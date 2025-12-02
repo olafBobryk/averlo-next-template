@@ -1,12 +1,4 @@
-export const NAV_LINKS = [
-	{ name: "Home", link: "/" },
-	{ name: "Inventory", link: "/inventory" },
-	{ name: "Pre-Order", link: "/pre-order" },
-	{ name: "Service", link: "/service" },
-	{ name: "Parts", link: "/parts" },
-	{ name: "Learn", link: "/learn" },
-	{ name: "About", link: "/about" },
-];
+export const NAV_LINKS = [{ name: "Home", link: "/" }];
 
 export const SOCIAL_LINKS = [
 	{

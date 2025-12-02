@@ -1,6 +1,4 @@
 "use client";
-
-import { useMediaQuery } from "react-responsive";
 import { NAV_LINKS } from "../../config/navConfig";
 import HeaderCompact from "./HeaderCompact";
 import HeaderFull from "./HeaderFull";
@@ -13,11 +11,17 @@ export default function Header({
 	className?: string;
 	navLinks?: { name: string; link: string }[];
 }) {
-	const isDesktop = useMediaQuery({ query: "(min-width: 1024px)" });
+	return (
+		<header className={className}>
+			{/* Desktop */}
+			<div className="hidden lg:block">
+				<HeaderFull navLinks={navLinks} />
+			</div>
 
-	return isDesktop ? (
-		<HeaderFull className={className} navLinks={navLinks} />
-	) : (
-		<HeaderCompact className={className} navLinks={navLinks} />
+			{/* Mobile / Tablet */}
+			<div className="block lg:hidden">
+				<HeaderCompact navLinks={navLinks} />
+			</div>
+		</header>
 	);
 }

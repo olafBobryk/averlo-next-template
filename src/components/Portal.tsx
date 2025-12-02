@@ -3,9 +3,10 @@ import { createPortal } from "react-dom";
 
 interface PortalProps {
 	children: ReactNode;
+	target?: string; // optional id
 }
 
-const Portal: React.FC<PortalProps> = ({ children }) => {
+const Portal: React.FC<PortalProps> = ({ children, target }) => {
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -14,7 +15,12 @@ const Portal: React.FC<PortalProps> = ({ children }) => {
 
 	if (!mounted) return null;
 
-	return createPortal(children, document.body);
+	const defaultTarget = document.body;
+	const portalTarget = target
+		? (document.getElementById(target) ?? defaultTarget)
+		: defaultTarget;
+
+	return createPortal(children, portalTarget);
 };
 
 export default Portal;
