@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/primitives/Button";
+import { Heading } from "@/components/ui/primitives/Heading";
+import { Text } from "@/components/ui/primitives/Text";
 
 export default function AppError({
 	error,
@@ -16,68 +19,35 @@ export default function AppError({
 		console.error(error);
 	}, [error]);
 
-	// Optional: lock scroll while overlay is visible
-	useEffect(() => {
-		const original = document.documentElement.style.overflow;
-		document.documentElement.style.overflow = "hidden";
-		return () => {
-			document.documentElement.style.overflow = original;
-		};
-	}, []);
-
 	return (
-		<div
-			aria-live="assertive"
-			className="fixed inset-0 z-[9999] flex min-h-screen items-center justify-center bg-black"
-		>
-			<div className="mx-4 w-full max-w-xl rounded-2xl border border-white/10 bg-white/5 p-8 text-white shadow-2xl">
-				<div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-400/90 text-black">
-					<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-						<path d="M1 21h22L12 2 1 21z" fill="currentColor" />
-						<rect x="11" y="8" width="2" height="7" fill="#000" />
-						<rect x="11" y="17" width="2" height="2" fill="#000" />
-					</svg>
-				</div>
-
-				<h1 className="text-center text-2xl font-semibold tracking-tight">
+		<main className="min-h-screen flex items-center justify-center px-4 py-12">
+			<section className="w-full max-w-xl text-center space-y-3">
+				<Heading as="h1" size="xl">
 					Something went wrong
-				</h1>
-
-				<p className="mt-2 text-center text-sm text-white/70">
+				</Heading>
+				<Text variant="muted">
 					The page failed to render. You can try again or go back.
-				</p>
+				</Text>
 
-				<div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-					<button
-						type="button"
-						onClick={() => reset()}
-						className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition active:translate-y-px"
-					>
+				<div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+					<Button variant="primary" onClick={() => reset()}>
 						Try again
-					</button>
-					<Link
-						href="/"
-						type="button"
-						className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/90 hover:border-white/40 transition"
-					>
+					</Button>
+					<Button variant="outline" href="/">
 						Go home
-					</Link>
-					<button
-						type="button"
-						onClick={() => setShowDetails((v) => !v)}
-						className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/70 hover:border-white/40 transition"
-					>
+					</Button>
+					<Button variant="ghost" onClick={() => setShowDetails((v) => !v)}>
 						{showDetails ? "Hide details" : "Show details"}
-					</button>
+					</Button>
 				</div>
 
 				{showDetails && (
-					<pre className="mt-6 max-h-48 overflow-auto rounded-lg bg-black/40 p-4 text-xs leading-relaxed text-white/80">
+					<pre className="mt-4 max-h-48 overflow-auto rounded-lg border border-border/15 bg-surface p-4 text-left text-xs leading-relaxed text-foreground/80">
 						{String(error.message || "Unknown error")}
 						{error.digest ? `\n\nDigest: ${error.digest}` : ""}
 					</pre>
 				)}
-			</div>
-		</div>
+			</section>
+		</main>
 	);
 }

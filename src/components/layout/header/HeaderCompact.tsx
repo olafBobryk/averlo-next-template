@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { NAV_LINKS } from "../../config/navConfig";
-import Logo from "../Logo";
+import Logo from "@/components/branding/Logo";
+import { NAV_LINKS } from "@/config/navConfig";
 import HeaderCompactModal from "./HeaderCompactModal";
 
 export default function HeaderCompact({
@@ -47,12 +47,19 @@ export default function HeaderCompact({
 		setAtTop(currentY <= 50);
 	}, []);
 
+	const headerClasses = [
+		"group fixed w-full z-50 transition-all duration-300",
+		className,
+	]
+		.filter(Boolean)
+		.join(" ");
+
 	return (
 		<header
 			data-open={isModalOpen}
 			data-top={atTop}
 			data-hide={hide}
-			className="group fixed w-full z-50 transition-all duration-300"
+			className={headerClasses}
 		>
 			<div className=" relative w-screen padding group-data-[open=true]:fixed">
 				<div

@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { NAV_LINKS } from "../../config/navConfig";
-import Portal from "../Portal";
+import Portal from "@/components/Portal";
+import { Text } from "@/components/ui/primitives/Text";
+import { NAV_LINKS } from "@/config/navConfig";
 
 export default function HeaderCompactModal({
 	navLinks = NAV_LINKS,
@@ -27,9 +28,9 @@ export default function HeaderCompactModal({
 							className="group"
 						>
 							<div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2.5 px-2.5 py-[25px] border-[#111416]/[0.15] border-b">
-								<p className="flex-grow-0 flex-shrink-0 text-xl font-medium text-left capitalize text-[#111416]">
+								<Text className="flex-grow-0 flex-shrink-0 capitalize text-[#111416]" variant="bodyStrong">
 									{obj.name}
-								</p>
+								</Text>
 								<div className="self-stretch flex-grow w-[249px] h-[27px] relative overflow-hidden" />
 								<Image
 									src="/components/header/arrow.svg"

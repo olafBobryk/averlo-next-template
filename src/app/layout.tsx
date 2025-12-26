@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header/Header";
-import ToastClientMount from "@/components/Toast/ToastClientMount";
+import Footer from "@/components/layout/footer/Footer";
+import Header from "@/components/layout/header/Header";
+import ModalClientMount from "@/components/mount/ModalClientMount";
+import ToastClientMount from "@/components/mount/ToastClientMount";
 import { KEYWORDS } from "@/config/metadataConfig";
 
 const geistSans = Geist({
@@ -44,6 +45,8 @@ export default function RootLayout({
 				<Header />
 				{children}
 				<Footer />
+				{/* TODO: Swap mount order or placement if a project needs overlays elsewhere. */}
+				<ModalClientMount />
 				<ToastClientMount />
 			</body>
 		</html>

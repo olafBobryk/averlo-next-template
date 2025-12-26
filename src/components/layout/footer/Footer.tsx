@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/components/branding/Logo";
+import { Text } from "@/components/ui/primitives/Text";
 import { NAV_LINKS, SOCIAL_LINKS } from "@/config/navConfig";
-import Logo from "./Logo";
 
 export default function Footer({
 	className = "",
@@ -27,9 +28,11 @@ export default function Footer({
 							href={item.link}
 							key={item.name}
 							type="button"
-							className="flex-grow-0 flex-shrink-0 text-base text-left text-white/70 hover:text-white/90 transition-colors duration-300"
+							className="flex-grow-0 flex-shrink-0 text-left transition-colors duration-300"
 						>
-							{item.name}
+							<Text className="text-white/70 hover:text-white/90" variant="bodyStrong">
+								{item.name}
+							</Text>
 						</Link>
 					))}
 				</div>

@@ -1,22 +1,36 @@
 /** biome-ignore-all lint/suspicious/noUnknownAtRules: <explanation> */
 @import "tailwindcss";
 
-/* :root {
-	--background: #ffffff;
-	--foreground: #171717;
+:root {
+	/* Core palette in RGB so we can apply opacity via Tailwind */
+	--color-primary-rgb: 2 127 255;
+	--color-primary-foreground-rgb: 255 255 255;
+	--color-danger-rgb: 207 35 49;
+	--color-success-rgb: 34 165 90;
+	--color-warning-rgb: 244 153 0;
+	--color-surface-rgb: 245 247 249;
+	--color-border-rgb: 2 2 2;
+	--color-muted-rgb: 2 2 2;
+	--color-foreground-rgb: 2 2 2;
+	--color-background-rgb: 255 255 255;
 }
 
 @theme inline {
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--font-sans: var(--font-geist-sans);
-	--font-mono: var(--font-geist-mono);
-} */
+	--color-primary: rgb(var(--color-primary-rgb) / 1);
+	--color-primary-foreground: rgb(var(--color-primary-foreground-rgb) / 1);
+	--color-danger: rgb(var(--color-danger-rgb) / 1);
+	--color-success: rgb(var(--color-success-rgb) / 1);
+	--color-warning: rgb(var(--color-warning-rgb) / 1);
+	--color-surface: rgb(var(--color-surface-rgb) / 1);
+	--color-border: rgb(var(--color-border-rgb) / 1);
+	--color-muted: rgb(var(--color-muted-rgb) / 1);
+	--color-foreground: rgb(var(--color-foreground-rgb) / 1);
+	--color-background: rgb(var(--color-background-rgb) / 1);
+}
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--background: #0a0a0a;
-		--foreground: #ededed;
+		/* TODO: set dark theme tokens if/when needed */
 	}
 }
 
@@ -25,8 +39,9 @@ html {
 }
 
 body {
-	/* background: var(--background);
-	color: var(--foreground); */
+	/* background and foreground are tokenized above */
+	/* background: var(--color-background); */
+	/* color: var(--color-foreground); */
 	font-family: Arial, Helvetica, sans-serif;
 }
 

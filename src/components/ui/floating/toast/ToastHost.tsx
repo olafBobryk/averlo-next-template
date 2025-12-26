@@ -8,7 +8,8 @@ import {
 } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { ToastType } from "@/lib/toast";
-import Portal from "../Portal";
+import Portal from "../../../Portal";
+import { Text } from "../../primitives/Text";
 
 type ToastItem = {
 	id: string;
@@ -64,11 +65,11 @@ export default function ToastHost() {
 	return (
 		<Portal>
 			<div
-				className="pointer-events-none fixed inset-x-0 bottom-4 z-[9999] mx-auto flex w-full max-w-sm flex-col items-center space-y-2 px-4
-					[mask-image:linear-gradient(to_top,rgba(0,0,0,1)_0,rgba(0,0,0,1)_calc(46px*3+8px*3),rgba(0,0,0,0)_calc(46px*4+8px*3),rgba(0,0,0,0)_100%)]
+				className="pointer-events-none fixed inset-x-0 bottom-0 pb-4 z-[9999] mx-auto flex w-full max-w-sm flex-col items-center space-y-2 px-4
+					[mask-image:linear-gradient(to_top,rgba(0,0,0,1)_0,rgba(0,0,0,1)_calc(46px*3+8px*3+16px),rgba(0,0,0,0)_calc(46px*4+8px*3+16px),rgba(0,0,0,0)_100%)]
 					[mask-repeat:no-repeat]
 					[mask-size:100%_100%]
-					[-webkit-mask-image:linear-gradient(to_top,rgba(0,0,0,1)_0,rgba(0,0,0,1)_calc(46px*3+8px*3),rgba(0,0,0,0)_calc(46px*4+8px*3),rgba(0,0,0,0)_100%)]
+					[-webkit-mask-image:linear-gradient(to_top,rgba(0,0,0,1)_0,rgba(0,0,0,1)_calc(46px*3+8px*3+16px),rgba(0,0,0,0)_calc(46px*4+8px*3+16px),rgba(0,0,0,0)_100%)]
 					[-webkit-mask-repeat:no-repeat]
 					[-webkit-mask-size:100%_100%]
 				"
@@ -110,10 +111,10 @@ function Toast({
 }) {
 	const palette =
 		type === "success"
-			? "bg-[#22C55E]/80 border-[#22C55E]/30 text-white"
+			? "border-success/25 text-foreground bg-[color-mix(in_srgb,theme(colors.surface)_85%,theme(colors.success)_15%)]"
 			: type === "error"
-				? "bg-[#EF4444]/80 border-[#EF4444]/30 text-white "
-				: "bg-slate-800 text-white";
+				? "border-danger/25 text-foreground bg-[color-mix(in_srgb,theme(colors.surface)_85%,theme(colors.danger)_15%)]"
+				: "border-primary/20 text-foreground bg-[color-mix(in_srgb,theme(colors.surface)_50%,theme(colors.primary)_50%)]";
 
 	// Animations
 	const transition: Transition = prefersReduced
@@ -129,12 +130,12 @@ function Toast({
 			exit={{ opacity: 0, y: 12, scale: 0.98 }}
 			transition={transition}
 			className={[
-				"pointer-events-auto w-full rounded-xl border-1 border-solid px-4 py-3 shadow-xl ring-1 ring-black/5",
+				"pointer-events-none select-none w-full rounded-xl border-1 border-solid px-4 py-3 shadow-sm ring-1 ring-black/5",
 				"focus:outline-none focus:ring-2 focus:ring-white/40",
 				palette,
 			].join(" ")}
 		>
-			<div className="text-sm">{message}</div>
+			<Text variant="muted">{message}</Text>
 		</motion.div>
 	);
 }
