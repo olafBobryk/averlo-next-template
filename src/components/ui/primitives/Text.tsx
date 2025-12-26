@@ -52,6 +52,7 @@ export function Text({
 }: TextProps) {
 	const Tag = as as "span" | "p" | "div" | "label";
 	return (
+		// biome-ignore lint/suspicious/noExplicitAny: <Tag is ambiguous, then so are the rest of the props>
 		<Tag className={textVariants({ variant, className })} {...(rest as any)}>
 			{children}
 		</Tag>

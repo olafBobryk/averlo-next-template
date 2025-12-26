@@ -24,14 +24,16 @@ const SIZE_MAP: Record<LogoSize, number> = {
 
 export default function Logo({
 	href = "/",
-	tone = "light",
+	tone = "dark",
 	variant = "full",
 	size = "md",
 	className = "",
 }: LogoProps) {
 	const height = SIZE_MAP[size];
 	const width =
-		variant === "full" ? Math.round(height * FULL_ASPECT) : Math.round(height * MARK_ASPECT);
+		variant === "full"
+			? Math.round(height * FULL_ASPECT)
+			: Math.round(height * MARK_ASPECT);
 
 	const toneClass = tone === "light" ? "text-[#E5F1FF]" : "text-[#010103]";
 
@@ -39,10 +41,17 @@ export default function Logo({
 		<Link
 			href={href}
 			aria-label="Go to homepage"
-			className={["inline-flex items-center gap-2", toneClass, className].join(" ")}
+			className={["inline-flex items-center gap-2", toneClass, className].join(
+				" ",
+			)}
 		>
 			{variant === "full" ? (
-				<svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 148 26">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width={width}
+					height={height}
+					viewBox="0 0 148 26"
+				>
 					<title>logo</title>
 					{/* TODO: Replace paths with your brand's wordmark */}
 					<path
@@ -55,7 +64,12 @@ export default function Logo({
 					/>
 				</svg>
 			) : (
-				<svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 40 42">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width={width}
+					height={height}
+					viewBox="0 0 40 42"
+				>
 					<title>logo mark</title>
 					{/* TODO: Replace paths with your brand's logomark */}
 					<path

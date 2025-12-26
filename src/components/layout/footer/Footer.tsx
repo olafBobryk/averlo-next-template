@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/components/branding/Logo";
+import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 import { NAV_LINKS, SOCIAL_LINKS } from "@/config/navConfig";
 
@@ -11,7 +11,7 @@ export default function Footer({
 }: {
 	className?: string;
 	navLinks?: { name: string; link: string }[];
-	socialLinks?: { image: string; href: string; name: string }[];
+	socialLinks?: { icon: string; href: string; name: string }[];
 }) {
 	return (
 		<footer
@@ -20,37 +20,25 @@ export default function Footer({
 				className
 			}
 		>
-			<div className="flex flex-col justify-center items-center max relative overflow-hidden gap-[25px] ">
+			<div className="flex flex-col justify-center items-center max relative gap-[25px] ">
 				<Logo size="md" />
-				<div className="flex justify-center gap-y-[10px] flex-wrap items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-[45px] p-2.5">
+				<div className="flex justify-center gap-y-[10px] flex-wrap items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-[45px] p-2.5">
 					{navLinks.map((item) => (
-						<Link
-							href={item.link}
-							key={item.name}
-							type="button"
-							className="flex-grow-0 flex-shrink-0 text-left transition-colors duration-300"
-						>
-							<Text className="text-white/70 hover:text-white/90" variant="bodyStrong">
-								{item.name}
-							</Text>
-						</Link>
+						<Button href={item.link} key={item.name} variant="ghost">
+							{item.name}
+						</Button>
 					))}
 				</div>
-				<div className="flex flex-wrap justify-center items-center flex-grow-0 flex-shrink-0 overflow-hidden gap-2.5">
+				<div className="flex flex-wrap justify-center items-center flex-grow-0 flex-shrink-0 gap-2.5">
 					{socialLinks.map((item) => (
-						<Link
+						<Button
 							key={item.name}
+							variant="outline"
+							className="w-[50px] h-[50px] !p-0 rounded-full"
+							iconSize={15}
+							leadingIcon={item.icon as any}
 							href={item.href}
-							className="flex justify-center items-center flex-grow-0 flex-shrink-0 w-[50px] h-[50px] relative overflow-hidden gap-2.5 rounded-[100px] bg-white/5 hover:bg-white/15 transition-colors duration-300 border border-white/5"
-						>
-							<Image
-								src={item.image}
-								alt={item.name}
-								width={20}
-								height={20}
-								className="w-5 h-5"
-							/>
-						</Link>
+						/>
 					))}
 				</div>
 			</div>

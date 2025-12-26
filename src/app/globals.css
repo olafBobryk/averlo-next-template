@@ -13,6 +13,11 @@
 	--color-muted-rgb: 2 2 2;
 	--color-foreground-rgb: 2 2 2;
 	--color-background-rgb: 255 255 255;
+
+	/* Layout tokens */
+	--section-px: clamp(1rem, 5vw, 6.25rem);
+	--section-py: clamp(3rem, 8vw, 6.25rem);
+	--section-max-width: 1500px;
 }
 
 @theme inline {
@@ -39,34 +44,9 @@ html {
 }
 
 body {
-	/* background and foreground are tokenized above */
-	/* background: var(--color-background); */
-	/* color: var(--color-foreground); */
+	background: var(--color-background);
+	color: var(--color-foreground);
 	font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer base {
-	section {
-		@apply px-[12px] md:px-[50px] xl:px-[100px] flex flex-col items-center w-full py-[100px];
-	}
-	h1 {
-		@apply max-w-[850px] text-[70px] font-bold text-center leading-[1.15em] tracking-[-0.06em];
-	}
-	h2 {
-		@apply max-w-[600px] text-[50px] font-bold text-center leading-[1.15em] tracking-[-0.06em];
-	}
-	button {
-		@apply cursor-pointer;
-	}
-}
-
-@layer utilities {
-	.padding {
-		@apply px-[12px] md:px-[50px] xl:px-[100px];
-	}
-	.max {
-		@apply max-w-[1500px];
-	}
 }
 
 .vh-max {

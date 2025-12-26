@@ -1,4 +1,5 @@
 // app/test/page.tsx
+// TODO: Remove this route
 "use client";
 
 import Image from "next/image";
@@ -54,11 +55,11 @@ export default function TestPage() {
 		},
 	]);
 
-const [contentState, setContentState] = useState<
-	"loading" | "error" | "ready"
->("ready");
+	const [contentState, setContentState] = useState<
+		"loading" | "error" | "ready"
+	>("ready");
 
-const isError = useMemo(() => contentState === "error", [contentState]);
+	const isError = useMemo(() => contentState === "error", [contentState]);
 	const [shouldCrash, setShouldCrash] = useState(false);
 
 	if (shouldCrash) {
@@ -69,7 +70,7 @@ const isError = useMemo(() => contentState === "error", [contentState]);
 	};
 
 	return (
-		<div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-10">
+		<div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
 			<header className="flex flex-col gap-2">
 				<Heading as="h1" size="lg">
 					UI Testbed

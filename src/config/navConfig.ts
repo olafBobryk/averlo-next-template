@@ -1,29 +1,32 @@
-export const NAV_LINKS = [{ name: "Home", link: "/" }];
+export const NAV_LINKS = [
+	{ name: "Home", link: "/" },
+	{ name: "Test", link: "/test" },
+];
 
 export const SOCIAL_LINKS = [
 	{
 		name: "X",
-		image: "/socials/x.svg",
+		icon: "x",
 		href: "",
 	},
 	{
 		name: "Instagram",
-		image: "/socials/instagram.svg",
+		icon: "instagram",
 		href: "",
 	},
 	{
 		name: "LinkedIn",
-		image: "/socials/linkedin.svg",
+		icon: "linked-in",
 		href: "",
 	},
 	{
 		name: "Meta",
-		image: "/socials/meta.svg",
+		icon: "meta",
 		href: "",
 	},
 	{
 		name: "You Tube",
-		image: "/socials/youtube.svg",
+		icon: "youtube",
 		href: "",
 	},
 ];

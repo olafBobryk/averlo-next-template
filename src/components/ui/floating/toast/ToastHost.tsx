@@ -111,10 +111,17 @@ function Toast({
 }) {
 	const palette =
 		type === "success"
-			? "border-success/25 text-foreground bg-[color-mix(in_srgb,theme(colors.surface)_85%,theme(colors.success)_15%)]"
+			? "border-success/25 text-foreground bg-surface"
 			: type === "error"
-				? "border-danger/25 text-foreground bg-[color-mix(in_srgb,theme(colors.surface)_85%,theme(colors.danger)_15%)]"
-				: "border-primary/20 text-foreground bg-[color-mix(in_srgb,theme(colors.surface)_50%,theme(colors.primary)_50%)]";
+				? "border-danger/25 text-foreground bg-surface"
+				: "border-primary/20 text-foreground bg-surface";
+
+	const backgroundStyle =
+		type === "success"
+			? "color-mix(in srgb, rgb(var(--color-surface-rgb)) 80%, rgb(var(--color-success-rgb)) 20%)"
+			: type === "error"
+				? "color-mix(in srgb, rgb(var(--color-surface-rgb)) 80%, rgb(var(--color-danger-rgb)) 20%)"
+				: "color-mix(in srgb, rgb(var(--color-surface-rgb)) 80%, rgb(var(--color-primary-rgb)) 20%)";
 
 	// Animations
 	const transition: Transition = prefersReduced
@@ -134,6 +141,7 @@ function Toast({
 				"focus:outline-none focus:ring-2 focus:ring-white/40",
 				palette,
 			].join(" ")}
+			style={{ background: backgroundStyle }}
 		>
 			<Text variant="muted">{message}</Text>
 		</motion.div>
