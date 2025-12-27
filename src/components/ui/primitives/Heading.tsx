@@ -5,6 +5,8 @@ import type * as React from "react";
 const headingVariants = cva("", {
 		variants: {
 		size: {
+			hero: "text-[70px] font-semibold text-foreground -tracking-[0.02em] leading-[1.05]",
+			"2xl": "text-[50px] font-semibold text-foreground -tracking-[0.02em] leading-[1.05]",
 			xxl: "text-[36px] font-semibold text-foreground -tracking-[0.02em]",
 			// 26px semibold – page titles, success messages
 			xl: "text-[26px] font-semibold text-foreground -tracking-[0.02em]",
