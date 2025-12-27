@@ -1,7 +1,9 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import * as React from "react";
+import { Loader } from "@/components/ui/misc/Loader";
 import { Button } from "@/components/ui/primitives/Button";
 import { showToast } from "@/lib/toast";
 
@@ -21,6 +23,7 @@ export function ImageInspectModal({
 	onShare,
 }: ImageInspectModalProps) {
 	const [isSharing, setIsSharing] = React.useState(false);
+	const [loaded, setLoaded] = React.useState(false);
 
 	const handleShare = async () => {
 		if (isSharing) return;
@@ -74,12 +77,29 @@ export function ImageInspectModal({
 				/>
 			</div>
 			<div className="relative w-full h-full">
+				<AnimatePresence>
+					{!loaded && (
+						<motion.div
+							key="loader"
+							className="absolute inset-0 z-10 flex items-center justify-center"
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.2, ease: "easeOut" }}
+						>
+							<Loader className="text-white" />
+						</motion.div>
+					)}
+				</AnimatePresence>
 				<Image
 					src={src}
 					alt={alt}
 					fill
-					className="object-contain select-none"
+					className={`object-contain select-none transition-opacity duration-200 ${
+						loaded ? "opacity-100" : "opacity-0"
+					}`}
 					priority
+					onLoadingComplete={() => setLoaded(true)}
 				/>
 			</div>
 		</div>

@@ -4,6 +4,8 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { Panel } from "@/components/layout/primitives/Panel";
+import { Section } from "@/components/layout/primitives/Section";
 import { useConfirmationModal } from "@/components/ui/floating/modal/useConfirmationModal";
 import { useImageInspectModal } from "@/components/ui/floating/modal/useImageInspectModal";
 import { useModal } from "@/components/ui/floating/modal/useModal";
@@ -21,12 +23,32 @@ import {
 	FilePreview,
 	type FilePreviewItem,
 } from "@/components/ui/misc/FilePreview";
+import { Loader } from "@/components/ui/misc/Loader";
+import { RevealGroup, RevealItem } from "@/components/ui/motion/Reveal";
+import { ScrollLag } from "@/components/ui/motion/ScrollLag";
+import { ScrollParallax } from "@/components/ui/motion/ScrollParallax";
 import { Button } from "@/components/ui/primitives/Button";
 import { Heading } from "@/components/ui/primitives/Heading";
+import { Icon, type IconName } from "@/components/ui/primitives/Icon";
 import { Text } from "@/components/ui/primitives/Text";
 import { showToast } from "@/lib/toast";
 
 export default function TestPage() {
+	const demoIcons: IconName[] = [
+		"arrow-right",
+		"arrow-left",
+		"check",
+		"cross",
+		"plus",
+		"camera",
+		"notes",
+		"add-image",
+		"instagram",
+		"linked-in",
+		"meta",
+		"x",
+		"youtube",
+	];
 	const { openModal, closeAll } = useModal();
 	const { openConfirmation } = useConfirmationModal();
 	const { openImageInspect } = useImageInspectModal();
@@ -44,14 +66,14 @@ export default function TestPage() {
 		{
 			key: "img-1",
 			status: "uploaded",
-			url: "/next.svg",
+			url: "/test/mercury.png",
 		},
 		{
 			key: "pending-1",
 			status: "pending",
 			type: "image/png",
-			url: "/next.svg",
-			name: "example.png",
+			url: "/test/blob.png",
+			name: "blob.png",
 		},
 	]);
 
@@ -70,7 +92,11 @@ export default function TestPage() {
 	};
 
 	return (
-		<div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
+		<Section
+			padding="default"
+			maxWidth="narrow"
+			innerClassName="flex flex-col gap-8 "
+		>
 			<header className="flex flex-col gap-2">
 				<Heading as="h1" size="lg">
 					UI Testbed
@@ -81,7 +107,7 @@ export default function TestPage() {
 				</Text>
 			</header>
 
-			<section className="grid gap-6 rounded-2xl border border-border/15 bg-white p-6 shadow-sm md:grid-cols-2">
+			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
 					<Heading as="h2" size="md">
 						Primitives
@@ -156,9 +182,62 @@ export default function TestPage() {
 						/>
 					</div>
 				</div>
-			</section>
+			</Panel>
 
-			<section className="grid gap-6 rounded-2xl border border-border/15 bg-white p-6 shadow-sm md:grid-cols-2">
+			<Panel columns={2}>
+				<div className="flex flex-col gap-3">
+					<Heading as="h2" size="md">
+						Icons
+					</Heading>
+					<Text variant="muted">
+						Static glyphs rendered via the `Icon` primitive. Adjust the `size`
+						variant and swap `name` to test available assets.
+					</Text>
+				</div>
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+					{demoIcons.map((icon) => (
+						<div
+							key={icon}
+							className="flex items-center gap-2 rounded-xl border border-border/15 bg-surface px-3 py-2"
+						>
+							<Icon name={icon} size="sm" className="text-primary" />
+							<Icon name={icon} size="md" />
+							<Icon name={icon} size="lg" className="text-muted-foreground" />
+							<Text variant="captionMuted" className="ml-auto">
+								{icon}
+							</Text>
+						</div>
+					))}
+				</div>
+			</Panel>
+
+			<Panel columns={2}>
+				<div className="flex flex-col gap-3">
+					<Heading as="h2" size="md">
+						Buttons with icons
+					</Heading>
+					<Text variant="muted">
+						Icon primitive wired through button props. Mix leading/trailing and
+						variant combos.
+					</Text>
+				</div>
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+					<Button variant="primary" trailingIcon="arrow-right">
+						Primary trailing
+					</Button>
+					<Button variant="outline" leadingIcon="arrow-left">
+						Outline leading
+					</Button>
+					<Button variant="solid" leadingIcon="plus">
+						Solid leading
+					</Button>
+					<Button variant="ghost" trailingIcon="check">
+						Ghost trailing
+					</Button>
+				</div>
+			</Panel>
+
+			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
 					<Heading as="h2" size="md">
 						Selection & composite inputs
@@ -222,9 +301,9 @@ export default function TestPage() {
 						Add more composite inputs here as you build them.
 					</Text>
 				</div>
-			</section>
+			</Panel>
 
-			<section className="grid gap-6 rounded-2xl border border-black/[0.08] bg-white p-6 shadow-sm md:grid-cols-2">
+			<Panel columns={2} className="border-black/[0.08]">
 				<div className="flex flex-col gap-3">
 					<Heading as="h2" size="md">
 						Modal basics
@@ -238,7 +317,7 @@ export default function TestPage() {
 							variant="primary"
 							onClick={() => {
 								openModal(({ close }) => (
-									<div className="flex flex-col gap-4 p-6">
+									<div className="flex flex-col gap-4">
 										<Heading as="h3" size="md">
 											Custom Modal
 										</Heading>
@@ -285,9 +364,9 @@ export default function TestPage() {
 						Open confirmation
 					</Button>
 				</div>
-			</section>
+			</Panel>
 
-			<section className="grid gap-6 rounded-2xl border border-black/[0.08] bg-white p-6 shadow-sm md:grid-cols-2">
+			<Panel columns={2} className="border-black/[0.08]">
 				<div className="flex flex-col gap-3">
 					<Heading as="h2" size="md">
 						Image inspect modal
@@ -300,7 +379,7 @@ export default function TestPage() {
 						onClick={() =>
 							openImageInspect({
 								// TODO: Swap to a real image for your project.
-								src: "/next.svg",
+								src: "/test/blob.png",
 								alt: "Preview",
 								onShare: async () => {
 									showToast({ type: "info", message: "Share clicked (stub)." });
@@ -316,9 +395,9 @@ export default function TestPage() {
 						<Image src="/next.svg" alt="Preview" fill sizes="96px" />
 					</div>
 				</div>
-			</section>
+			</Panel>
 
-			<section className="grid gap-6 rounded-2xl border border-black/[0.08] bg-white p-6 shadow-sm md:grid-cols-2">
+			<Panel columns={2} className="border-black/[0.08]">
 				<div className="flex flex-col gap-3">
 					<Heading as="h2" size="md">
 						Toasts
@@ -358,9 +437,9 @@ export default function TestPage() {
 						this page stays server-renderable aside from the client bits above.
 					</Text>
 				</div>
-			</section>
+			</Panel>
 
-			<section className="grid gap-6 rounded-2xl border border-border/15 bg-white p-6 shadow-sm md:grid-cols-2">
+			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
 					<Heading as="h2" size="md">
 						Dynamic content & alerts
@@ -401,9 +480,26 @@ export default function TestPage() {
 						</div>
 					</DynamicContent>
 				</div>
-			</section>
+			</Panel>
 
-			<section className="grid gap-6 rounded-2xl border border-border/15 bg-white p-6 shadow-sm md:grid-cols-2">
+			<Panel columns={2}>
+				<div className="flex flex-col gap-3">
+					<Heading as="h2" size="md">
+						Loader
+					</Heading>
+					<Text variant="muted">
+						Lightweight CSS loader used by DynamicContent when no text is
+						provided to the `load` prop.
+					</Text>
+				</div>
+				<div className="flex items-center gap-4">
+					<Loader className="text-primary" />
+					<Loader className="text-muted-foreground" />
+					<Loader className="text-success" />
+				</div>
+			</Panel>
+
+			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
 					<Heading as="h2" size="md">
 						File previews
@@ -432,9 +528,9 @@ export default function TestPage() {
 						/>
 					))}
 				</div>
-			</section>
+			</Panel>
 
-			<section className="grid gap-6 rounded-2xl border border-border/15 bg-white p-6 shadow-sm md:grid-cols-2">
+			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
 					<Heading as="h2" size="md">
 						Routing & error tests
@@ -456,7 +552,93 @@ export default function TestPage() {
 						Use these controls to verify your error and 404 experiences.
 					</Text>
 				</div>
-			</section>
-		</div>
+			</Panel>
+
+			<Panel columns={2}>
+				<div className="flex flex-col gap-3">
+					<Heading as="h2" size="md">
+						Motion: Reveal
+					</Heading>
+					<Text variant="muted">
+						Staggered reveal group with reduced-motion guard. Adjust
+						stagger/duration in the primitive.
+					</Text>
+					<RevealGroup
+						stagger={0.12}
+						delay={0.1}
+						className="flex flex-col gap-2"
+					>
+						<RevealItem>
+							<Text variant="bodyStrong">Item 1 (RevealItem)</Text>
+						</RevealItem>
+						<RevealItem>
+							<Text variant="bodyStrong">Item 2 (RevealItem)</Text>
+						</RevealItem>
+						<RevealItem>
+							<Button variant="outline">CTA inside reveal</Button>
+						</RevealItem>
+					</RevealGroup>
+				</div>
+				<div className="flex flex-col gap-3">
+					<Heading as="h2" size="md">
+						Motion: ScrollLag
+					</Heading>
+					<Text variant="muted">
+						Left: normal flow lag. Right: fixed lag to mimic parallax.
+					</Text>
+					<div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+						<ScrollLag className="rounded-xl border border-border/15 bg-surface px-4 py-6">
+							<Text variant="bodyStrong">Flow ScrollLag</Text>
+							<Text variant="muted">
+								This box should drift slightly opposite scroll (flow layout).
+							</Text>
+						</ScrollLag>
+						<div className="relative h-40 rounded-xl border border-border/15 bg-surface overflow-hidden">
+							<ScrollLag
+								className="absolute inset-3 flex flex-col gap-2 rounded-lg border border-border/15 bg-white/70 px-4 py-3 backdrop-blur"
+								magnitude={0.2}
+							>
+								<Text variant="bodyStrong">Fixed ScrollLag</Text>
+								<Text variant="muted">
+									This is positioned fixed within the card to check parallax
+									feel.
+								</Text>
+							</ScrollLag>
+						</div>
+					</div>
+				</div>
+				<div className="flex flex-col gap-3">
+					<Heading as="h2" size="md">
+						Motion: ScrollParallax
+					</Heading>
+					<Text variant="muted">
+						Uses page scroll progress to offset content. Adjust magnitude to
+						make it scroll faster or slower than the page.
+					</Text>
+					<div className="grid gap-3 lg:grid-cols-2">
+						<ScrollParallax
+							className="rounded-xl border border-border/15 bg-surface px-4 py-6"
+							magnitude={120}
+						>
+							<Text variant="bodyStrong">Downward parallax</Text>
+							<Text variant="muted">
+								Moves down as the page scrolls; higher magnitude exaggerates the
+								effect.
+							</Text>
+						</ScrollParallax>
+						<ScrollParallax
+							className="rounded-xl border border-border/15 bg-surface px-4 py-6"
+							magnitude={120}
+							direction="up"
+						>
+							<Text variant="bodyStrong">Upward parallax</Text>
+							<Text variant="muted">
+								Moves up relative to scroll, creating a slower-than-page feel.
+							</Text>
+						</ScrollParallax>
+					</div>
+				</div>
+			</Panel>
+		</Section>
 	);
 }

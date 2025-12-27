@@ -5,6 +5,8 @@
 
 import * as React from "react";
 import { Dropdown } from "../primitives/Dropdown";
+import { InputFrame } from "../primitives/InputFrame";
+import { Icon } from "../primitives/Icon";
 import { Text } from "../primitives/Text";
 
 const APP_TIMEZONE = process.env.NEXT_PUBLIC_APP_TIMEZONE || "Europe/Amsterdam";
@@ -306,47 +308,35 @@ export function DateRangeDropdown({
 				onLeftClick,
 				onRightClick,
 			}) => (
-				<div
-	ref={ref}
-	onMouseEnter={onRootMouseEnter}
-	onMouseLeave={onRootMouseLeave}
-	className={[
-		"w-fit",
-		"flex h-[39px] items-center gap-[15px] px-[15px] rounded-[100px] bg-white border border-border/15",
-		"transition-all motion-interactive",
-		"shadow-[2px_4px_15px_rgba(2,2,2,0.03)]",
-		className,
-	]
-		.filter(Boolean)
-						.join(" ")}
+				<InputFrame
+					ref={ref as any}
+					onMouseEnter={onRootMouseEnter}
+					onMouseLeave={onRootMouseLeave}
+					start={<Icon name="calendar" className="text-foreground" />}
+					end={
+						<button
+							type="button"
+							onClick={onRightClick}
+							className="flex items-center gap-2 pl-4 border-l border-border/20 hover:opacity-80 motion-micro"
+						>
+							<Text as="span" variant="bodyStrong">
+								{currentPresetLabel}
+							</Text>
+							{chevronIcon}
+						</button>
+					}
+					className={["w-fit cursor-pointer", className].filter(Boolean).join(" ")}
 				>
-					{/* Left */}
-					<div
-						className={[
-							"flex items-center gap-2.5",
-							onLeftClick ? "cursor-pointer hover:opacity-80 motion-micro" : "",
-						]
-							.filter(Boolean)
-							.join(" ")}
+					<button
+						type="button"
 						onClick={onLeftClick}
+						className="flex items-center gap-2.5 text-left hover:opacity-80 motion-micro"
 					>
-						{calendarIcon}
 						<Text as="span" variant="bodyStrong">
 							{currentRangeLabel}
 						</Text>
-					</div>
-
-					{/* Right */}
-					<div
-						className="flex items-center gap-2.5 pl-[15px] border-l border-border/15 cursor-pointer hover:opacity-80 motion-micro"
-						onClick={onRightClick}
-					>
-						<Text as="span" variant="bodyStrong">
-							{currentPresetLabel}
-						</Text>
-						{chevronIcon}
-					</div>
-				</div>
+					</button>
+				</InputFrame>
 			)}
 			renderMenu={({ close }) => (
 				<div className="flex flex-col gap-2 p-2">

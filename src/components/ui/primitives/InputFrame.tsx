@@ -47,29 +47,46 @@ type InputFrameProps = {
 } & VariantProps<typeof inputFrameVariants> &
 	React.HTMLAttributes<HTMLDivElement>;
 
-export function InputFrame({
-	start,
-	end,
-	children,
-	className,
-	size,
-	tone,
-	fullWidth,
-	disabled,
-	...rest
-}: InputFrameProps) {
-	const wrapperClass = [
-		inputFrameVariants({ size, tone, fullWidth: fullWidth ? true : undefined, disabled }),
-		className,
-	]
-		.filter(Boolean)
-		.join(" ");
+export const InputFrame = React.forwardRef<HTMLDivElement, InputFrameProps>(
+	function InputFrame(
+		{
+			start,
+			end,
+			children,
+			className,
+			size,
+			tone,
+			fullWidth,
+			disabled,
+			...rest
+		},
+		ref,
+	) {
+		const wrapperClass = [
+			inputFrameVariants({
+				size,
+				tone,
+				fullWidth: fullWidth ? true : undefined,
+				disabled,
+			}),
+			className,
+		]
+			.filter(Boolean)
+			.join(" ");
 
-	return (
-		<div className={wrapperClass} data-disabled={disabled ? true : undefined} {...rest}>
-			{start ? <span className="shrink-0">{start}</span> : null}
-			<div className="flex-1 min-w-0">{children}</div>
-			{end ? <span className="shrink-0">{end}</span> : null}
-		</div>
-	);
-}
+		return (
+			<div
+				ref={ref}
+				className={wrapperClass}
+				data-disabled={disabled ? true : undefined}
+				{...rest}
+			>
+				{start ? (
+					<span className="flex items-center shrink-0">{start}</span>
+				) : null}
+				<div className="flex-1 min-w-0">{children}</div>
+				{end ? <span className="flex items-center shrink-0">{end}</span> : null}
+			</div>
+		);
+	},
+);

@@ -1,6 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
-import Portal from "@/components/Portal";
+import { ModalShell } from "@/components/ui/floating/modal/ModalShell";
+import { Button } from "@/components/ui/primitives/Button";
+import { Icon } from "@/components/ui/primitives/Icon";
 import { Text } from "@/components/ui/primitives/Text";
 import { NAV_LINKS } from "@/config/navConfig";
 
@@ -14,36 +14,37 @@ export default function HeaderCompactModal({
 	handleChangeModal: () => void;
 }) {
 	return (
-		<Portal>
-			<div
-				data-open={isModalOpen}
-				className="w-full pt-[150px] h-screen padding duration-300 overflow-hidden transition-[opacity] bg-white fixed top-0 z-40 pointer-events-none data-[open=true]:pointer-events-auto opacity-0 data-[open=true]:opacity-100"
-			>
-				<nav className="flex flex-col overflow-auto h-full border-t border-[#111416]/[0.15]">
-					{navLinks.map((obj) => (
-						<Link
-							href={obj.link}
-							key={obj.name}
-							onClick={handleChangeModal}
-							className="group"
-						>
-							<div className="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative overflow-hidden gap-2.5 px-2.5 py-[25px] border-[#111416]/[0.15] border-b">
-								<Text className="flex-grow-0 flex-shrink-0 capitalize text-[#111416]" variant="bodyStrong">
-									{obj.name}
-								</Text>
-								<div className="self-stretch flex-grow w-[249px] h-[27px] relative overflow-hidden" />
-								<Image
-									src="/components/header/arrow.svg"
-									alt="alt"
-									width={25}
-									height={25}
-									className="flex-grow-0 flex-shrink-0 w-[25px] h-[25px] relative"
-								/>
-							</div>
-						</Link>
-					))}
-				</nav>
-			</div>
-		</Portal>
+		<ModalShell
+			animate={{ y: false }}
+			onClose={handleChangeModal}
+			portalTargetId="header-compact-modal-root"
+			wrapperClassName="items-start justify-start !p-0"
+			backdropClassName="bg-black/30"
+			data-open={isModalOpen}
+			panelClassName="h-screen w-full max-w-none rounded-none border-0 bg-white shadow-none px-section-x data-[open=false]:pointer-events-none"
+			panelStyle={{ boxShadow: "none" }}
+		>
+			<nav className="flex h-full w-full flex-col divide-y divide-border/15 pt-[100px] ">
+				{navLinks.map((obj) => (
+					<Button
+						key={obj.name}
+						href={obj.link}
+						variant="ghost"
+						align="left"
+						className="group flex !w-full !items-center !justify-between rounded-none !py-4 text-foreground"
+						onClick={handleChangeModal}
+					>
+						<Text variant="bodyStrong" className="capitalize !text-lg">
+							{obj.name}
+						</Text>
+						<Icon
+							name="arrow-right"
+							size="lg"
+							className="text-muted-foreground transition-transform duration-200 group-hover:translate-x-1"
+						/>
+					</Button>
+				))}
+			</nav>
+		</ModalShell>
 	);
 }

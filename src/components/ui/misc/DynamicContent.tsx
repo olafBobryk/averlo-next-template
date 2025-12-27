@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import type * as React from "react";
+import { Loader } from "@/components/ui/misc/Loader";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -18,6 +19,7 @@ type DynamicContentProps = {
 	onRetry?: () => void;
 	children: React.ReactNode;
 	className?: string;
+	load?: React.ReactNode;
 
 	/**
 	 * Which HTML tag to animate as.
@@ -40,8 +42,10 @@ export function DynamicContent({
 	tag = "div",
 	colSpan = 1,
 	className = "",
+	load,
 }: DynamicContentProps) {
 	const state = loading ? "loading" : error ? "error" : "content";
+	const loadNode = load ?? <Loader className="text-foreground" />;
 
 	// map tag -> motion[tag]
 	const MotionTag: any = (motion as any)[tag] ?? motion.div;
@@ -63,7 +67,7 @@ export function DynamicContent({
 							colSpan={colSpan}
 							className="px-8 py-[31px] text-center align-middle"
 						>
-							<Text variant="muted">Loading…</Text>
+							{loadNode}
 						</td>
 					</MotionTag>
 				)}
@@ -111,9 +115,9 @@ export function DynamicContent({
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: -6 }}
 					transition={transition}
-					className={`${className} flex justify-center`}
+					className={`${className} h-[54px] flex justify-center`}
 				>
-					<Text variant="muted">Loading…</Text>
+					{loadNode}
 				</MotionTag>
 			)}
 

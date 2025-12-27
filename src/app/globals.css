@@ -13,14 +13,9 @@
 	--color-muted-rgb: 2 2 2;
 	--color-foreground-rgb: 2 2 2;
 	--color-background-rgb: 255 255 255;
-
-	/* Layout tokens */
-	--section-px: clamp(1rem, 5vw, 6.25rem);
-	--section-py: clamp(3rem, 8vw, 6.25rem);
-	--section-max-width: 1500px;
 }
 
-@theme inline {
+@theme {
 	--color-primary: rgb(var(--color-primary-rgb) / 1);
 	--color-primary-foreground: rgb(var(--color-primary-foreground-rgb) / 1);
 	--color-danger: rgb(var(--color-danger-rgb) / 1);
@@ -31,11 +26,127 @@
 	--color-muted: rgb(var(--color-muted-rgb) / 1);
 	--color-foreground: rgb(var(--color-foreground-rgb) / 1);
 	--color-background: rgb(var(--color-background-rgb) / 1);
+
+	/* Layout tokens */
+	--spacing-section-x: clamp(1rem, 5vw, 6.25rem);
+	--spacing-section-y: clamp(3rem, 8vw, 6.25rem);
+	--spacing-section: var(--spacing-section-x) var(--spacing-section-y);
+	--container-section: 1500px;
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
 		/* TODO: set dark theme tokens if/when needed */
+	}
+}
+
+@layer components {
+	.inset-center {
+		@apply absolute inset-1/2 -translate-1/2;
+	}
+}
+
+@layer utilities {
+	/*
+	 * .motion-micro
+	 * -------------------------
+	 * Very small, quick transitions for micro-interactions.
+	 *
+	 * Ideal for:
+	 * - Icon / chevron rotations (eg. dropdown chevron pointing up when open).
+	 * - Tiny hover effects (opacity, color, background on pills or badges).
+	 * - Button hover states where only color/opacity changes.
+	 * - Focus rings appearing on inputs.
+	 * - Small border-color changes on validation.
+	 * - Slight scale on icons or small buttons (scale(0.97–1.03)).
+	 *
+	 * Use on:
+	 * - The chevron SVG on dropdown triggers when you toggle `rotate-180`.
+	 * - Small elements that should feel snappy and responsive with almost no lag.
+	 */
+	.motion-micro {
+		transition-duration: 140ms;
+		transition-timing-function: cubic-bezier(0.33, 0.1, 0.2, 1);
+	}
+
+	/* 
+	 * .motion-interactive
+	 * -------------------------
+	 * For interactive elements where the user explicitly clicks or taps.
+	 *
+	 * Ideal for:
+	 * - Dropdown triggers (the pill/button that opens a menu).
+	 * - Buttons that slightly change background, scale, or shadow on hover/active.
+	 * - Toggle switches and checkboxes changing state.
+	 * - Tabs highlighting / underline sliding between active tabs.
+	 * - Chips / filters being selected or deselected.
+	 *
+	 * Specific examples:
+	 * - DateRangeDropdown pill: background + border subtle change on hover/active.
+	 * - Cards that slightly lift with a shadow when hovered.
+	 * - A button that grows in width when loading text appears ("Save" -> "Saving…").
+	 */
+	.motion-interactive {
+		transition-duration: 200ms;
+		transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+	}
+
+	/* 
+	 * .motion-component
+	 * -------------------------
+	 * For component-level transitions where the shape/size/layout of a component changes.
+	 *
+	 * Ideal for:
+	 * - Dropdown menus appearing/disappearing (opacity, translateY) if not using Framer.
+	 * - Panels expanding/collapsing in an accordion.
+	 * - Cards changing layout slightly (eg. showing extra text or controls).
+	 * - Form sections sliding in when a toggle reveals more fields.
+	 * - Width/height changes where the component grows/shrinks a bit.
+	 *
+	 * Specific examples:
+	 * - A filter sidebar opening from the side (width change).
+	 * - A details row expanding inside a table to show extra information.
+	 * - A "more options" panel inside a card that fades and slides down into view.
+	 */
+	.motion-component {
+		transition-duration: 260ms;
+		transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	/* 
+	 * .motion-macro
+	 * -------------------------
+	 * For large, page-level or layout-level transitions that should feel slower and smoother.
+	 *
+	 * Ideal for:
+	 * - Entire sidebars opening/closing.
+	 * - Overlay panels / drawers sliding in from edges.
+	 * - Modals fading in combined with a backdrop.
+	 * - Big layout shifts (eg. dashboard content area resizing when nav collapses).
+	 * - Page sections expanding to show advanced filters, analytics, or details.
+	 *
+	 * Specific examples:
+	 * - A full-height filter drawer on mobile that slides up.
+	 * - The main content shifting right when a left sidebar expands.
+	 * - A hero section height expanding when a "show more" description is opened.
+	 */
+	.motion-macro {
+		transition-duration: 320ms;
+		transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+
+	@keyframes loader-dot {
+		0%,
+		100% {
+			opacity: 0.25;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+
+	.animate-loader-dot {
+		animation: loader-dot 0.9s ease-in-out infinite;
 	}
 }
 

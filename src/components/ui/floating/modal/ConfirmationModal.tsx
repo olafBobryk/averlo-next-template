@@ -37,23 +37,21 @@ export function ConfirmationModal({
 
 	return (
 		<div className="flex flex-col gap-[20px]">
-			<div className=" p-[25px] flex flex-col gap-[40px]">
-				<div className="flex flex-col gap-[5px] text-center">
-					<Heading size="md" as="h2">
-						{title}
-					</Heading>
-					<Text variant="muted">{description}</Text>
-				</div>
-				{warning && (
-					<div className="rounded-[12px] border border-danger/20 bg-danger/10 px-4 py-3">
-						<Text variant="muted" className="text-danger">
-							{warning}
-						</Text>
-					</div>
-				)}
+			<div className="flex flex-col gap-[5px] text-center">
+				<Heading size="md" as="h2">
+					{title}
+				</Heading>
+				<Text variant="muted">{description}</Text>
 			</div>
-
-			<div className="flex justify-between gap-3 border-t border-border/15 p-[25px]">
+			{warning && (
+				<div className="rounded-[12px] border border-danger/20 bg-danger/10 px-4 py-3">
+					<Text variant="muted" className="text-danger">
+						{warning}
+					</Text>
+				</div>
+			)}
+			<div className="h-px rounded-full bg-border/15" />
+			<div className="flex justify-between gap-3">
 				<Button variant="outline" onClick={onClose} disabled={isSubmitting}>
 					Cancel
 				</Button>

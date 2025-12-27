@@ -1,8 +1,10 @@
 "use client";
 
-import Image from "next/image";
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import Logo from "@/components/branding/Logo";
+import { Button } from "@/components/ui/primitives/Button";
+import { Icon } from "@/components/ui/primitives/Icon";
 import { NAV_LINKS } from "@/config/navConfig";
 import HeaderCompactModal from "./HeaderCompactModal";
 
@@ -48,61 +50,65 @@ export default function HeaderCompact({
 	}, []);
 
 	const headerClasses = [
-		"group fixed w-full z-50 transition-all duration-300",
+		"group fixed w-full z-50 transition-all pointer-events-none duration-300",
 		className,
 	]
 		.filter(Boolean)
 		.join(" ");
 
 	return (
-		<header
-			data-open={isModalOpen}
-			data-top={atTop}
-			data-hide={hide}
-			className={headerClasses}
-		>
-			<div className=" relative w-screen padding group-data-[open=true]:fixed">
-				<div
-					className={
-						"w-full h-[100px] items-center relative justify-between overflow-hidden z-[100] flex " +
-						className
-					}
-				>
-					<Logo />
-					<div className="flex gap-[6px]">
-						<button
-							type="button"
-							onClick={handleChangeModal}
-							className="flex flex-col justify-start items-start relative overflow-hidden gap-2.5 px-[20px] py-[15px] rounded-[100px] bg-white/[0.15] group-data-[open=false]:group-data-[light=true]:bg-[rgba(17,20,22,0.15)]"
-							style={{
-								boxShadow: !isModalOpen
-									? "2px 4px 15px -2px rgba(17,20,22,0.05)"
-									: "",
-							}}
-						>
-							<Image
-								src="/components/header/menu.svg"
-								alt="menu"
-								width={19}
-								height={19}
-								className="group-data-[open=true]:opacity-0 group-data-[open=true]:rotate-90 duration-300 transition-all text-white group-data-[light=true]:text-[#111416]"
-							/>
-							<Image
-								src="/components/header/close.svg"
-								alt="close"
-								width={25}
-								height={25}
-								className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-data-[open=true]:opacity-100 -rotate-90 group-data-[open=true]:rotate-0 opacity-0 duration-300 transition-all"
-							/>
-						</button>
+		<>
+			<header
+				data-open={isModalOpen}
+				data-top={atTop}
+				data-hide={hide}
+				className={headerClasses}
+			>
+				<div className="relative w-full px-section-x group-data-[open=true]:fixed">
+					<div className="flex h-[100px] w-full items-center justify-between overflow-hidden">
+						<Logo className="pointer-events-auto" />
+						<div className="flex gap-2">
+							<Button
+								variant="primary"
+								size="md"
+								align="center"
+								data-open={isModalOpen}
+								onClick={handleChangeModal}
+								className="relative pointer-events-auto group-data-[open=true]:!shadow-none transition group-data-[open=true]:bg-transparent group-data-[open=true]:hover:bg-transparent group-data-[open=true]:text-foreground group-data-[open=true]:border-foreground/15"
+								aria-expanded={isModalOpen}
+								aria-label={isModalOpen ? "Close menu" : "Open menu"}
+							>
+								<Icon
+									name="menu"
+									className="transition-all duration-300 data-[open=true]:-rotate-90 data-[open=true]:opacity-0"
+									data-open={isModalOpen}
+									size="lg"
+								/>
+								<Icon
+									name="cross"
+									className="inset-center rotate-90 opacity-0 transition-all duration-300 data-[open=true]:rotate-0 data-[open=true]:opacity-100"
+									data-open={isModalOpen}
+									size="lg"
+								/>
+							</Button>
+						</div>
 					</div>
 				</div>
-			</div>
-			<HeaderCompactModal
-				isModalOpen={isModalOpen}
-				handleChangeModal={handleChangeModal}
-				navLinks={navLinks}
+			</header>
+			<div
+				id="header-compact-modal-root"
+				data-open={isModalOpen}
+				className="fixed inset-0 z-40 data-[open=false]:pointer-events-none"
 			/>
-		</header>
+			<AnimatePresence>
+				{isModalOpen ? (
+					<HeaderCompactModal
+						isModalOpen={isModalOpen}
+						handleChangeModal={handleChangeModal}
+						navLinks={navLinks}
+					/>
+				) : null}
+			</AnimatePresence>
+		</>
 	);
 }

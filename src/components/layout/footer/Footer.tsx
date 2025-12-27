@@ -16,7 +16,7 @@ export default function Footer({
 	return (
 		<footer
 			className={
-				"flex flex-col items-center padding py-[100px] border-t border-white/[0.15] " +
+				"flex flex-col items-center py-section-y px-section-x border-t border-white/[0.15] " +
 				className
 			}
 		>
