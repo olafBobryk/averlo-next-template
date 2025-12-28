@@ -1,7 +1,7 @@
 // components/ui/primitives/Field.tsx
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { Text } from "./Text";
 
 type FieldTone = "default" | "error" | "success";
@@ -28,12 +28,18 @@ export function Field({
 	children,
 }: FieldProps) {
 	return (
-		<div className={["flex flex-col gap-2", className].filter(Boolean).join(" ")}>
+		<div
+			className={["flex flex-col gap-2.5", className].filter(Boolean).join(" ")}
+		>
 			{label ? (
-				<Text as="label" variant="bodyStrong" htmlFor={inputId}>
+				<Text as="label" variant="body" htmlFor={inputId}>
 					<span className="inline-flex items-center gap-1">
 						{label}
-						{required ? <span aria-hidden="true" className="text-danger">*</span> : null}
+						{required ? (
+							<span aria-hidden="true" className="text-danger">
+								*
+							</span>
+						) : null}
 					</span>
 				</Text>
 			) : null}
@@ -46,21 +52,27 @@ export function Field({
 
 			{children}
 
-			{message ? (
+			<div
+				className={[
+					"transition-all motion-micro", // reserve one line
+					message ? "max-h-[26px]" : "max-h-0",
+				].join(" ")}
+			>
 				<Text
 					as="p"
 					variant="captionMuted"
 					className={[
-						"transition-all motion-micro mt-1",
-						tone === "error" ? "text-danger" : "",
-						tone === "success" ? "text-success" : "",
-					]
-						.filter(Boolean)
-						.join(" ")}
+						"transition-all motion-micro mt-2.5", // reserve one line
+						tone === "error"
+							? "!text-danger"
+							: tone === "success"
+								? "!text-success"
+								: "text-transparent",
+					].join(" ")}
 				>
-					{message}
+					{message ?? "placeholder"}
 				</Text>
-			) : null}
+			</div>
 		</div>
 	);
 }

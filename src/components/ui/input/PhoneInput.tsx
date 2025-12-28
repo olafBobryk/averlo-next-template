@@ -6,6 +6,11 @@ import { AsYouType, parsePhoneNumberFromString } from "libphonenumber-js";
 import * as React from "react";
 import flags from "react-phone-number-input/flags";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import { Field } from "@/components/ui/primitives/Field";
+import {
+	InputFrame,
+	inputTextClasses,
+} from "@/components/ui/primitives/InputFrame";
 import { Text } from "@/components/ui/primitives/Text";
 
 export function PhoneFlag({ code }: { code: CountryCode }) {
@@ -71,8 +76,12 @@ export function PhoneInput({
 	defaultCountry = "DO",
 	countries = PHONE_COUNTRIES,
 }: PhoneInputProps) {
+	const inputId = id ?? name;
+	const messageId = inputId ? `${inputId}-message` : undefined;
+
 	const [clientError, setClientError] = React.useState<string | null>(null);
 	const derivedError = error ?? clientError;
+	const tone = derivedError ? "error" : "default";
 
 	const [country, setCountry] = React.useState<CountryCode>(defaultCountry);
 
@@ -100,9 +109,6 @@ export function PhoneInput({
 		[countries, country],
 	);
 
-	const wrapperFocusStyles =
-		"transition-all motion-micro focus-within:!border-primary/60 focus-within:ring-4 focus-within:!ring-primary/10 hover:border-border/25";
-
 	const setNextDisplay = (raw: string) => {
 		// Keep a nice "as you type" formatting per country
 		const formatted = new AsYouType(country).input(raw);
@@ -122,146 +128,109 @@ export function PhoneInput({
 	};
 
 	return (
-		<div
-			className={[
-				"flex flex-col justify-start items-start flex-grow relative",
-				className,
-			]
-				.filter(Boolean)
-				.join(" ")}
+		<Field
+			label={label}
+			required={required}
+			inputId={inputId}
+			className={className}
+			message={derivedError ?? undefined}
+			tone={tone}
 		>
-			<Text as="label" variant="bodyStrong" htmlFor={id}>
-				{label}
-			</Text>
+			<InputFrame
+				tone={tone}
+				disabled={disabled}
+				fullWidth
+				start={
+					<Dropdown
+						renderTrigger={({
+							ref,
+							onRootMouseEnter,
+							onRootMouseLeave,
+							onRightClick,
+						}) => (
+							// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+							<button
+								ref={ref as any}
+								onMouseEnter={onRootMouseEnter}
+								onMouseLeave={onRootMouseLeave}
+								className="flex items-center gap-2 cursor-pointer"
+								onClick={onRightClick}
+								type="button"
+								tabIndex={0}
+							>
+								<PhoneFlag code={selected.code} />
+								<Text as="span" className="!text-sm text-left text-foreground">
+									{selected.dialCode}
+								</Text>
+							</button>
+						)}
+						renderMenu={({ close }) => (
+							<div className="p-2 max-h-[300px] overflow-y-auto">
+								{countries.map((c) => {
+									const active = c.code === country;
+									return (
+										<button
+											key={c.code}
+											type="button"
+											onClick={() => {
+												setCountry(c.code);
+												const reformatted = new AsYouType(c.code).input(
+													display,
+												);
+												setDisplay(reformatted);
 
-			<div
-				className={[
-					"flex justify-start mt-5 items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5",
-					"px-[15px] py-2.5 rounded-[10px] bg-surface border border-border/15",
-					"shadow-[2px_4px_15px_rgba(2,2,2,0.03)]",
-					wrapperFocusStyles,
-					disabled ? "opacity-60 pointer-events-none" : "",
-					derivedError
-						? "border-danger focus-within:border-danger focus-within:ring-danger/10"
-						: "",
-				]
-					.filter(Boolean)
-					.join(" ")}
-			>
-				{/* Country dropdown */}
-				<Dropdown
-					renderTrigger={({
-						ref,
-						onRootMouseEnter,
-						onRootMouseLeave,
-						onRightClick,
-						isOpen,
-					}) => (
-						// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-						<button
-							ref={ref as any}
-							onMouseEnter={onRootMouseEnter}
-							onMouseLeave={onRootMouseLeave}
-							className="flex items-center gap-2 rounded-[10px] cursor-pointer"
-							onClick={onRightClick}
-							type="button"
-							tabIndex={0}
-						>
-							<PhoneFlag code={selected.code} />
-							<Text as="span" className="text-sm text-foreground/80">
-								{selected.dialCode}
-							</Text>
-							{/* your chevron */}
-							<span className="ml-1">{isOpen ? " " : " "}</span>
-						</button>
-					)}
-					renderMenu={({ close }) => (
-						<div className="p-2 max-h-[300px] overflow-y-auto">
-							{countries.map((c) => {
-								const active = c.code === country;
-								return (
-									<button
-										key={c.code}
-										type="button"
-										onClick={() => {
-											setCountry(c.code);
-											// reformat current display for new country
-											const reformatted = new AsYouType(c.code).input(display);
-											setDisplay(reformatted);
+												const parsed = parsePhoneNumberFromString(
+													reformatted,
+													c.code,
+												);
+												onChange?.(
+													parsed?.isValid() ? parsed.number : undefined,
+												);
 
-											// recompute e164
-											const parsed = parsePhoneNumberFromString(
-												reformatted,
-												c.code,
-											);
-											onChange?.(parsed?.isValid() ? parsed.number : undefined);
-
-											close();
-										}}
-										className={[
-											"w-full flex items-center motion-interactive justify-between gap-3 rounded-[10px] px-3 py-2 text-left hover:bg-border/5",
-											active ? "bg-border/5" : "",
-										]
-											.filter(Boolean)
-											.join(" ")}
-									>
-										<span className="flex items-center gap-3">
-											<PhoneFlag code={c.code} />
-											<Text as="span" className="text-sm text-foreground">
-												{c.name}
+												close();
+											}}
+											className={[
+												"w-full flex items-center motion-interactive justify-between gap-3 rounded-[10px] px-3 py-2 text-left hover:bg-border/5",
+												active ? "bg-border/5" : "",
+											]
+												.filter(Boolean)
+												.join(" ")}
+										>
+											<span className="flex items-center gap-3">
+												<PhoneFlag code={c.code} />
+												<Text as="span" className="text-sm text-foreground">
+													{c.name}
+												</Text>
+											</span>
+											<Text as="span" className="text-sm text-muted/70">
+												{c.dialCode}
 											</Text>
-										</span>
-										<Text as="span" className="text-sm text-muted/70">
-											{c.dialCode}
-										</Text>
-									</button>
-								);
-							})}
-						</div>
-					)}
-				/>
-
-				{/* Number input */}
+										</button>
+									);
+								})}
+							</div>
+						)}
+					/>
+				}
+			>
 				<input
-					id={id}
+					id={inputId}
 					name={name}
 					type="tel"
 					placeholder={placeholder}
 					required={required}
 					disabled={disabled}
-					value={display}
 					onChange={(e) => setNextDisplay(e.target.value)}
 					onBlur={handleBlur}
-					className={[
-						"w-full bg-transparent outline-none text-sm text-left text-foreground",
-						"placeholder:text-muted/70",
-						inputClassName,
-					]
+					className={[inputTextClasses, inputClassName]
 						.filter(Boolean)
 						.join(" ")}
 					aria-invalid={Boolean(derivedError)}
-					aria-describedby={derivedError ? `${id ?? name}-error` : undefined}
+					aria-describedby={derivedError ? messageId : undefined}
+					value={display}
 				/>
-			</div>
-			<div
-				className={[
-					"transition-all motion-micro", // reserve one line
-					derivedError ? "max-h-[26px]" : "max-h-0",
-				].join(" ")}
-			>
-				<Text
-					as="p"
-					id={derivedError ? `${id ?? name}-error` : undefined}
-					variant="captionMuted"
-					className={[
-						"transition-all motion-micro mt-2.5", // reserve one line
-						derivedError ? "text-danger" : "text-transparent",
-					].join(" ")}
-				>
-					{derivedError ?? "placeholder"}
-				</Text>
-			</div>
-		</div>
+			</InputFrame>
+		</Field>
 	);
 }
 

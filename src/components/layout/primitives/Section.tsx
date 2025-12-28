@@ -20,7 +20,7 @@ const outerStyles = cva("w-full", {
 		background: "none",
 	},
 });
-
+//TODO: background react node layer strategy
 const innerStyles = cva("w-full", {
 	variants: {
 		maxWidth: {
