@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Section } from "@/components/layout/primitives/Section";
 import { Button } from "@/components/ui/primitives/Button";
 import { Heading } from "@/components/ui/primitives/Heading";
 import { Text } from "@/components/ui/primitives/Text";
@@ -21,7 +22,7 @@ export default function AppError({
 
 	return (
 		<main className="min-h-screen flex items-center justify-center px-4 py-12">
-			<section className="w-full max-w-xl text-center space-y-3">
+			<Section className="h-full" innerClassName="h-full" align={"center"}>
 				<Heading as="h1" size="xl">
 					Something went wrong
 				</Heading>
@@ -47,7 +48,7 @@ export default function AppError({
 						{error.digest ? `\n\nDigest: ${error.digest}` : ""}
 					</pre>
 				)}
-			</section>
+			</Section>
 		</main>
 	);
 }
