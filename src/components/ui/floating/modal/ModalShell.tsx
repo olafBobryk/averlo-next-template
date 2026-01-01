@@ -14,6 +14,7 @@ type ModalShellProps = {
 	animate?: {
 		y?: boolean;
 		opacity?: boolean;
+		scale?: boolean;
 	};
 	disableWhenReducedMotion?: boolean;
 
@@ -36,7 +37,7 @@ const panelTransition = {
 
 // TODO: Swap the default panel classes below to match your project's design tokens.
 const DEFAULT_PANEL =
-	"flex max-w-full w-[450px] max-h-full max-w-lg overflow-hidden overflow-y-auto rounded-[20px] border border-border/15 bg-white";
+	"flex will-change-opacity max-w-full w-[450px] max-w-lg overflow-hidden overflow-y-auto rounded-[20px] border border-border/15 bg-white";
 
 export function ModalShell({
 	onClose,
@@ -60,6 +61,7 @@ export function ModalShell({
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const animateY = animate?.y ?? true;
 	const animateOpacity = animate?.opacity ?? true;
+	const animateScale = animate?.scale ?? true;
 
 	const backdropInitial = motionAllowed
 		? { ...(animateOpacity ? { opacity: 0 } : {}) }
@@ -81,35 +83,35 @@ export function ModalShell({
 		? { ...(animateOpacity ? { opacity: 0 } : {}) }
 		: undefined;
 
-	const panelInitial = motionAllowed
+	const wrapperPanelInitial = motionAllowed
 		? {
 				...(animateOpacity ? { opacity: 0 } : {}),
 				...(animateY ? { y: 24 } : {}),
-				scale: 0.98,
+				...(animateScale ? { scale: 0.98 } : {}),
 			}
 		: undefined;
-	const panelAnimate = motionAllowed
+	const wrapperPanelAnimate = motionAllowed
 		? {
 				...(animateOpacity ? { opacity: 1 } : {}),
 				...(animateY ? { y: 0 } : {}),
-				scale: 1,
+				...(animateScale ? { scale: 1 } : {}),
 			}
 		: undefined;
-	const panelExit = motionAllowed
+	const wrapperPanelExit = motionAllowed
 		? {
 				...(animateOpacity ? { opacity: 0 } : {}),
 				...(animateY ? { y: 24 } : {}),
-				scale: 0.98,
+				...(animateScale ? { scale: 0.98 } : {}),
 			}
 		: undefined;
 
 	return (
 		<Portal target={portalTargetId}>
-			<div className="sticky top-0 w-full h-screen inset-0 z-80">
+			<div className="fixed top-0 w-full vh-max inset-0 z-80">
 				<motion.div
 					key="modal-backdrop"
 					className={[
-						"absolute inset-0 z-[81] bg-gradient-to-b from-black/25 to-black/70",
+						"absolute will-change-opacity inset-0 z-[81] bg-gradient-to-b from-black/25 to-black/70",
 						backdropClassName,
 					]
 						.filter(Boolean)
@@ -124,14 +126,14 @@ export function ModalShell({
 				<motion.div
 					key="modal-panel-wrapper"
 					className={[
-						"relative z-[82] flex h-full w-full items-center justify-center px-section-x py-10",
+						"relative z-[82] flex will-change-opacity h-full w-full items-center justify-center px-section-x py-10",
 						wrapperClassName,
 					]
 						.filter(Boolean)
 						.join(" ")}
-					initial={wrapperInitial}
-					animate={wrapperAnimate}
-					exit={wrapperExit}
+					initial={wrapperPanelInitial}
+					animate={wrapperPanelAnimate}
+					exit={wrapperPanelExit}
 					transition={motionAllowed ? panelTransition : undefined}
 					aria-modal="true"
 					role="dialog"
@@ -146,9 +148,6 @@ export function ModalShell({
 						style={
 							panelStyle ?? { boxShadow: "2px 4px 15px 0 rgba(2,2,2,0.03)" }
 						}
-						initial={panelInitial}
-						animate={panelAnimate}
-						exit={panelExit}
 						transition={
 							motionAllowed ? { ...panelTransition, delay: 0.04 } : undefined
 						}
