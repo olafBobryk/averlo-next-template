@@ -20,7 +20,7 @@ export default function Footer({
 				className
 			}
 		>
-			<div className="flex flex-col justify-center items-center max relative gap-[25px] ">
+			<div className="flex flex-col justify-center items-center max-w-section-max relative gap-[25px] ">
 				<Logo size="md" />
 				<div className="flex justify-center gap-y-[10px] flex-wrap items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-[45px] p-2.5">
 					{navLinks.map((item) => (

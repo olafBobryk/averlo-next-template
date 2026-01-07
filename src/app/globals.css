@@ -30,8 +30,8 @@
 	/* Layout tokens */
 	--spacing-section-x: clamp(1rem, 5vw, 6.25rem);
 	--spacing-section-y: clamp(3rem, 8vw, 6.25rem);
-	--spacing-section: var(--spacing-section-x) var(--spacing-section-y);
-	--container-section: 1500px;
+	--spacing-section: var(--spacing-section-y) var(--spacing-section-x);
+	--spacing-section-max: 1500px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -158,20 +158,4 @@ body {
 	background: var(--color-background);
 	color: var(--color-foreground);
 	font-family: Arial, Helvetica, sans-serif;
-}
-
-.vh-max {
-	height: 100lvh; /* largest viewport height (iOS 16+, modern browsers) */
-}
-
-/* Fallbacks for older browsers */
-@supports not (height: 100lvh) {
-	.vh-max {
-		height: 100dvh; /* dynamic vh (better than vh on many browsers) */
-	}
-}
-@supports not (height: 100dvh) {
-	.vh-max {
-		height: 100vh; /* last-resort legacy */
-	}
 }

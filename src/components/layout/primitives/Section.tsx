@@ -13,6 +13,12 @@ const outerStyles = cva("w-full", {
 		background: {
 			none: "",
 			surface: "bg-surface",
+			background: "bg-background",
+			foreground: "bg-foreground",
+		},
+		height: {
+			auto: "h-auto",
+			hero: "h-svh max-h-[1000px]",
 		},
 	},
 	defaultVariants: {
@@ -20,11 +26,11 @@ const outerStyles = cva("w-full", {
 		background: "none",
 	},
 });
-//TODO: background react node layer strategy
+
 const innerStyles = cva("w-full", {
 	variants: {
 		maxWidth: {
-			default: "max-w-[var(--section-max-width)] mx-auto",
+			default: "max-w-section-max mx-auto",
 			wide: "max-w-none",
 			narrow: "max-w-4xl mx-auto",
 		},
@@ -56,13 +62,14 @@ export function Section<T extends ElementType = "section">({
 	innerClassName,
 	padding,
 	background,
+	height,
 	maxWidth,
 	align,
 	...rest
 }: SectionProps<T>) {
 	const Tag = (as ?? "section") as ElementType;
 
-	const outerClass = [outerStyles({ padding, background }), className]
+	const outerClass = [outerStyles({ padding, background, height }), className]
 		.filter(Boolean)
 		.join(" ");
 	const innerClass = [innerStyles({ maxWidth, align }), innerClassName]

@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { Button } from "@/components/ui/primitives/Button";
 import { NAV_LINKS } from "@/config/navConfig";
@@ -43,7 +43,7 @@ export default function HeaderFull({
 	}, [motionAllowed]);
 
 	const headerClasses = [
-		"h-[100px] fixed z-50 px-section pointer-events-none left-1/2 flex justify-center -translate-x-1/2 w-full group",
+		"h-[100px] fixed z-50 px-section-x pointer-events-none left-1/2 flex justify-center -translate-x-1/2 w-full group",
 		className,
 	]
 		.filter(Boolean)
@@ -51,7 +51,7 @@ export default function HeaderFull({
 
 	return (
 		<header className={headerClasses} data-top={atTop} data-hide={hide}>
-			<div className="max-w-section w-full flex items-center h-full">
+			<div className="max-w-section-max w-full flex items-center h-full">
 				<div className="flex justify-between w-full h-fit">
 					<Logo size="md" className="pointer-events-auto" />
 					<Button
