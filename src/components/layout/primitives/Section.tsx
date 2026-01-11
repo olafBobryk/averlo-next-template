@@ -18,7 +18,7 @@ const outerStyles = cva("w-full", {
 		},
 		height: {
 			auto: "h-auto",
-			hero: "h-svh max-h-[1000px] min-h-fit",
+			hero: "sm:h-svh max-h-[1000px] min-h-fit",
 		},
 	},
 	defaultVariants: {
