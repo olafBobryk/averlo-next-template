@@ -1,0 +1,64 @@
+@layer utilities {
+	@keyframes loader-dot {
+		0%,
+		100% {
+			opacity: 0.25;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+
+	.animate-loader-dot {
+		animation: loader-dot 0.9s ease-in-out infinite;
+	}
+
+	@keyframes spin-smooth {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(1080deg);
+		}
+	}
+
+	.animate-spin-smooth {
+		animation: spin-smooth var(--motion-spin-duration) var(--motion-spin-ease)
+			infinite;
+	}
+
+	@keyframes ring {
+		10%,
+		90% {
+			transform: rotate(-5deg);
+		}
+		20%,
+		80% {
+			transform: rotate(10deg);
+		}
+		30%,
+		50%,
+		70% {
+			transform: rotate(-20deg);
+		}
+		40%,
+		60% {
+			transform: rotate(20deg);
+		}
+	}
+
+	.animate-ring {
+		animation: ring var(--motion-decorative-duration) var(--motion-ring-ease)
+			both;
+	}
+
+	.icon-bell-animate {
+		transform-origin: 50% 25%;
+	}
+
+	.icon-bell-animate:hover,
+	.group:hover .icon-bell-animate {
+		animation: ring var(--motion-decorative-duration) var(--motion-ring-ease)
+			both;
+	}
+}

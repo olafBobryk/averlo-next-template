@@ -1,7 +1,7 @@
 // components/ui/motion/ScrollParallax.tsx
 "use client";
 
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { useMemo, useRef, type ComponentProps, type ReactNode } from "react";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 

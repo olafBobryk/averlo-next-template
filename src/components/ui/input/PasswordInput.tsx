@@ -2,8 +2,16 @@
 "use client";
 
 import * as React from "react";
+import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Field } from "@/components/ui/primitives/Field";
-import { InputFrame, inputTextClasses } from "@/components/ui/primitives/InputFrame";
+import { Icon } from "@/components/ui/icons/Icon";
+import { Button } from "@/components/ui/primitives/Button";
+import {
+	InputFrame,
+	type InputFrameSize,
+	inputVariants,
+} from "@/components/ui/primitives/InputFrame";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type PasswordInputProps = {
 	label: React.ReactNode;
@@ -23,6 +31,8 @@ type PasswordInputProps = {
 
 	disabled?: boolean;
 	inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+	autoComplete?: string;
+	showStrength?: boolean;
 
 	// Validation (recommended: pass error from parent)
 	error?: React.ReactNode;
@@ -32,7 +42,31 @@ type PasswordInputProps = {
 
 	className?: string;
 	inputClassName?: string;
+	size?: InputFrameSize;
 };
+
+const PASSWORD_RULES = [
+	{
+		id: "length",
+		label: "at least 6 characters",
+		test: (value: string) => value.length >= 6,
+	},
+	{
+		id: "uppercase",
+		label: "1 uppercase letter",
+		test: (value: string) => /[A-Z]/.test(value),
+	},
+	{
+		id: "number",
+		label: "1 number",
+		test: (value: string) => /\d/.test(value),
+	},
+	{
+		id: "symbol",
+		label: "1 symbol",
+		test: (value: string) => /[^A-Za-z0-9]/.test(value),
+	},
+];
 
 export function PasswordInput({
 	label,
@@ -45,23 +79,48 @@ export function PasswordInput({
 	onChange,
 	disabled,
 	inputMode,
+	autoComplete,
+	showStrength = false,
 	error,
 	validate,
 	required = false,
 	className,
 	inputClassName,
+	size,
 }: PasswordInputProps) {
 	const isControlled = value !== undefined;
+	const [internalValue, setInternalValue] = React.useState(
+		defaultValue ?? "",
+	);
 
 	const [clientError, setClientError] = React.useState<string | null>(null);
 	const [isVisible, setIsVisible] = React.useState(false);
+	const motionAllowed = useMotionAllowed(true);
 
 	const derivedError = error ?? clientError;
 	const tone = derivedError ? "error" : "default";
+	const fallbackId = React.useId();
+	const inputId = id ?? name ?? fallbackId;
+	const descriptionId = description ? `${inputId}-description` : undefined;
+	const messageId = derivedError ? `${inputId}-message` : undefined;
+	const describedBy =
+		[descriptionId, derivedError ? messageId : undefined]
+			.filter(Boolean)
+			.join(" ") || undefined;
+	const currentValue = isControlled ? value ?? "" : internalValue;
+	const strength = React.useMemo(() => {
+		const passed = PASSWORD_RULES.filter((rule) =>
+			rule.test(currentValue),
+		).length;
+		const total = PASSWORD_RULES.length;
+		const percent = total > 0 ? Math.round((passed / total) * 100) : 0;
+		return { passed, total, percent };
+	}, [currentValue]);
 
 	const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
 		const next = e.target.value;
 		if (validate) setClientError(null);
+		if (!isControlled) setInternalValue(next);
 		onChange?.(next);
 	};
 
@@ -71,9 +130,6 @@ export function PasswordInput({
 		setClientError(validate(next));
 	};
 
-	const inputId = id ?? name;
-	const messageId = inputId ? `${inputId}-message` : undefined;
-
 	return (
 		<Field
 			label={label}
@@ -82,51 +138,102 @@ export function PasswordInput({
 			tone={tone}
 			required={required}
 			inputId={inputId}
+			descriptionId={descriptionId}
+			messageId={messageId}
 			className={className}
 		>
-			<InputFrame
-				tone={tone}
-				disabled={disabled}
-				fullWidth
-				end={
-					<button
-						type="button"
-						onClick={() => setIsVisible((v) => !v)}
+			<div className="flex flex-col gap-2.5">
+				<InputFrame
+					tone={tone}
+					size={size}
+					disabled={disabled}
+					fullWidth
+					end={
+						<Button
+							variant="ghost"
+							size="icon-sm"
+							align="center"
+							onClick={() => setIsVisible((v) => !v)}
+							disabled={disabled}
+							aria-label={isVisible ? "Hide password" : "Show password"}
+							aria-pressed={isVisible}
+							className={[
+								"shrink-0 relative select-none aspect-square",
+								"!p-1 !rounded-[8px] max-w-fit max-h-fit ",
+								"text-foreground/80 hover:text-foreground",
+								"transition-all motion-micro",
+								"hover:bg-[#020202]/[0.05] active:bg-[#020202]/[0.08] cursor-pointer",
+							]
+								.filter(Boolean)
+								.join(" ")}
+						>
+							<IconSwap
+								size="sm"
+								activeIndex={isVisible ? 0 : 1}
+								items={[
+									{ icon: <Icon name="eye" size="md" /> },
+									{ icon: <Icon name="eye-closed" size="md" /> },
+								]}
+							/>
+							<span className="sr-only">
+								{isVisible ? "Hide password" : "Show password"}
+							</span>
+						</Button>
+					}
+				>
+					<input
+						id={inputId}
+						name={name}
+						type={isVisible ? "text" : "password"}
+						inputMode={inputMode}
+						autoComplete={autoComplete ?? "current-password"}
 						disabled={disabled}
-						aria-label={isVisible ? "Hide password" : "Show password"}
-						aria-pressed={isVisible}
+						placeholder={placeholder}
+						required={required}
 						className={[
-							"shrink-0 select-none",
-							"px-2 py-1 rounded-[8px]",
-							"text-xs text-foreground/80 hover:text-foreground",
-							"transition-all motion-micro",
-							"hover:bg-[#020202]/[0.05] active:bg-[#020202]/[0.08]",
-							"focus:outline-none focus:ring-4 focus:ring-primary/10 cursor-pointer focus:ring-offset-0",
+							inputVariants({
+								size,
+								hasEnd: true,
+								disabled: disabled ? true : undefined,
+							}),
+							inputClassName,
 						]
 							.filter(Boolean)
 							.join(" ")}
+						{...(isControlled
+							? { value: value ?? "", onChange: handleChange }
+							: { defaultValue, onChange: handleChange })}
+						onBlur={handleBlur}
+						aria-invalid={Boolean(derivedError)}
+						aria-describedby={describedBy}
+					/>
+				</InputFrame>
+				{showStrength ? (
+					<div
+						className="h-1.5 w-full rounded-full bg-foreground/10 overflow-hidden"
+						role="progressbar"
+						aria-label="Password strength"
+						aria-valuemin={0}
+						aria-valuemax={100}
+						aria-valuenow={strength.percent}
 					>
-						{isVisible ? "Hide" : "Show"}
-					</button>
-				}
-			>
-				<input
-					id={inputId}
-					name={name}
-					type={isVisible ? "text" : "password"}
-					inputMode={inputMode}
-					disabled={disabled}
-					placeholder={placeholder}
-					required={required}
-					className={[inputTextClasses, inputClassName].filter(Boolean).join(" ")}
-					{...(isControlled
-						? { value: value ?? "", onChange: handleChange }
-						: { defaultValue, onChange: handleChange })}
-					onBlur={handleBlur}
-					aria-invalid={Boolean(derivedError)}
-					aria-describedby={derivedError ? messageId : undefined}
-				/>
-			</InputFrame>
+						<div
+							className={[
+								"h-full rounded-full",
+								motionAllowed
+									? "transition-[width] motion-micro"
+									: "transition-none",
+							]
+								.filter(Boolean)
+								.join(" ")}
+							style={{
+								width: `${strength.percent}%`,
+								backgroundColor: `color-mix(in srgb, var(--color-danger) ${100 - strength.percent}%, var(--color-success) ${strength.percent}%)`,
+							}}
+						/>
+					</div>
+				) : null}
+			</div>
 		</Field>
 	);
 }

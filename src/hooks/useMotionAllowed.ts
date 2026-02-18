@@ -2,12 +2,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSettingsContext } from "@/components/ui/foundations/settingsContext";
 
 export function useMotionAllowed(disableWhenReduced: boolean) {
+	const settings = useSettingsContext();
+	const forcedDisabled = settings?.motionDisabled === true;
+
 	// Start as allowed to avoid skipping animations before the first effect runs.
 	const [allowed, setAllowed] = useState(true);
 
 	useEffect(() => {
+		if (forcedDisabled) {
+			setAllowed(false);
+			return;
+		}
+
 		if (!disableWhenReduced) {
 			setAllowed(true);
 			return;
@@ -30,7 +39,7 @@ export function useMotionAllowed(disableWhenReduced: boolean) {
 			media.removeEventListener("change", compute);
 			connection?.removeEventListener?.("change", compute);
 		};
-	}, [disableWhenReduced]);
+	}, [disableWhenReduced, forcedDisabled]);
 
-	return allowed;
+	return forcedDisabled ? false : allowed;
 }

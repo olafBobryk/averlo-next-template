@@ -2,7 +2,7 @@
 "use client";
 
 import { Slot } from "@radix-ui/react-slot";
-import { motion, useInView, type Variants } from "framer-motion";
+import { motion, useInView, type Variants } from "motion/react";
 import {
 	type ComponentProps,
 	forwardRef,

@@ -5,6 +5,15 @@
 
 import * as React from "react";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import { dropdownListClassName } from "@/components/ui/primitives/dropdownStyles";
+import { Field } from "@/components/ui/primitives/Field";
+import {
+	InputFrame,
+	type InputFrameSize,
+	inputVariants,
+} from "@/components/ui/primitives/InputFrame";
+import { Button } from "@/components/ui/primitives/Button";
+import { Listbox } from "@/components/ui/primitives/Listbox";
 import { Text } from "@/components/ui/primitives/Text";
 
 export type ComboboxOption = {
@@ -46,12 +55,19 @@ type ComboboxTextInputProps = {
 	className?: string;
 	inputClassName?: string;
 	menuClassName?: string;
+	menuListClassName?: string;
+	optionClassName?: string;
+	optionActiveClassName?: string;
+	optionSelectedClassName?: string;
+	fieldClassName?: string;
+	noResultsText?: React.ReactNode;
 
 	// Dropdown behavior
 	openOnFocus?: boolean; // default true
 	openOnChevronClick?: boolean; // default true
 
 	portalTargetId?: string;
+	size?: InputFrameSize;
 };
 
 function defaultFilter(query: string, option: ComboboxOption) {
@@ -77,13 +93,27 @@ export function ComboboxTextInput({
 	className,
 	inputClassName,
 	menuClassName,
+	menuListClassName,
+	optionClassName,
+	optionActiveClassName,
+	optionSelectedClassName,
+	fieldClassName,
+	noResultsText,
 	openOnFocus = true,
 	openOnChevronClick = true,
 	portalTargetId,
+	size,
 }: ComboboxTextInputProps) {
+	const inputRef = React.useRef<HTMLInputElement | null>(null);
 	const isControlled = value !== undefined;
 	const [clientError, setClientError] = React.useState<string | null>(null);
 	const derivedError = error ?? clientError;
+	const tone = derivedError ? "error" : "default";
+
+	const fallbackId = React.useId();
+	const inputId = id ?? name ?? fallbackId;
+	const messageId = derivedError ? `${inputId}-message` : undefined;
+	const menuId = `${inputId}-menu`;
 
 	// local input state for uncontrolled mode
 	const [uncontrolledValue, setUncontrolledValue] = React.useState(
@@ -104,79 +134,142 @@ export function ComboboxTextInput({
 		return options.filter((opt) => filterOption(inputValue, opt));
 	}, [options, filterOption, inputValue]);
 
-	const wrapperFocusStyles =
-		" transition-all motion-micro focus-within:!border-primary/60 focus-within:ring-4 focus-within:ring-primary/10 hover:border-border/25";
+	const [activeIndex, setActiveIndex] = React.useState(0);
+	const [menuOpen, setMenuOpen] = React.useState(false);
+	const listRef = React.useRef<HTMLDivElement | null>(null);
+
+	React.useEffect(() => {
+		if (filtered.length === 0) {
+			setActiveIndex(0);
+			return;
+		}
+		if (activeIndex > filtered.length - 1) {
+			setActiveIndex(0);
+		}
+	}, [activeIndex, filtered.length]);
+
+	React.useEffect(() => {
+		if (!menuOpen) return;
+		const selectedIndex = filtered.findIndex(
+			(opt) => (opt.value ?? opt.label) === inputValue,
+		);
+		if (selectedIndex >= 0) {
+			setActiveIndex(selectedIndex);
+		} else if (filtered.length > 0) {
+			setActiveIndex(0);
+		}
+	}, [menuOpen, filtered, inputValue]);
+
+	React.useEffect(() => {
+		if (!menuOpen) return;
+		const option = listRef.current?.querySelector<HTMLElement>(
+			`[data-option-index="${activeIndex}"]`,
+		);
+		option?.scrollIntoView({ block: "nearest" });
+	}, [activeIndex, menuOpen]);
+
+	const updateActiveIndex = React.useCallback(
+		(nextIndex: number) => {
+			if (filtered.length === 0) return;
+			const safeIndex = (nextIndex + filtered.length) % filtered.length;
+			setActiveIndex(safeIndex);
+		},
+		[filtered.length],
+	);
 
 	return (
-		<div
-			className={[
-				"flex flex-col justify-start items-start flex-grow relative",
-				className,
-			]
-				.filter(Boolean)
-				.join(" ")}
+		<Field
+			label={label}
+			message={derivedError ?? undefined}
+			tone={tone}
+			required={required}
+			inputId={inputId}
+			messageId={messageId}
+			className={fieldClassName}
 		>
-			<Text as="label" variant="bodyStrong" htmlFor={id}>
-				{label}
-			</Text>
-
 			<Dropdown
 				portalTargetId={portalTargetId}
-				// Left click is used here as "open/pin" and also lets us focus the input
-				onLeftClick={() => {
-					// focus the input on any left click inside trigger if possible
-					const el = document.getElementById(id ?? "");
-					if (el instanceof HTMLInputElement) el.focus();
-				}}
+				menuWidth="trigger"
+				disabled={disabled}
+				openOnHover={false}
+				pinOnClick={false}
+				onOpenChange={setMenuOpen}
+				menuClassName={menuClassName}
 				renderTrigger={({
 					ref,
 					isOpen,
 					onRootMouseEnter,
 					onRootMouseLeave,
-					onLeftClick,
-					onRightClick,
+					openMenu,
+					closeMenu,
 					chevronIcon,
 				}) => {
+					const activeOptionId =
+						menuId && isOpen && filtered[activeIndex]
+							? `${menuId}-option-${activeIndex}`
+							: undefined;
+
+					const handleChevronClick = (event: React.MouseEvent) => {
+						event.stopPropagation();
+						if (!openOnChevronClick) return;
+						if (isOpen) {
+							closeMenu({ restoreFocus: false });
+							return;
+						}
+						openMenu();
+					};
+
 					return (
-						<div
-							ref={ref}
+						<InputFrame
+							ref={ref as any}
 							onMouseEnter={onRootMouseEnter}
 							onMouseLeave={onRootMouseLeave}
-							className={[
-								"flex justify-start items-center mt-5 self-stretch flex-grow-0 flex-shrink-0 relative gap-2.5",
-								"px-[15px] py-2.5 rounded-[10px] bg-surface border border-border/15",
-								"shadow-[2px_4px_15px_rgba(2,2,2,0.03)]",
-								wrapperFocusStyles,
-								disabled ? "opacity-60 pointer-events-none" : "",
-								derivedError
-									? "border-danger focus-within:border-danger focus-within:ring-danger/10"
-									: "",
-							]
-								.filter(Boolean)
-								.join(" ")}
-							// clicking anywhere in the trigger (left side) should open/pin AND focus input
-							onMouseDown={(e) => {
-								// keep focus on input, prevent wrapper from stealing it
-								// but do not block selecting text inside input
-								const target = e.target as HTMLElement;
-								if (target.tagName !== "INPUT") e.preventDefault();
-							}}
-							onClick={(e) => {
-								// If chevron click is disabled, avoid pinning from clicks on chevron
-								// We still allow left side click to pin/open via Dropdown's onLeftClick.
-								onLeftClick?.(e);
+							tone={tone}
+							size={size}
+							disabled={disabled}
+							fullWidth
+							end={
+								openOnChevronClick ? (
+									<Button
+										variant="ghost"
+										size="icon-sm"
+										align="center"
+										onClick={handleChevronClick}
+										onMouseDown={(event) => {
+											event.preventDefault();
+										}}
+										tabIndex={-1}
+										className="rounded-[8px] text-foreground/60"
+										aria-label="Toggle options"
+									>
+										{chevronIcon}
+									</Button>
+								) : null
+							}
+							className={className}
+							contentClassName="flex items-center"
+							onMouseDown={(event) => {
+								if (disabled) return;
+								const target = event.target as HTMLElement;
+								if (target.tagName !== "INPUT") event.preventDefault();
+								inputRef.current?.focus({ preventScroll: true });
+								if (openOnFocus) openMenu();
 							}}
 						>
 							<input
-								id={id}
+								ref={inputRef}
+								id={inputId}
 								name={name}
 								type="text"
 								disabled={disabled}
 								placeholder={placeholder}
 								required={required}
 								className={[
-									"w-full bg-transparent outline-none text-sm text-left text-foreground",
-									"placeholder:text-muted/70",
+									inputVariants({
+										size,
+										hasEnd: openOnChevronClick ? true : undefined,
+										disabled: disabled ? true : undefined,
+									}),
 									inputClassName,
 								]
 									.filter(Boolean)
@@ -184,8 +277,9 @@ export function ComboboxTextInput({
 								value={inputValue}
 								onChange={(e) => {
 									if (validate) setClientError(null);
-									// typing always takes priority
 									setValue(e.target.value);
+									setActiveIndex(0);
+									if (openOnFocus && !isOpen) openMenu();
 								}}
 								onBlur={(e) => {
 									if (!validate) return;
@@ -193,94 +287,90 @@ export function ComboboxTextInput({
 								}}
 								onFocus={() => {
 									if (!openOnFocus) return;
-									// Open by simulating the "left click" behavior
-									// (Dropdown pins + opens on left click)
-									// We do it without needing the event object
-									// by using the prop call onLeftClick via a synthetic click.
-									// Safer: just trigger the wrapper click.
-									const wrapper = (document.getElementById(id ?? "") as any)
-										?.parentElement as HTMLElement | null;
-									if (wrapper) wrapper.click();
+									openMenu();
+								}}
+								onKeyDown={(event) => {
+									if (event.key === "ArrowDown") {
+										event.preventDefault();
+										if (!isOpen) openMenu();
+										updateActiveIndex(activeIndex + 1);
+										return;
+									}
+									if (event.key === "ArrowUp") {
+										event.preventDefault();
+										if (!isOpen) openMenu();
+										updateActiveIndex(activeIndex - 1);
+										return;
+									}
+									if (event.key === "Enter") {
+										if (!isOpen) {
+											event.preventDefault();
+											openMenu();
+											return;
+										}
+										const option = filtered[activeIndex];
+										if (option) {
+											event.preventDefault();
+											setValue(option.value ?? option.label);
+											closeMenu({ restoreFocus: false });
+										}
+										return;
+									}
+									if (event.key === "Escape" && isOpen) {
+										event.preventDefault();
+										closeMenu({ restoreFocus: false });
+									}
 								}}
 								aria-invalid={Boolean(derivedError)}
-								aria-describedby={
-									derivedError ? `${id ?? name}-error` : undefined
-								}
-								role="combobox"
+								aria-describedby={messageId}
+								aria-controls={menuId}
 								aria-expanded={isOpen}
 								aria-autocomplete="list"
-								autoComplete="off"
+								aria-activedescendant={activeOptionId}
+								role="combobox"
 							/>
-
-							<button
-								type="button"
-								aria-label="Toggle options"
-								className="flex items-center justify-center rounded-[8px]"
-								onClick={(e) => {
-									if (!openOnChevronClick) return;
-									// Right click toggles pin open/close
-									onRightClick(e);
-								}}
-							>
-								{chevronIcon}
-							</button>
-						</div>
+						</InputFrame>
 					);
 				}}
-				renderMenu={({ close }) => {
-					return (
-						<div className={[menuClassName].filter(Boolean).join(" ")}>
-							{filtered.length === 0 ? (
-								<div className="px-4 py-2">
-									<Text variant="muted">No results</Text>
-								</div>
-							) : (
-								<ul className="p-2 max-h-[300px] overflow-y-auto">
-									{filtered.map((opt) => (
-										<li key={opt.id}>
-											<button
-												type="button"
-												className={[
-													"flex w-full items-center motion-micro cursor-pointer justify-between px-3 py-1.5 text-sm " +
-														"transition-colors motion-micro text-left rounded-lg " +
-														"bg-white text-foreground/80 hover:bg-surface",
-												]
-													.filter(Boolean)
-													.join(" ")}
-												onClick={() => {
-													// clicking option sets the input value and closes
-													setValue(opt.value ?? opt.label);
-													close();
-												}}
-											>
-												{opt.label}
-											</button>
-										</li>
-									))}
-								</ul>
-							)}
-						</div>
-					);
-				}}
+				renderMenu={({ close }) => (
+					<Listbox
+						options={filtered.map((opt) => {
+							const optionValue = opt.value ?? opt.label;
+							return {
+								key: opt.id,
+								value: optionValue,
+								selected: optionValue === inputValue,
+								content: <span className="min-w-0 truncate">{opt.label}</span>,
+							};
+						})}
+						activeIndex={activeIndex}
+						onActiveIndexChange={setActiveIndex}
+						onSelect={(_, index) => {
+							const option = filtered[index];
+							if (!option) return;
+							setValue(option.value ?? option.label);
+							close({ restoreFocus: false });
+						}}
+						emptyState={
+							<Text as="span" variant="body">
+								{noResultsText ?? "No results"}
+							</Text>
+						}
+						listRef={listRef}
+						listId={menuId}
+						optionIdPrefix={menuId ? `${menuId}-option` : undefined}
+						listClassName={[dropdownListClassName, menuListClassName]
+							.filter(Boolean)
+							.join(" ")}
+						optionClassName={optionClassName}
+						optionActiveClassName={optionActiveClassName}
+						optionSelectedClassName={
+							optionSelectedClassName ?? optionActiveClassName
+						}
+						disabled={disabled}
+					/>
+				)}
 			/>
-			<div
-				className={[
-					"transition-all motion-micro", // reserve one line
-					derivedError ? "max-h-[26px]" : "max-h-0",
-				].join(" ")}
-			>
-				<Text
-					as="p"
-					id={derivedError ? `${id ?? name}-error` : undefined}
-					variant="captionMuted"
-					className={[
-						"transition-all motion-micro mt-2.5", // reserve one line
-						derivedError ? "text-danger" : "text-transparent",
-					].join(" ")}
-				>
-					{derivedError ?? "placeholder"}
-				</Text>
-			</div>
-		</div>
+		</Field>
 	);
 }

@@ -5,6 +5,12 @@ import Footer from "@/components/layout/footer/Footer";
 import Header from "@/components/layout/header/Header";
 import ModalClientMount from "@/components/mount/ModalClientMount";
 import ToastClientMount from "@/components/mount/ToastClientMount";
+import { SettingsProvider } from "@/components/ui/foundations/settingsContext";
+import {
+	IconProvider,
+	localIconRegistry,
+} from "@/components/ui/icons/iconRegistry";
+import { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";
 import { KEYWORDS } from "@/config/metadataConfig";
 
 const geistSans = Geist({
@@ -42,12 +48,16 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${geistSans.variable} antialiased`}>
-				<Header />
-				{children}
-				<Footer />
-				{/* TODO: Swap mount order or placement if a project needs overlays elsewhere. */}
-				<ModalClientMount />
-				<ToastClientMount />
+				<SettingsProvider>
+					<IconProvider registry={phosphorIconRegistry}>
+						<Header />
+						{children}
+						<Footer />
+						{/* TODO: Swap mount order or placement if a project needs overlays elsewhere. */}
+						<ModalClientMount />
+						<ToastClientMount />
+					</IconProvider>
+				</SettingsProvider>
 			</body>
 		</html>
 	);

@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import type * as React from "react";
 import { Loader } from "@/components/ui/misc/Loader";
 import { Button } from "@/components/ui/primitives/Button";

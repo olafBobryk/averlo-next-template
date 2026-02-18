@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Section } from "@/components/layout/primitives/Section";
+import { Section } from "@/components/ui/primitives/Section";
 import { Button } from "@/components/ui/primitives/Button";
-import { Heading } from "@/components/ui/primitives/Heading";
 import { Text } from "@/components/ui/primitives/Text";
 
 export default function AppError({
@@ -23,9 +22,9 @@ export default function AppError({
 	return (
 		<main className="min-h-screen flex items-center justify-center px-4 py-12">
 			<Section className="h-full" innerClassName="h-full" align={"center"}>
-				<Heading as="h1" size="xl">
+				<Text as="h1" variant="headingXl">
 					Something went wrong
-				</Heading>
+				</Text>
 				<Text variant="muted">
 					The page failed to render. You can try again or go back.
 				</Text>

@@ -5,9 +5,11 @@
 
 import * as React from "react";
 import { Dropdown } from "../primitives/Dropdown";
-import { InputFrame } from "../primitives/InputFrame";
-import { Icon } from "../primitives/Icon";
+import { InputFrame, inputSizeClasses } from "../primitives/InputFrame";
+import { Icon } from "../icons/Icon";
+import { Listbox } from "../primitives/Listbox";
 import { Text } from "../primitives/Text";
+import { focusRing } from "../foundations/focus";
 
 const APP_TIMEZONE = process.env.NEXT_PUBLIC_APP_TIMEZONE || "Europe/Amsterdam";
 
@@ -169,9 +171,14 @@ export function DateRangeDropdown({
 	const [range, setRange] = React.useState<DateRange>(
 		() => value ?? getPresetRange("last_30_days"),
 	);
-	const [showCustom, setShowCustom] = React.useState(false);
 	const [startInput, setStartInput] = React.useState<string>("");
 	const [endInput, setEndInput] = React.useState<string>("");
+	const [menuOpen, setMenuOpen] = React.useState(false);
+	const [activeIndex, setActiveIndex] = React.useState(0);
+	const listRef = React.useRef<HTMLDivElement | null>(null);
+	const startInputRef = React.useRef<HTMLInputElement | null>(null);
+	const endInputRef = React.useRef<HTMLInputElement | null>(null);
+	const listId = React.useId();
 
 	// sync external value if provided
 	React.useEffect(() => {
@@ -188,9 +195,8 @@ export function DateRangeDropdown({
 		setPreset(inferred);
 	}, [value]);
 
-	// update inputs when range or showCustom changes
+	// update inputs when range changes
 	React.useEffect(() => {
-		if (!showCustom) return;
 		const start = range.start;
 		const end = range.end;
 		const pad = (n: number) => (n < 10 ? `0${n}` : String(n));
@@ -201,7 +207,7 @@ export function DateRangeDropdown({
 		setEndInput(
 			`${pad(end.getDate())}/${pad(end.getMonth() + 1)}/${end.getFullYear()}`,
 		);
-	}, [range, showCustom]);
+	}, [range]);
 
 	React.useEffect(() => {
 		if (resetSignal === undefined) return;
@@ -209,10 +215,29 @@ export function DateRangeDropdown({
 		const nextRange = getPresetRange(resetTo);
 		setPreset(resetTo);
 		setRange(nextRange);
-		setShowCustom(false);
 		setStartInput("");
 		setEndInput("");
 	}, [resetSignal, resetTo]);
+
+	React.useEffect(() => {
+		if (!menuOpen) return;
+		const selectedIndex =
+			preset === "custom"
+				? 0
+				: Math.max(
+						0,
+						PRESETS.findIndex((item) => item.key === preset) + 1,
+					);
+		setActiveIndex(selectedIndex);
+	}, [menuOpen, preset]);
+
+	React.useEffect(() => {
+		if (!menuOpen) return;
+		const option = listRef.current?.querySelector<HTMLElement>(
+			`[data-option-index="${activeIndex}"]`,
+		);
+		option?.scrollIntoView({ block: "nearest" });
+	}, [activeIndex, menuOpen]);
 
 	const currentRangeLabel = formatRange(range);
 	const currentPresetLabel =
@@ -232,186 +257,240 @@ export function DateRangeDropdown({
 			onChange?.(newRange, p);
 		}
 
-		setShowCustom(false);
 		close();
 	};
 
-	const handleApplyCustom = (close: () => void) => {
-		const start = parseDdMmYyyy(startInput);
-		const end = parseDdMmYyyy(endInput);
-		if (!start || !end || end < start) {
-			// minimal guard; in real life you might show error
-			return;
-		}
-		const newRange: DateRange = {
-			start: startOfDay(start),
-			end: startOfDay(end),
-		};
-		setRange(newRange);
-		setPreset("custom");
-		onChange?.(newRange, "custom");
-		close();
-	};
-
-	// left icon (calendar)
-	const calendarIcon = (
-		<svg
-			width={15}
-			height={15}
-			viewBox="0 0 15 15"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-			className="w-[15px] h-[15px]"
-			preserveAspectRatio="none"
-		>
-			<title>calendar</title>
-			<path
-				d="M4.375 2.5V1.5625"
-				stroke="#020202"
-				strokeWidth="0.9375"
-				strokeLinecap="round"
-			/>
-			<path
-				d="M10.625 2.5V1.5625"
-				stroke="#020202"
-				strokeWidth="0.9375"
-				strokeLinecap="round"
-			/>
-			<path
-				d="M10.3125 11.25C10.8303 11.25 11.25 10.8303 11.25 10.3125C11.25 9.79473 10.8303 9.375 10.3125 9.375C9.79473 9.375 9.375 9.79473 9.375 10.3125C9.375 10.8303 9.79473 11.25 10.3125 11.25Z"
-				stroke="#020202"
-				strokeWidth="0.9375"
-			/>
-			<path
-				d="M13.4375 5.625H10.3906H6.71875M1.25 5.625H3.67188"
-				stroke="#020202"
-				strokeWidth="0.9375"
-				strokeLinecap="round"
-			/>
-			<path
-				d="M8.75 13.75H6.25C3.89298 13.75 2.71447 13.75 1.98223 13.0177C1.25 12.2856 1.25 11.107 1.25 8.75V7.5C1.25 5.14298 1.25 3.96447 1.98223 3.23223C2.71447 2.5 3.89298 2.5 6.25 2.5H8.75C11.107 2.5 12.2856 2.5 13.0177 3.23223C13.75 3.96447 13.75 5.14298 13.75 7.5V8.75C13.75 11.107 13.75 12.2856 13.0177 13.0177C12.6095 13.426 12.0626 13.6066 11.25 13.6866"
-				stroke="#020202"
-				strokeWidth="0.9375"
-				strokeLinecap="round"
-			/>
-		</svg>
+	const handleApplyCustom = React.useCallback(
+		(close?: () => void) => {
+			const start = parseDdMmYyyy(startInput);
+			const end = parseDdMmYyyy(endInput);
+			if (!start || !end || end < start) {
+				// minimal guard; in real life you might show error
+				return;
+			}
+			const newRange: DateRange = {
+				start: startOfDay(start),
+				end: startOfDay(end),
+			};
+			setRange(newRange);
+			setPreset("custom");
+			onChange?.(newRange, "custom");
+			close?.();
+		},
+		[endInput, onChange, startInput],
 	);
+
+	const listboxOptions = React.useMemo(() => {
+		return [
+			{
+				key: "custom",
+				value: "custom" as const,
+				selected: preset === "custom",
+				unwrapped: true,
+				className: "!items-stretch !gap-3 !py-3",
+				content: (
+					<div className="flex w-full flex-col gap-2.5">
+						<div className="flex min-w-0 items-center justify-between gap-3">
+							<Text as="span" variant="bodyStrong">
+								Custom range
+							</Text>
+							<Text
+								as="span"
+								variant="captionMuted"
+								className="truncate text-right"
+							>
+								{currentRangeLabel}
+							</Text>
+						</div>
+						<div className="flex gap-2">
+							<input
+								ref={startInputRef}
+								type="text"
+								value={startInput}
+								onChange={(e) => setStartInput(e.target.value)}
+								placeholder="Start"
+								onKeyDown={(event) => {
+									if (event.key !== "Enter") return;
+									event.preventDefault();
+									endInputRef.current?.focus({ preventScroll: true });
+								}}
+								className={[
+									"flex-1 rounded-lg border border-border/15 bg-white px-2 py-1 text-xs text-foreground outline-none transition-colors motion-micro",
+									focusRing.visibleDefault,
+								].join(" ")}
+							/>
+							<input
+								ref={endInputRef}
+								type="text"
+								value={endInput}
+								onChange={(e) => setEndInput(e.target.value)}
+								placeholder="End"
+								onKeyDown={(event) => {
+									if (event.key !== "Enter") return;
+									event.preventDefault();
+									handleApplyCustom();
+								}}
+								onBlur={() => {
+									handleApplyCustom();
+								}}
+								className={[
+									"flex-1 rounded-lg border border-border/15 bg-white px-2 py-1 text-xs text-foreground outline-none transition-colors motion-micro",
+									focusRing.visibleDefault,
+								].join(" ")}
+							/>
+						</div>
+					</div>
+				),
+			},
+			...PRESETS.map((presetOption) => ({
+				key: presetOption.key,
+				value: presetOption.key,
+				selected: preset === presetOption.key,
+				content: (
+					<Text as="span" variant="body">
+						{presetOption.label}
+					</Text>
+				),
+			})),
+		];
+	}, [currentRangeLabel, endInput, handleApplyCustom, preset, startInput]);
+
+	const activeOptionId =
+		menuOpen && listboxOptions[activeIndex]
+			? `${listId}-option-${activeIndex}`
+			: undefined;
+
+	const updateActiveIndex = React.useCallback(
+		(nextIndex: number) => {
+			if (listboxOptions.length === 0) return;
+			const safeIndex =
+				(nextIndex + listboxOptions.length) % listboxOptions.length;
+			setActiveIndex(safeIndex);
+		},
+		[listboxOptions.length],
+	);
+
+	const focusCustomStart = React.useCallback(() => {
+		requestAnimationFrame(() => {
+			startInputRef.current?.focus({ preventScroll: true });
+		});
+	}, []);
 
 	return (
 		<Dropdown
 			className={className}
+			onOpenChange={setMenuOpen}
 			renderTrigger={({
 				ref,
 				chevronIcon,
 				onRootMouseEnter,
 				onRootMouseLeave,
-				onLeftClick,
-				onRightClick,
+				openMenu,
+				closeMenu,
+				isOpen,
 			}) => (
 				<InputFrame
 					ref={ref as any}
 					onMouseEnter={onRootMouseEnter}
 					onMouseLeave={onRootMouseLeave}
-					start={<Icon name="calendar" className="text-foreground" />}
-					end={
-						<button
-							type="button"
-							onClick={onRightClick}
-							className="flex items-center gap-2 pl-4 border-l border-border/20 hover:opacity-80 motion-micro"
-						>
-							<Text as="span" variant="bodyStrong">
-								{currentPresetLabel}
-							</Text>
-							{chevronIcon}
-						</button>
-					}
-					className={["w-fit cursor-pointer", className].filter(Boolean).join(" ")}
+					className={[
+						"w-fit cursor-pointer",
+						inputSizeClasses.md,
+						className,
+					]
+						.filter(Boolean)
+						.join(" ")}
 				>
 					<button
 						type="button"
-						onClick={onLeftClick}
-						className="flex items-center gap-2.5 text-left hover:opacity-80 motion-micro"
+						onClick={() => {
+							if (isOpen) {
+								closeMenu({ restoreFocus: false });
+								return;
+							}
+							openMenu({ focusMenu: true });
+						}}
+						className="flex w-full items-center justify-between gap-4 text-left motion-micro p-0 bg-transparent outline-none ring-0 shadow-none"
 					>
-						<Text as="span" variant="bodyStrong">
-							{currentRangeLabel}
-						</Text>
+						<span className="flex min-w-0 items-center gap-2.5">
+							<Icon name="calendar" className="text-foreground" />
+							<Text
+								as="span"
+								variant="bodyStrong"
+								className="truncate !leading-[17px]"
+							>
+								{currentRangeLabel}
+							</Text>
+						</span>
+						<span className="flex items-center gap-2 text-foreground/70">
+							<Text as="span" variant="captionMuted" className="!leading-[17px]">
+								{currentPresetLabel}
+							</Text>
+							{chevronIcon}
+						</span>
 					</button>
 				</InputFrame>
 			)}
 			renderMenu={({ close }) => (
-				<div className="flex flex-col gap-2 p-2">
-					{/* Custom range section */}
-					<div className="rounded-xl bg-surface p-2">
-						<div className="mb-1 flex items-center justify-between">
-							<Text as="p" variant="bodyStrong">
-								Custom range
-							</Text>
-							<Text as="p" variant="captionMuted">
-								dd/mm/yyyy
-							</Text>
-						</div>
-						<div className="flex gap-2">
-							<input
-								type="text"
-								value={startInput}
-								onChange={(e) => setStartInput(e.target.value)}
-								placeholder="Start"
-								className="flex-1 rounded-lg border border-border/15 bg-white px-2 py-1 text-xs text-foreground outline-none transition-colors motion-micro focus:border-primary"
-							/>
-							<input
-								type="text"
-								value={endInput}
-								onChange={(e) => setEndInput(e.target.value)}
-								placeholder="End"
-								className="flex-1 rounded-lg border  border-border/15 bg-white px-2 py-1 text-xs text-foreground outline-none transition-colors motion-micro focus:border-primary"
-							/>
-						</div>
-						<div className="mt-2 flex justify-end gap-2">
-							<button
-								type="button"
-								className="text-xs text-foreground/60 cursor-pointer hover:text-foreground transition-colors motion-micro"
-								onClick={() => {
-									setShowCustom(false);
-									close();
-								}}
-							>
-								Cancel
-							</button>
-							<button
-								type="button"
-								className="rounded-[100px] bg-primary cursor-pointer px-3 py-1 text-xs font-medium text-primary-foreground transition-all motion-interactive"
-								onClick={() => handleApplyCustom(close)}
-							>
-								Apply
-							</button>
-						</div>
-					</div>
-
-					{/* Presets */}
-					<div className="mt-1 flex flex-col">
-						{PRESETS.map((p) => {
-							const isActive = preset === p.key;
-							return (
-								<button
-									key={p.key}
-									type="button"
-									onClick={() => handlePresetClick(p.key, close)}
-									className={[
-										"flex w-full items-center cursor-pointer justify-between px-3 py-1.5 text-sm",
-										"transition-colors motion-micro text-left rounded-lg",
-										isActive
-											? "bg-primary/10 text-primary"
-											: "bg-white text-foreground/80 hover:bg-surface",
-									]
-										.filter(Boolean)
-										.join(" ")}
-								>
-									<span>{p.label}</span>
-								</button>
-							);
-						})}
-					</div>
-				</div>
+				<Listbox
+					options={listboxOptions}
+					activeIndex={activeIndex}
+					onActiveIndexChange={setActiveIndex}
+					onSelect={(option) => {
+						if (option.value === "custom") {
+							setPreset("custom");
+							focusCustomStart();
+							return;
+						}
+						handlePresetClick(option.value as PresetKey, close);
+					}}
+					listRef={listRef}
+					listId={listId}
+					optionIdPrefix={`${listId}-option`}
+					listTabIndex={0}
+					ariaActivedescendant={activeOptionId}
+					onKeyDown={(event) => {
+						const target = event.target as HTMLElement;
+						if (target.closest("input,textarea,select")) return;
+						if (event.key === "ArrowDown") {
+							event.preventDefault();
+							updateActiveIndex(activeIndex + 1);
+							return;
+						}
+						if (event.key === "ArrowUp") {
+							event.preventDefault();
+							updateActiveIndex(activeIndex - 1);
+							return;
+						}
+						if (event.key === "Home") {
+							event.preventDefault();
+							setActiveIndex(0);
+							return;
+						}
+						if (event.key === "End") {
+							event.preventDefault();
+							setActiveIndex(listboxOptions.length - 1);
+							return;
+						}
+						if (event.key === "Enter" || event.key === " ") {
+							event.preventDefault();
+							const option = listboxOptions[activeIndex];
+							if (!option) return;
+							if (option.value === "custom") {
+								setPreset("custom");
+								focusCustomStart();
+								return;
+							}
+							handlePresetClick(option.value as PresetKey, close);
+						}
+					}}
+					className={[
+						"outline-none",
+						focusRing.visibleDefault,
+					]
+						.filter(Boolean)
+						.join(" ")}
+				/>
 			)}
 		/>
 	);

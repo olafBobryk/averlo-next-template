@@ -2,32 +2,40 @@
 "use client";
 
 import type { CountryCode } from "libphonenumber-js";
-import { AsYouType, parsePhoneNumberFromString } from "libphonenumber-js";
+import {
+	getCountries,
+	getCountryCallingCode,
+	isValidPhoneNumber,
+	parsePhoneNumberFromString,
+} from "libphonenumber-js/min";
 import * as React from "react";
-import flags from "react-phone-number-input/flags";
+import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import {
+	dropdownListClassName,
+} from "@/components/ui/primitives/dropdownStyles";
 import { Field } from "@/components/ui/primitives/Field";
+import { Icon } from "@/components/ui/icons/Icon";
+import { Button } from "@/components/ui/primitives/Button";
+import { Listbox } from "@/components/ui/primitives/Listbox";
 import {
 	InputFrame,
-	inputTextClasses,
+	type InputFrameSize,
+	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
 import { Text } from "@/components/ui/primitives/Text";
 
-export function PhoneFlag({ code }: { code: CountryCode }) {
-	const Flag = (flags as any)[code] as React.ComponentType<any> | undefined;
-	if (!Flag) return null;
-
-	return (
-		<span className="inline-flex h-[14px] w-[20px] overflow-hidden rounded-[3px]">
-			<Flag title={code} />
-		</span>
-	);
-}
+export type CountryOption = {
+	code: CountryCode; // "DO"
+	name: string; // "Dominican Republic"
+	dialCode: string; // "+1"
+};
 
 type PhoneValue = string | undefined; // E.164
 
 type PhoneInputProps = {
 	label: React.ReactNode;
+	description?: React.ReactNode;
 	placeholder?: string;
 
 	id?: string;
@@ -36,355 +44,637 @@ type PhoneInputProps = {
 	value?: PhoneValue;
 	onChange?: (value: PhoneValue) => void;
 
+	// Optional extended API
+	country?: CountryCode;
+	defaultCountry?: CountryCode;
+	onCountryChange?: (countryCode: CountryCode) => void;
+	formatOnBlur?: boolean;
+	e164Name?: string;
+	showSpinnerOnMismatch?: boolean;
+	size?: InputFrameSize;
+
 	required?: boolean;
 	disabled?: boolean;
 
 	error?: React.ReactNode;
-	validate?: (value: PhoneValue) => string | null;
+	validate?: (value: PhoneValue, country?: CountryCode) => string | null;
 
 	className?: string;
 	inputClassName?: string;
+	menuClassName?: string;
+	optionClassName?: string;
+	optionActiveClassName?: string;
+	optionSelectedClassName?: string;
+	portalTargetId?: string;
 
-	defaultCountry?: CountryCode;
 	countries?: CountryOption[]; // allow override/extension
 };
 
-function findCountry(
-	list: CountryOption[],
-	code: CountryCode | undefined,
-): CountryOption {
-	return (
-		list.find((c) => c.code === code) ??
-		list.find((c) => c.code === "DO") ??
-		list[0]
-	);
-}
+type InternalCountryOption = {
+	code: CountryCode;
+	name: string;
+	dial_code: string;
+	flag: string;
+};
+
+const normalizeQuery = (value: string) =>
+	value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+const isLetterKey = (value: string) => /^[a-zA-Z]$/.test(value);
+const isNumberKey = (value: string) => /^[0-9]$/.test(value);
+const normalizeDialCode = (value: string) =>
+	value.replace(/\s+/g, "").replace(/^00/, "+");
+const getFlagEmoji = (code: string) =>
+	code
+		.toUpperCase()
+		.replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+
+const getCountrySearchText = (countryItem: InternalCountryOption) =>
+	`${countryItem.name} ${countryItem.code} ${countryItem.dial_code}`;
+
+const getMatchRank = (query: string, countryItem: InternalCountryOption) => {
+	const text = normalizeQuery(getCountrySearchText(countryItem));
+	if (text === query) return 0;
+	if (text.startsWith(query)) return 1;
+	if (text.includes(query)) return 2;
+	return 3;
+};
+
+const defaultValidate = (value: PhoneValue, country?: CountryCode) => {
+	if (!value) return null;
+	if (!country) return "Select a country.";
+	return isValidPhoneNumber(
+		value,
+		country as Parameters<typeof isValidPhoneNumber>[1],
+	)
+		? null
+		: "Enter a valid phone number.";
+};
 
 export function PhoneInput({
 	label,
+	description,
 	placeholder = "Phone number",
 	id,
 	name,
 	value,
 	onChange,
-	required = false,
+	country,
+	defaultCountry = "US",
+	onCountryChange,
+	required,
 	disabled,
 	error,
-	validate,
+	validate = defaultValidate,
+	formatOnBlur = false,
+	e164Name,
+	showSpinnerOnMismatch = true,
+	size,
 	className,
 	inputClassName,
-	defaultCountry = "DO",
-	countries = PHONE_COUNTRIES,
+	menuClassName,
+	optionClassName,
+	optionActiveClassName,
+	optionSelectedClassName,
+	portalTargetId,
+	countries,
 }: PhoneInputProps) {
-	const inputId = id ?? name;
-	const messageId = inputId ? `${inputId}-message` : undefined;
-
+	const inputRef = React.useRef<HTMLInputElement | null>(null);
+	const [searchQuery, setSearchQuery] = React.useState("");
 	const [clientError, setClientError] = React.useState<string | null>(null);
 	const derivedError = error ?? clientError;
 	const tone = derivedError ? "error" : "default";
+	const fallbackId = React.useId();
+	const inputId = id ?? name ?? fallbackId;
+	const descriptionId = description ? `${inputId}-description` : undefined;
+	const messageId = derivedError ? `${inputId}-message` : undefined;
+	const menuId = `${inputId}-menu`;
 
-	const [country, setCountry] = React.useState<CountryCode>(defaultCountry);
-
-	// what user sees/edits (national formatting)
-	const [display, setDisplay] = React.useState<string>("");
-
-	// hydrate display when value changes externally
-	React.useEffect(() => {
-		if (!value) {
-			setDisplay("");
-			return;
-		}
-		const parsed = parsePhoneNumberFromString(value);
-		if (!parsed) {
-			setDisplay(value);
-			return;
-		}
-		setCountry((parsed.country as CountryCode) || country);
-		setDisplay(parsed.formatNational());
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [value, country]);
-
-	const selected = React.useMemo(
-		() => findCountry(countries, country),
-		[countries, country],
+	const isCountryControlled = country !== undefined;
+	const [internalCountry, setInternalCountry] = React.useState<CountryCode>(
+		defaultCountry ?? "US",
 	);
 
-	const setNextDisplay = (raw: string) => {
-		// Keep a nice "as you type" formatting per country
-		const formatted = new AsYouType(country).input(raw);
-		setDisplay(formatted);
+	const [displayValue, setDisplayValue] = React.useState("");
 
-		// Convert to E.164 for storage if valid-ish
-		const parsed = parsePhoneNumberFromString(formatted, country);
-		const e164 = parsed?.isValid() ? parsed.number : undefined;
+	React.useEffect(() => {
+		if (!value) {
+			setDisplayValue("");
+			return;
+		}
+		try {
+			const parsed = parsePhoneNumberFromString(value);
+			if (!parsed) {
+				setDisplayValue(value);
+				return;
+			}
+			setDisplayValue(parsed.formatInternational());
+			if (parsed.country && !isCountryControlled) {
+				setInternalCountry(parsed.country as CountryCode);
+			}
+		} catch {
+			setDisplayValue(value);
+		}
+	}, [value, isCountryControlled]);
 
-		if (validate) setClientError(null);
-		onChange?.(e164);
+	React.useEffect(() => {
+		if (isCountryControlled) return;
+		if (defaultCountry && defaultCountry !== internalCountry) {
+			setInternalCountry(defaultCountry);
+		}
+	}, [defaultCountry, internalCountry, isCountryControlled]);
+
+	const selectedCountryCode = isCountryControlled ? country : internalCountry;
+
+	const displayNames = React.useMemo(() => {
+		try {
+			return new Intl.DisplayNames(["en"], { type: "region" });
+		} catch {
+			return null;
+		}
+	}, []);
+
+	const internalCountries: InternalCountryOption[] = React.useMemo(() => {
+		if (countries && countries.length > 0) {
+			return countries.map((item) => ({
+				code: item.code,
+				name: item.name,
+				dial_code: item.dialCode,
+				flag: getFlagEmoji(item.code),
+			}));
+		}
+
+		return getCountries()
+			.map((code) => ({
+				code,
+				name: displayNames?.of(code) ?? code,
+				dial_code: `+${getCountryCallingCode(code)}`,
+				flag: getFlagEmoji(code),
+			}))
+			.sort((a, b) => a.name.localeCompare(b.name));
+	}, [countries, displayNames]);
+
+	const selectedCountry =
+		internalCountries.find((item) => item.code === selectedCountryCode) ?? null;
+
+	const parsedPhone = React.useMemo(() => {
+		if (!displayValue || !selectedCountryCode) return null;
+		try {
+			return parsePhoneNumberFromString(
+				displayValue,
+				selectedCountryCode as Parameters<typeof parsePhoneNumberFromString>[1],
+			);
+		} catch {
+			return null;
+		}
+	}, [displayValue, selectedCountryCode]);
+
+	const e164Value = parsedPhone?.number;
+	const describedBy =
+		[descriptionId, derivedError ? messageId : undefined]
+			.filter(Boolean)
+			.join(" ") || undefined;
+
+	const normalizedQuery = normalizeQuery(searchQuery);
+	const filteredCountries = React.useMemo(() => {
+		if (!normalizedQuery) return internalCountries;
+		return internalCountries
+			.filter((countryItem) =>
+				normalizeQuery(getCountrySearchText(countryItem)).includes(
+					normalizedQuery,
+				),
+			)
+			.map((countryItem, index) => ({ countryItem, index }))
+			.sort((a, b) => {
+				const rank =
+					getMatchRank(normalizedQuery, a.countryItem) -
+					getMatchRank(normalizedQuery, b.countryItem);
+				if (rank !== 0) return rank;
+				return a.countryItem.name.localeCompare(b.countryItem.name);
+			})
+			.map((entry) => entry.countryItem);
+	}, [internalCountries, normalizedQuery]);
+
+	const matchCountryFromValue = React.useCallback(
+		(nextValue: string) => {
+			const prefixMatch = nextValue.trim().match(/^\+?\d+/);
+			if (!prefixMatch) return null;
+			const rawPrefix = prefixMatch[0].startsWith("+")
+				? prefixMatch[0]
+				: `+${prefixMatch[0]}`;
+			return (
+				internalCountries
+					.slice()
+					.sort((a, b) => b.dial_code.length - a.dial_code.length)
+					.find((countryItem) => rawPrefix.startsWith(countryItem.dial_code)) ??
+				null
+			);
+		},
+		[internalCountries],
+	);
+
+	const resolvedDial = selectedCountry?.dial_code
+		? normalizeDialCode(selectedCountry.dial_code)
+		: null;
+	const normalizedValue = normalizeDialCode(displayValue.trim());
+	const normalizedValueWithPlus =
+		normalizedValue && !normalizedValue.startsWith("+")
+			? `+${normalizedValue}`
+			: normalizedValue;
+	const selectedMatchesValue =
+		resolvedDial && normalizedValueWithPlus.startsWith(resolvedDial);
+
+	const iconCountry =
+		selectedCountry && selectedMatchesValue
+			? selectedCountry
+			: matchCountryFromValue(displayValue);
+
+	const showSpinner = showSpinnerOnMismatch && !iconCountry;
+	const [activeIndex, setActiveIndex] = React.useState(0);
+	const [menuOpen, setMenuOpen] = React.useState(false);
+	const listRef = React.useRef<HTMLDivElement | null>(null);
+
+	React.useEffect(() => {
+		if (filteredCountries.length === 0) {
+			setActiveIndex(0);
+			return;
+		}
+		if (activeIndex > filteredCountries.length - 1) {
+			setActiveIndex(0);
+		}
+	}, [activeIndex, filteredCountries.length]);
+
+	React.useEffect(() => {
+		if (!menuOpen) return;
+		const option = listRef.current?.querySelector<HTMLElement>(
+			`[data-option-index="${activeIndex}"]`,
+		);
+		option?.scrollIntoView({ block: "nearest" });
+	}, [activeIndex, menuOpen]);
+
+	const updateActiveIndex = React.useCallback(
+		(nextIndex: number) => {
+			if (filteredCountries.length === 0) return;
+			const safeIndex =
+				(nextIndex + filteredCountries.length) % filteredCountries.length;
+			setActiveIndex(safeIndex);
+		},
+		[filteredCountries.length],
+	);
+
+	const applyDialCode = React.useCallback(
+		(nextDialCode: string) => {
+			const normalizedDial = nextDialCode.startsWith("+")
+				? nextDialCode
+				: `+${nextDialCode}`;
+			const rest = displayValue.replace(/^\+\d+\s*/, "").trimStart();
+			const nextValue = rest
+				? `${normalizedDial} ${rest}`
+				: `${normalizedDial} `;
+			setDisplayValue(nextValue);
+		},
+		[displayValue],
+	);
+
+	const didPrefillRef = React.useRef(false);
+	React.useEffect(() => {
+		if (didPrefillRef.current) return;
+		if (!selectedCountry?.dial_code) return;
+		if (displayValue.trim().length > 0) {
+			didPrefillRef.current = true;
+			return;
+		}
+		applyDialCode(selectedCountry.dial_code);
+		didPrefillRef.current = true;
+	}, [applyDialCode, displayValue, selectedCountry?.dial_code]);
+
+	const syncCountryFromValue = React.useCallback(
+		(nextValue: string) => {
+			const matched = matchCountryFromValue(nextValue);
+			if (!matched) return;
+			if (matched.code === selectedCountryCode) return;
+			if (!isCountryControlled) setInternalCountry(matched.code);
+			onCountryChange?.(matched.code);
+		},
+		[
+			isCountryControlled,
+			matchCountryFromValue,
+			onCountryChange,
+			selectedCountryCode,
+		],
+	);
+
+	const handleCountrySelect = (nextCode: CountryCode) => {
+		if (!isCountryControlled) setInternalCountry(nextCode);
+		onCountryChange?.(nextCode);
+		const nextCountry = internalCountries.find(
+			(item) => item.code === nextCode,
+		);
+		if (nextCountry?.dial_code) {
+			applyDialCode(nextCountry.dial_code);
+		}
+		setSearchQuery("");
 	};
 
-	const handleBlur: React.FocusEventHandler<HTMLInputElement> = () => {
-		if (!validate) return;
-		setClientError(validate(value));
-	};
+	const startSwap = (() => {
+		const resolvedCountry = iconCountry ?? null;
+		const flagIcon = resolvedCountry ? (
+			<span aria-hidden="true" className="text-[18px] leading-none">
+				{resolvedCountry.flag}
+			</span>
+		) : (
+			<span />
+		);
+		const spinnerIcon = (
+			<Icon name="spinner" size="md" className="text-foreground/60" animate />
+		);
+
+		if (!resolvedCountry && !showSpinner) return null;
+
+		return (
+			<IconSwap
+				size="md"
+				activeIndex={showSpinner ? 1 : 0}
+				items={[{ icon: flagIcon }, { icon: spinnerIcon }]}
+			/>
+		);
+	})();
 
 	return (
 		<Field
 			label={label}
-			required={required}
-			inputId={inputId}
-			className={className}
+			description={description}
 			message={derivedError ?? undefined}
 			tone={tone}
+			required={required}
+			inputId={inputId}
+			descriptionId={descriptionId}
+			messageId={messageId}
+			className={className}
 		>
-			<InputFrame
-				tone={tone}
+			<Dropdown
+				portalTargetId={portalTargetId}
+				menuWidth="trigger"
+				align="start"
+				offset={20}
 				disabled={disabled}
-				fullWidth
-				start={
-					<Dropdown
-						renderTrigger={({
-							ref,
-							onRootMouseEnter,
-							onRootMouseLeave,
-							onRightClick,
-						}) => (
-							// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-							<button
-								ref={ref as any}
-								onMouseEnter={onRootMouseEnter}
-								onMouseLeave={onRootMouseLeave}
-								className="flex items-center gap-2 cursor-pointer"
-								onClick={onRightClick}
-								type="button"
-								tabIndex={0}
-							>
-								<PhoneFlag code={selected.code} />
-								<Text as="span" className="!text-sm text-left text-foreground">
-									{selected.dialCode}
-								</Text>
-							</button>
-						)}
-						renderMenu={({ close }) => (
-							<div className="p-2 max-h-[300px] overflow-y-auto">
-								{countries.map((c) => {
-									const active = c.code === country;
-									return (
-										<button
-											key={c.code}
-											type="button"
-											onClick={() => {
-												setCountry(c.code);
-												const reformatted = new AsYouType(c.code).input(
-													display,
-												);
-												setDisplay(reformatted);
+				openOnHover={false}
+				pinOnClick={false}
+				onOpenChange={setMenuOpen}
+				menuClassName={menuClassName}
+				renderTrigger={({
+					ref,
+					isOpen,
+					onRootMouseEnter,
+					onRootMouseLeave,
+					openMenu,
+					closeMenu,
+					chevronIcon,
+				}) => {
+					const activeOptionId =
+						menuId && isOpen && filteredCountries[activeIndex]
+							? `${menuId}-option-${activeIndex}`
+							: undefined;
 
-												const parsed = parsePhoneNumberFromString(
-													reformatted,
-													c.code,
-												);
-												onChange?.(
-													parsed?.isValid() ? parsed.number : undefined,
-												);
-
-												close();
-											}}
-											className={[
-												"w-full flex items-center motion-interactive justify-between gap-3 rounded-[10px] px-3 py-2 text-left hover:bg-border/5",
-												active ? "bg-border/5" : "",
-											]
-												.filter(Boolean)
-												.join(" ")}
-										>
-											<span className="flex items-center gap-3">
-												<PhoneFlag code={c.code} />
-												<Text as="span" className="text-sm text-foreground">
-													{c.name}
-												</Text>
-											</span>
-											<Text as="span" className="text-sm text-muted/70">
-												{c.dialCode}
-											</Text>
-										</button>
-									);
-								})}
-							</div>
-						)}
+					return (
+						<InputFrame
+							tone={tone}
+							ref={ref as React.Ref<HTMLDivElement>}
+							onMouseEnter={onRootMouseEnter}
+							onMouseLeave={onRootMouseLeave}
+							size={size}
+							disabled={disabled}
+							fullWidth
+							contentClassName="relative flex min-w-0 items-center"
+							start={
+								<div className="flex items-center gap-2.5">
+									{startSwap ? (
+										<span className="flex items-center">{startSwap}</span>
+									) : null}
+									<span className="w-px h-5 rounded-full bg-foreground/15" />
+								</div>
+							}
+							end={
+								<div className="flex items-center gap-2.5">
+									<Button
+										data-dropdown-chevron
+										aria-label="Toggle country list"
+										variant="ghost"
+										size="icon-sm"
+										align="center"
+										className="rounded-[8px] text-foreground/60"
+										onMouseDown={(event) => {
+											event.preventDefault();
+										}}
+										onClick={() => {
+											if (isOpen) {
+												closeMenu({ restoreFocus: false });
+												return;
+											}
+											openMenu();
+										}}
+										tabIndex={-1}
+									>
+										{chevronIcon}
+									</Button>
+								</div>
+							}
+							onMouseDown={(event) => {
+								if (disabled) return;
+								const target = event.target as HTMLElement;
+								if (target.closest("[data-dropdown-chevron]")) return;
+								if (target.tagName !== "INPUT") event.preventDefault();
+								inputRef.current?.focus({ preventScroll: true });
+								openMenu();
+							}}
+						>
+							<input
+								ref={inputRef}
+								id={inputId}
+								name={name}
+								type="tel"
+								inputMode="tel"
+								autoComplete="tel"
+								disabled={disabled}
+								placeholder={placeholder}
+								required={required}
+								className={[
+									inputVariants({
+										size,
+										hasStart: true,
+										hasEnd: true,
+										disabled: disabled ? true : undefined,
+									}),
+									inputClassName,
+								]
+									.filter(Boolean)
+									.join(" ")}
+								value={displayValue}
+								onChange={(event) => {
+									setClientError(null);
+									const next = event.target.value;
+									setDisplayValue(next);
+									let nextE164: PhoneValue;
+									try {
+										const parsed = parsePhoneNumberFromString(
+											next,
+											selectedCountryCode as Parameters<
+												typeof parsePhoneNumberFromString
+											>[1],
+										);
+										nextE164 = parsed?.isValid() ? parsed.number : undefined;
+									} catch {
+										nextE164 = undefined;
+									}
+									onChange?.(nextE164);
+									if (!next.trim() || /\d/.test(next) || searchQuery) {
+										setSearchQuery("");
+										setActiveIndex(0);
+									}
+									syncCountryFromValue(next);
+								}}
+								onKeyDown={(event) => {
+									if (event.key === "ArrowDown") {
+										event.preventDefault();
+										if (!isOpen) openMenu();
+										updateActiveIndex(activeIndex + 1);
+										return;
+									}
+									if (event.key === "ArrowUp") {
+										event.preventDefault();
+										if (!isOpen) openMenu();
+										updateActiveIndex(activeIndex - 1);
+										return;
+									}
+									if (event.key === "Enter") {
+										if (!isOpen) {
+											event.preventDefault();
+											openMenu();
+											return;
+										}
+										const option = filteredCountries[activeIndex];
+										if (option) {
+											event.preventDefault();
+											handleCountrySelect(option.code);
+											closeMenu({ restoreFocus: false });
+										}
+									}
+									if (event.key === "Backspace" && searchQuery.length > 0) {
+										const nextQuery = searchQuery.slice(0, -1);
+										setSearchQuery(nextQuery);
+										if (!isOpen && nextQuery.length > 0) openMenu();
+										setActiveIndex(0);
+									}
+									if (
+										isLetterKey(event.key) &&
+										!event.metaKey &&
+										!event.ctrlKey &&
+										!event.altKey
+									) {
+										event.preventDefault();
+										setSearchQuery((current) =>
+											`${current}${event.key}`.trim(),
+										);
+										if (!isOpen) openMenu();
+										setActiveIndex(0);
+										return;
+									}
+									if (isNumberKey(event.key) && searchQuery.length > 0) {
+										setSearchQuery("");
+										setActiveIndex(0);
+									}
+								}}
+								onBlur={(event) => {
+									if (validate) {
+										setClientError(validate(e164Value, selectedCountryCode));
+									}
+									if (formatOnBlur && parsedPhone) {
+										const formatted = parsedPhone.formatInternational();
+										if (formatted !== displayValue) {
+											setDisplayValue(formatted);
+										}
+									}
+									setSearchQuery("");
+								}}
+								onFocus={() => {
+									openMenu();
+								}}
+								aria-invalid={Boolean(derivedError)}
+								aria-describedby={describedBy}
+								aria-controls={menuId}
+								aria-expanded={isOpen}
+								aria-autocomplete="list"
+								aria-activedescendant={activeOptionId}
+								role="combobox"
+								spellCheck={false}
+							/>
+							<input
+								type="text"
+								tabIndex={-1}
+								aria-hidden="true"
+								className="sr-only"
+								value={searchQuery}
+								readOnly
+							/>
+							{name || e164Name ? (
+								<input
+									type="hidden"
+									name={e164Name ?? `${name}-e164`}
+									value={e164Value ?? ""}
+								/>
+							) : null}
+						</InputFrame>
+					);
+				}}
+				renderMenu={({ close }) => (
+					<Listbox
+						options={filteredCountries.map((countryItem) => ({
+							key: countryItem.code,
+							value: countryItem.code,
+							selected: countryItem.code === selectedCountryCode,
+							content: (
+								<>
+									<span aria-hidden="true" className="text-[18px] leading-none">
+										{countryItem.flag}
+									</span>
+									<Text as="span" variant="body" className="min-w-0 truncate">
+										<span className="text-foreground">{countryItem.name}</span>
+										<span className="text-foreground/50">
+											{" "}
+											{countryItem.dial_code}
+										</span>
+									</Text>
+								</>
+							),
+						}))}
+						activeIndex={activeIndex}
+						onActiveIndexChange={setActiveIndex}
+						onSelect={(_, index) => {
+							const option = filteredCountries[index];
+							if (!option) return;
+							handleCountrySelect(option.code);
+							close({ restoreFocus: false });
+						}}
+						emptyState={<Text variant="body">No results</Text>}
+						listRef={listRef}
+						listId={menuId}
+						optionIdPrefix={menuId ? `${menuId}-option` : undefined}
+						listClassName={dropdownListClassName}
+						optionClassName={optionClassName}
+						optionActiveClassName={optionActiveClassName}
+						optionSelectedClassName={
+							optionSelectedClassName ?? optionActiveClassName
+						}
+						disabled={disabled}
 					/>
-				}
-			>
-				<input
-					id={inputId}
-					name={name}
-					type="tel"
-					placeholder={placeholder}
-					required={required}
-					disabled={disabled}
-					onChange={(e) => setNextDisplay(e.target.value)}
-					onBlur={handleBlur}
-					className={[inputTextClasses, inputClassName]
-						.filter(Boolean)
-						.join(" ")}
-					aria-invalid={Boolean(derivedError)}
-					aria-describedby={derivedError ? messageId : undefined}
-					value={display}
-				/>
-			</InputFrame>
+				)}
+			/>
 		</Field>
 	);
 }
 
-export type CountryOption = {
-	code: CountryCode; // "DO"
-	name: string; // "Dominican Republic"
-	dialCode: string; // "+1"
-};
-
-export const PHONE_COUNTRIES: CountryOption[] = [
-	{ code: "AF", name: "Afghanistan", dialCode: "+93" },
-	{ code: "AL", name: "Albania", dialCode: "+355" },
-	{ code: "DZ", name: "Algeria", dialCode: "+213" },
-	{ code: "AS", name: "American Samoa", dialCode: "+1" },
-	{ code: "AD", name: "Andorra", dialCode: "+376" },
-	{ code: "AO", name: "Angola", dialCode: "+244" },
-	{ code: "AI", name: "Anguilla", dialCode: "+1" },
-	{ code: "AG", name: "Antigua and Barbuda", dialCode: "+1" },
-	{ code: "AR", name: "Argentina", dialCode: "+54" },
-	{ code: "AM", name: "Armenia", dialCode: "+374" },
-	{ code: "AW", name: "Aruba", dialCode: "+297" },
-	{ code: "AU", name: "Australia", dialCode: "+61" },
-	{ code: "AT", name: "Austria", dialCode: "+43" },
-	{ code: "AZ", name: "Azerbaijan", dialCode: "+994" },
-
-	{ code: "BS", name: "Bahamas", dialCode: "+1" },
-	{ code: "BH", name: "Bahrain", dialCode: "+973" },
-	{ code: "BD", name: "Bangladesh", dialCode: "+880" },
-	{ code: "BB", name: "Barbados", dialCode: "+1" },
-	{ code: "BY", name: "Belarus", dialCode: "+375" },
-	{ code: "BE", name: "Belgium", dialCode: "+32" },
-	{ code: "BZ", name: "Belize", dialCode: "+501" },
-	{ code: "BJ", name: "Benin", dialCode: "+229" },
-	{ code: "BM", name: "Bermuda", dialCode: "+1" },
-	{ code: "BT", name: "Bhutan", dialCode: "+975" },
-	{ code: "BO", name: "Bolivia", dialCode: "+591" },
-	{ code: "BA", name: "Bosnia and Herzegovina", dialCode: "+387" },
-	{ code: "BW", name: "Botswana", dialCode: "+267" },
-	{ code: "BR", name: "Brazil", dialCode: "+55" },
-	{ code: "BN", name: "Brunei", dialCode: "+673" },
-	{ code: "BG", name: "Bulgaria", dialCode: "+359" },
-	{ code: "BF", name: "Burkina Faso", dialCode: "+226" },
-	{ code: "BI", name: "Burundi", dialCode: "+257" },
-
-	{ code: "KH", name: "Cambodia", dialCode: "+855" },
-	{ code: "CM", name: "Cameroon", dialCode: "+237" },
-	{ code: "CA", name: "Canada", dialCode: "+1" },
-	{ code: "CV", name: "Cape Verde", dialCode: "+238" },
-	{ code: "KY", name: "Cayman Islands", dialCode: "+1" },
-	{ code: "CF", name: "Central African Republic", dialCode: "+236" },
-	{ code: "TD", name: "Chad", dialCode: "+235" },
-	{ code: "CL", name: "Chile", dialCode: "+56" },
-	{ code: "CN", name: "China", dialCode: "+86" },
-	{ code: "CO", name: "Colombia", dialCode: "+57" },
-	{ code: "KM", name: "Comoros", dialCode: "+269" },
-	{ code: "CG", name: "Congo", dialCode: "+242" },
-	{ code: "CR", name: "Costa Rica", dialCode: "+506" },
-	{ code: "CI", name: "Côte d’Ivoire", dialCode: "+225" },
-	{ code: "HR", name: "Croatia", dialCode: "+385" },
-	{ code: "CU", name: "Cuba", dialCode: "+53" },
-	{ code: "CY", name: "Cyprus", dialCode: "+357" },
-	{ code: "CZ", name: "Czech Republic", dialCode: "+420" },
-
-	{ code: "DK", name: "Denmark", dialCode: "+45" },
-	{ code: "DJ", name: "Djibouti", dialCode: "+253" },
-	{ code: "DO", name: "Dominican Republic", dialCode: "+1" },
-
-	{ code: "EC", name: "Ecuador", dialCode: "+593" },
-	{ code: "EG", name: "Egypt", dialCode: "+20" },
-	{ code: "SV", name: "El Salvador", dialCode: "+503" },
-	{ code: "EE", name: "Estonia", dialCode: "+372" },
-	{ code: "ET", name: "Ethiopia", dialCode: "+251" },
-
-	{ code: "FI", name: "Finland", dialCode: "+358" },
-	{ code: "FR", name: "France", dialCode: "+33" },
-
-	{ code: "GE", name: "Georgia", dialCode: "+995" },
-	{ code: "DE", name: "Germany", dialCode: "+49" },
-	{ code: "GH", name: "Ghana", dialCode: "+233" },
-	{ code: "GR", name: "Greece", dialCode: "+30" },
-	{ code: "GT", name: "Guatemala", dialCode: "+502" },
-
-	{ code: "HT", name: "Haiti", dialCode: "+509" },
-	{ code: "HN", name: "Honduras", dialCode: "+504" },
-	{ code: "HK", name: "Hong Kong", dialCode: "+852" },
-	{ code: "HU", name: "Hungary", dialCode: "+36" },
-
-	{ code: "IS", name: "Iceland", dialCode: "+354" },
-	{ code: "IN", name: "India", dialCode: "+91" },
-	{ code: "ID", name: "Indonesia", dialCode: "+62" },
-	{ code: "IR", name: "Iran", dialCode: "+98" },
-	{ code: "IQ", name: "Iraq", dialCode: "+964" },
-	{ code: "IE", name: "Ireland", dialCode: "+353" },
-	{ code: "IL", name: "Israel", dialCode: "+972" },
-	{ code: "IT", name: "Italy", dialCode: "+39" },
-
-	{ code: "JP", name: "Japan", dialCode: "+81" },
-	{ code: "JO", name: "Jordan", dialCode: "+962" },
-
-	{ code: "KE", name: "Kenya", dialCode: "+254" },
-	{ code: "KW", name: "Kuwait", dialCode: "+965" },
-	{ code: "KZ", name: "Kazakhstan", dialCode: "+7" },
-
-	{ code: "LA", name: "Laos", dialCode: "+856" },
-	{ code: "LV", name: "Latvia", dialCode: "+371" },
-	{ code: "LB", name: "Lebanon", dialCode: "+961" },
-	{ code: "LT", name: "Lithuania", dialCode: "+370" },
-	{ code: "LU", name: "Luxembourg", dialCode: "+352" },
-
-	{ code: "MY", name: "Malaysia", dialCode: "+60" },
-	{ code: "MX", name: "Mexico", dialCode: "+52" },
-	{ code: "MD", name: "Moldova", dialCode: "+373" },
-	{ code: "MA", name: "Morocco", dialCode: "+212" },
-
-	{ code: "NL", name: "Netherlands", dialCode: "+31" },
-	{ code: "NZ", name: "New Zealand", dialCode: "+64" },
-	{ code: "NG", name: "Nigeria", dialCode: "+234" },
-	{ code: "NO", name: "Norway", dialCode: "+47" },
-
-	{ code: "PK", name: "Pakistan", dialCode: "+92" },
-	{ code: "PA", name: "Panama", dialCode: "+507" },
-	{ code: "PE", name: "Peru", dialCode: "+51" },
-	{ code: "PH", name: "Philippines", dialCode: "+63" },
-	{ code: "PL", name: "Poland", dialCode: "+48" },
-	{ code: "PT", name: "Portugal", dialCode: "+351" },
-
-	{ code: "QA", name: "Qatar", dialCode: "+974" },
-
-	{ code: "RO", name: "Romania", dialCode: "+40" },
-	{ code: "RU", name: "Russia", dialCode: "+7" },
-
-	{ code: "SA", name: "Saudi Arabia", dialCode: "+966" },
-	{ code: "RS", name: "Serbia", dialCode: "+381" },
-	{ code: "SG", name: "Singapore", dialCode: "+65" },
-	{ code: "SK", name: "Slovakia", dialCode: "+421" },
-	{ code: "SI", name: "Slovenia", dialCode: "+386" },
-	{ code: "ZA", name: "South Africa", dialCode: "+27" },
-	{ code: "KR", name: "South Korea", dialCode: "+82" },
-	{ code: "ES", name: "Spain", dialCode: "+34" },
-	{ code: "SE", name: "Sweden", dialCode: "+46" },
-	{ code: "CH", name: "Switzerland", dialCode: "+41" },
-
-	{ code: "TW", name: "Taiwan", dialCode: "+886" },
-	{ code: "TH", name: "Thailand", dialCode: "+66" },
-	{ code: "TR", name: "Turkey", dialCode: "+90" },
-
-	{ code: "UA", name: "Ukraine", dialCode: "+380" },
-	{ code: "AE", name: "United Arab Emirates", dialCode: "+971" },
-	{ code: "GB", name: "United Kingdom", dialCode: "+44" },
-	{ code: "US", name: "United States", dialCode: "+1" },
-
-	{ code: "VE", name: "Venezuela", dialCode: "+58" },
-	{ code: "VN", name: "Vietnam", dialCode: "+84" },
-
-	{ code: "ZM", name: "Zambia", dialCode: "+260" },
-	{ code: "ZW", name: "Zimbabwe", dialCode: "+263" },
-];
+export const PHONE_COUNTRIES: CountryOption[] = getCountries().map((code) => ({
+	code,
+	name: code,
+	dialCode: `+${getCountryCallingCode(code)}`,
+}));

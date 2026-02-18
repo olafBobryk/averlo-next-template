@@ -13,6 +13,8 @@ type FieldProps = {
 	tone?: FieldTone;
 	required?: boolean;
 	inputId?: string;
+	descriptionId?: string;
+	messageId?: string;
 	className?: string;
 	children: React.ReactNode;
 };
@@ -24,39 +26,57 @@ export function Field({
 	tone = "default",
 	required,
 	inputId,
+	descriptionId,
+	messageId,
 	className,
 	children,
 }: FieldProps) {
+	const hasMessage = Boolean(message);
+	const announceMessage = tone === "error" && hasMessage;
+
 	return (
 		<div
-			className={["flex flex-col gap-2.5", className].filter(Boolean).join(" ")}
+			data-tone={tone}
+			className={["group/field flex flex-col gap-3", className]
+				.filter(Boolean)
+				.join(" ")}
 		>
-			{label ? (
-				<Text as="label" variant="body" htmlFor={inputId}>
-					<span className="inline-flex items-center gap-1">
-						{label}
-						{required ? (
-							<span aria-hidden="true" className="text-danger">
-								*
-							</span>
-						) : null}
-					</span>
-				</Text>
-			) : null}
+			<div className="flex flex-col gap-1">
+				{label ? (
+					<Text
+						as="label"
+						variant="body"
+						htmlFor={inputId}
+						className="pointer-events-none"
+					>
+						<span className="inline-flex items-center gap-1">
+							{label}
+							{required ? (
+								<span aria-hidden="true" className="text-danger">
+									*
+								</span>
+							) : null}
+						</span>
+					</Text>
+				) : null}
 
-			{description ? (
-				<Text as="p" variant="muted" className="text-sm">
-					{description}
-				</Text>
-			) : null}
+				{description ? (
+					<Text as="p" variant="muted" className="text-sm" id={descriptionId}>
+						{description}
+					</Text>
+				) : null}
+			</div>
 
 			{children}
 
 			<div
 				className={[
-					"transition-all motion-micro", // reserve one line
+					"transition-all motion-micro -mt-2.5 overflow-hidden",
 					message ? "max-h-[26px]" : "max-h-0",
 				].join(" ")}
+				role={announceMessage ? "alert" : undefined}
+				aria-live={announceMessage ? "polite" : undefined}
+				aria-atomic={announceMessage ? "true" : undefined}
 			>
 				<Text
 					as="p"
@@ -69,6 +89,8 @@ export function Field({
 								? "!text-success"
 								: "text-transparent",
 					].join(" ")}
+					id={messageId}
+					aria-hidden={!hasMessage}
 				>
 					{message ?? "placeholder"}
 				</Text>

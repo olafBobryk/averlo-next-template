@@ -3,7 +3,11 @@
 
 import * as React from "react";
 import { Field } from "@/components/ui/primitives/Field";
-import { InputFrame, inputTextClasses } from "@/components/ui/primitives/InputFrame";
+import {
+	InputFrame,
+	type InputFrameSize,
+	inputVariants,
+} from "@/components/ui/primitives/InputFrame";
 
 type TextAreaInputProps = {
 	label: React.ReactNode;
@@ -34,6 +38,7 @@ type TextAreaInputProps = {
 
 	// Textarea-specific
 	rows?: number; // default a couple lines
+	size?: InputFrameSize;
 };
 
 export function TextAreaInput({
@@ -52,15 +57,21 @@ export function TextAreaInput({
 	className,
 	textareaClassName,
 	rows = 3,
+	size,
 }: TextAreaInputProps) {
 	const isControlled = value !== undefined;
-	const inputId = id ?? name;
-	const messageId = inputId ? `${inputId}-message` : undefined;
-
 	const [clientError, setClientError] = React.useState<string | null>(null);
 
 	const derivedError = error ?? clientError;
 	const tone = derivedError ? "error" : "default";
+	const fallbackId = React.useId();
+	const inputId = id ?? name ?? fallbackId;
+	const descriptionId = description ? `${inputId}-description` : undefined;
+	const messageId = derivedError ? `${inputId}-message` : undefined;
+	const describedBy =
+		[descriptionId, derivedError ? messageId : undefined]
+			.filter(Boolean)
+			.join(" ") || undefined;
 
 	const handleChange: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
 		const next = e.target.value;
@@ -83,9 +94,11 @@ export function TextAreaInput({
 			tone={tone}
 			required={required}
 			inputId={inputId}
+			descriptionId={descriptionId}
+			messageId={messageId}
 			className={className}
 		>
-			<InputFrame tone={tone} disabled={disabled} fullWidth>
+			<InputFrame tone={tone} size={size} disabled={disabled} fullWidth>
 				<textarea
 					id={inputId}
 					name={name}
@@ -94,7 +107,10 @@ export function TextAreaInput({
 					required={required}
 					rows={rows}
 					className={[
-						inputTextClasses,
+						inputVariants({
+							size,
+							disabled: disabled ? true : undefined,
+						}),
 						"resize-y",
 						"min-h-[88px]", // a couple lines tall by default
 						textareaClassName,
@@ -106,7 +122,7 @@ export function TextAreaInput({
 						: { defaultValue, onChange: handleChange })}
 					onBlur={handleBlur}
 					aria-invalid={Boolean(derivedError)}
-					aria-describedby={derivedError ? messageId : undefined}
+					aria-describedby={describedBy}
 				/>
 			</InputFrame>
 		</Field>

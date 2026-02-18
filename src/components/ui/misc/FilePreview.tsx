@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useConfirmationModal } from "@/components/ui/floating/modal/useConfirmationModal";
+import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirmationModal";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 import { InspectableImage } from "./InspectableImage";

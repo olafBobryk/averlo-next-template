@@ -3,7 +3,11 @@
 
 import * as React from "react";
 import { Field } from "@/components/ui/primitives/Field";
-import { InputFrame, inputTextClasses } from "@/components/ui/primitives/InputFrame";
+import {
+	InputFrame,
+	type InputFrameSize,
+	inputVariants,
+} from "@/components/ui/primitives/InputFrame";
 
 type TextInputProps = {
 	label: React.ReactNode;
@@ -32,6 +36,7 @@ type TextInputProps = {
 
 	className?: string;
 	inputClassName?: string;
+	size?: InputFrameSize;
 };
 
 export function TextInput({
@@ -50,15 +55,21 @@ export function TextInput({
 	required = false,
 	className,
 	inputClassName,
+	size,
 }: TextInputProps) {
 	const isControlled = value !== undefined;
-	const inputId = id ?? name;
-	const messageId = inputId ? `${inputId}-message` : undefined;
-
 	const [clientError, setClientError] = React.useState<string | null>(null);
 
 	const derivedError = error ?? clientError;
 	const tone = derivedError ? "error" : "default";
+	const fallbackId = React.useId();
+	const inputId = id ?? name ?? fallbackId;
+	const descriptionId = description ? `${inputId}-description` : undefined;
+	const messageId = derivedError ? `${inputId}-message` : undefined;
+	const describedBy =
+		[descriptionId, derivedError ? messageId : undefined]
+			.filter(Boolean)
+			.join(" ") || undefined;
 
 	const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
 		const next = e.target.value;
@@ -80,9 +91,11 @@ export function TextInput({
 			tone={tone}
 			required={required}
 			inputId={inputId}
+			descriptionId={descriptionId}
+			messageId={messageId}
 			className={className}
 		>
-			<InputFrame tone={tone} disabled={disabled} fullWidth>
+			<InputFrame tone={tone} size={size} disabled={disabled} fullWidth>
 				<input
 					id={inputId}
 					name={name}
@@ -91,13 +104,21 @@ export function TextInput({
 					disabled={disabled}
 					placeholder={placeholder}
 					required={required}
-					className={[inputTextClasses, inputClassName].filter(Boolean).join(" ")}
+					className={[
+						inputVariants({
+							size,
+							disabled: disabled ? true : undefined,
+						}),
+						inputClassName,
+					]
+						.filter(Boolean)
+						.join(" ")}
 					{...(isControlled
 						? { value: value ?? "", onChange: handleChange }
 						: { defaultValue, onChange: handleChange })}
 					onBlur={handleBlur}
 					aria-invalid={Boolean(derivedError)}
-					aria-describedby={derivedError ? messageId : undefined}
+					aria-describedby={describedBy}
 				/>
 			</InputFrame>
 		</Field>

@@ -3,43 +3,68 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import { Panel } from "@/components/layout/primitives/Panel";
-import { Section } from "@/components/layout/primitives/Section";
-import { useConfirmationModal } from "@/components/ui/floating/modal/useConfirmationModal";
-import { useImageInspectModal } from "@/components/ui/floating/modal/useImageInspectModal";
-import { useModal } from "@/components/ui/floating/modal/useModal";
-import { ChoiceInput } from "@/components/ui/input/ChoiceInput";
+import { useState } from "react";
+import { useSettingsContext } from "@/components/ui/foundations/settingsContext";
+import { ComboboxMultiSelectInput } from "@/components/ui/input/ComboboxMultiSelectInput";
 import { ComboboxTextInput } from "@/components/ui/input/ComboboxTextInput";
 import { DateRangeDropdown } from "@/components/ui/input/DateRangeDropDown";
 import { EmailInput } from "@/components/ui/input/EmailInput";
+import { MultiselectInput } from "@/components/ui/input/MultiselectInput";
 import { NumberInput } from "@/components/ui/input/NumberInput";
 import { PasswordInput } from "@/components/ui/input/PasswordInput";
 import { PhoneInput } from "@/components/ui/input/PhoneInput";
+import { RadioInput } from "@/components/ui/input/RadioInput";
+import { SelectInput } from "@/components/ui/input/SelectInput";
 import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
 import { TextInput } from "@/components/ui/input/TextInput";
-import { DynamicContent } from "@/components/ui/misc/DynamicContent";
+import { ToggleInput } from "@/components/ui/input/ToggleInput";
+import { Accordion } from "@/components/ui/misc/Accordion";
+import { CopyField } from "@/components/ui/misc/CopyField";
 import {
 	FilePreview,
 	type FilePreviewItem,
 } from "@/components/ui/misc/FilePreview";
 import { Loader } from "@/components/ui/misc/Loader";
+import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
+import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
+import { SuspenseBoundary } from "@/components/ui/misc/SuspenseBoundary";
+import { Warning } from "@/components/ui/misc/Warning";
 import { RevealGroup, RevealItem } from "@/components/ui/motion/Reveal";
 import { ScrollLag } from "@/components/ui/motion/ScrollLag";
 import { ScrollParallax } from "@/components/ui/motion/ScrollParallax";
+import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirmationModal";
+import { useImageInspectModal } from "@/components/ui/overlays/modal/useImageInspectModal";
+import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
-import { Heading } from "@/components/ui/primitives/Heading";
-import { Icon, type IconName } from "@/components/ui/primitives/Icon";
+import { Icon, type IconName } from "@/components/ui/icons/Icon";
+import { MenuDropdown } from "@/components/ui/primitives/MenuDropdown";
+import { Panel } from "@/components/ui/primitives/Panel";
+import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { showToast } from "@/lib/toast";
 
 export default function TestPage() {
 	const demoIcons: IconName[] = [
 		"arrow-right",
 		"arrow-left",
+		"chevron",
 		"check",
+		"close",
 		"cross",
 		"plus",
+		"minus",
+		"copy",
+		"warning",
+		"search",
+		"ellipsis",
+		"ellipsis-vertical",
+		"eye",
+		"eye-closed",
+		"menu",
+		"calendar",
+		"bell",
+		"spinner",
 		"camera",
 		"notes",
 		"add-image",
@@ -49,17 +74,84 @@ export default function TestPage() {
 		"x",
 		"youtube",
 	];
+	const colorSections = [
+		{
+			title: "Primary",
+			items: [
+				{ label: "primary", swatchClassName: "bg-primary" },
+				{ label: "primary hover", swatchClassName: "bg-primary-hover" },
+				{ label: "primary active", swatchClassName: "bg-primary-active" },
+				{
+					label: "primary foreground",
+					swatchClassName: "bg-primary-foreground",
+				},
+			],
+		},
+		{
+			title: "Danger",
+			items: [
+				{ label: "danger", swatchClassName: "bg-danger" },
+				{ label: "danger 90", swatchClassName: "bg-danger/90" },
+				{ label: "danger 80", swatchClassName: "bg-danger/80" },
+			],
+		},
+		{
+			title: "Foreground",
+			items: [
+				{ label: "foreground", swatchClassName: "bg-foreground" },
+				{ label: "foreground hover", swatchClassName: "bg-foreground-hover" },
+				{ label: "foreground active", swatchClassName: "bg-foreground-active" },
+			],
+		},
+		{
+			title: "Background",
+			items: [
+				{ label: "background", swatchClassName: "bg-background" },
+				{ label: "background hover", swatchClassName: "bg-background-hover" },
+				{ label: "background active", swatchClassName: "bg-background-active" },
+			],
+		},
+		{
+			title: "Surface & Border",
+			items: [
+				{ label: "surface", swatchClassName: "bg-surface" },
+				{
+					label: "border 15",
+					swatchClassName: "bg-white border border-border/15",
+				},
+				{ label: "border /10", swatchClassName: "bg-border/10" },
+				{ label: "border /5", swatchClassName: "bg-border/5" },
+				{
+					label: "border fg/20",
+					swatchClassName: "bg-white border border-foreground/20",
+				},
+				{
+					label: "border white/15",
+					swatchClassName: "bg-primary border border-white/15",
+				},
+			],
+		},
+	] as const;
+
 	const { openModal, closeAll } = useModal();
 	const { openConfirmation } = useConfirmationModal();
 	const { openImageInspect } = useImageInspectModal();
+	const settings = useSettingsContext();
+	const motionAllowed = useMotionAllowed(true);
+	const motionSetting = settings?.motionDisabled ? "reduced" : "system";
 	const [inputValues, setInputValues] = useState({
 		name: "",
 		email: "",
 		password: "",
 		bio: "",
 		quantity: 1,
-		choice: "opt1",
+		radio: "opt1",
+		multiselect: ["opt1"],
+		toggles: ["opt2"],
 		combobox: "Alpha",
+		comboboxMulti: ["alpha"],
+		select: "alpha",
+		segment: "overview",
 		phone: undefined as string | undefined,
 	});
 	const [files, setFiles] = useState<FilePreviewItem[]>(() => [
@@ -81,7 +173,6 @@ export default function TestPage() {
 		"loading" | "error" | "ready"
 	>("ready");
 
-	const isError = useMemo(() => contentState === "error", [contentState]);
 	const [shouldCrash, setShouldCrash] = useState(false);
 
 	if (shouldCrash) {
@@ -98,45 +189,96 @@ export default function TestPage() {
 			innerClassName="flex flex-col gap-8 "
 		>
 			<header className="flex flex-col gap-2">
-				<Heading as="h1" size="lg">
+				<Text as="h1" variant="headingLg">
 					UI Testbed
-				</Heading>
+				</Text>
 				<Text variant="muted">
 					Manual checks for the UI kit. TODO: Swap copy, colors, assets, and
 					ranges per project needs.
 				</Text>
 			</header>
 
+			<Panel columns={1} className="border-black/[0.08]">
+				<div className="flex flex-col gap-4">
+					<div>
+						<Text as="h2" variant="headingMd">
+							Color tokens
+						</Text>
+						<Text variant="muted">Shared UI color tokens.</Text>
+					</div>
+					<div className="grid gap-4">
+						{colorSections.map((section) => (
+							<div key={section.title} className="flex flex-col gap-2">
+								<Text as="h3" variant="bodyStrong">
+									{section.title}
+								</Text>
+								<div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+									{section.items.map((item) => (
+										<div
+											key={item.label}
+											className="flex items-center gap-3 rounded-lg border border-border/15 bg-white px-2 py-2"
+										>
+											<div
+												className={`h-8 w-8 rounded-md border border-border/15 ${item.swatchClassName}`}
+											/>
+											<Text variant="captionMuted" className="min-w-0 truncate">
+												{item.label}
+											</Text>
+										</div>
+									))}
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			</Panel>
+
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Primitives
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Typography and buttons using shared tokens.
 					</Text>
 					<div className="flex flex-col gap-1">
-						<Heading as="h3" size="xl">
+						<Text as="h3" variant="headingXl">
 							Heading XL
-						</Heading>
-						<Heading as="h4" size="md">
+						</Text>
+						<Text as="h4" variant="headingMd">
 							Heading MD
-						</Heading>
+						</Text>
 						<Text variant="body">Body text</Text>
 						<Text variant="muted">Muted text</Text>
 						<Text variant="captionMuted">Caption muted</Text>
 					</div>
 					<div className="flex flex-wrap gap-2">
 						<Button variant="primary">Primary</Button>
+						<Button variant="danger">Danger</Button>
 						<Button variant="outline">Outline</Button>
 						<Button variant="solid">Solid</Button>
 						<Button variant="ghost">Ghost</Button>
 					</div>
+					<Text variant="muted">Loading states</Text>
+					<div className="flex flex-wrap gap-2">
+						<Button variant="primary" loading>
+							Primary loading
+						</Button>
+						<Button variant="outline" leadingIcon="arrow-left" loading>
+							Outline loading
+						</Button>
+						<Button variant="solid" trailingIcon="arrow-right" loading>
+							Solid loading
+						</Button>
+						<Button variant="ghost" loading>
+							Ghost loading
+						</Button>
+					</div>
 				</div>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Text Inputs
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Shared frame + field messaging. Error state uses the same token as
 						toasts/warnings.
@@ -145,6 +287,20 @@ export default function TestPage() {
 						<TextInput
 							label="Name"
 							placeholder="Your name"
+							value={inputValues.name}
+							onChange={(name) => setInputValues((s) => ({ ...s, name }))}
+						/>
+						<TextInput
+							label="Name (Small)"
+							placeholder="Small size"
+							size="sm"
+							value={inputValues.name}
+							onChange={(name) => setInputValues((s) => ({ ...s, name }))}
+						/>
+						<TextInput
+							label="Name (Large)"
+							placeholder="Large size"
+							size="lg"
 							value={inputValues.name}
 							onChange={(name) => setInputValues((s) => ({ ...s, name }))}
 						/>
@@ -164,6 +320,7 @@ export default function TestPage() {
 							onChange={(password) =>
 								setInputValues((s) => ({ ...s, password }))
 							}
+							showStrength
 						/>
 						<NumberInput
 							label="Quantity"
@@ -186,9 +343,9 @@ export default function TestPage() {
 
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Icons
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Static glyphs rendered via the `Icon` primitive. Adjust the `size`
 						variant and swap `name` to test available assets.
@@ -213,9 +370,9 @@ export default function TestPage() {
 
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Buttons with icons
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Icon primitive wired through button props. Mix leading/trailing and
 						variant combos.
@@ -239,38 +396,48 @@ export default function TestPage() {
 
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Selection & composite inputs
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Choice, combobox, phone, and date range using the shared tokens.
 					</Text>
-					<div className="grid gap-3">
-						<div className="flex flex-col gap-2">
-							<Text variant="bodyStrong">ChoiceInput</Text>
-							<div className="flex items-center gap-3">
-								<ChoiceInput
-									id="choice-opt1"
-									name="choice-demo"
-									value="opt1"
-									label="Option 1"
-									checked={inputValues.choice === "opt1"}
-									onChange={(val) =>
-										setInputValues((s) => ({ ...s, choice: val }))
-									}
-								/>
-								<ChoiceInput
-									id="choice-opt2"
-									name="choice-demo"
-									value="opt2"
-									label="Option 2"
-									checked={inputValues.choice === "opt2"}
-									onChange={(val) =>
-										setInputValues((s) => ({ ...s, choice: val }))
-									}
-								/>
-							</div>
-						</div>
+					<div className="grid gap-4">
+						<RadioInput
+							label="Radio input"
+							description="Single selection with the new indicators."
+							options={[
+								{ value: "opt1", label: "Option 1" },
+								{ value: "opt2", label: "Option 2" },
+								{ value: "opt3", label: "Option 3", disabled: true },
+							]}
+							value={inputValues.radio}
+							onChange={(radio) => setInputValues((s) => ({ ...s, radio }))}
+						/>
+						<MultiselectInput
+							label="Multiselect input"
+							description="Multi-select with checkmark indicator."
+							options={[
+								{ value: "opt1", label: "Option 1" },
+								{ value: "opt2", label: "Option 2" },
+								{ value: "opt3", label: "Option 3", disabled: true },
+							]}
+							value={inputValues.multiselect}
+							onChange={(multiselect) =>
+								setInputValues((s) => ({ ...s, multiselect }))
+							}
+						/>
+						<ToggleInput
+							label="Toggle input"
+							description="Switch-style multi-toggle."
+							options={[
+								{ value: "opt1", label: "Option 1" },
+								{ value: "opt2", label: "Option 2" },
+								{ value: "opt3", label: "Option 3", disabled: true },
+							]}
+							value={inputValues.toggles}
+							onChange={(toggles) => setInputValues((s) => ({ ...s, toggles }))}
+						/>
 						<ComboboxTextInput
 							label="Combobox"
 							placeholder="Pick an option"
@@ -284,8 +451,45 @@ export default function TestPage() {
 								{ id: "g", label: "Gamma" },
 							]}
 						/>
+						<SelectInput
+							label="Select input"
+							description="Type to search; value updates on selection."
+							placeholder="Select option"
+							value={inputValues.select}
+							onChange={(select) => setInputValues((s) => ({ ...s, select }))}
+							options={[
+								{ value: "alpha", label: "Alpha", symbol: "A" },
+								{ value: "beta", label: "Beta", symbol: "B" },
+								{ value: "gamma", label: "Gamma", symbol: "G" },
+								{ value: "delta", label: "Delta", symbol: "D" },
+							]}
+						/>
+						<ComboboxMultiSelectInput
+							label="Combobox multiselect"
+							description="Search + pick multiple, backspace removes last."
+							placeholder="Search options"
+							value={inputValues.comboboxMulti}
+							onChange={(comboboxMulti) =>
+								setInputValues((s) => ({ ...s, comboboxMulti }))
+							}
+							// leadingIcon="notes"
+							endText={`${inputValues.comboboxMulti.length} selected`}
+							options={[
+								{ value: "alpha", label: "Alpha", symbol: "A" },
+								{ value: "beta", label: "Beta", symbol: "B" },
+								{ value: "gamma", label: "Gamma", symbol: "G" },
+								{ value: "delta", label: "Delta", symbol: "D" },
+								{ value: "epsilon", label: "Epsilon", symbol: "E" },
+								{ value: "zeta", label: "Zeta", symbol: "Z" },
+								{ value: "eta", label: "Eta", symbol: "H" },
+								{ value: "theta", label: "Theta", symbol: "T" },
+								{ value: "iota", label: "Iota", symbol: "I" },
+								{ value: "kappa", label: "Kappa", symbol: "K" },
+							]}
+						/>
 						<PhoneInput
 							label="Phone"
+							description="Auto-detects country from dial code."
 							value={inputValues.phone}
 							onChange={(phone) => setInputValues((s) => ({ ...s, phone }))}
 						/>
@@ -303,150 +507,67 @@ export default function TestPage() {
 				</div>
 			</Panel>
 
-			<Panel columns={2} className="border-black/[0.08]">
+			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
-						Modal basics
-					</Heading>
-					<Text variant="muted">
-						Open a simple modal using the low-level `useModal` helper. The modal
-						render function receives a `close` handler.
+					<Text as="h2" variant="headingMd">
+						Helpers & feedback
 					</Text>
-					<div className="flex flex-wrap gap-2">
-						<Button
-							variant="primary"
-							onClick={() => {
-								openModal(({ close }) => (
-									<div className="flex flex-col gap-4">
-										<Heading as="h3" size="md">
-											Custom Modal
-										</Heading>
-										<Text variant="muted">
-											This uses the shared ModalHost; nothing is wrapped around
-											the page.
-										</Text>
-										<Button onClick={close}>Close</Button>
-									</div>
-								));
-							}}
-						>
-							Open basic modal
-						</Button>
-						<Button variant="ghost" onClick={closeAll}>
-							Close all modals
-						</Button>
+					<Text variant="muted">
+						Skeletons, warnings, copy field, and menu dropdown patterns.
+					</Text>
+				</div>
+				<div className="grid gap-4">
+					<Warning message="Heads up: this is a warning helper." />
+					<CopyField value="https://example.com/referral=123456" />
+					<div className="flex items-center gap-3">
+						<MoreMenuDropdown
+							options={[
+								{ label: "Edit", href: "/asd" },
+								{ label: "Duplicate", onClick: () => {} },
+								{ label: "Archive", onClick: () => {} },
+							]}
+						/>
+						<Text variant="muted">More menu dropdown</Text>
 					</div>
-				</div>
-
-				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
-						Confirmation modal
-					</Heading>
-					<Text variant="muted">
-						Uses the `useConfirmationModal` convenience hook.
-					</Text>
-					<Button
-						variant="outline"
-						onClick={() =>
-							openConfirmation({
-								title: "Delete example item?",
-								description: "This cannot be undone.",
-								confirmLabel: "Delete",
-								warning: "TODO: wire real destructive action.",
-								onConfirm: async () => {
-									// TODO: plug in your real handler.
-									await new Promise((resolve) => setTimeout(resolve, 600));
-									showToast({ type: "success", message: "Deleted (stub)." });
-								},
-							})
-						}
-					>
-						Open confirmation
-					</Button>
-				</div>
-			</Panel>
-
-			<Panel columns={2} className="border-black/[0.08]">
-				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
-						Image inspect modal
-					</Heading>
-					<Text variant="muted">
-						Exercises the image-focused modal with custom layout options.
-					</Text>
-					<Button
-						variant="primary"
-						onClick={() =>
-							openImageInspect({
-								// TODO: Swap to a real image for your project.
-								src: "/test/blob.png",
-								alt: "Preview",
-								onShare: async () => {
-									showToast({ type: "info", message: "Share clicked (stub)." });
-								},
-							})
-						}
-					>
-						Open image inspect
-					</Button>
-				</div>
-				<div className="flex items-center justify-center">
-					<div className="relative h-24 w-24">
-						<Image src="/next.svg" alt="Preview" fill sizes="96px" />
+					<div className="flex flex-wrap items-center gap-3">
+						<Text.Skeleton>Loading text</Text.Skeleton>
+						<Button.Skeleton>Loading button</Button.Skeleton>
 					</div>
-				</div>
-			</Panel>
-
-			<Panel columns={2} className="border-black/[0.08]">
-				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
-						Toasts
-					</Heading>
-					<Text variant="muted">
-						Trigger different toast types via the shared `showToast` helper.
-					</Text>
-					<div className="flex flex-wrap gap-2">
-						<Button
-							onClick={() =>
-								showToast({ type: "success", message: "Success toast example" })
-							}
-						>
-							Show success
-						</Button>
-						<Button
-							variant="outline"
-							onClick={() =>
-								showToast({ type: "error", message: "Error toast example" })
-							}
-						>
-							Show error
-						</Button>
-						<Button
-							variant="ghost"
-							onClick={() =>
-								showToast({ type: "info", message: "Info toast example" })
-							}
-						>
-							Show info
-						</Button>
-					</div>
-				</div>
-				<div className="flex flex-col gap-2 text-sm text-muted-foreground">
-					<Text variant="muted">
-						All toasts are rendered by `ToastClientMount` in `layout.tsx`, so
-						this page stays server-renderable aside from the client bits above.
-					</Text>
 				</div>
 			</Panel>
 
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
-						Dynamic content & alerts
-					</Heading>
+					<Text as="h2" variant="headingMd">
+						Accordion & segmented control
+					</Text>
 					<Text variant="muted">
-						Test the loading/error/content states that reuse the same tone
-						tokens.
+						Library motion patterns using shared spring presets.
+					</Text>
+				</div>
+				<div className="flex flex-col gap-4">
+					<SegmentedControl
+						options={[
+							{ value: "overview", label: "Overview" },
+							{ value: "insights", label: "Insights" },
+							{ value: "alerts", label: "Alerts" },
+						]}
+						value={inputValues.segment}
+						onChange={(segment) => setInputValues((s) => ({ ...s, segment }))}
+					/>
+					<Accordion title="Accordion title">
+						This is accordion body content. It can be text or custom nodes.
+					</Accordion>
+				</div>
+			</Panel>
+
+			<Panel columns={2}>
+				<div className="flex flex-col gap-3">
+					<Text as="h2" variant="headingMd">
+						Suspense & states
+					</Text>
+					<Text variant="muted">
+						Controlled boundary with the default ErrorState fallback.
 					</Text>
 					<div className="flex gap-2">
 						<Button size="sm" onClick={() => setContentState("loading")}>
@@ -468,28 +589,227 @@ export default function TestPage() {
 						</Button>
 					</div>
 				</div>
-				<div>
-					<DynamicContent
+				<div className="flex flex-col gap-4">
+					<SuspenseBoundary
 						loading={contentState === "loading"}
-						error={isError ? new Error("Network request failed (stub).") : null}
-						onRetry={() => setContentState("loading")}
-						className="w-full"
+						error={contentState === "error"}
+						fallback={<Loader />}
 					>
 						<div className="rounded-xl border border-border/15 bg-surface px-4 py-3">
-							<Text>Loaded content goes here.</Text>
+							<Text>Suspense boundary content ready.</Text>
 						</div>
-					</DynamicContent>
+					</SuspenseBoundary>
 				</div>
 			</Panel>
 
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
-						Loader
-					</Heading>
+					<Text as="h2" variant="headingMd">
+						Motion settings
+					</Text>
 					<Text variant="muted">
-						Lightweight CSS loader used by DynamicContent when no text is
-						provided to the `load` prop.
+						Override reduced motion for this session. System respects OS + data
+						saver; reduced motion forces animations off.
+					</Text>
+					<SegmentedControl
+						options={[
+							{ value: "system", label: "System" },
+							{ value: "reduced", label: "Reduced motion" },
+						]}
+						value={motionSetting}
+						onChange={(next) => settings?.setMotionDisabled(next === "reduced")}
+						layout="auto"
+					/>
+					<Text variant="captionMuted">
+						Motion allowed: {motionAllowed ? "Yes" : "No"}
+					</Text>
+				</div>
+				<div className="flex flex-col gap-3">
+					<div className="group flex items-center gap-3 rounded-xl border border-border/15 bg-surface px-4 py-3">
+						<Icon name="bell" animate className="text-primary" />
+						<Text variant="body">
+							Hover the bell icon to see the ring animation. It stops when
+							reduced motion is on.
+						</Text>
+					</div>
+					<div className="flex flex-wrap gap-2">
+						<Button variant="outline">Hover me</Button>
+						<Button variant="ghost" trailingIcon="arrow-right">
+							Hover me
+						</Button>
+					</div>
+				</div>
+			</Panel>
+
+			<Panel columns={2} className="border-black/[0.08]">
+				<div className="flex flex-col gap-3">
+					<Text as="h2" variant="headingMd">
+						Modal basics
+					</Text>
+					<Text variant="muted">
+						Open a simple modal using the low-level `useModal` helper. The modal
+						render function receives a `close` handler.
+					</Text>
+					<div className="flex flex-wrap gap-2">
+						<Button
+							variant="primary"
+							onClick={() => {
+								openModal(({ close }) => (
+									<div className="flex flex-col gap-4">
+										<Text as="h3" variant="headingMd">
+											Custom Modal
+										</Text>
+										<Text variant="muted">
+											This uses the shared ModalHost; nothing is wrapped around
+											the page.
+										</Text>
+										<Button onClick={close}>Close</Button>
+									</div>
+								));
+							}}
+						>
+							Open basic modal
+						</Button>
+						<Button variant="ghost" onClick={closeAll}>
+							Close all modals
+						</Button>
+					</div>
+				</div>
+
+				<div className="flex flex-col gap-3">
+					<Text as="h2" variant="headingMd">
+						Confirmation modal
+					</Text>
+					<Text variant="muted">
+						Uses the `useConfirmationModal` convenience hook.
+					</Text>
+					<Button
+						variant="outline"
+						onClick={() =>
+							openConfirmation({
+								title: "Delete example item?",
+								description: "This cannot be undone.",
+								confirmLabel: "Delete",
+								warning: "TODO: wire real destructive action.",
+								onConfirm: async () => {
+									// TODO: plug in your real handler.
+									await new Promise((resolve) => setTimeout(resolve, 600));
+									showToast.success("Deleted (stub).");
+								},
+							})
+						}
+					>
+						Open confirmation
+					</Button>
+				</div>
+			</Panel>
+
+			<Panel columns={2} className="border-black/[0.08]">
+				<div className="flex flex-col gap-3">
+					<Text as="h2" variant="headingMd">
+						Image inspect modal
+					</Text>
+					<Text variant="muted">
+						Exercises the image-focused modal with custom layout options.
+					</Text>
+					<Button
+						variant="primary"
+						onClick={() =>
+							openImageInspect({
+								// TODO: Swap to a real image for your project.
+								src: "/test/blob.png",
+								alt: "Preview",
+								onShare: async () => {
+									showToast.info("Share clicked (stub).");
+								},
+							})
+						}
+					>
+						Open image inspect
+					</Button>
+				</div>
+				<div className="flex items-center justify-center">
+					<div className="relative h-24 w-24">
+						<Image src="/next.svg" alt="Preview" fill sizes="96px" />
+					</div>
+				</div>
+			</Panel>
+
+			<Panel columns={2} className="border-black/[0.08]">
+				<div className="flex flex-col gap-3">
+					<Text as="h2" variant="headingMd">
+						Toasts
+					</Text>
+					<Text variant="muted">
+						Trigger different toast types via the shared `showToast` helper.
+					</Text>
+					<div className="flex flex-wrap gap-2">
+						<Button onClick={() => showToast.success("Success toast example")}>
+							Show success
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => showToast.error("Error toast example")}
+						>
+							Show error
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() =>
+								showToast.success("Permanent toast (dev testing).", {
+									title: "Pinned",
+									durationMs: 0,
+								})
+							}
+						>
+							Show permanent
+						</Button>
+						<Button
+							variant="ghost"
+							onClick={() => {
+								const promise = new Promise((resolve, reject) => {
+									setTimeout(() => {
+										Math.random() > 0.25
+											? resolve(true)
+											: reject(new Error("Failed"));
+									}, 1400);
+								});
+								void showToast
+									.promise(
+										promise,
+										{
+											loading: "Saving changes...",
+											success: "Changes saved.",
+											error: "Save failed.",
+										},
+										{
+											loadingTitle: "Working",
+											successTitle: "Done",
+											errorTitle: "Failed",
+										},
+									)
+									.catch(() => undefined);
+							}}
+						>
+							Show loading (promise)
+						</Button>
+					</div>
+				</div>
+				<div className="flex flex-col gap-2 text-sm text-muted-foreground">
+					<Text variant="muted">
+						All toasts are rendered by `ToastClientMount` in `layout.tsx`, so
+						this page stays server-renderable aside from the client bits above.
+					</Text>
+				</div>
+			</Panel>
+
+			<Panel columns={2}>
+				<div className="flex flex-col gap-3">
+					<Text as="h2" variant="headingMd">
+						Loader
+					</Text>
+					<Text variant="muted">
+						Lightweight CSS loader for async UI states.
 					</Text>
 				</div>
 				<div className="flex items-center gap-4">
@@ -501,9 +821,9 @@ export default function TestPage() {
 
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						File previews
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Remove buttons call confirmation modal; status pills use shared
 						colors.
@@ -532,9 +852,9 @@ export default function TestPage() {
 
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Routing & error tests
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Quick links to exercise 404 and error boundaries.
 					</Text>
@@ -556,9 +876,9 @@ export default function TestPage() {
 
 			<Panel columns={2}>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Motion: Reveal
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Staggered reveal group with reduced-motion guard. Adjust
 						stagger/duration in the primitive.
@@ -580,9 +900,9 @@ export default function TestPage() {
 					</RevealGroup>
 				</div>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Motion: ScrollLag
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Left: normal flow lag. Right: fixed lag to mimic parallax.
 					</Text>
@@ -608,9 +928,9 @@ export default function TestPage() {
 					</div>
 				</div>
 				<div className="flex flex-col gap-3">
-					<Heading as="h2" size="md">
+					<Text as="h2" variant="headingMd">
 						Motion: ScrollParallax
-					</Heading>
+					</Text>
 					<Text variant="muted">
 						Uses page scroll progress to offset content. Adjust magnitude to
 						make it scroll faster or slower than the page.

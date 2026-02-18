@@ -1,0 +1,263 @@
+/** biome-ignore-all lint/suspicious/noUnknownAtRules: <explanation> */
+@import "tailwindcss";
+@import "./iconAnimations.css";
+
+:root {
+	--font-body: "Inter", system-ui, -apple-system, sans-serif;
+	--font-heading: "Inter", system-ui, -apple-system, sans-serif;
+
+	--motion-micro-duration: 140ms;
+	--motion-micro-ease: cubic-bezier(0.33, 0.1, 0.2, 1);
+	--motion-interactive-duration: 200ms;
+	--motion-interactive-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+	--motion-component-duration: 260ms;
+	--motion-component-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--motion-macro-duration: 320ms;
+	--motion-macro-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+	--motion-decorative-duration: 900ms;
+	--motion-decorative-ease: cubic-bezier(0.33, 0, 0.2, 1);
+	--motion-ring-ease: cubic-bezier(0.36, 0.07, 0.19, 0.97);
+	--motion-spin-duration: 2s;
+	--motion-spin-ease: cubic-bezier(0.75, 0.25, 0.25, 0.75);
+
+	/* Core palette in RGB so we can apply opacity via Tailwind */
+	--color-primary-rgb: 2 127 255;
+	--color-primary-hover-rgb: 26 146 255;
+	--color-primary-active-rgb: 46 160 255;
+	--color-primary-foreground-rgb: 255 255 255;
+	--color-danger-rgb: 207 35 49;
+	--color-success-rgb: 34 165 90;
+	--color-warning-rgb: 244 153 0;
+	--color-surface-rgb: 245 247 249;
+	--color-border-rgb: 2 2 2;
+	--color-muted-rgb: 2 2 2;
+	--color-foreground-rgb: 2 2 2;
+	--color-foreground-hover-rgb: 26 26 26;
+	--color-foreground-active-rgb: 45 45 45;
+	--color-background-rgb: 255 255 255;
+	--color-background-hover-rgb: 245 247 249;
+	--color-background-active-rgb: 235 238 242;
+
+	/* Layout tokens */
+	--spacing-section-x: clamp(1rem, 5vw, 6.25rem);
+	--spacing-section-y: clamp(3rem, 8vw, 6.25rem);
+	--spacing-section: var(--spacing-section-y) var(--spacing-section-x);
+	--spacing-section-max: 1500px;
+}
+
+@theme {
+	--color-primary: rgb(var(--color-primary-rgb) / 1);
+	--color-primary-hover: rgb(var(--color-primary-hover-rgb) / 1);
+	--color-primary-active: rgb(var(--color-primary-active-rgb) / 1);
+	--color-primary-foreground: rgb(var(--color-primary-foreground-rgb) / 1);
+	--color-danger: rgb(var(--color-danger-rgb) / 1);
+	--color-success: rgb(var(--color-success-rgb) / 1);
+	--color-warning: rgb(var(--color-warning-rgb) / 1);
+	--color-surface: rgb(var(--color-surface-rgb) / 1);
+	--color-border: rgb(var(--color-border-rgb) / 1);
+	--color-muted: rgb(var(--color-muted-rgb) / 1);
+	--color-foreground: rgb(var(--color-foreground-rgb) / 1);
+	--color-foreground-hover: rgb(var(--color-foreground-hover-rgb) / 1);
+	--color-foreground-active: rgb(var(--color-foreground-active-rgb) / 1);
+	--color-background: rgb(var(--color-background-rgb) / 1);
+	--color-background-hover: rgb(var(--color-background-hover-rgb) / 1);
+	--color-background-active: rgb(var(--color-background-active-rgb) / 1);
+
+	--spacing-section-x: var(--spacing-section-x);
+	--spacing-section-y: var(--spacing-section-y);
+	--spacing-section: var(--spacing-section);
+	--spacing-section-max: var(--spacing-section-max);
+}
+
+@layer components {
+	.inset-center {
+		@apply absolute inset-1/2 -translate-1/2;
+	}
+}
+
+@layer utilities {
+	/*
+	 * .motion-micro
+	 * -------------------------
+	 * Very small, quick transitions for micro-interactions.
+	 *
+	 * Ideal for:
+	 * - Icon / chevron rotations (eg. dropdown chevron pointing up when open).
+	 * - Tiny hover effects (opacity, color, background on pills or badges).
+	 * - Button hover states where only color/opacity changes.
+	 * - Focus rings appearing on inputs.
+	 * - Small border-color changes on validation.
+	 * - Slight scale on icons or small buttons (scale(0.97–1.03)).
+	 *
+	 * Use on:
+	 * - The chevron SVG on dropdown triggers when you toggle `rotate-180`.
+	 * - Small elements that should feel snappy and responsive with almost no lag.
+	 */
+	.motion-micro {
+		transition-duration: var(--motion-micro-duration);
+		transition-timing-function: var(--motion-micro-ease);
+	}
+
+	/*
+	 * .motion-interactive
+	 * -------------------------
+	 * For interactive elements where the user explicitly clicks or taps.
+	 *
+	 * Ideal for:
+	 * - Dropdown triggers (the pill/button that opens a menu).
+	 * - Buttons that slightly change background, scale, or shadow on hover/active.
+	 * - Toggle switches and checkboxes changing state.
+	 * - Tabs highlighting / underline sliding between active tabs.
+	 * - Chips / filters being selected or deselected.
+	 *
+	 * Specific examples:
+	 * - DateRangeDropdown pill: background + border subtle change on hover/active.
+	 * - Cards that slightly lift with a shadow when hovered.
+	 * - A button that grows in width when loading text appears ("Save" -> "Saving…").
+	 */
+	.motion-interactive {
+		transition-duration: var(--motion-interactive-duration);
+		transition-timing-function: var(--motion-interactive-ease);
+	}
+
+	/*
+	 * .motion-component
+	 * -------------------------
+	 * For component-level transitions where the shape/size/layout of a component changes.
+	 *
+	 * Ideal for:
+	 * - Dropdown menus appearing/disappearing (opacity, translateY) if not using Framer.
+	 * - Panels expanding/collapsing in an accordion.
+	 * - Cards changing layout slightly (eg. showing extra text or controls).
+	 * - Form sections sliding in when a toggle reveals more fields.
+	 * - Width/height changes where the component grows/shrinks a bit.
+	 *
+	 * Specific examples:
+	 * - A filter sidebar opening from the side (width change).
+	 * - A details row expanding inside a table to show extra information.
+	 * - A "more options" panel inside a card that fades and slides down into view.
+	 */
+	.motion-component {
+		transition-duration: var(--motion-component-duration);
+		transition-timing-function: var(--motion-component-ease);
+	}
+
+	/*
+	 * .motion-macro
+	 * -------------------------
+	 * For large, page-level or layout-level transitions that should feel slower and smoother.
+	 *
+	 * Ideal for:
+	 * - Entire sidebars opening/closing.
+	 * - Overlay panels / drawers sliding in from edges.
+	 * - Modals fading in combined with a backdrop.
+	 * - Big layout shifts (eg. dashboard content area resizing when nav collapses).
+	 * - Page sections expanding to show advanced filters, analytics, or details.
+	 *
+	 * Specific examples:
+	 * - A full-height filter drawer on mobile that slides up.
+	 * - The main content shifting right when a left sidebar expands.
+	 * - A hero section height expanding when a "show more" description is opened.
+	 */
+	.motion-macro {
+		transition-duration: var(--motion-macro-duration);
+		transition-timing-function: var(--motion-macro-ease);
+	}
+
+	/*
+	 * .motion-decorative
+	 * -------------------------
+	 * For non-interactive, decorative animations that loop or pulse.
+	 *
+	 * Ideal for:
+	 * - Icon accent animations (bell, subtle pulses).
+	 * - Background glows or ambient motion.
+	 *
+	 * Use on:
+	 * - Elements with a keyframe animation where you want consistent timing.
+	 */
+	.motion-decorative {
+		animation-duration: var(--motion-decorative-duration);
+		animation-timing-function: var(--motion-decorative-ease);
+	}
+}
+
+@layer base {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+		scrollbar-width: thin;
+		scrollbar-color: rgba(229, 241, 255, 0.22) #101011;
+	}
+
+	body {
+		font-family: var(--font-body);
+		background: var(--color-background);
+		min-height: 100vh;
+		color: var(--color-foreground);
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: var(--font-heading);
+	}
+
+	::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: #101011;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: rgba(229, 241, 255, 0.18);
+		border-radius: 999px;
+		border: 2px solid #101011;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: rgba(229, 241, 255, 0.28);
+	}
+
+	::-webkit-scrollbar-corner {
+		background: #080808;
+	}
+
+	input:-webkit-autofill,
+	input:-webkit-autofill:hover,
+	input:-webkit-autofill:focus,
+	input:-webkit-autofill:active,
+	textarea:-webkit-autofill,
+	textarea:-webkit-autofill:hover,
+	textarea:-webkit-autofill:focus,
+	textarea:-webkit-autofill:active,
+	select:-webkit-autofill,
+	select:-webkit-autofill:hover,
+	select:-webkit-autofill:focus,
+	select:-webkit-autofill:active {
+		-webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+		-webkit-text-fill-color: inherit !important;
+		caret-color: inherit !important;
+		transition: background-color 5000s ease-in-out 0s !important;
+	}
+}
+
+@keyframes skeleton-shimmer {
+	0% {
+		background-position-x: -30vw;
+	}
+	100% {
+		background-position-x: 130vw;
+	}
+}

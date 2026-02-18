@@ -1,10 +1,10 @@
 "use client";
 
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { Button } from "@/components/ui/primitives/Button";
-import { Icon } from "@/components/ui/primitives/Icon";
+import { Icon } from "@/components/ui/icons/Icon";
 import { NAV_LINKS } from "@/config/navConfig";
 import HeaderCompactModal from "./HeaderCompactModal";
 

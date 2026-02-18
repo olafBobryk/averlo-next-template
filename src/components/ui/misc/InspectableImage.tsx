@@ -2,7 +2,8 @@
 
 import Image, { type ImageProps } from "next/image";
 import * as React from "react";
-import { useImageInspectModal } from "../floating/modal/useImageInspectModal";
+import { useImageInspectModal } from "../overlays/modal/useImageInspectModal";
+import { Button } from "@/components/ui/primitives/Button";
 
 type InspectableImageProps = Omit<ImageProps, "onClick"> & {
 	className?: string; // applied to button
@@ -38,14 +39,16 @@ export function InspectableImage({
 	]);
 
 	return (
-		<button
-			type="button"
-			className={["p-0 border-0 bg-transparent pointer-cursor ", className]
+		<Button
+			variant="ghost"
+			size="md"
+			align="center"
+			className={["!p-0 !rounded-none border-0 bg-transparent", className]
 				.filter(Boolean)
 				.join(" ")}
 			onClick={handleOpen}
 		>
 			<Image {...imageProps} className="w-full h-full object-cover" />
-		</button>
+		</Button>
 	);
 }

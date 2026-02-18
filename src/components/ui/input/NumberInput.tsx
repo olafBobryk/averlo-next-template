@@ -4,7 +4,11 @@
 
 import * as React from "react";
 import { Field } from "@/components/ui/primitives/Field";
-import { InputFrame, inputTextClasses } from "@/components/ui/primitives/InputFrame";
+import {
+	InputFrame,
+	type InputFrameSize,
+	inputVariants,
+} from "@/components/ui/primitives/InputFrame";
 
 type NumberInputProps = {
 	label: React.ReactNode;
@@ -39,6 +43,7 @@ type NumberInputProps = {
 
 	className?: string;
 	inputClassName?: string;
+	size?: InputFrameSize;
 };
 
 function parseNumber(raw: string): number | null {
@@ -71,15 +76,21 @@ export function NumberInput({
 	validate,
 	className,
 	inputClassName,
+	size,
 }: NumberInputProps) {
 	const isControlled = value !== undefined;
-	const inputId = id ?? name;
-	const messageId = inputId ? `${inputId}-message` : undefined;
-
 	const [clientError, setClientError] = React.useState<string | null>(null);
 
 	const derivedError = error ?? clientError;
 	const tone = derivedError ? "error" : "default";
+	const fallbackId = React.useId();
+	const inputId = id ?? name ?? fallbackId;
+	const descriptionId = description ? `${inputId}-description` : undefined;
+	const messageId = derivedError ? `${inputId}-message` : undefined;
+	const describedBy =
+		[descriptionId, derivedError ? messageId : undefined]
+			.filter(Boolean)
+			.join(" ") || undefined;
 
 	const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
 		const next = parseNumber(e.target.value);
@@ -100,15 +111,20 @@ export function NumberInput({
 			tone={tone}
 			required={required}
 			inputId={inputId}
+			descriptionId={descriptionId}
+			messageId={messageId}
 			className={className}
 		>
 			<InputFrame
 				tone={tone}
+				size={size}
 				disabled={disabled}
 				fullWidth
 				end={
 					unit ? (
-						<span className="whitespace-nowrap text-sm text-muted/70">{unit}</span>
+						<span className="whitespace-nowrap text-sm text-muted/70">
+							{unit}
+						</span>
 					) : null
 				}
 			>
@@ -124,7 +140,11 @@ export function NumberInput({
 					placeholder={placeholder}
 					required={required}
 					className={[
-						inputTextClasses,
+						inputVariants({
+							size,
+							hasEnd: unit ? true : undefined,
+							disabled: disabled ? true : undefined,
+						}),
 						"[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
 						inputClassName,
 					]
@@ -141,7 +161,7 @@ export function NumberInput({
 							})}
 					onBlur={handleBlur}
 					aria-invalid={Boolean(derivedError)}
-					aria-describedby={derivedError ? messageId : undefined}
+					aria-describedby={describedBy}
 				/>
 			</InputFrame>
 		</Field>

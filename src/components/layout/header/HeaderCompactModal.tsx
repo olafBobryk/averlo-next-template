@@ -1,6 +1,6 @@
-import { ModalShell } from "@/components/ui/floating/modal/ModalShell";
+import { ModalShell } from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
-import { Icon } from "@/components/ui/primitives/Icon";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Text } from "@/components/ui/primitives/Text";
 import { NAV_LINKS } from "@/config/navConfig";
 

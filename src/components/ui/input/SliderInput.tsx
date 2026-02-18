@@ -3,7 +3,11 @@
 
 import * as React from "react";
 import { Field } from "@/components/ui/primitives/Field";
-import { InputFrame, inputTextClasses } from "@/components/ui/primitives/InputFrame";
+import {
+	InputFrame,
+	type InputFrameSize,
+	inputVariants,
+} from "@/components/ui/primitives/InputFrame";
 
 type SliderInputProps = {
 	label: React.ReactNode;
@@ -28,6 +32,7 @@ type SliderInputProps = {
 	error?: React.ReactNode;
 	className?: string;
 	inputClassName?: string;
+	size?: InputFrameSize;
 };
 
 export function SliderInput({
@@ -47,10 +52,17 @@ export function SliderInput({
 	error,
 	className,
 	inputClassName,
+	size,
 }: SliderInputProps) {
-	const inputId = id ?? name;
-	const messageId = inputId ? `${inputId}-message` : undefined;
 	const tone = error ? "error" : "default";
+	const fallbackId = React.useId();
+	const inputId = id ?? name ?? fallbackId;
+	const descriptionId = description ? `${inputId}-description` : undefined;
+	const messageId = error ? `${inputId}-message` : undefined;
+	const describedBy =
+		[descriptionId, error ? messageId : undefined]
+			.filter(Boolean)
+			.join(" ") || undefined;
 
 	const sliderValue = React.useMemo(() => {
 		if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -76,9 +88,11 @@ export function SliderInput({
 			tone={tone}
 			required={required}
 			inputId={inputId}
+			descriptionId={descriptionId}
+			messageId={messageId}
 			className={className}
 		>
-			<InputFrame tone={tone} disabled={disabled} fullWidth>
+			<InputFrame tone={tone} size={size} disabled={disabled} fullWidth>
 				<div className="flex items-center gap-3">
 					<input
 						type="range"
@@ -104,7 +118,10 @@ export function SliderInput({
 							placeholder={placeholder}
 							required={required}
 							className={[
-								inputTextClasses,
+								inputVariants({
+									size,
+									disabled: disabled ? true : undefined,
+								}),
 								"w-20 text-right",
 								"[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
 								inputClassName,
@@ -114,7 +131,7 @@ export function SliderInput({
 							value={value ?? ""}
 							onChange={handleNumberChange}
 							aria-invalid={Boolean(error)}
-							aria-describedby={error ? messageId : undefined}
+							aria-describedby={describedBy}
 						/>
 						{unit ? (
 							<span className="whitespace-nowrap text-sm text-muted/70">
