@@ -5,6 +5,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useSettingsContext } from "@/components/ui/foundations/settingsContext";
+import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { ComboboxMultiSelectInput } from "@/components/ui/input/ComboboxMultiSelectInput";
 import { ComboboxTextInput } from "@/components/ui/input/ComboboxTextInput";
 import { DateRangeDropdown } from "@/components/ui/input/DateRangeDropDown";
@@ -36,8 +37,6 @@ import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirma
 import { useImageInspectModal } from "@/components/ui/overlays/modal/useImageInspectModal";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
-import { Icon, type IconName } from "@/components/ui/icons/Icon";
-import { MenuDropdown } from "@/components/ui/primitives/MenuDropdown";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
