@@ -61,9 +61,9 @@ Use these defaults unless product requirements explicitly say otherwise.
 - **Disclosure content:** Use `Accordion` before building new expand/collapse rows.
 
 ## App Standards To Preserve
-- **Hero gradient border:** Use the `hero-gradient-border` class from `src/app/(marketing)/home.css` for gradient borders that need transparency.
-  - Apply it to a wrapper element.
-  - Keep the wrapper background transparent so the border is drawn by the `::before` pseudo-element.
+- **Transparent gradient-border wrappers:** When reusing a transparent gradient-border treatment, keep wrapper and inner surface responsibilities separate.
+  - Apply the border effect to a wrapper element.
+  - Keep the wrapper background transparent so the border treatment can render independently.
   - Keep the inner panel itself transparent and apply interior fills separately, for example `bg-linear-to-b from-surface to-transparent`.
 - **Radius plus transparency:** When using transparent panels, keep wrapper and panel radii aligned, such as `rounded-t-3xl` on both layers when that is the chosen radius token.
 - **Form submission:** Prefer real `<form>` elements with `onSubmit` so Enter-to-submit and accessibility work naturally.

@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Webvizion Website Template
+
+This repository is the base template for building Webvizion websites.
+
+It provides:
+- a Next.js app-router foundation
+- a shared component library under `src/components`
+- a centralized demo/catalog system under `src/app/demo`
+- reusable UI, motion, overlay, and feedback patterns for Webvizion site builds
+
+## What This Project Is For
+
+Use this template when starting or extending a Webvizion website.
+
+It is intended to give Webvizion projects:
+- a consistent component and layout system
+- reusable interaction patterns instead of page-local UI
+- a demo environment for documenting and testing components
+- a shared baseline for future site work
 
 ## Getting Started
 
-First, run the development server:
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Areas
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app`: application routes, layouts, and pages
+- `src/app/demo`: internal component demo and documentation system
+- `src/components`: shared Webvizion UI library
+- `src/lib`: reusable non-UI utilities such as API, feedback, and mocks
 
-## Learn More
+## Demo System
 
-To learn more about Next.js, take a look at the following resources:
+The component demo system lives under `src/app/demo`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+It is useful for:
+- browsing available UI primitives and higher-level components
+- validating interaction states and variants
+- documenting reusable patterns for future Webvizion websites
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Most demo content is centralized in `src/app/demo/content.tsx`.
 
-## Deploy on Vercel
+## Development Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Prefer extending the shared component system instead of building page-local one-off UI.
+- Check the nearest `AGENTS.md` file before adding new reusable features.
+- Keep demos and documentation updated when shared components change.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+This project is designed to be deployed as a Webvizion website, typically on Vercel.
