@@ -18,7 +18,7 @@ export default function HeaderCompactModal({
 			animate={{ y: false }}
 			onClose={handleChangeModal}
 			portalTargetId="header-compact-modal-root"
-			wrapperClassName="items-start justify-start !p-0"
+			panelWrapperClassName="items-start justify-start !p-0"
 			backdropClassName="bg-black/30"
 			data-open={isModalOpen}
 			panelClassName="h-screen w-full max-w-none rounded-none border-0 bg-white shadow-none px-section-x data-[open=false]:pointer-events-none"

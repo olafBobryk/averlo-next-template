@@ -2,6 +2,7 @@
 "use client";
 
 import * as React from "react";
+import { CopyStatusIcon, useCopyAction } from "@/components/ui/helpers/useCopyAction";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Field } from "@/components/ui/primitives/Field";
 import { Icon } from "@/components/ui/icons/Icon";
@@ -39,6 +40,10 @@ type PasswordInputProps = {
 
 	// Optional client-side validation helper
 	validate?: (value: string) => string | null;
+	copy?: boolean;
+	onCopy?: (value: string) => void | Promise<void>;
+	copyAriaLabel?: string;
+	copyToastMessage?: string | false;
 
 	className?: string;
 	inputClassName?: string;
@@ -84,6 +89,10 @@ export function PasswordInput({
 	error,
 	validate,
 	required = false,
+	copy,
+	onCopy,
+	copyAriaLabel = "Copy to clipboard",
+	copyToastMessage,
 	className,
 	inputClassName,
 	size,
@@ -108,6 +117,11 @@ export function PasswordInput({
 			.filter(Boolean)
 			.join(" ") || undefined;
 	const currentValue = isControlled ? value ?? "" : internalValue;
+	const { copied, handleCopy } = useCopyAction({
+		value: currentValue,
+		onCopy,
+		toastMessage: copyToastMessage,
+	});
 	const strength = React.useMemo(() => {
 		const passed = PASSWORD_RULES.filter((rule) =>
 			rule.test(currentValue),
@@ -130,6 +144,23 @@ export function PasswordInput({
 		setClientError(validate(next));
 	};
 
+	const copyButton = copy ? (
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			align="center"
+			aria-label={copyAriaLabel}
+			onClick={handleCopy}
+			onMouseDown={(event) => {
+				event.preventDefault();
+			}}
+			disabled={disabled}
+			className="rounded-[8px] text-foreground/60"
+		>
+			<CopyStatusIcon copied={copied} size="sm" />
+		</Button>
+	) : null;
+
 	return (
 		<Field
 			label={label}
@@ -149,36 +180,39 @@ export function PasswordInput({
 					disabled={disabled}
 					fullWidth
 					end={
-						<Button
-							variant="ghost"
-							size="icon-sm"
-							align="center"
-							onClick={() => setIsVisible((v) => !v)}
-							disabled={disabled}
-							aria-label={isVisible ? "Hide password" : "Show password"}
-							aria-pressed={isVisible}
-							className={[
-								"shrink-0 relative select-none aspect-square",
-								"!p-1 !rounded-[8px] max-w-fit max-h-fit ",
-								"text-foreground/80 hover:text-foreground",
-								"transition-all motion-micro",
-								"hover:bg-[#020202]/[0.05] active:bg-[#020202]/[0.08] cursor-pointer",
-							]
-								.filter(Boolean)
-								.join(" ")}
-						>
-							<IconSwap
-								size="sm"
-								activeIndex={isVisible ? 0 : 1}
-								items={[
-									{ icon: <Icon name="eye" size="md" /> },
-									{ icon: <Icon name="eye-closed" size="md" /> },
-								]}
-							/>
-							<span className="sr-only">
-								{isVisible ? "Hide password" : "Show password"}
-							</span>
-						</Button>
+						<div className="flex items-center gap-2.5">
+							{copyButton}
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								align="center"
+								onClick={() => setIsVisible((v) => !v)}
+								disabled={disabled}
+								aria-label={isVisible ? "Hide password" : "Show password"}
+								aria-pressed={isVisible}
+								className={[
+									"shrink-0 relative select-none aspect-square",
+									"!p-1 !rounded-[8px] max-w-fit max-h-fit ",
+									"text-foreground/80 hover:text-foreground",
+									"transition-all motion-micro",
+									"hover:bg-[#020202]/[0.05] active:bg-[#020202]/[0.08] cursor-pointer",
+								]
+									.filter(Boolean)
+									.join(" ")}
+							>
+								<IconSwap
+									size="sm"
+									activeIndex={isVisible ? 0 : 1}
+									items={[
+										{ icon: <Icon name="eye" size="md" /> },
+										{ icon: <Icon name="eye-closed" size="md" /> },
+									]}
+								/>
+								<span className="sr-only">
+									{isVisible ? "Hide password" : "Show password"}
+								</span>
+							</Button>
+						</div>
 					}
 				>
 					<input

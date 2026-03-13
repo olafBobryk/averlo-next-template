@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import * as React from "react";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -41,7 +40,7 @@ export function UploadedFilesList({
 				className,
 			].join(" ")}
 		>
-			<Text variant="muted" className="text-xs uppercase">
+			<Text variant="body" tone="muted" className="text-xs uppercase">
 				Uploaded files
 			</Text>
 

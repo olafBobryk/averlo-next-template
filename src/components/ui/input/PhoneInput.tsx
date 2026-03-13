@@ -10,19 +10,17 @@ import {
 } from "libphonenumber-js/min";
 import * as React from "react";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
-import { Dropdown } from "@/components/ui/primitives/Dropdown";
-import {
-	dropdownListClassName,
-} from "@/components/ui/primitives/dropdownStyles";
-import { Field } from "@/components/ui/primitives/Field";
 import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
-import { Listbox } from "@/components/ui/primitives/Listbox";
+import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import { dropdownListClassName } from "@/components/ui/primitives/dropdownStyles";
+import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
 	type InputFrameSize,
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
+import { Listbox } from "@/components/ui/primitives/Listbox";
 import { Text } from "@/components/ui/primitives/Text";
 
 export type CountryOption = {
@@ -386,7 +384,7 @@ export function PhoneInput({
 			<span />
 		);
 		const spinnerIcon = (
-			<Icon name="spinner" size="md" className="text-foreground/60" animate />
+			<Icon name="flag" size="md" className="text-foreground/60" animate />
 		);
 
 		if (!resolvedCountry && !showSpinner) return null;

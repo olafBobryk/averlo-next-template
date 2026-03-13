@@ -38,7 +38,7 @@ export function useImageInspectModal(defaultPortalTargetId?: string) {
 				{
 					panelClassName:
 						"!p-0 !bg-transparent h-full w-full !border-0 !rounded-none !shadow-none max-w-none max-h-none",
-					wrapperClassName: "!px-10",
+					panelWrapperClassName: "!px-10",
 					backdropClassName: "",
 					panelStyle: { boxShadow: "none" },
 					portalTargetId: targetId,

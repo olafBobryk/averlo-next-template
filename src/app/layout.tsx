@@ -51,6 +51,7 @@ export default function RootLayout({
 				<SettingsProvider>
 					<IconProvider registry={phosphorIconRegistry}>
 						<Header />
+
 						{children}
 						<Footer />
 						{/* TODO: Swap mount order or placement if a project needs overlays elsewhere. */}

@@ -1,5 +1,6 @@
 // components/ui/Text.tsx
 import { cva, type VariantProps } from "class-variance-authority";
+import clsx from "clsx";
 import type * as React from "react";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 
@@ -7,24 +8,35 @@ const textVariants = cva("", {
 	variants: {
 		variant: {
 			headingHero:
-				"text-[70px] font-semibold text-foreground -tracking-[0.02em] leading-[1.05]",
+				"text-[calc(70px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
 			heading2xxl:
-				"text-[50px] font-semibold text-foreground -tracking-[0.02em] leading-[1.05]",
+				"text-[calc(50px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
 			headingXxl:
-				"text-[36px] font-semibold text-foreground -tracking-[0.02em]",
+				"text-[calc(36px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
 			headingXl:
-				"text-[26px] font-semibold text-foreground -tracking-[0.02em]",
-			headingLg: "text-xl font-semibold text-foreground -tracking-[0.02em]",
-			headingMd: "text-xl font-medium text-foreground -tracking-[0.02em]",
-			headingXs: "text-base font-medium text-foreground -tracking-[0.02em]",
-			body: "text-sm font-normal text-foreground",
-			bodyStrong: "text-sm font-medium text-foreground -tracking-[0.02em]",
-			muted: "text-sm font-medium text-muted/60 -tracking-[0.02em]",
-			captionMuted: "text-xs font-normal text-muted/60",
+				"text-[calc(26px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+			headingLg:
+				"text-[calc(1.25rem*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+			headingMd:
+				"text-[calc(1.25rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+			headingSm:
+				"text-[calc(1.125rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+			headingXs:
+				"text-[calc(1rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+			body: "text-[calc(0.875rem*var(--text-scale,1))] font-normal",
+			bodyStrong:
+				"text-[calc(0.875rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+			caption: "text-[calc(0.75rem*var(--text-scale,1))] font-normal",
+		},
+		tone: {
+			default: "text-foreground",
+			muted: "text-muted/60",
+			inherit: "",
 		},
 	},
 	defaultVariants: {
 		variant: "body",
+		tone: "default",
 	},
 });
 
@@ -50,14 +62,29 @@ type HeadingProps = BaseProps & {
 	as: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 } & React.HTMLAttributes<HTMLHeadingElement>;
 
-export type TextProps = SpanProps | PProps | DivProps | LabelProps | HeadingProps;
+export type TextProps =
+	| SpanProps
+	| PProps
+	| DivProps
+	| LabelProps
+	| HeadingProps;
 
 type TextSkeletonProps = Omit<
 	React.ComponentPropsWithoutRef<typeof Skeleton>,
 	"children"
 > &
 	VariantProps<typeof textVariants> & {
-		as?: "span" | "p" | "div" | "label" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+		as?:
+			| "span"
+			| "p"
+			| "div"
+			| "label"
+			| "h1"
+			| "h2"
+			| "h3"
+			| "h4"
+			| "h5"
+			| "h6";
 		children?: React.ReactNode;
 		textClassName?: string;
 	};
@@ -65,6 +92,7 @@ type TextSkeletonProps = Omit<
 function TextSkeleton({
 	as = "span",
 	variant,
+	tone,
 	className,
 	textClassName,
 	children,
@@ -81,10 +109,17 @@ function TextSkeleton({
 		| "h4"
 		| "h5"
 		| "h6";
-	const resolvedVariant = textVariants({ variant, className: textClassName });
+	const resolvedVariant = textVariants({
+		variant,
+		tone,
+		className: textClassName,
+	});
 
 	return (
-		<Skeleton className={textVariants({ variant, className })} {...rest}>
+		<Skeleton
+			className={clsx("w-fit", textVariants({ variant, tone, className }))}
+			{...rest}
+		>
 			<Tag className={resolvedVariant}>{children ?? "Loading"}</Tag>
 		</Skeleton>
 	);
@@ -100,6 +135,7 @@ function TextRoot(props: HeadingProps): React.ReactElement;
 function TextRoot({
 	as = "span",
 	variant,
+	tone,
 	className,
 	children,
 	...rest
@@ -116,8 +152,10 @@ function TextRoot({
 		| "h5"
 		| "h6";
 	return (
-		// biome-ignore lint/suspicious/noExplicitAny: <Tag is ambiguous, then so are the rest of the props>
-		<Tag className={textVariants({ variant, className })} {...(rest as any)}>
+		<Tag
+			className={textVariants({ variant, tone, className })}
+			{...(rest as Record<string, unknown>)}
+		>
 			{children}
 		</Tag>
 	);

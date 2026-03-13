@@ -3,13 +3,25 @@
 
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
-import { type IconName } from "@/components/ui/icons/iconMap";
-import { useIconRegistry } from "@/components/ui/icons/iconRegistry";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
+import { useIconRegistry, type IconName } from "@/components/ui/icons/iconRegistry";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 export type { IconName };
 
-const iconStyles = cva("inline-flex items-center justify-center", {
+const missingIconNames = new Set<string>();
+const isDev = process.env.NODE_ENV !== "production";
+
+function reportMissingIcon(name: IconName) {
+	if (!isDev) return;
+	const key = String(name);
+	if (missingIconNames.has(key)) return;
+	missingIconNames.add(key);
+	// eslint-disable-next-line no-console
+	console.warn(`[Icon] Missing icon: "${key}".`);
+}
+
+const iconSizeStyles = cva("inline-flex items-center justify-center", {
 	variants: {
 		size: {
 			sm: "w-[0.75rem] h-[0.75rem]",
@@ -22,11 +34,24 @@ const iconStyles = cva("inline-flex items-center justify-center", {
 	},
 });
 
+const iconFrameStyles = cva("inline-flex items-center justify-center", {
+	variants: {
+		frame: {
+			none: "",
+			default: "p-ui-5 rounded-button-sm border border-border",
+		},
+	},
+	defaultVariants: {
+		frame: "none",
+	},
+});
+
 type IconProps = {
 	name: IconName;
 	className?: string;
 	animate?: boolean;
-} & VariantProps<typeof iconStyles> &
+} & VariantProps<typeof iconSizeStyles> &
+	VariantProps<typeof iconFrameStyles> &
 	Omit<ComponentProps<"span">, "children">;
 
 const animatedIconClassMap: Record<string, string> = {
@@ -40,32 +65,105 @@ const animatedIconClassMap: Record<string, string> = {
 	bell: "icon-bell-animate transition-transform motion-interactive",
 };
 
-export function Icon({
+type IconSkeletonProps = {
+	size?: VariantProps<typeof iconSizeStyles>["size"];
+	className?: string;
+};
+
+const IconRoot = ({
 	name,
 	size,
+	frame = "none",
 	className,
 	animate = false,
 	...rest
-}: IconProps) {
+}: IconProps) => {
 	const registry = useIconRegistry();
 	const IconNode = registry[name];
 	const motionAllowed = useMotionAllowed(true);
-	if (!IconNode) return null;
+	if (!IconNode) {
+		reportMissingIcon(name);
 
-	const shouldAnimate = animate && (motionAllowed || name === "spinner");
-
-	return (
-		<span
-			className={[
-				iconStyles({ size }),
-				shouldAnimate ? animatedIconClassMap[name] : undefined,
+		if (isDev) {
+			const label = typeof name === "string" ? name : "missing";
+			const wrapperClassName = [
+				frame === "none" ? undefined : iconFrameStyles({ frame }),
 				className,
 			]
 				.filter(Boolean)
-				.join(" ")}
-			{...rest}
-		>
+				.join(" ");
+			const placeholder = (
+				<span
+					className={[
+						iconSizeStyles({ size }),
+						"inline-flex items-center justify-center rounded-[4px] border border-dashed border-danger/50 text-[9px] leading-none text-danger/80",
+						frame === "none" ? className : undefined,
+					]
+						.filter(Boolean)
+						.join(" ")}
+					{...(frame === "none" ? rest : {})}
+				>
+					{label}
+				</span>
+			);
+
+			if (frame && frame !== "none") {
+				return (
+					<span className={wrapperClassName} {...rest}>
+						{placeholder}
+					</span>
+				);
+			}
+
+			return placeholder;
+		}
+
+		return null;
+	}
+
+	const shouldAnimate = animate && (motionAllowed || name === "spinner");
+
+	const wrapperClassName = [
+		frame === "none" ? undefined : iconFrameStyles({ frame }),
+		className,
+	]
+		.filter(Boolean)
+		.join(" ");
+	const innerClassName = [
+		iconSizeStyles({ size }),
+		shouldAnimate ? animatedIconClassMap[name] : undefined,
+		frame === "none" ? className : undefined,
+	]
+		.filter(Boolean)
+		.join(" ");
+
+	if (frame && frame !== "none") {
+		return (
+			<span className={wrapperClassName} {...rest}>
+				<span className={innerClassName}>
+					<IconNode className="w-full h-full" aria-hidden={true} />
+				</span>
+			</span>
+		);
+	}
+
+	return (
+		<span className={innerClassName} {...rest}>
 			<IconNode className="w-full h-full" aria-hidden={true} />
 		</span>
 	);
+};
+
+function IconSkeleton({ size, className }: IconSkeletonProps) {
+	return (
+		<Skeleton
+			className={[iconSizeStyles({ size }), className]
+				.filter(Boolean)
+				.join(" ")}
+		/>
+	);
 }
+
+export const Icon = Object.assign(IconRoot, {
+	Skeleton: IconSkeleton,
+});

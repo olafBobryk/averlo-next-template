@@ -30,8 +30,7 @@ type ToastEvent =
 const EVENT_NAME = "app-toast";
 const DEFAULT_DURATION = 3000;
 
-const createId = () =>
-	`${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const createId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 const dispatchToast = (detail: ToastEvent) => {
 	if (typeof window === "undefined") return;
@@ -90,7 +89,7 @@ export const showToast = {
 	dismiss: (id?: string) => {
 		dispatchToast({ action: "dismiss", id });
 	},
-	promise: async <T,>(
+	promise: async <T>(
 		promise: Promise<T>,
 		messages: { loading: string; success: string; error: string },
 		options?: ToastPromiseOptions,

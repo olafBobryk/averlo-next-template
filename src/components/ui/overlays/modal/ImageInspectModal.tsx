@@ -1,11 +1,10 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
 import * as React from "react";
 import { Loader } from "@/components/ui/misc/Loader";
+import { RevealImage } from "@/components/ui/motion/RevealImage";
 import { Button } from "@/components/ui/primitives/Button";
-import { showToast } from "@/lib/toast";
+import { showToast } from "@/lib/feedback";
 
 type ImageInspectModalProps = {
 	src: string;
@@ -23,7 +22,6 @@ export function ImageInspectModal({
 	onShare,
 }: ImageInspectModalProps) {
 	const [isSharing, setIsSharing] = React.useState(false);
-	const [loaded, setLoaded] = React.useState(false);
 
 	const handleShare = async () => {
 		if (isSharing) return;
@@ -53,50 +51,34 @@ export function ImageInspectModal({
 	const canShowShare = Boolean(onShare || shareUrl);
 
 	return (
-		<div className="relative w-full h-full max-w-full max-h-full flex flex-col gap-5">
+		<div className="relative w-full h-full max-w-full max-h-full p-1 flex flex-col gap-5">
 			<div className="relative justify-end flex gap-2">
 				{canShowShare ? (
 					<Button
-						variant="ghost"
 						size="icon"
 						trailingIcon="camera"
 						onClick={handleShare}
+						loading={isSharing}
 						disabled={isSharing}
-						className="!rounded-full !border !border-white/40 !bg-black/40 text-white hover:!bg-black/60"
 					/>
 				) : null}
-				<Button
-					variant="ghost"
-					size="icon"
-					trailingIcon="cross"
-					onClick={onClose}
-					className="!rounded-full !border !border-white/40 !bg-black/40 text-white hover:!bg-black/60"
-				/>
+				<Button size="icon" trailingIcon="cross" onClick={onClose} />
 			</div>
 			<div className="relative w-full h-full">
-				<AnimatePresence>
-					{!loaded && (
-						<motion.div
-							key="loader"
-							className="absolute inset-0 z-10 flex items-center justify-center"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.2, ease: "easeOut" }}
-						>
-							<Loader className="text-white" />
-						</motion.div>
-					)}
-				</AnimatePresence>
-				<Image
+				<RevealImage
 					src={src}
 					alt={alt}
 					fill
-					className={`object-contain select-none transition-opacity duration-200 ${
-						loaded ? "opacity-100" : "opacity-0"
-					}`}
 					priority
-					onLoadingComplete={() => setLoaded(true)}
+					className="h-full w-full"
+					contentClassName="h-full w-full"
+					imageClassName="object-contain select-none"
+					fallback={
+						<div className="flex h-full w-full items-center justify-center">
+							<Loader className="text-white" />
+						</div>
+					}
+					fallbackClassName="flex items-center justify-center"
 				/>
 			</div>
 		</div>

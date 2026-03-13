@@ -16,8 +16,7 @@ const inputFrameVariants = cva(
 				lg: "min-h-[48px]",
 			},
 			tone: {
-				default:
-					`border-border/15 hover:border-border/25 has-[input:-webkit-autofill]:bg-primary/10 has-[input:-webkit-autofill]:border-primary/40 has-[input:autofill]:bg-primary/10 has-[input:autofill]:border-primary/40 ${focusRing.fieldDefault}`,
+				default: `border-border/15 hover:border-border/25 has-[input:-webkit-autofill]:bg-primary/10 has-[input:-webkit-autofill]:border-primary/40 has-[input:autofill]:bg-primary/10 has-[input:autofill]:border-primary/40 ${focusRing.fieldDefault}`,
 				error: `border-danger ${focusRing.fieldError}`,
 				success: `border-success/70 ${focusRing.fieldSuccess}`,
 			},
@@ -35,13 +34,13 @@ const inputFrameVariants = cva(
 	},
 );
 
-const inputPaddingXClasses = {
+export const inputPaddingXClasses = {
 	sm: "px-3",
 	md: "px-[15px]",
 	lg: "px-4",
 } as const;
 
-const inputPaddingYClasses = {
+export const inputPaddingYClasses = {
 	sm: "py-2",
 	md: "py-2.5",
 	lg: "py-3",
@@ -71,10 +70,10 @@ export const inputVariants = cva(
 		variants: {
 			size: inputSizeClasses,
 			hasStart: {
-				true: "pl-0",
+				true: "!pl-0",
 			},
 			hasEnd: {
-				true: "pr-0",
+				true: "!pr-0",
 			},
 			disabled: {
 				true: "cursor-not-allowed",

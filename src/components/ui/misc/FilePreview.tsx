@@ -81,7 +81,11 @@ export function FilePreview({
 				/>
 			) : (
 				<div className="text-xs text-center flex flex-col items-center gap-1 px-2 w-full h-full justify-center">
-					<Text variant="captionMuted" className="text-[10px] break-all">
+					<Text
+						variant="caption"
+						tone="muted"
+						className="text-[10px] break-all"
+					>
 						{"type" in item ? item.name : item.url}
 					</Text>
 				</div>
@@ -90,7 +94,8 @@ export function FilePreview({
 			{/* status label */}
 			<div className="absolute top-2 left-2">
 				<Text
-					variant="captionMuted"
+					variant="caption"
+					tone="muted"
 					className="text-[10px] px-2 py-1 rounded-md bg-white/80 border border-border/15"
 				>
 					{isPending ? "Pending" : "Uploaded"}

@@ -7,7 +7,7 @@ export type OpenModalOptions = {
 	portalTargetId?: string;
 	id?: string;
 	panelClassName?: string;
-	wrapperClassName?: string;
+	panelWrapperClassName?: string;
 	backdropClassName?: string;
 	panelStyle?: CSSProperties;
 };

@@ -5,11 +5,10 @@ import clsx from "clsx";
 import Link from "next/link";
 import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { Loader } from "@/components/ui/misc/Loader";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
-import { Icon, type IconName } from "@/components/ui/icons/Icon";
-import { iconMap } from "@/components/ui/icons/iconMap";
-import { Text } from "@/components/ui/primitives/Text";
+import { Text, type TextProps } from "@/components/ui/primitives/Text";
 
 type IconProp = React.ReactNode | IconName;
 
@@ -96,6 +95,8 @@ type ButtonBaseProps = {
 	href?: string;
 	className?: string;
 	contentClassName?: string;
+	textVariant?: TextProps["variant"];
+	textClassName?: string;
 	style?: React.CSSProperties;
 	loading?: boolean;
 	iconSize?: number;
@@ -126,8 +127,6 @@ function renderIcon(icon?: IconProp, size = DEFAULT_ICON_SIZE) {
 	if (!icon) return null;
 
 	if (typeof icon === "string") {
-		if (!iconMap[icon as IconName]) return null;
-
 		return (
 			<Icon
 				name={icon as IconName}
@@ -149,13 +148,15 @@ type ButtonSkeletonProps = {
 	leadingIcon?: boolean;
 	trailingIcon?: boolean;
 	iconSize?: number;
+	textVariant?: TextProps["variant"];
+	textClassName?: string;
+	variant?: VariantProps<typeof buttonStyles>["variant"];
 } & VariantProps<typeof buttonSkeletonStyles>;
 
 const buttonSkeletonStyles = cva(
-	[
-		"inline-flex items-center justify-center gap-2.5",
-		"whitespace-nowrap",
-	].join(" "),
+	["inline-flex items-center justify-center gap-2.5", "whitespace-nowrap"].join(
+		" ",
+	),
 	{
 		variants: {
 			size: {
@@ -198,13 +199,28 @@ function ButtonSkeleton({
 	leadingIcon = false,
 	trailingIcon = false,
 	iconSize = DEFAULT_ICON_SIZE,
+	textVariant = "body",
+	textClassName,
+	variant,
 }: ButtonSkeletonProps) {
+	const label = children ?? "Button";
+	if (variant === "ghost") {
+		return (
+			<Text.Skeleton
+				variant={textVariant}
+				className={clsx(className, textClassName)}
+			>
+				{label}
+			</Text.Skeleton>
+		);
+	}
+
 	const hasLabel = React.Children.count(children) > 0;
 	const isIconSize = size === "icon" || size === "icon-sm";
 	const minWidthClass =
 		isIconSize || fullWidth || hasLabel ? undefined : "min-w-[140px]";
 	const iconStyle = { width: `${iconSize}px`, height: `${iconSize}px` };
-	const label = children ?? "Button";
+	const isTextChild = typeof label === "string" || typeof label === "number";
 
 	return (
 		<Skeleton
@@ -227,10 +243,17 @@ function ButtonSkeleton({
 						style={iconStyle}
 					/>
 				) : null}
-				{isIconSize ? null : (
-					<Text as="span" variant="body" className="opacity-0 select-none">
+				{isIconSize ? null : isTextChild ? (
+					<Text
+						as="span"
+						variant={textVariant}
+						style={{ color: "inherit" }}
+						className={clsx("opacity-0 select-none", textClassName)}
+					>
 						{label}
 					</Text>
+				) : (
+					<span className="opacity-0 select-none">{label}</span>
 				)}
 				{trailingIcon ? (
 					<span
@@ -252,6 +275,8 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			href,
 			className,
 			contentClassName,
+			textVariant = "body",
+			textClassName,
 			style,
 			variant = "outline",
 			size = "md",
@@ -286,6 +311,8 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 					: "justify-start text-left";
 		const contentWidthClass =
 			align === "between" || align === "center" ? "w-full" : "w-fit";
+		const isTextChild =
+			typeof children === "string" || typeof children === "number";
 		const content = (
 			<>
 				<span
@@ -303,7 +330,20 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 					)}
 
 					{/* children can be anything (text, icon, etc) */}
-					{children && <>{children}</>}
+					{children != null ? (
+						isTextChild ? (
+							<Text
+								as="span"
+								variant={textVariant}
+								style={{ color: "inherit" }}
+								className={textClassName}
+							>
+								{children}
+							</Text>
+						) : (
+							children
+						)
+					) : null}
 
 					{trailingIcon && (
 						<span className="flex items-center justify-center">

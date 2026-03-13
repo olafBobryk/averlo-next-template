@@ -1,14 +1,15 @@
 "use client";
 
-import * as React from "react";
 import clsx from "clsx";
+import * as React from "react";
 import { Text } from "@/components/ui/primitives/Text";
 
 type ChoiceFieldProps = {
 	id: string;
 	name?: string;
 	value: string;
-	label: React.ReactNode;
+	label?: React.ReactNode;
+	description?: React.ReactNode;
 	checked: boolean;
 	disabled?: boolean;
 	required?: boolean;
@@ -28,6 +29,7 @@ export function ChoiceField({
 	name,
 	value,
 	label,
+	description,
 	checked,
 	disabled,
 	required,
@@ -91,17 +93,22 @@ export function ChoiceField({
 				className="sr-only peer choice-field-input"
 			/>
 			{indicator}
-			<Text
-				as="span"
-				variant="body"
-				className={clsx(
-					"text-sm",
-					checked ? "text-foreground" : "text-muted/60",
-					labelClassName,
-				)}
-			>
-				{label}
-			</Text>
+			<span className="flex min-w-0 flex-col gap-0">
+				{label ? (
+					<Text
+						as="span"
+						variant="body"
+						className={clsx("text-sm", labelClassName)}
+					>
+						{label}
+					</Text>
+				) : null}
+				{description ? (
+					<Text as="span" variant="caption" tone="muted">
+						{description}
+					</Text>
+				) : null}
+			</span>
 		</label>
 	);
 }

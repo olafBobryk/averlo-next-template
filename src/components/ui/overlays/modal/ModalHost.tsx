@@ -61,7 +61,7 @@ export function ModalHost() {
 					}}
 					portalTargetId={options?.portalTargetId}
 					panelClassName={options?.panelClassName}
-					wrapperClassName={options?.wrapperClassName}
+					panelWrapperClassName={options?.panelWrapperClassName}
 					backdropClassName={options?.backdropClassName}
 					panelStyle={options?.panelStyle}
 				>

@@ -1,6 +1,6 @@
 // components/ui/Dropdown.tsx
-/** biome-ignore-all lint/a11y/useKeyWithClickEvents: <explanation> */
-/** biome-ignore-all lint/a11y/noStaticElementInteractions: <explanation> */
+/** biome-ignore-all lint/a11y/useKeyWithClickEvents: trigger interaction is delegated through render props and nested controls */
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: trigger wrapper behavior is delegated through render props and nested controls */
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
@@ -48,6 +48,7 @@ type DropdownProps = {
 	menuMinWidth?: number;
 	align?: "start" | "end";
 	offset?: number;
+	positionStrategy?: "fixed" | "absolute";
 	disabled?: boolean;
 	openOnHover?: boolean;
 	pinOnClick?: boolean;
@@ -79,6 +80,7 @@ export function Dropdown({
 	menuMinWidth = DEFAULT_MENU_MIN_WIDTH,
 	align = "end",
 	offset = 8,
+	positionStrategy = "fixed",
 	disabled,
 	openOnHover = true,
 	pinOnClick = openOnHover,
@@ -89,6 +91,7 @@ export function Dropdown({
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const [isOpen, setIsOpen] = React.useState(false);
 	const [isPinned, setIsPinned] = React.useState(false);
+	const wrapperRef = React.useRef<HTMLDivElement | null>(null);
 	const rootRef = React.useRef<HTMLElement | null>(null);
 	const menuRef = React.useRef<HTMLDivElement | null>(null);
 	const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>();
@@ -260,31 +263,52 @@ export function Dropdown({
 		if (!rootRef.current) return;
 
 		const rect = rootRef.current.getBoundingClientRect();
-		const viewportWidth = window.innerWidth;
-		const padding = 16;
 		const explicitWidth = menuWidth === "trigger" ? rect.width : menuWidth;
-
 		const resolvedMinWidth =
 			explicitWidth ?? (menuWidth === "trigger" ? rect.width : menuMinWidth);
-
 		const measuredWidth =
 			explicitWidth ??
 			menuRef.current?.getBoundingClientRect().width ??
 			resolvedMinWidth;
+		if (positionStrategy === "fixed") {
+			const viewportWidth = window.innerWidth;
+			const padding = 16;
+			let left = align === "end" ? rect.right - measuredWidth : rect.left;
+			left = Math.max(left, padding);
+			left = Math.min(left, viewportWidth - measuredWidth - padding);
 
-		let left = align === "end" ? rect.right - measuredWidth : rect.left;
-		left = Math.max(left, padding);
-		left = Math.min(left, viewportWidth - measuredWidth - padding);
+			setMenuStyle({
+				position: "fixed",
+				top: rect.bottom + offset,
+				left,
+				zIndex: 90,
+				width: explicitWidth,
+				minWidth: resolvedMinWidth,
+			});
+			return;
+		}
+
+		if (!wrapperRef.current) return;
+		const wrapperRect = wrapperRef.current.getBoundingClientRect();
+		const wrapperWidth = wrapperRect.width;
+		const rawLeft =
+			align === "end"
+				? rect.right - wrapperRect.left - measuredWidth
+				: rect.left - wrapperRect.left;
+		const clampedLeft = Math.max(
+			0,
+			Math.min(rawLeft, Math.max(0, wrapperWidth - measuredWidth)),
+		);
 
 		setMenuStyle({
-			position: "fixed",
-			top: rect.bottom + offset,
-			left,
+			position: "absolute",
+			top: rect.bottom - wrapperRect.top + offset,
+			left: clampedLeft,
 			zIndex: 90,
 			width: explicitWidth,
 			minWidth: resolvedMinWidth,
 		});
-	}, [align, menuMinWidth, menuWidth, offset]);
+	}, [align, menuMinWidth, menuWidth, offset, positionStrategy]);
 
 	React.useEffect(() => {
 		if (isOpen) {
@@ -308,12 +332,16 @@ export function Dropdown({
 		}
 		const handleResize = () => calculateMenuPosition();
 		window.addEventListener("resize", handleResize);
-		window.addEventListener("scroll", handleResize, true);
+		if (positionStrategy === "fixed") {
+			window.addEventListener("scroll", handleResize, true);
+		}
 		return () => {
 			window.removeEventListener("resize", handleResize);
-			window.removeEventListener("scroll", handleResize, true);
+			if (positionStrategy === "fixed") {
+				window.removeEventListener("scroll", handleResize, true);
+			}
 		};
-	}, [isOpen, calculateMenuPosition, autoFocusMenu]);
+	}, [isOpen, calculateMenuPosition, autoFocusMenu, positionStrategy]);
 
 	React.useEffect(() => {
 		if (!isOpen && !isPinned) return;
@@ -383,21 +411,65 @@ export function Dropdown({
 	const setMenuNode = React.useCallback(
 		(node: HTMLDivElement | null) => {
 			menuRef.current = node;
-			if (node && isOpen) {
+			if (node && isOpen && positionStrategy === "fixed") {
 				calculateMenuPosition();
 			}
 		},
-		[isOpen, calculateMenuPosition],
+		[isOpen, calculateMenuPosition, positionStrategy],
 	);
 
-	const baseMenuClassName =
-		"min-w-[220px] w-fit rounded-[10px] fixed bg-white border border-border/15 shadow-[2px_4px_15px_-2px_rgba(1,1,3,0.05)] z-[91] overflow-hidden";
+	const baseMenuClassName = [
+		"min-w-[220px] w-fit rounded-[10px] bg-white border border-border/15 shadow-[2px_4px_15px_-2px_rgba(1,1,3,0.05)] z-[91] overflow-hidden",
+		positionStrategy === "fixed" ? "fixed" : "absolute",
+	]
+		.filter(Boolean)
+		.join(" ");
 	const resolvedMenuClassName = [baseMenuClassName, menuClassName]
 		.filter(Boolean)
 		.join(" ");
+	const menuNode = motionAllowed ? (
+		<AnimatePresence>
+			{isOpen ? (
+				<motion.div
+					ref={setMenuNode}
+					key="dropdown-menu"
+					initial={{ opacity: 0, y: 6 }}
+					animate={{ opacity: 1, y: 0 }}
+					exit={{ opacity: 0, y: 6 }}
+					transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+					style={menuStyle}
+					className={resolvedMenuClassName}
+					onMouseEnter={clearHoverTimeout}
+					onMouseLeave={() => {
+						if (!isPinned && openOnHover) scheduleClose();
+					}}
+				>
+					{renderMenu({ close: closeMenu })}
+				</motion.div>
+			) : null}
+		</AnimatePresence>
+	) : isOpen ? (
+		<div
+			ref={setMenuNode}
+			key="dropdown-menu"
+			style={menuStyle}
+			className={resolvedMenuClassName}
+			onMouseEnter={clearHoverTimeout}
+			onMouseLeave={() => {
+				if (!isPinned && openOnHover) scheduleClose();
+			}}
+		>
+			{renderMenu({ close: closeMenu })}
+		</div>
+	) : null;
 
 	return (
-		<>
+		<div
+			ref={wrapperRef}
+			className={
+				positionStrategy === "absolute" ? "relative max-w-full" : undefined
+			}
+		>
 			{renderTrigger({
 				ref: rootRef,
 				isOpen,
@@ -412,43 +484,11 @@ export function Dropdown({
 				chevronIcon: <DEFAULT_CHEVRON_ICON isOpen={isOpen} />,
 			})}
 
-			<Portal target={portalTargetId}>
-				{motionAllowed ? (
-					<AnimatePresence>
-						{isOpen ? (
-							<motion.div
-								ref={setMenuNode}
-								key="dropdown-menu"
-								initial={{ opacity: 0, y: 6 }}
-								animate={{ opacity: 1, y: 0 }}
-								exit={{ opacity: 0, y: 6 }}
-								transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-								style={menuStyle}
-								className={resolvedMenuClassName}
-								onMouseEnter={clearHoverTimeout}
-								onMouseLeave={() => {
-									if (!isPinned && openOnHover) scheduleClose();
-								}}
-							>
-								{renderMenu({ close: closeMenu })}
-							</motion.div>
-						) : null}
-					</AnimatePresence>
-				) : isOpen ? (
-					<div
-						ref={setMenuNode}
-						key="dropdown-menu"
-						style={menuStyle}
-						className={resolvedMenuClassName}
-						onMouseEnter={clearHoverTimeout}
-						onMouseLeave={() => {
-							if (!isPinned && openOnHover) scheduleClose();
-						}}
-					>
-						{renderMenu({ close: closeMenu })}
-					</div>
-				) : null}
-			</Portal>
-		</>
+			{positionStrategy === "fixed" ? (
+				<Portal target={portalTargetId}>{menuNode}</Portal>
+			) : (
+				menuNode
+			)}
+		</div>
 	);
 }

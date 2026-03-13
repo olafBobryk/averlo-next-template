@@ -1,15 +1,15 @@
-// components/ui/DateRangeDropdown.tsx
-/** biome-ignore-all lint/a11y/useKeyWithClickEvents: <explanation> */
-/** biome-ignore-all lint/a11y/noStaticElementInteractions: <explanation> */
+// components/ui/input/DateRangeInput.tsx
+/** biome-ignore-all lint/a11y/useKeyWithClickEvents: trigger behavior is handled by the nested button and dropdown keyboard handling */
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: trigger wrapper forwards interaction to the nested button and dropdown state */
 "use client";
 
 import * as React from "react";
+import { focusRing } from "../foundations/focus";
+import { Icon } from "../icons/Icon";
 import { Dropdown } from "../primitives/Dropdown";
 import { InputFrame, inputSizeClasses } from "../primitives/InputFrame";
-import { Icon } from "../icons/Icon";
 import { Listbox } from "../primitives/Listbox";
 import { Text } from "../primitives/Text";
-import { focusRing } from "../foundations/focus";
 
 const APP_TIMEZONE = process.env.NEXT_PUBLIC_APP_TIMEZONE || "Europe/Amsterdam";
 
@@ -25,7 +25,7 @@ type PresetKey =
 	| "this_month"
 	| "last_month";
 
-type DateRangeDropdownProps = {
+type DateRangeInputProps = {
 	value?: DateRange;
 	// range can be null for "All time"
 	onChange?: (range: DateRange | null, preset: PresetKey | "custom") => void;
@@ -157,13 +157,13 @@ function getPresetKeyForRange(range: DateRange): PresetKey | "custom" {
 	return "custom";
 }
 
-export function DateRangeDropdown({
+export function DateRangeInput({
 	value,
 	onChange,
 	className,
 	resetSignal,
 	resetTo = "last_30_days",
-}: DateRangeDropdownProps) {
+}: DateRangeInputProps) {
 	// This is just the dropdown's internal "selection"; parent can override via `value`.
 	const [preset, setPreset] = React.useState<PresetKey | "custom">(
 		"last_30_days",
@@ -224,10 +224,7 @@ export function DateRangeDropdown({
 		const selectedIndex =
 			preset === "custom"
 				? 0
-				: Math.max(
-						0,
-						PRESETS.findIndex((item) => item.key === preset) + 1,
-					);
+				: Math.max(0, PRESETS.findIndex((item) => item.key === preset) + 1);
 		setActiveIndex(selectedIndex);
 	}, [menuOpen, preset]);
 
@@ -296,7 +293,8 @@ export function DateRangeDropdown({
 							</Text>
 							<Text
 								as="span"
-								variant="captionMuted"
+								variant="caption"
+								tone="muted"
 								className="truncate text-right"
 							>
 								{currentRangeLabel}
@@ -390,16 +388,17 @@ export function DateRangeDropdown({
 				isOpen,
 			}) => (
 				<InputFrame
-					ref={ref as any}
+					ref={ref as React.Ref<HTMLDivElement>}
 					onMouseEnter={onRootMouseEnter}
 					onMouseLeave={onRootMouseLeave}
 					className={[
-						"w-fit cursor-pointer",
+						"w-fit max-w-full cursor-pointer",
 						inputSizeClasses.md,
 						className,
 					]
 						.filter(Boolean)
 						.join(" ")}
+					start={<Icon name="calendar" className="text-foreground" />}
 				>
 					<button
 						type="button"
@@ -410,20 +409,22 @@ export function DateRangeDropdown({
 							}
 							openMenu({ focusMenu: true });
 						}}
-						className="flex w-full items-center justify-between gap-4 text-left motion-micro p-0 bg-transparent outline-none ring-0 shadow-none"
+						className="flex min-w-0 w-full items-center justify-between gap-4 bg-transparent p-0 text-left motion-micro outline-none ring-0 shadow-none"
 					>
-						<span className="flex min-w-0 items-center gap-2.5">
-							<Icon name="calendar" className="text-foreground" />
+						<Text
+							as="span"
+							variant="bodyStrong"
+							className="min-w-0 flex-1 truncate !leading-[17px]"
+						>
+							{currentRangeLabel}
+						</Text>
+						<span className="flex shrink-0 items-center gap-2 text-foreground/70">
 							<Text
 								as="span"
-								variant="bodyStrong"
-								className="truncate !leading-[17px]"
+								variant="caption"
+								tone="muted"
+								className="!leading-[17px] whitespace-nowrap"
 							>
-								{currentRangeLabel}
-							</Text>
-						</span>
-						<span className="flex items-center gap-2 text-foreground/70">
-							<Text as="span" variant="captionMuted" className="!leading-[17px]">
 								{currentPresetLabel}
 							</Text>
 							{chevronIcon}
@@ -484,10 +485,7 @@ export function DateRangeDropdown({
 							handlePresetClick(option.value as PresetKey, close);
 						}
 					}}
-					className={[
-						"outline-none",
-						focusRing.visibleDefault,
-					]
+					className={["outline-none", focusRing.visibleDefault]
 						.filter(Boolean)
 						.join(" ")}
 				/>

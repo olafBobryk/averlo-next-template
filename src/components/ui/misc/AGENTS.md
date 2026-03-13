@@ -1,0 +1,54 @@
+# Folder: `src/components/ui/misc`
+
+## Role
+Cross-cutting UI helpers and feedback components that do not belong to inputs, overlays, or pure primitives.
+
+## Use This Folder When
+- You need loading, empty, warning, copy, segmented selection, disclosure, skeleton, file preview, or dynamic-state wrappers.
+- The UX pattern is common across pages but not strictly a form input or overlay primitive.
+
+## Prefer These Files
+- `src/components/ui/misc/Accordion.tsx`: disclosure UI.
+- `src/components/ui/misc/CopyField.tsx`: copy-to-clipboard interaction.
+- `src/components/ui/misc/FilePreview.tsx`: file preview tile with shared actions.
+- `src/components/ui/misc/Loader.tsx`: spinner loader.
+- `src/components/ui/misc/MoreMenuDropdown.tsx`: overflow action menu.
+- `src/components/ui/misc/SegmentedControl.tsx`: segmented option selector.
+- `src/components/ui/misc/SuspenseBoundary.tsx`: loading and error boundary wrapper.
+- `src/components/ui/misc/Warning.tsx`: inline or panel warning block.
+- `src/components/ui/misc/Skeleton.tsx`: loading placeholder.
+- `src/components/ui/misc/InspectableImage.tsx`: image trigger for inspect modal.
+
+## Invariants
+- Prefer these shared UX patterns before introducing page-local versions.
+- `Accordion` should continue to use `Button`, `IconSwap`, and motion conventions rather than ad hoc disclosure code.
+- `CopyField` should remain the default for copy-to-clipboard UX.
+- `SegmentedControl` should remain the default for segmented selection instead of custom pill navs.
+- `SuspenseBoundary` and the state components should remain the default path for async loading and error presentation.
+  - When a loading fallback is a ghost or skeleton version of the final UI, keep the live and fallback layouts structurally identical so transitions can crossfade without layout jump.
+- The focus invariant still applies: every interactive surface here must keep visible keyboard focus through the underlying shared controls.
+- `Skeleton` should be preferred over one-off shimmer markup, especially when a component-specific skeleton already exists.
+- Skeleton parity matters:
+  - Skeleton components should mirror the live component's DOM structure, wrapper layout, spacing, and breakpoint classes.
+  - Swap content nodes for skeleton nodes, not the surrounding layout containers.
+  - Skeleton UIs must remain non-interactive and should not carry hover, click, focus, or blur behavior.
+
+## How To Use It
+- Use `Accordion` for FAQ rows, expandable settings, and compact disclosure content.
+- Use `CopyField` whenever the user copies a token, URL, or identifier.
+- Use `Loader` inside asynchronous regions, but avoid duplicating loader behavior already built into `Button` or other components.
+- Use `MoreMenuDropdown` for action-overflow menus instead of assembling a new icon-trigger dropdown.
+- Use `InspectableImage` for click-to-zoom image behavior.
+- Use `Warning` for cautionary messaging; use `variant="panel"` when the warning should be visually separated from surrounding content.
+- For initial-load loading states, prefer `Skeleton`, `Text.Skeleton`, and component-specific skeletons before toasts.
+  - For `SuspenseBoundary ghost`, build the fallback from component skeletons inside the same wrapper and spacing structure as the resolved content.
+
+## Avoid
+- Custom copy, disclosure, segmented, or skeleton patterns in page code when the shared component already fits.
+- New async wrappers that duplicate `SuspenseBoundary`.
+- Skeleton layouts that shrink, jump, or change breakpoint structure compared to the live widget.
+
+## See Also
+- `src/components/ui/misc/state/AGENTS.md`
+- `src/components/ui/overlays/modal/AGENTS.md`
+- `src/components/ui/overlays/toast/AGENTS.md`

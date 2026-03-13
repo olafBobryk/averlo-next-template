@@ -135,7 +135,8 @@ export function StateIndicator({
 				{description ? (
 					<Text
 						as="p"
-						variant="muted"
+						variant="body"
+						tone="muted"
 						className={clsx(descriptionClassName)}
 					>
 						{description}
@@ -143,7 +144,12 @@ export function StateIndicator({
 				) : null}
 			</div>
 			{actionNode ? (
-				<div className={clsx(stateActionStyles({ layout, align }), actionClassName)}>
+				<div
+					className={clsx(
+						stateActionStyles({ layout, align }),
+						actionClassName,
+					)}
+				>
 					{actionNode}
 				</div>
 			) : null}

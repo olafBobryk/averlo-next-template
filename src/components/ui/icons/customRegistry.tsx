@@ -1,7 +1,7 @@
-// components/ui/icons/iconMap.tsx
+// components/ui/icons/customRegistry.tsx
 import type { ReactNode } from "react";
 
-export const iconMap = {
+export const customRegistry = {
 	"arrow-right": (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -632,4 +632,4 @@ export const iconMap = {
 	),
 } satisfies Record<string, ReactNode>;
 
-export type IconName = keyof typeof iconMap;
+export type CustomIconName = keyof typeof customRegistry;

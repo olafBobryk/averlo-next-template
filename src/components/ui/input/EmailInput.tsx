@@ -2,12 +2,14 @@
 "use client";
 
 import * as React from "react";
+import { CopyStatusIcon, useCopyAction } from "@/components/ui/helpers/useCopyAction";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
 	type InputFrameSize,
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
+import { Button } from "@/components/ui/primitives/Button";
 
 type EmailInputProps = {
 	label: React.ReactNode;
@@ -27,6 +29,10 @@ type EmailInputProps = {
 
 	error?: React.ReactNode;
 	validate?: (value: string) => string | null;
+	copy?: boolean;
+	onCopy?: (value: string) => void | Promise<void>;
+	copyAriaLabel?: string;
+	copyToastMessage?: string | false;
 
 	className?: string;
 	inputClassName?: string;
@@ -46,12 +52,26 @@ export function EmailInput({
 	disabled,
 	error,
 	validate,
+	copy,
+	onCopy,
+	copyAriaLabel = "Copy to clipboard",
+	copyToastMessage,
 	className,
 	inputClassName,
 	size,
 }: EmailInputProps) {
 	const isControlled = value !== undefined;
 	const [clientError, setClientError] = React.useState<string | null>(null);
+	const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+	const { copied, handleCopy } = useCopyAction({
+		value: isControlled ? value ?? "" : undefined,
+		getValue: !isControlled
+			? () => inputRef.current?.value ?? defaultValue ?? ""
+			: undefined,
+		onCopy,
+		toastMessage: copyToastMessage,
+	});
 
 	const derivedError = error ?? clientError;
 	const tone = derivedError ? "error" : "default";
@@ -74,6 +94,23 @@ export function EmailInput({
 		setClientError(validate(e.target.value));
 	};
 
+	const copyButton = copy ? (
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			align="center"
+			aria-label={copyAriaLabel}
+			onClick={handleCopy}
+			onMouseDown={(event) => {
+				event.preventDefault();
+			}}
+			disabled={disabled}
+			className="rounded-[8px] text-foreground/60"
+		>
+			<CopyStatusIcon copied={copied} size="sm" />
+		</Button>
+	) : null;
+
 	return (
 		<Field
 			label={label}
@@ -86,8 +123,15 @@ export function EmailInput({
 			messageId={messageId}
 			className={className}
 		>
-			<InputFrame tone={tone} size={size} disabled={disabled} fullWidth>
+			<InputFrame
+				tone={tone}
+				size={size}
+				disabled={disabled}
+				fullWidth
+				end={copyButton}
+			>
 				<input
+					ref={inputRef}
 					id={inputId}
 					name={name}
 					type="email"
@@ -101,6 +145,7 @@ export function EmailInput({
 					className={[
 						inputVariants({
 							size,
+							hasEnd: copy ? true : undefined,
 							disabled: disabled ? true : undefined,
 						}),
 						inputClassName,

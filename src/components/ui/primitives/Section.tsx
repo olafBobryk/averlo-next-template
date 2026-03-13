@@ -1,6 +1,13 @@
 // components/ui/primitives/Section.tsx
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import {
+	Children,
+	type ComponentPropsWithoutRef,
+	type ElementType,
+	isValidElement,
+	type ReactElement,
+	type ReactNode,
+} from "react";
 
 const outerStyles = cva("w-full", {
 	variants: {
@@ -46,6 +53,12 @@ const innerStyles = cva("w-full", {
 	},
 });
 
+export type SectionBackgroundProps = {
+	children: ReactNode;
+	className?: string;
+	interactive?: boolean;
+};
+
 type SectionProps<T extends ElementType> = {
 	as?: T;
 	children: ReactNode;
@@ -55,7 +68,19 @@ type SectionProps<T extends ElementType> = {
 	VariantProps<typeof innerStyles> &
 	Omit<ComponentPropsWithoutRef<T>, "as" | "children" | "className">;
 
-export function Section<T extends ElementType = "section">({
+function SectionBackground({ children }: SectionBackgroundProps) {
+	return <>{children}</>;
+}
+
+SectionBackground.displayName = "Section.Background";
+
+function isSectionBackgroundElement(
+	child: ReactNode,
+): child is ReactElement<SectionBackgroundProps, typeof SectionBackground> {
+	return isValidElement(child) && child.type === SectionBackground;
+}
+
+function SectionRoot<T extends ElementType = "section">({
 	as,
 	children,
 	className,
@@ -68,11 +93,35 @@ export function Section<T extends ElementType = "section">({
 	...rest
 }: SectionProps<T>) {
 	const Tag = (as ?? "section") as ElementType;
+	const backgroundChildren: ReactElement<
+		SectionBackgroundProps,
+		typeof SectionBackground
+	>[] = [];
+	const foregroundChildren: ReactNode[] = [];
 
-	const outerClass = [outerStyles({ padding, background, height }), className]
+	Children.forEach(children, (child) => {
+		if (isSectionBackgroundElement(child)) {
+			backgroundChildren.push(child);
+			return;
+		}
+
+		foregroundChildren.push(child);
+	});
+
+	const hasBackground = backgroundChildren.length > 0;
+
+	const outerClass = [
+		outerStyles({ padding, background, height }),
+		hasBackground ? "relative isolate overflow-hidden" : undefined,
+		className,
+	]
 		.filter(Boolean)
 		.join(" ");
-	const innerClass = [innerStyles({ maxWidth, align }), innerClassName]
+	const innerClass = [
+		innerStyles({ maxWidth, align }),
+		hasBackground ? "relative z-10" : undefined,
+		innerClassName,
+	]
 		.filter(Boolean)
 		.join(" ");
 
@@ -81,7 +130,39 @@ export function Section<T extends ElementType = "section">({
 			className={outerClass}
 			{...(rest as ComponentPropsWithoutRef<ElementType>)}
 		>
-			<div className={innerClass}>{children}</div>
+			{hasBackground ? (
+				<div className="absolute inset-0 z-0">
+					{backgroundChildren.map((child, index) => (
+						<div
+							key={child.key ?? `section-background-${index}`}
+							className={[
+								"absolute inset-0 h-full w-full",
+								child.props.interactive ? undefined : "pointer-events-none",
+							]
+								.filter(Boolean)
+								.join(" ")}
+							aria-hidden={child.props.interactive ? undefined : true}
+						>
+							<div
+								className={["relative h-full w-full", child.props.className]
+									.filter(Boolean)
+									.join(" ")}
+							>
+								{child.props.children}
+							</div>
+						</div>
+					))}
+				</div>
+			) : null}
+			<div className={innerClass}>{foregroundChildren}</div>
 		</Tag>
 	);
 }
+
+type SectionComponent = typeof SectionRoot & {
+	Background: typeof SectionBackground;
+};
+
+export const Section = Object.assign(SectionRoot, {
+	Background: SectionBackground,
+}) as SectionComponent;

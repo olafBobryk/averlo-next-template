@@ -2,15 +2,21 @@
 "use client";
 
 import { motion } from "motion/react";
-import { type CSSProperties, type ReactNode, useEffect } from "react";
-import { Panel } from "@/components/ui/primitives/Panel";
+import {
+	type CSSProperties,
+	type MouseEvent,
+	type ReactNode,
+	useEffect,
+} from "react";
 import Portal from "@/components/ui/overlays/Portal";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type ModalShellProps = {
 	onClose: () => void;
 	children: ReactNode;
 	portalTargetId?: string;
+	panelDirection?: "down" | "up" | "left" | "right";
 	animate?: {
 		y?: boolean;
 		opacity?: boolean;
@@ -20,7 +26,7 @@ type ModalShellProps = {
 
 	// NEW
 	panelClassName?: string;
-	wrapperClassName?: string;
+	panelWrapperClassName?: string;
 	backdropClassName?: string;
 	panelStyle?: CSSProperties;
 };
@@ -35,18 +41,18 @@ const panelTransition = {
 	ease: [0.16, 1, 0.3, 1] as const,
 };
 
-// TODO: Swap the default panel classes below to match your project's design tokens.
 const DEFAULT_PANEL =
-	"flex will-change-opacity max-w-full w-[450px] max-w-lg overflow-hidden overflow-y-auto rounded-[20px] border border-border/15 bg-white";
+	"flex will-change-opacity max-w-full w-[450px] max-w-lg overflow-hidden overflow-y-auto";
 
 export function ModalShell({
 	onClose,
 	children,
 	portalTargetId = "modal-root",
+	panelDirection = "down",
 	animate = { y: true, opacity: true },
 	disableWhenReducedMotion = true,
 	panelClassName,
-	wrapperClassName,
+	panelWrapperClassName,
 	backdropClassName,
 	panelStyle,
 }: ModalShellProps) {
@@ -58,10 +64,52 @@ export function ModalShell({
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [onClose]);
 
+	useEffect(() => {
+		const body = document.body;
+		const currentCount = Number(body.dataset.modalOpenCount ?? "0");
+		if (currentCount === 0) {
+			body.dataset.modalPrevOverflow = body.style.overflow;
+			body.dataset.modalPrevPaddingRight = body.style.paddingRight;
+			const scrollbarWidth =
+				window.innerWidth - document.documentElement.clientWidth;
+			body.style.overflow = "hidden";
+			if (scrollbarWidth > 0) {
+				body.style.paddingRight = `${scrollbarWidth}px`;
+			}
+		}
+		body.dataset.modalOpenCount = String(currentCount + 1);
+
+		return () => {
+			const nextCount = Number(body.dataset.modalOpenCount ?? "1") - 1;
+			if (nextCount <= 0) {
+				body.style.overflow = body.dataset.modalPrevOverflow ?? "";
+				body.style.paddingRight = body.dataset.modalPrevPaddingRight ?? "";
+				delete body.dataset.modalPrevOverflow;
+				delete body.dataset.modalPrevPaddingRight;
+				delete body.dataset.modalOpenCount;
+			} else {
+				body.dataset.modalOpenCount = String(nextCount);
+			}
+		};
+	}, []);
+
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const animateY = animate?.y ?? true;
 	const animateOpacity = animate?.opacity ?? true;
 	const animateScale = animate?.scale ?? true;
+
+	const offset = (() => {
+		switch (panelDirection) {
+			case "up":
+				return { x: 0, y: -24 };
+			case "left":
+				return { x: -24, y: 0 };
+			case "right":
+				return { x: 24, y: 0 };
+			default:
+				return { x: 0, y: 24 };
+		}
+	})();
 
 	const backdropInitial = motionAllowed
 		? { ...(animateOpacity ? { opacity: 0 } : {}) }
@@ -73,41 +121,51 @@ export function ModalShell({
 		? { ...(animateOpacity ? { opacity: 0 } : {}) }
 		: undefined;
 
-	const wrapperInitial = motionAllowed
+	const panelWrapperInitial = motionAllowed
 		? { ...(animateOpacity ? { opacity: 0 } : {}) }
 		: undefined;
-	const wrapperAnimate = motionAllowed
+	const panelWrapperAnimate = motionAllowed
 		? { ...(animateOpacity ? { opacity: 1 } : {}) }
 		: undefined;
-	const wrapperExit = motionAllowed
+	const panelWrapperExit = motionAllowed
 		? { ...(animateOpacity ? { opacity: 0 } : {}) }
 		: undefined;
 
-	const wrapperPanelInitial = motionAllowed
+	const panelInitial = motionAllowed
 		? {
 				...(animateOpacity ? { opacity: 0 } : {}),
-				...(animateY ? { y: 24 } : {}),
+				...(animateY
+					? {
+							...(offset.x ? { x: offset.x } : {}),
+							...(offset.y ? { y: offset.y } : {}),
+						}
+					: {}),
 				...(animateScale ? { scale: 0.98 } : {}),
 			}
 		: undefined;
-	const wrapperPanelAnimate = motionAllowed
+	const panelAnimate = motionAllowed
 		? {
 				...(animateOpacity ? { opacity: 1 } : {}),
-				...(animateY ? { y: 0 } : {}),
+				...(animateY ? { x: 0, y: 0 } : {}),
 				...(animateScale ? { scale: 1 } : {}),
 			}
 		: undefined;
-	const wrapperPanelExit = motionAllowed
+	const panelExit = motionAllowed
 		? {
 				...(animateOpacity ? { opacity: 0 } : {}),
-				...(animateY ? { y: 24 } : {}),
+				...(animateY
+					? {
+							...(offset.x ? { x: offset.x } : {}),
+							...(offset.y ? { y: offset.y } : {}),
+						}
+					: {}),
 				...(animateScale ? { scale: 0.98 } : {}),
 			}
 		: undefined;
 
 	return (
 		<Portal target={portalTargetId}>
-			<div className="fixed top-0 w-full vh-max inset-0 z-80">
+			<div className="fixed top-0 pointer-events-auto w-full vh-max inset-0 z-80">
 				<motion.div
 					key="modal-backdrop"
 					className={[
@@ -126,17 +184,18 @@ export function ModalShell({
 				<motion.div
 					key="modal-panel-wrapper"
 					className={[
-						"relative z-[82] flex will-change-opacity h-full w-full items-center justify-center px-section-x py-10",
-						wrapperClassName,
+						"relative z-[82] flex will-change-opacity h-full w-full items-center justify-center p-[50px]",
+						panelWrapperClassName,
 					]
 						.filter(Boolean)
 						.join(" ")}
-					initial={wrapperPanelInitial}
-					animate={wrapperPanelAnimate}
-					exit={wrapperPanelExit}
-					transition={motionAllowed ? panelTransition : undefined}
+					initial={panelWrapperInitial}
+					animate={panelWrapperAnimate}
+					exit={panelWrapperExit}
+					transition={motionAllowed ? overlayTransition : undefined}
 					aria-modal="true"
 					role="dialog"
+					onClick={onClose}
 				>
 					<Panel
 						as={motion.div}
@@ -145,13 +204,19 @@ export function ModalShell({
 						className={[DEFAULT_PANEL, panelClassName]
 							.filter(Boolean)
 							.join(" ")}
-						style={
-							panelStyle ?? { boxShadow: "2px 4px 15px 0 rgba(2,2,2,0.03)" }
+						style={panelStyle}
+						// transition={
+						// \tmotionAllowed
+						// \t\t? { ...panelTransition, delay: 0.04 }
+						// \t\t: undefined
+						// }
+						initial={panelInitial}
+						animate={panelAnimate}
+						exit={panelExit}
+						transition={motionAllowed ? panelTransition : undefined}
+						onClick={(event: MouseEvent<HTMLDivElement>) =>
+							event.stopPropagation()
 						}
-						transition={
-							motionAllowed ? { ...panelTransition, delay: 0.04 } : undefined
-						}
-						onClick={(e) => e.stopPropagation()}
 					>
 						{children}
 					</Panel>

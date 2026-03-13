@@ -40,6 +40,11 @@ const panelStyles = cva(
 				surface: "bg-surface",
 				transparent: "bg-transparent",
 			},
+			tone: {
+				default: "",
+				warning: "border border-warning/20 bg-warning/10",
+				danger: "border border-danger/20 bg-danger/10",
+			},
 		},
 		defaultVariants: {
 			display: "grid",
@@ -49,11 +54,12 @@ const panelStyles = cva(
 			shadow: "sm",
 			bordered: true,
 			background: "white",
+			tone: "default",
 		},
 	},
 );
 
-type PanelProps<T extends ElementType> = {
+export type PanelProps<T extends ElementType = "div"> = {
 	as?: T;
 	children: ReactNode;
 	className?: string;
@@ -71,11 +77,21 @@ export function Panel<T extends ElementType = "div">({
 	shadow,
 	bordered,
 	background,
+	tone,
 	...rest
 }: PanelProps<T>) {
 	const Tag = (as ?? "div") as ElementType;
 	const classes = [
-		panelStyles({ display, padding, gap, columns, shadow, bordered, background }),
+		panelStyles({
+			display,
+			padding,
+			gap,
+			columns,
+			shadow,
+			bordered,
+			background,
+			tone,
+		}),
 		className,
 	]
 		.filter(Boolean)

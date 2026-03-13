@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Section } from "@/components/ui/primitives/Section";
 import { Button } from "@/components/ui/primitives/Button";
+import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 
 export default function AppError({
@@ -25,7 +24,7 @@ export default function AppError({
 				<Text as="h1" variant="headingXl">
 					Something went wrong
 				</Text>
-				<Text variant="muted">
+				<Text variant="body" tone="muted">
 					The page failed to render. You can try again or go back.
 				</Text>
 

@@ -2,7 +2,10 @@
 "use client";
 
 import * as React from "react";
-import { iconMap, type IconName } from "@/components/ui/icons/iconMap";
+import {
+	customRegistry,
+	type CustomIconName,
+} from "@/components/ui/icons/customRegistry";
 
 export type IconRenderProps = {
 	className?: string;
@@ -10,26 +13,32 @@ export type IconRenderProps = {
 	"aria-hidden"?: boolean;
 };
 
-export type IconRegistry = Record<IconName, React.ComponentType<IconRenderProps>>;
+export type IconName = CustomIconName | (string & {});
+export type IconRegistry = Record<
+	string,
+	React.ComponentType<IconRenderProps>
+>;
 
 const createLocalRegistry = (): IconRegistry => {
-	const entries = (Object.keys(iconMap) as IconName[]).map((name) => {
-		const LocalIcon: React.FC<IconRenderProps> = ({ className }) => {
-			const icon = iconMap[name];
-			if (React.isValidElement<{ className?: string }>(icon)) {
-				const mergedClassName = [icon.props.className, className]
-					.filter(Boolean)
-					.join(" ");
-				return React.cloneElement(
-					icon as React.ReactElement<{ className?: string }>,
-					{ className: mergedClassName },
-				);
-			}
-			return icon;
-		};
-		LocalIcon.displayName = `LocalIcon(${name})`;
-		return [name, LocalIcon] as const;
-	});
+	const entries = (Object.keys(customRegistry) as CustomIconName[]).map(
+		(name) => {
+			const LocalIcon: React.FC<IconRenderProps> = ({ className }) => {
+				const icon = customRegistry[name];
+				if (React.isValidElement<{ className?: string }>(icon)) {
+					const mergedClassName = [icon.props.className, className]
+						.filter(Boolean)
+						.join(" ");
+					return React.cloneElement(
+						icon as React.ReactElement<{ className?: string }>,
+						{ className: mergedClassName },
+					);
+				}
+				return icon;
+			};
+			LocalIcon.displayName = `LocalIcon(${name})`;
+			return [name, LocalIcon] as const;
+		},
+	);
 
 	return Object.fromEntries(entries) as IconRegistry;
 };
@@ -39,10 +48,15 @@ export const localIconRegistry = createLocalRegistry();
 export const createIconRegistry = (
 	overrides: Partial<IconRegistry>,
 ): IconRegistry => {
-	return {
-		...localIconRegistry,
-		...overrides,
-	};
+	const merged: Record<string, React.ComponentType<IconRenderProps> | undefined> =
+		{
+			...localIconRegistry,
+			...overrides,
+		};
+
+	return Object.fromEntries(
+		Object.entries(merged).filter(([, value]) => Boolean(value)),
+	) as IconRegistry;
 };
 
 const IconRegistryContext = React.createContext<IconRegistry | null>(null);

@@ -1,20 +1,24 @@
 "use client";
 
-import * as React from "react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
-import { ErrorState, type ErrorStateProps } from "@/components/ui/misc/state/ErrorState";
-import { Loader } from "@/components/ui/misc/Loader";
+import * as React from "react";
 import {
 	getMotionTiming,
 	type MotionTimingPreset,
 } from "@/components/ui/foundations/motionTiming";
+import { Loader } from "@/components/ui/misc/Loader";
+import {
+	ErrorState,
+	type ErrorStateProps,
+} from "@/components/ui/misc/state/ErrorState";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type SuspenseBoundaryProps = {
 	mode?: "controlled" | "suspense";
 	loading?: boolean;
 	fallback?: React.ReactNode;
+	ghost?: boolean;
 	error?: boolean;
 	errorFallback?: React.ReactNode | ErrorStateProps | null;
 	children: React.ReactNode;
@@ -28,6 +32,7 @@ export function SuspenseBoundary({
 	mode = "controlled",
 	loading = false,
 	fallback,
+	ghost = false,
 	error = false,
 	errorFallback,
 	children,
@@ -39,12 +44,11 @@ export function SuspenseBoundary({
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const shouldAnimate = motionAllowed && forceReducedMotion !== true;
 	const resolvedErrorFallback = resolveErrorFallback(errorFallback);
-	const resolvedFallback =
-		fallback ?? (
-			<div className="flex items-center justify-center py-10">
-				<Loader className="text-muted-foreground" />
-			</div>
-		);
+	const resolvedFallback = fallback ?? (
+		<div className="flex items-center justify-center py-10">
+			<Loader className="text-muted-foreground" />
+		</div>
+	);
 
 	if (mode === "suspense") {
 		return (
@@ -86,7 +90,75 @@ export function SuspenseBoundary({
 		);
 	}
 
-	const content = error ? resolvedErrorFallback : loading ? resolvedFallback : children;
+	const overlayContent = error
+		? resolvedErrorFallback
+		: loading
+			? resolvedFallback
+			: null;
+
+	if (ghost) {
+		const contentHidden = Boolean(overlayContent);
+
+		if (!shouldAnimate) {
+			return (
+				<div className={clsx("relative", className)}>
+					<div
+						className={clsx(
+							"relative",
+							contentHidden
+								? "pointer-events-none select-none opacity-0"
+								: undefined,
+						)}
+						aria-hidden={contentHidden || undefined}
+					>
+						{children}
+					</div>
+					{overlayContent ? (
+						<div
+							className="absolute inset-0 z-[1]"
+							aria-hidden={!contentHidden || undefined}
+						>
+							{overlayContent}
+						</div>
+					) : null}
+				</div>
+			);
+		}
+
+		return (
+			<div className={clsx("relative", className)}>
+				<motion.div
+					className={clsx(
+						"relative",
+						contentHidden ? "pointer-events-none select-none" : undefined,
+					)}
+					aria-hidden={contentHidden || undefined}
+					initial={false}
+					animate={{ opacity: contentHidden ? 0 : 1 }}
+					transition={getMotionTiming(timingPreset)}
+				>
+					{children}
+				</motion.div>
+				{overlayContent ? (
+					<motion.div
+						className="absolute inset-0 z-[1]"
+						aria-hidden={!contentHidden || undefined}
+						initial={false}
+						animate={{ opacity: contentHidden ? 1 : 0 }}
+						transition={getMotionTiming(timingPreset)}
+					>
+						{overlayContent}
+					</motion.div>
+				) : null}
+			</div>
+		);
+	}
+
+	const content = error
+		? resolvedErrorFallback
+		: loading
+			? resolvedFallback
+			: children;
 
 	if (!shouldAnimate) {
 		if (className) {

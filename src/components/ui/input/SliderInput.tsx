@@ -6,7 +6,8 @@ import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
 	type InputFrameSize,
-	inputVariants,
+	inputPaddingXClasses,
+	inputPaddingYClasses,
 } from "@/components/ui/primitives/InputFrame";
 
 type SliderInputProps = {
@@ -60,9 +61,8 @@ export function SliderInput({
 	const descriptionId = description ? `${inputId}-description` : undefined;
 	const messageId = error ? `${inputId}-message` : undefined;
 	const describedBy =
-		[descriptionId, error ? messageId : undefined]
-			.filter(Boolean)
-			.join(" ") || undefined;
+		[descriptionId, error ? messageId : undefined].filter(Boolean).join(" ") ||
+		undefined;
 
 	const sliderValue = React.useMemo(() => {
 		if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -70,12 +70,16 @@ export function SliderInput({
 		return 0;
 	}, [value, min]);
 
-	const handleNumberChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+	const handleNumberChange: React.ChangeEventHandler<HTMLInputElement> = (
+		e,
+	) => {
 		const next = Number(e.target.value);
 		onChange?.(Number.isFinite(next) ? next : null);
 	};
 
-	const handleSliderChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+	const handleSliderChange: React.ChangeEventHandler<HTMLInputElement> = (
+		e,
+	) => {
 		const next = Number(e.target.value);
 		onChange?.(Number.isFinite(next) ? next : null);
 	};
@@ -92,8 +96,14 @@ export function SliderInput({
 			messageId={messageId}
 			className={className}
 		>
-			<InputFrame tone={tone} size={size} disabled={disabled} fullWidth>
-				<div className="flex items-center gap-3">
+			<InputFrame
+				tone={tone}
+				size={size}
+				disabled={disabled}
+				fullWidth
+				contentClassName={inputPaddingXClasses[size ?? "md"]}
+			>
+				<div className="flex w-full items-center gap-3">
 					<input
 						type="range"
 						min={min}
@@ -118,11 +128,8 @@ export function SliderInput({
 							placeholder={placeholder}
 							required={required}
 							className={[
-								inputVariants({
-									size,
-									disabled: disabled ? true : undefined,
-								}),
-								"w-20 text-right",
+								"w-20 min-w-0 bg-transparent text-right text-foreground outline-none placeholder:text-muted/70 disabled:cursor-not-allowed",
+								inputPaddingYClasses[size ?? "md"],
 								"[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
 								inputClassName,
 							]

@@ -12,7 +12,7 @@ export default function Page() {
 					<Text as="h1" variant="headingXl">
 						Page not found
 					</Text>
-					<Text variant="muted">
+					<Text variant="body" tone="muted">
 						The page you’re looking for doesn’t exist.
 					</Text>
 					<Button variant="primary" href="/">

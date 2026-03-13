@@ -2,7 +2,7 @@
 "use client";
 
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
-import { useMemo, useRef, type ComponentProps, type ReactNode } from "react";
+import { type ComponentProps, type ReactNode, useMemo, useRef } from "react";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type ScrollParallaxProps = {
@@ -15,6 +15,7 @@ type ScrollParallaxProps = {
 	direction?: "down" | "up";
 	stiffness?: number;
 	damping?: number;
+	smooth?: boolean;
 } & Omit<ComponentProps<"div">, "children" | "className" | "style">;
 
 export function ScrollParallax({
@@ -27,6 +28,7 @@ export function ScrollParallax({
 	direction = "down",
 	stiffness = 140,
 	damping = 18,
+	smooth = true,
 	...rest
 }: ScrollParallaxProps) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
@@ -42,16 +44,23 @@ export function ScrollParallax({
 	);
 
 	// Map progress so translation crosses 0 at mid-scroll: start -> 0 -> end
-	const rawY = useTransform(scrollYProgress, [0, 0.5, 1], [-amplitude, 0, amplitude]);
-	const y = useSpring(rawY, {
+	const rawY = useTransform(
+		scrollYProgress,
+		[0, 0.5, 1],
+		[-amplitude, 0, amplitude],
+	);
+	const springY = useSpring(rawY, {
 		stiffness,
 		damping,
 		mass: 1,
 		restSpeed: 0.001,
 	});
+	const y = smooth ? springY : rawY;
 
 	const Tag = motionAllowed ? (as ?? motion.div) : (as ?? "div");
-	const passthroughStyle = motionAllowed ? { ...style, y } : style;
+	const passthroughStyle = motionAllowed
+		? { willChange: "transform", ...style, y }
+		: style;
 
 	return (
 		<Tag ref={ref} className={className} style={passthroughStyle} {...rest}>

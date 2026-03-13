@@ -5,8 +5,8 @@ import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import { spring } from "@/components/ui/foundations/spring";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
-import { Button } from "@/components/ui/primitives/Button";
 import { Icon } from "@/components/ui/icons/Icon";
+import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
@@ -48,6 +48,21 @@ export function Accordion({
 	const contentId = `accordion-content-${id}`;
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const shouldAnimate = motionAllowed && forceReducedMotion !== true;
+	const isPlainTitle = typeof title === "string" || typeof title === "number";
+	const titleNode = isPlainTitle ? (
+		<span
+			className={clsx(
+				"min-w-0 flex-1 truncate text-left transition-colors text-foreground/60 group-data-[group-open=true]:text-foreground motion-interactive",
+				titleClassName,
+			)}
+		>
+			{title}
+		</span>
+	) : (
+		<div className={clsx("min-w-0 flex-1 text-left", titleClassName)}>
+			{title}
+		</div>
+	);
 
 	const handleToggle = () => {
 		if (disabled) return;
@@ -73,9 +88,9 @@ export function Accordion({
 		<div
 			className={clsx(
 				"flex w-full flex-col rounded-[10px] group transition-colors motion-micro",
-				"bg-surface/60 text-foreground",
-				"has-[.accordion-trigger:hover]:bg-foreground/5",
-				"has-[.accordion-trigger:active]:bg-foreground/10",
+				"bg-surface text-foreground",
+				"has-[.accordion-trigger:hover]:bg-foreground/10",
+				"has-[.accordion-trigger:active]:bg-foreground/15",
 				disabled ? "opacity-60" : undefined,
 				className,
 			)}
@@ -98,14 +113,7 @@ export function Accordion({
 					buttonClassName,
 				)}
 			>
-				<span
-					className={clsx(
-						"min-w-0 flex-1 truncate text-left transition-colors text-foreground/60 group-data-[group-open=true]:text-foreground motion-interactive",
-						titleClassName,
-					)}
-				>
-					{title}
-				</span>
+				{titleNode}
 				<IconSwap
 					size="md"
 					className={clsx(

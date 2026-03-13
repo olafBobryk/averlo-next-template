@@ -5,6 +5,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { motion, useInView, type Variants } from "motion/react";
 import {
 	type ComponentProps,
+	type ElementType,
 	forwardRef,
 	type ReactNode,
 	useEffect,
@@ -14,20 +15,21 @@ import {
 } from "react";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
-const SlotWithRef = forwardRef<any, ComponentProps<typeof Slot>>(
+const SlotWithRef = forwardRef<HTMLElement, ComponentProps<typeof Slot>>(
 	(props, ref) => <Slot ref={ref} {...props} />,
 );
 SlotWithRef.displayName = "SlotWithRef";
 const MotionSlot = motion(SlotWithRef);
 
-type RevealGroupProps = {
+export type RevealGroupProps = {
 	children: ReactNode;
-	as?: any;
+	as?: ElementType;
 	className?: string;
 	stagger?: number;
 	delay?: number;
 	duration?: number;
 	once?: boolean;
+	active?: boolean;
 	disableWhenReducedMotion?: boolean;
 };
 
@@ -40,9 +42,11 @@ export function RevealGroup({
 	// Match motion-macro timing from globals.css (320ms)
 	duration = 0.32,
 	once = true,
+	active,
 	disableWhenReducedMotion = true,
 }: RevealGroupProps) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const isControlled = typeof active === "boolean";
 	const ref = useRef<HTMLElement | null>(null);
 	const inView = useInView(ref, { amount: 0.1 });
 	const [hasShown, setHasShown] = useState(false);
@@ -75,7 +79,18 @@ export function RevealGroup({
 
 	if (!motionAllowed) {
 		const Tag = as ?? "div";
-		return <Tag className={className}>{children}</Tag>;
+		return (
+			<Tag
+				className={[
+					className,
+					isControlled && !active ? "pointer-events-none opacity-0" : undefined,
+				]
+					.filter(Boolean)
+					.join(" ")}
+			>
+				{children}
+			</Tag>
+		);
 	}
 
 	const animateState = once
@@ -85,13 +100,15 @@ export function RevealGroup({
 		: inView
 			? "show"
 			: "hidden";
+	const resolvedAnimateState =
+		typeof active === "boolean" ? (active ? "show" : "hidden") : animateState;
 
 	const MotionTag = as ?? motion.div;
 	return (
 		<MotionTag
 			ref={ref}
 			initial="hidden"
-			animate={animateState}
+			animate={resolvedAnimateState}
 			variants={variants}
 			className={className}
 		>
@@ -100,14 +117,15 @@ export function RevealGroup({
 	);
 }
 
-type RevealItemProps = {
+export type RevealItemProps = {
 	children?: ReactNode;
-	as?: any;
+	as?: ElementType;
 	asChild?: boolean;
 	className?: string;
 	variants?: Variants;
 	disableTransform?: boolean;
 	useViewport?: boolean;
+	active?: boolean;
 	disableWhenReducedMotion?: boolean;
 };
 
@@ -119,9 +137,11 @@ export function RevealItem({
 	variants,
 	disableTransform = false,
 	useViewport = false,
+	active,
 	disableWhenReducedMotion = true,
 }: RevealItemProps) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const isControlled = typeof active === "boolean";
 	const [hasPlayed, setHasPlayed] = useState(false);
 	const childRef = useRef<HTMLElement | null>(null);
 	const originalTransitionRef = useRef<string | null>(null);
@@ -131,12 +151,12 @@ export function RevealItem({
 	// Temporarily remove the child's own transition while the reveal animation runs
 	// to avoid timing conflicts, then restore it after the animation completes.
 	useEffect(() => {
-		if (!asChild || !motionAllowed || hasPlayed) return;
+		if (isControlled || !asChild || !motionAllowed || hasPlayed) return;
 		const node = childRef.current;
 		if (!node) return;
 		originalTransitionRef.current = node.style.transition;
 		node.style.transition = "none";
-	}, [asChild, motionAllowed, hasPlayed]);
+	}, [isControlled, asChild, motionAllowed, hasPlayed]);
 
 	// Clear any queued restore on unmount
 	useEffect(() => {
@@ -148,6 +168,7 @@ export function RevealItem({
 	}, []);
 
 	const handleAnimationComplete = () => {
+		if (isControlled) return;
 		if (!asChild || !motionAllowed) return;
 		if (restoredRef.current) return;
 		const node = childRef.current;
@@ -181,22 +202,40 @@ export function RevealItem({
 
 	// After the first play, render a plain element to avoid Framer re-applying
 	// motion bookkeeping on subsequent scrolls.
-	if (!motionAllowed || hasPlayed) {
+	if (!motionAllowed) {
 		const Tag = asChild ? Slot : (as ?? "div");
-		return <Tag className={className}>{children}</Tag>;
+		return (
+			<Tag
+				className={[
+					className,
+					isControlled && !active ? "pointer-events-none opacity-0" : undefined,
+				]
+					.filter(Boolean)
+					.join(" ")}
+			>
+				{children}
+			</Tag>
+		);
 	}
 
-	if (!motionAllowed) {
+	if (!isControlled && hasPlayed) {
 		const Tag = asChild ? Slot : (as ?? "div");
 		return <Tag className={className}>{children}</Tag>;
 	}
 
 	const MotionTag = asChild ? MotionSlot : (as ?? motion.div);
-	const viewportProps = useViewport
+	const viewportProps =
+		!isControlled && useViewport
+			? {
+					initial: "hidden",
+					whileInView: "show",
+					viewport: { once: true, amount: 0.2 },
+				}
+			: {};
+	const controlledProps = isControlled
 		? {
-				initial: "hidden",
-				whileInView: "show",
-				viewport: { once: true, amount: 0.2 },
+				initial: "hidden" as const,
+				animate: active ? "show" : "hidden",
 			}
 		: {};
 
@@ -206,6 +245,7 @@ export function RevealItem({
 			variants={baseVariants}
 			className={className}
 			onAnimationComplete={handleAnimationComplete}
+			{...controlledProps}
 			{...viewportProps}
 		>
 			{children}

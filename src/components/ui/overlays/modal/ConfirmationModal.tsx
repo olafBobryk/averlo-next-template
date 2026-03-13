@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Divider from "@/components/ui/primitives/Divider";
+import { Warning } from "@/components/ui/misc/Warning";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -40,16 +42,19 @@ export function ConfirmationModal({
 				<Text as="h2" variant="headingMd">
 					{title}
 				</Text>
-				<Text variant="muted">{description}</Text>
+				<Text variant="body" tone="muted">
+					{description}
+				</Text>
 			</div>
-			{warning && (
-				<div className="rounded-[12px] border border-danger/20 bg-danger/10 px-4 py-3">
-					<Text variant="muted" className="text-danger">
-						{warning}
-					</Text>
-				</div>
-			)}
-			<div className="h-px rounded-full bg-border/15" />
+			{warning ? (
+				<Warning
+					variant="panel"
+					tone="warning"
+					message={warning}
+					className="w-full"
+				/>
+			) : null}
+			<Divider />
 			<div className="flex justify-between gap-3">
 				<Button variant="outline" onClick={onClose} disabled={isSubmitting}>
 					Cancel
@@ -57,10 +62,11 @@ export function ConfirmationModal({
 				<Button
 					variant="primary"
 					onClick={handleConfirm}
+					loading={isSubmitting}
 					disabled={isSubmitting}
 					trailingIcon="check"
 				>
-					{isSubmitting ? "Working..." : confirmLabel}
+					{confirmLabel}
 				</Button>
 			</div>
 		</div>

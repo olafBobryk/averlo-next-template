@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { type ChangeEvent, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/primitives/Button";
-import { createFakeFetcher } from "@/lib/createFakeFetcher";
+import { createFakeFetcher } from "@/lib/mock";
 
 export default function FileUploader({
 	uploadType,

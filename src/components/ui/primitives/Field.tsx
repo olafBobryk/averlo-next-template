@@ -61,7 +61,13 @@ export function Field({
 				) : null}
 
 				{description ? (
-					<Text as="p" variant="muted" className="text-sm" id={descriptionId}>
+					<Text
+						as="p"
+						variant="body"
+						tone="muted"
+						className="text-sm"
+						id={descriptionId}
+					>
 						{description}
 					</Text>
 				) : null}
@@ -80,7 +86,8 @@ export function Field({
 			>
 				<Text
 					as="p"
-					variant="captionMuted"
+					variant="caption"
+					tone="muted"
 					className={[
 						"transition-all motion-micro mt-2.5", // reserve one line
 						tone === "error"

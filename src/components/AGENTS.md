@@ -1,115 +1,127 @@
 <INSTRUCTIONS>
-## Purpose
-These instructions guide agents working on UI components under `src/components/ui`.
-Keep components consistent, flexible, and reusable across the app while centralizing shared logic.
+## Scope
+These instructions guide agents working anywhere under `src/components`.
+The goal is not just to document the library, but to push implementation work toward existing components, existing UX conventions, and existing accessibility behavior before adding anything new.
 
-## Principles (Versatility + Centralization)
-- **Build from each other:** Start with primitives and compose upward. Prefer extending existing components over introducing new one-offs.
-- **Centralize rules:** Shared sizes, tones, and motion belong in `cva` variants or `foundations/` utilities, not duplicated strings.
-- **Design for extension:** Expose `className` and structural slots; keep props stable and additive so components remain versatile.
-- **Avoid tight coupling:** Components should be app-agnostic unless placed in `misc/` or a clearly domain-specific folder.
+## Primary Goal
+Use as much of this component library as possible before inventing new UI.
+Agents should assume that a matching component probably already exists and should search this tree before building custom controls, wrappers, overlays, feedback patterns, or layout widgets.
 
-## Programming Standards
-- **Class precedence:** Always merge class names as `clsx(variantClasses, className)` so `className` wins.
-- **Variants:** Use `cva` for variants; keep sizes/tones aligned across components.
-- **Composition over duplication:** Build specialized components by composing base ones (e.g., `IconButton` wraps `Button`).
-- **Slots for exceptions:** Prefer slot/compound patterns for one-off internal overrides instead of new components.
-- **No hardcoded fonts:** Components should use `Text` variants or `font-body`/`font-heading` utilities.
-- **Motion utilities:** Use `motion-micro`, `motion-interactive`, `motion-component`, `motion-macro` with Tailwind `transition` utilities.
-- **Motion + springs:** Tailwind motion utilities are the default for CSS transitions. Use `foundations/spring.ts` presets only for `motion/react` (layout/expand) so it builds on — not replaces — the motion system.
-- **Inputs:** Use `InputFrame` for the shell and `inputVariants` (or `inputSizeClasses`) on the input element so padding lives on the input, not the frame.
-- **Input IDs:** Always fall back to `React.useId()` when `id`/`name` aren’t provided so labels remain accessible.
-- **Input a11y wiring:** Always wire `aria-describedby` and `aria-invalid` on the actual input element. Field error messages must be `aria-live`/`role="alert"` when tone is error.
-- **Listbox a11y:** For listbox-style components, set `role="listbox"` plus `aria-multiselectable` when relevant, and ensure each option reflects `aria-selected`. Non-native option wrappers must include `aria-disabled` when disabled.
-- **Keyboard activation:** Custom choice inputs should keep native Space behavior and explicitly support Enter activation (via `ChoiceField`).
-- **Autocomplete:** Expose/forward `autoComplete` and `inputMode` where applicable (Email defaults to `autoComplete="email"`).
-- **Button icon a11y:** If a button has visible text or an explicit aria label, icons should be `aria-hidden` so their titles aren’t announced. Icon-only buttons should provide an accessible name (aria-label or icon title).
-- **Icon swapping:** Use `helpers/IconSwap.tsx` when toggling between icons (e.g., accordion plus/minus, password eye). It supports size, rotation via active/inactive classes, and multiple icons via `items` + `activeIndex`.
+## Default Workflow
+1. Identify the UX pattern first, not the page-specific styling.
+2. Find the closest existing component in `primitives/`, `input/`, `misc/`, `overlays/`, or `layout/`.
+3. Compose upward from library pieces instead of creating one-off page components.
+4. Only introduce new components when the behavior cannot be expressed by extending the library without harming reuse.
+5. When a page needs a familiar UX convention, prefer the built-in implementation even if a custom version seems faster.
 
-## Structure
-- **`foundations/`**: shared TS-only utilities (`focus`, `spring`, `polymorphic`, `iconMap`).
-- **`primitives/`**: small building blocks (Button, Text, Icon, InputFrame, Field, Panel).
-- **`input/`**: form inputs composed from primitives.
-- **`overlays/`**: portal-based UI (Dropdown, ToastHost, ModalHost).
-- **`helpers/`**: composable helpers (IconSwap, motion helpers).
-- **`misc/`**: composables that don’t fit inputs/overlays.
-- **`motion/`**: motion-related utilities and hooks.
-- **`time/`**: time/date-related UI helpers.
+## New Feature Workflow
+For any new reusable UI-library feature:
+1. Implement the feature in its canonical source folder under `src/components`.
+2. Update exports, types, and related consumers only where needed to make the public surface coherent.
+3. Add a focused demo in `src/app/demo/content.tsx` with at least one live example.
+4. Add at least one usage snippet in the demo so adoption is copyable.
+5. Update the nearest folder `AGENTS.md` with what the feature is for, when to use it, and any new invariants.
+6. If the feature changes shared library conventions, also update this file so the workflow is visible at the top of the component tree.
+7. Run checks on the touched files before considering the feature complete.
 
-## How It Works (Fonts + Motion)
-- **Fonts:** Only two fonts are expected: body + heading.
-  - Body: `--font-body` → `font-body` utility.
-  - Headings: use `Text` variants (`heading*`) backed by `--font-heading` → `font-heading` utility.
-  - Use `Text` variants for typography; do not hardcode `font-family`.
-  - Devs can change fonts by updating the global CSS variables.
-- **Motion:** Use the utility classes defined in global CSS:
-  - `motion-micro`: tiny interactions (icons, subtle hovers).
-  - `motion-interactive`: buttons, toggles, active states.
-  - `motion-component`: component expand/collapse, panel transitions.
-  - `motion-macro`: large UI transitions (drawers, modals, layout shifts).
-  - Motion overrides: Wrap the app with `SettingsProvider` (`ui/foundations/settingsContext.tsx`) to allow a `motionDisabled` toggle. `useMotionAllowed` respects this context.
+## Invariants
+- **Library-first invariant:** Never start from raw HTML if a library component already covers the pattern. Search here first.
+- **Composition invariant:** Prefer `Text`, `Button`, `Panel`, `Field`, `InputFrame`, `Dropdown`, `Listbox`, `PasswordInput`, `SelectInput`, `ModalShell`, `ToastHost`, and other existing building blocks before introducing bespoke UI.
+- **Focus invariant:** Every interactive control must preserve visible keyboard focus using the shared focus tokens from `ui/foundations/focus.ts`. Do not invent ad hoc focus rings, remove outlines without replacement, or move focus styling away from the real interactive element.
+- **Form invariant:** Labels, descriptions, errors, required state, IDs, and `aria-describedby` should flow through `Field` plus the relevant input component instead of page-local markup.
+- **Input shell invariant:** Text-like controls should use `InputFrame` for the shell and `inputVariants` or `inputSizeClasses` for the actual input element. Padding belongs on the input, not the wrapper.
+- **Typography invariant:** Use `Text` variants or the shared font utilities. Do not hardcode font families in component-level UI.
+- **Motion invariant:** CSS motion utilities are the default. Use `motion/react` only where the library already does or where layout/reveal motion truly needs it. Respect reduced motion via `useMotionAllowed`.
+  - For load-aware media reveals, prefer `RevealImage` plus explicit `RevealGroup active` / `RevealItem active` wiring instead of page-local image-loading animation code.
+- **Overlay invariant:** Use the existing portal and host model for modals, dropdowns, and toasts. Do not create page-local overlay stacks.
+- **Skeleton invariant:** If a component ships with a skeleton, prefer `Component.Skeleton` over custom placeholders. Keep skeleton sizing driven by real content where possible.
+- **Naming invariant:** When documenting or extending components, use real file paths and real export names so agents can find the correct file quickly.
+- **React Compiler invariant:** Avoid `useCallback`, `useMemo`, and similar memoization wrappers unless they are strictly necessary for correctness or measurable performance. Prefer plain functions and values.
 
-## Component Coverage (UI)
-- **`Button` (`ui/primitives/Button.tsx`)**
-  - Variants, sizes, and alignment are standardized via `cva`.
-  - Icons should be optional and animation-friendly; keep icon rendering centralized.
-  - Loading should disable interaction and show the correct visual state.
-  - Links: `href` or `as` switches to anchor semantics.
-- **`Text` (`ui/primitives/Text.tsx`)**
-  - Use for typography; avoid hardcoded `font-*`.
-- **`Icon` (`ui/icons/Icon.tsx`)**
-  - `name`, `size` (`sm|md|lg`), `animate` to enable hover/active motion styles.
-- **`IconSwap` (`ui/helpers/IconSwap.tsx`)**
-  - Standardizes icon transitions; use `items` + `activeIndex`.
-  - Each item can have `activeClassName`/`inactiveClassName` for rotation/scale.
-  - Supports `size` and custom `transitionClassName`.
-- **`InputFrame` (`ui/primitives/InputFrame.tsx`)**
-  - Shell component that provides tone/size/disabled styling and slots: `start`, `end`.
-  - Use `inputVariants(...)` on the `<input>` for padding/size.
-- **`Field` (`ui/primitives/Field.tsx`)**
-  - Handles label/description/message with `tone` (`default|error|success`).
-  - Use `inputId`, `descriptionId`, `messageId` for accessibility.
-  - Error messages announce via `aria-live` (`role="alert"` when tone is error).
-- **Inputs (`ui/input/*`)**
-  - Inputs should be composed from `InputFrame` + `Field`.
-  - Validation should be opt-out friendly (e.g., `validate={undefined}` disables defaults).
-  - Combobox and select inputs should route menu styling through centralized helpers.
-- **`SegmentedControl` (`ui/misc/SegmentedControl.tsx`)**
-  - Controlled `value` / `onChange`.
-  - Layouts: `equal` (default), `auto`, `columns`.
-  - `roundedFull` for pill radius; options support `leadingIcon`/`trailingIcon`/`icon`.
-  - `disableWhenReducedMotion` toggles the animated pill via `useMotionAllowed`.
-- **`Accordion` (`ui/misc/Accordion.tsx`)**
-  - Controlled or uncontrolled: `open`, `defaultOpen`, `onOpenChange`.
-  - Uses `IconSwap` for plus/minus; content animates via `motion/react`.
-- **`CopyField` (`ui/misc/CopyField.tsx`)**
-  - Copy-to-clipboard wrapper on `Button`.
-  - Props: `value`, optional `display`, `textVariant`, `onCopy`, `copiedDurationMs`, `loading`.
-- **`ToastHost` + `showToast` (`ui/overlays/toast/*`)**
-  - Mount `ToastHost` once (portal-based). Use `showToast.success/error/loading/dismiss/promise`.
-  - `showToast.loading` returns an id; `dismiss(id)` removes it; `promise` updates from loading → success/error.
-  - `disableWhenReducedMotion` disables toast animations via `useMotionAllowed`.
-- **`Dropdown` (`ui/primitives/Dropdown.tsx`)**
-  - Render-prop API: `renderTrigger` + `renderMenu`.
-  - Supports hover + pin, positioning, and `menuWidth="trigger"`.
-  - `disableWhenReducedMotion` disables the menu animation via `useMotionAllowed`.
-- **`ModalHost` + modal helpers (`ui/overlays/modal/*` + `src/lib/modal.ts`)**
-  - Mount `ModalHost` once (portal-based).
-  - Focus should remain trapped in the top-most modal; `Escape` closes only the top-most modal.
+## UX Convention Map
+Use these defaults unless product requirements explicitly say otherwise.
 
-## Component + Skeleton Export Pattern
-- Components that ship a skeleton should export it via a static property:
-  - Example: `export const OnlineIndicator = Object.assign(OnlineIndicatorRoot, { Skeleton: OnlineIndicatorSkeleton })`
-  - Usage: `<OnlineIndicator.Skeleton />`
-- Keep the skeleton implementation **in the same file** as the component.
-- The goal is a consistent, discoverable API: `Component` + `Component.Skeleton`.
+- **Auth forms:** Use `EmailInput` and `PasswordInput`.
+  - Sign-up and password creation flows should usually enable `showStrength` on `PasswordInput`.
+  - Sign-in flows usually keep `showStrength={false}`.
+  - Password visibility toggling should use the built-in `PasswordInput`, not a custom eye button.
+- **Searchable selection:** Use `SelectInput`, `ComboboxTextInput`, or `ComboboxMultiSelectInput` before building a custom searchable menu.
+- **Phone numbers:** Use `PhoneInput` instead of a plain text input plus manual country code UI.
+- **Numeric entry:** Use `NumberInput`, `UnitNumberInput`, or `SliderInput` depending on whether the value is typed, unit-bound, or range-like.
+- **Choice groups:** Use `RadioInput`, `MultiselectInput`, or `ToggleInput`, which already route through the choice system and focus behavior.
+- **Date range filtering:** Use `DateRangeInput` from `ui/input/DateRangeInput.tsx` before creating ad hoc preset filters.
+- **File workflows:** Use `FileInput`, `UploadedFilesList`, and `FilePreview` before custom upload tiles.
+- **Copy actions:** Use `CopyField` instead of wiring clipboard actions by hand.
+- **Async states:** Use `Loader`, `SuspenseBoundary`, `ErrorState`, and `IdleState` before custom loading or empty-state wrappers.
+- **Toasts:** Use `showToast` with `ToastHost` for async mutation feedback, but not for initial page-load loading.
+- **Confirmation flows:** Use `useConfirmationModal` before creating page-specific confirm dialogs.
+- **Image inspection:** Use `InspectableImage` or `useImageInspectModal` for click-to-enlarge image behavior.
+- **Image reveal choreography:** Use `RevealImage` when an image needs a loading fallback, reveal animation, or should gate later reveal content.
+- **Segmented options:** Use `SegmentedControl` before rolling custom pill selectors.
+- **Disclosure content:** Use `Accordion` before building new expand/collapse rows.
 
-## Skeleton Sizing Rules
-- The `Skeleton` primitive accepts optional `children`.
-- When children are provided, they render invisibly (`opacity: 0`, no pointer events) to **drive the exact size** of the skeleton.
-- Prefer sizing via real content and component variants instead of hardcoded widths/heights.
+## App Standards To Preserve
+- **Hero gradient border:** Use the `hero-gradient-border` class from `src/app/(marketing)/home.css` for gradient borders that need transparency.
+  - Apply it to a wrapper element.
+  - Keep the wrapper background transparent so the border is drawn by the `::before` pseudo-element.
+  - Keep the inner panel itself transparent and apply interior fills separately, for example `bg-linear-to-b from-surface to-transparent`.
+- **Radius plus transparency:** When using transparent panels, keep wrapper and panel radii aligned, such as `rounded-t-3xl` on both layers when that is the chosen radius token.
+- **Form submission:** Prefer real `<form>` elements with `onSubmit` so Enter-to-submit and accessibility work naturally.
+- **Toast usage:** Do not show toast notifications for initial page loads. Use skeletons or inline loading states first, then use toast-wrapped requests for explicit user actions like submit, apply, refresh, or retry.
+- **SVG casing:** Inline SVG in JSX or TSX must use camelCase attribute names such as `clipPath`, `strokeWidth`, `colorInterpolationFilters`, `stopColor`, `stopOpacity`, and `maskType`.
+- **Redirects:** Use `redirect()` for redirects. For auth guards, do not leave the UI blank on `401` or `403`; redirect to `/login` instead of returning `null` or stalling on a permanent loading state.
 
-## Recommended Usage
-- For text: use `Text.Skeleton` with the same `variant`/`as` as the real text.
-- For composite components: pass sub‑skeletons as children (e.g., `UserInlineProfile.Skeleton` with `OnlineIndicator.Skeleton`).
+## Directory Map
+- `branding/`: brand identity primitives such as `Logo`.
+- `layout/`: app shell assemblies such as header and footer.
+- `mount/`: client-only mounts for modal and toast hosts.
+- `ui/foundations/`: focus, motion, settings, and shared CSS tokens.
+- `ui/helpers/`: small helpers such as `IconSwap`.
+- `ui/icons/`: icon rendering and registry infrastructure.
+- `ui/primitives/`: the first place to look for reusable building blocks.
+- `ui/input/`: ready-made form controls built from the primitives.
+- `ui/misc/`: cross-cutting UX components that do not fit input or overlay categories.
+- `ui/motion/`: reveal and scroll-driven helpers.
+- `ui/overlays/`: portal-backed UI including modals and toasts.
+- `ui/time/`: centralized date and relative-time presentation.
+
+## What Agents Should Avoid
+- Building raw buttons, inputs, labels, dropdowns, dialogs, or toasts when a library component already exists.
+- Creating page-local password toggles, custom strength meters, or custom confirmation dialogs.
+- Repeating focus classes instead of using the focus tokens.
+- Re-implementing common UX patterns with slight stylistic changes that could be handled by props, variants, or composition.
+- Editing multiple folders for one feature before checking whether a higher-level existing component already solves it.
+- Using toasts as a substitute for initial-load skeletons or inline field validation.
+- Memoizing ordinary component-local functions by default.
+
+## Documentation Strategy
+Each folder-level `AGENTS.md` should answer four questions quickly:
+- What belongs here?
+- When should an agent use this folder?
+- What invariants must remain true?
+- Which existing component is the preferred starting point?
+
+Reusable features are not complete until implementation, demo coverage, and documentation all exist together.
+
+## Folder Index
+- `src/components/branding/AGENTS.md`
+- `src/components/layout/AGENTS.md`
+- `src/components/layout/header/AGENTS.md`
+- `src/components/layout/footer/AGENTS.md`
+- `src/components/mount/AGENTS.md`
+- `src/components/ui/AGENTS.md`
+- `src/components/ui/foundations/AGENTS.md`
+- `src/components/ui/helpers/AGENTS.md`
+- `src/components/ui/icons/AGENTS.md`
+- `src/components/ui/primitives/AGENTS.md`
+- `src/components/ui/input/AGENTS.md`
+- `src/components/ui/input/choice/AGENTS.md`
+- `src/components/ui/input/files/AGENTS.md`
+- `src/components/ui/misc/AGENTS.md`
+- `src/components/ui/misc/state/AGENTS.md`
+- `src/components/ui/motion/AGENTS.md`
+- `src/components/ui/overlays/AGENTS.md`
+- `src/components/ui/overlays/modal/AGENTS.md`
+- `src/components/ui/overlays/toast/AGENTS.md`
+- `src/components/ui/time/AGENTS.md`
 </INSTRUCTIONS>

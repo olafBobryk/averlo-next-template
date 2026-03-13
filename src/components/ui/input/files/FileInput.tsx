@@ -1,13 +1,12 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
+import { AnimatePresence } from "motion/react";
 import * as React from "react";
-import { createFakeFetcher } from "@/lib/createFakeFetcher";
-import { showToast } from "@/lib/toast";
-import { FilePreview } from "../misc/FilePreview";
-import { Button } from "../primitives/Button";
-import { Text } from "../primitives/Text";
+import { showToast } from "@/lib/feedback";
+import { createFakeFetcher } from "@/lib/mock";
+import { FilePreview } from "../../misc/FilePreview";
+import { Button } from "../../primitives/Button";
+import { Text } from "../../primitives/Text";
 
 export enum UploadTypes {
 	PROFILE,
@@ -273,7 +272,7 @@ export const FileInput = React.forwardRef<FileInputHandle, FileInputProps>(
 		);
 
 		return (
-			// biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
+			// biome-ignore lint/a11y/noStaticElementInteractions: dropzone root listens for drag events
 			<div
 				onDragEnter={onDragEnter}
 				onDragOver={onDragOver}
@@ -342,7 +341,7 @@ export const FileInput = React.forwardRef<FileInputHandle, FileInputProps>(
 							Upload {uploadType === UploadTypes.CAR ? "Photos" : "Files"}
 						</Text>
 
-						<Text variant="captionMuted" className="mb-[25px]">
+						<Text variant="caption" tone="muted" className="mb-[25px]">
 							Drag &amp; drop or click to choose files
 						</Text>
 					</div>

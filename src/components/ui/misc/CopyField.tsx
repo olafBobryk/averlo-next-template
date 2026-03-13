@@ -2,17 +2,16 @@
 
 import clsx from "clsx";
 import * as React from "react";
-import { IconSwap } from "@/components/ui/helpers/IconSwap";
+import { CopyStatusIcon, useCopyAction } from "@/components/ui/helpers/useCopyAction";
 import { Button } from "@/components/ui/primitives/Button";
-import { Icon } from "@/components/ui/icons/Icon";
 import { Text } from "@/components/ui/primitives/Text";
-import { showToast } from "@/lib/toast";
 
 type CopyFieldProps = {
 	value: string;
 	display?: React.ReactNode;
 	copiedDurationMs?: number;
 	onCopy?: (value: string) => void | Promise<void>;
+	toastMessage?: string | false;
 	onClick?: React.MouseEventHandler<HTMLButtonElement>;
 	loading?: boolean;
 	disabled?: boolean;
@@ -32,6 +31,7 @@ function CopyFieldRoot({
 	display,
 	copiedDurationMs = 1500,
 	onCopy,
+	toastMessage,
 	onClick,
 	loading,
 	disabled,
@@ -39,42 +39,20 @@ function CopyFieldRoot({
 	textClassName,
 	iconClassName,
 }: CopyFieldProps) {
-	const [copied, setCopied] = React.useState(false);
-	const timeoutRef = React.useRef<number | null>(null);
+	const { copied, handleCopy } = useCopyAction({
+		value,
+		onCopy,
+		copiedDurationMs,
+		toastMessage,
+	});
 
-	React.useEffect(
-		() => () => {
-			if (timeoutRef.current) {
-				window.clearTimeout(timeoutRef.current);
-			}
-		},
-		[],
-	);
-
-	const handleCopy: React.MouseEventHandler<HTMLButtonElement> = async (
+	const handleCopyClick: React.MouseEventHandler<HTMLButtonElement> = async (
 		event,
 	) => {
 		onClick?.(event);
 		if (event.defaultPrevented || disabled) return;
 
-		try {
-			if (onCopy) {
-				await onCopy(value);
-			} else if (navigator?.clipboard?.writeText) {
-				await navigator.clipboard.writeText(value);
-			}
-			showToast.success("Copied to clipboard");
-			setCopied(true);
-			if (timeoutRef.current) {
-				window.clearTimeout(timeoutRef.current);
-			}
-			timeoutRef.current = window.setTimeout(
-				() => setCopied(false),
-				copiedDurationMs,
-			);
-		} catch {
-			// no-op
-		}
+		await handleCopy();
 	};
 
 	const displayValue = display ?? value;
@@ -93,15 +71,7 @@ function CopyFieldRoot({
 	);
 
 	const iconNode = (
-		<IconSwap
-			size="sm"
-			className={clsx(iconClassName)}
-			activeIndex={copied ? 1 : 0}
-			items={[
-				{ icon: <Icon name="copy" size="sm" animate /> },
-				{ icon: <Icon name="check" size="sm" animate /> },
-			]}
-		/>
+		<CopyStatusIcon copied={copied} size="sm" className={iconClassName} />
 	);
 
 	return (
@@ -111,7 +81,7 @@ function CopyFieldRoot({
 			data-copied={copied ? "true" : undefined}
 			loading={loading}
 			disabled={disabled}
-			onClick={handleCopy}
+			onClick={handleCopyClick}
 			trailingIcon={iconNode}
 			className={clsx(
 				"w-full min-w-0 !rounded-full !px-[15px] !py-[12px]",

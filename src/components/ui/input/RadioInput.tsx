@@ -1,14 +1,15 @@
 "use client";
 
-import * as React from "react";
 import clsx from "clsx";
-import { Field } from "@/components/ui/primitives/Field";
+import * as React from "react";
 import { ChoiceField } from "@/components/ui/input/choice/ChoiceField";
 import { ChoiceIndicatorRadio } from "@/components/ui/input/choice/ChoiceIndicators";
+import { Field } from "@/components/ui/primitives/Field";
 
 type RadioOption = {
 	value: string;
 	label: React.ReactNode;
+	description?: React.ReactNode;
 	disabled?: boolean;
 };
 
@@ -56,12 +57,15 @@ export function RadioInput({
 	const fallbackId = React.useId();
 	const baseId = inputId ?? name ?? fallbackId;
 	const groupName = name ?? baseId;
-	const labelTargetId = options[0]?.value ? `${baseId}-${options[0].value}` : undefined;
+	const labelTargetId = options[0]?.value
+		? `${baseId}-${options[0].value}`
+		: undefined;
 	const descriptionId = description ? `${baseId}-description` : undefined;
 	const messageId = message ? `${baseId}-message` : undefined;
 	const describedBy =
-		[descriptionId, message ? messageId : undefined].filter(Boolean).join(" ") ||
-		undefined;
+		[descriptionId, message ? messageId : undefined]
+			.filter(Boolean)
+			.join(" ") || undefined;
 	const isInvalid = tone === "error" && Boolean(message);
 
 	React.useEffect(() => {
@@ -103,6 +107,7 @@ export function RadioInput({
 							name={groupName}
 							value={option.value}
 							label={option.label}
+							description={option.description}
 							checked={isSelected}
 							disabled={isDisabled}
 							required={required}

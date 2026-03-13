@@ -1,10 +1,11 @@
-/** biome-ignore-all lint/suspicious/noUnknownAtRules: <explanation> */
+/** biome-ignore-all lint/suspicious/noUnknownAtRules: Tailwind and theme at-rules are expected here. */
 @import "tailwindcss";
 @import "./iconAnimations.css";
 
 :root {
 	--font-body: "Inter", system-ui, -apple-system, sans-serif;
 	--font-heading: "Inter", system-ui, -apple-system, sans-serif;
+	--text-scale: 1;
 
 	--motion-micro-duration: 140ms;
 	--motion-micro-ease: cubic-bezier(0.33, 0.1, 0.2, 1);
@@ -73,6 +74,10 @@
 	.inset-center {
 		@apply absolute inset-1/2 -translate-1/2;
 	}
+
+	.scroll-target {
+		@apply scroll-m-[100px];
+	}
 }
 
 @layer utilities {
@@ -111,7 +116,7 @@
 	 * - Chips / filters being selected or deselected.
 	 *
 	 * Specific examples:
-	 * - DateRangeDropdown pill: background + border subtle change on hover/active.
+	 * - DateRangeInput pill: background + border subtle change on hover/active.
 	 * - Cards that slightly lift with a shadow when hovered.
 	 * - A button that grows in width when loading text appears ("Save" -> "Saving…").
 	 */
@@ -248,8 +253,8 @@
 	select:-webkit-autofill:active {
 		-webkit-box-shadow: 0 0 0 1000px transparent inset !important;
 		-webkit-text-fill-color: inherit !important;
-		caret-color: inherit !important;
 		transition: background-color 5000s ease-in-out 0s !important;
+		caret-color: rgb(var(--color-foreground-rgb) / 1) !important;
 	}
 }
 

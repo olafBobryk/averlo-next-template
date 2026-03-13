@@ -5,16 +5,20 @@ import * as React from "react";
 type SettingsContextValue = {
 	motionDisabled: boolean;
 	setMotionDisabled: (value: boolean) => void;
+	textScale: number;
+	setTextScale: (value: number) => void;
 };
 
 type SettingsProviderProps = {
 	children: React.ReactNode;
 	defaultMotionDisabled?: boolean;
+	defaultTextScale?: number;
 	storageKey?: string | null;
 };
 
 type StoredSettings = {
 	motionDisabled?: boolean;
+	textScale?: number;
 };
 
 const DEFAULT_STORAGE_KEY = "webvizion-ui-settings";
@@ -22,6 +26,9 @@ const DEFAULT_STORAGE_KEY = "webvizion-ui-settings";
 const SettingsContext = React.createContext<SettingsContextValue | undefined>(
 	undefined,
 );
+
+const isValidTextScale = (value: unknown): value is number =>
+	typeof value === "number" && Number.isFinite(value) && value > 0;
 
 const readStoredSettings = (storageKey: string) => {
 	try {
@@ -46,17 +53,30 @@ const writeStoredSettings = (storageKey: string, settings: StoredSettings) => {
 export function SettingsProvider({
 	children,
 	defaultMotionDisabled = false,
+	defaultTextScale = 1,
 	storageKey = DEFAULT_STORAGE_KEY,
 }: SettingsProviderProps) {
 	const [motionDisabled, setMotionDisabled] = React.useState(
 		defaultMotionDisabled,
 	);
+	const [textScale, setTextScale] = React.useState(defaultTextScale);
 	const hasHydrated = React.useRef(false);
 
 	React.useEffect(() => {
 		if (!storageKey || !hasHydrated.current) return;
-		writeStoredSettings(storageKey, { motionDisabled });
-	}, [motionDisabled, storageKey]);
+		writeStoredSettings(storageKey, { motionDisabled, textScale });
+	}, [motionDisabled, textScale, storageKey]);
+
+	React.useEffect(() => {
+		document.documentElement.style.setProperty(
+			"--text-scale",
+			String(textScale),
+		);
+
+		return () => {
+			document.documentElement.style.removeProperty("--text-scale");
+		};
+	}, [textScale]);
 
 	React.useEffect(() => {
 		if (!storageKey) {
@@ -66,6 +86,9 @@ export function SettingsProvider({
 		const stored = readStoredSettings(storageKey);
 		if (typeof stored?.motionDisabled === "boolean") {
 			setMotionDisabled(stored.motionDisabled);
+		}
+		if (isValidTextScale(stored?.textScale)) {
+			setTextScale(stored.textScale);
 		}
 		hasHydrated.current = true;
 	}, [storageKey]);
@@ -78,19 +101,24 @@ export function SettingsProvider({
 			if (typeof stored?.motionDisabled === "boolean") {
 				setMotionDisabled(stored.motionDisabled);
 			}
+			if (isValidTextScale(stored?.textScale)) {
+				setTextScale(stored.textScale);
+			}
 		};
 
 		window.addEventListener("storage", handleStorage);
 		return () => window.removeEventListener("storage", handleStorage);
 	}, [storageKey]);
 
-	const value = React.useMemo(
-		() => ({ motionDisabled, setMotionDisabled }),
-		[motionDisabled],
-	);
-
 	return (
-		<SettingsContext.Provider value={value}>
+		<SettingsContext.Provider
+			value={{
+				motionDisabled,
+				setMotionDisabled,
+				textScale,
+				setTextScale,
+			}}
+		>
 			{children}
 		</SettingsContext.Provider>
 	);
