@@ -1,10 +1,15 @@
 "use client";
 
 import clsx from "clsx";
-import * as React from "react";
-import { CopyStatusIcon, useCopyAction } from "@/components/ui/helpers/useCopyAction";
+import type * as React from "react";
+import {
+	CopyStatusIcon,
+	useCopyAction,
+} from "@/components/ui/helpers/useCopyAction";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
+
+type CopyFieldButtonSize = "md" | "sm" | "fit";
 
 type CopyFieldProps = {
 	value: string;
@@ -15,6 +20,10 @@ type CopyFieldProps = {
 	onClick?: React.MouseEventHandler<HTMLButtonElement>;
 	loading?: boolean;
 	disabled?: boolean;
+	buttonVariant?: React.ComponentProps<typeof Button>["variant"];
+	buttonSize?: CopyFieldButtonSize;
+	textVariant?: React.ComponentProps<typeof Text>["variant"];
+	textTone?: React.ComponentProps<typeof Text>["tone"];
 	className?: string;
 	textClassName?: string;
 	iconClassName?: string;
@@ -22,6 +31,10 @@ type CopyFieldProps = {
 
 type CopyFieldSkeletonProps = {
 	placeholder?: string;
+	buttonVariant?: React.ComponentProps<typeof Button>["variant"];
+	buttonSize?: CopyFieldButtonSize;
+	textVariant?: React.ComponentProps<typeof Text>["variant"];
+	textTone?: React.ComponentProps<typeof Text>["tone"];
 	className?: string;
 	textClassName?: string;
 };
@@ -35,6 +48,10 @@ function CopyFieldRoot({
 	onClick,
 	loading,
 	disabled,
+	buttonVariant = "solid",
+	buttonSize = "md",
+	textVariant = "body",
+	textTone,
 	className,
 	textClassName,
 	iconClassName,
@@ -56,6 +73,7 @@ function CopyFieldRoot({
 	};
 
 	const displayValue = display ?? value;
+	const resolvedButtonSize = buttonSize === "fit" ? "sm" : buttonSize;
 	const isPrimitive =
 		typeof displayValue === "string" || typeof displayValue === "number";
 	const textBaseClasses = clsx(
@@ -63,7 +81,12 @@ function CopyFieldRoot({
 		textClassName,
 	);
 	const content = isPrimitive ? (
-		<Text as="span" variant="body" className={clsx(textBaseClasses)}>
+		<Text
+			as="span"
+			variant={textVariant}
+			tone={textTone}
+			className={clsx(textBaseClasses)}
+		>
 			{displayValue}
 		</Text>
 	) : (
@@ -76,7 +99,8 @@ function CopyFieldRoot({
 
 	return (
 		<Button
-			variant="solid"
+			variant={buttonVariant}
+			size={resolvedButtonSize}
 			align="between"
 			data-copied={copied ? "true" : undefined}
 			loading={loading}
@@ -84,7 +108,9 @@ function CopyFieldRoot({
 			onClick={handleCopyClick}
 			trailingIcon={iconNode}
 			className={clsx(
-				"w-full min-w-0 !rounded-full !px-[15px] !py-[12px]",
+				buttonVariant === "solid" && buttonSize === "md"
+					? "w-full min-w-0 !rounded-full !px-[15px] !py-[12px]"
+					: "min-w-0",
 				className,
 			)}
 		>
@@ -95,21 +121,30 @@ function CopyFieldRoot({
 
 function CopyFieldSkeleton({
 	placeholder = "example.com/referral=123456",
+	buttonVariant = "solid",
+	buttonSize = "md",
+	textVariant = "body",
+	textTone,
 	className,
 	textClassName,
 }: CopyFieldSkeletonProps) {
 	return (
 		<Button.Skeleton
+			variant={buttonVariant}
+			size={buttonSize === "fit" ? "sm" : buttonSize}
 			align="between"
-			fullWidth
+			fullWidth={buttonVariant === "solid" && buttonSize === "md"}
 			className={clsx(
-				"w-full min-w-0 !rounded-full !px-[15px] !py-[12px]",
+				buttonVariant === "solid" && buttonSize === "md"
+					? "w-full min-w-0 !rounded-full !px-[15px] !py-[12px]"
+					: "min-w-0",
 				className,
 			)}
 		>
 			<Text
 				as="span"
-				variant="body"
+				variant={textVariant}
+				tone={textTone}
 				className={clsx(
 					"block min-w-0 flex-1 truncate text-left",
 					textClassName,

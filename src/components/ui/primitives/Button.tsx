@@ -54,7 +54,7 @@ const buttonStyles = cva(
 				primaryDark:
 					"bg-foreground text-background hover:bg-foreground-hover active:bg-foreground-active border border-transparent",
 				solid:
-					"bg-border/5 text-foreground hover:bg-border/10 border border-transparent",
+					"border! border-border! bg-white/70 shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:bg-white active:bg-[#F3F3F3]",
 				ghost:
 					"border-0 bg-transparent !p-0 text-foreground hover:text-foreground/85 active:text-foreground/70 hover:bg-transparent hover:translate-y-0 hover:scale-100 active:translate-y-0 active:!scale-100",
 			},
