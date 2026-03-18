@@ -4,12 +4,10 @@ import "./globals.css";
 import Footer from "@/components/layout/footer/Footer";
 import Header from "@/components/layout/header/Header";
 import ModalClientMount from "@/components/mount/ModalClientMount";
+import ScrollController from "@/components/mount/ScrollController";
 import ToastClientMount from "@/components/mount/ToastClientMount";
 import { SettingsProvider } from "@/components/ui/foundations/settingsContext";
-import {
-	IconProvider,
-	localIconRegistry,
-} from "@/components/ui/icons/iconRegistry";
+import { IconProvider } from "@/components/ui/icons/iconRegistry";
 import { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";
 import { KEYWORDS } from "@/config/metadataConfig";
 
@@ -57,6 +55,7 @@ export default function RootLayout({
 						{/* TODO: Swap mount order or placement if a project needs overlays elsewhere. */}
 						<ModalClientMount />
 						<ToastClientMount />
+						<ScrollController />
 					</IconProvider>
 				</SettingsProvider>
 			</body>

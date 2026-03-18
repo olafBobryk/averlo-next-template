@@ -5,7 +5,6 @@ import { AnimatePresence, motion, type Variants } from "motion/react";
 import Image, { type ImageProps } from "next/image";
 import * as React from "react";
 import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
-import { Skeleton } from "@/components/ui/misc/Skeleton";
 import {
 	RevealItem,
 	type RevealItemProps,
@@ -17,6 +16,8 @@ type RevealImageOwnProps = {
 	fallback?: React.ReactNode;
 	fallbackClassName?: string;
 	contentClassName?: string;
+	overlay?: React.ReactNode;
+	revealDelay?: number;
 	onLoadStateChange?: (loaded: boolean) => void;
 	onRevealStateChange?: (revealed: boolean) => void;
 	variants?: Variants;
@@ -54,6 +55,8 @@ export function RevealImage({
 	fallback,
 	fallbackClassName,
 	contentClassName,
+	overlay,
+	revealDelay = 0,
 	onLoadStateChange,
 	onRevealStateChange,
 	placeholder,
@@ -82,16 +85,23 @@ export function RevealImage({
 		onRevealStateChange?.(revealed);
 	}, [revealed, onRevealStateChange]);
 
+	const hasCustomRevealVariants = Boolean(variants);
 	const revealTransition = motionAllowed
-		? getMotionTiming("component")
+		? {
+				...getMotionTiming("grand"),
+				delay: revealDelay,
+			}
 		: undefined;
 	const resolvedFallback =
 		fallback ??
 		(placeholder === "blur" ? null : (
-			<Skeleton className="h-full w-full rounded-none" />
+			<div />
+			// <Skeleton className="h-full w-full rounded-none" />
 		));
 	const imageMotionClassName = clsx(
-		fill ? "relative h-full w-full" : "relative w-fit h-fit",
+		fill
+			? "relative h-full w-full overflow-hidden"
+			: "relative h-fit w-fit overflow-hidden",
 	);
 
 	return (
@@ -130,15 +140,32 @@ export function RevealImage({
 					initial={false}
 					animate={
 						motionAllowed
-							? loaded
-								? { opacity: 1, scale: 1, filter: "blur(0px)" }
-								: { opacity: 0, scale: 0.985, filter: "blur(10px)" }
-							: { opacity: 1, scale: 1, filter: "blur(0px)" }
+							? hasCustomRevealVariants
+								? {
+										opacity: loaded ? 1 : 0,
+										clipPath: "inset(0% 0% 0% 0%)",
+										scale: 1,
+									}
+								: loaded
+									? {
+											opacity: 1,
+											clipPath: "inset(0% 0% 0% 0%)",
+											scale: 1,
+											radius: 20,
+										}
+									: {
+											opacity: 0.8,
+											clipPath: "inset(100% 0% 0% 0%)",
+											scale: 1,
+											radius: 0,
+										}
+							: { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", scale: 1 }
 					}
-					transition={revealTransition}
+					transition={hasCustomRevealVariants ? undefined : revealTransition}
 					onAnimationComplete={() => {
 						if (!loaded) return;
 						if (revealed) return;
+						if (hasCustomRevealVariants) return;
 						setRevealed(true);
 					}}
 				>
@@ -153,13 +180,14 @@ export function RevealImage({
 						onLoadingComplete={(image) => {
 							onLoadingComplete?.(image);
 							setLoaded(true);
-							if (!motionAllowed) {
+							if (!motionAllowed || hasCustomRevealVariants) {
 								setRevealed(true);
 							}
 						}}
 						className={clsx(fill ? "h-full w-full" : undefined, imageClassName)}
 						{...imageProps}
 					/>
+					{overlay}
 				</motion.div>
 			</div>
 		</RevealItem>

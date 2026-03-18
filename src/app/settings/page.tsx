@@ -30,11 +30,32 @@ export default function SettingsPage() {
 
 	const selectedValues = [
 		settings.motionDisabled ? "reduce-motion" : null,
+		settings.smoothScrollAvailable && settings.smoothScrollDisabled
+			? "disable-smooth-scroll"
+			: null,
 		settings.textScale > 1 ? "large-text" : null,
 	].filter(Boolean) as string[];
 
+	const options = settings.smoothScrollAvailable
+		? [
+				...SETTINGS_OPTIONS.slice(0, 1),
+				{
+					value: "disable-smooth-scroll",
+					label: "Disable smooth scroll",
+					description:
+						"Uses immediate jumps for anchor links and desktop wheel scrolling.",
+				},
+				...SETTINGS_OPTIONS.slice(1),
+			]
+		: SETTINGS_OPTIONS;
+
 	const handleSettingsChange = (values: string[]) => {
 		settings.setMotionDisabled(values.includes("reduce-motion"));
+		if (settings.smoothScrollAvailable) {
+			settings.setSmoothScrollDisabled(
+				values.includes("disable-smooth-scroll"),
+			);
+		}
 		settings.setTextScale(values.includes("large-text") ? 1.1 : 1);
 	};
 
@@ -56,7 +77,7 @@ export default function SettingsPage() {
 			<Panel display="flex" padding="md" gap="md" shadow="none">
 				<ToggleInput
 					label="Accessibility"
-					options={SETTINGS_OPTIONS}
+					options={options}
 					value={selectedValues}
 					onChange={handleSettingsChange}
 				/>

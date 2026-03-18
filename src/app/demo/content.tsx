@@ -59,8 +59,10 @@ import { Warning } from "@/components/ui/misc/Warning";
 import { RevealGroup, RevealItem } from "@/components/ui/motion/Reveal";
 import { RevealImage } from "@/components/ui/motion/RevealImage";
 import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
+import { ScrollHighlightText } from "@/components/ui/motion/ScrollHighlightText";
 import { ScrollLag } from "@/components/ui/motion/ScrollLag";
 import { ScrollParallax } from "@/components/ui/motion/ScrollParallax";
+import { ScrollWidth } from "@/components/ui/motion/ScrollWidth";
 import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirmationModal";
 import { useImageInspectModal } from "@/components/ui/overlays/modal/useImageInspectModal";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
@@ -381,8 +383,10 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: ["ImageInspectModal"],
 	},
 	ScrambleReveal: { uses: ["motionTiming"], usedIn: [] },
+	ScrollHighlightText: { uses: [], usedIn: [] },
 	ScrollLag: { uses: [], usedIn: [] },
 	ScrollParallax: { uses: [], usedIn: [] },
+	ScrollWidth: { uses: ["spring"], usedIn: [] },
 	MultiselectInput: {
 		uses: [
 			"ChoiceField",
@@ -2451,22 +2455,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "reveal-item",
-						kind: "component",
-						name: "RevealItem",
-						label: "Reveal child",
-						related: relatedMap.RevealItem,
-						Render() {
-							return (
-								<RevealGroup className="flex flex-col gap-2">
-									<RevealItem>
-										<Text variant="bodyStrong">Single item</Text>
-									</RevealItem>
-								</RevealGroup>
-							);
-						},
-					},
-					{
 						id: "reveal-image",
 						kind: "component",
 						name: "RevealImage",
@@ -2547,28 +2535,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "reveal-image-usage",
-						kind: "usage",
-						name: "RevealImage",
-						label: "Usage snippet",
-						related: relatedMap.RevealImage,
-						snippet: `const [imageReady, setImageReady] = useState(false)
-
-<RevealImage
-  src="/hero.jpg"
-  alt="Hero image"
-  fill
-  useViewport={false}
-  contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl"
-  imageClassName="object-cover"
-  onRevealStateChange={setImageReady}
-/>
-
-<RevealGroup active={imageReady}>
-  <RevealItem active={imageReady}>...</RevealItem>
-</RevealGroup>`,
-					},
-					{
 						id: "scramble-reveal",
 						kind: "component",
 						name: "ScrambleReveal",
@@ -2595,6 +2561,27 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
+						id: "scroll-highlight-text",
+						kind: "component",
+						name: "ScrollHighlightText",
+						label: "Scroll-driven text emphasis",
+						related: relatedMap.ScrollHighlightText,
+						Render() {
+							return (
+								<div className="space-y-3">
+									<Text variant="body" tone="muted">
+										Scroll until the headline enters the viewport.
+									</Text>
+									<Text variant="headingSm" as="h3">
+										<ScrollHighlightText className="text-foreground">
+											Clarity arrives as the section lands.
+										</ScrollHighlightText>
+									</Text>
+								</div>
+							);
+						},
+					},
+					{
 						id: "scroll-lag",
 						kind: "component",
 						name: "ScrollLag",
@@ -2605,6 +2592,43 @@ export const demoPages: DemoPage[] = [
 								<ScrollLag className="rounded-lg border border-border/10 bg-surface px-3 py-2">
 									<Text variant="bodyStrong">ScrollLag</Text>
 								</ScrollLag>
+							);
+						},
+					},
+					{
+						id: "scroll-width",
+						kind: "component",
+						name: "ScrollWidth",
+						label: "Scroll-driven frame reveal",
+						related: relatedMap.ScrollWidth,
+						Render() {
+							return (
+								<div className="space-y-3">
+									<Text variant="body" tone="muted">
+										The side masks open up as the card crosses the viewport.
+									</Text>
+									<div className="min-h-[18rem]">
+										<ScrollWidth
+											className="h-64 w-full"
+											frameClassName="border border-border/10 bg-surface/70"
+											contentClassName="rounded-[inherit] bg-linear-to-br from-surface via-surface/90 to-surface-secondary/70"
+											coverClassName="bg-background"
+											startInset={112}
+											endInset={0}
+											startRadius={{ tl: 40, tr: 40, br: 24, bl: 24 }}
+											endRadius={{ tl: 24, tr: 24, br: 24, bl: 24 }}
+											progressRange={[0.1, 0.8]}
+										>
+											<div className="flex h-full flex-col justify-end gap-2 p-6">
+												<Text variant="headingSm">ScrollWidth</Text>
+												<Text variant="body" tone="muted">
+													Use it for panels or media where the frame should open
+													progressively instead of snapping full width.
+												</Text>
+											</div>
+										</ScrollWidth>
+									</div>
+								</div>
 							);
 						},
 					},

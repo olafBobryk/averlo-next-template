@@ -10,6 +10,7 @@ Client-only mounts for global UI hosts that must exist once near the app root.
 
 ## Prefer These Files
 - `src/components/mount/ModalClientMount.tsx`: mounts `ModalHost` on the client.
+- `src/components/mount/ScrollController.tsx`: centralizes native smooth-scroll behavior and same-page anchor handling.
 - `src/components/mount/ToastClientMount.tsx`: mounts `ToastHost` on the client.
 
 ## Invariants
@@ -20,6 +21,7 @@ Client-only mounts for global UI hosts that must exist once near the app root.
 
 ## How To Use It
 - Place the modal and toast mounts in the global layout so any page can use the matching hooks or event APIs.
+- Place `ScrollController` in the global layout when the app should coordinate same-page anchor scrolls and route resets through one client mount.
 - If an overlay needs a special portal target, prefer host options or portal targets over introducing extra root mounts.
 
 ## Avoid

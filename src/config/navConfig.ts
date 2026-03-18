@@ -1,6 +1,7 @@
 export const NAV_LINKS = [
 	{ name: "Home", link: "/" },
 	{ name: "Demo", link: "/demo" },
+	{ name: "Settings", link: "/settings" },
 ];
 
 export const SOCIAL_LINKS = [

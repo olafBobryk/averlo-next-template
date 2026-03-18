@@ -12,8 +12,10 @@ Shared reveal and scroll-motion helpers for cases where motion meaningfully impr
 ## Prefer These Files
 - `src/components/ui/motion/Reveal.tsx`: exports `RevealGroup` and `RevealItem` for entrance animation.
 - `src/components/ui/motion/RevealImage.tsx`: load-aware image reveal that can coordinate with other reveal motion.
+- `src/components/ui/motion/ScrollHighlightText.tsx`: character-by-character highlight sweep driven by scroll progress.
 - `src/components/ui/motion/ScrollLag.tsx`: subtle lagging scroll effect.
 - `src/components/ui/motion/ScrollParallax.tsx`: scroll-based offset effect.
+- `src/components/ui/motion/ScrollWidth.tsx`: scroll-driven frame mask for progressive width reveals.
 - `src/components/ui/motion/ScrambleReveal.tsx`: text scramble reveal effect.
 
 ## Invariants
@@ -31,7 +33,9 @@ Shared reveal and scroll-motion helpers for cases where motion meaningfully impr
 - Use `RevealGroup` and `RevealItem` for section or list entrance choreography.
 - Use `RevealImage` when an image should fade in after load without flashing, or when image readiness should trigger later reveal choreography.
 - Use `active` on `RevealGroup` or `RevealItem` when reveal timing should be driven by app state instead of viewport entry.
+- Use `ScrollHighlightText` when a short string should brighten progressively as it enters the viewport.
 - Use `ScrollParallax` and `ScrollLag` sparingly for decorative depth effects.
+- Use `ScrollWidth` when a panel or media block should reveal from a narrow inset to a full-width frame while preserving rounded corners.
 - Use `ScrambleReveal` for decoding/scramble text reveals; prefer `maintainSpace` when layout must remain stable.
 - If a component already animates itself sufficiently, do not wrap it in extra motion without a clear UX payoff.
 - For gradient-border cards or panels, put layout classes such as `w-full`, `flex`, or `justify-center` on `RevealItem` and leave the wrapped element responsible for its own visual structure.

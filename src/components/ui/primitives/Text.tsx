@@ -4,7 +4,7 @@ import clsx from "clsx";
 import type * as React from "react";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 
-const textVariants = cva("", {
+export const textVariants = cva("", {
 	variants: {
 		variant: {
 			headingHero:

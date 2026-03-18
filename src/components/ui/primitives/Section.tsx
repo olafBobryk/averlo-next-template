@@ -16,6 +16,7 @@ const outerStyles = cva("w-full", {
 			soft: "px-[calc(var(--spacing-section-x)/2)] py-[calc(var(--spacing-section-y)/2)]",
 			default: "px-[var(--spacing-section-x)] py-[var(--spacing-section-y)]",
 			"flush-x": "py-[var(--section-py)]",
+			hero: "px-[var(--spacing-section-x)] pb-[var(--spacing-section-y)]  pt-[calc(var(--spacing-section-y)*2)]",
 		},
 		background: {
 			none: "",

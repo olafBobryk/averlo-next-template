@@ -1,4 +1,3 @@
-// components/ui/motion/Reveal.tsx
 "use client";
 
 import { Slot } from "@radix-ui/react-slot";
@@ -13,6 +12,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 const SlotWithRef = forwardRef<HTMLElement, ComponentProps<typeof Slot>>(
@@ -142,7 +142,7 @@ export function RevealItem({
 }: RevealItemProps) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const isControlled = typeof active === "boolean";
-	const [hasPlayed, setHasPlayed] = useState(false);
+	const revealTiming = getMotionTiming("grand");
 	const childRef = useRef<HTMLElement | null>(null);
 	const originalTransitionRef = useRef<string | null>(null);
 	const restoredRef = useRef(false);
@@ -151,12 +151,13 @@ export function RevealItem({
 	// Temporarily remove the child's own transition while the reveal animation runs
 	// to avoid timing conflicts, then restore it after the animation completes.
 	useEffect(() => {
-		if (isControlled || !asChild || !motionAllowed || hasPlayed) return;
+		if (isControlled || !asChild || !motionAllowed) return;
+		if (restoredRef.current) return;
 		const node = childRef.current;
 		if (!node) return;
 		originalTransitionRef.current = node.style.transition;
 		node.style.transition = "none";
-	}, [isControlled, asChild, motionAllowed, hasPlayed]);
+	}, [isControlled, asChild, motionAllowed]);
 
 	// Clear any queued restore on unmount
 	useEffect(() => {
@@ -167,7 +168,11 @@ export function RevealItem({
 		};
 	}, []);
 
-	const handleAnimationComplete = () => {
+	const handleAnimationComplete = (definition: unknown) => {
+		// Only restore the child's transition when the "show" reveal finishes.
+		// Framer also fires this for the initial "hidden" cascade on client-side
+		// navigation — guard with definition check to avoid premature restore.
+		if (definition !== "show") return;
 		if (isControlled) return;
 		if (!asChild || !motionAllowed) return;
 		if (restoredRef.current) return;
@@ -180,7 +185,9 @@ export function RevealItem({
 		restoreRafRef.current = requestAnimationFrame(() => {
 			node.style.transition = originalTransitionRef.current ?? "";
 			restoreRafRef.current = null;
-			setHasPlayed(true);
+			// Note: intentionally NOT swapping MotionSlot → Slot here.
+			// Doing so causes React to unmount/remount children (e.g. ScrambleReveal),
+			// which resets their hasPlayed refs and triggers double animations.
 		});
 	};
 
@@ -188,20 +195,17 @@ export function RevealItem({
 		variants ??
 		({
 			hidden: disableTransform ? { opacity: 0 } : { opacity: 0, y: 12 },
-			// Match motion-macro duration to align with group timing
 			show: disableTransform
-				? { opacity: 1, transition: { ease: "easeOut", duration: 0.32 } }
+				? { opacity: 1, transition: revealTiming }
 				: {
 						opacity: 1,
 						y: 0,
-						transition: { ease: "easeOut", duration: 0.32 },
+						transition: revealTiming,
 						// Drop transform after the animation to avoid flicker on scroll
 						transitionEnd: { transform: "none", y: 0 },
 					},
 		} as const);
 
-	// After the first play, render a plain element to avoid Framer re-applying
-	// motion bookkeeping on subsequent scrolls.
 	if (!motionAllowed) {
 		const Tag = asChild ? Slot : (as ?? "div");
 		return (
@@ -216,11 +220,6 @@ export function RevealItem({
 				{children}
 			</Tag>
 		);
-	}
-
-	if (!isControlled && hasPlayed) {
-		const Tag = asChild ? Slot : (as ?? "div");
-		return <Tag className={className}>{children}</Tag>;
 	}
 
 	const MotionTag = asChild ? MotionSlot : (as ?? motion.div);
