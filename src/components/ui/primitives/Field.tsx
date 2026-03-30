@@ -15,6 +15,7 @@ type FieldProps = {
 	inputId?: string;
 	descriptionId?: string;
 	messageId?: string;
+	disableMessage?: boolean;
 	className?: string;
 	children: React.ReactNode;
 };
@@ -28,6 +29,7 @@ export function Field({
 	inputId,
 	descriptionId,
 	messageId,
+	disableMessage = false,
 	className,
 	children,
 }: FieldProps) {
@@ -41,67 +43,71 @@ export function Field({
 				.filter(Boolean)
 				.join(" ")}
 		>
-			<div className="flex flex-col gap-1">
-				{label ? (
-					<Text
-						as="label"
-						variant="body"
-						htmlFor={inputId}
-						className="pointer-events-none"
-					>
-						<span className="inline-flex items-center gap-1">
-							{label}
-							{required ? (
-								<span aria-hidden="true" className="text-danger">
-									*
-								</span>
-							) : null}
-						</span>
-					</Text>
-				) : null}
+			{label || description ? (
+				<div className="flex flex-col gap-1">
+					{label ? (
+						<Text
+							as="label"
+							variant="body"
+							htmlFor={inputId}
+							className="pointer-events-none"
+						>
+							<span className="inline-flex items-center gap-1">
+								{label}
+								{required ? (
+									<span aria-hidden="true" className="text-danger">
+										*
+									</span>
+								) : null}
+							</span>
+						</Text>
+					) : null}
 
-				{description ? (
-					<Text
-						as="p"
-						variant="body"
-						tone="muted"
-						className="text-sm"
-						id={descriptionId}
-					>
-						{description}
-					</Text>
-				) : null}
-			</div>
+					{description ? (
+						<Text
+							as="p"
+							variant="body"
+							tone="muted"
+							className="text-sm"
+							id={descriptionId}
+						>
+							{description}
+						</Text>
+					) : null}
+				</div>
+			) : null}
 
 			{children}
 
-			<div
-				className={[
-					"transition-all motion-micro -mt-2.5 overflow-hidden",
-					message ? "max-h-[26px]" : "max-h-0",
-				].join(" ")}
-				role={announceMessage ? "alert" : undefined}
-				aria-live={announceMessage ? "polite" : undefined}
-				aria-atomic={announceMessage ? "true" : undefined}
-			>
-				<Text
-					as="p"
-					variant="caption"
-					tone="muted"
+			{disableMessage ? null : (
+				<div
 					className={[
-						"transition-all motion-micro mt-2.5", // reserve one line
-						tone === "error"
-							? "!text-danger"
-							: tone === "success"
-								? "!text-success"
-								: "text-transparent",
+						"transition-all motion-micro -mt-2.5 overflow-hidden",
+						message ? "max-h-[26px]" : "max-h-0",
 					].join(" ")}
-					id={messageId}
-					aria-hidden={!hasMessage}
+					role={announceMessage ? "alert" : undefined}
+					aria-live={announceMessage ? "polite" : undefined}
+					aria-atomic={announceMessage ? "true" : undefined}
 				>
-					{message ?? "placeholder"}
-				</Text>
-			</div>
+					<Text
+						as="p"
+						variant="caption"
+						tone="muted"
+						className={[
+							"transition-all motion-micro mt-2.5", // reserve one line
+							tone === "error"
+								? "!text-danger"
+								: tone === "success"
+									? "!text-success"
+									: "text-transparent",
+						].join(" ")}
+						id={messageId}
+						aria-hidden={!hasMessage}
+					>
+						{message ?? "placeholder"}
+					</Text>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -1,0 +1,62 @@
+import { Icon } from "@/components/ui/icons/Icon";
+import { Button, type ButtonProps } from "@/components/ui/primitives/Button";
+import { Text, type TextProps } from "@/components/ui/primitives/Text";
+
+type PaginationControlsProps = {
+	current: number;
+	total: number;
+	onPrev: () => void;
+	onNext: () => void;
+	prevLabel?: string;
+	nextLabel?: string;
+	disablePrev?: boolean;
+	disableNext?: boolean;
+	variant?: ButtonProps["variant"];
+	textVariant?: TextProps["variant"];
+	textClassName?: string;
+	className?: string;
+};
+
+export function PaginationControls({
+	current,
+	total,
+	onPrev,
+	onNext,
+	prevLabel = "Previous",
+	nextLabel = "Next",
+	disablePrev,
+	disableNext,
+	variant = "solid",
+	textVariant = "body",
+	textClassName,
+	className,
+}: PaginationControlsProps) {
+	return (
+		<div className={`flex items-center gap-[15px] ${className ?? ""}`}>
+			<Button
+				variant={variant}
+				size="icon-sm"
+				onClick={onPrev}
+				aria-label={prevLabel}
+				disabled={disablePrev}
+			>
+				<Icon name="caret-left" />
+			</Button>
+			<Text
+				variant={textVariant}
+				className={`font-mono ${textClassName ?? ""}`}
+			>
+				{current}/{total}
+			</Text>
+			<Button
+				variant={variant}
+				size="icon-sm"
+				onClick={onNext}
+				aria-label={nextLabel}
+				disabled={disableNext}
+			>
+				<Icon name="caret-right" />
+			</Button>
+		</div>
+	);
+}

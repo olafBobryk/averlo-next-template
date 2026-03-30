@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://webvizion-template.vercel.app/
+
+# Sitemaps
+Sitemap: https://webvizion-template.vercel.app/sitemap.xml

@@ -398,7 +398,6 @@ export function DateRangeInput({
 					]
 						.filter(Boolean)
 						.join(" ")}
-					start={<Icon name="calendar" className="text-foreground" />}
 				>
 					<button
 						type="button"

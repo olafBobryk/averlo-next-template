@@ -209,13 +209,13 @@ export function Listbox<T>({
 								align="left"
 								size="md"
 								className={optionClasses}
-								onMouseDown={(event) => {
+								onMouseDown={(event: React.MouseEvent<HTMLElement>) => {
 									event.preventDefault();
 								}}
 								onMouseEnter={() => {
 									if (!isDisabled) onActiveIndexChange?.(index);
 								}}
-								onClick={(event) => {
+								onClick={(event: React.MouseEvent<HTMLElement>) => {
 									if (isDisabled) {
 										event.preventDefault();
 										return;

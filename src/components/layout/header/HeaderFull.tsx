@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/primitives/Button";
 import { NAV_LINKS } from "@/config/navConfig";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { springs } from "@/lib/motionPresets";
+import ContentSearch from "./ContentSearch";
 
 export default function HeaderFull({
 	className = "",
@@ -54,13 +55,22 @@ export default function HeaderFull({
 			<div className="max-w-section-max w-full flex items-center h-full">
 				<div className="flex justify-between w-full h-fit">
 					<Logo size="md" className="pointer-events-auto" />
-					<Button
-						variant="primary"
-						href="/contact"
-						className="pointer-events-auto"
-					>
-						Join Now
-					</Button>
+					<div className="flex items-center gap-3 pointer-events-auto">
+						<ContentSearch
+							navLinks={navLinks}
+							size="sm"
+							fieldClassName="min-w-0"
+							className="w-[14rem] xl:w-[16rem]"
+							inputClassName="text-sm"
+						/>
+						<Button
+							variant="primary"
+							href="/contact"
+							className="pointer-events-auto"
+						>
+							Join Now
+						</Button>
+					</div>
 				</div>
 				<div className="pointer-events-auto absolute left-1/2 top-0 flex h-[100px] -translate-x-1/2 items-start justify-start">
 					<motion.nav

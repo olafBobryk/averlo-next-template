@@ -107,6 +107,19 @@ const createApiError = (
 	return error;
 };
 
+const getErrorResponseMessage = (payload: unknown) => {
+	if (!payload || typeof payload !== "object") {
+		return undefined;
+	}
+	if ("message" in payload && typeof payload.message === "string") {
+		return payload.message;
+	}
+	if ("error" in payload && typeof payload.error === "string") {
+		return payload.error;
+	}
+	return undefined;
+};
+
 const getProjectApiBaseUrl = () => process.env.NEXT_PUBLIC_BACKEND_API_URL;
 
 export function createApiClient({
@@ -143,7 +156,7 @@ export function createApiClient({
 
 		if (!response.ok) {
 			throw createApiError(
-				payload?.message ?? payload?.error ?? "Request failed.",
+				getErrorResponseMessage(payload) ?? "Request failed.",
 				response.status,
 				payload as ErrorResponse | null,
 			);

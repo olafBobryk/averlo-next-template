@@ -15,6 +15,16 @@ type FakeErrorPayload = {
 const MOCK_BASE_URL = "https://fake-fetch.local";
 const MOCK_PATH = "/fake-fetch";
 
+const getFakeErrorMessage = (payload: unknown) => {
+	if (!payload || typeof payload !== "object") {
+		return undefined;
+	}
+	if ("message" in payload && typeof payload.message === "string") {
+		return payload.message;
+	}
+	return undefined;
+};
+
 const getDelay = (minDelay: number, maxDelay: number) =>
 	minDelay + Math.random() * maxDelay;
 
@@ -59,7 +69,7 @@ export function createFakeFetcher<T>({
 			| null;
 
 		if (!response.ok) {
-			throw new Error(payload?.message ?? errorMessage);
+			throw new Error(getFakeErrorMessage(payload) ?? errorMessage);
 		}
 
 		if (!payload || !Array.isArray(payload)) {

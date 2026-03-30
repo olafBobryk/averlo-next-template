@@ -1,16 +1,21 @@
-// components/ui/motion/ScrollParallax.tsx
 "use client";
 
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
-import { type ComponentProps, type ReactNode, useMemo, useRef } from "react";
+import {
+	type ComponentProps,
+	type ElementType,
+	type ReactNode,
+	useRef,
+} from "react";
+import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type ScrollParallaxProps = {
 	children: ReactNode;
-	as?: any;
+	as?: ElementType;
 	className?: string;
 	style?: React.CSSProperties;
-	magnitude?: number; // max translation in px (positive moves down when scrolling down)
+	magnitude?: number;
 	disableWhenReducedMotion?: boolean;
 	direction?: "down" | "up";
 	stiffness?: number;
@@ -31,19 +36,16 @@ export function ScrollParallax({
 	smooth = true,
 	...rest
 }: ScrollParallaxProps) {
+	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const motionReady = motionAllowed && appReady;
 	const ref = useRef<HTMLElement | null>(null);
 	const { scrollYProgress } = useScroll({
 		target: ref,
 		offset: ["start end", "end start"],
 	});
 
-	const amplitude = useMemo(
-		() => (direction === "down" ? magnitude : -magnitude),
-		[magnitude, direction],
-	);
-
-	// Map progress so translation crosses 0 at mid-scroll: start -> 0 -> end
+	const amplitude = direction === "down" ? magnitude : -magnitude;
 	const rawY = useTransform(
 		scrollYProgress,
 		[0, 0.5, 1],
@@ -57,8 +59,8 @@ export function ScrollParallax({
 	});
 	const y = smooth ? springY : rawY;
 
-	const Tag = motionAllowed ? (as ?? motion.div) : (as ?? "div");
-	const passthroughStyle = motionAllowed
+	const Tag = motionReady ? (as ?? motion.div) : (as ?? "div");
+	const passthroughStyle = motionReady
 		? { willChange: "transform", ...style, y }
 		: style;
 

@@ -6,12 +6,23 @@ import { useInView } from "motion/react";
 import type { ComponentPropsWithoutRef } from "react";
 import * as React from "react";
 import { motionTiming } from "@/components/ui/foundations/motionTiming";
+import {
+	type MotionSceneStageInput,
+	useMotionSceneGate,
+} from "@/components/ui/motion/MotionScene";
 import { type TextProps, textVariants } from "@/components/ui/primitives/Text";
+import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 const DEFAULT_CHARACTERS =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}<>?/|~";
 const NUMERIC_CHARACTERS = "0123456789";
+const REMOUNT_PLAY_CACHE_TTL_MS = 1500;
+
+const pendingRemountPlayCache = new Map<
+	string,
+	{ signature: string; timeoutId: number }
+>();
 
 const textVariantAliasMap = {
 	"2xxl": "heading2xxl",
@@ -50,6 +61,29 @@ function isAnimatableCharacter(
 	return true;
 }
 
+function consumePendingRemountPlay(instanceId: string, signature: string) {
+	const entry = pendingRemountPlayCache.get(instanceId);
+	if (!entry || entry.signature !== signature) return false;
+	clearTimeout(entry.timeoutId);
+	pendingRemountPlayCache.delete(instanceId);
+	return true;
+}
+
+function primePendingRemountPlay(instanceId: string, signature: string) {
+	if (typeof window === "undefined") return;
+	const existing = pendingRemountPlayCache.get(instanceId);
+	if (existing) {
+		clearTimeout(existing.timeoutId);
+	}
+	const timeoutId = window.setTimeout(() => {
+		const current = pendingRemountPlayCache.get(instanceId);
+		if (current?.timeoutId === timeoutId) {
+			pendingRemountPlayCache.delete(instanceId);
+		}
+	}, REMOUNT_PLAY_CACHE_TTL_MS);
+	pendingRemountPlayCache.set(instanceId, { signature, timeoutId });
+}
+
 type ScrambleRevealOwnProps = {
 	text?: string;
 	children?: string;
@@ -68,6 +102,8 @@ type ScrambleRevealOwnProps = {
 	preserveWhitespace?: boolean;
 	disableWhenReducedMotion?: boolean;
 	maintainSpace?: boolean;
+	waitFor?: MotionSceneStageInput;
+	unlockStage?: MotionSceneStageInput;
 };
 
 type ScrambleRevealProps = ScrambleRevealOwnProps &
@@ -91,15 +127,23 @@ export function ScrambleReveal({
 	preserveWhitespace = true,
 	disableWhenReducedMotion = true,
 	maintainSpace = false,
+	waitFor,
+	unlockStage,
 	...rest
 }: ScrambleRevealProps) {
+	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const { hasWaitFor, sceneReady, markReady } = useMotionSceneGate(
+		"ScrambleReveal",
+		{ waitFor, unlockStage },
+	);
 	const resolvedChildren =
 		typeof children === "string" || typeof children === "number"
 			? String(children)
 			: "";
 	const finalText = text ?? resolvedChildren;
 	const Tag = (as ?? "span") as React.ElementType;
+	const instanceId = React.useId();
 	const containerRef = React.useRef<HTMLElement | null>(null);
 	const displayRef = React.useRef<HTMLElement | null>(null);
 	const inView = useInView(containerRef, { amount: 0.2, once });
@@ -111,6 +155,7 @@ export function ScrambleReveal({
 		resolvedTextVariant &&
 			textVariants({ variant: resolvedTextVariant, tone: "inherit" }),
 		className,
+		hasWaitFor && !sceneReady && "pointer-events-none opacity-0",
 	);
 	const resolvedCharacters = getResolvedCharacters(mode, characters);
 	const resolvedTickMs =
@@ -119,9 +164,17 @@ export function ScrambleReveal({
 		mode === "numeric"
 			? Math.min(1500, Math.max(700, durationMs))
 			: Math.max(0, durationMs);
+	const remountReplaySignature = JSON.stringify({
+		finalText,
+		mode,
+		preserveWhitespace,
+		maintainSpace,
+		once,
+	});
 
 	React.useEffect(() => {
-		hasPlayedRef.current = false;
+		hasPlayedRef.current =
+			once && consumePendingRemountPlay(instanceId, remountReplaySignature);
 		if (animationRef.current) {
 			animationRef.current.stop();
 			animationRef.current = null;
@@ -129,7 +182,13 @@ export function ScrambleReveal({
 		if (displayRef.current) {
 			displayRef.current.textContent = finalText;
 		}
-	}, [finalText]);
+	}, [finalText, instanceId, once, remountReplaySignature]);
+
+	React.useEffect(() => {
+		if (finalText.length > 0 && motionAllowed) return;
+		if (hasWaitFor && !sceneReady) return;
+		markReady();
+	}, [finalText.length, hasWaitFor, markReady, motionAllowed, sceneReady]);
 
 	React.useEffect(() => {
 		if (animationRef.current) {
@@ -145,7 +204,8 @@ export function ScrambleReveal({
 			return undefined;
 		}
 
-		const shouldReveal = useViewport ? inView : true;
+		const shouldReveal =
+			appReady && sceneReady && (useViewport ? inView : true);
 		if (once && hasPlayedRef.current) {
 			displayNode.textContent = finalText;
 			return undefined;
@@ -175,7 +235,6 @@ export function ScrambleReveal({
 			) {
 				const charIndex = animatableIndices[unitIndex];
 				if (mode === "numeric") {
-					// EaseOut: slow down as we approach the target digit
 					const eased = 1 - (1 - currentProgress) ** 2;
 					const targetDigit = parseInt(chars[charIndex] ?? "0", 10);
 					buffer[charIndex] = String(
@@ -196,6 +255,12 @@ export function ScrambleReveal({
 			if (displayRef.current.textContent === value) return;
 			displayRef.current.textContent = value;
 		};
+		const markPlayed = () => {
+			hasPlayedRef.current = true;
+			markReady();
+			if (!once) return;
+			primePendingRemountPlay(instanceId, remountReplaySignature);
+		};
 
 		if (!shouldReveal) {
 			writeDisplay(buildFrame(0));
@@ -205,7 +270,7 @@ export function ScrambleReveal({
 
 		if (totalUnits === 0) {
 			writeDisplay(finalText);
-			hasPlayedRef.current = true;
+			markPlayed();
 			return undefined;
 		}
 
@@ -214,14 +279,13 @@ export function ScrambleReveal({
 				? Math.max(0, delay) * 1000
 				: Math.max(0, delayMs);
 
-		// ── Numeric mode: count up the whole number, 1 → target ─────────────
 		if (mode === "numeric") {
 			const match = finalText.match(/\d+/);
 			const targetNumber = match ? parseInt(match[0], 10) : 0;
 
 			if (!match || targetNumber === 0) {
 				writeDisplay(finalText);
-				hasPlayedRef.current = true;
+				markPlayed();
 				return undefined;
 			}
 
@@ -236,11 +300,11 @@ export function ScrambleReveal({
 			const tick = () => {
 				if (currentStep > targetNumber) {
 					writeDisplay(finalText);
-					hasPlayedRef.current = true;
+					markPlayed();
 					return;
 				}
 				writeDisplay(`${prefix}${currentStep}${suffix}`);
-				currentStep++;
+				currentStep += 1;
 				timerId = window.setTimeout(tick, stepMs);
 			};
 
@@ -253,7 +317,6 @@ export function ScrambleReveal({
 			};
 		}
 
-		// ── Default mode: scramble animation ─────────────────────────────────
 		const totalDurationMs = Math.max(1, resolvedDurationMs + resolvedDelayMs);
 		const delayRatio = resolvedDelayMs / totalDurationMs;
 
@@ -291,7 +354,7 @@ export function ScrambleReveal({
 			},
 			onComplete: () => {
 				writeDisplay(finalText);
-				hasPlayedRef.current = true;
+				markPlayed();
 			},
 		});
 
@@ -302,18 +365,23 @@ export function ScrambleReveal({
 			}
 		};
 	}, [
+		appReady,
 		delayMs,
 		delay,
 		finalText,
 		inView,
+		instanceId,
+		markReady,
 		mode,
 		motionAllowed,
 		once,
 		preserveWhitespace,
+		remountReplaySignature,
 		resolvedCharacters,
 		resolvedDurationMs,
 		resolvedTickMs,
 		revealStep,
+		sceneReady,
 		useViewport,
 	]);
 
@@ -358,7 +426,6 @@ export function ScrambleReveal({
 					displayRef.current = node;
 				}}
 				className={resolvedClassName}
-				aria-hidden="true"
 				{...rest}
 			/>
 			<span className="sr-only">{finalText}</span>

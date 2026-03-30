@@ -101,7 +101,7 @@ export function ChoiceIndicatorToggle({
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator flex h-[26px] w-[42px] items-center justify-center rounded-full overflow-hidden bg-background group-hover:bg-surface group-hover:scale-[1.05] group-active:scale-[0.95] motion-micro",
+				"choice-field-indicator flex h-[26px] min-w-[42px] items-center justify-center rounded-full overflow-hidden bg-background group-hover:bg-surface group-hover:scale-[1.05] group-active:scale-[0.95] motion-micro",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",
@@ -110,7 +110,7 @@ export function ChoiceIndicatorToggle({
 		>
 			<div
 				className={clsx(
-					"relative flex h-[26px] w-[42px] items-center rounded-full overflow-hidden border transition-colors motion-interactive",
+					"relative flex h-[26px] min-w-[42px] items-center rounded-full overflow-hidden border transition-colors motion-interactive",
 					checked
 						? "border-white/15 bg-primary"
 						: "border-foreground/20 group-data-[tone=error]/field:border-danger",

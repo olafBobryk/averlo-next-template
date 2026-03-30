@@ -6,9 +6,14 @@ import Image, { type ImageProps } from "next/image";
 import * as React from "react";
 import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
 import {
+	useMotionSceneGate,
+	useOptionalMotionScene,
+} from "@/components/ui/motion/MotionScene";
+import {
 	RevealItem,
 	type RevealItemProps,
 } from "@/components/ui/motion/Reveal";
+import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type RevealImageOwnProps = {
@@ -32,11 +37,14 @@ export type RevealImageProps = ImageProps &
 		| "disableTransform"
 		| "useViewport"
 		| "active"
+		| "waitFor"
+		| "unlockStage"
 		| "disableWhenReducedMotion"
 	> &
 	RevealImageOwnProps;
 
 function getSourceKey(src: ImageProps["src"]) {
+	if (!src) return "";
 	if (typeof src === "string") return src;
 	if ("src" in src) return src.src;
 	return src.default.src;
@@ -50,6 +58,8 @@ export function RevealImage({
 	disableTransform = false,
 	useViewport = false,
 	active,
+	waitFor,
+	unlockStage,
 	disableWhenReducedMotion = true,
 	imageClassName,
 	fallback,
@@ -61,21 +71,24 @@ export function RevealImage({
 	onRevealStateChange,
 	placeholder,
 	src,
-	onLoadingComplete,
 	onLoad,
 	fill,
 	...imageProps
 }: RevealImageProps) {
+	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const scene = useOptionalMotionScene();
+	const { markReady } = useMotionSceneGate("RevealImage", { unlockStage });
 	const sourceKey = getSourceKey(src);
-	const [loaded, setLoaded] = React.useState(false);
+	const isBlur = placeholder === "blur";
+	const [loaded, setLoaded] = React.useState(isBlur);
 	const [revealed, setRevealed] = React.useState(false);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset state when the image source identity changes
 	React.useEffect(() => {
-		setLoaded(false);
+		setLoaded(isBlur);
 		setRevealed(false);
-	}, [sourceKey]);
+	}, [isBlur, sourceKey]);
 
 	React.useEffect(() => {
 		onLoadStateChange?.(loaded);
@@ -83,9 +96,23 @@ export function RevealImage({
 
 	React.useEffect(() => {
 		onRevealStateChange?.(revealed);
-	}, [revealed, onRevealStateChange]);
+	}, [onRevealStateChange, revealed]);
+
+	React.useEffect(() => {
+		if (!revealed) return;
+		markReady();
+	}, [markReady, revealed]);
 
 	const hasCustomRevealVariants = Boolean(variants);
+	const sceneReady = scene ? scene.isStageReady(waitFor) : true;
+	const shouldRevealImage = loaded && appReady && sceneReady;
+
+	React.useEffect(() => {
+		if (!loaded || !shouldRevealImage) return;
+		if (motionAllowed && !hasCustomRevealVariants) return;
+		setRevealed(true);
+	}, [hasCustomRevealVariants, loaded, motionAllowed, shouldRevealImage]);
+
 	const revealTransition = motionAllowed
 		? {
 				...getMotionTiming("grand"),
@@ -93,15 +120,11 @@ export function RevealImage({
 			}
 		: undefined;
 	const resolvedFallback =
-		fallback ??
-		(placeholder === "blur" ? null : (
-			<div />
-			// <Skeleton className="h-full w-full rounded-none" />
-		));
+		fallback ?? (placeholder === "blur" ? null : <div />);
 	const imageMotionClassName = clsx(
 		fill
 			? "relative h-full w-full overflow-hidden"
-			: "relative h-fit w-fit overflow-hidden",
+			: "relative h-full w-full overflow-hidden",
 	);
 
 	return (
@@ -113,6 +136,7 @@ export function RevealImage({
 			disableTransform={disableTransform}
 			useViewport={useViewport}
 			active={active}
+			waitFor={waitFor}
 			disableWhenReducedMotion={disableWhenReducedMotion}
 		>
 			<div className={clsx("relative min-w-0", contentClassName)}>
@@ -142,11 +166,11 @@ export function RevealImage({
 						motionAllowed
 							? hasCustomRevealVariants
 								? {
-										opacity: loaded ? 1 : 0,
+										opacity: shouldRevealImage ? 1 : 0,
 										clipPath: "inset(0% 0% 0% 0%)",
 										scale: 1,
 									}
-								: loaded
+								: shouldRevealImage
 									? {
 											opacity: 1,
 											clipPath: "inset(0% 0% 0% 0%)",
@@ -163,9 +187,8 @@ export function RevealImage({
 					}
 					transition={hasCustomRevealVariants ? undefined : revealTransition}
 					onAnimationComplete={() => {
-						if (!loaded) return;
-						if (revealed) return;
-						if (hasCustomRevealVariants) return;
+						if (!shouldRevealImage) return;
+						if (revealed || hasCustomRevealVariants) return;
 						setRevealed(true);
 					}}
 				>
@@ -176,15 +199,9 @@ export function RevealImage({
 						placeholder={placeholder}
 						onLoad={(event) => {
 							onLoad?.(event);
-						}}
-						onLoadingComplete={(image) => {
-							onLoadingComplete?.(image);
 							setLoaded(true);
-							if (!motionAllowed || hasCustomRevealVariants) {
-								setRevealed(true);
-							}
 						}}
-						className={clsx(fill ? "h-full w-full" : undefined, imageClassName)}
+						className={clsx("h-full w-full", imageClassName)}
 						{...imageProps}
 					/>
 					{overlay}

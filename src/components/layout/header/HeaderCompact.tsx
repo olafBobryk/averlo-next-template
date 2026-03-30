@@ -3,9 +3,10 @@
 import { AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
 import Logo from "@/components/branding/Logo";
-import { Button } from "@/components/ui/primitives/Button";
 import { Icon } from "@/components/ui/icons/Icon";
+import { Button } from "@/components/ui/primitives/Button";
 import { NAV_LINKS } from "@/config/navConfig";
+import ContentSearch from "./ContentSearch";
 import HeaderCompactModal from "./HeaderCompactModal";
 
 export default function HeaderCompact({
@@ -65,9 +66,9 @@ export default function HeaderCompact({
 				className={headerClasses}
 			>
 				<div className="relative w-full px-section-x group-data-[open=true]:fixed">
-					<div className="flex h-[100px] w-full items-center justify-between overflow-hidden">
-						<Logo className="pointer-events-auto" />
-						<div className="flex gap-2">
+					<div className="flex w-full flex-col gap-3 py-4">
+						<div className="flex w-full items-center justify-between overflow-hidden">
+							<Logo className="pointer-events-auto" />
 							<Button
 								variant="primary"
 								size="md"
@@ -92,6 +93,14 @@ export default function HeaderCompact({
 								/>
 							</Button>
 						</div>
+						<ContentSearch
+							navLinks={navLinks}
+							size="sm"
+							fieldClassName="pointer-events-auto"
+							className="pointer-events-auto"
+							inputClassName="text-sm"
+							onNavigate={() => setIsModalOpen(false)}
+						/>
 					</div>
 				</div>
 			</header>

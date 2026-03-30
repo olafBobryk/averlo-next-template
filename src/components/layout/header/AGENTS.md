@@ -13,10 +13,12 @@ Responsive header system for global navigation, CTAs, and the mobile menu modal.
 - `src/components/layout/header/HeaderFull.tsx`: desktop header.
 - `src/components/layout/header/HeaderCompact.tsx`: mobile header trigger bar.
 - `src/components/layout/header/HeaderCompactModal.tsx`: mobile full-screen menu content rendered in a modal shell.
+- `src/components/layout/header/ContentSearch.tsx`: project-level route search used across header variants.
 
 ## Invariants
 - Use `Header.tsx` by default. Reach for `HeaderFull` or `HeaderCompact` directly only when a breakpoint-specific render is truly required.
 - Desktop and mobile navigation should expose the same information architecture unless there is an explicit product reason to diverge.
+- Header-level search should point at real project routes and keep desktop and mobile coverage aligned.
 - The compact menu should continue to use the modal system rather than a page-local drawer or ad hoc overlay.
 - Focus is critical here:
   - The mobile menu trigger must keep a visible focus state.

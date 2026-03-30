@@ -13,8 +13,10 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - `src/components/ui/misc/FilePreview.tsx`: file preview tile with shared actions.
 - `src/components/ui/misc/Loader.tsx`: spinner loader.
 - `src/components/ui/misc/MoreMenuDropdown.tsx`: overflow action menu.
+- `src/components/ui/misc/PaginationControls.tsx`: compact previous or next pagination controls.
 - `src/components/ui/misc/SegmentedControl.tsx`: segmented option selector.
 - `src/components/ui/misc/SuspenseBoundary.tsx`: loading and error boundary wrapper.
+- `src/components/ui/misc/Tooltip.tsx`: hover or focus helper text built on the shared dropdown primitive.
 - `src/components/ui/misc/Warning.tsx`: inline or panel warning block.
 - `src/components/ui/misc/Skeleton.tsx`: loading placeholder.
 - `src/components/ui/misc/InspectableImage.tsx`: image trigger for inspect modal.
@@ -38,6 +40,8 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - Use `CopyField` whenever the user copies a token, URL, or identifier.
 - Use `Loader` inside asynchronous regions, but avoid duplicating loader behavior already built into `Button` or other components.
 - Use `MoreMenuDropdown` for action-overflow menus instead of assembling a new icon-trigger dropdown.
+- Use `PaginationControls` for compact previous or next paging actions before building page-local pager rows.
+- Use `Tooltip` for short helper copy on hover or focus instead of hand-rolled positioned labels.
 - Use `InspectableImage` for click-to-zoom image behavior.
 - Use `Warning` for cautionary messaging; use `variant="panel"` when the warning should be visually separated from surrounding content.
 - For initial-load loading states, prefer `Skeleton`, `Text.Skeleton`, and component-specific skeletons before toasts.

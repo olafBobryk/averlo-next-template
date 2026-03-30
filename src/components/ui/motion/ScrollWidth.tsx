@@ -9,6 +9,7 @@ import {
 	useRef,
 } from "react";
 import { getSpring } from "@/components/ui/foundations/spring";
+import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 export type ScrollWidthRadius = {
@@ -73,7 +74,9 @@ export function ScrollWidth({
 	mass,
 	...rest
 }: ScrollWidthProps) {
+	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const motionReady = motionAllowed && appReady;
 	const ref = useRef<HTMLElement | null>(null);
 	const Tag = as ?? "div";
 	const start = resolveRadius(startRadius);
@@ -125,7 +128,7 @@ export function ScrollWidth({
 		[startCoverScale, endCoverScale],
 	);
 
-	const frameStyle = motionAllowed
+	const frameStyle = motionReady
 		? {
 				borderTopLeftRadius,
 				borderTopRightRadius,
@@ -139,7 +142,7 @@ export function ScrollWidth({
 				borderBottomRightRadius: start.br,
 				borderBottomLeftRadius: start.bl,
 			};
-	const leftCoverStyle = motionAllowed
+	const leftCoverStyle = motionReady
 		? {
 				scaleX: coverScale,
 				originX: 0,
@@ -149,7 +152,7 @@ export function ScrollWidth({
 				scaleX: startCoverScale,
 				originX: 0,
 			};
-	const rightCoverStyle = motionAllowed
+	const rightCoverStyle = motionReady
 		? {
 				scaleX: coverScale,
 				originX: 1,

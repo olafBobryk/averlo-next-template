@@ -6,6 +6,8 @@ import {
 	Bell,
 	Calendar,
 	CaretDown,
+	CaretLeftIcon,
+	CaretRightIcon,
 	Check,
 	Copy,
 	DiscordLogo,
@@ -33,6 +35,8 @@ import {
 
 const phosphorOverrides: Partial<IconRegistry> = {
 	"arrow-right": ArrowRight,
+	"caret-left": CaretLeftIcon,
+	"caret-right": CaretRightIcon,
 	bell: Bell,
 	calendar: Calendar,
 	chevron: CaretDown,

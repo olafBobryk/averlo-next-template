@@ -4,6 +4,7 @@
 "use client";
 
 import * as React from "react";
+import { Button } from "@/components/ui/primitives/Button";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { dropdownListClassName } from "@/components/ui/primitives/dropdownStyles";
 import { Field } from "@/components/ui/primitives/Field";
@@ -12,7 +13,6 @@ import {
 	type InputFrameSize,
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
-import { Button } from "@/components/ui/primitives/Button";
 import { Listbox } from "@/components/ui/primitives/Listbox";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -45,6 +45,7 @@ type ComboboxTextInputProps = {
 
 	// Optional filter: if omitted, defaults to case-insensitive includes
 	filterOption?: (query: string, option: ComboboxOption) => boolean;
+	onSelect?: (option: ComboboxOption) => void;
 
 	// Validation (recommended: pass error from parent)
 	error?: React.ReactNode;
@@ -65,6 +66,8 @@ type ComboboxTextInputProps = {
 	// Dropdown behavior
 	openOnFocus?: boolean; // default true
 	openOnChevronClick?: boolean; // default true
+	showResultsOnEmptyQuery?: boolean;
+	hideNoResults?: boolean;
 
 	portalTargetId?: string;
 	size?: InputFrameSize;
@@ -88,6 +91,7 @@ export function ComboboxTextInput({
 	disabled,
 	options,
 	filterOption = defaultFilter,
+	onSelect,
 	error,
 	validate,
 	className,
@@ -101,6 +105,8 @@ export function ComboboxTextInput({
 	noResultsText,
 	openOnFocus = true,
 	openOnChevronClick = true,
+	showResultsOnEmptyQuery = true,
+	hideNoResults = false,
 	portalTargetId,
 	size,
 }: ComboboxTextInputProps) {
@@ -131,8 +137,12 @@ export function ComboboxTextInput({
 	);
 
 	const filtered = React.useMemo(() => {
+		if (!showResultsOnEmptyQuery && inputValue.trim().length === 0) {
+			return [];
+		}
+
 		return options.filter((opt) => filterOption(inputValue, opt));
-	}, [options, filterOption, inputValue]);
+	}, [options, filterOption, inputValue, showResultsOnEmptyQuery]);
 
 	const [activeIndex, setActiveIndex] = React.useState(0);
 	const [menuOpen, setMenuOpen] = React.useState(false);
@@ -221,7 +231,7 @@ export function ComboboxTextInput({
 
 					return (
 						<InputFrame
-							ref={ref as any}
+							ref={ref as React.Ref<HTMLDivElement>}
 							onMouseEnter={onRootMouseEnter}
 							onMouseLeave={onRootMouseLeave}
 							tone={tone}
@@ -276,10 +286,13 @@ export function ComboboxTextInput({
 									.join(" ")}
 								value={inputValue}
 								onChange={(e) => {
+									const nextValue = e.target.value;
 									if (validate) setClientError(null);
-									setValue(e.target.value);
+									setValue(nextValue);
 									setActiveIndex(0);
-									if (openOnFocus && !isOpen) openMenu();
+									if (!isOpen && (openOnFocus || nextValue.trim().length > 0)) {
+										openMenu();
+									}
 								}}
 								onBlur={(e) => {
 									if (!validate) return;
@@ -312,6 +325,7 @@ export function ComboboxTextInput({
 										if (option) {
 											event.preventDefault();
 											setValue(option.value ?? option.label);
+											onSelect?.(option);
 											closeMenu({ restoreFocus: false });
 										}
 										return;
@@ -349,12 +363,15 @@ export function ComboboxTextInput({
 							const option = filtered[index];
 							if (!option) return;
 							setValue(option.value ?? option.label);
+							onSelect?.(option);
 							close({ restoreFocus: false });
 						}}
 						emptyState={
-							<Text as="span" variant="body">
-								{noResultsText ?? "No results"}
-							</Text>
+							hideNoResults ? null : (
+								<Text as="span" variant="body">
+									{noResultsText ?? "No results"}
+								</Text>
+							)
 						}
 						listRef={listRef}
 						listId={menuId}

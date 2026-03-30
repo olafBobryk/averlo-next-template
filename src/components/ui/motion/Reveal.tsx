@@ -8,11 +8,16 @@ import {
 	forwardRef,
 	type ReactNode,
 	useEffect,
-	useMemo,
+	useLayoutEffect,
 	useRef,
 	useState,
 } from "react";
 import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
+import {
+	type MotionSceneStageInput,
+	useMotionSceneGate,
+} from "@/components/ui/motion/MotionScene";
+import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 const SlotWithRef = forwardRef<HTMLElement, ComponentProps<typeof Slot>>(
@@ -30,6 +35,8 @@ export type RevealGroupProps = {
 	duration?: number;
 	once?: boolean;
 	active?: boolean;
+	waitFor?: MotionSceneStageInput;
+	unlockStage?: MotionSceneStageInput;
 	disableWhenReducedMotion?: boolean;
 };
 
@@ -39,43 +46,55 @@ export function RevealGroup({
 	className,
 	stagger = 0.12,
 	delay = 0,
-	// Match motion-macro timing from globals.css (320ms)
 	duration = 0.32,
 	once = true,
 	active,
+	waitFor,
+	unlockStage,
 	disableWhenReducedMotion = true,
 }: RevealGroupProps) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const appReady = useAppReady();
 	const isControlled = typeof active === "boolean";
 	const ref = useRef<HTMLElement | null>(null);
 	const inView = useInView(ref, { amount: 0.1 });
 	const [hasShown, setHasShown] = useState(false);
-
-	const variants = useMemo<Variants>(
-		() => ({
-			hidden: { opacity: 0, y: 12 },
-			show: {
-				opacity: 1,
-				y: 0,
-				transition: {
-					staggerChildren: stagger,
-					delayChildren: delay,
-					ease: "easeOut",
-					duration,
-				},
-			},
-		}),
-		[stagger, delay, duration],
+	const { hasWaitFor, sceneReady, markReady } = useMotionSceneGate(
+		"RevealGroup",
+		{ waitFor, unlockStage },
 	);
 
 	useEffect(() => {
-		if (!motionAllowed) return;
+		if (!motionAllowed || !appReady || !sceneReady) return;
 		if (inView) {
 			setHasShown(true);
-		} else if (!once) {
+			return;
+		}
+		if (!once) {
 			setHasShown(false);
 		}
-	}, [inView, motionAllowed, once]);
+	}, [appReady, inView, motionAllowed, once, sceneReady]);
+
+	useEffect(() => {
+		if (motionAllowed) return;
+		if (isControlled && !active) return;
+		if (hasWaitFor && !sceneReady) return;
+		markReady();
+	}, [active, hasWaitFor, isControlled, markReady, motionAllowed, sceneReady]);
+
+	const variants: Variants = {
+		hidden: { opacity: 0, y: 12 },
+		show: {
+			opacity: 1,
+			y: 0,
+			transition: {
+				staggerChildren: stagger,
+				delayChildren: delay,
+				ease: "easeOut",
+				duration,
+			},
+		},
+	};
 
 	if (!motionAllowed) {
 		const Tag = as ?? "div";
@@ -83,7 +102,9 @@ export function RevealGroup({
 			<Tag
 				className={[
 					className,
-					isControlled && !active ? "pointer-events-none opacity-0" : undefined,
+					(isControlled && !active) || (hasWaitFor && !sceneReady)
+						? "pointer-events-none opacity-0"
+						: undefined,
 				]
 					.filter(Boolean)
 					.join(" ")}
@@ -97,11 +118,15 @@ export function RevealGroup({
 		? hasShown
 			? "show"
 			: "hidden"
-		: inView
+		: appReady && sceneReady && inView
 			? "show"
 			: "hidden";
 	const resolvedAnimateState =
-		typeof active === "boolean" ? (active ? "show" : "hidden") : animateState;
+		typeof active === "boolean"
+			? active && appReady && sceneReady
+				? "show"
+				: "hidden"
+			: animateState;
 
 	const MotionTag = as ?? motion.div;
 	return (
@@ -111,6 +136,10 @@ export function RevealGroup({
 			animate={resolvedAnimateState}
 			variants={variants}
 			className={className}
+			onAnimationComplete={(definition: unknown) => {
+				if (definition !== "show") return;
+				markReady();
+			}}
 		>
 			{children}
 		</MotionTag>
@@ -121,11 +150,14 @@ export type RevealItemProps = {
 	children?: ReactNode;
 	as?: ElementType;
 	asChild?: boolean;
+	handoffAfterReveal?: boolean;
 	className?: string;
 	variants?: Variants;
 	disableTransform?: boolean;
 	useViewport?: boolean;
 	active?: boolean;
+	waitFor?: MotionSceneStageInput;
+	unlockStage?: MotionSceneStageInput;
 	disableWhenReducedMotion?: boolean;
 };
 
@@ -133,33 +165,93 @@ export function RevealItem({
 	children,
 	as = motion.div,
 	asChild = false,
+	handoffAfterReveal = false,
 	className,
 	variants,
 	disableTransform = false,
 	useViewport = false,
 	active,
+	waitFor,
+	unlockStage,
 	disableWhenReducedMotion = true,
 }: RevealItemProps) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const appReady = useAppReady();
 	const isControlled = typeof active === "boolean";
 	const revealTiming = getMotionTiming("grand");
+	const [hasPlayed, setHasPlayed] = useState(false);
 	const childRef = useRef<HTMLElement | null>(null);
+	const viewportRef = useRef<HTMLElement | null>(null);
+	const measureRef = asChild ? childRef : viewportRef;
+	const isInViewport = useInView(measureRef, { once: true, amount: 0.2 });
+	const [hasShownViewport, setHasShownViewport] = useState(false);
 	const originalTransitionRef = useRef<string | null>(null);
 	const restoredRef = useRef(false);
 	const restoreRafRef = useRef<number | null>(null);
+	const { hasWaitFor, sceneReady, markReady } = useMotionSceneGate(
+		"RevealItem",
+		{ waitFor, unlockStage },
+	);
 
-	// Temporarily remove the child's own transition while the reveal animation runs
-	// to avoid timing conflicts, then restore it after the animation completes.
 	useEffect(() => {
-		if (isControlled || !asChild || !motionAllowed) return;
-		if (restoredRef.current) return;
+		if (!useViewport || isControlled || !motionAllowed) return;
+		if (!appReady || !sceneReady || !isInViewport) return;
+		setHasShownViewport(true);
+	}, [
+		appReady,
+		isControlled,
+		isInViewport,
+		motionAllowed,
+		sceneReady,
+		useViewport,
+	]);
+
+	useEffect(() => {
+		if (motionAllowed) return;
+		if (isControlled && !active) return;
+		if (hasWaitFor && !sceneReady) return;
+		markReady();
+	}, [active, hasWaitFor, isControlled, markReady, motionAllowed, sceneReady]);
+
+	useLayoutEffect(() => {
+		if (!asChild || !handoffAfterReveal || !motionAllowed) return;
+		if (hasPlayed || restoredRef.current) return;
 		const node = childRef.current;
 		if (!node) return;
 		originalTransitionRef.current = node.style.transition;
 		node.style.transition = "none";
-	}, [isControlled, asChild, motionAllowed]);
+	}, [asChild, handoffAfterReveal, hasPlayed, motionAllowed]);
 
-	// Clear any queued restore on unmount
+	useLayoutEffect(() => {
+		if (!asChild || !handoffAfterReveal || !motionAllowed) return;
+		if (hasPlayed || restoredRef.current) return;
+		const node = childRef.current;
+		if (!node || typeof MutationObserver === "undefined") return;
+
+		const observer = new MutationObserver(() => {
+			const inlineOpacity = Number.parseFloat(node.style.opacity || "");
+			if (Number.isNaN(inlineOpacity) || inlineOpacity < 0.99) return;
+			observer.disconnect();
+			if (restoredRef.current) return;
+			restoredRef.current = true;
+			if (restoreRafRef.current !== null) {
+				cancelAnimationFrame(restoreRafRef.current);
+			}
+			restoreRafRef.current = requestAnimationFrame(() => {
+				node.style.transition = originalTransitionRef.current ?? "";
+				restoreRafRef.current = null;
+				setHasPlayed(true);
+			});
+		});
+
+		observer.observe(node, {
+			attributes: true,
+			attributeFilter: ["style"],
+		});
+
+		return () => observer.disconnect();
+	}, [asChild, handoffAfterReveal, hasPlayed, motionAllowed]);
+
 	useEffect(() => {
 		return () => {
 			if (restoreRafRef.current !== null) {
@@ -167,29 +259,6 @@ export function RevealItem({
 			}
 		};
 	}, []);
-
-	const handleAnimationComplete = (definition: unknown) => {
-		// Only restore the child's transition when the "show" reveal finishes.
-		// Framer also fires this for the initial "hidden" cascade on client-side
-		// navigation — guard with definition check to avoid premature restore.
-		if (definition !== "show") return;
-		if (isControlled) return;
-		if (!asChild || !motionAllowed) return;
-		if (restoredRef.current) return;
-		const node = childRef.current;
-		if (!node) return;
-		restoredRef.current = true;
-		if (restoreRafRef.current !== null) {
-			cancelAnimationFrame(restoreRafRef.current);
-		}
-		restoreRafRef.current = requestAnimationFrame(() => {
-			node.style.transition = originalTransitionRef.current ?? "";
-			restoreRafRef.current = null;
-			// Note: intentionally NOT swapping MotionSlot → Slot here.
-			// Doing so causes React to unmount/remount children (e.g. ScrambleReveal),
-			// which resets their hasPlayed refs and triggers double animations.
-		});
-	};
 
 	const baseVariants: Variants =
 		variants ??
@@ -201,18 +270,22 @@ export function RevealItem({
 						opacity: 1,
 						y: 0,
 						transition: revealTiming,
-						// Drop transform after the animation to avoid flicker on scroll
 						transitionEnd: { transform: "none", y: 0 },
 					},
 		} as const);
 
-	if (!motionAllowed) {
+	const usePlainAsChild =
+		asChild && handoffAfterReveal && hasPlayed && (!isControlled || active);
+
+	if (!motionAllowed || usePlainAsChild) {
 		const Tag = asChild ? Slot : (as ?? "div");
 		return (
 			<Tag
 				className={[
 					className,
-					isControlled && !active ? "pointer-events-none opacity-0" : undefined,
+					(isControlled && !active) || (hasWaitFor && !sceneReady)
+						? "pointer-events-none opacity-0"
+						: undefined,
 				]
 					.filter(Boolean)
 					.join(" ")}
@@ -223,29 +296,58 @@ export function RevealItem({
 	}
 
 	const MotionTag = asChild ? MotionSlot : (as ?? motion.div);
-	const viewportProps =
-		!isControlled && useViewport
-			? {
-					initial: "hidden",
-					whileInView: "show",
-					viewport: { once: true, amount: 0.2 },
-				}
-			: {};
 	const controlledProps = isControlled
 		? {
 				initial: "hidden" as const,
-				animate: active ? "show" : "hidden",
+				animate: active && appReady && sceneReady ? "show" : "hidden",
 			}
 		: {};
+	const viewportProps =
+		!isControlled && useViewport
+			? {
+					initial: "hidden" as const,
+					animate: hasShownViewport ? ("show" as const) : ("hidden" as const),
+				}
+			: {};
+	const sceneProps =
+		!isControlled && !useViewport && hasWaitFor
+			? {
+					initial: "hidden" as const,
+					animate:
+						appReady && sceneReady ? ("show" as const) : ("hidden" as const),
+				}
+			: {};
 
 	return (
 		<MotionTag
-			ref={asChild ? childRef : undefined}
+			ref={asChild ? childRef : useViewport ? viewportRef : undefined}
 			variants={baseVariants}
 			className={className}
-			onAnimationComplete={handleAnimationComplete}
+			onAnimationComplete={(definition: unknown) => {
+				if (definition === "show") {
+					markReady();
+				}
+				const node = childRef.current;
+				if (!asChild || !handoffAfterReveal || !motionAllowed || !node) return;
+				if (restoredRef.current) return;
+				if (definition === "hidden") return;
+				const currentOpacity = Number.parseFloat(
+					window.getComputedStyle(node).opacity,
+				);
+				if (Number.isNaN(currentOpacity) || currentOpacity < 0.99) return;
+				restoredRef.current = true;
+				if (restoreRafRef.current !== null) {
+					cancelAnimationFrame(restoreRafRef.current);
+				}
+				restoreRafRef.current = requestAnimationFrame(() => {
+					node.style.transition = originalTransitionRef.current ?? "";
+					restoreRafRef.current = null;
+					setHasPlayed(true);
+				});
+			}}
 			{...controlledProps}
 			{...viewportProps}
+			{...sceneProps}
 		>
 			{children}
 		</MotionTag>

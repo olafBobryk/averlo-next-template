@@ -33,6 +33,7 @@ For any new reusable UI-library feature:
 - **Typography invariant:** Use `Text` variants or the shared font utilities. Do not hardcode font families in component-level UI.
 - **Motion invariant:** CSS motion utilities are the default. Use `motion/react` only where the library already does or where layout/reveal motion truly needs it. Respect reduced motion via `useMotionAllowed`.
   - For load-aware media reveals, prefer `RevealImage` plus explicit `RevealGroup active` / `RevealItem active` wiring instead of page-local image-loading animation code.
+  - For multi-step choreography across intro completion, media reveal, and later copy or accents, prefer `MotionScene` over page-local booleans and ad hoc callback chains.
 - **Overlay invariant:** Use the existing portal and host model for modals, dropdowns, and toasts. Do not create page-local overlay stacks.
 - **Skeleton invariant:** If a component ships with a skeleton, prefer `Component.Skeleton` over custom placeholders. Keep skeleton sizing driven by real content where possible.
 - **Naming invariant:** When documenting or extending components, use real file paths and real export names so agents can find the correct file quickly.

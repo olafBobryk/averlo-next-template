@@ -15,6 +15,8 @@
 	--motion-component-ease: cubic-bezier(0.16, 1, 0.3, 1);
 	--motion-macro-duration: 320ms;
 	--motion-macro-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+	--motion-grand-duration: 940ms;
+	--motion-grand-ease: cubic-bezier(0.32, 0.04, 0.18, 1);
 	--motion-decorative-duration: 900ms;
 	--motion-decorative-ease: cubic-bezier(0.33, 0, 0.2, 1);
 	--motion-ring-ease: cubic-bezier(0.36, 0.07, 0.19, 0.97);
@@ -167,6 +169,21 @@
 	.motion-macro {
 		transition-duration: var(--motion-macro-duration);
 		transition-timing-function: var(--motion-macro-ease);
+	}
+
+	/*
+	 * .motion-grand
+	 * -------------------------
+	 * For slow, deliberate reveal or scene-level transitions that should feel cinematic.
+	 *
+	 * Ideal for:
+	 * - Hero or intro sequences.
+	 * - Layered reveal choreography across multiple sections.
+	 * - Large decorative transforms that should settle with more weight than macro UI motion.
+	 */
+	.motion-grand {
+		transition-duration: var(--motion-grand-duration);
+		transition-timing-function: var(--motion-grand-ease);
 	}
 
 	/*

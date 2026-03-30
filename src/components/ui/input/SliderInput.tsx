@@ -8,6 +8,7 @@ import {
 	type InputFrameSize,
 	inputPaddingXClasses,
 	inputPaddingYClasses,
+	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
 
 type SliderInputProps = {
@@ -128,9 +129,14 @@ export function SliderInput({
 							placeholder={placeholder}
 							required={required}
 							className={[
-								"w-20 min-w-0 bg-transparent text-right text-foreground outline-none placeholder:text-muted/70 disabled:cursor-not-allowed",
-								inputPaddingYClasses[size ?? "md"],
+								"w-20 min-w-0 bg-transparent pr-0! text-right text-foreground outline-none placeholder:text-muted/70 disabled:cursor-not-allowed",
+
 								"[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+								inputClassName,
+								inputVariants({
+									size,
+									disabled: disabled ? true : undefined,
+								}),
 								inputClassName,
 							]
 								.filter(Boolean)

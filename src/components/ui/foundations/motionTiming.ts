@@ -12,7 +12,7 @@ const timingPresetMap: Record<MotionTimingPreset, Transition> = {
 	interactive: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] as const },
 	component: { duration: 0.26, ease: [0.16, 1, 0.3, 1] as const },
 	macro: { duration: 0.32, ease: [0.2, 0.8, 0.2, 1] as const },
-	grand: { duration: 0.94, ease: [0.32, 0.04, 0.18, 1] as const }, //TODO: add this to hte library: demo and docs
+	grand: { duration: 0.94, ease: [0.32, 0.04, 0.18, 1] as const },
 };
 
 export const motionTiming = timingPresetMap;

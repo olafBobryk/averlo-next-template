@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/layout/footer/Footer";
 import Header from "@/components/layout/header/Header";
+import LoadingScreenMount from "@/components/mount/LoadingScreenMount";
 import ModalClientMount from "@/components/mount/ModalClientMount";
 import ScrollController from "@/components/mount/ScrollController";
 import ToastClientMount from "@/components/mount/ToastClientMount";
@@ -52,6 +53,7 @@ export default function RootLayout({
 
 						{children}
 						<Footer />
+						<LoadingScreenMount />
 						{/* TODO: Swap mount order or placement if a project needs overlays elsewhere. */}
 						<ModalClientMount />
 						<ToastClientMount />

@@ -1,4 +1,3 @@
-// components/ui/motion/ScrollLag.tsx
 "use client";
 
 import {
@@ -11,18 +10,20 @@ import {
 } from "motion/react";
 import {
 	type ComponentProps,
+	type ElementType,
 	type ReactNode,
 	useEffect,
 	useState,
 } from "react";
+import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type ScrollLagProps = {
 	children: ReactNode;
-	as?: any;
+	as?: ElementType;
 	className?: string;
 	style?: React.CSSProperties;
-	magnitude?: number; // multiplier applied to scroll velocity
+	magnitude?: number;
 	stiffness?: number;
 	damping?: number;
 	velocityClamp?: number;
@@ -41,7 +42,9 @@ export function ScrollLag({
 	disableWhenReducedMotion = true,
 	...rest
 }: ScrollLagProps) {
+	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const motionReady = motionAllowed && appReady;
 	const { scrollY } = useScroll();
 	const velocity = useVelocity(scrollY);
 	const [hasScrolled, setHasScrolled] = useState(false);
@@ -51,13 +54,12 @@ export function ScrollLag({
 			if (!hasScrolled && Math.abs(latest) > 0) setHasScrolled(true);
 		});
 		return () => unsubscribe();
-	}, [scrollY, hasScrolled]);
+	}, [hasScrolled, scrollY]);
 
-	// Ensure an initial zero value to avoid any jump on first paint.
 	const base = useMotionValue(0);
-	const safeVelocity = useTransform(velocity, (v) =>
-		Number.isFinite(v)
-			? Math.max(-velocityClamp, Math.min(velocityClamp, v))
+	const safeVelocity = useTransform(velocity, (value) =>
+		Number.isFinite(value)
+			? Math.max(-velocityClamp, Math.min(velocityClamp, value))
 			: base.get(),
 	);
 
@@ -67,15 +69,14 @@ export function ScrollLag({
 		mass: 1,
 		restSpeed: 0.0001,
 	});
-	const y = useTransform(smoothVelocity, (v) =>
-		hasScrolled ? -v * magnitude : 0,
+	const y = useTransform(smoothVelocity, (value) =>
+		hasScrolled ? -value * magnitude : 0,
 	);
 
-	const Tag = motionAllowed ? (as ?? motion.div) : (as ?? "div");
+	const Tag = motionReady ? (as ?? motion.div) : (as ?? "div");
 	return (
 		<Tag
-			// If motion is disabled, drop the transform
-			style={motionAllowed ? { ...style, y } : style}
+			style={motionReady ? { ...style, y } : style}
 			className={className}
 			{...rest}
 		>

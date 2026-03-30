@@ -3,12 +3,10 @@
 import type { MotionValue } from "motion/react";
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef } from "react";
+import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
-// Spring that caps the max speed of the highlight sweep.
-// Soft stiffness + overdamped mass means fast scrolling causes the
-// animation to lag and play through rather than snap to the end.
-const highlightSpring = { stiffness: 55, damping: 20, mass: 1 } as const;
+const highlightSpring = { stiffness: 30, damping: 18, mass: 1.2 } as const;
 
 type Props = {
 	children: string;
@@ -17,16 +15,19 @@ type Props = {
 
 export function ScrollHighlightText({ children, className }: Props) {
 	const ref = useRef<HTMLSpanElement>(null);
+	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(true);
-	const { scrollYProgress: rawProgress } = useScroll({
-		target: ref,
-		offset: ["start end", "start center"],
-	});
+	const motionReady = motionAllowed && appReady;
+	const { scrollYProgress: rawProgress } = useScroll(
+		motionReady
+			? { target: ref, offset: ["start end", "start center"] }
+			: { offset: ["start end", "start center"] },
+	);
 	const scrollYProgress = useSpring(rawProgress, highlightSpring);
 
 	const chars = children.split("");
 
-	if (!motionAllowed) {
+	if (!motionReady) {
 		return <span className={className}>{children}</span>;
 	}
 
@@ -34,14 +35,14 @@ export function ScrollHighlightText({ children, className }: Props) {
 		<span ref={ref} className={className}>
 			<span className="sr-only">{children}</span>
 			<span aria-hidden={true}>
-				{chars.map((char, i) => (
+				{chars.map((char, index) => (
 					<HighlightChar
 						// biome-ignore lint/suspicious/noArrayIndexKey: character position is the identity
-						key={i}
+						key={`${char}-${index}`}
 						char={char}
 						scrollYProgress={scrollYProgress}
-						start={i / chars.length}
-						end={(i + 1) / chars.length}
+						start={index / chars.length}
+						end={(index + 1) / chars.length}
 					/>
 				))}
 			</span>

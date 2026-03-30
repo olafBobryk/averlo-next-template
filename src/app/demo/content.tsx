@@ -49,15 +49,20 @@ import {
 import { InspectableImage } from "@/components/ui/misc/InspectableImage";
 import { Loader } from "@/components/ui/misc/Loader";
 import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
+import { PaginationControls } from "@/components/ui/misc/PaginationControls";
 import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { SuspenseBoundary } from "@/components/ui/misc/SuspenseBoundary";
 import { ErrorState } from "@/components/ui/misc/state/ErrorState";
 import { IdleState } from "@/components/ui/misc/state/IdleState";
 import { StateIndicator } from "@/components/ui/misc/state/State";
+import { Tooltip } from "@/components/ui/misc/Tooltip";
 import { Warning } from "@/components/ui/misc/Warning";
+import { LetterWave } from "@/components/ui/motion/LetterWave";
+import { MotionScene } from "@/components/ui/motion/MotionScene";
 import { RevealGroup, RevealItem } from "@/components/ui/motion/Reveal";
 import { RevealImage } from "@/components/ui/motion/RevealImage";
+import { RevealText } from "@/components/ui/motion/RevealText";
 import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 import { ScrollHighlightText } from "@/components/ui/motion/ScrollHighlightText";
 import { ScrollLag } from "@/components/ui/motion/ScrollLag";
@@ -179,14 +184,18 @@ const mockHealthErrorClient = createApiClient({
 const relatedMap: Record<string, RelatedInfo> = {
 	Logo: { uses: [], usedIn: ["Footer", "HeaderCompact", "HeaderFull"] },
 	Header: { uses: ["HeaderCompact", "HeaderFull"], usedIn: [] },
-	HeaderFull: { uses: ["Button", "Logo"], usedIn: ["Header"] },
+	HeaderFull: { uses: ["Button", "ContentSearch", "Logo"], usedIn: ["Header"] },
 	HeaderCompact: {
-		uses: ["Button", "HeaderCompactModal", "Icon", "Logo"],
+		uses: ["Button", "ContentSearch", "HeaderCompactModal", "Icon", "Logo"],
 		usedIn: ["Header"],
 	},
 	HeaderCompactModal: {
 		uses: ["Button", "Icon", "ModalShell", "Text"],
 		usedIn: ["HeaderCompact"],
+	},
+	ContentSearch: {
+		uses: ["ComboboxTextInput"],
+		usedIn: ["HeaderCompact", "HeaderFull"],
 	},
 	Footer: { uses: ["Button", "Logo", "Text"], usedIn: [] },
 	ModalClientMount: { uses: ["ModalHost"], usedIn: [] },
@@ -376,12 +385,18 @@ const relatedMap: Record<string, RelatedInfo> = {
 	createApiClient: { uses: [], usedIn: ["checkHealth"] },
 	createMockFetch: { uses: [], usedIn: [] },
 	checkHealth: { uses: ["createApiClient"], usedIn: [] },
+	MotionScene: {
+		uses: ["RevealGroup", "RevealImage", "ScrambleReveal"],
+		usedIn: [],
+	},
 	RevealGroup: { uses: [], usedIn: [] },
 	RevealItem: { uses: [], usedIn: [] },
 	RevealImage: {
 		uses: ["RevealItem", "Skeleton", "motionTiming"],
 		usedIn: ["ImageInspectModal"],
 	},
+	RevealText: { uses: ["RevealGroup"], usedIn: [] },
+	LetterWave: { uses: ["Text"], usedIn: [] },
 	ScrambleReveal: { uses: ["motionTiming"], usedIn: [] },
 	ScrollHighlightText: { uses: [], usedIn: [] },
 	ScrollLag: { uses: [], usedIn: [] },
@@ -546,6 +561,14 @@ const relatedMap: Record<string, RelatedInfo> = {
 	},
 	MoreMenuDropdown: {
 		uses: ["Button", "Dropdown", "Icon", "Listbox"],
+		usedIn: [],
+	},
+	PaginationControls: {
+		uses: ["Button", "Icon", "Text"],
+		usedIn: [],
+	},
+	Tooltip: {
+		uses: ["Dropdown", "Text"],
 		usedIn: [],
 	},
 	Loader: {
@@ -730,6 +753,15 @@ export const demoPages: DemoPage[] = [
 						label: "Mobile menu modal",
 						snippet: "<HeaderCompactModal isModalOpen handleChangeModal />",
 						related: relatedMap.HeaderCompactModal,
+					},
+					{
+						id: "content-search",
+						kind: "usage",
+						name: "ContentSearch",
+						label: "Project route search",
+						snippet:
+							'<ContentSearch navLinks={NAV_LINKS} className="w-[16rem]" size="sm" />',
+						related: relatedMap.ContentSearch,
 					},
 				],
 			},
@@ -2199,6 +2231,67 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
+						id: "pagination-controls",
+						kind: "component",
+						name: "PaginationControls",
+						label: "Compact pager",
+						related: relatedMap.PaginationControls,
+						Render() {
+							const [page, setPage] = useState(3);
+							const total = 8;
+
+							return (
+								<PaginationControls
+									current={page}
+									total={total}
+									onPrev={() => setPage((value) => Math.max(1, value - 1))}
+									onNext={() => setPage((value) => Math.min(total, value + 1))}
+									disablePrev={page <= 1}
+									disableNext={page >= total}
+								/>
+							);
+						},
+					},
+					{
+						id: "pagination-controls-usage",
+						kind: "usage",
+						name: "PaginationControls",
+						label: "Usage",
+						snippet: `<PaginationControls
+  current={page}
+  total={totalPages}
+  onPrev={() => setPage((value) => Math.max(1, value - 1))}
+  onNext={() => setPage((value) => Math.min(totalPages, value + 1))}
+  disablePrev={page <= 1}
+  disableNext={page >= totalPages}
+/>`,
+					},
+					{
+						id: "tooltip",
+						kind: "component",
+						name: "Tooltip",
+						label: "Hover helper",
+						related: relatedMap.Tooltip,
+						Render() {
+							return (
+								<Tooltip content="Search the shared component library.">
+									<Button size="sm" variant="outline">
+										Library tip
+									</Button>
+								</Tooltip>
+							);
+						},
+					},
+					{
+						id: "tooltip-usage",
+						kind: "usage",
+						name: "Tooltip",
+						label: "Usage",
+						snippet: `<Tooltip content="Search the shared component library.">
+  <Button size="sm" variant="outline">Library tip</Button>
+</Tooltip>`,
+					},
+					{
 						id: "loader",
 						kind: "component",
 						name: "Loader",
@@ -2475,6 +2568,47 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
+						id: "reveal-text",
+						kind: "component",
+						name: "RevealText",
+						label: "Character stagger text",
+						related: relatedMap.RevealText,
+						Render() {
+							return (
+								<RevealGroup className="flex flex-col gap-2" stagger={0.08}>
+									<RevealText as="h3" variant="headingSm">
+										Character reveals can inherit the parent stagger.
+									</RevealText>
+									<RevealItem>
+										<Text variant="body" tone="muted">
+											Use it for short headlines or callouts that should feel
+											more deliberate than a plain line fade.
+										</Text>
+									</RevealItem>
+								</RevealGroup>
+							);
+						},
+					},
+					{
+						id: "letter-wave",
+						kind: "component",
+						name: "LetterWave",
+						label: "Hover wave text",
+						related: relatedMap.LetterWave,
+						Render() {
+							return (
+								<div className="group w-fit space-y-2">
+									<LetterWave as="span" variant="headingXs">
+										Hover to send the wave across the label.
+									</LetterWave>
+									<Text variant="caption" tone="muted">
+										Pair it with a parent <code>group</code> container.
+									</Text>
+								</div>
+							);
+						},
+					},
+					{
 						id: "reveal-image-group",
 						kind: "component",
 						name: "RevealImage + RevealGroup",
@@ -2535,6 +2669,90 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
+						id: "motion-scene",
+						kind: "component",
+						name: "MotionScene",
+						label: "Staged scene orchestration",
+						related: relatedMap.MotionScene,
+						Render() {
+							const [imageSrc, setImageSrc] = useState("/test/blob.png");
+
+							return (
+								<div className="flex flex-col gap-3">
+									<div className="flex flex-wrap gap-2">
+										<Button
+											size="sm"
+											variant="primary"
+											onClick={() => setImageSrc("/test/blob.png")}
+										>
+											Blob
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => setImageSrc("/test/mercury.png")}
+										>
+											Mercury
+										</Button>
+									</div>
+									<MotionScene key={imageSrc}>
+										<div className="flex flex-col gap-3">
+											<RevealImage
+												src={imageSrc}
+												alt="Motion scene image"
+												fill
+												useViewport={false}
+												waitFor="app"
+												unlockStage="media"
+												className="w-full"
+												contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
+												imageClassName="object-cover"
+											/>
+											<RevealGroup
+												waitFor="media"
+												unlockStage="content"
+												className="flex flex-col gap-2"
+												stagger={0.08}
+											>
+												<RevealItem>
+													<Text variant="headingSm">
+														Content waits for the media reveal to finish.
+													</Text>
+												</RevealItem>
+												<RevealItem>
+													<Text variant="body" tone="muted">
+														This keeps the section API declarative instead of
+														wiring image state through page-local booleans.
+													</Text>
+												</RevealItem>
+											</RevealGroup>
+											<Text variant="bodyStrong" as="span">
+												<ScrambleReveal
+													text="Accent copy unlocks after the content stage."
+													waitFor="content"
+													unlockStage="accent"
+													maintainSpace
+												/>
+											</Text>
+											<RevealGroup
+												waitFor="accent"
+												className="flex gap-2"
+												stagger={0.06}
+											>
+												<RevealItem className="rounded-full border border-border/10 bg-surface px-3 py-1">
+													<Text variant="caption">Scene</Text>
+												</RevealItem>
+												<RevealItem className="rounded-full border border-border/10 bg-surface px-3 py-1">
+													<Text variant="caption">Unlocked</Text>
+												</RevealItem>
+											</RevealGroup>
+										</div>
+									</MotionScene>
+								</div>
+							);
+						},
+					},
+					{
 						id: "scramble-reveal",
 						kind: "component",
 						name: "ScrambleReveal",
@@ -2559,6 +2777,25 @@ export const demoPages: DemoPage[] = [
 								</div>
 							);
 						},
+					},
+					{
+						id: "motion-scene-usage",
+						kind: "usage",
+						name: "MotionScene",
+						label: "Staged usage",
+						related: relatedMap.MotionScene,
+						snippet: `import { MotionScene } from "@/components/ui/motion/MotionScene";
+import { RevealGroup, RevealItem } from "@/components/ui/motion/Reveal";
+import { RevealImage } from "@/components/ui/motion/RevealImage";
+import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
+
+<MotionScene>
+	<RevealImage waitFor="app" unlockStage="media" {...imageProps} />
+	<RevealGroup waitFor="media" unlockStage="content">
+		<RevealItem>...</RevealItem>
+	</RevealGroup>
+	<ScrambleReveal waitFor="content" text="..." maintainSpace />
+</MotionScene>`,
 					},
 					{
 						id: "scroll-highlight-text",

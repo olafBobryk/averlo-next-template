@@ -12,14 +12,6 @@ import { Text, type TextProps } from "@/components/ui/primitives/Text";
 
 type IconProp = React.ReactNode | IconName;
 
-const animatedIconClassMap: Partial<Record<IconName, string>> = {
-	"arrow-right":
-		"group-hover:translate-x-[2px] motion-macro transition-transform",
-	"arrow-left":
-		"group-hover:-translate-x-[2px] motion-macro transition-transform",
-	plus: "group-hover:rotate-[900deg] motion-macro transition-transform",
-};
-
 const buttonStyles = cva(
 	[
 		// layout
@@ -100,6 +92,7 @@ type ButtonBaseProps = {
 	style?: React.CSSProperties;
 	loading?: boolean;
 	iconSize?: number;
+	focusable?: boolean;
 } & Omit<VariantProps<typeof buttonStyles>, "align"> & {
 		align?: "left" | "center" | "between";
 	};
@@ -119,7 +112,8 @@ type AnchorElementProps = Omit<
 };
 
 // allow both button + link props without getting too crazy on typing
-type ButtonProps = ButtonBaseProps & (ButtonElementProps | AnchorElementProps);
+export type ButtonProps = ButtonBaseProps &
+	(ButtonElementProps | AnchorElementProps);
 
 type ButtonElement = HTMLElement;
 
@@ -130,7 +124,8 @@ function renderIcon(icon?: IconProp, size = DEFAULT_ICON_SIZE) {
 		return (
 			<Icon
 				name={icon as IconName}
-				className={animatedIconClassMap[icon as IconName]}
+				animate
+				// className={animatedIconClassMap[icon as IconName]}
 				style={{ width: `${size}px`, height: `${size}px` }}
 			/>
 		);
@@ -284,12 +279,14 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			radius,
 			loading,
 			iconSize = DEFAULT_ICON_SIZE,
+			focusable = true,
 			...rest
 		} = props;
 
 		const isDisabled = Boolean(
 			(rest as { disabled?: boolean }).disabled || loading,
 		);
+		const buttonRest = rest as React.ButtonHTMLAttributes<HTMLButtonElement>;
 		const loadingState =
 			loading === undefined ? undefined : loading ? "true" : "false";
 
@@ -381,7 +378,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 					style={style}
 					ref={ref as React.Ref<HTMLAnchorElement>}
 					aria-disabled={isDisabled || undefined}
-					tabIndex={isDisabled ? -1 : undefined}
+					tabIndex={isDisabled ? -1 : focusable ? linkRest.tabIndex : -1}
 					data-loading={loadingState}
 					onClick={handleDisabledClick}
 					{...linkRest}
@@ -399,8 +396,9 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 				style={style}
 				ref={ref as React.Ref<HTMLButtonElement>}
 				disabled={isDisabled}
+				tabIndex={isDisabled ? undefined : focusable ? buttonRest.tabIndex : -1}
 				data-loading={loadingState}
-				{...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+				{...(buttonRest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
 			>
 				{content}
 			</button>
