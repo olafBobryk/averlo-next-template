@@ -3,8 +3,8 @@
 @import "./iconAnimations.css";
 
 :root {
-	--font-body: "Inter", system-ui, -apple-system, sans-serif;
-	--font-heading: "Inter", system-ui, -apple-system, sans-serif;
+	--font-body: var(--font-roboto), system-ui, -apple-system, sans-serif;
+	--font-heading: var(--font-roboto), system-ui, -apple-system, sans-serif;
 	--text-scale: 1;
 
 	--motion-micro-duration: 140ms;

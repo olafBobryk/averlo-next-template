@@ -10,6 +10,7 @@ Client-only mounts for global UI hosts and singleton app-level systems that must
 - You need the host side of `showToast`, `useModal`, or related overlay APIs.
 
 ## Prefer These Files
+- `src/components/mount/FormValidationClientMount.tsx`: disables native browser validation UI so shared field messaging stays in control.
 - `src/components/mount/LoadingScreenMount.tsx`: first-load intro overlay that controls the app-ready signal.
 - `src/components/mount/ModalClientMount.tsx`: mounts `ModalHost` on the client.
 - `src/components/mount/ScrollController.tsx`: centralizes native smooth-scroll behavior and same-page anchor handling.
@@ -24,6 +25,7 @@ Client-only mounts for global UI hosts and singleton app-level systems that must
 
 ## How To Use It
 - Place the modal, toast, and loading screen mounts in the global layout so any page can rely on the matching hooks or intro-ready state.
+- Place `FormValidationClientMount` once near the app root when the shared input system should suppress browser-native validation popups in favor of library field messaging.
 - Place `ScrollController` in the global layout when the app should coordinate same-page anchor scrolls and route resets through one client mount.
 - If an overlay needs a special portal target, prefer host options or portal targets over introducing extra root mounts.
 

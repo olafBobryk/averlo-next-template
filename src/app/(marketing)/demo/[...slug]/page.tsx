@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { DemoPage } from "@/app/demo/_components/DemoPage";
-import { demoPages } from "@/app/demo/content";
+import { DemoPage } from "../_components/DemoPage";
+import { demoPages } from "../content";
 
 export default function DemoSlugPage({
 	params,

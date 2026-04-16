@@ -29,14 +29,47 @@ export const textVariants = cva("", {
 			caption: "text-[calc(0.75rem*var(--text-scale,1))] font-normal",
 		},
 		tone: {
-			default: "text-foreground",
-			muted: "text-muted/60",
+			default: "",
+			muted: "",
 			inherit: "",
 		},
+		theme: {
+			dark: "",
+			light: "",
+			inherit: "",
+		},
+		interactive: {
+			true: "transition-colors motion-interactive",
+			false: "",
+		},
 	},
+	compoundVariants: [
+		{
+			theme: "dark",
+			tone: "default",
+			class: "text-foreground",
+		},
+		{
+			theme: "dark",
+			tone: "muted",
+			class: "text-muted/60",
+		},
+		{
+			theme: "light",
+			tone: "default",
+			class: "text-background",
+		},
+		{
+			theme: "light",
+			tone: "muted",
+			class: "text-background/70",
+		},
+	],
 	defaultVariants: {
 		variant: "body",
 		tone: "default",
+		theme: "dark",
+		interactive: true,
 	},
 });
 
@@ -93,6 +126,8 @@ function TextSkeleton({
 	as = "span",
 	variant,
 	tone,
+	theme,
+	interactive,
 	className,
 	textClassName,
 	children,
@@ -112,12 +147,17 @@ function TextSkeleton({
 	const resolvedVariant = textVariants({
 		variant,
 		tone,
+		theme,
+		interactive,
 		className: textClassName,
 	});
 
 	return (
 		<Skeleton
-			className={clsx("w-fit", textVariants({ variant, tone, className }))}
+			className={clsx(
+				"w-fit",
+				textVariants({ variant, tone, theme, interactive, className }),
+			)}
 			{...rest}
 		>
 			<Tag className={resolvedVariant}>{children ?? "Loading"}</Tag>
@@ -136,6 +176,8 @@ function TextRoot({
 	as = "span",
 	variant,
 	tone,
+	theme,
+	interactive,
 	className,
 	children,
 	...rest
@@ -153,7 +195,7 @@ function TextRoot({
 		| "h6";
 	return (
 		<Tag
-			className={textVariants({ variant, tone, className })}
+			className={textVariants({ variant, tone, theme, interactive, className })}
 			{...(rest as Record<string, unknown>)}
 		>
 			{children}

@@ -3,9 +3,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import Link from "next/link";
 import type * as React from "react";
+import { focusRing } from "../ui/foundations/focus";
 
 const logoStyles = cva(
-	"inline-flex items-center shrink-0 transition-opacity motion-micro",
+	clsx(
+		"inline-flex items-center shrink-0 transition-opacity motion-micro rounded-sm",
+		focusRing.visibleDefault,
+	),
 	{
 		variants: {
 			variant: {
@@ -21,6 +25,10 @@ const logoStyles = cva(
 				light: "text-[#E5F1FF]",
 				dark: "text-[#010103]",
 			},
+			interactive: {
+				true: "cursor-pointer hover:opacity-80",
+				false: "",
+			},
 		},
 		compoundVariants: [
 			{ variant: "full", size: "sm", class: "h-[24px] w-[86px]" },
@@ -34,6 +42,7 @@ const logoStyles = cva(
 			variant: "full",
 			size: "md",
 			tone: "dark",
+			interactive: true,
 		},
 	},
 );
@@ -42,6 +51,9 @@ type LogoOwnProps = {
 	href?: string;
 	title?: string;
 	className?: string;
+	logoClassName?: string;
+	interactive?: boolean;
+	focusable?: boolean;
 } & VariantProps<typeof logoStyles>;
 
 type LogoProps<T extends React.ElementType = "span"> = LogoOwnProps & {
@@ -56,6 +68,9 @@ export default function Logo<T extends React.ElementType = "span">({
 	tone,
 	title,
 	className,
+	logoClassName,
+	interactive = true,
+	focusable = true,
 	...rest
 }: LogoProps<T>) {
 	const href = hrefProp === undefined ? "/" : hrefProp;
@@ -65,9 +80,10 @@ export default function Logo<T extends React.ElementType = "span">({
 	const Tag = (as ??
 		(href ? Link : hasClick ? "button" : "span")) as React.ElementType;
 	const isButton = Tag === "button";
-	const isInteractive = Boolean(
+	const hasInteractiveSurface = Boolean(
 		href || hasClick || Tag === "button" || Tag === "a" || Tag === Link,
 	);
+	const isInteractive = interactive && hasInteractiveSurface;
 	const ariaLabel =
 		(rest as { "aria-label"?: string })["aria-label"] ??
 		(href ? "Go to homepage" : "Logo");
@@ -81,8 +97,8 @@ export default function Logo<T extends React.ElementType = "span">({
 			variant: resolvedVariant,
 			size: resolvedSize,
 			tone: resolvedTone,
+			interactive: isInteractive,
 		}),
-		isInteractive && "cursor-pointer hover:opacity-80",
 		className,
 	);
 
@@ -95,7 +111,7 @@ export default function Logo<T extends React.ElementType = "span">({
 				width="100%"
 				height="100%"
 				viewBox="0 0 40 42"
-				className="h-full w-full"
+				className={clsx("h-full w-full", logoClassName)}
 			>
 				<title>{svgTitle}</title>
 				{/* TODO: Replace paths with your brand's logomark */}
@@ -110,7 +126,7 @@ export default function Logo<T extends React.ElementType = "span">({
 				width="100%"
 				height="100%"
 				viewBox="0 0 148 26"
-				className="h-full w-full"
+				className={clsx("h-full w-full", logoClassName)}
 			>
 				<title>{svgTitle}</title>
 				{/* TODO: Replace paths with your brand's wordmark */}
@@ -126,13 +142,15 @@ export default function Logo<T extends React.ElementType = "span">({
 		);
 
 	if (isButton) {
-		const { type, ...buttonRest } =
+		const { type, disabled, tabIndex, ...buttonRest } =
 			rest as React.ButtonHTMLAttributes<HTMLButtonElement>;
 		return (
 			<button
 				type={type ?? "button"}
 				className={mergedClassName}
 				aria-label={ariaLabel}
+				disabled={disabled || !interactive}
+				tabIndex={disabled || !interactive ? -1 : focusable ? tabIndex : -1}
 				{...buttonRest}
 			>
 				{svg}
@@ -140,17 +158,37 @@ export default function Logo<T extends React.ElementType = "span">({
 		);
 	}
 
+	const { onClick, tabIndex, ...tagRest } =
+		rest as React.HTMLAttributes<HTMLElement> & {
+			onClick?: React.MouseEventHandler<HTMLElement>;
+			tabIndex?: number;
+		};
+
 	return (
 		<Tag
 			className={mergedClassName}
 			aria-label={ariaLabel}
+			aria-disabled={hasInteractiveSurface && !interactive ? true : undefined}
 			role={Tag === "span" ? "img" : undefined}
-			{...(Tag === Link
-				? { href }
-				: Tag === "a" && href
-					? { href }
-					: {})}
-			{...rest}
+			tabIndex={
+				hasInteractiveSurface
+					? interactive && focusable
+						? tabIndex
+						: -1
+					: tabIndex
+			}
+			{...(Tag === Link ? { href } : Tag === "a" && href ? { href } : {})}
+			onClick={
+				interactive
+					? onClick
+					: hasInteractiveSurface
+						? (event: React.MouseEvent<HTMLElement>) => {
+								event.preventDefault();
+								event.stopPropagation();
+							}
+						: onClick
+			}
+			{...tagRest}
 		>
 			{svg}
 		</Tag>

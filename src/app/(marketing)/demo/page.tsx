@@ -1,6 +1,6 @@
 "use client";
 
-import { getVisibleDemoPages } from "@/app/demo/content";
+import { getVisibleDemoPages } from "@/app/(marketing)/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { Panel } from "@/components/ui/primitives/Panel";
@@ -27,7 +27,7 @@ export default function DemoIndexPage() {
 	const grouped = groupPages();
 
 	return (
-		<div className="w-full">
+		<div className="w-full space-y-5">
 			<header className="flex flex-col gap-2">
 				<Text as="h1" variant="headingLg">
 					Demo Index

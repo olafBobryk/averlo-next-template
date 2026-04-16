@@ -1,5 +1,3 @@
-//TODO ready integrate.
-
 "use client";
 
 import { useEffect } from "react";

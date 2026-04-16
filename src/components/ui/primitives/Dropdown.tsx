@@ -50,6 +50,7 @@ type DropdownProps = {
 	offset?: number;
 	positionStrategy?: "fixed" | "absolute";
 	disabled?: boolean;
+	open?: boolean;
 	openOnHover?: boolean;
 	pinOnClick?: boolean;
 	disableWhenReducedMotion?: boolean;
@@ -82,6 +83,7 @@ export function Dropdown({
 	offset = 8,
 	positionStrategy = "fixed",
 	disabled,
+	open,
 	openOnHover = true,
 	pinOnClick = openOnHover,
 	disableWhenReducedMotion = true,
@@ -89,7 +91,7 @@ export function Dropdown({
 	onOpenChange,
 }: DropdownProps) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
-	const [isOpen, setIsOpen] = React.useState(false);
+	const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
 	const [isPinned, setIsPinned] = React.useState(false);
 	const wrapperRef = React.useRef<HTMLDivElement | null>(null);
 	const rootRef = React.useRef<HTMLElement | null>(null);
@@ -97,14 +99,24 @@ export function Dropdown({
 	const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>();
 	const hoverTimeoutRef = React.useRef<number | null>(null);
 	const lastOpenMethodRef = React.useRef<"keyboard" | "pointer" | null>(null);
+	const isOpenControlled = open !== undefined;
+	const isOpen = open ?? uncontrolledOpen;
 
 	const setOpenState = React.useCallback(
 		(next: boolean) => {
-			setIsOpen(next);
+			if (!isOpenControlled) {
+				setUncontrolledOpen(next);
+			}
 			onOpenChange?.(next);
 		},
-		[onOpenChange],
+		[isOpenControlled, onOpenChange],
 	);
+
+	React.useEffect(() => {
+		if (!isOpen && isPinned) {
+			setIsPinned(false);
+		}
+	}, [isOpen, isPinned]);
 
 	const focusableSelector =
 		'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';

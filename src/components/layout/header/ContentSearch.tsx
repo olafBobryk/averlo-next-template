@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getVisibleDemoPages } from "@/app/demo/content";
+import { getVisibleDemoPages } from "@/app/(marketing)/demo/content";
 import {
 	type ComboboxOption,
 	ComboboxTextInput,
@@ -79,7 +79,6 @@ export default function ContentSearch({
 
 	return (
 		<ComboboxTextInput
-			label={<span className="sr-only">Search pages</span>}
 			fieldClassName={fieldClassName}
 			className={className}
 			size={size}
@@ -88,6 +87,7 @@ export default function ContentSearch({
 			options={options}
 			value={query}
 			onChange={setQuery}
+			hideDropdown={(currentQuery) => currentQuery.trim().length === 0}
 			filterOption={(currentQuery, option) => {
 				const normalizedQuery = currentQuery.trim().toLowerCase();
 				if (!normalizedQuery) return false;

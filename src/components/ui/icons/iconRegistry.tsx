@@ -1,23 +1,22 @@
 // components/ui/icons/iconRegistry.tsx
 "use client";
 
+import type { IconWeight } from "@phosphor-icons/react";
 import * as React from "react";
 import {
-	customRegistry,
 	type CustomIconName,
+	customRegistry,
 } from "@/components/ui/icons/customRegistry";
 
 export type IconRenderProps = {
 	className?: string;
 	title?: string;
 	"aria-hidden"?: boolean;
+	weight?: IconWeight;
 };
 
 export type IconName = CustomIconName | (string & {});
-export type IconRegistry = Record<
-	string,
-	React.ComponentType<IconRenderProps>
->;
+export type IconRegistry = Record<string, React.ComponentType<IconRenderProps>>;
 
 const createLocalRegistry = (): IconRegistry => {
 	const entries = (Object.keys(customRegistry) as CustomIconName[]).map(
@@ -48,11 +47,13 @@ export const localIconRegistry = createLocalRegistry();
 export const createIconRegistry = (
 	overrides: Partial<IconRegistry>,
 ): IconRegistry => {
-	const merged: Record<string, React.ComponentType<IconRenderProps> | undefined> =
-		{
-			...localIconRegistry,
-			...overrides,
-		};
+	const merged: Record<
+		string,
+		React.ComponentType<IconRenderProps> | undefined
+	> = {
+		...localIconRegistry,
+		...overrides,
+	};
 
 	return Object.fromEntries(
 		Object.entries(merged).filter(([, value]) => Boolean(value)),

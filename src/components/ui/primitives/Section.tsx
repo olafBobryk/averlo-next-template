@@ -15,8 +15,8 @@ const outerStyles = cva("w-full", {
 			none: "",
 			soft: "px-[calc(var(--spacing-section-x)/2)] py-[calc(var(--spacing-section-y)/2)]",
 			default: "px-[var(--spacing-section-x)] py-[var(--spacing-section-y)]",
-			"flush-x": "py-[var(--section-py)]",
-			hero: "px-[var(--spacing-section-x)] pb-[var(--spacing-section-y)]  pt-[calc(var(--spacing-section-y)*2)]",
+			"flush-x": "py-[var(--spacing-section-y)]",
+			hero: "px-[var(--spacing-section-x)] pb-[var(--spacing-section-y)]  pt-[calc(var(--spacing-section-y)*1.5)]",
 		},
 		background: {
 			none: "",
@@ -35,22 +35,27 @@ const outerStyles = cva("w-full", {
 	},
 });
 
-const innerStyles = cva("w-full", {
+const innerStyles = cva("w-full flex flex-col", {
 	variants: {
 		maxWidth: {
 			default: "max-w-section-max mx-auto",
 			wide: "max-w-none",
 			narrow: "max-w-4xl mx-auto",
+			none: "",
 		},
 		align: {
 			start: "items-start text-left",
 			center: "items-center text-center",
 			end: "items-end text-right",
 		},
+		size: {
+			seamless: "min-h-full h-fit",
+		},
 	},
 	defaultVariants: {
 		maxWidth: "default",
 		align: "start",
+		size: "seamless",
 	},
 });
 

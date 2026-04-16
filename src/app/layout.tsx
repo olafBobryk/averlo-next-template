@@ -1,23 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/layout/footer/Footer";
-import Header from "@/components/layout/header/Header";
-import LoadingScreenMount from "@/components/mount/LoadingScreenMount";
-import ModalClientMount from "@/components/mount/ModalClientMount";
-import ScrollController from "@/components/mount/ScrollController";
-import ToastClientMount from "@/components/mount/ToastClientMount";
-import { SettingsProvider } from "@/components/ui/foundations/settingsContext";
-import { IconProvider } from "@/components/ui/icons/iconRegistry";
-import { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";
 import { KEYWORDS } from "@/config/metadataConfig";
-
-const geistSans = Geist({
-	variable: "--font-geist-sans",
-	subsets: ["latin"],
-});
-
-//Generate related files: https://favicon.io/favicon-converter/
+import { roboto } from "@/font";
 
 export const metadata: Metadata = {
 	title: "WebVizion Template",
@@ -46,21 +30,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={`${geistSans.variable} antialiased`}>
-				<SettingsProvider>
-					<IconProvider registry={phosphorIconRegistry}>
-						<Header />
-
-						{children}
-						<Footer />
-						<LoadingScreenMount />
-						{/* TODO: Swap mount order or placement if a project needs overlays elsewhere. */}
-						<ModalClientMount />
-						<ToastClientMount />
-						<ScrollController />
-					</IconProvider>
-				</SettingsProvider>
-			</body>
+			<body className={`${roboto.variable} antialiased`}>{children}</body>
 		</html>
 	);
 }

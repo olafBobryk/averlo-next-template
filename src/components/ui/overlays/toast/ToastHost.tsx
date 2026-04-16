@@ -143,11 +143,11 @@ export default function ToastHost({
 		return () => window.clearInterval(interval);
 	}, []);
 
-	const containerClassName =
+	const containerClassName = clsx(
+		"pointer-events-none fixed inset-0 z-[9999] flex w-full flex-col p-4",
 		position === "bottom-center"
 			? [
-					"pointer-events-none fixed inset-x-0 bottom-0 pb-4 z-[9999]",
-					"mx-auto flex w-full max-w-sm flex-col items-center space-y-2 px-4",
+					"items-center justify-end gap-2",
 					"[mask-image:linear-gradient(to_top,rgba(0,0,0,1)_0,rgba(0,0,0,1)_calc(46px*3+8px*3+16px),rgba(0,0,0,0)_calc(46px*4+8px*3+16px),rgba(0,0,0,0)_100%)]",
 					"[mask-repeat:no-repeat]",
 					"[mask-size:100%_100%]",
@@ -156,10 +156,11 @@ export default function ToastHost({
 					"[-webkit-mask-size:100%_100%]",
 				].join(" ")
 			: position === "bottom-left"
-				? "pointer-events-none fixed left-4 bottom-4 z-[9999] flex w-full max-w-sm flex-col items-start gap-3"
+				? "items-start justify-end gap-3"
 				: position === "bottom-right"
-					? "pointer-events-none fixed right-4 bottom-4 z-[9999] flex w-full max-w-sm flex-col items-end gap-3"
-					: "pointer-events-none fixed right-4 top-4 z-[9999] flex w-full max-w-sm flex-col items-end gap-3";
+					? "items-end justify-end gap-3"
+					: "items-end justify-start gap-3",
+	);
 
 	return (
 		<Portal target={targetId}>

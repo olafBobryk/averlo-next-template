@@ -1,10 +1,13 @@
-// components/ui/icons/Icon.tsx
 "use client";
 
+import type { IconWeight } from "@phosphor-icons/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
+import {
+	type IconName,
+	useIconRegistry,
+} from "@/components/ui/icons/iconRegistry";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
-import { useIconRegistry, type IconName } from "@/components/ui/icons/iconRegistry";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 export type { IconName };
@@ -50,6 +53,7 @@ type IconProps = {
 	name: IconName;
 	className?: string;
 	animate?: boolean;
+	weight?: IconWeight;
 } & VariantProps<typeof iconSizeStyles> &
 	VariantProps<typeof iconFrameStyles> &
 	Omit<ComponentProps<"span">, "children">;
@@ -76,6 +80,7 @@ const IconRoot = ({
 	frame = "none",
 	className,
 	animate = false,
+	weight,
 	...rest
 }: IconProps) => {
 	const registry = useIconRegistry();
@@ -141,7 +146,11 @@ const IconRoot = ({
 		return (
 			<span className={wrapperClassName} {...rest}>
 				<span className={innerClassName}>
-					<IconNode className="w-full h-full" aria-hidden={true} />
+					<IconNode
+						className="w-full h-full"
+						aria-hidden={true}
+						weight={weight}
+					/>
 				</span>
 			</span>
 		);
@@ -149,7 +158,7 @@ const IconRoot = ({
 
 	return (
 		<span className={innerClassName} {...rest}>
-			<IconNode className="w-full h-full" aria-hidden={true} />
+			<IconNode className="w-full h-full" aria-hidden={true} weight={weight} />
 		</span>
 	);
 };

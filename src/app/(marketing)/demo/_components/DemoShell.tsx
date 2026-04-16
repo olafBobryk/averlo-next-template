@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getVisibleDemoPages } from "@/app/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
+import { getVisibleDemoPages } from "../content";
 
 const NAV_PADDING_BASE = 12;
 
@@ -23,7 +23,7 @@ export function DemoShell({ children }: DemoShellProps) {
 	const visiblePages = getVisibleDemoPages();
 
 	return (
-		<Section innerClassName="flex w-full gap-8">
+		<Section innerClassName="flex flex-row w-full gap-8">
 			<aside className="w-64 shrink-0">
 				<div className="sticky top-24 flex flex-col gap-4">
 					<Panel display="flex" padding="sm" gap="sm" shadow="none">

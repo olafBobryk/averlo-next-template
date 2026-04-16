@@ -7,6 +7,8 @@ export const focusRing = {
 		"focus-within:!border-success/70 focus-within:ring-4 focus-within:ring-success/10",
 	visibleDefault:
 		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+	visibleInner:
+		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-inset",
 	visibleError:
 		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
 	peerDefault:

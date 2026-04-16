@@ -50,6 +50,7 @@ import { InspectableImage } from "@/components/ui/misc/InspectableImage";
 import { Loader } from "@/components/ui/misc/Loader";
 import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
 import { PaginationControls } from "@/components/ui/misc/PaginationControls";
+import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { SuspenseBoundary } from "@/components/ui/misc/SuspenseBoundary";
@@ -186,18 +187,15 @@ const relatedMap: Record<string, RelatedInfo> = {
 	Header: { uses: ["HeaderCompact", "HeaderFull"], usedIn: [] },
 	HeaderFull: { uses: ["Button", "ContentSearch", "Logo"], usedIn: ["Header"] },
 	HeaderCompact: {
-		uses: ["Button", "ContentSearch", "HeaderCompactModal", "Icon", "Logo"],
+		uses: ["Accordion", "Button", "ContentSearch", "Logo"],
 		usedIn: ["Header"],
-	},
-	HeaderCompactModal: {
-		uses: ["Button", "Icon", "ModalShell", "Text"],
-		usedIn: ["HeaderCompact"],
 	},
 	ContentSearch: {
 		uses: ["ComboboxTextInput"],
 		usedIn: ["HeaderCompact", "HeaderFull"],
 	},
 	Footer: { uses: ["Button", "Logo", "Text"], usedIn: [] },
+	FormValidationClientMount: { uses: [], usedIn: [] },
 	ModalClientMount: { uses: ["ModalHost"], usedIn: [] },
 	ToastClientMount: { uses: ["ToastHost"], usedIn: [] },
 	IconSwap: {
@@ -224,7 +222,6 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"Dropdown",
 			"ErrorState",
 			"HeaderCompact",
-			"HeaderCompactModal",
 			"Loader",
 			"MoreMenuDropdown",
 			"PasswordInput",
@@ -258,7 +255,6 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"Field",
 			// "FilePreview",
 			"Footer",
-			"HeaderCompactModal",
 			"Listbox",
 			"PhoneInput",
 			"SegmentedControl",
@@ -281,7 +277,6 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"FileUploader",
 			"Footer",
 			"HeaderCompact",
-			"HeaderCompactModal",
 			"HeaderFull",
 			"ImageInspectModal",
 			"InspectableImage",
@@ -567,6 +562,10 @@ const relatedMap: Record<string, RelatedInfo> = {
 		uses: ["Button", "Icon", "Text"],
 		usedIn: [],
 	},
+	ScrollBorders: {
+		uses: ["Button", "focus", "motionTiming"],
+		usedIn: [],
+	},
 	Tooltip: {
 		uses: ["Dropdown", "Text"],
 		usedIn: [],
@@ -595,7 +594,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 	},
 	ModalShell: {
 		uses: ["Panel", "Portal"],
-		usedIn: ["HeaderCompactModal", "ModalHost"],
+		usedIn: ["ModalHost"],
 	},
 	useImageInspectModal: {
 		uses: ["ImageInspectModal", "useModal"],
@@ -747,14 +746,6 @@ export const demoPages: DemoPage[] = [
 						related: relatedMap.HeaderCompact,
 					},
 					{
-						id: "header-compact-modal",
-						kind: "usage",
-						name: "HeaderCompactModal",
-						label: "Mobile menu modal",
-						snippet: "<HeaderCompactModal isModalOpen handleChangeModal />",
-						related: relatedMap.HeaderCompactModal,
-					},
-					{
 						id: "content-search",
 						kind: "usage",
 						name: "ContentSearch",
@@ -794,7 +785,7 @@ export const demoPages: DemoPage[] = [
 		id: "mount",
 		slug: ["mount"],
 		title: "Mount",
-		description: "Portal mounts for overlays",
+		description: "Client mounts for shared app systems",
 		groups: [
 			{
 				id: "mount-usage",
@@ -808,6 +799,14 @@ export const demoPages: DemoPage[] = [
 						label: "Mounts modal host",
 						snippet: "<ModalClientMount />",
 						related: relatedMap.ModalClientMount,
+					},
+					{
+						id: "form-validation-client-mount",
+						kind: "usage",
+						name: "FormValidationClientMount",
+						label: "Disables native form validation UI",
+						snippet: "<FormValidationClientMount />",
+						related: relatedMap.FormValidationClientMount,
 					},
 					{
 						id: "toast-client-mount",
@@ -899,6 +898,16 @@ export const demoPages: DemoPage[] = [
 									<Text variant="caption" tone="muted">
 										Caption muted
 									</Text>
+									<div className="rounded-lg bg-foreground px-4 py-3">
+										<Text
+											variant="body"
+											theme="light"
+											tone="muted"
+											interactive={false}
+										>
+											Muted light text
+										</Text>
+									</div>
 								</div>
 							);
 						},
@@ -2265,6 +2274,71 @@ export const demoPages: DemoPage[] = [
   disablePrev={page <= 1}
   disableNext={page >= totalPages}
 />`,
+					},
+					{
+						id: "scroll-borders",
+						kind: "component",
+						name: "ScrollBorders",
+						label: "Scrollable edge affordances",
+						related: relatedMap.ScrollBorders,
+						Render() {
+							return (
+								<ScrollBorders className="h-40 overflow-y-auto bg-surface px-4 py-3">
+									<div className="flex flex-col gap-3">
+										{Array.from({ length: 10 }, (_, index) => (
+											<div
+												key={`scroll-borders-demo-${index + 1}`}
+												className="rounded-md border border-border/10 bg-background px-3 py-2"
+											>
+												<Text as="p" variant="bodyStrong">
+													Section {index + 1}
+												</Text>
+												<Text as="p" variant="body" tone="muted">
+													Keep longer scroll regions readable without inventing
+													page-local chrome.
+												</Text>
+											</div>
+										))}
+									</div>
+								</ScrollBorders>
+							);
+						},
+						skeleton: {
+							name: "ScrollBorders.Skeleton",
+							related: relatedMap.ScrollBorders,
+							Render() {
+								return (
+									<ScrollBorders.Skeleton className="h-40 rounded-lg bg-surface px-4 py-3">
+										<div className="flex flex-col gap-3">
+											{Array.from({ length: 5 }, (_, index) => (
+												<div
+													key={`scroll-borders-skeleton-${index + 1}`}
+													className="rounded-md border border-border/10 bg-background px-3 py-2"
+												>
+													<Text.Skeleton as="p" variant="bodyStrong">
+														Section {index + 1}
+													</Text.Skeleton>
+													<Text.Skeleton as="p" variant="body">
+														Keep longer scroll regions readable without
+														inventing page-local chrome.
+													</Text.Skeleton>
+												</div>
+											))}
+										</div>
+									</ScrollBorders.Skeleton>
+								);
+							},
+						},
+					},
+					{
+						id: "scroll-borders-usage",
+						kind: "usage",
+						name: "ScrollBorders",
+						label: "Usage",
+						related: relatedMap.ScrollBorders,
+						snippet: `<ScrollBorders className="h-40 overflow-y-auto rounded-lg bg-surface px-4 py-3">
+  <div className="flex flex-col gap-3">{children}</div>
+</ScrollBorders>`,
 					},
 					{
 						id: "tooltip",

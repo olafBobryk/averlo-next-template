@@ -24,7 +24,7 @@ export type ComboboxOption = {
 };
 
 type ComboboxTextInputProps = {
-	label: React.ReactNode;
+	label?: React.ReactNode;
 	placeholder?: string;
 
 	id?: string;
@@ -68,6 +68,7 @@ type ComboboxTextInputProps = {
 	openOnChevronClick?: boolean; // default true
 	showResultsOnEmptyQuery?: boolean;
 	hideNoResults?: boolean;
+	hideDropdown?: boolean | ((value: string) => boolean);
 
 	portalTargetId?: string;
 	size?: InputFrameSize;
@@ -107,6 +108,7 @@ export function ComboboxTextInput({
 	openOnChevronClick = true,
 	showResultsOnEmptyQuery = true,
 	hideNoResults = false,
+	hideDropdown = false,
 	portalTargetId,
 	size,
 }: ComboboxTextInputProps) {
@@ -127,6 +129,14 @@ export function ComboboxTextInput({
 	);
 
 	const inputValue = isControlled ? (value ?? "") : uncontrolledValue;
+	const shouldHideDropdownForValue = React.useCallback(
+		(nextValue: string) =>
+			typeof hideDropdown === "function"
+				? hideDropdown(nextValue)
+				: hideDropdown,
+		[hideDropdown],
+	);
+	const shouldHideDropdown = shouldHideDropdownForValue(inputValue);
 
 	const setValue = React.useCallback(
 		(next: string) => {
@@ -198,6 +208,7 @@ export function ComboboxTextInput({
 			className={fieldClassName}
 		>
 			<Dropdown
+				open={shouldHideDropdown ? false : menuOpen}
 				portalTargetId={portalTargetId}
 				menuWidth="trigger"
 				disabled={disabled}
@@ -221,7 +232,7 @@ export function ComboboxTextInput({
 
 					const handleChevronClick = (event: React.MouseEvent) => {
 						event.stopPropagation();
-						if (!openOnChevronClick) return;
+						if (!openOnChevronClick || shouldHideDropdown) return;
 						if (isOpen) {
 							closeMenu({ restoreFocus: false });
 							return;
@@ -263,7 +274,7 @@ export function ComboboxTextInput({
 								const target = event.target as HTMLElement;
 								if (target.tagName !== "INPUT") event.preventDefault();
 								inputRef.current?.focus({ preventScroll: true });
-								if (openOnFocus) openMenu();
+								if (openOnFocus && !shouldHideDropdown) openMenu();
 							}}
 						>
 							<input
@@ -287,9 +298,17 @@ export function ComboboxTextInput({
 								value={inputValue}
 								onChange={(e) => {
 									const nextValue = e.target.value;
+									const nextShouldHideDropdown =
+										shouldHideDropdownForValue(nextValue);
 									if (validate) setClientError(null);
 									setValue(nextValue);
 									setActiveIndex(0);
+									if (nextShouldHideDropdown) {
+										if (isOpen) {
+											closeMenu({ restoreFocus: false });
+										}
+										return;
+									}
 									if (!isOpen && (openOnFocus || nextValue.trim().length > 0)) {
 										openMenu();
 									}
@@ -299,23 +318,26 @@ export function ComboboxTextInput({
 									setClientError(validate(e.target.value));
 								}}
 								onFocus={() => {
-									if (!openOnFocus) return;
+									if (!openOnFocus || shouldHideDropdown) return;
 									openMenu();
 								}}
 								onKeyDown={(event) => {
 									if (event.key === "ArrowDown") {
+										if (shouldHideDropdown) return;
 										event.preventDefault();
 										if (!isOpen) openMenu();
 										updateActiveIndex(activeIndex + 1);
 										return;
 									}
 									if (event.key === "ArrowUp") {
+										if (shouldHideDropdown) return;
 										event.preventDefault();
 										if (!isOpen) openMenu();
 										updateActiveIndex(activeIndex - 1);
 										return;
 									}
 									if (event.key === "Enter") {
+										if (shouldHideDropdown) return;
 										if (!isOpen) {
 											event.preventDefault();
 											openMenu();

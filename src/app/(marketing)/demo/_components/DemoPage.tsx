@@ -6,11 +6,11 @@ import {
 	ComponentCard,
 	ComponentGroup,
 	UsageCard,
-} from "@/app/demo/_components/demo-cards";
+} from "@/app/(marketing)/demo/_components/demo-cards";
 import type {
 	DemoComponentItem,
 	DemoPage as DemoPageType,
-} from "@/app/demo/content";
+} from "@/app/(marketing)/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { Panel } from "@/components/ui/primitives/Panel";

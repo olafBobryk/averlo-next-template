@@ -1,13 +1,22 @@
 "use client";
 
-import { AnimatePresence } from "motion/react";
-import { useEffect, useState } from "react";
+import clsx from "clsx";
+import { useState } from "react";
 import Logo from "@/components/branding/Logo";
-import { Icon } from "@/components/ui/icons/Icon";
+import { Accordion } from "@/components/ui/misc/Accordion";
+import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { Button } from "@/components/ui/primitives/Button";
 import { NAV_LINKS } from "@/config/navConfig";
 import ContentSearch from "./ContentSearch";
-import HeaderCompactModal from "./HeaderCompactModal";
+
+const COMPACT_HEADER_TOP_OFFSET = 16;
+const COMPACT_HEADER_BAR_HEIGHT = 72;
+const COMPACT_HEADER_CTA_HEIGHT = 44;
+const COMPACT_HEADER_SCROLL_AREA_OFFSET =
+	COMPACT_HEADER_TOP_OFFSET +
+	COMPACT_HEADER_BAR_HEIGHT +
+	COMPACT_HEADER_CTA_HEIGHT +
+	48;
 
 export default function HeaderCompact({
 	className = "",
@@ -16,108 +25,87 @@ export default function HeaderCompact({
 	className?: string;
 	navLinks?: { name: string; link: string }[];
 }) {
-	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-	const handleChangeModal = () => {
-		setIsModalOpen(!isModalOpen);
-	};
-
-	const [atTop, setAtTop] = useState(false);
-	const [hide, setHide] = useState(false);
-	const [lastScrollY, setLastScrollY] = useState(0);
-
-	useEffect(() => {
-		const handleScroll = () => {
-			const currentY = window.scrollY;
-			setAtTop(currentY <= 50);
-
-			if (currentY > lastScrollY && currentY > 10) {
-				setHide(true); // scrolling down
-			} else {
-				setHide(false); // scrolling up
-			}
-
-			setLastScrollY(currentY);
-		};
-
-		window.addEventListener("scroll", handleScroll);
-
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, [lastScrollY]);
-
-	useEffect(() => {
-		const currentY = window.scrollY;
-		setAtTop(currentY <= 50);
-	}, []);
-
-	const headerClasses = [
-		"group fixed w-full z-50 transition-all pointer-events-none duration-300",
-		className,
-	]
-		.filter(Boolean)
-		.join(" ");
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 	return (
-		<>
-			<header
-				data-open={isModalOpen}
-				data-top={atTop}
-				data-hide={hide}
-				className={headerClasses}
-			>
-				<div className="relative w-full px-section-x group-data-[open=true]:fixed">
-					<div className="flex w-full flex-col gap-3 py-4">
-						<div className="flex w-full items-center justify-between overflow-hidden">
-							<Logo className="pointer-events-auto" />
-							<Button
-								variant="primary"
-								size="md"
-								align="center"
-								data-open={isModalOpen}
-								onClick={handleChangeModal}
-								className="relative pointer-events-auto group-data-[open=true]:!shadow-none transition group-data-[open=true]:bg-transparent group-data-[open=true]:hover:bg-transparent group-data-[open=true]:text-foreground group-data-[open=true]:border-foreground/15"
-								aria-expanded={isModalOpen}
-								aria-label={isModalOpen ? "Close menu" : "Open menu"}
-							>
-								<Icon
-									name="menu"
-									className="transition-all duration-300 data-[open=true]:-rotate-90 data-[open=true]:opacity-0"
-									data-open={isModalOpen}
-									size="lg"
+		<header
+			data-open={isMenuOpen}
+			className={clsx(
+				"fixed inset-x-0 top-0 z-50 px-section-x motion-component pt-4 data-[open=true]:bg-background transition-[background-color,border,height] border-b border-transparent data-[open=true]:border-border/15 data-[open=true]:h-svh",
+				className,
+			)}
+		>
+			<div className="mx-auto flex h-full w-full max-w-section-max flex-col gap-3">
+				<div className="flex items-center justify-between gap-3 px-3 py-3">
+					<Logo size="sm" className="pointer-events-auto" />
+					<Button
+						variant="ghost"
+						size="sm"
+						align="center"
+						trailingIcon={isMenuOpen ? "minus" : "plus"}
+						onClick={() => setIsMenuOpen((value) => !value)}
+						aria-expanded={isMenuOpen}
+						aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
+					>
+						Menu
+					</Button>
+				</div>
+				<div
+					data-open={isMenuOpen}
+					className="grid min-h-0 transition-[grid-template-rows,opacity] motion-component data-[open=false]:grid-rows-[0fr] data-[open=false]:opacity-0 data-[open=true]:grid-rows-[1fr] data-[open=true]:opacity-100"
+					style={{
+						height: isMenuOpen
+							? `calc(100svh - ${COMPACT_HEADER_TOP_OFFSET + COMPACT_HEADER_BAR_HEIGHT}px)`
+							: undefined,
+					}}
+				>
+					<div className="overflow-hidden">
+						<ScrollBorders
+							showBackToTop={false}
+							className="overflow-scroll"
+							style={{
+								maxHeight: `calc(100vh - ${COMPACT_HEADER_SCROLL_AREA_OFFSET}px)`,
+							}}
+							// style={{
+							// 	maxHeight: `calc(100svh - ${COMPACT_HEADER_SCROLL_AREA_OFFSET}px)`,
+							// }}
+						>
+							<div className="flex min-h-full flex-col gap-3">
+								<ContentSearch
+									navLinks={navLinks}
+									size="sm"
+									fieldClassName="w-full"
+									className="w-full"
+									inputClassName="text-sm"
+									onNavigate={() => setIsMenuOpen(false)}
 								/>
-								<Icon
-									name="cross"
-									className="inset-center rotate-90 opacity-0 transition-all duration-300 data-[open=true]:rotate-0 data-[open=true]:opacity-100"
-									data-open={isModalOpen}
-									size="lg"
-								/>
-							</Button>
-						</div>
-						<ContentSearch
-							navLinks={navLinks}
-							size="sm"
-							fieldClassName="pointer-events-auto"
-							className="pointer-events-auto"
-							inputClassName="text-sm"
-							onNavigate={() => setIsModalOpen(false)}
-						/>
+								<Accordion title="Pages" defaultOpen>
+									{navLinks.map((item) => (
+										<Button
+											key={item.name}
+											href={item.link}
+											variant="ghost"
+											align="left"
+											className="w-full justify-between"
+											onClick={() => setIsMenuOpen(false)}
+										>
+											{item.name}
+										</Button>
+									))}
+								</Accordion>
+								<Button
+									variant="primary"
+									href="/contact"
+									onClick={() => setIsMenuOpen(false)}
+									className="mt-auto"
+								>
+									Join Now
+								</Button>
+							</div>
+						</ScrollBorders>
 					</div>
 				</div>
-			</header>
-			<div
-				id="header-compact-modal-root"
-				data-open={isModalOpen}
-				className="fixed inset-0 z-40 data-[open=false]:pointer-events-none"
-			/>
-			<AnimatePresence>
-				{isModalOpen ? (
-					<HeaderCompactModal
-						isModalOpen={isModalOpen}
-						handleChangeModal={handleChangeModal}
-						navLinks={navLinks}
-					/>
-				) : null}
-			</AnimatePresence>
-		</>
+			</div>
+		</header>
 	);
 }

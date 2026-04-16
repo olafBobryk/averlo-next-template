@@ -14,6 +14,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - `src/components/ui/misc/Loader.tsx`: spinner loader.
 - `src/components/ui/misc/MoreMenuDropdown.tsx`: overflow action menu.
 - `src/components/ui/misc/PaginationControls.tsx`: compact previous or next pagination controls.
+- `src/components/ui/misc/ScrollBorders.tsx`: scroll container with top/bottom edge affordances and an optional return-to-top action.
 - `src/components/ui/misc/SegmentedControl.tsx`: segmented option selector.
 - `src/components/ui/misc/SuspenseBoundary.tsx`: loading and error boundary wrapper.
 - `src/components/ui/misc/Tooltip.tsx`: hover or focus helper text built on the shared dropdown primitive.
@@ -41,6 +42,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - Use `Loader` inside asynchronous regions, but avoid duplicating loader behavior already built into `Button` or other components.
 - Use `MoreMenuDropdown` for action-overflow menus instead of assembling a new icon-trigger dropdown.
 - Use `PaginationControls` for compact previous or next paging actions before building page-local pager rows.
+- Use `ScrollBorders` when a vertically scrollable region should expose overflow with shared border treatment instead of page-local scroll shadows or one-off borders.
 - Use `Tooltip` for short helper copy on hover or focus instead of hand-rolled positioned labels.
 - Use `InspectableImage` for click-to-zoom image behavior.
 - Use `Warning` for cautionary messaging; use `variant="panel"` when the warning should be visually separated from surrounding content.

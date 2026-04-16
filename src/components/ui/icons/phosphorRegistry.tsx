@@ -3,6 +3,7 @@
 
 import {
 	ArrowRight,
+	ArrowUpIcon,
 	Bell,
 	Calendar,
 	CaretDown,
@@ -48,6 +49,7 @@ const phosphorOverrides: Partial<IconRegistry> = {
 	eye: Eye,
 	"eye-closed": EyeClosed,
 	instagram: InstagramLogo,
+	"arrow-up": ArrowUpIcon,
 	"linked-in": LinkedinLogo,
 	lock: Lock,
 	menu: List,
