@@ -44,9 +44,14 @@ const innerStyles = cva("w-full flex flex-col", {
 			none: "",
 		},
 		align: {
-			start: "items-start text-left",
+			start: "items-start",
 			center: "items-center text-center",
-			end: "items-end text-right",
+			end: "items-end",
+		},
+		justify: {
+			start: "justify-start",
+			center: "justify-center",
+			end: "justify-end",
 		},
 		size: {
 			seamless: "min-h-full h-fit",
@@ -55,6 +60,7 @@ const innerStyles = cva("w-full flex flex-col", {
 	defaultVariants: {
 		maxWidth: "default",
 		align: "start",
+		justify: "start",
 		size: "seamless",
 	},
 });
@@ -96,6 +102,8 @@ function SectionRoot<T extends ElementType = "section">({
 	height,
 	maxWidth,
 	align,
+	justify,
+	size,
 	...rest
 }: SectionProps<T>) {
 	const Tag = (as ?? "section") as ElementType;
@@ -124,7 +132,7 @@ function SectionRoot<T extends ElementType = "section">({
 		.filter(Boolean)
 		.join(" ");
 	const innerClass = [
-		innerStyles({ maxWidth, align }),
+		innerStyles({ maxWidth, align, justify, size }),
 		hasBackground ? "relative z-10" : undefined,
 		innerClassName,
 	]

@@ -1,3 +1,2 @@
-TODO ready medium: Use prop bags throughout the component tree: prefer namespaced slot props over flattened component props so each internal part gets its own typed object, for example text={{...TextProps}}, button={{...ButtonProps}}, icon={{...}}, and keep only true component-level behavior props at the top level. Refactor new and touched components toward this pattern for API consistency, clearer ownership, and easier composition.
 
-TODO ready: find repo location for usefull links like: https://realfavicongenerator.net/.
+TODO: motion scene + reveal + loading screen issue. on hard reload the pages reveals are blocked possibly by motion scene, this is not the case when navifating between pages.

@@ -1,24 +1,26 @@
-import Logo from "@/components/branding/Logo";
-import { Section } from "@/components/ui/primitives/Section";
+import { StatusContent } from "@/app/(site)/_components/status/StatusContent";
 import { Button } from "@/components/ui/primitives/Button";
-import { Text } from "@/components/ui/primitives/Text";
+import { Section } from "@/components/ui/primitives/Section";
+import { hrefFor } from "@/lib/routes";
 
 export default function Page() {
 	return (
 		<main className="h-screen">
-			<Section className="h-full" innerClassName="h-full" align={"center"}>
-				<div className="max flex flex-col items-center h-full justify-center gap-2">
-					<Logo size="md" />
-					<Text as="h1" variant="headingXl">
-						Page not found
-					</Text>
-					<Text variant="body" tone="muted">
-						The page you’re looking for doesn’t exist.
-					</Text>
-					<Button variant="primary" href="/">
-						Go Home
-					</Button>
-				</div>
+			<Section
+				className="h-full"
+				innerClassName="h-full"
+				align="center"
+				justify={"center"}
+			>
+				<StatusContent
+					heading="Page not found"
+					body="The page you’re looking for doesn’t exist."
+					actions={
+						<Button variant="primary" href={hrefFor("home")}>
+							Go home
+						</Button>
+					}
+				/>
 			</Section>
 		</main>
 	);

@@ -1,21 +1,32 @@
 export {
-	checkHealth,
-	type HealthResponse,
+  fetchSession,
+  login,
+  logout,
+  type SessionUser,
+  updateStoredSessionUser,
+} from "./auth";
+export {
+  checkHealth,
+  type HealthResponse,
 } from "./checkHealth";
 export {
-	type ApiClient,
-	type ApiClientOptions,
-	type ApiError,
-	type ApiRequestBody,
-	type ApiRequester,
-	type ApiRequestOptions,
-	createApiClient,
-	type ErrorResponse,
-	request,
+  type ApiClient,
+  type ApiClientOptions,
+  type ApiError,
+  type ApiRequestBody,
+  type ApiRequester,
+  type ApiRequestOptions,
+  createApiClient,
+  type ErrorResponse,
+  request,
 } from "./createApiClient";
 export {
-	createMockFetch,
-	type MockApiResponse,
-	type MockRequestContext,
-	type MockRoute,
+  createMockFetch,
+  type MockApiResponse,
+  type MockRequestContext,
+  type MockRoute,
 } from "./createMockFetch";
+export {
+  type SpamProtectedExampleSubmission,
+  submitSpamProtectedExample,
+} from "./submitSpamProtectedExample";

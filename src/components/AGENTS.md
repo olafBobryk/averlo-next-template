@@ -9,7 +9,7 @@ Agents should assume that a matching component probably already exists and shoul
 
 ## Default Workflow
 1. Identify the UX pattern first, not the page-specific styling.
-2. Find the closest existing component in `primitives/`, `input/`, `misc/`, `overlays/`, or `layout/`.
+2. Find the closest existing component in `primitives/`, `input/`, `misc/`, `overlays/`, or `domain/`.
 3. Compose upward from library pieces instead of creating one-off page components.
 4. Only introduce new components when the behavior cannot be expressed by extending the library without harming reuse.
 5. When a page needs a familiar UX convention, prefer the built-in implementation even if a custom version seems faster.
@@ -18,7 +18,7 @@ Agents should assume that a matching component probably already exists and shoul
 For any new reusable UI-library feature:
 1. Implement the feature in its canonical source folder under `src/components`.
 2. Update exports, types, and related consumers only where needed to make the public surface coherent.
-3. Add a focused demo in `src/app/demo/content.tsx` with at least one live example.
+3. Add a focused demo in `src/app/(site)/(internal)/demo/content.tsx` with at least one live example.
 4. Add at least one usage snippet in the demo so adoption is copyable.
 5. Update the nearest folder `AGENTS.md` with what the feature is for, when to use it, and any new invariants.
 6. If the feature changes shared library conventions, also update this file so the workflow is visible at the top of the component tree.
@@ -74,7 +74,7 @@ Use these defaults unless product requirements explicitly say otherwise.
 
 ## Directory Map
 - `branding/`: brand identity primitives such as `Logo`.
-- `layout/`: app shell assemblies such as header and footer.
+- `domain/`: reusable domain-level widgets such as shared search surfaces.
 - `mount/`: client-only mounts for modal and toast hosts.
 - `ui/foundations/`: focus, motion, settings, and shared CSS tokens.
 - `ui/helpers/`: small helpers such as `IconSwap`.
@@ -106,9 +106,8 @@ Reusable features are not complete until implementation, demo coverage, and docu
 
 ## Folder Index
 - `src/components/branding/AGENTS.md`
-- `src/components/layout/AGENTS.md`
-- `src/components/layout/header/AGENTS.md`
-- `src/components/layout/footer/AGENTS.md`
+- `src/components/domain/AGENTS.md`
+- `src/components/domain/search/AGENTS.md`
 - `src/components/mount/AGENTS.md`
 - `src/components/ui/AGENTS.md`
 - `src/components/ui/foundations/AGENTS.md`

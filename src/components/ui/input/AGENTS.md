@@ -22,6 +22,7 @@ Ready-made form controls composed from the primitives. This folder should be the
 - `src/components/ui/input/ComboboxMultiSelectInput.tsx`: multi-select combobox.
 - `src/components/ui/input/DateRangeInput.tsx`: date-range presets plus custom range entry; exported as `DateRangeInput`.
 - `src/components/ui/input/SignaturePad.tsx`: signature capture.
+- `src/components/ui/input/SpamProtectionFields.tsx`: hidden honeypot field for form submissions.
 - `src/components/ui/input/RadioInput.tsx`: radio group built on the shared choice system.
 - `src/components/ui/input/MultiselectInput.tsx`: checkbox group built on the shared choice system.
 - `src/components/ui/input/ToggleInput.tsx`: toggle-style group built on the shared choice system.

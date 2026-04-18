@@ -33,6 +33,9 @@ function isExcludedPath(path) {
 		path === "/settings" ||
 		path === "/demo" ||
 		path.startsWith("/demo/") ||
+		path === "/dictionary" ||
+		path.startsWith("/dictionary/") ||
+		path === "/reference" ||
 		/\.(png|svg|json|xml|txt|ico)$/i.test(path)
 	);
 }

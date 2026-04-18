@@ -5,7 +5,9 @@ This repository is the base template for building Webvizion websites.
 It provides:
 - a Next.js app-router foundation
 - a shared component library under `src/components`
-- a centralized demo/catalog system under `src/app/demo`
+- a centralized demo/catalog system under `src/app/(site)/(internal)/demo`
+- a dictionary area under `src/app/(site)/(internal)/dictionary`
+- an internal reference area under `src/app/(site)/(internal)/reference`
 - reusable UI, motion, overlay, and feedback patterns for Webvizion site builds
 
 ## What This Project Is For
@@ -31,20 +33,22 @@ Then open `http://localhost:3000`.
 ## Key Areas
 
 - `src/app`: application routes, layouts, and pages
-- `src/app/demo`: internal component demo and documentation system
+- `src/app/(site)/(internal)/demo`: internal component demo and documentation system
+- `src/app/(site)/(internal)/dictionary`: structured pattern vault for source material
+- `src/app/(site)/(internal)/reference`: repo-level utility links and operational notes
 - `src/components`: shared Webvizion UI library
 - `src/lib`: reusable non-UI utilities such as API, feedback, and mocks
 
 ## Demo System
 
-The component demo system lives under `src/app/demo`.
+The component demo system lives under `src/app/(site)/(internal)/demo`.
 
 It is useful for:
 - browsing available UI primitives and higher-level components
 - validating interaction states and variants
 - documenting reusable patterns for future Webvizion websites
 
-Most demo content is centralized in `src/app/demo/content.tsx`.
+Most demo content is centralized in `src/app/(site)/(internal)/demo/content.tsx`.
 
 ## Development Notes
 
