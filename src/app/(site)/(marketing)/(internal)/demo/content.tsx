@@ -1210,6 +1210,7 @@ export const demoPages: DemoPage[] = [
 											Fixed follow
 										</Text>
 										<Dropdown
+											positionStrategy="fixed"
 											renderTrigger={({ ref, onRightClick, chevronIcon }) => (
 												<Button
 													ref={ref as Ref<HTMLElement>}

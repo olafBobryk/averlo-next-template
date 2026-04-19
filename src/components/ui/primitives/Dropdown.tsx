@@ -81,7 +81,7 @@ export function Dropdown({
 	menuMinWidth = DEFAULT_MENU_MIN_WIDTH,
 	align = "end",
 	offset = 8,
-	positionStrategy = "fixed",
+	positionStrategy = "absolute",
 	disabled,
 	open,
 	openOnHover = true,

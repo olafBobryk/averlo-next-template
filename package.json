@@ -8,6 +8,7 @@
 		"start": "next start",
 		"lint": "biome check",
 		"format": "biome format --write",
+		"prune:template": "node scripts/prune-template.mjs",
 		"postinstall": "node scripts/pin-deps.mjs",
 		"postbuild": "next-sitemap"
 	},

@@ -17,7 +17,7 @@ export function DashboardFrame({
 
 	return (
 		<div className="min-h-screen bg-surface">
-			<div className="mx-auto flex min-h-screen max-w-section-max gap-4 px-section-x py-4 lg:py-6">
+			<div className="mx-auto flex min-h-screen max-w-section-max gap-4 p-4 lg:p-6">
 				<DashboardSidebar
 					mobileOpen={mobileOpen}
 					onMobileOpenChange={setMobileOpen}

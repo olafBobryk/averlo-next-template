@@ -26,6 +26,10 @@ const SlotWithRef = forwardRef<HTMLElement, ComponentProps<typeof Slot>>(
 SlotWithRef.displayName = "SlotWithRef";
 const MotionSlot = motion(SlotWithRef);
 
+function getStaticRevealTag(as?: ElementType) {
+	return typeof as === "string" ? as : "div";
+}
+
 export type RevealGroupProps = {
 	children: ReactNode;
 	as?: ElementType;
@@ -97,7 +101,7 @@ export function RevealGroup({
 	};
 
 	if (!motionAllowed) {
-		const Tag = as ?? "div";
+		const Tag = getStaticRevealTag(as);
 		return (
 			<Tag
 				className={[
@@ -278,7 +282,7 @@ export function RevealItem({
 		asChild && handoffAfterReveal && hasPlayed && (!isControlled || active);
 
 	if (!motionAllowed || usePlainAsChild) {
-		const Tag = asChild ? Slot : (as ?? "div");
+		const Tag = asChild ? Slot : getStaticRevealTag(as);
 		return (
 			<Tag
 				className={[

@@ -162,24 +162,18 @@ export function DashboardSidebar({
 						}}
 					>
 						<motion.div
-							className="grid overflow-hidden"
 							initial={false}
 							animate={{
-								gridTemplateRows: showSkip ? "1fr" : "0fr",
+								maxHeight: showSkip ? "30px" : "0px",
 								opacity: showSkip ? 1 : 0,
 								marginBottom: showSkip ? 12 : 0,
 							}}
 							transition={componentTransition}
 							style={{ pointerEvents: showSkip ? "auto" : "none" }}
 						>
-							<div
-								className={clsx(
-									"overflow-hidden",
-									isExpanded ? "" : "flex justify-start",
-								)}
-							>
+							<div className={clsx("", isExpanded ? "" : "flex justify-start")}>
 								<Button
-									className={clsx(isExpanded ? "w-full" : "w-fit")}
+									className={"w-full"}
 									variant="outline"
 									size={isExpanded ? "sm" : "icon-sm"}
 									href="#dashboard-main"
@@ -187,40 +181,39 @@ export function DashboardSidebar({
 									aria-label={isExpanded ? undefined : "Skip to content"}
 									onClick={handleSkipToContent}
 								>
-									{isExpanded ? (
-										"Skip to content"
-									) : (
-										<Icon name="arrow-right" size="sm" />
-									)}
+									{isExpanded ? "Skip to content" : "Skip"}
 								</Button>
 							</div>
 						</motion.div>
 
-						<div className="flex items-center justify-between gap-3">
-							<div className="relative h-6 min-w-0 flex-1 overflow-hidden">
-								<motion.div
-									className={clsx(
-										"absolute inset-y-0 left-0 flex items-center",
-										isExpanded ? "pointer-events-auto" : "pointer-events-none",
-									)}
+						<div className="flex items-center relative">
+							<motion.div
+								className={clsx(
+									"absolute inset-y-0 left-0 flex items-center",
+									isExpanded ? "pointer-events-auto" : "pointer-events-none",
+								)}
+								aria-hidden={!isExpanded}
+								initial={false}
+								animate={{
+									opacity: isExpanded ? 1 : 0,
+									x: isExpanded ? 0 : -6,
+								}}
+								transition={interactiveTransition}
+							>
+								<Logo
+									size="sm"
+									href={isExpanded ? hrefFor("dashboard") : undefined}
+									tabIndex={isExpanded ? 0 : -1}
 									aria-hidden={!isExpanded}
-									initial={false}
-									animate={{
-										opacity: isExpanded ? 1 : 0,
-										x: isExpanded ? 0 : -6,
-									}}
-									transition={interactiveTransition}
-								>
-									<Logo
-										size="sm"
-										href={isExpanded ? hrefFor("dashboard") : undefined}
-										tabIndex={isExpanded ? 0 : -1}
-										aria-hidden={!isExpanded}
-									/>
-								</motion.div>
-							</div>
+								/>
+							</motion.div>
 
-							<div className="flex items-center gap-2">
+							<div
+								className={clsx(
+									"flex items-center gap-2",
+									isExpanded ? "ml-auto" : "mx-auto",
+								)}
+							>
 								{forceExpanded ? (
 									<Button
 										variant="outline"
