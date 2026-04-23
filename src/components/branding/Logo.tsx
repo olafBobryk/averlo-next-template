@@ -22,8 +22,8 @@ const logoStyles = cva(
 				lg: "",
 			},
 			tone: {
-				light: "text-[#E5F1FF]",
-				dark: "text-[#010103]",
+				light: "text-background",
+				dark: "text-foreground",
 			},
 			interactive: {
 				true: "cursor-pointer hover:opacity-80",

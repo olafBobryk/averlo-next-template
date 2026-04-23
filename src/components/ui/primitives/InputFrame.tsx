@@ -16,7 +16,7 @@ const inputFrameVariants = cva(
 				lg: "min-h-[48px]",
 			},
 			tone: {
-				default: `border-border/15 hover:border-border/25 has-[input:-webkit-autofill]:bg-primary/10 has-[input:-webkit-autofill]:border-primary/40 has-[input:autofill]:bg-primary/10 has-[input:autofill]:border-primary/40 ${focusRing.fieldDefault}`,
+				default: `border-border hover:border-border/50 has-[input:-webkit-autofill]:bg-primary/10 has-[input:-webkit-autofill]:border-primary/40 has-[input:autofill]:bg-primary/10 has-[input:autofill]:border-primary/40 ${focusRing.fieldDefault}`,
 				error: `border-danger ${focusRing.fieldError}`,
 				success: `border-success/70 ${focusRing.fieldSuccess}`,
 			},

@@ -1,11 +1,12 @@
 "use client";
 
 import clsx from "clsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { Button } from "@/components/ui/primitives/Button";
 import { hrefFor } from "@/lib/routes";
+import { useDashboardSettingsContext } from "../providers/DashboardSettingsProvider";
 import { DashboardSidebar } from "./DashboardSidebar";
 
 export function DashboardFrame({
@@ -14,10 +15,29 @@ export function DashboardFrame({
 	children: React.ReactNode;
 }>) {
 	const [mobileOpen, setMobileOpen] = useState(false);
+	const { dashboardAppearance } = useDashboardSettingsContext();
+
+	useEffect(() => {
+		const { body } = document;
+		const hadDarkClass = body.classList.contains("dark");
+		const previousColorScheme = body.style.colorScheme;
+
+		body.classList.toggle("dark", dashboardAppearance === "dark");
+		body.style.colorScheme = dashboardAppearance;
+
+		return () => {
+			body.classList.toggle("dark", hadDarkClass);
+			body.style.colorScheme = previousColorScheme;
+		};
+	}, [dashboardAppearance]);
 
 	return (
-		<div className="min-h-screen bg-surface">
-			<div className="mx-auto flex min-h-screen max-w-section-max gap-4 p-4 lg:p-6">
+		<div
+			className={clsx(
+				"min-h-screen bg-background text-foreground transition-colors",
+			)}
+		>
+			<div className="mx-auto flex min-h-screen max-w-section-max gap-8 p-4 lg:p-6">
 				<DashboardSidebar
 					mobileOpen={mobileOpen}
 					onMobileOpenChange={setMobileOpen}
@@ -40,7 +60,7 @@ export function DashboardFrame({
 						id="dashboard-main"
 						tabIndex={-1}
 						className={clsx(
-							"flex min-h-[calc(100svh-2rem)] min-w-0 flex-1 flex-col rounded-xl border border-border/15 bg-background p-4 shadow-sm lg:min-h-[calc(100svh-3rem)] lg:p-6",
+							"flex min-h-[calc(100svh-2rem-32px)] min-w-0 flex-1 flex-col pt-8",
 							focusRing.visibleDefault,
 						)}
 					>

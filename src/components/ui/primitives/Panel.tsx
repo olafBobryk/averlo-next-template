@@ -2,62 +2,59 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 
-const panelStyles = cva(
-	"w-full rounded-2xl border border-border/15 bg-white shadow-sm",
-	{
-		variants: {
-			display: {
-				grid: "grid",
-				flex: "flex flex-col",
-			},
-			padding: {
-				none: "p-0",
-				sm: "p-4",
-				md: "p-6",
-				lg: "p-8",
-			},
-			gap: {
-				none: "gap-0",
-				sm: "gap-4",
-				md: "gap-6",
-				lg: "gap-8",
-			},
-			columns: {
-				1: "grid-cols-1",
-				2: "grid-cols-1 md:grid-cols-2",
-				3: "grid-cols-1 md:grid-cols-3",
-			},
-			shadow: {
-				none: "shadow-none",
-				sm: "shadow-sm",
-			},
-			bordered: {
-				true: "border border-border/15",
-				false: "border-0",
-			},
-			background: {
-				white: "bg-white",
-				surface: "bg-surface",
-				transparent: "bg-transparent",
-			},
-			tone: {
-				default: "",
-				warning: "border border-warning/20 bg-warning/10",
-				danger: "border border-danger/20 bg-danger/10",
-			},
+const panelStyles = cva("w-full rounded-2xl border border-border shadow-sm", {
+	variants: {
+		display: {
+			grid: "grid",
+			flex: "flex flex-col",
 		},
-		defaultVariants: {
-			display: "grid",
-			padding: "md",
-			gap: "md",
-			columns: 1,
-			shadow: "sm",
-			bordered: true,
-			background: "white",
-			tone: "default",
+		padding: {
+			none: "p-0",
+			sm: "p-4",
+			md: "p-6",
+			lg: "p-8",
+		},
+		gap: {
+			none: "gap-0",
+			sm: "gap-4",
+			md: "gap-6",
+			lg: "gap-8",
+		},
+		columns: {
+			1: "grid-cols-1",
+			2: "grid-cols-1 md:grid-cols-2",
+			3: "grid-cols-1 md:grid-cols-3",
+		},
+		shadow: {
+			none: "shadow-none",
+			sm: "shadow-sm",
+		},
+		bordered: {
+			true: "border border-border",
+			false: "border-0",
+		},
+		background: {
+			white: "bg-background",
+			surface: "bg-surface",
+			transparent: "bg-transparent",
+		},
+		tone: {
+			default: "",
+			warning: "border border-warning/20 bg-warning/10",
+			danger: "border border-danger/20 bg-danger/10",
 		},
 	},
-);
+	defaultVariants: {
+		display: "grid",
+		padding: "md",
+		gap: "md",
+		columns: 1,
+		shadow: "sm",
+		bordered: true,
+		background: "white",
+		tone: "default",
+	},
+});
 
 export type PanelProps<T extends ElementType = "div"> = {
 	as?: T;
@@ -98,7 +95,10 @@ export function Panel<T extends ElementType = "div">({
 		.join(" ");
 
 	return (
-		<Tag className={classes} {...(rest as ComponentPropsWithoutRef<ElementType>)}>
+		<Tag
+			className={classes}
+			{...(rest as ComponentPropsWithoutRef<ElementType>)}
+		>
 			{children}
 		</Tag>
 	);

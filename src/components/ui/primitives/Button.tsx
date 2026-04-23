@@ -38,7 +38,7 @@ const buttonStyles = cva(
 		variants: {
 			variant: {
 				outline:
-					"border border-border/15 bg-background text-foreground hover:bg-background-hover active:bg-background-active",
+					"border border-border bg-background text-background text-foreground hover:bg-background-hover active:bg-background-active",
 				primary:
 					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active border border-transparent",
 				danger:

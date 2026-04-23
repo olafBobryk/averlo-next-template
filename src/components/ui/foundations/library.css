@@ -2,7 +2,10 @@
 @import "tailwindcss";
 @import "./iconAnimations.css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+	/* TODO ready: --font-roboto doesnt compute in root as its passed onto body, additionally do not apply font heading directly on headint tags but heading variants in text.tsx instead */
 	--font-body: var(--font-roboto), system-ui, -apple-system, sans-serif;
 	--font-heading: var(--font-roboto), system-ui, -apple-system, sans-serif;
 	--text-scale: 1;
@@ -31,15 +34,8 @@
 	--color-danger-rgb: 207 35 49;
 	--color-success-rgb: 34 165 90;
 	--color-warning-rgb: 244 153 0;
-	--color-surface-rgb: 245 247 249;
-	--color-border-rgb: 2 2 2;
-	--color-muted-rgb: 2 2 2;
 	--color-foreground-rgb: 2 2 2;
-	--color-foreground-hover-rgb: 26 26 26;
-	--color-foreground-active-rgb: 45 45 45;
 	--color-background-rgb: 255 255 255;
-	--color-background-hover-rgb: 245 247 249;
-	--color-background-active-rgb: 235 238 242;
 
 	/* Layout tokens */
 	--spacing-section-x: clamp(1rem, 5vw, 6.25rem);
@@ -48,7 +44,90 @@
 	--spacing-section-max: 1500px;
 }
 
+.dark {
+	--color-primary-rgb: 74 146 255;
+	--color-primary-hover-rgb: 98 161 255;
+	--color-primary-active-rgb: 121 175 255;
+	--color-primary-foreground-rgb: 7 12 19;
+	--color-foreground-rgb: 255 255 255;
+	--color-background-rgb: 2 2 2;
+	--color-background: rgb(var(--color-background-rgb) / 1);
+	--color-background-hover: color-mix(
+		in srgb,
+		rgb(var(--color-background-rgb) / 1) 95%,
+		rgb(var(--color-foreground-rgb) / 1)
+	);
+	--color-background-active: color-mix(
+		in srgb,
+		rgb(var(--color-background-rgb) / 1) 90%,
+		rgb(var(--color-foreground-rgb) / 1)
+	);
+	--color-surface: color-mix(
+		in srgb,
+		rgb(var(--color-background-rgb) / 1) 98%,
+		rgb(var(--color-foreground-rgb) / 1)
+	);
+	--color-border: color-mix(
+		in srgb,
+		rgb(var(--color-background-rgb) / 1) 85%,
+		rgb(var(--color-foreground-rgb) / 1)
+	);
+	--color-foreground: rgb(var(--color-foreground-rgb) / 1);
+	--color-foreground-hover: color-mix(
+		in srgb,
+		rgb(var(--color-foreground-rgb) / 1) 95%,
+		rgb(var(--color-background-rgb) / 1)
+	);
+	--color-foreground-active: color-mix(
+		in srgb,
+		rgb(var(--color-foreground-rgb) / 1) 80%,
+		rgb(var(--color-background-rgb) / 1)
+	);
+	--color-muted: color-mix(
+		in srgb,
+		rgb(var(--color-foreground-rgb) / 1) 75%,
+		rgb(var(--color-background-rgb) / 1)
+	);
+}
+
 @theme {
+	--color-background: rgb(var(--color-background-rgb) / 1);
+	--color-background-hover: color-mix(
+		in srgb,
+		rgb(var(--color-background-rgb) / 1) 95%,
+		rgb(var(--color-foreground-rgb) / 1)
+	);
+	--color-background-active: color-mix(
+		in srgb,
+		rgb(var(--color-background-rgb) / 1) 90%,
+		rgb(var(--color-foreground-rgb) / 1)
+	);
+	--color-surface: color-mix(
+		in srgb,
+		rgb(var(--color-background-rgb) / 1) 99%,
+		rgb(var(--color-foreground-rgb) / 1)
+	);
+	--color-border: color-mix(
+		in srgb,
+		rgb(var(--color-background-rgb) / 1) 85%,
+		rgb(var(--color-foreground-rgb) / 1)
+	);
+	--color-foreground: rgb(var(--color-foreground-rgb) / 1);
+	--color-foreground-hover: color-mix(
+		in srgb,
+		rgb(var(--color-foreground-rgb) / 1) 95%,
+		rgb(var(--color-background-rgb) / 1)
+	);
+	--color-foreground-active: color-mix(
+		in srgb,
+		rgb(var(--color-foreground-rgb) / 1) 80%,
+		rgb(var(--color-background-rgb) / 1)
+	);
+	--color-muted: color-mix(
+		in srgb,
+		rgb(var(--color-foreground-rgb) / 1) 75%,
+		rgb(var(--color-background-rgb) / 1)
+	);
 	--color-primary: rgb(var(--color-primary-rgb) / 1);
 	--color-primary-hover: rgb(var(--color-primary-hover-rgb) / 1);
 	--color-primary-active: rgb(var(--color-primary-active-rgb) / 1);
@@ -56,15 +135,6 @@
 	--color-danger: rgb(var(--color-danger-rgb) / 1);
 	--color-success: rgb(var(--color-success-rgb) / 1);
 	--color-warning: rgb(var(--color-warning-rgb) / 1);
-	--color-surface: rgb(var(--color-surface-rgb) / 1);
-	--color-border: rgb(var(--color-border-rgb) / 1);
-	--color-muted: rgb(var(--color-muted-rgb) / 1);
-	--color-foreground: rgb(var(--color-foreground-rgb) / 1);
-	--color-foreground-hover: rgb(var(--color-foreground-hover-rgb) / 1);
-	--color-foreground-active: rgb(var(--color-foreground-active-rgb) / 1);
-	--color-background: rgb(var(--color-background-rgb) / 1);
-	--color-background-hover: rgb(var(--color-background-hover-rgb) / 1);
-	--color-background-active: rgb(var(--color-background-active-rgb) / 1);
 
 	--spacing-section-x: var(--spacing-section-x);
 	--spacing-section-y: var(--spacing-section-y);

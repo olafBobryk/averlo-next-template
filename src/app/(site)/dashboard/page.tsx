@@ -9,7 +9,13 @@ export default function DashboardPage() {
 			description="A minimal dashboard shell with route-scoped auth, sidebar navigation, and responsive layout scaffolding."
 		>
 			<div className="grid gap-4 lg:grid-cols-2">
-				<Panel display="flex" padding="md" gap="sm" shadow="none">
+				<Panel
+					display="flex"
+					padding="md"
+					gap="sm"
+					shadow="none"
+					background="surface"
+				>
 					<Text as="h2" variant="headingSm">
 						Shell ready
 					</Text>
@@ -18,7 +24,13 @@ export default function DashboardPage() {
 						guard, and responsive sidebar structure.
 					</Text>
 				</Panel>
-				<Panel display="flex" padding="md" gap="sm" shadow="none">
+				<Panel
+					display="flex"
+					padding="md"
+					gap="sm"
+					shadow="none"
+					background="surface"
+				>
 					<Text as="h2" variant="headingSm">
 						Next step
 					</Text>

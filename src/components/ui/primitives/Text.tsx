@@ -95,6 +95,8 @@ type HeadingProps = BaseProps & {
 	as: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 } & React.HTMLAttributes<HTMLHeadingElement>;
 
+export type TextSpanProps = SpanProps;
+
 export type TextProps =
 	| SpanProps
 	| PProps

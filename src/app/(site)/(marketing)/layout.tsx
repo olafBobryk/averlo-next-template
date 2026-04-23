@@ -1,9 +1,14 @@
 import { MarketingShell } from "./_components/layout/MarketingShell";
+import { MarketingSettingsProvider } from "./_components/providers/MarketingSettingsProvider";
 
 export default function MarketingLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	return <MarketingShell>{children}</MarketingShell>;
+	return (
+		<MarketingSettingsProvider>
+			<MarketingShell>{children}</MarketingShell>
+		</MarketingSettingsProvider>
+	);
 }

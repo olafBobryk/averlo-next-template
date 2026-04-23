@@ -1,11 +1,12 @@
 "use client";
 
 import clsx from "clsx";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon } from "@/components/ui/icons/Icon";
@@ -143,9 +144,10 @@ export function DashboardSidebar({
 				display="flex"
 				padding="none"
 				gap="none"
+				background="surface"
 				className="h-full overflow-hidden rounded-xl"
 			>
-				<div className="border-b border-border/15 p-4">
+				<div className="border-b border-border p-4">
 					<div
 						className="flex flex-col gap-0"
 						onFocusCapture={(event) => {
@@ -290,10 +292,10 @@ export function DashboardSidebar({
 					</div>
 				</ScrollBorders>
 
-				<div className="border-t border-border/15 p-4">
+				<div className="border-t border-border p-4">
 					<div
 						className={clsx(
-							"rounded-lg border border-border/15 bg-surface px-3 py-3",
+							"rounded-lg border border-border bg-surface px-3 py-3",
 							!isExpanded && "flex items-center justify-center px-2",
 						)}
 					>
@@ -324,23 +326,40 @@ export function DashboardSidebar({
 				animate={{ width: collapsed ? 88 : 280 }}
 				transition={macroTransition}
 			>
-				<aside className="sticky top-6 h-[calc(100svh-3rem)]">
+				<aside className="sticky top-6 h-[calc(100svh-3rem)] ">
 					{renderSidebarContent(false)}
 				</aside>
 			</motion.div>
-			{mobileOpen ? (
-				<div className="fixed inset-0 z-50 flex lg:hidden">
-					<button
-						type="button"
-						className="flex-1 bg-foreground/35 backdrop-blur-[2px]"
-						aria-label="Close dashboard navigation"
-						onClick={() => onMobileOpenChange(false)}
-					/>
-					<aside className="w-[19rem] p-3">
-						<div className="h-full">{renderSidebarContent(true)}</div>
-					</aside>
-				</div>
-			) : null}
+			<div className="lg:hidden">
+				<AnimatePresence>
+					{mobileOpen ? (
+						<>
+							<motion.button
+								transition={getMotionTiming("interactive")}
+								initial={{ background: "transparent" }}
+								animate={{ background: "rgba(0,0,0,.5)" }}
+								exit={{ background: "transparent" }}
+								onClick={() => onMobileOpenChange(false)}
+								aria-label="Close dashboard navigation"
+								type="button"
+								className={clsx(
+									"fixed inset-0 z-50 flex lg:hidden motion-interactive transition-background",
+								)}
+							/>
+
+							<motion.aside
+								className="w-[19rem] z-60 fixed h-[calc(100vh-24px)] top-3 right-3"
+								transition={getMotionTiming("interactive")}
+								initial={{ x: 15, opacity: 0 }}
+								animate={{ x: 0, opacity: 1 }}
+								exit={{ x: 15, opacity: 0 }}
+							>
+								<div className="h-full">{renderSidebarContent(true)}</div>
+							</motion.aside>
+						</>
+					) : null}
+				</AnimatePresence>
+			</div>
 		</>
 	);
 }

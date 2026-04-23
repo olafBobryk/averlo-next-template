@@ -18,7 +18,7 @@ export function ChoiceIndicatorRadio({
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator flex h-[22px] w-[22px] items-center justify-center rounded-full bg-background group-hover:bg-surface motion-micro",
+				"choice-field-indicator flex h-[22px] w-[22px] items-center justify-center rounded-full bg-background group-hover:bg-background-hover group-active:bg-background-active motion-micro",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",
@@ -55,7 +55,7 @@ export function ChoiceIndicatorMulti({
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator flex h-[22px] w-[22px] items-center justify-center rounded-[8px] group-hover:bg-surface group-hover:scale-[1.05] group-active:scale-[0.95] motion-micro",
+				"choice-field-indicator flex h-[22px] w-[22px] items-center justify-center rounded-[8px] group-hover:bg-background-hover group-hover:scale-[1.05] group-active:bg-background-active group-active:scale-[0.95] motion-micro",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",
@@ -101,7 +101,7 @@ export function ChoiceIndicatorToggle({
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator flex h-[26px] min-w-[42px] items-center justify-center rounded-full overflow-hidden bg-background group-hover:bg-surface group-hover:scale-[1.05] group-active:scale-[0.95] motion-micro",
+				"choice-field-indicator flex h-[26px] min-w-[42px] items-center justify-center rounded-full overflow-hidden bg-background group-hover:bg-background-hover group-active:bg-background-active group-hover:scale-[1.05] group-active:scale-[0.95] motion-micro",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",

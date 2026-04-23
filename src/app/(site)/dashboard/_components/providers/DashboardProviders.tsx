@@ -1,9 +1,14 @@
 import { DashboardAuthProvider } from "./DashboardAuthProvider";
+import { DashboardSettingsProvider } from "./DashboardSettingsProvider";
 
 export function DashboardProviders({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	return <DashboardAuthProvider>{children}</DashboardAuthProvider>;
+	return (
+		<DashboardSettingsProvider>
+			<DashboardAuthProvider>{children}</DashboardAuthProvider>
+		</DashboardSettingsProvider>
+	);
 }

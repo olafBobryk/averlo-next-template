@@ -3,17 +3,17 @@
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import {
-	fetchSession,
 	logout as clearSession,
+	fetchSession,
 	type SessionUser,
 	updateStoredSessionUser,
 } from "@/lib/api/auth";
+import { hrefFor } from "@/lib/routes";
 import {
 	DashboardBannedFallback,
 	DashboardLoadingFallback,
 	DashboardUnauthenticatedFallback,
 } from "../pages/DashboardAuthFallbacks";
-import { hrefFor } from "@/lib/routes";
 
 export type DashboardAuthContextValue = {
 	user: SessionUser | null;
@@ -44,28 +44,25 @@ export function DashboardAuthProvider({
 	const [loading, setLoading] = React.useState(false);
 	const [error, setError] = React.useState<Error | null>(null);
 
-	const refresh = React.useCallback(
-		async (options?: { silent?: boolean }) => {
-			const silent = options?.silent ?? false;
-			if (!silent) {
-				setLoading(true);
-			}
-			setError(null);
+	const refresh = React.useCallback(async (options?: { silent?: boolean }) => {
+		const silent = options?.silent ?? false;
+		if (!silent) {
+			setLoading(true);
+		}
+		setError(null);
 
-			try {
-				const response = await fetchSession();
-				setUser(response.user);
-			} catch (nextError) {
-				setUser(null);
-				setError(getError(nextError));
-			} finally {
-				if (!silent) {
-					setLoading(false);
-				}
+		try {
+			const response = await fetchSession();
+			setUser(response.user);
+		} catch (nextError) {
+			setUser(null);
+			setError(getError(nextError));
+		} finally {
+			if (!silent) {
+				setLoading(false);
 			}
-		},
-		[],
-	);
+		}
+	}, []);
 
 	const logout = React.useCallback(async () => {
 		setLoading(true);
@@ -126,11 +123,7 @@ export function useDashboardAuth() {
 	return context;
 }
 
-export function DashboardAuthGate({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export function DashboardAuthGate({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
 	const { user, initializing } = useDashboardAuth();
 
