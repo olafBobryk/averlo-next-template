@@ -46,10 +46,13 @@ import {
 	FilePreview,
 	type FilePreviewItem,
 } from "@/components/ui/misc/FilePreview";
+import { HealthCheckIndicator } from "@/components/ui/misc/HealthCheckIndicator";
 import { InspectableImage } from "@/components/ui/misc/InspectableImage";
 import { Loader } from "@/components/ui/misc/Loader";
 import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
 import { PaginationControls } from "@/components/ui/misc/PaginationControls";
+import { Pill } from "@/components/ui/misc/Pill";
+import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
 import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
@@ -579,9 +582,26 @@ const relatedMap: Record<string, RelatedInfo> = {
 	},
 	Loader: {
 		uses: ["Icon"],
-		usedIn: ["Button", "ImageInspectModal", "SuspenseBoundary"],
+		usedIn: [
+			"Button",
+			"HealthCheckIndicator",
+			"ImageInspectModal",
+			"SuspenseBoundary",
+		],
 	},
 	Warning: { uses: ["Icon", "Text"], usedIn: [] },
+	HealthCheckIndicator: {
+		uses: ["Button", "Loader", "Pill", "Text"],
+		usedIn: [],
+	},
+	Pill: {
+		uses: [],
+		usedIn: ["HealthCheckIndicator", "ProfilePicture"],
+	},
+	ProfilePicture: {
+		uses: ["Pill", "Skeleton", "Text"],
+		usedIn: [],
+	},
 	FilePreview: {
 		uses: ["Button", "InspectableImage", "Text", "useConfirmationModal"],
 		usedIn: [],
@@ -2405,6 +2425,112 @@ export const demoPages: DemoPage[] = [
 						Render() {
 							return <Warning message="Heads up: warning helper." />;
 						},
+					},
+					{
+						id: "health-check-indicator",
+						kind: "component",
+						name: "HealthCheckIndicator",
+						label: "Service status",
+						related: relatedMap.HealthCheckIndicator,
+						Render() {
+							return (
+								<div className="flex flex-col items-start gap-2">
+									<HealthCheckIndicator label="Supabase" />
+									<HealthCheckIndicator label="Supabase" variant="sm" />
+								</div>
+							);
+						},
+					},
+					{
+						id: "health-check-indicator-usage",
+						kind: "usage",
+						name: "HealthCheckIndicator",
+						label: "Usage",
+						related: relatedMap.HealthCheckIndicator,
+						snippet: `<HealthCheckIndicator label="Supabase" endpoint="/api/health" />`,
+					},
+					{
+						id: "profile-picture",
+						kind: "component",
+						name: "ProfilePicture",
+						label: "Avatar",
+						related: relatedMap.ProfilePicture,
+						Render() {
+							return (
+								<div className="flex items-center gap-3">
+									<ProfilePicture name="Dina Maar" />
+									<ProfilePicture name="Unknown member" />
+									<ProfilePicture name="Large avatar" size="lg" />
+								</div>
+							);
+						},
+						skeleton: {
+							name: "ProfilePicture loading",
+							related: relatedMap.ProfilePicture,
+							Render() {
+								return (
+									<div className="flex items-center gap-3">
+										<ProfilePicture name="Dina Maar" loading />
+										<ProfilePicture name="Unknown member" loading />
+										<ProfilePicture name="Large avatar" size="lg" loading />
+									</div>
+								);
+							},
+						},
+					},
+					{
+						id: "profile-picture-usage",
+						kind: "usage",
+						name: "ProfilePicture",
+						label: "Usage",
+						related: relatedMap.ProfilePicture,
+						snippet: `<ProfilePicture name="Dina Maar" src="/test/blob.png" />`,
+					},
+					{
+						id: "pill",
+						kind: "component",
+						name: "Pill",
+						label: "Status badge",
+						related: relatedMap.Pill,
+						Render() {
+							return (
+								<div className="flex flex-wrap gap-2">
+									<Pill tone="plain" className="px-3 py-1 text-xs">
+										Plain
+									</Pill>
+									<Pill tone="neutral" className="px-3 py-1 text-xs">
+										Neutral
+									</Pill>
+									<Pill tone="primary" className="px-3 py-1 text-xs">
+										Primary
+									</Pill>
+									<Pill tone="success" className="px-3 py-1 text-xs">
+										Success
+									</Pill>
+									<Pill tone="warning" className="px-3 py-1 text-xs">
+										Warning
+									</Pill>
+									<Pill tone="danger" className="px-3 py-1 text-xs">
+										Danger
+									</Pill>
+									<Pill
+										tone="helper"
+										helperIndex={3}
+										className="px-3 py-1 text-xs"
+									>
+										Helper
+									</Pill>
+								</div>
+							);
+						},
+					},
+					{
+						id: "pill-usage",
+						kind: "usage",
+						name: "Pill",
+						label: "Usage",
+						related: relatedMap.Pill,
+						snippet: `<Pill tone="success" className="px-3 py-1 text-xs">Operational</Pill>`,
 					},
 					{
 						id: "skeleton",

@@ -5,9 +5,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-	/* TODO ready: --font-roboto doesnt compute in root as its passed onto body, additionally do not apply font heading directly on headint tags but heading variants in text.tsx instead */
-	--font-body: var(--font-roboto), system-ui, -apple-system, sans-serif;
-	--font-heading: var(--font-roboto), system-ui, -apple-system, sans-serif;
+	--font-body: system-ui, -apple-system, sans-serif;
+	--font-heading: system-ui, -apple-system, sans-serif;
 	--text-scale: 1;
 
 	--motion-micro-duration: 140ms;
@@ -34,6 +33,14 @@
 	--color-danger-rgb: 207 35 49;
 	--color-success-rgb: 34 165 90;
 	--color-warning-rgb: 244 153 0;
+	--color-helper-0: #0f766e;
+	--color-helper-1: #2563eb;
+	--color-helper-2: #7c3aed;
+	--color-helper-3: #c2410c;
+	--color-helper-4: #be123c;
+	--color-helper-5: #047857;
+	--color-helper-6: #9333ea;
+	--color-helper-7: #0369a1;
 	--color-foreground-rgb: 2 2 2;
 	--color-background-rgb: 255 255 255;
 
@@ -284,19 +291,12 @@
 	}
 
 	body {
+		--font-body: var(--font-roboto), system-ui, -apple-system, sans-serif;
+		--font-heading: var(--font-roboto), system-ui, -apple-system, sans-serif;
 		font-family: var(--font-body);
 		background: var(--color-background);
 		min-height: 100vh;
 		color: var(--color-foreground);
-	}
-
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		font-family: var(--font-heading);
 	}
 
 	::-webkit-scrollbar {

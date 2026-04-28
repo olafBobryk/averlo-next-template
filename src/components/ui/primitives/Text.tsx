@@ -8,21 +8,21 @@ export const textVariants = cva("", {
 	variants: {
 		variant: {
 			headingHero:
-				"text-[calc(70px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
+				"[font-family:var(--font-heading)] text-[calc(70px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
 			heading2xxl:
-				"text-[calc(50px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
+				"[font-family:var(--font-heading)] text-[calc(50px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
 			headingXxl:
-				"text-[calc(36px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-[calc(36px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
 			headingXl:
-				"text-[calc(26px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-[calc(26px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
 			headingLg:
-				"text-[calc(1.25rem*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-[calc(1.25rem*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
 			headingMd:
-				"text-[calc(1.25rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-[calc(1.25rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
 			headingSm:
-				"text-[calc(1.125rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-[calc(1.125rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
 			headingXs:
-				"text-[calc(1rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-[calc(1rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
 			body: "text-[calc(0.875rem*var(--text-scale,1))] font-normal",
 			bodyStrong:
 				"text-[calc(0.875rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",

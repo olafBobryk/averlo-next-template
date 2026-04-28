@@ -23,10 +23,10 @@ const buttonStyles = cva(
 
 		// focus / disabled
 		focusRing.visibleDefault,
-		"disabled:opacity-50 disabled:pointer-events-none",
+		"disabled:opacity-50",
 
 		// subtle interaction
-		"hover:-translate-y-[0.0625rem] active:translate-y-[0rem] active:scale-[0.98]",
+		"hover:-translate-y-[0.0625rem] active:translate-y-[0rem] active:scale-[0.98] disabled:hover:-translate-y-0 disabled:active:scale-100",
 
 		// tailwind helpers
 		"group",
@@ -38,13 +38,13 @@ const buttonStyles = cva(
 		variants: {
 			variant: {
 				outline:
-					"border border-border bg-background text-background text-foreground hover:bg-background-hover active:bg-background-active",
+					"border border-border bg-background text-background text-foreground hover:bg-background-hover active:bg-background-active disable:hover:bg-background disable:active:bg-background",
 				primary:
-					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active border border-transparent",
+					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active border border-transparent disable:hover:bg-primary disable:active:bg-background",
 				danger:
-					"bg-danger text-white hover:bg-danger/90 active:bg-danger/80 border border-transparent",
+					"bg-danger text-white hover:bg-danger/90 active:bg-danger/80 border border-transparent disable:hover:bg-danger disable:active:bg-background",
 				primaryDark:
-					"bg-foreground text-background hover:bg-foreground-hover active:bg-foreground-active border border-transparent",
+					"bg-foreground text-background hover:bg-foreground-hover active:bg-foreground-active border border-transparent disable:hover:bg-foreground disable:active:bg-foreground",
 				solid:
 					"border! border-border! bg-white/70 shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:bg-white active:bg-[#F3F3F3]",
 				ghost:

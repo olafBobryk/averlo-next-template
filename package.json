@@ -10,7 +10,7 @@
 		"format": "biome format --write",
 		"prune:template": "node scripts/prune-template.mjs",
 		"postinstall": "node scripts/pin-deps.mjs",
-		"postbuild": "next-sitemap"
+		"postbuild": "node scripts/postbuild.mjs"
 	},
 	"dependencies": {
 		"@phosphor-icons/react": "^2.1.10",
