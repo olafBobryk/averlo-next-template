@@ -5,8 +5,9 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-	--font-body: system-ui, -apple-system, sans-serif;
-	--font-heading: system-ui, -apple-system, sans-serif;
+	--font-sans-fallback: system-ui, -apple-system, sans-serif;
+	--font-body: var(--font-sans-fallback);
+	--font-heading: var(--font-sans-fallback);
 	--text-scale: 1;
 
 	--motion-micro-duration: 140ms;
@@ -290,9 +291,13 @@
 		scrollbar-color: rgba(229, 241, 255, 0.22) #101011;
 	}
 
+	html[data-motion-override="off"] [data-loading-screen-mount="true"] {
+		visibility: hidden;
+	}
+
 	body {
-		--font-body: var(--font-roboto), system-ui, -apple-system, sans-serif;
-		--font-heading: var(--font-roboto), system-ui, -apple-system, sans-serif;
+		--font-body: var(--font-roboto), var(--font-sans-fallback);
+		--font-heading: var(--font-roboto), var(--font-sans-fallback);
 		font-family: var(--font-body);
 		background: var(--color-background);
 		min-height: 100vh;

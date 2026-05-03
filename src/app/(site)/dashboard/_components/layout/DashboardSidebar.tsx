@@ -5,22 +5,31 @@ import { AnimatePresence, motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import Logo from "@/components/branding/Logo";
-import { focusRing } from "@/components/ui/foundations/focus";
 import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon } from "@/components/ui/icons/Icon";
+import { HealthCheckIndicator } from "@/components/ui/misc/HealthCheckIndicator";
+import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
 import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
+import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
+import Divider from "@/components/ui/primitives/Divider";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { showToast } from "@/lib/feedback";
 import { hrefFor } from "@/lib/routes";
+import { userPresentation } from "../entities/users/presentation";
+import { ReportIssueModal } from "../feedback/ReportIssueModal";
 import { useDashboardAuth } from "../providers/DashboardAuthProvider";
+import { useDashboardSettingsContext } from "../providers/DashboardSettingsProvider";
 import {
-	type DashboardSidebarItem,
-	dashboardNavigationSections,
+	type DashboardNavigationItem,
+	type DashboardUserMenuItem,
+	dashboardPagesNavigationItem,
+	dashboardUserMenuItems,
+	getDashboardNavigationItems,
 } from "./dashboardNavigation";
 
 type DashboardSidebarProps = {
@@ -43,9 +52,14 @@ export function DashboardSidebar({
 	const pathname = usePathname();
 	const router = useRouter();
 	const { loading, logout, user } = useDashboardAuth();
+	const { dashboardSidebarRouteIds } = useDashboardSettingsContext();
+	const { openModal } = useModal();
 	const [collapsed, setCollapsed] = useState(false);
 	const [showSkip, setShowSkip] = useState(false);
 	const [loggingOut, setLoggingOut] = useState(false);
+	const visibleNavigationItems = getDashboardNavigationItems(
+		dashboardSidebarRouteIds,
+	);
 	const motionAllowed = useMotionAllowed(true);
 	const macroTransition = motionAllowed ? spring.macro : { duration: 0 };
 	const componentTransition = motionAllowed
@@ -70,14 +84,27 @@ export function DashboardSidebar({
 		}
 	}
 
+	function openReportIssueModal() {
+		openModal(
+			({ close }) => (
+				<ReportIssueModal onClose={close} currentRoute={pathname} />
+			),
+			{
+				panelClassName: "w-[min(42rem,calc(100vw-2rem))] max-w-2xl",
+				panelWrapperClassName: "p-4 sm:p-[50px]",
+			},
+		);
+		onMobileOpenChange(false);
+	}
+
 	function handleSkipToContent() {
 		const target = document.getElementById("dashboard-main");
 		target?.focus();
 		onMobileOpenChange(false);
 	}
 
-	function renderNavButton(item: DashboardSidebarItem, isExpanded: boolean) {
-		const href = item.routeId ? hrefFor(item.routeId) : undefined;
+	function renderNavButton(item: DashboardNavigationItem, isExpanded: boolean) {
+		const href = hrefFor(item.routeId);
 		const active = buildActiveState(pathname, href);
 		const size = isExpanded ? "md" : "icon";
 		const align = isExpanded ? "left" : "center";
@@ -85,7 +112,6 @@ export function DashboardSidebar({
 		const className = clsx(
 			"w-full",
 			isExpanded ? "justify-between" : "justify-center",
-			focusRing.visibleDefault,
 		);
 		const labelNode = isExpanded ? (
 			<Text as="span" variant="bodyStrong" style={{ color: "inherit" }}>
@@ -93,43 +119,17 @@ export function DashboardSidebar({
 			</Text>
 		) : null;
 
-		const handleClick = () => {
-			if (item.action === "logout") {
-				void handleLogout();
-				return;
-			}
-			onMobileOpenChange(false);
-		};
-
-		if (href) {
-			return (
-				<Button
-					key={item.label}
-					href={href}
-					size={size}
-					align={align}
-					variant={variant}
-					className={className}
-					leadingIcon={item.icon}
-					aria-label={isExpanded ? undefined : item.label}
-					onClick={handleClick}
-				>
-					{labelNode}
-				</Button>
-			);
-		}
-
 		return (
 			<Button
 				key={item.label}
+				href={href}
 				size={size}
 				align={align}
 				variant={variant}
 				className={className}
 				leadingIcon={item.icon}
 				aria-label={isExpanded ? undefined : item.label}
-				onClick={handleClick}
-				disabled={loading || loggingOut}
+				onClick={() => onMobileOpenChange(false)}
 			>
 				{labelNode}
 			</Button>
@@ -138,6 +138,22 @@ export function DashboardSidebar({
 
 	function renderSidebarContent(forceExpanded = false) {
 		const isExpanded = forceExpanded ? true : !collapsed;
+		const sidebarUser = {
+			id: user?.id ?? "dashboard-user",
+			name: user?.name ?? "Dashboard user",
+			email: user?.email ?? "No active session",
+			role: user?.role,
+			profilePictureUrl: user?.profilePictureUrl,
+		};
+		const userMenuItems: DashboardUserMenuItem[] = [
+			{
+				id: "report-issue",
+				label: "Report issue",
+				icon: "flag",
+				action: "reportIssue",
+			},
+			...dashboardUserMenuItems,
+		];
 
 		return (
 			<Panel
@@ -262,55 +278,104 @@ export function DashboardSidebar({
 					showBackToTop={false}
 					className="min-h-0 flex-1 overflow-y-auto"
 				>
-					<div className="flex flex-col gap-5 p-4">
-						{dashboardNavigationSections.map((section) => (
-							<div key={section.label} className="flex flex-col gap-2">
-								<motion.div
-									className="grid overflow-hidden"
-									initial={false}
-									animate={{
-										gridTemplateRows: isExpanded ? "1fr" : "0fr",
-										opacity: isExpanded ? 1 : 0,
-										marginBottom: isExpanded ? 2 : 0,
-									}}
-									transition={componentTransition}
-									aria-hidden={!isExpanded}
-								>
-									<div className="overflow-hidden">
-										<Text variant="caption" tone="muted" className="px-1">
-											{section.label}
-										</Text>
-									</div>
-								</motion.div>
-								<div className="flex flex-col gap-2">
-									{section.items.map((item) =>
-										renderNavButton(item, isExpanded),
-									)}
-								</div>
-							</div>
-						))}
+					<div className="flex flex-col gap-2 p-4">
+						{visibleNavigationItems.map((item) =>
+							renderNavButton(item, isExpanded),
+						)}
+						<Divider />
+						<Button
+							variant="ghost"
+							href={hrefFor(dashboardPagesNavigationItem.routeId)}
+							onClick={() => onMobileOpenChange(false)}
+							className="w-full rounded-[10px] !py-[15px] shadow-none"
+							align={isExpanded ? "left" : "center"}
+							aria-label={
+								isExpanded ? undefined : dashboardPagesNavigationItem.label
+							}
+						>
+							{isExpanded ? (
+								dashboardPagesNavigationItem.label
+							) : (
+								<Icon name={dashboardPagesNavigationItem.icon} />
+							)}
+						</Button>
 					</div>
 				</ScrollBorders>
 
 				<div className="border-t border-border p-4">
-					<div
-						className={clsx(
-							"rounded-lg border border-border bg-surface px-3 py-3",
-							!isExpanded && "flex items-center justify-center px-2",
-						)}
-					>
-						{isExpanded ? (
-							<div className="flex flex-col gap-1 truncate overflow-hidden max-w-full">
-								<Text as="p" variant="bodyStrong">
-									{user?.name ?? "Dashboard user"}
-								</Text>
-								<Text as="p" variant="caption" tone="muted">
-									{user?.email ?? "No active session"}
-								</Text>
-							</div>
-						) : (
-							<Icon name="lock" size="sm" />
-						)}
+					<div className="flex flex-col gap-3">
+						<MoreMenuDropdown
+							align="start"
+							side="top"
+							positionStrategy="fixed"
+							openOnHover={false}
+							pinOnClick={false}
+							menuMinWidth={220}
+							offset={12}
+							disabled={loading || loggingOut}
+							options={userMenuItems.map((item) => ({
+								id: item.id,
+								label: item.label,
+								leadingIcon: item.icon,
+								href: item.routeId ? hrefFor(item.routeId) : undefined,
+								onClick:
+									item.action === "logout"
+										? () => {
+												void handleLogout();
+											}
+										: item.action === "reportIssue"
+											? openReportIssueModal
+											: () => {
+													onMobileOpenChange(false);
+												},
+							}))}
+							renderTrigger={({
+								ref,
+								isOpen,
+								onRootMouseEnter,
+								onRootMouseLeave,
+								onRightClick,
+							}) => (
+								<Button
+									ref={ref}
+									type="button"
+									variant="ghost"
+									align={isExpanded ? "left" : "center"}
+									aria-label="Open dashboard user menu"
+									aria-haspopup="menu"
+									aria-expanded={isOpen}
+									disabled={loading || loggingOut}
+									onMouseEnter={onRootMouseEnter}
+									onMouseLeave={onRootMouseLeave}
+									onClick={onRightClick}
+									className={clsx(
+										"w-full rounded-[10px] !p-0 shadow-none hover:!bg-transparent active:!bg-transparent",
+										!isExpanded && "justify-center",
+									)}
+								>
+									<span
+										className={clsx(
+											"group-data-[open=false]:grow flex w-full items-center gap-3 rounded-[10px] px-2 py-2.5 transition-[background-color,width] duration-500 will-change-[width] motion-micro",
+											isExpanded
+												? "hover:bg-background"
+												: "justify-center hover:bg-background",
+											isOpen && "bg-background",
+										)}
+									>
+										{userPresentation.profile.render(sidebarUser, {
+											showText: isExpanded,
+											loading,
+											avatarSize: "sm",
+											textClassName: "text-left",
+										})}
+									</span>
+								</Button>
+							)}
+						/>
+						<HealthCheckIndicator
+							className="w-full"
+							variant={isExpanded ? "default" : "sm"}
+						/>
 					</div>
 				</div>
 			</Panel>

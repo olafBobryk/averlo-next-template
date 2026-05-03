@@ -1,4 +1,5 @@
 import { Text } from "@/components/ui/primitives/Text";
+import { DashboardBreadcrumb } from "../misc/DashboardBreadcrumb";
 
 type DashboardSectionProps = {
 	title?: React.ReactNode;
@@ -7,6 +8,8 @@ type DashboardSectionProps = {
 	children: React.ReactNode;
 	className?: string;
 	contentClassName?: string;
+	breadcrumbLabel?: string;
+	breadcrumbLabels?: Record<string, string>;
 };
 
 export function DashboardSection({
@@ -16,9 +19,17 @@ export function DashboardSection({
 	children,
 	className,
 	contentClassName,
+	breadcrumbLabel,
+	breadcrumbLabels,
 }: DashboardSectionProps) {
 	return (
-		<section className={["flex flex-col gap-6", className].filter(Boolean).join(" ")}>
+		<section
+			className={["flex flex-col gap-6", className].filter(Boolean).join(" ")}
+		>
+			<DashboardBreadcrumb
+				lastSegmentLabel={breadcrumbLabel}
+				labelOverrides={breadcrumbLabels}
+			/>
 			{title || description || actions ? (
 				<header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 					<div className="flex min-w-0 flex-col gap-2">

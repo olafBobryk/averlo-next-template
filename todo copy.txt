@@ -1,1 +1,0 @@
-TODO: motion scene + reveal + loading screen issue. on hard reload the pages reveals are blocked possibly by motion scene, this is not the case when navifating between pages.

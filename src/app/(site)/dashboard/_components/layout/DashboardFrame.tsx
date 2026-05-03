@@ -60,7 +60,7 @@ export function DashboardFrame({
 						id="dashboard-main"
 						tabIndex={-1}
 						className={clsx(
-							"flex min-h-[calc(100svh-2rem-32px)] min-w-0 flex-1 flex-col pt-8",
+							"flex min-h-[calc(100svh-2rem-32px)] min-w-0 flex-1 flex-col pt-1.5",
 							focusRing.visibleDefault,
 						)}
 					>

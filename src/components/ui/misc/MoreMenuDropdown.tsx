@@ -2,9 +2,12 @@
 
 import clsx from "clsx";
 import * as React from "react";
-import { Button } from "@/components/ui/primitives/Button";
-import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
+import { Button } from "@/components/ui/primitives/Button";
+import {
+	Dropdown,
+	type DropdownTriggerRenderProps,
+} from "@/components/ui/primitives/Dropdown";
 import { Listbox } from "@/components/ui/primitives/Listbox";
 
 type IconProp = React.ReactNode | IconName;
@@ -34,11 +37,14 @@ type MoreMenuDropdownProps = {
 	optionActiveClassName?: string;
 	portalTargetId?: string;
 	align?: "start" | "end";
+	side?: "top" | "bottom";
 	offset?: number;
 	menuWidth?: number | "trigger";
 	menuMinWidth?: number;
 	openOnHover?: boolean;
 	pinOnClick?: boolean;
+	positionStrategy?: "fixed" | "absolute";
+	renderTrigger?: (props: DropdownTriggerRenderProps) => React.ReactNode;
 };
 
 function renderIcon(icon?: IconProp) {
@@ -60,11 +66,14 @@ export function MoreMenuDropdown({
 	optionActiveClassName,
 	portalTargetId,
 	align = "start",
+	side = "bottom",
+	positionStrategy = "absolute",
 	offset,
 	menuWidth,
 	menuMinWidth,
 	openOnHover = true,
 	pinOnClick = false,
+	renderTrigger,
 }: MoreMenuDropdownProps) {
 	const resolvedMenuWidth = menuWidth ?? menuMinWidth ?? 220;
 	const [menuOpen, setMenuOpen] = React.useState(false);
@@ -125,76 +134,74 @@ export function MoreMenuDropdown({
 		<Dropdown
 			portalTargetId={portalTargetId}
 			align={align}
+			side={side}
 			offset={offset}
 			menuWidth={resolvedMenuWidth}
 			menuMinWidth={menuMinWidth}
 			menuClassName={clsx("max-w-[calc(100vw-32px)]", menuClassName)}
+			positionStrategy={positionStrategy}
 			disabled={disabled}
 			openOnHover={openOnHover}
 			pinOnClick={pinOnClick}
 			autoFocusMenu={false}
 			onOpenChange={setMenuOpen}
-			renderTrigger={({
-				ref,
-				isOpen,
-				onRootMouseEnter,
-				onRootMouseLeave,
-				onRightClick,
-				openMenu,
-				closeMenu,
-			}) => (
-				<Button
-					variant="ghost"
-					size="icon-sm"
-					align="center"
-					aria-label={ariaLabel}
-					ref={ref}
-					onMouseEnter={onRootMouseEnter}
-					onMouseLeave={onRootMouseLeave}
-					aria-haspopup="menu"
-					aria-expanded={isOpen}
-					disabled={disabled}
-					onClick={onRightClick}
-					onKeyDown={(event) => {
-						if (disabled) return;
-						if (event.key === "ArrowDown") {
-							event.preventDefault();
-							if (!isOpen) openMenu();
-							setActiveIndex((current) => getNextEnabledIndex(current, 1));
-							return;
-						}
-						if (event.key === "ArrowUp") {
-							event.preventDefault();
-							if (!isOpen) openMenu();
-							setActiveIndex((current) => getNextEnabledIndex(current, -1));
-							return;
-						}
-						if (event.key === "Enter") {
-							event.preventDefault();
-							if (!isOpen) {
-								openMenu();
+			renderTrigger={(triggerProps) =>
+				renderTrigger ? (
+					renderTrigger(triggerProps)
+				) : (
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						align="center"
+						aria-label={ariaLabel}
+						ref={triggerProps.ref}
+						onMouseEnter={triggerProps.onRootMouseEnter}
+						onMouseLeave={triggerProps.onRootMouseLeave}
+						aria-haspopup="menu"
+						aria-expanded={triggerProps.isOpen}
+						disabled={disabled}
+						onClick={triggerProps.onRightClick}
+						onKeyDown={(event) => {
+							if (disabled) return;
+							if (event.key === "ArrowDown") {
+								event.preventDefault();
+								if (!triggerProps.isOpen) triggerProps.openMenu();
+								setActiveIndex((current) => getNextEnabledIndex(current, 1));
 								return;
 							}
-							const option = options[activeIndex];
-							if (!option || option.disabled) return;
-							option.onClick?.(
-								event as unknown as React.MouseEvent<HTMLElement>,
-							);
-							if (option.href && typeof window !== "undefined") {
-								window.location.href = option.href;
+							if (event.key === "ArrowUp") {
+								event.preventDefault();
+								if (!triggerProps.isOpen) triggerProps.openMenu();
+								setActiveIndex((current) => getNextEnabledIndex(current, -1));
+								return;
 							}
-							closeMenu({ restoreFocus: false });
-						}
-						if (event.key === "Escape" && isOpen) {
-							event.preventDefault();
-							closeMenu({ restoreFocus: false });
-						}
-					}}
-					className={clsx(buttonClassName)}
-				>
-					<Icon name="ellipsis-vertical" size="sm" />
-				</Button>
-			)}
+							if (event.key === "Enter") {
+								event.preventDefault();
+								if (!triggerProps.isOpen) {
+									triggerProps.openMenu();
+									return;
+								}
+								const option = options[activeIndex];
+								if (!option || option.disabled) return;
+								option.onClick?.(
+									event as unknown as React.MouseEvent<HTMLElement>,
+								);
+								if (option.href && typeof window !== "undefined") {
+									window.location.href = option.href;
+								}
+								triggerProps.closeMenu({ restoreFocus: false });
+							}
+							if (event.key === "Escape" && triggerProps.isOpen) {
+								event.preventDefault();
+								triggerProps.closeMenu({ restoreFocus: false });
+							}
+						}}
+						className={clsx(buttonClassName)}
+					>
+						<Icon name="ellipsis-vertical" size="md" />
+					</Button>
+				)
+			}
 			renderMenu={({ close }) => (
 				<Listbox
 					role="menu"

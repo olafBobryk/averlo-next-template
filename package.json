@@ -3,7 +3,9 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev --turbopack",
+		"dev": "node scripts/dev-server.mjs user",
+		"dev:user": "node scripts/dev-server.mjs user",
+		"dev:agent": "node scripts/dev-server.mjs agent",
 		"build": "next build --turbopack",
 		"start": "next start",
 		"lint": "biome check",
@@ -32,6 +34,7 @@
 		"@types/node": "latest",
 		"@types/react": "latest",
 		"@types/react-dom": "latest",
+		"code-inspector-plugin": "^1.5.1",
 		"tailwindcss": "latest",
 		"typescript": "latest"
 	}

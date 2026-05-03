@@ -3,9 +3,9 @@
 import clsx from "clsx";
 import Image from "next/image";
 import * as React from "react";
-import { Text } from "../primitives/Text";
-import { Pill } from "./Pill";
-import { Skeleton } from "./Skeleton";
+import { Pill } from "@/components/ui/misc/Pill";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
+import { Text } from "@/components/ui/primitives/Text";
 
 const sizeMap = {
 	sm: { px: 40, className: "h-10 w-10 text-sm" },
@@ -39,14 +39,16 @@ export function ProfilePicture({
 	const initial = name?.trim().charAt(0).toUpperCase() || "D";
 	const showImage = src && !imgError;
 	const helperIndex = getAvatarHelperIndex(initial);
+	const isLocalPreviewSource =
+		src?.startsWith("data:") || src?.startsWith("blob:");
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: reset error when src changes
+	// biome-ignore lint/correctness/useExhaustiveDependencies: reset image fallback when the image source changes
 	React.useEffect(() => {
 		setImgError(false);
 	}, [src]);
 
 	const baseClass = clsx(
-		"shrink-0 overflow-hidden flex items-center justify-center font-semibold",
+		"flex shrink-0 items-center justify-center overflow-hidden font-semibold",
 		sizeClass,
 		className,
 	);
@@ -64,6 +66,7 @@ export function ProfilePicture({
 					width={px}
 					height={px}
 					className="h-full w-full object-cover"
+					unoptimized={isLocalPreviewSource}
 					onError={() => setImgError(true)}
 				/>
 			</Pill>
@@ -72,7 +75,7 @@ export function ProfilePicture({
 
 	return (
 		<Pill tone="helper" helperIndex={helperIndex} className={baseClass}>
-			<span className="w-full h-full flex items-center justify-center">
+			<span className="flex h-full w-full items-center justify-center">
 				<Text variant="bodyStrong" theme="inherit" tone="inherit">
 					{name ? (name.startsWith("Unknown") ? "?" : initial) : "?"}
 				</Text>

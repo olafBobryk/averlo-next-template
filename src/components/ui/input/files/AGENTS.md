@@ -9,19 +9,19 @@ File selection and upload-oriented controls for forms and document workflows.
 - The UI should reuse existing preview, list, and button conventions.
 
 ## Prefer These Files
-- `src/components/ui/input/files/FileInput.tsx`: preferred upload widget for modern flows.
-- `src/components/ui/input/files/UploadedFilesList.tsx`: list of uploaded files with removal actions.
-- `src/components/ui/input/files/FileUploader.tsx`: older uploader abstraction; use only if it still matches the needed flow better than `FileInput`.
+- `src/components/ui/input/files/FileUploadInput.tsx`: preferred file picker for modern flows.
+- `src/components/ui/misc/FileGallery.tsx`: preview gallery for pending and uploaded files.
+- `src/components/ui/misc/FilePreview.tsx`: individual preview tile used by galleries.
 
 ## Invariants
-- Prefer `FileInput` for new work unless a legacy flow already depends on `FileUploader`.
+- Prefer `FileUploadInput` for new work and pair it with `FileGallery` when selected files should be visible before submit.
 - File actions should continue to use shared `Button`, `Text`, and preview conventions rather than custom upload cards.
 - Removal or replacement actions must keep visible focus and keyboard accessibility.
 - If a richer preview flow is needed, prefer composing with `FilePreview` and confirmation or image-inspection helpers instead of starting from scratch.
 
 ## How To Use It
-- Use `FileInput` as the default entry point for new upload UI.
-- Use `UploadedFilesList` when the workflow needs a persistent, editable list of selected or uploaded files.
+- Use `FileUploadInput` as the default entry point for new file selection UI.
+- Use `FileGallery` when the workflow needs a persistent, editable list of selected or uploaded files.
 - If removing a file is destructive or surprising, pair the flow with the shared confirmation modal helpers.
 
 ## Avoid

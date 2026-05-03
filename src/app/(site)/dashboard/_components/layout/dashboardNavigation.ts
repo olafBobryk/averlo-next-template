@@ -1,28 +1,33 @@
-import type { AppRouteId } from "@/config/routes";
 import type { IconName } from "@/components/ui/icons/Icon";
+import type { AppRouteId } from "@/config/routes";
+import {
+	type DashboardNavigationItem,
+	dashboardNavigationItems,
+	dashboardPagesNavigationItem,
+	getDashboardNavigationItems,
+} from "../entities/pages/presentation";
 
-export type DashboardSidebarItem = {
+export type DashboardUserMenuItem = {
+	id: string;
 	label: string;
-	icon: IconName;
+	icon?: IconName;
 	routeId?: AppRouteId;
-	action?: "logout";
+	action?: "logout" | "reportIssue";
 };
 
-export type DashboardSidebarSection = {
-	label: string;
-	items: DashboardSidebarItem[];
+export {
+	type DashboardNavigationItem,
+	dashboardNavigationItems,
+	dashboardPagesNavigationItem,
+	getDashboardNavigationItems,
 };
 
-export const dashboardNavigationSections: DashboardSidebarSection[] = [
+export const dashboardUserMenuItems: DashboardUserMenuItem[] = [
 	{
-		label: "General",
-		items: [
-			{ label: "Dashboard", icon: "copy", routeId: "dashboard" },
-			{ label: "Settings", icon: "notes", routeId: "dashboardSettings" },
-		],
+		id: "settings",
+		label: "Settings",
+		routeId: "dashboardSettings",
+		icon: "gear",
 	},
-	{
-		label: "Account",
-		items: [{ label: "Logout", icon: "close", action: "logout" }],
-	},
+	{ id: "logout", label: "Logout", action: "logout", icon: "log-out" },
 ];

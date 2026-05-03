@@ -38,13 +38,13 @@ const buttonStyles = cva(
 		variants: {
 			variant: {
 				outline:
-					"border border-border bg-background text-background text-foreground hover:bg-background-hover active:bg-background-active disable:hover:bg-background disable:active:bg-background",
+					"border border-border bg-background text-background text-foreground hover:bg-background-hover active:bg-background-active disabled:hover:bg-background disabled:active:bg-background",
 				primary:
-					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active border border-transparent disable:hover:bg-primary disable:active:bg-background",
+					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active border border-transparent disabled:hover:bg-primary disabled:active:bg-primary",
 				danger:
-					"bg-danger text-white hover:bg-danger/90 active:bg-danger/80 border border-transparent disable:hover:bg-danger disable:active:bg-background",
+					"bg-danger text-white hover:bg-danger/90 active:bg-danger/80 border border-transparent disabled:hover:bg-danger disabled:active:bg-danger",
 				primaryDark:
-					"bg-foreground text-background hover:bg-foreground-hover active:bg-foreground-active border border-transparent disable:hover:bg-foreground disable:active:bg-foreground",
+					"bg-foreground text-background hover:bg-foreground-hover active:bg-foreground-active border border-transparent",
 				solid:
 					"border! border-border! bg-white/70 shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:bg-white active:bg-[#F3F3F3]",
 				ghost:
@@ -88,11 +88,13 @@ type ButtonBaseProps = {
 	className?: string;
 	contentClassName?: string;
 	textVariant?: TextProps["variant"];
+	textTone?: TextProps["tone"];
 	textClassName?: string;
 	style?: React.CSSProperties;
 	loading?: boolean;
 	iconSize?: number;
 	focusable?: boolean;
+	disabled?: boolean;
 } & Omit<VariantProps<typeof buttonStyles>, "align"> & {
 		align?: "left" | "center" | "between";
 	};
@@ -117,7 +119,45 @@ export type ButtonProps = ButtonBaseProps &
 
 type ButtonElement = HTMLElement;
 
-function renderIcon(icon?: IconProp, size = DEFAULT_ICON_SIZE) {
+function getTextToneClassName(tone?: TextProps["tone"]) {
+	switch (tone) {
+		case "default":
+			return "text-foreground";
+		case "muted":
+			return "text-muted/60";
+		default:
+			return undefined;
+	}
+}
+
+function getDisabledClassName(variant: ButtonBaseProps["variant"]) {
+	const disabledBase =
+		"!cursor-not-allowed opacity-50 hover:!translate-y-0 active:!translate-y-0 active:!scale-100";
+
+	switch (variant) {
+		case "primary":
+			return clsx(disabledBase, "hover:!bg-primary active:!bg-primary");
+		case "danger":
+			return clsx(disabledBase, "hover:!bg-danger active:!bg-danger");
+		case "primaryDark":
+			return clsx(disabledBase, "hover:!bg-foreground active:!bg-foreground");
+		case "solid":
+			return clsx(disabledBase, "hover:!bg-background active:!bg-background");
+		case "ghost":
+			return clsx(
+				disabledBase,
+				"hover:!bg-transparent hover:!text-foreground active:!text-foreground",
+			);
+		default:
+			return clsx(disabledBase, "hover:!bg-background active:!bg-background");
+	}
+}
+
+function renderIcon(
+	icon?: IconProp,
+	size = DEFAULT_ICON_SIZE,
+	className?: string,
+) {
 	if (!icon) return null;
 
 	if (typeof icon === "string") {
@@ -126,13 +166,18 @@ function renderIcon(icon?: IconProp, size = DEFAULT_ICON_SIZE) {
 				name={icon as IconName}
 				animate
 				// className={animatedIconClassMap[icon as IconName]}
+				className={className}
 				style={{ width: `${size}px`, height: `${size}px` }}
 			/>
 		);
 	}
 
 	return (
-		<span className="inline-flex items-center justify-center">{icon}</span>
+		<span
+			className={clsx("inline-flex items-center justify-center", className)}
+		>
+			{icon}
+		</span>
 	);
 }
 
@@ -271,6 +316,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			className,
 			contentClassName,
 			textVariant = "body",
+			textTone,
 			textClassName,
 			style,
 			variant = "outline",
@@ -297,6 +343,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 				: variant === "ghost"
 					? undefined
 					: "shadow-[2px_4px_15px_0_rgba(2,2,2,0.03)]",
+			isDisabled && getDisabledClassName(variant),
 			className,
 		);
 
@@ -310,6 +357,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			align === "between" || align === "center" ? "w-full" : "w-fit";
 		const isTextChild =
 			typeof children === "string" || typeof children === "number";
+		const textToneClassName = getTextToneClassName(textTone);
 		const content = (
 			<>
 				<span
@@ -322,7 +370,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 				>
 					{leadingIcon && (
 						<span className="flex items-center justify-center">
-							{renderIcon(leadingIcon, iconSize)}
+							{renderIcon(leadingIcon, iconSize, textToneClassName)}
 						</span>
 					)}
 
@@ -332,7 +380,8 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 							<Text
 								as="span"
 								variant={textVariant}
-								style={{ color: "inherit" }}
+								tone={textTone}
+								style={textTone ? undefined : { color: "inherit" }}
 								className={textClassName}
 							>
 								{children}
@@ -344,7 +393,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 
 					{trailingIcon && (
 						<span className="flex items-center justify-center">
-							{renderIcon(trailingIcon, iconSize)}
+							{renderIcon(trailingIcon, iconSize, textToneClassName)}
 						</span>
 					)}
 				</span>
@@ -380,6 +429,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 					aria-disabled={isDisabled || undefined}
 					tabIndex={isDisabled ? -1 : focusable ? linkRest.tabIndex : -1}
 					data-loading={loadingState}
+					data-disabled={isDisabled ? "true" : undefined}
 					onClick={handleDisabledClick}
 					{...linkRest}
 				>
@@ -398,6 +448,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 				disabled={isDisabled}
 				tabIndex={isDisabled ? undefined : focusable ? buttonRest.tabIndex : -1}
 				data-loading={loadingState}
+				data-disabled={isDisabled ? "true" : undefined}
 				{...(buttonRest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
 			>
 				{content}

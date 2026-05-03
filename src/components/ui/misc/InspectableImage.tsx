@@ -2,8 +2,8 @@
 
 import Image, { type ImageProps } from "next/image";
 import * as React from "react";
-import { useImageInspectModal } from "../overlays/modal/useImageInspectModal";
 import { Button } from "@/components/ui/primitives/Button";
+import { useImageInspectModal } from "../overlays/modal/useImageInspectModal";
 
 type InspectableImageProps = Omit<ImageProps, "onClick"> & {
 	className?: string; // applied to button
@@ -46,6 +46,7 @@ export function InspectableImage({
 			className={["!p-0 !rounded-none border-0 bg-transparent", className]
 				.filter(Boolean)
 				.join(" ")}
+			contentClassName="h-full w-full"
 			onClick={handleOpen}
 		>
 			<Image {...imageProps} className="w-full h-full object-cover" />

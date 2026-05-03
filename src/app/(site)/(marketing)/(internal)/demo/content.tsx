@@ -15,20 +15,14 @@ import {
 	ChoiceIndicatorToggle,
 } from "@/components/ui/input/choice/ChoiceIndicators";
 import { DateRangeInput } from "@/components/ui/input/DateRangeInput";
+import { EditableTextInput } from "@/components/ui/input/EditableTextInput";
 import { EmailInput } from "@/components/ui/input/EmailInput";
-import {
-	FileInput,
-	type FileInputHandle,
-	UploadTypes,
-} from "@/components/ui/input/files/FileInput";
-import FileUploader, {
-	UploadTypes as FileUploaderTypes,
-} from "@/components/ui/input/files/FileUploader";
-import { UploadedFilesList } from "@/components/ui/input/files/UploadedFilesList";
+import { FileUploadInput } from "@/components/ui/input/files/FileUploadInput";
 import { MultiselectInput } from "@/components/ui/input/MultiselectInput";
 import { NumberInput } from "@/components/ui/input/NumberInput";
 import { PasswordInput } from "@/components/ui/input/PasswordInput";
 import { PhoneInput } from "@/components/ui/input/PhoneInput";
+import { ProfilePictureInput } from "@/components/ui/input/ProfilePictureInput";
 import { RadioInput } from "@/components/ui/input/RadioInput";
 import { SelectInput } from "@/components/ui/input/SelectInput";
 import {
@@ -42,6 +36,7 @@ import { ToggleInput } from "@/components/ui/input/ToggleInput";
 import { UnitNumberInput } from "@/components/ui/input/UnitNumberInput";
 import { Accordion } from "@/components/ui/misc/Accordion";
 import { CopyField } from "@/components/ui/misc/CopyField";
+import { FileGallery } from "@/components/ui/misc/FileGallery";
 import {
 	FilePreview,
 	type FilePreviewItem,
@@ -64,7 +59,11 @@ import { Tooltip } from "@/components/ui/misc/Tooltip";
 import { Warning } from "@/components/ui/misc/Warning";
 import { LetterWave } from "@/components/ui/motion/LetterWave";
 import { MotionScene } from "@/components/ui/motion/MotionScene";
-import { RevealGroup, RevealItem } from "@/components/ui/motion/Reveal";
+import {
+	RevealGroup,
+	RevealItem,
+	RevealRoot,
+} from "@/components/ui/motion/Reveal";
 import { RevealImage } from "@/components/ui/motion/RevealImage";
 import { RevealText } from "@/components/ui/motion/RevealText";
 import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
@@ -236,6 +235,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"MoreMenuDropdown",
 			"PasswordInput",
 			"PhoneInput",
+			"ProfilePictureInput",
 			"SegmentedControl",
 			"SelectInput",
 			"StateIndicator",
@@ -262,16 +262,18 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"DateAgo",
 			"DateIndicator",
 			"DateRangeInput",
+			"EditableTextInput",
 			"Field",
 			// "FilePreview",
 			"Footer",
 			"Listbox",
 			"PhoneInput",
+			"ProfilePicture",
 			"SegmentedControl",
 			"SelectInput",
 			"StateIndicator",
 			"ToastHost",
-			"UploadedFilesList",
+			"FileUploadInput",
 			"Warning",
 		],
 	},
@@ -283,8 +285,8 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ComboboxTextInput",
 			"ConfirmationModal",
 			"CopyField",
+			"EditableTextInput",
 			"FilePreview",
-			"FileUploader",
 			"Footer",
 			"HeaderCompact",
 			"HeaderFull",
@@ -294,11 +296,12 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"MoreMenuDropdown",
 			"PasswordInput",
 			"PhoneInput",
+			"ProfilePictureInput",
 			"SegmentedControl",
 			"SelectInput",
 			"StateIndicator",
 			"ToastHost",
-			"UploadedFilesList",
+			"FileGallery",
 		],
 	},
 	InputFrame: {
@@ -307,6 +310,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ComboboxMultiSelectInput",
 			"ComboboxTextInput",
 			"DateRangeInput",
+			"EditableTextInput",
 			"EmailInput",
 			"NumberInput",
 			"PasswordInput",
@@ -336,11 +340,13 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: [
 			"ComboboxMultiSelectInput",
 			"ComboboxTextInput",
+			"EditableTextInput",
 			"EmailInput",
 			"MultiselectInput",
 			"NumberInput",
 			"PasswordInput",
 			"PhoneInput",
+			"ProfilePictureInput",
 			"RadioInput",
 			"SelectInput",
 			"SliderInput",
@@ -391,9 +397,10 @@ const relatedMap: Record<string, RelatedInfo> = {
 	createMockFetch: { uses: [], usedIn: [] },
 	checkHealth: { uses: ["createApiClient"], usedIn: [] },
 	MotionScene: {
-		uses: ["RevealGroup", "RevealImage", "ScrambleReveal"],
+		uses: ["RevealRoot", "RevealGroup", "RevealImage", "ScrambleReveal"],
 		usedIn: [],
 	},
+	RevealRoot: { uses: [], usedIn: [] },
 	RevealGroup: { uses: [], usedIn: [] },
 	RevealItem: { uses: [], usedIn: [] },
 	RevealImage: {
@@ -448,6 +455,10 @@ const relatedMap: Record<string, RelatedInfo> = {
 	},
 	TextAreaInput: { uses: ["Field", "InputFrame"], usedIn: [] },
 	TextInput: { uses: ["Field", "InputFrame"], usedIn: [] },
+	EditableTextInput: {
+		uses: ["Button", "Field", "InputFrame", "Text"],
+		usedIn: [],
+	},
 	EmailInput: { uses: ["Field", "InputFrame"], usedIn: [] },
 	RadioInput: {
 		uses: [
@@ -476,6 +487,10 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"Text",
 			"dropdownStyles",
 		],
+		usedIn: [],
+	},
+	ProfilePictureInput: {
+		uses: ["Button", "Field", "Icon", "ProfilePicture"],
 		usedIn: [],
 	},
 	SelectInput: {
@@ -538,10 +553,12 @@ const relatedMap: Record<string, RelatedInfo> = {
 		uses: ["Text"],
 		usedIn: ["MultiselectInput", "RadioInput", "ToggleInput"],
 	},
-	FileInput: { uses: [], usedIn: [] },
-	FileUploader: { uses: ["Button"], usedIn: [] },
-	UploadedFilesList: { uses: ["Button", "Text"], usedIn: [] },
-	Skeleton: { uses: [], usedIn: ["Button", "Text"] },
+	FileUploadInput: {
+		uses: ["Button", "Field", "InputFrame", "Text"],
+		usedIn: [],
+	},
+	FileGallery: { uses: ["FilePreview", "IdleState"], usedIn: [] },
+	Skeleton: { uses: [], usedIn: ["Button", "ProfilePicture", "Text"] },
 	SegmentedControl: {
 		uses: ["Button", "Icon", "Text", "spring"],
 		usedIn: [],
@@ -596,15 +613,27 @@ const relatedMap: Record<string, RelatedInfo> = {
 	},
 	Pill: {
 		uses: [],
-		usedIn: ["HealthCheckIndicator", "ProfilePicture"],
+		usedIn: ["FilePreview", "HealthCheckIndicator", "ProfilePicture"],
 	},
 	ProfilePicture: {
 		uses: ["Pill", "Skeleton", "Text"],
-		usedIn: [],
+		usedIn: ["ProfilePictureInput"],
 	},
 	FilePreview: {
-		uses: ["Button", "InspectableImage", "Text", "useConfirmationModal"],
-		usedIn: [],
+		uses: [
+			"Button",
+			"FileInspectModal",
+			"InspectableImage",
+			"Pill",
+			"Text",
+			"useConfirmationModal",
+			"useModal",
+		],
+		usedIn: ["FileGallery"],
+	},
+	FileInspectModal: {
+		uses: ["Button", "Text"],
+		usedIn: ["FilePreview"],
 	},
 	InspectableImage: {
 		uses: ["Button", "useImageInspectModal"],
@@ -642,7 +671,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 	},
 	showToast: {
 		uses: [],
-		usedIn: ["CopyField", "FileInput", "ImageInspectModal", "ToastHost"],
+		usedIn: ["CopyField", "ImageInspectModal", "ToastHost"],
 	},
 };
 
@@ -1481,6 +1510,82 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
+						id: "editable-text-input",
+						kind: "component",
+						name: "EditableTextInput",
+						label: "Inline edit",
+						related: relatedMap.EditableTextInput,
+						Render() {
+							const [title, setTitle] = useState("Template dashboard");
+
+							return (
+								<div className="flex max-w-sm flex-col items-start gap-3">
+									<EditableTextInput
+										value={title}
+										onSubmit={async (nextTitle) => setTitle(nextTitle)}
+										validate={(nextTitle) =>
+											nextTitle ? null : "Enter a title."
+										}
+										ariaLabel={`Rename ${title}`}
+										editAriaLabel="Title"
+										submitAriaLabel="Save title"
+										cancelAriaLabel="Cancel rename"
+										displayButtonVariant="ghost"
+										displayTextVariant="body"
+										displayTextTone="muted"
+										displayTrailingIcon="pencil"
+										displayClassName="min-w-0 max-w-full"
+										displayContentClassName="min-w-0 max-w-full"
+										displayTextClassName="truncate"
+										formClassName="w-full"
+										fieldClassName="gap-1"
+										frameClassName="bg-background! shadow-none"
+									/>
+								</div>
+							);
+						},
+					},
+					{
+						id: "profile-picture-input",
+						kind: "component",
+						name: "ProfilePictureInput",
+						label: "Profile image picker",
+						related: relatedMap.ProfilePictureInput,
+						Render() {
+							const [selectedFileName, setSelectedFileName] = useState<
+								string | null
+							>(null);
+
+							return (
+								<div className="flex max-w-sm flex-col gap-2">
+									<ProfilePictureInput
+										label="Profile picture"
+										description="JPG, PNG, or WebP up to 25 MB."
+										name="Ada Lovelace"
+										onChange={(file) => setSelectedFileName(file?.name ?? null)}
+									/>
+									<Text as="p" variant="caption" tone="muted">
+										{selectedFileName
+											? `Selected: ${selectedFileName}`
+											: "No file selected"}
+									</Text>
+								</div>
+							);
+						},
+					},
+					{
+						id: "profile-picture-input-usage",
+						kind: "usage",
+						name: "ProfilePictureInput",
+						label: "Usage",
+						related: relatedMap.ProfilePictureInput,
+						snippet: `<ProfilePictureInput
+  name={user.name}
+  currentUrl={user.profilePictureUrl}
+  onChange={(file) => setProfilePictureFile(file)}
+/>`,
+					},
+					{
 						id: "email-input",
 						kind: "component",
 						name: "EmailInput",
@@ -1889,6 +1994,15 @@ export const demoPages: DemoPage[] = [
 							);
 						},
 					},
+					{
+						id: "editable-text-input-usage",
+						kind: "usage",
+						name: "EditableTextInput",
+						label: "Optimistic title edit",
+						related: relatedMap.EditableTextInput,
+						snippet:
+							'<EditableTextInput value={title} onSubmit={saveTitle} ariaLabel="Rename dashboard" displayButtonVariant="ghost" displayTrailingIcon="pencil" />',
+					},
 				],
 			},
 		],
@@ -2068,50 +2182,43 @@ export const demoPages: DemoPage[] = [
 				columns: "grid-cols-1 lg:grid-cols-2",
 				items: [
 					{
-						id: "file-input",
+						id: "file-upload-input",
 						kind: "component",
-						name: "FileInput",
-						label: "Upload flow",
-						related: relatedMap.FileInput,
+						name: "FileUploadInput",
+						label: "File picker",
+						related: relatedMap.FileUploadInput,
 						Render() {
-							const fileInputRef = useRef<FileInputHandle>(null);
-							const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+							const [files, setFiles] = useState<File[]>([]);
 
 							return (
 								<div className="flex w-full flex-col gap-2">
-									<FileInput
-										ref={fileInputRef}
-										uploadType={UploadTypes.PROFILE}
-										uploadedUrls={uploadedUrls}
-										onUploadedChange={setUploadedUrls}
+									<FileUploadInput
+										files={files}
+										onFilesChange={setFiles}
+										label="Attachments"
+										description="Select images or PDFs for this workflow."
 									/>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => void fileInputRef.current?.upload()}
-									>
-										Upload pending
-									</Button>
 								</div>
 							);
 						},
 					},
 					{
-						id: "uploaded-files-list",
+						id: "file-gallery",
 						kind: "component",
-						name: "UploadedFilesList",
-						label: "Uploaded list",
-						related: relatedMap.UploadedFilesList,
+						name: "FileGallery",
+						label: "File gallery",
+						related: relatedMap.FileGallery,
 						Render() {
-							const [urls, setUrls] = useState<string[]>([
-								"https://cdn.example.com/mock.png",
+							const [urls, setUrls] = useState([
+								"/test/mercury.png",
+								"https://example.com/report.pdf",
 							]);
 
 							return (
-								<UploadedFilesList
-									files={urls}
-									onRemove={(url) =>
-										setUrls((prev) => prev.filter((item) => item !== url))
+								<FileGallery
+									uploadedUrls={urls}
+									onRemoveUploaded={(url) =>
+										setUrls((current) => current.filter((item) => item !== url))
 									}
 								/>
 							);
@@ -2125,7 +2232,12 @@ export const demoPages: DemoPage[] = [
 						related: relatedMap.FilePreview,
 						Render() {
 							const [files, setFiles] = useState<FilePreviewItem[]>([
-								{ key: "img-1", status: "uploaded", url: "/test/mercury.png" },
+								{
+									key: "img-1",
+									status: "uploaded",
+									url: "/test/mercury.png",
+									name: "mercury.png",
+								},
 								{
 									key: "pending-1",
 									status: "pending",
@@ -2154,16 +2266,6 @@ export const demoPages: DemoPage[] = [
 									))}
 								</div>
 							);
-						},
-					},
-					{
-						id: "file-uploader",
-						kind: "component",
-						name: "FileUploader",
-						label: "Legacy uploader",
-						related: relatedMap.FileUploader,
-						Render() {
-							return <FileUploader uploadType={FileUploaderTypes.PROFILE} />;
 						},
 					},
 				],
@@ -2453,26 +2555,27 @@ export const demoPages: DemoPage[] = [
 						id: "profile-picture",
 						kind: "component",
 						name: "ProfilePicture",
-						label: "Avatar",
+						label: "Avatar display",
 						related: relatedMap.ProfilePicture,
 						Render() {
 							return (
-								<div className="flex items-center gap-3">
-									<ProfilePicture name="Dina Maar" />
-									<ProfilePicture name="Unknown member" />
-									<ProfilePicture name="Large avatar" size="lg" />
+								<div className="flex flex-wrap items-center gap-3">
+									<ProfilePicture name="Ada Lovelace" size="sm" />
+									<ProfilePicture name="Grace Hopper" />
+									<ProfilePicture name="Unknown user" />
+									<ProfilePicture size="lg" />
 								</div>
 							);
 						},
 						skeleton: {
-							name: "ProfilePicture loading",
+							name: "ProfilePicture.Skeleton",
 							related: relatedMap.ProfilePicture,
 							Render() {
 								return (
 									<div className="flex items-center gap-3">
-										<ProfilePicture name="Dina Maar" loading />
-										<ProfilePicture name="Unknown member" loading />
-										<ProfilePicture name="Large avatar" size="lg" loading />
+										<ProfilePicture loading size="sm" />
+										<ProfilePicture loading />
+										<ProfilePicture loading size="lg" />
 									</div>
 								);
 							},
@@ -2484,7 +2587,11 @@ export const demoPages: DemoPage[] = [
 						name: "ProfilePicture",
 						label: "Usage",
 						related: relatedMap.ProfilePicture,
-						snippet: `<ProfilePicture name="Dina Maar" src="/test/blob.png" />`,
+						snippet: `<ProfilePicture
+  name={user.name}
+  src={user.profilePictureUrl}
+  size="md"
+/>`,
 					},
 					{
 						id: "pill",
@@ -2745,19 +2852,38 @@ export const demoPages: DemoPage[] = [
 				description: "Reveal + scroll motion",
 				items: [
 					{
-						id: "reveal-group",
+						id: "reveal-root",
 						kind: "component",
-						name: "RevealGroup",
-						label: "Staggered reveal",
-						related: relatedMap.RevealGroup,
+						name: "RevealRoot",
+						label: "Visible-item scheduler",
+						related: relatedMap.RevealRoot,
 						Render() {
 							return (
-								<RevealGroup className="flex flex-col gap-2" stagger={0.08}>
+								<RevealRoot>
 									<RevealItem>
 										<Text variant="bodyStrong">Reveal 1</Text>
 									</RevealItem>
 									<RevealItem>
 										<Text variant="bodyStrong">Reveal 2</Text>
+									</RevealItem>
+								</RevealRoot>
+							);
+						},
+					},
+					{
+						id: "reveal-group",
+						kind: "component",
+						name: "RevealGroup",
+						label: "Compatibility scope",
+						related: relatedMap.RevealGroup,
+						Render() {
+							return (
+								<RevealGroup className="flex flex-col gap-2" stagger={0.08}>
+									<RevealItem>
+										<Text variant="bodyStrong">Scoped reveal 1</Text>
+									</RevealItem>
+									<RevealItem>
+										<Text variant="bodyStrong">Scoped reveal 2</Text>
 									</RevealItem>
 								</RevealGroup>
 							);
@@ -3001,17 +3127,19 @@ export const demoPages: DemoPage[] = [
 						label: "Staged usage",
 						related: relatedMap.MotionScene,
 						snippet: `import { MotionScene } from "@/components/ui/motion/MotionScene";
-import { RevealGroup, RevealItem } from "@/components/ui/motion/Reveal";
+import { RevealGroup, RevealItem, RevealRoot } from "@/components/ui/motion/Reveal";
 import { RevealImage } from "@/components/ui/motion/RevealImage";
 import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 
-<MotionScene>
-	<RevealImage waitFor="app" unlockStage="media" {...imageProps} />
-	<RevealGroup waitFor="media" unlockStage="content">
-		<RevealItem>...</RevealItem>
-	</RevealGroup>
-	<ScrambleReveal waitFor="content" text="..." maintainSpace />
-</MotionScene>`,
+<RevealRoot>
+	<MotionScene>
+		<RevealImage waitFor="app" unlockStage="media" {...imageProps} />
+		<RevealGroup waitFor="media" unlockStage="content">
+			<RevealItem>...</RevealItem>
+		</RevealGroup>
+		<ScrambleReveal waitFor="content" text="..." maintainSpace />
+	</MotionScene>
+</RevealRoot>`,
 					},
 					{
 						id: "scroll-highlight-text",

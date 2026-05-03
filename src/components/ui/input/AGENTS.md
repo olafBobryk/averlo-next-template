@@ -10,8 +10,10 @@ Ready-made form controls composed from the primitives. This folder should be the
 
 ## Choose The Highest-Level Match First
 - `src/components/ui/input/TextInput.tsx`: plain single-line text entry.
+- `src/components/ui/input/EditableTextInput.tsx`: inline display-to-edit text control for rename/title flows.
 - `src/components/ui/input/EmailInput.tsx`: email entry with email-centric defaults.
 - `src/components/ui/input/PasswordInput.tsx`: password entry with built-in visibility toggle and optional strength meter.
+- `src/components/ui/input/ProfilePictureInput.tsx`: image picker for profile/avatar flows with preview, type validation, and remove action.
 - `src/components/ui/input/TextAreaInput.tsx`: multi-line text input.
 - `src/components/ui/input/NumberInput.tsx`: typed numeric entry.
 - `src/components/ui/input/UnitNumberInput.tsx`: numeric entry with a fixed unit.
@@ -52,7 +54,7 @@ Ready-made form controls composed from the primitives. This folder should be the
 ## Page-Level Usage Guidance
 - **Login form:** usually `EmailInput` plus `PasswordInput` without strength meter.
 - **Sign-up form:** usually `EmailInput` plus `PasswordInput showStrength`.
-- **Profile or settings form:** start with `TextInput`, `EmailInput`, `PhoneInput`, `SelectInput`, and `ToggleInput` before creating bespoke controls.
+- **Profile or settings form:** start with `ProfilePictureInput`, `TextInput`, `EmailInput`, `PhoneInput`, `SelectInput`, and `ToggleInput` before creating bespoke controls.
 - **Filter bars and dashboards:** use `SelectInput`, `ComboboxTextInput`, `ComboboxMultiSelectInput`, and `DateRangeInput` before ad hoc filter UIs.
 - **Preference selection:** use `RadioInput`, `MultiselectInput`, or `ToggleInput` so focus, semantics, and indicators stay consistent.
 
@@ -65,6 +67,7 @@ Ready-made form controls composed from the primitives. This folder should be the
 
 ## How To Extend Safely
 - If the needed UX is text-like, begin from an existing text-like input and preserve `Field` plus `InputFrame` structure.
+- If the needed UX is inline renaming or title editing, use `EditableTextInput` before creating a page-local edit/display toggle.
 - If the needed UX is choice-based, extend the choice subsystem in `choice/` rather than building a new label-plus-hidden-input pattern.
 - If the needed UX opens a menu, see whether `SelectInput`, `ComboboxTextInput`, or `ComboboxMultiSelectInput` already covers it before touching `Dropdown` directly.
 

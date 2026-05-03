@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// biome-ignore-all lint/suspicious/noTemplateCurlyInString: this script renders source files that intentionally contain template placeholders.
 
 import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
@@ -11,6 +12,10 @@ const SRC_DIR = path.join(ROOT, "src");
 const INTERNAL_MARKETING_DIR = path.join(
 	ROOT,
 	"src/app/(site)/(marketing)/(internal)",
+);
+const CONCRETE_INTERNAL_MARKETING_DIR = path.join(
+	ROOT,
+	"src/app/(site)/(marketing)/internal",
 );
 
 const SURFACES = {
@@ -25,7 +30,7 @@ const SURFACES = {
 			"src/app/(site)/(auth)",
 			"src/lib/api/auth.ts",
 		],
-		routeIds: ["login", "dashboard", "dashboardSettings"],
+		routeIds: ["login", "dashboard", "dashboardPages", "dashboardSettings"],
 		routeBuilders: ["dashboardSubpage"],
 		navRouteIds: [],
 		searchSources: [],
@@ -33,7 +38,7 @@ const SURFACES = {
 			{
 				label: "dashboard route ids",
 				pattern:
-					/(hrefFor\("dashboard"\)|hrefFor\("dashboardSettings"\)|hrefFor\("login"\)|routeId:\s*"dashboard"|routeId:\s*"dashboardSettings"|routeId:\s*"login")/,
+					/(hrefFor\("dashboard"\)|hrefFor\("dashboardPages"\)|hrefFor\("dashboardSettings"\)|hrefFor\("login"\)|routeId:\s*"dashboard"|routeId:\s*"dashboardPages"|routeId:\s*"dashboardSettings"|routeId:\s*"login")/,
 			},
 			{
 				label: "dashboard auth import",
@@ -58,7 +63,44 @@ const SURFACES = {
 			},
 			{
 				label: "demo content import",
-				pattern: /from\s+["']@\/app\/\(site\)\/\(marketing\)\/\(internal\)\/demo\/content["']/,
+				pattern:
+					/from\s+["']@\/app\/\(site\)\/\(marketing\)\/\(internal\)\/demo\/content["']/,
+			},
+		],
+	},
+	playground: {
+		id: "playground",
+		flag: "--no-playground",
+		description:
+			"Remove the internal playground surface and playground search/nav references.",
+		dependentSurfaces: [],
+		ownedPaths: ["src/app/(site)/(marketing)/internal/playground"],
+		routeIds: ["playground"],
+		routeBuilders: [],
+		navRouteIds: ["playground"],
+		searchSources: [],
+		postRemovalAssertions: [
+			{
+				label: "playground route ids and links",
+				pattern:
+					/(hrefFor\("playground"\)|routeId:\s*"playground"|\/internal\/playground)/,
+			},
+		],
+	},
+	motionLegacy: {
+		id: "motionLegacy",
+		flag: "--no-motion-legacy",
+		description: "Remove the legacy group-triggered reveal implementation.",
+		dependentSurfaces: [],
+		ownedPaths: ["src/components/ui/motion/legacy"],
+		routeIds: [],
+		routeBuilders: [],
+		navRouteIds: [],
+		searchSources: [],
+		postRemovalAssertions: [
+			{
+				label: "legacy motion imports",
+				pattern: /@\/components\/ui\/motion\/legacy/,
 			},
 		],
 	},
@@ -114,6 +156,9 @@ function printUsage() {
 Flags:
   --no-dashboard   Remove dashboard routes, auth/login shell, and dashboard auth helpers
   --no-demo        Remove the internal demo surface
+  --no-playground  Remove the internal playground surface
+  --no-motion-legacy
+                   Remove the legacy group-triggered reveal implementation
   --no-dictionary  Remove the internal dictionary surface
   --no-reference   Remove the internal reference surface
   --dry-run        Print the prune plan without changing files
@@ -182,6 +227,7 @@ function buildState(surfaceIds) {
 	return {
 		hasDashboard: !removed.has("dashboard"),
 		hasDemo: !removed.has("demo"),
+		hasPlayground: !removed.has("playground"),
 		hasDictionary: !removed.has("dictionary"),
 		hasReference: !removed.has("reference"),
 	};
@@ -204,12 +250,14 @@ async function collectPlan(surfaceIds) {
 		surfaceIds.includes("demo") &&
 		surfaceIds.includes("dictionary") &&
 		surfaceIds.includes("reference");
+	const removeConcreteInternalDir = surfaceIds.includes("playground");
 
 	return {
 		surfaces: surfaceIds.map((surfaceId) => SURFACES[surfaceId]),
 		deletedPaths: uniqueDeletedPaths,
 		rewriteFiles: [...CENTRAL_FILES],
 		removeInternalDir,
+		removeConcreteInternalDir,
 	};
 }
 
@@ -224,11 +272,16 @@ function renderRoutesFile(state) {
 		lines.push(`\tdemo: "/demo",`);
 	}
 
+	if (state.hasPlayground) {
+		lines.push(`\tplayground: "/internal/playground",`);
+	}
+
 	lines.push(`\tsettings: "/settings",`);
 
 	if (state.hasDashboard) {
 		lines.push(`\tlogin: "/login",`);
 		lines.push(`\tdashboard: "/dashboard",`);
+		lines.push(`\tdashboardPages: "/dashboard/pages",`);
 		lines.push(`\tdashboardSettings: "/dashboard/settings",`);
 	}
 
@@ -242,7 +295,12 @@ function renderRoutesFile(state) {
 		);
 	}
 
-	lines.push(`} as const;`, "", `export type AppRouteId = keyof typeof appRoutes;`, "");
+	lines.push(
+		`} as const;`,
+		"",
+		`export type AppRouteId = keyof typeof appRoutes;`,
+		"",
+	);
 
 	return lines.join("\n");
 }
@@ -252,13 +310,13 @@ function renderLibRoutesFile(state) {
 
 	if (state.hasDashboard) {
 		builderLines.push(
-			"\tdashboardSubpage: (...segments: string[]) => `/dashboard/${segments.join(\"/\")}`,",
+			'\tdashboardSubpage: (...segments: string[]) => `/dashboard/${segments.join("/")}`,',
 		);
 	}
 
 	if (state.hasDictionary) {
 		builderLines.push(
-			"\tdictionaryEntry: (...segments: string[]) => `/dictionary/${segments.join(\"/\")}`,",
+			'\tdictionaryEntry: (...segments: string[]) => `/dictionary/${segments.join("/")}`,',
 		);
 	}
 
@@ -282,6 +340,10 @@ function renderMarketingNavFile(state) {
 
 	if (state.hasDemo) {
 		navEntries.push('\t{ name: "Demo", routeId: "demo" },');
+	}
+
+	if (state.hasPlayground) {
+		navEntries.push('\t{ name: "Playground", routeId: "playground" },');
 	}
 
 	navEntries.push('\t{ name: "Settings", routeId: "settings" },');
@@ -365,7 +427,7 @@ function renderMarketingContentSearchFile(state) {
 		"",
 		"function getMarketingSearchEntries(): ContentSearchEntry[] {",
 		"\tconst entries: ContentSearchEntry[] = [];",
-		'\tconst seen = new Set<string>();',
+		"\tconst seen = new Set<string>();",
 		"",
 		"\tfunction addEntry(entry: ContentSearchEntry) {",
 		"\t\tif (seen.has(entry.href)) return;",
@@ -388,10 +450,21 @@ function renderMarketingContentSearchFile(state) {
 			"\tfor (const page of getVisibleDemoPages()) {",
 			"\t\taddEntry({",
 			"\t\t\tid: `demo-${page.id}`,",
-			'\t\t\tlabel: `Demo: ${page.title}`,',
+			"\t\t\tlabel: `Demo: ${page.title}`,",
 			'\t\t\thref: `/demo/${page.slug.join("/")}`,',
 			"\t\t});",
 			"\t}",
+		);
+	}
+
+	if (state.hasPlayground) {
+		header.push(
+			"",
+			"\taddEntry({",
+			'\t\tid: "playground-motion-reveal-root",',
+			'\t\tlabel: "Playground: Reveal Root",',
+			'\t\thref: "/internal/playground/motion/reveal-root",',
+			"\t});",
 		);
 	}
 
@@ -496,7 +569,7 @@ function renderHeaderFullFile(state) {
 		"\t\t\t\t\t</div>",
 		"\t\t\t\t\t<motion.nav",
 		'\t\t\t\t\t\tclassName="relative pointer-events-auto flex h-full items-center justify-center gap-5"',
-		'\t\t\t\t\t\tanimate={motionAllowed ? { y: hide ? -80 : 0 } : { y: 0 }}',
+		"\t\t\t\t\t\tanimate={motionAllowed ? { y: hide ? -80 : 0 } : { y: 0 }}",
 		"\t\t\t\t\t\ttransition={motionAllowed ? springs.soft : { duration: 0 }}",
 		"\t\t\t\t\t>",
 		"\t\t\t\t\t\t{MARKETING_NAV_LINKS.map((item) => (",
@@ -517,7 +590,7 @@ function renderHeaderFullFile(state) {
 		'\t\t\t\t\t\t\t\tclassName: "w-[14rem] xl:w-[16rem]",',
 		'\t\t\t\t\t\t\t\ttextClassName: "text-sm",',
 		"\t\t\t\t\t\t\t}}",
-		"\t\t\t\t\t\t/>" + ctaBlock,
+		`\t\t\t\t\t\t/>${ctaBlock}`,
 		"\t\t\t\t\t</div>",
 		"\t\t\t\t</div>",
 		"\t\t\t</div>",
@@ -533,7 +606,7 @@ function renderApiIndexFile(state) {
 
 	if (state.hasDashboard) {
 		lines.push(
-			'export {',
+			"export {",
 			"  fetchSession,",
 			"  login,",
 			"  logout,",
@@ -631,6 +704,19 @@ async function removeEmptyInternalDirIfNeeded(shouldRemove) {
 	}
 }
 
+async function removeEmptyConcreteInternalDirIfNeeded(shouldRemove) {
+	if (!shouldRemove) return;
+	if (!(await pathExists(CONCRETE_INTERNAL_MARKETING_DIR))) return;
+
+	const children = await fs.readdir(CONCRETE_INTERNAL_MARKETING_DIR);
+	if (children.length === 0) {
+		await fs.rm(CONCRETE_INTERNAL_MARKETING_DIR, {
+			recursive: true,
+			force: true,
+		});
+	}
+}
+
 async function walkFiles(targetDir) {
 	const entries = await fs.readdir(targetDir, { withFileTypes: true });
 	const files = [];
@@ -694,9 +780,7 @@ function printPlan(plan) {
 	for (const surface of plan.surfaces) {
 		console.log(`- ${surface.flag}: ${surface.description}`);
 		if (surface.dependentSurfaces.length > 0) {
-			console.log(
-				`  dependencies: ${surface.dependentSurfaces.join(", ")}`,
-			);
+			console.log(`  dependencies: ${surface.dependentSurfaces.join(", ")}`);
 		}
 	}
 
@@ -710,7 +794,15 @@ function printPlan(plan) {
 	}
 
 	if (plan.removeInternalDir) {
-		console.log(`- ${relativePath(INTERNAL_MARKETING_DIR)} (if empty after prune)`);
+		console.log(
+			`- ${relativePath(INTERNAL_MARKETING_DIR)} (if empty after prune)`,
+		);
+	}
+
+	if (plan.removeConcreteInternalDir) {
+		console.log(
+			`- ${relativePath(CONCRETE_INTERNAL_MARKETING_DIR)} (if empty after prune)`,
+		);
 	}
 
 	console.log("\nCentral files to rewrite");
@@ -788,6 +880,7 @@ async function main() {
 	}
 
 	await removeEmptyInternalDirIfNeeded(plan.removeInternalDir);
+	await removeEmptyConcreteInternalDirIfNeeded(plan.removeConcreteInternalDir);
 	await validateRemovedSurfaceReferences(parsed.surfaceIds);
 	runBuild();
 

@@ -15,8 +15,10 @@ export type MarketingSocialLink = {
 export const MARKETING_NAV_LINKS: MarketingNavLink[] = [
 	{ name: "Home", routeId: "home" },
 	{ name: "Demo", routeId: "demo" },
+	{ name: "Playground", routeId: "playground" },
 	{ name: "Settings", routeId: "settings" },
 	{ name: "Dictionary", routeId: "dictionary" },
+	{ name: "Reference", routeId: "reference" },
 ];
 
 export const MARKETING_SOCIAL_LINKS: MarketingSocialLink[] = [

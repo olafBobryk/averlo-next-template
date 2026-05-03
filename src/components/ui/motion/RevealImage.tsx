@@ -12,6 +12,7 @@ import {
 import {
 	RevealItem,
 	type RevealItemProps,
+	useRevealAnimationsDisabled,
 } from "@/components/ui/motion/Reveal";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -77,6 +78,7 @@ export function RevealImage({
 }: RevealImageProps) {
 	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const revealDisabled = useRevealAnimationsDisabled(disableWhenReducedMotion);
 	const scene = useOptionalMotionScene();
 	const { markReady } = useMotionSceneGate("RevealImage", { unlockStage });
 	const sourceKey = getSourceKey(src);
@@ -105,27 +107,30 @@ export function RevealImage({
 
 	const hasCustomRevealVariants = Boolean(variants);
 	const sceneReady = scene ? scene.isStageReady(waitFor) : true;
-	const shouldRevealImage = loaded && appReady && sceneReady;
+	const shouldRevealImage =
+		revealDisabled || (loaded && appReady && sceneReady && active !== false);
 
 	React.useEffect(() => {
-		if (!loaded || !shouldRevealImage) return;
-		if (motionAllowed && !hasCustomRevealVariants) return;
+		if (!shouldRevealImage) return;
+		if (motionAllowed && !revealDisabled && !hasCustomRevealVariants) return;
 		setRevealed(true);
-	}, [hasCustomRevealVariants, loaded, motionAllowed, shouldRevealImage]);
+	}, [
+		hasCustomRevealVariants,
+		motionAllowed,
+		revealDisabled,
+		shouldRevealImage,
+	]);
 
-	const revealTransition = motionAllowed
-		? {
-				...getMotionTiming("grand"),
-				delay: revealDelay,
-			}
-		: undefined;
+	const revealTransition =
+		motionAllowed && !revealDisabled
+			? {
+					...getMotionTiming("grand"),
+					delay: revealDelay,
+				}
+			: undefined;
 	const resolvedFallback =
 		fallback ?? (placeholder === "blur" ? null : <div />);
-	const imageMotionClassName = clsx(
-		fill
-			? "relative h-full w-full overflow-hidden"
-			: "relative h-full w-full overflow-hidden",
-	);
+	const imageMotionClassName = clsx("relative h-full w-full overflow-hidden");
 
 	return (
 		<RevealItem
@@ -135,7 +140,7 @@ export function RevealImage({
 			variants={variants}
 			disableTransform={disableTransform}
 			useViewport={useViewport}
-			active={active}
+			active={shouldRevealImage}
 			waitFor={waitFor}
 			disableWhenReducedMotion={disableWhenReducedMotion}
 		>
@@ -163,27 +168,29 @@ export function RevealImage({
 					className={imageMotionClassName}
 					initial={false}
 					animate={
-						motionAllowed
-							? hasCustomRevealVariants
-								? {
-										opacity: shouldRevealImage ? 1 : 0,
-										clipPath: "inset(0% 0% 0% 0%)",
-										scale: 1,
-									}
-								: shouldRevealImage
+						revealDisabled
+							? { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", scale: 1 }
+							: motionAllowed
+								? hasCustomRevealVariants
 									? {
-											opacity: 1,
+											opacity: shouldRevealImage ? 1 : 0,
 											clipPath: "inset(0% 0% 0% 0%)",
 											scale: 1,
-											radius: 20,
 										}
-									: {
-											opacity: 0.8,
-											clipPath: "inset(100% 0% 0% 0%)",
-											scale: 1,
-											radius: 0,
-										}
-							: { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", scale: 1 }
+									: shouldRevealImage
+										? {
+												opacity: 1,
+												clipPath: "inset(0% 0% 0% 0%)",
+												scale: 1,
+												radius: 20,
+											}
+										: {
+												opacity: 0.8,
+												clipPath: "inset(100% 0% 0% 0%)",
+												scale: 1,
+												radius: 0,
+											}
+								: { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", scale: 1 }
 					}
 					transition={hasCustomRevealVariants ? undefined : revealTransition}
 					onAnimationComplete={() => {

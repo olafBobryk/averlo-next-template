@@ -43,6 +43,12 @@ function getMarketingSearchEntries(): ContentSearchEntry[] {
 		});
 	}
 
+	addEntry({
+		id: "playground-motion-reveal-root",
+		label: "Playground: Reveal Root",
+		href: "/internal/playground/motion/reveal-root",
+	});
+
 	return entries;
 }
 

@@ -15,6 +15,9 @@
 
 # next.js
 /.next/
+/.next-user/
+/.next-agent-*/
+/tsconfig.next-*.json
 /out/
 
 # production

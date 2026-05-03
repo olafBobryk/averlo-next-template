@@ -3,7 +3,12 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import Logo from "@/components/branding/Logo";
+import {
+	hasMotionDisabledSearchParam,
+	useMotionDisableOverride,
+} from "@/components/ui/foundations/motionDisableOverride";
 import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { markAppReady } from "@/lib/appReadySignal";
 import { Text } from "../ui/primitives/Text";
 
@@ -13,40 +18,59 @@ type Phase = "loading" | "revealing" | "transitioning" | "done";
 const GRAND_MS = 940;
 
 export default function LoadingScreenMount() {
-	const [phase, setPhase] = useState<Phase>("loading");
+	const immediateIntroDisabled = hasMotionDisabledSearchParam();
+	const [phase, setPhase] = useState<Phase>(() =>
+		hasMotionDisabledSearchParam() ? "done" : "loading",
+	);
+	const motionAllowed = useMotionAllowed(true);
+	const motionDisabled = useMotionDisableOverride();
+	const introDisabled =
+		immediateIntroDisabled || motionDisabled || !motionAllowed;
+
+	useEffect(() => {
+		if (!introDisabled) return;
+		markAppReady();
+		setPhase("done");
+	}, [introDisabled]);
 
 	// Prevent scroll until the loading screen is fully gone
 	useEffect(() => {
-		if (phase === "done") return;
+		if (introDisabled || phase === "done") return;
 		const prev = document.body.style.overflow;
 		document.body.style.overflow = "hidden";
 		return () => {
 			document.body.style.overflow = prev;
 		};
-	}, [phase]);
+	}, [introDisabled, phase]);
 
 	useEffect(() => {
+		if (introDisabled) return;
 		let t1: ReturnType<typeof setTimeout> | undefined;
+		let cancelled = false;
 		Promise.all([
 			document.fonts.ready,
 			new Promise<void>((resolve) => setTimeout(resolve, 500)),
 		]).then(() => {
+			if (cancelled) return;
 			setPhase("revealing");
 			t1 = setTimeout(() => {
+				if (cancelled) return;
 				setPhase("transitioning");
 			}, GRAND_MS);
 		});
 		return () => {
+			cancelled = true;
 			clearTimeout(t1);
 		};
-	}, []);
+	}, [introDisabled]);
 
-	if (phase === "done") return null;
+	if (introDisabled || phase === "done") return null;
 
 	return (
 		<motion.div
 			aria-hidden="true"
 			className="fixed inset-0 z-[9999] flex items-center justify-center bg-white pointer-events-none"
+			data-loading-screen-mount="true"
 			animate={{ opacity: phase === "transitioning" ? 0 : 1 }}
 			transition={getMotionTiming("grand")}
 			onAnimationComplete={() => {

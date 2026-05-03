@@ -13,6 +13,7 @@ Shared interaction tokens, motion tokens, settings, and base CSS that define how
 - `src/components/ui/foundations/focus.ts`: source of truth for focus-ring utilities.
 - `src/components/ui/foundations/spring.ts`: shared spring presets for `motion/react` animations.
 - `src/components/ui/foundations/motionTiming.ts`: centralized timing tokens.
+- `src/components/ui/foundations/motionDisableOverride.ts`: URL override detection for automation-friendly motion disabling.
 - `src/components/ui/foundations/settingsContext.tsx`: motion settings provider and hook.
 - `src/components/ui/foundations/library.css`: library-wide CSS tokens and utility classes.
 - `src/components/ui/foundations/iconAnimations.css`: shared icon animation CSS.

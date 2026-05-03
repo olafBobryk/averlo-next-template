@@ -2,8 +2,8 @@
 
 import type { VariantProps } from "class-variance-authority";
 import { motion } from "motion/react";
+import { RevealItem } from "@/components/ui/motion/Reveal";
 import { textVariants } from "@/components/ui/primitives/Text";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type TextAs = "span" | "p" | "div" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
@@ -35,10 +35,6 @@ type RevealTextProps = {
 	charDelay?: number;
 } & VariantProps<typeof textVariants>;
 
-/**
- * Like RevealItem, but splits text into per-character staggered spans.
- * Must be a direct child of RevealGroup (inherits hidden/show variant cascade).
- */
 export function RevealText({
 	children,
 	as = "span",
@@ -47,29 +43,25 @@ export function RevealText({
 	variant,
 	tone,
 }: RevealTextProps) {
-	const motionAllowed = useMotionAllowed(true);
 	const resolvedClass = textVariants({ variant, tone, className });
-
-	if (!motionAllowed) {
-		const Tag = as;
-		return <Tag className={resolvedClass}>{children}</Tag>;
-	}
-
 	const MotionTag = motionElements[as];
 	const chars = children.split("");
 
 	return (
-		<MotionTag
+		<RevealItem
+			as={MotionTag}
+			staticAs={as}
 			className={resolvedClass}
 			variants={{
 				hidden: {},
 				show: { transition: { staggerChildren: charDelay } },
 			}}
+			disableTransform
 		>
-			{chars.map((char, i) => (
+			{chars.map((char, index) => (
 				<span
 					// biome-ignore lint/suspicious/noArrayIndexKey: stable positional index
-					key={i}
+					key={index}
 					className="inline-block overflow-hidden"
 					style={{ verticalAlign: "bottom", lineHeight: "1.05em" }}
 				>
@@ -78,6 +70,6 @@ export function RevealText({
 					</motion.span>
 				</span>
 			))}
-		</MotionTag>
+		</RevealItem>
 	);
 }

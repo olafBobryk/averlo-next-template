@@ -47,6 +47,7 @@ type DropdownProps = {
 	menuWidth?: number | "trigger";
 	menuMinWidth?: number;
 	align?: "start" | "end";
+	side?: "top" | "bottom";
 	offset?: number;
 	positionStrategy?: "fixed" | "absolute";
 	disabled?: boolean;
@@ -57,6 +58,8 @@ type DropdownProps = {
 	autoFocusMenu?: boolean;
 	onOpenChange?: (open: boolean) => void;
 };
+
+type DropdownSide = NonNullable<DropdownProps["side"]>;
 
 const DEFAULT_CHEVRON_ICON = ({ isOpen }: { isOpen: boolean }) => {
 	return (
@@ -69,6 +72,29 @@ const DEFAULT_CHEVRON_ICON = ({ isOpen }: { isOpen: boolean }) => {
 };
 
 const DEFAULT_MENU_MIN_WIDTH = 220;
+const COLLISION_PADDING = 16;
+
+function resolveDropdownSide({
+	preferredSide,
+	measuredHeight,
+	availableAbove,
+	availableBelow,
+}: {
+	preferredSide: DropdownSide;
+	measuredHeight: number;
+	availableAbove: number;
+	availableBelow: number;
+}): DropdownSide {
+	const preferredAvailable =
+		preferredSide === "top" ? availableAbove : availableBelow;
+	const oppositeSide = preferredSide === "top" ? "bottom" : "top";
+	const oppositeAvailable =
+		oppositeSide === "top" ? availableAbove : availableBelow;
+
+	if (measuredHeight <= preferredAvailable) return preferredSide;
+	if (oppositeAvailable > preferredAvailable) return oppositeSide;
+	return preferredSide;
+}
 
 export function Dropdown({
 	renderTrigger,
@@ -80,6 +106,7 @@ export function Dropdown({
 	menuWidth,
 	menuMinWidth = DEFAULT_MENU_MIN_WIDTH,
 	align = "end",
+	side = "bottom",
 	offset = 8,
 	positionStrategy = "absolute",
 	disabled,
@@ -97,6 +124,7 @@ export function Dropdown({
 	const rootRef = React.useRef<HTMLElement | null>(null);
 	const menuRef = React.useRef<HTMLDivElement | null>(null);
 	const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>();
+	const [resolvedSide, setResolvedSide] = React.useState<DropdownSide>(side);
 	const hoverTimeoutRef = React.useRef<number | null>(null);
 	const lastOpenMethodRef = React.useRef<"keyboard" | "pointer" | null>(null);
 	const isOpenControlled = open !== undefined;
@@ -282,20 +310,57 @@ export function Dropdown({
 			explicitWidth ??
 			menuRef.current?.getBoundingClientRect().width ??
 			resolvedMinWidth;
+		const measuredHeight =
+			menuRef.current?.scrollHeight ??
+			menuRef.current?.getBoundingClientRect().height ??
+			0;
+		const availableAbove = Math.max(0, rect.top - offset - COLLISION_PADDING);
+		const availableBelow = Math.max(
+			0,
+			window.innerHeight - rect.bottom - offset - COLLISION_PADDING,
+		);
+		const nextSide = resolveDropdownSide({
+			preferredSide: side,
+			measuredHeight,
+			availableAbove,
+			availableBelow,
+		});
+		const availableHeight =
+			nextSide === "top" ? availableAbove : availableBelow;
+		const constrainedHeight =
+			measuredHeight > availableHeight ? availableHeight : undefined;
+		const renderedHeight = constrainedHeight ?? measuredHeight;
+
+		setResolvedSide(nextSide);
+
 		if (positionStrategy === "fixed") {
 			const viewportWidth = window.innerWidth;
-			const padding = 16;
 			let left = align === "end" ? rect.right - measuredWidth : rect.left;
-			left = Math.max(left, padding);
-			left = Math.min(left, viewportWidth - measuredWidth - padding);
+			const maxLeft = Math.max(
+				COLLISION_PADDING,
+				viewportWidth - measuredWidth - COLLISION_PADDING,
+			);
+			left = Math.min(Math.max(left, COLLISION_PADDING), maxLeft);
+			const top =
+				nextSide === "top"
+					? Math.max(COLLISION_PADDING, rect.top - renderedHeight - offset)
+					: Math.max(
+							COLLISION_PADDING,
+							Math.min(
+								rect.bottom + offset,
+								window.innerHeight - COLLISION_PADDING - renderedHeight,
+							),
+						);
 
 			setMenuStyle({
 				position: "fixed",
-				top: rect.bottom + offset,
+				top,
 				left,
 				zIndex: 90,
 				width: explicitWidth,
 				minWidth: resolvedMinWidth,
+				maxHeight: constrainedHeight,
+				overflowY: constrainedHeight === undefined ? undefined : "auto",
 			});
 			return;
 		}
@@ -311,24 +376,34 @@ export function Dropdown({
 			0,
 			Math.min(rawLeft, Math.max(0, wrapperWidth - measuredWidth)),
 		);
+		const top =
+			nextSide === "top" ? undefined : rect.bottom - wrapperRect.top + offset;
+		const bottom =
+			nextSide === "top"
+				? Math.max(0, wrapperRect.bottom - rect.top + offset)
+				: undefined;
 
 		setMenuStyle({
 			position: "absolute",
-			top: rect.bottom - wrapperRect.top + offset,
+			top,
+			bottom,
 			left: clampedLeft,
 			zIndex: 90,
 			width: explicitWidth,
 			minWidth: resolvedMinWidth,
+			maxHeight: constrainedHeight,
+			overflowY: constrainedHeight === undefined ? undefined : "auto",
 		});
-	}, [align, menuMinWidth, menuWidth, offset, positionStrategy]);
+	}, [align, menuMinWidth, menuWidth, offset, positionStrategy, side]);
 
 	React.useEffect(() => {
 		if (isOpen) {
 			calculateMenuPosition();
 		} else {
 			setMenuStyle(undefined);
+			setResolvedSide(side);
 		}
-	}, [isOpen, calculateMenuPosition]);
+	}, [isOpen, calculateMenuPosition, side]);
 
 	React.useEffect(() => {
 		if (!isOpen) return;
@@ -423,15 +498,15 @@ export function Dropdown({
 	const setMenuNode = React.useCallback(
 		(node: HTMLDivElement | null) => {
 			menuRef.current = node;
-			if (node && isOpen && positionStrategy === "fixed") {
+			if (node && isOpen) {
 				calculateMenuPosition();
 			}
 		},
-		[isOpen, calculateMenuPosition, positionStrategy],
+		[isOpen, calculateMenuPosition],
 	);
 
 	const baseMenuClassName = [
-		"min-w-[220px] w-fit rounded-[10px] bg-white border border-border/15 shadow-[2px_4px_15px_-2px_rgba(1,1,3,0.05)] z-[91] overflow-hidden",
+		"min-w-[220px] w-fit rounded-[10px] bg-background border border-border shadow-[2px_4px_15px_-2px_rgba(1,1,3,0.05)] z-[91] overflow-hidden",
 		positionStrategy === "fixed" ? "fixed" : "absolute",
 	]
 		.filter(Boolean)
@@ -439,15 +514,16 @@ export function Dropdown({
 	const resolvedMenuClassName = [baseMenuClassName, menuClassName]
 		.filter(Boolean)
 		.join(" ");
+	const menuMotionY = resolvedSide === "top" ? 6 : -6;
 	const menuNode = motionAllowed ? (
 		<AnimatePresence>
 			{isOpen ? (
 				<motion.div
 					ref={setMenuNode}
 					key="dropdown-menu"
-					initial={{ opacity: 0, y: 6 }}
+					initial={{ opacity: 0, y: menuMotionY }}
 					animate={{ opacity: 1, y: 0 }}
-					exit={{ opacity: 0, y: 6 }}
+					exit={{ opacity: 0, y: menuMotionY }}
 					transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
 					style={menuStyle}
 					className={resolvedMenuClassName}

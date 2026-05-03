@@ -1,2 +1,0 @@
-TODO: motion scene + reveal + loading screen issue. on hard reload the pages reveals are blocked possibly by motion scene, this is not the case when navifating between pages.
-TODO wip group:npx: extract the local prune workflow into an npx create-webvizion command after the in-repo surface graph and cleanup transforms are stable.

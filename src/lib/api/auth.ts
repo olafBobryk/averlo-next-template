@@ -4,6 +4,7 @@ export type SessionUser = {
 	email: string;
 	role: "member" | "admin";
 	isBanned: boolean;
+	profilePictureUrl?: string;
 };
 
 type SessionResponse = {

@@ -32,7 +32,9 @@ For any new reusable UI-library feature:
 - **Input shell invariant:** Text-like controls should use `InputFrame` for the shell and `inputVariants` or `inputSizeClasses` for the actual input element. Padding belongs on the input, not the wrapper.
 - **Typography invariant:** Use `Text` variants or the shared font utilities. Do not hardcode font families in component-level UI.
 - **Motion invariant:** CSS motion utilities are the default. Use `motion/react` only where the library already does or where layout/reveal motion truly needs it. Respect reduced motion via `useMotionAllowed`.
-  - For load-aware media reveals, prefer `RevealImage` plus explicit `RevealGroup active` / `RevealItem active` wiring instead of page-local image-loading animation code.
+  - For entrance reveals, prefer the canonical scheduler in `RevealRoot` / `RevealItem`. Marketing pages already provide a route-level `RevealRoot`; isolated surfaces can rely on the local fallback or add a scoped root.
+  - For screenshot scripts and AI traversal, disable reveal motion at the root with the motion setting or a URL override such as `?motion=off` / `?reveal=off`; disabled roots render reveal content visible immediately.
+  - For load-aware media reveals, prefer `RevealImage` with scheduler gates, `waitFor`, and `unlockStage` instead of page-local image-loading animation code.
   - For multi-step choreography across intro completion, media reveal, and later copy or accents, prefer `MotionScene` over page-local booleans and ad hoc callback chains.
 - **Overlay invariant:** Use the existing portal and host model for modals, dropdowns, and toasts. Do not create page-local overlay stacks.
 - **Skeleton invariant:** If a component ships with a skeleton, prefer `Component.Skeleton` over custom placeholders. Keep skeleton sizing driven by real content where possible.
@@ -51,7 +53,7 @@ Use these defaults unless product requirements explicitly say otherwise.
 - **Numeric entry:** Use `NumberInput`, `UnitNumberInput`, or `SliderInput` depending on whether the value is typed, unit-bound, or range-like.
 - **Choice groups:** Use `RadioInput`, `MultiselectInput`, or `ToggleInput`, which already route through the choice system and focus behavior.
 - **Date range filtering:** Use `DateRangeInput` from `ui/input/DateRangeInput.tsx` before creating ad hoc preset filters.
-- **File workflows:** Use `FileInput`, `UploadedFilesList`, and `FilePreview` before custom upload tiles.
+- **File workflows:** Use `FileUploadInput`, `FileGallery`, and `FilePreview` before custom upload tiles.
 - **Copy actions:** Use `CopyField` instead of wiring clipboard actions by hand.
 - **Async states:** Use `Loader`, `SuspenseBoundary`, `ErrorState`, and `IdleState` before custom loading or empty-state wrappers.
 - **Toasts:** Use `showToast` with `ToastHost` for async mutation feedback, but not for initial page-load loading.
