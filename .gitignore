@@ -16,6 +16,7 @@
 # next.js
 /.next/
 /.next-user/
+/.next-user-*/
 /.next-agent-*/
 /tsconfig.next-*.json
 /out/
@@ -35,6 +36,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env.local
+
+# local agent/worktree metadata
+/.codex/preview.json
+/.worktrees/
 
 # vercel
 .vercel
