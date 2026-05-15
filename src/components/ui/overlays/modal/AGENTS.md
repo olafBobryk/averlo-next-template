@@ -1,7 +1,7 @@
 # Folder: `src/components/ui/overlays/modal`
 
 ## Role
-Shared modal shell, host, and hooks for confirmation dialogs, image inspection, and future modal flows.
+Shared modal shell, host, and hooks for confirmation dialogs, image inspection, and future modal flows. `ConfirmationModal` is a first-class Halo primitive, not a demo-only example.
 
 ## Use This Folder When
 - A feature needs blocking or focused dialog UI.
@@ -27,6 +27,7 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
   - Closing a modal should restore focus predictably to the invoking control when possible.
 - Backdrop, shell, and panel behavior should stay centralized in `ModalShell`.
 - Destructive confirmation patterns should reuse the shared confirmation modal before introducing custom dialog copy and controls.
+- Do not add a second confirmation system. If a standard confirm-before-action flow needs different copy, pass different options to `useConfirmationModal`.
 
 ## How To Use It
 - Use `useConfirmationModal` for delete, remove, disconnect, or other confirm-before-action flows.

@@ -7,17 +7,20 @@ import {
 	type ContentSearchFieldProps,
 	type ContentSearchInputProps,
 } from "@/components/domain/search/ContentSearch";
-import { hrefFor } from "@/lib/routes";
-import { MARKETING_NAV_LINKS } from "./marketingNav";
+import { getMarketingLinkHref } from "@/lib/marketing-content/links";
+import type { MarketingNavLink } from "@/lib/marketing-content/types";
 
 type MarketingContentSearchProps = {
+	navLinks: MarketingNavLink[];
 	onNavigate?: () => void;
 	portalTargetId?: string;
 	field?: ContentSearchFieldProps;
 	input?: ContentSearchInputProps;
 };
 
-function getMarketingSearchEntries(): ContentSearchEntry[] {
+function getMarketingSearchEntries(
+	navLinks: MarketingNavLink[],
+): ContentSearchEntry[] {
 	const entries: ContentSearchEntry[] = [];
 	const seen = new Set<string>();
 
@@ -27,12 +30,24 @@ function getMarketingSearchEntries(): ContentSearchEntry[] {
 		entries.push(entry);
 	}
 
-	for (const link of MARKETING_NAV_LINKS) {
+	for (const link of navLinks) {
+		const href = getMarketingLinkHref(link);
+
 		addEntry({
-			id: `nav-${link.routeId}`,
-			label: link.name,
-			href: hrefFor(link.routeId),
+			id: `nav-${href}`,
+			label: link.label,
+			href,
 		});
+
+		for (const section of link.sections ?? []) {
+			const sectionHref = getMarketingLinkHref(section);
+
+			addEntry({
+				id: `section-${sectionHref}`,
+				label: section.label,
+				href: sectionHref,
+			});
+		}
 	}
 
 	for (const page of getVisibleDemoPages()) {
@@ -53,6 +68,7 @@ function getMarketingSearchEntries(): ContentSearchEntry[] {
 }
 
 export default function MarketingContentSearch({
+	navLinks,
 	onNavigate,
 	portalTargetId,
 	field,
@@ -60,7 +76,7 @@ export default function MarketingContentSearch({
 }: MarketingContentSearchProps) {
 	return (
 		<ContentSearch
-			entries={getMarketingSearchEntries()}
+			entries={getMarketingSearchEntries(navLinks)}
 			onNavigate={onNavigate}
 			portalTargetId={portalTargetId}
 			field={field}

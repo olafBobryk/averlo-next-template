@@ -56,8 +56,8 @@ Use these defaults unless product requirements explicitly say otherwise.
 - **File workflows:** Use `FileUploadInput`, `FileGallery`, and `FilePreview` before custom upload tiles.
 - **Copy actions:** Use `CopyField` instead of wiring clipboard actions by hand.
 - **Async states:** Use `Loader`, `SuspenseBoundary`, `ErrorState`, and `IdleState` before custom loading or empty-state wrappers.
-- **Toasts:** Use `showToast` with `ToastHost` for async mutation feedback, but not for initial page-load loading.
-- **Confirmation flows:** Use `useConfirmationModal` before creating page-specific confirm dialogs.
+- **Toasts:** Use `showToast` with `ToastHost` for async mutation feedback, but not for initial page-load loading. Toast titles are built in; pass `{ title }` or promise title options when flow-specific titles are needed.
+- **Confirmation flows:** Use `useConfirmationModal` before creating page-specific confirm dialogs. The shared confirmation modal is part of the Halo primitives and should cover standard destructive or confirm-before-action flows.
 - **Image inspection:** Use `InspectableImage` or `useImageInspectModal` for click-to-enlarge image behavior.
 - **Image reveal choreography:** Use `RevealImage` when an image needs a loading fallback, reveal animation, or should gate later reveal content.
 - **Segmented options:** Use `SegmentedControl` before rolling custom pill selectors.

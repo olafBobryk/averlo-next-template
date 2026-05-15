@@ -1,94 +1,304 @@
 "use client";
 
 import clsx from "clsx";
-import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, type Transition } from "motion/react";
+import { useEffect, useId, useRef, useState } from "react";
 import Logo from "@/components/branding/Logo";
+import { spring } from "@/components/ui/foundations/spring";
+import { IconSwap } from "@/components/ui/helpers/IconSwap";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
-import { springs } from "@/lib/motionPresets";
-import { hrefFor } from "@/lib/routes";
-import MarketingContentSearch from "./MarketingContentSearch";
-import { MARKETING_NAV_LINKS } from "./marketingNav";
+import { useTailwindBreakpoints } from "@/hooks/useTailwindBreakpoints";
+import { getMarketingLinkHref } from "@/lib/marketing-content/links";
+import type {
+	MarketingLink,
+	SiteLayoutDocument,
+} from "@/lib/marketing-content/types";
+import {
+	getHeaderSearchGroups,
+	getMenuContentHeight,
+	HEADER_MENU_CAPPED_COLUMNS,
+	HEADER_MENU_DEFAULT_COLUMNS,
+	HeaderMenuGrid,
+	HeaderSearchInput,
+	HeaderSearchResults,
+} from "./HeaderMenuContent";
 
-// TODO wip: animte header in with motion scene and app ready.
-export default function HeaderFull({ className = "" }: { className?: string }) {
-	const [atTop, setAtTop] = useState(false);
-	const [hide, setHide] = useState(false);
+const HEADER_EXPANDED_HEIGHT = 100;
+const HEADER_COMPACT_HEIGHT = 70;
+const HEADER_MENU_TOP_PADDING = 22;
+const HEADER_MENU_BOTTOM_PADDING = 32;
+
+function HeaderTopNavLink({
+	link,
+	focusable,
+	className,
+}: {
+	link: MarketingLink;
+	focusable: boolean;
+	className?: string;
+}) {
+	return (
+		<Button
+			href={getMarketingLinkHref(link)}
+			variant="ghost"
+			size="md"
+			textVariant="nav"
+			textTone="inherit"
+			className={clsx(
+				"text-foreground/50 hover:!text-foreground/50 active:!text-foreground/50",
+				className,
+			)}
+			focusable={focusable}
+		>
+			{link.label}
+		</Button>
+	);
+}
+
+export default function HeaderFull({
+	isScrolled,
+	layout,
+	className = "",
+}: {
+	isScrolled: boolean;
+	layout: SiteLayoutDocument["header"];
+	className?: string;
+}) {
+	const { isMd, isLg } = useTailwindBreakpoints();
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const headerRef = useRef<HTMLElement>(null);
+	const menuId = useId();
+	const isCompact = isScrolled && !isMenuOpen;
+	const isSearchActive = searchQuery.trim().length > 0;
+	const shouldHideTopNavLinks = isMd || isLg;
+	const areTopNavLinksVisible = !isMenuOpen && !shouldHideTopNavLinks;
+	const shouldUseCappedMenuColumns = isMd || isLg;
+	const searchGroups = getHeaderSearchGroups(searchQuery, layout.searchGroups);
+	const menuColumnCount = shouldUseCappedMenuColumns
+		? HEADER_MENU_CAPPED_COLUMNS
+		: HEADER_MENU_DEFAULT_COLUMNS;
+	const activeMenuGroups = isSearchActive ? searchGroups : layout.menuGroups;
+	const menuContentHeight = getMenuContentHeight(
+		activeMenuGroups,
+		menuColumnCount,
+	);
+	const showHeaderSurface = isScrolled || isMenuOpen;
 	const motionAllowed = useMotionAllowed(true);
-	const lastScrollRef = useRef(0);
+	const headerTransition: Transition = motionAllowed
+		? spring.macro
+		: { duration: 0 };
+	const menuTransition: Transition = motionAllowed
+		? spring.component
+		: { duration: 0 };
 
-	useEffect(() => {
-		if (!motionAllowed) {
-			setHide(false);
+	const closeMenu = () => {
+		setSearchQuery("");
+		setIsMenuOpen(false);
+	};
+
+	const toggleMenu = () => {
+		if (isMenuOpen) {
+			closeMenu();
 			return;
 		}
 
-		const handleScroll = () => {
-			const currentY = window.scrollY;
-			setAtTop(currentY <= 50);
-			setHide(currentY > lastScrollRef.current && currentY > 10);
-			lastScrollRef.current = currentY;
-		};
+		setIsMenuOpen(true);
+	};
 
-		handleScroll();
-		window.addEventListener("scroll", handleScroll, { passive: true });
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, [motionAllowed]);
+	const handleSearchQueryChange = (value: string) => {
+		setSearchQuery(value);
+
+		if (value.trim().length > 0) {
+			setIsMenuOpen(true);
+		}
+	};
 
 	useEffect(() => {
-		if (!motionAllowed) return;
-		setAtTop(window.scrollY <= 50);
-	}, [motionAllowed]);
+		if (!isMenuOpen) return;
+
+		function handlePointerDown(event: PointerEvent) {
+			const target = event.target;
+
+			if (!(target instanceof Node)) return;
+			if (headerRef.current?.contains(target)) return;
+
+			setSearchQuery("");
+			setIsMenuOpen(false);
+		}
+
+		document.addEventListener("pointerdown", handlePointerDown);
+
+		return () => {
+			document.removeEventListener("pointerdown", handlePointerDown);
+		};
+	}, [isMenuOpen]);
 
 	return (
 		<header
+			ref={headerRef}
 			className={clsx(
-				"h-[100px] fixed z-50 px-section-x pointer-events-none left-1/2 flex justify-center items-center -translate-x-1/2 w-full group",
+				"pointer-events-none fixed inset-x-0 top-0 z-50 overflow-hidden px-section-x",
 				className,
 			)}
-			data-top={atTop}
-			data-hide={hide}
 		>
-			<div className="max-w-section-max w-full flex items-center h-full">
-				<div className="flex justify-between items-center w-full h-fit">
-					<div className=" min-w-[400px]">
-						<Logo size="md" className="pointer-events-auto" />
-					</div>
-					<motion.nav
-						className="relative pointer-events-auto flex h-full items-center justify-center gap-5"
-						animate={motionAllowed ? { y: hide ? -80 : 0 } : { y: 0 }}
-						transition={motionAllowed ? springs.soft : { duration: 0 }}
-					>
-						{MARKETING_NAV_LINKS.map((item) => (
-							<Button
-								href={hrefFor(item.routeId)}
-								key={item.name}
-								variant="ghost"
-							>
-								{item.name}
-							</Button>
-						))}
-					</motion.nav>
-					<div className="flex justify-end items-center gap-3 pointer-events-auto min-w-[400px]">
-						<MarketingContentSearch
-							field={{ className: "min-w-0" }}
-							input={{
-								size: "sm",
-								className: "w-[14rem] xl:w-[16rem]",
-								textClassName: "text-sm",
-							}}
-						/>
-
-						<Button
-							variant="primary"
-							href={hrefFor("login")}
-							className="pointer-events-auto"
+			<motion.div
+				aria-hidden="true"
+				className="pointer-events-none absolute inset-0 border-b border-border bg-background"
+				initial={false}
+				animate={{ opacity: showHeaderSurface ? 1 : 0 }}
+				transition={headerTransition}
+			/>
+			<div className="relative mx-auto flex w-full max-w-section-max flex-col">
+				<motion.div
+					className="flex w-full items-center justify-between gap-6"
+					initial={false}
+					animate={{
+						height: isCompact ? HEADER_COMPACT_HEIGHT : HEADER_EXPANDED_HEIGHT,
+					}}
+					transition={headerTransition}
+				>
+					<div className="flex min-w-[220px] items-center">
+						<motion.div
+							className="origin-left"
+							initial={false}
+							animate={{ scale: isCompact ? 0.88 : 1 }}
+							transition={headerTransition}
 						>
-							Join Now
+							<Logo size="md" className="pointer-events-auto" />
+						</motion.div>
+					</div>
+					<nav
+						className="pointer-events-auto flex items-center justify-center text-foreground"
+						aria-label="Primary navigation"
+					>
+						<motion.div
+							className="flex items-center justify-center gap-10 overflow-hidden py-2"
+							initial={false}
+							animate={{
+								width: areTopNavLinksVisible ? "auto" : 0,
+								opacity: areTopNavLinksVisible ? 1 : 0,
+							}}
+							transition={headerTransition}
+							aria-hidden={!areTopNavLinksVisible}
+						>
+							{layout.topNavLinks.map((item, index) => (
+								<HeaderTopNavLink
+									key={`${item.label}-${getMarketingLinkHref(item)}`}
+									link={item}
+									focusable={areTopNavLinksVisible}
+									className={
+										index === layout.topNavLinks.length - 1
+											? "mr-10"
+											: undefined
+									}
+								/>
+							))}
+						</motion.div>
+						<HeaderSearchInput
+							value={searchQuery}
+							onValueChange={handleSearchQueryChange}
+							onClear={closeMenu}
+							ariaLabel={layout.search.ariaLabel}
+							clearLabel={layout.search.clearLabel}
+						/>
+						<Button
+							variant="ghost"
+							size="icon"
+							textTone="inherit"
+							className="text-foreground hover:!text-foreground active:!text-foreground"
+							aria-controls={menuId}
+							aria-expanded={isMenuOpen}
+							aria-label={
+								isMenuOpen
+									? layout.mobile.closeAriaLabel
+									: layout.mobile.openAriaLabel
+							}
+							onClick={toggleMenu}
+							leadingIcon={
+								<IconSwap
+									activeIndex={isMenuOpen ? 1 : 0}
+									size="lg"
+									items={[
+										{
+											icon: (
+												<Icon
+													name="menu"
+													className="size-full text-foreground"
+													style={{ width: "100%", height: "100%" }}
+												/>
+											),
+										},
+										{
+											icon: (
+												<Icon
+													name="close"
+													className="size-full text-foreground"
+													style={{ width: "100%", height: "100%" }}
+												/>
+											),
+										},
+									]}
+								/>
+							}
+						/>
+					</nav>
+					<div className="flex min-w-[220px] justify-end">
+						<Button
+							href={getMarketingLinkHref(layout.cta)}
+							variant="primary"
+							size="md"
+						>
+							{layout.cta.label}
 						</Button>
 					</div>
-				</div>
+				</motion.div>
+				<AnimatePresence initial={false}>
+					{isMenuOpen ? (
+						<motion.div
+							id={menuId}
+							initial={{ height: 0, opacity: 0 }}
+							animate={{ height: "auto", opacity: 1 }}
+							exit={{ height: 0, opacity: 0 }}
+							transition={menuTransition}
+							className="pointer-events-auto overflow-hidden"
+						>
+							<div
+								className="w-full border-t border-border"
+								style={{
+									paddingTop: HEADER_MENU_TOP_PADDING,
+									paddingBottom: HEADER_MENU_BOTTOM_PADDING,
+								}}
+							>
+								<motion.div
+									className="relative overflow-hidden"
+									initial={false}
+									animate={{ height: menuContentHeight }}
+									transition={menuTransition}
+								>
+									<div className="absolute inset-0">
+										{isSearchActive ? (
+											<HeaderSearchResults
+												groups={searchGroups}
+												onNavigate={closeMenu}
+												columnCount={menuColumnCount}
+												noResultsText={layout.search.noResultsText}
+											/>
+										) : (
+											<HeaderMenuGrid
+												groups={layout.menuGroups}
+												onNavigate={closeMenu}
+												columnCount={menuColumnCount}
+											/>
+										)}
+									</div>
+								</motion.div>
+							</div>
+						</motion.div>
+					) : null}
+				</AnimatePresence>
 			</div>
 		</header>
 	);

@@ -10,3 +10,17 @@
 - `npm run dev` and `npm run dev:user` are reserved for the user's server. They try `http://localhost:3000` first, then fall forward through `3001-3010` before failing.
 - Agent dev servers must use the isolated port and build directory chosen by `npm run dev:agent`.
 - Do not edit generated `tsconfig.next-*.json` files; the dev server wrapper owns them.
+
+## Template Content Modes
+
+- This template supports static, Payload-ready, and Payload-powered Vercel modes. Read `docs/template-content-modes.md` before changing content architecture, Payload wiring, or prune behavior.
+- Static projects should remove Payload with `npm run prune:template -- --no-payload` and build from fallback TypeScript content.
+- Payload-ready projects keep the guarded Payload scaffold but do not expose live admin/API routes until activation.
+- Payload-powered Vercel projects must follow `docs/payload-vercel-neon-blob.md` and use Neon Postgres, Vercel Blob, and real Payload admin/API routes.
+- Keep the frontend contract lightweight. Marketing components should render page, section, and site layout data; they should not depend on full Payload document shapes.
+- Put source-specific details in server-side resolvers/adapters. Payload-only metadata such as relationships, media records, drafts, SEO fields, localization, redirects, and taxonomies should be resolved before it reaches section renderers.
+
+## Halo UI Primitives
+
+- Treat `ToastHost` plus `showToast` as the shared transient-feedback system. Simple toast helpers accept `{ title }`; promise toasts accept `loadingTitle`, `successTitle`, and `errorTitle`.
+- Treat `ConfirmationModal` and `useConfirmationModal` as the shared confirm-before-action primitive. Do not create page-local confirmation dialogs for standard destructive or confirm flows.

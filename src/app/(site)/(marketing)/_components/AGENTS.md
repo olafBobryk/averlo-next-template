@@ -11,10 +11,13 @@ Route-scoped public-site shell components and adapters.
 ## Prefer These Files
 - `layout/MarketingShell.tsx`: public shell assembly.
 - `layout/Header.tsx`: responsive public header wrapper.
+- `layout/HeaderMenuContent.tsx`: grouped menu, search input, search results, and no-results primitives used by both header breakpoints.
 - `layout/Footer.tsx`: public footer.
-- `layout/MarketingContentSearch.tsx`: adapter that feeds public/demo pages into the shared `ContentSearch`.
+- `layout/MarketingContentSearch.tsx`: adapter that feeds public/demo pages into the shared `ContentSearch` when a standalone combobox search is needed outside the header menu.
 
 ## Invariants
-- Public navigation data lives here, not in shared app config.
+- Public navigation data flows through `SiteLayoutDocument` fallback/resolver data, not shared app config.
 - Header and footer behavior should stay aligned across breakpoints.
+- The marketing header uses grouped `menuGroups` and `searchGroups`; keep desktop and compact search behavior sourced from the same layout data.
+- Keep localized routing, language switchers, and brand-specific CTA treatments out of the template header unless they become explicit optional slots.
 - Shared building blocks should come from `src/components`, but public-shell orchestration belongs here.

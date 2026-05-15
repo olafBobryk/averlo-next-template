@@ -1,60 +1,138 @@
 "use client";
 
 import clsx from "clsx";
+import { motion, type Transition } from "motion/react";
 import { useState } from "react";
 import Logo from "@/components/branding/Logo";
-import { Accordion } from "@/components/ui/misc/Accordion";
+import { spring } from "@/components/ui/foundations/spring";
 import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { Button } from "@/components/ui/primitives/Button";
-import { hrefFor } from "@/lib/routes";
-import MarketingContentSearch from "./MarketingContentSearch";
-import { MARKETING_NAV_LINKS } from "./marketingNav";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
+import { getMarketingLinkHref } from "@/lib/marketing-content/links";
+import type { SiteLayoutDocument } from "@/lib/marketing-content/types";
+import {
+	getHeaderSearchGroups,
+	HeaderMenuGroup,
+	HeaderMenuNoResults,
+	HeaderSearchInput,
+} from "./HeaderMenuContent";
 
-const COMPACT_HEADER_TOP_OFFSET = 16;
-const COMPACT_HEADER_BAR_HEIGHT = 72;
-const COMPACT_HEADER_CTA_HEIGHT = 44;
-const COMPACT_HEADER_SCROLL_AREA_OFFSET =
-	COMPACT_HEADER_TOP_OFFSET +
-	COMPACT_HEADER_BAR_HEIGHT +
-	COMPACT_HEADER_CTA_HEIGHT +
-	48;
+const COMPACT_OPEN_TOP_PADDING = 16;
+const COMPACT_OPEN_BAR_HEIGHT = 48;
+const COMPACT_OPEN_MENU_GAP = 12;
+const COMPACT_OPEN_MENU_OFFSET =
+	COMPACT_OPEN_TOP_PADDING + COMPACT_OPEN_BAR_HEIGHT + COMPACT_OPEN_MENU_GAP;
+const COMPACT_OPEN_CTA_HEIGHT = 60;
+const COMPACT_OPEN_SCROLL_AREA_OFFSET =
+	COMPACT_OPEN_MENU_OFFSET + COMPACT_OPEN_CTA_HEIGHT + 48;
+const COMPACT_CLOSED_HEADER_HEIGHT = 76;
+const COMPACT_CONDENSED_HEADER_HEIGHT = 60;
 
 export default function HeaderCompact({
+	isScrolled,
+	layout,
 	className = "",
 }: {
+	isScrolled: boolean;
+	layout: SiteLayoutDocument["header"];
 	className?: string;
 }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const showHeaderSurface = isScrolled || isMenuOpen;
+	const isCondensed = isScrolled && !isMenuOpen;
+	const isSearchActive = searchQuery.trim().length > 0;
+	const searchGroups = getHeaderSearchGroups(searchQuery, layout.searchGroups);
+	const activeMenuGroups = isSearchActive ? searchGroups : layout.menuGroups;
+	const motionAllowed = useMotionAllowed(true);
+	const headerTransition: Transition = motionAllowed
+		? spring.macro
+		: { duration: 0 };
+	const heightTransition: Transition = motionAllowed
+		? spring.component
+		: { duration: 0 };
+	const closeMenu = () => {
+		setSearchQuery("");
+		setIsMenuOpen(false);
+	};
+	const toggleMenu = () => {
+		if (isMenuOpen) {
+			closeMenu();
+			return;
+		}
+
+		setIsMenuOpen(true);
+	};
 
 	return (
-		<header
+		<motion.header
 			data-open={isMenuOpen}
+			initial={false}
+			animate={{
+				height: isMenuOpen
+					? "100vh"
+					: isCondensed
+						? COMPACT_CONDENSED_HEADER_HEIGHT
+						: COMPACT_CLOSED_HEADER_HEIGHT,
+			}}
+			transition={heightTransition}
 			className={clsx(
-				"fixed inset-x-0 top-0 z-50 px-section-x motion-component pt-4 data-[open=true]:bg-background transition-[background-color,border,height] border-b border-transparent data-[open=true]:border-border/15 data-[open=true]:h-svh",
+				"fixed inset-x-0 top-0 z-50 h-[76px] px-section-x",
 				className,
 			)}
 		>
-			<div className="mx-auto flex h-full w-full max-w-section-max flex-col gap-3">
-				<div className="flex items-center justify-between gap-3 px-3 py-3">
-					<Logo size="sm" className="pointer-events-auto" />
+			<motion.div
+				aria-hidden="true"
+				className="pointer-events-none absolute inset-0 border-b border-border bg-background"
+				initial={false}
+				animate={{ opacity: showHeaderSurface ? 1 : 0 }}
+				transition={headerTransition}
+			/>
+			<motion.div
+				className="relative mx-auto flex h-full w-full max-w-section-max flex-col gap-3"
+				initial={false}
+				animate={{ paddingTop: isCondensed ? 8 : 16 }}
+				transition={headerTransition}
+			>
+				<motion.div
+					className="flex items-center justify-between gap-3 px-3"
+					initial={false}
+					animate={{
+						paddingTop: isCondensed ? 8 : 12,
+						paddingBottom: isCondensed ? 8 : 12,
+					}}
+					transition={headerTransition}
+				>
+					<motion.div
+						className="origin-left"
+						initial={false}
+						animate={{ scale: isCondensed ? 0.9 : 1 }}
+						transition={headerTransition}
+					>
+						<Logo size="sm" className="pointer-events-auto" />
+					</motion.div>
 					<Button
 						variant="ghost"
 						size="sm"
 						align="center"
 						trailingIcon={isMenuOpen ? "minus" : "plus"}
-						onClick={() => setIsMenuOpen((value) => !value)}
+						onClick={toggleMenu}
 						aria-expanded={isMenuOpen}
-						aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
+						aria-label={
+							isMenuOpen
+								? layout.mobile.closeAriaLabel
+								: layout.mobile.openAriaLabel
+						}
 					>
-						Menu
+						{layout.mobile.menuLabel}
 					</Button>
-				</div>
+				</motion.div>
 				<div
 					data-open={isMenuOpen}
 					className="grid min-h-0 transition-[grid-template-rows,opacity] motion-component data-[open=false]:grid-rows-[0fr] data-[open=false]:opacity-0 data-[open=true]:grid-rows-[1fr] data-[open=true]:opacity-100"
 					style={{
 						height: isMenuOpen
-							? `calc(100svh - ${COMPACT_HEADER_TOP_OFFSET + COMPACT_HEADER_BAR_HEIGHT}px)`
+							? `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`
 							: undefined,
 					}}
 				>
@@ -63,46 +141,50 @@ export default function HeaderCompact({
 							showBackToTop={false}
 							className="overflow-scroll"
 							style={{
-								maxHeight: `calc(100vh - ${COMPACT_HEADER_SCROLL_AREA_OFFSET}px)`,
+								maxHeight: `calc(100vh - ${COMPACT_OPEN_SCROLL_AREA_OFFSET}px)`,
 							}}
 						>
 							<div className="flex min-h-full flex-col gap-3">
-								<MarketingContentSearch
-									onNavigate={() => setIsMenuOpen(false)}
-									field={{ className: "w-full" }}
-									input={{
-										size: "sm",
-										className: "w-full",
-										textClassName: "text-sm",
-									}}
-								/>
-								<Accordion title="Pages" defaultOpen>
-									{MARKETING_NAV_LINKS.map((item) => (
-										<Button
-											key={item.name}
-											href={hrefFor(item.routeId)}
-											variant="ghost"
-											align="left"
-											className="w-full justify-between"
-											onClick={() => setIsMenuOpen(false)}
-										>
-											{item.name}
-										</Button>
-									))}
-								</Accordion>
-								<Button
-									variant="primary"
-									href={hrefFor("contact")}
-									onClick={() => setIsMenuOpen(false)}
-									className="mt-auto"
-								>
-									Join Now
-								</Button>
+								<div className="mb-6">
+									<HeaderSearchInput
+										value={searchQuery}
+										onValueChange={setSearchQuery}
+										onClear={() => setSearchQuery("")}
+										ariaLabel={layout.search.ariaLabel}
+										clearLabel={layout.search.clearLabel}
+										placeholder={layout.search.ariaLabel}
+										className="group/header-search w-full text-sm text-foreground"
+									/>
+								</div>
+								{activeMenuGroups.length > 0 ? (
+									<div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
+										{activeMenuGroups.map((group) => (
+											<div key={group.label} className="min-w-0">
+												<HeaderMenuGroup group={group} onNavigate={closeMenu} />
+											</div>
+										))}
+									</div>
+								) : (
+									<HeaderMenuNoResults
+										noResultsText={layout.search.noResultsText}
+									/>
+								)}
+								<div className="mt-auto flex flex-col gap-8 pt-5">
+									<Button
+										variant="primary"
+										href={getMarketingLinkHref(layout.cta)}
+										onClick={closeMenu}
+										className="w-full"
+										contentClassName="justify-center"
+									>
+										{layout.cta.label}
+									</Button>
+								</div>
 							</div>
 						</ScrollBorders>
 					</div>
 				</div>
-			</div>
-		</header>
+			</motion.div>
+		</motion.header>
 	);
 }

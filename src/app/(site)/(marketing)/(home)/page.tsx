@@ -1,11 +1,8 @@
-"use client";
+import { getMarketingPage } from "@/lib/marketing-content/resolvers";
+import { renderMarketingSections } from "@/lib/marketing-content/sections/renderMarketingSections";
 
-import { HomeHeroSection } from "./sections/HomeHeroSection";
+export default async function Home() {
+	const page = await getMarketingPage("home");
 
-export default function Home() {
-	return (
-		<main>
-			<HomeHeroSection />
-		</main>
-	);
+	return <main>{renderMarketingSections(page.layout)}</main>;
 }

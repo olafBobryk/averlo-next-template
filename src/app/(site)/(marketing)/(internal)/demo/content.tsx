@@ -188,16 +188,20 @@ const relatedMap: Record<string, RelatedInfo> = {
 	Logo: { uses: [], usedIn: ["Footer", "HeaderCompact", "HeaderFull"] },
 	Header: { uses: ["HeaderCompact", "HeaderFull"], usedIn: [] },
 	HeaderFull: {
-		uses: ["Button", "MarketingContentSearch", "Logo"],
+		uses: ["Button", "HeaderMenuContent", "IconSwap", "Logo"],
 		usedIn: ["Header"],
 	},
 	HeaderCompact: {
-		uses: ["Accordion", "Button", "MarketingContentSearch", "Logo"],
+		uses: ["Button", "HeaderMenuContent", "Logo", "ScrollBorders"],
 		usedIn: ["Header"],
+	},
+	HeaderMenuContent: {
+		uses: ["Button", "Icon", "InputFrame", "Text"],
+		usedIn: ["HeaderCompact", "HeaderFull"],
 	},
 	MarketingContentSearch: {
 		uses: ["ContentSearch"],
-		usedIn: ["HeaderCompact", "HeaderFull"],
+		usedIn: [],
 	},
 	ContentSearch: {
 		uses: ["ComboboxTextInput"],
@@ -782,31 +786,43 @@ export const demoPages: DemoPage[] = [
 						kind: "usage",
 						name: "Header",
 						label: "Responsive header wrapper",
-						snippet: "<Header />",
+						snippet: "<Header layout={siteLayout.header} />",
 						related: relatedMap.Header,
 					},
 					{
 						id: "header-full",
 						kind: "usage",
 						name: "HeaderFull",
-						label: "Desktop header",
-						snippet: "<HeaderFull />",
+						label: "Desktop grouped header",
+						snippet:
+							"<HeaderFull isScrolled={false} layout={siteLayout.header} />",
 						related: relatedMap.HeaderFull,
 					},
 					{
 						id: "header-compact",
 						kind: "usage",
 						name: "HeaderCompact",
-						label: "Mobile header",
-						snippet: "<HeaderCompact />",
+						label: "Mobile grouped header",
+						snippet:
+							"<HeaderCompact isScrolled={false} layout={siteLayout.header} />",
 						related: relatedMap.HeaderCompact,
+					},
+					{
+						id: "header-menu-content",
+						kind: "usage",
+						name: "HeaderMenuContent",
+						label: "Grouped menu and search primitives",
+						snippet:
+							"<HeaderMenuGrid groups={siteLayout.header.menuGroups} columnCount={6} />",
+						related: relatedMap.HeaderMenuContent,
 					},
 					{
 						id: "marketing-content-search",
 						kind: "usage",
 						name: "MarketingContentSearch",
-						label: "Marketing route search",
-						snippet: "<MarketingContentSearch />",
+						label: "Marketing route search adapter",
+						snippet:
+							"<MarketingContentSearch navLinks={siteLayout.header.navLinks} />",
 						related: relatedMap.MarketingContentSearch,
 					},
 					{
@@ -3456,16 +3472,35 @@ import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 									<Button
 										size="sm"
 										variant="outline"
-										onClick={() => showToast.success("Success toast")}
+										onClick={() =>
+											showToast.success("Settings saved.", {
+												title: "Success",
+											})
+										}
 									>
 										Show success
 									</Button>
 									<Button
 										size="sm"
 										variant="ghost"
-										onClick={() => showToast.error("Error toast")}
+										onClick={() =>
+											showToast.error("Upload failed.", {
+												title: "Failed",
+											})
+										}
 									>
 										Show error
+									</Button>
+									<Button
+										size="sm"
+										variant="ghost"
+										onClick={() =>
+											showToast.info("Sync will continue in the background.", {
+												title: "Info",
+											})
+										}
+									>
+										Show info
 									</Button>
 								</div>
 							);
@@ -3528,7 +3563,7 @@ import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 						name: "showToast.promise",
 						label: "Async toast helper",
 						snippet:
-							"await showToast.promise(savePromise, { loading: 'Saving...', success: 'Saved.', error: 'Failed.' })",
+							"showToast.success('Saved.', { title: 'Success' })\nawait showToast.promise(savePromise, { loading: 'Saving...', success: 'Saved.', error: 'Failed.' }, { loadingTitle: 'Request', successTitle: 'Success', errorTitle: 'Failed' })",
 						related: relatedMap.showToast,
 					},
 				],

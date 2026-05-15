@@ -27,6 +27,11 @@ export const textVariants = cva("", {
 			bodyStrong:
 				"text-[calc(0.875rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
 			caption: "text-[calc(0.75rem*var(--text-scale,1))] font-normal",
+			nav: "text-[calc(0.875rem*var(--text-scale,1))] font-medium leading-none",
+			"menu-title":
+				"text-[calc(0.875rem*var(--text-scale,1))] font-medium leading-[1.15]",
+			"menu-description":
+				"text-[calc(0.75rem*var(--text-scale,1))] font-normal leading-[1.2]",
 		},
 		tone: {
 			default: "",

@@ -139,6 +139,24 @@ const SURFACES = {
 		searchSources: [],
 		postRemovalAssertions: [],
 	},
+	payload: {
+		id: "payload",
+		flag: "--no-payload",
+		description:
+			"Remove the guarded Payload CMS scaffold, config references, and Payload packages.",
+		dependentSurfaces: [],
+		ownedPaths: ["payload.config.ts", "src/payload", "src/app/(payload)"],
+		routeIds: [],
+		routeBuilders: [],
+		navRouteIds: [],
+		searchSources: [],
+		postRemovalAssertions: [
+			{
+				label: "Payload imports",
+				pattern: /(@payloadcms|@payload-config|@\/payload)/,
+			},
+		],
+	},
 };
 
 const CENTRAL_FILES = [
@@ -147,7 +165,15 @@ const CENTRAL_FILES = [
 	"src/lib/api/index.ts",
 	"src/app/(site)/(marketing)/_components/layout/marketingNav.ts",
 	"src/app/(site)/(marketing)/_components/layout/MarketingContentSearch.tsx",
-	"src/app/(site)/(marketing)/_components/layout/HeaderFull.tsx",
+];
+
+const PAYLOAD_PACKAGE_DEPENDENCIES = [
+	"@payloadcms/db-postgres",
+	"@payloadcms/next",
+	"@payloadcms/richtext-lexical",
+	"@payloadcms/storage-vercel-blob",
+	"payload",
+	"sharp",
 ];
 
 function printUsage() {
@@ -161,6 +187,7 @@ Flags:
                    Remove the legacy group-triggered reveal implementation
   --no-dictionary  Remove the internal dictionary surface
   --no-reference   Remove the internal reference surface
+  --no-payload     Remove the guarded Payload CMS scaffold and dependencies
   --dry-run        Print the prune plan without changing files
   --yes            Skip the confirmation prompt
 `);
@@ -230,6 +257,7 @@ function buildState(surfaceIds) {
 		hasPlayground: !removed.has("playground"),
 		hasDictionary: !removed.has("dictionary"),
 		hasReference: !removed.has("reference"),
+		hasPayload: !removed.has("payload"),
 	};
 }
 
@@ -255,7 +283,16 @@ async function collectPlan(surfaceIds) {
 	return {
 		surfaces: surfaceIds.map((surfaceId) => SURFACES[surfaceId]),
 		deletedPaths: uniqueDeletedPaths,
-		rewriteFiles: [...CENTRAL_FILES],
+		rewriteFiles: [
+			...CENTRAL_FILES,
+			"src/lib/marketing-content/fallback.ts",
+			...(surfaceIds.includes("payload")
+				? ["next.config.ts", "tsconfig.json", "package.json"]
+				: []),
+		],
+		packageDependencies: surfaceIds.includes("payload")
+			? [...PAYLOAD_PACKAGE_DEPENDENCIES]
+			: [],
 		removeInternalDir,
 		removeConcreteInternalDir,
 	};
@@ -293,6 +330,10 @@ function renderRoutesFile(state) {
 		lines.push(
 			`\tdictionarySpamProtectedForm: "/dictionary/forms/spam-protected-form",`,
 		);
+	}
+
+	if (state.hasReference) {
+		lines.push(`\treference: "/reference",`);
 	}
 
 	lines.push(
@@ -350,6 +391,10 @@ function renderMarketingNavFile(state) {
 
 	if (state.hasDictionary) {
 		navEntries.push('\t{ name: "Dictionary", routeId: "dictionary" },');
+	}
+
+	if (state.hasReference) {
+		navEntries.push('\t{ name: "Reference", routeId: "reference" },');
 	}
 
 	return [
@@ -415,17 +460,18 @@ function renderMarketingContentSearchFile(state) {
 		"\ttype ContentSearchFieldProps,",
 		"\ttype ContentSearchInputProps,",
 		'} from "@/components/domain/search/ContentSearch";',
-		'import { hrefFor } from "@/lib/routes";',
-		'import { MARKETING_NAV_LINKS } from "./marketingNav";',
+		'import { getMarketingLinkHref } from "@/lib/marketing-content/links";',
+		'import type { MarketingNavLink } from "@/lib/marketing-content/types";',
 		"",
 		"type MarketingContentSearchProps = {",
+		"\tnavLinks: MarketingNavLink[];",
 		"\tonNavigate?: () => void;",
 		"\tportalTargetId?: string;",
 		"\tfield?: ContentSearchFieldProps;",
 		"\tinput?: ContentSearchInputProps;",
 		"};",
 		"",
-		"function getMarketingSearchEntries(): ContentSearchEntry[] {",
+		"function getMarketingSearchEntries(navLinks: MarketingNavLink[]): ContentSearchEntry[] {",
 		"\tconst entries: ContentSearchEntry[] = [];",
 		"\tconst seen = new Set<string>();",
 		"",
@@ -435,12 +481,24 @@ function renderMarketingContentSearchFile(state) {
 		"\t\tentries.push(entry);",
 		"\t}",
 		"",
-		"\tfor (const link of MARKETING_NAV_LINKS) {",
+		"\tfor (const link of navLinks) {",
+		"\t\tconst href = getMarketingLinkHref(link);",
+		"",
 		"\t\taddEntry({",
-		"\t\t\tid: `nav-${link.routeId}`,",
-		"\t\t\tlabel: link.name,",
-		"\t\t\thref: hrefFor(link.routeId),",
+		"\t\t\tid: `nav-${href}`,",
+		"\t\t\tlabel: link.label,",
+		"\t\t\thref: href,",
 		"\t\t});",
+		"",
+		"\t\tfor (const section of link.sections ?? []) {",
+		"\t\t\tconst sectionHref = getMarketingLinkHref(section);",
+		"",
+		"\t\t\taddEntry({",
+		"\t\t\t\tid: `section-${sectionHref}`,",
+		"\t\t\t\tlabel: section.label,",
+		"\t\t\t\thref: sectionHref,",
+		"\t\t\t});",
+		"\t\t}",
 		"\t}",
 	];
 
@@ -474,6 +532,7 @@ function renderMarketingContentSearchFile(state) {
 		"}",
 		"",
 		"export default function MarketingContentSearch({",
+		"\tnavLinks,",
 		"\tonNavigate,",
 		"\tportalTargetId,",
 		"\tfield,",
@@ -481,7 +540,7 @@ function renderMarketingContentSearchFile(state) {
 		"}: MarketingContentSearchProps) {",
 		"\treturn (",
 		"\t\t<ContentSearch",
-		"\t\t\tentries={getMarketingSearchEntries()}",
+		"\t\t\tentries={getMarketingSearchEntries(navLinks)}",
 		"\t\t\tonNavigate={onNavigate}",
 		"\t\t\tportalTargetId={portalTargetId}",
 		"\t\t\tfield={field}",
@@ -495,107 +554,359 @@ function renderMarketingContentSearchFile(state) {
 	return header.filter(Boolean).join("\n");
 }
 
-function renderHeaderFullFile(state) {
-	const ctaBlock = state.hasDashboard
-		? [
-				"",
-				"\t\t\t\t\t\t<Button",
-				'\t\t\t\t\t\t\tvariant="primary"',
-				'\t\t\t\t\t\t\thref={hrefFor("login")}',
-				'\t\t\t\t\t\t\tclassName="pointer-events-auto"',
-				"\t\t\t\t\t\t>",
-				"\t\t\t\t\t\t\tJoin Now",
-				"\t\t\t\t\t\t</Button>",
-			].join("\n")
-		: "";
+function renderMarketingContentFallbackFile(state) {
+	const navEntries = [
+		"\t\t\t{",
+		'\t\t\t\tlabel: "Home",',
+		'\t\t\t\trouteId: "home",',
+		"\t\t\t\tsections: [",
+		"\t\t\t\t\t{",
+		'\t\t\t\t\t\tlabel: "Hero",',
+		'\t\t\t\t\t\thref: "/#hero",',
+		'\t\t\t\t\t\tdescription: "Primary home page introduction.",',
+		"\t\t\t\t\t},",
+		"\t\t\t\t],",
+		"\t\t\t},",
+	];
+
+	if (state.hasDemo) {
+		navEntries.push(
+			"\t\t\t{",
+			'\t\t\t\tlabel: "Demo",',
+			'\t\t\t\trouteId: "demo",',
+			"\t\t\t\tsections: [",
+			"\t\t\t\t\t{",
+			'\t\t\t\t\t\tlabel: "Header",',
+			'\t\t\t\t\t\thref: "/demo/layout/header",',
+			'\t\t\t\t\t\tdescription: "Responsive marketing header patterns.",',
+			"\t\t\t\t\t},",
+			"\t\t\t\t\t{",
+			'\t\t\t\t\t\tlabel: "Toast",',
+			'\t\t\t\t\t\thref: "/demo/ui/overlays/toast",',
+			'\t\t\t\t\t\tdescription: "Transient feedback examples.",',
+			"\t\t\t\t\t},",
+			"\t\t\t\t],",
+			"\t\t\t},",
+		);
+	}
+
+	if (state.hasPlayground) {
+		navEntries.push(
+			"\t\t\t{",
+			'\t\t\t\tlabel: "Playground",',
+			'\t\t\t\trouteId: "playground",',
+			"\t\t\t\tsections: [",
+			"\t\t\t\t\t{",
+			'\t\t\t\t\t\tlabel: "Reveal root",',
+			'\t\t\t\t\t\thref: "/internal/playground/motion/reveal-root",',
+			'\t\t\t\t\t\tdescription: "Motion reveal scheduler playground.",',
+			"\t\t\t\t\t},",
+			"\t\t\t\t],",
+			"\t\t\t},",
+		);
+	}
+
+	navEntries.push('\t\t\t{ label: "Settings", routeId: "settings" },');
+
+	if (state.hasDictionary) {
+		navEntries.push('\t\t\t{ label: "Dictionary", routeId: "dictionary" },');
+	}
+
+	if (state.hasReference) {
+		navEntries.push('\t\t\t{ label: "Reference", routeId: "reference" },');
+	}
+
+	const templateMenuLinks = [];
+	if (state.hasDemo) {
+		templateMenuLinks.push('\t\t\t\t\t{ label: "Demo", routeId: "demo" },');
+	}
+	if (state.hasPlayground) {
+		templateMenuLinks.push(
+			'\t\t\t\t\t{ label: "Playground", routeId: "playground" },',
+		);
+	}
+	if (state.hasDictionary) {
+		templateMenuLinks.push(
+			'\t\t\t\t\t{ label: "Dictionary", routeId: "dictionary" },',
+		);
+	}
+	if (state.hasReference) {
+		templateMenuLinks.push(
+			'\t\t\t\t\t{ label: "Reference", routeId: "reference" },',
+		);
+	}
+
+	const menuGroups = [
+		"\t\t\t{",
+		'\t\t\t\tlabel: "Start",',
+		'\t\t\t\tlink: { label: "Home", routeId: "home" },',
+		"\t\t\t\tlinks: [",
+		'\t\t\t\t\t{ label: "Hero", href: "/#hero" },',
+		'\t\t\t\t\t{ label: "Settings", routeId: "settings" },',
+		"\t\t\t\t],",
+		"\t\t\t},",
+	];
+
+	if (templateMenuLinks.length > 0) {
+		menuGroups.push(
+			"\t\t\t{",
+			'\t\t\t\tlabel: "Template",',
+			"\t\t\t\tlinks: [",
+			...templateMenuLinks,
+			"\t\t\t\t],",
+			"\t\t\t},",
+		);
+	}
+
+	if (state.hasDashboard) {
+		menuGroups.push(
+			"\t\t\t{",
+			'\t\t\t\tlabel: "Build",',
+			"\t\t\t\tlinks: [",
+			'\t\t\t\t\t{ label: "Dashboard", routeId: "dashboard" },',
+			'\t\t\t\t\t{ label: "Pages", routeId: "dashboardPages" },',
+			'\t\t\t\t\t{ label: "Dashboard settings", routeId: "dashboardSettings" },',
+			"\t\t\t\t],",
+			"\t\t\t},",
+		);
+	}
+
+	const topNavEntries = ['\t\t\t{ label: "Home", routeId: "home" },'];
+	if (state.hasDemo) {
+		topNavEntries.push('\t\t\t{ label: "Demo", routeId: "demo" },');
+	}
+	topNavEntries.push('\t\t\t{ label: "Settings", routeId: "settings" },');
 
 	return [
-		'"use client";',
+		'import type { MarketingPageDocument, SiteLayoutDocument } from "./types";',
 		"",
-		'import clsx from "clsx";',
-		'import { motion } from "motion/react";',
-		'import { useEffect, useRef, useState } from "react";',
-		'import Logo from "@/components/branding/Logo";',
-		'import { Button } from "@/components/ui/primitives/Button";',
-		'import { useMotionAllowed } from "@/hooks/useMotionAllowed";',
-		'import { springs } from "@/lib/motionPresets";',
-		'import { hrefFor } from "@/lib/routes";',
-		'import MarketingContentSearch from "./MarketingContentSearch";',
-		'import { MARKETING_NAV_LINKS } from "./marketingNav";',
+		"export const fallbackHomePage: MarketingPageDocument = {",
+		'\tslug: "home",',
+		'\ttitle: "Home",',
+		"\tlayout: [",
+		"\t\t{",
+		'\t\t\tid: "home-hero",',
+		'\t\t\tblockType: "homeHero",',
+		'\t\t\theadline: "A design system built for full control.",',
+		"\t\t\tdescriptions: [",
+		"\t\t\t\t{",
+		'\t\t\t\t\ttext: "Compose pages from shared primitives, motion, and layout building blocks so every screen stays consistent, adaptable, and easy to extend.",',
+		"\t\t\t\t},",
+		"\t\t\t],",
+		"\t\t\tcta: {",
+		'\t\t\t\tlabel: "Contact",',
+		'\t\t\t\thref: "/contact",',
+		"\t\t\t},",
+		"\t\t},",
+		"\t],",
+		"};",
 		"",
-		"// TODO wip: animte header in with motion scene and app ready.",
-		'export default function HeaderFull({ className = "" }: { className?: string }) {',
-		"\tconst [atTop, setAtTop] = useState(false);",
-		"\tconst [hide, setHide] = useState(false);",
-		"\tconst motionAllowed = useMotionAllowed(true);",
-		"\tconst lastScrollRef = useRef(0);",
+		"export const fallbackSiteLayout: SiteLayoutDocument = {",
+		"\theader: {",
+		"\t\tcta: {",
+		'\t\t\tlabel: "Join Now",',
+		'\t\t\thref: "/contact",',
+		"\t\t},",
+		"\t\tmenuGroups: [",
+		...menuGroups,
+		"\t\t],",
+		"\t\tmobile: {",
+		'\t\t\tcloseAriaLabel: "Close navigation",',
+		'\t\t\tmenuLabel: "Menu",',
+		'\t\t\topenAriaLabel: "Open navigation",',
+		"\t\t},",
+		"\t\tnavLinks: [",
+		...navEntries,
+		"\t\t],",
+		"\t\tsearch: {",
+		'\t\t\tariaLabel: "Search pages",',
+		'\t\t\tclearLabel: "Clear",',
+		'\t\t\tnoResultsText: "No matching pages",',
+		"\t\t},",
+		"\t\tsearchGroups: [",
+		...menuGroups,
+		"\t\t],",
+		"\t\ttopNavLinks: [",
+		...topNavEntries,
+		"\t\t],",
+		"\t},",
+		"\tfooter: {",
+		"\t\tnavLinks: [",
+		...navEntries,
+		"\t\t],",
+		"\t\tsocialLinks: [",
+		"\t\t\t{",
+		'\t\t\t\tlabel: "X",',
+		'\t\t\t\ticon: "x",',
+		'\t\t\t\thref: "",',
+		"\t\t\t},",
+		"\t\t\t{",
+		'\t\t\t\tlabel: "Instagram",',
+		'\t\t\t\ticon: "instagram",',
+		'\t\t\t\thref: "",',
+		"\t\t\t},",
+		"\t\t\t{",
+		'\t\t\t\tlabel: "LinkedIn",',
+		'\t\t\t\ticon: "linked-in",',
+		'\t\t\t\thref: "",',
+		"\t\t\t},",
+		"\t\t\t{",
+		'\t\t\t\tlabel: "Meta",',
+		'\t\t\t\ticon: "meta",',
+		'\t\t\t\thref: "",',
+		"\t\t\t},",
+		"\t\t\t{",
+		'\t\t\t\tlabel: "You Tube",',
+		'\t\t\t\ticon: "youtube",',
+		'\t\t\t\thref: "",',
+		"\t\t\t},",
+		"\t\t],",
+		"\t},",
+		"};",
 		"",
-		"\tuseEffect(() => {",
-		"\t\tif (!motionAllowed) {",
-		"\t\t\tsetHide(false);",
-		"\t\t\treturn;",
+	].join("\n");
+}
+
+function renderNextConfigFile(state) {
+	if (state.hasPayload) return null;
+
+	return [
+		'import { codeInspectorPlugin } from "code-inspector-plugin";',
+		'import type { NextConfig } from "next";',
+		'import { PHASE_DEVELOPMENT_SERVER } from "next/constants";',
+		"",
+		"const getDevIsolationConfig = (",
+		"\tphase: string,",
+		'): Pick<NextConfig, "distDir" | "typescript"> => {',
+		"\tif (phase !== PHASE_DEVELOPMENT_SERVER) {",
+		"\t\treturn {};",
+		"\t}",
+		"",
+		"\tconst distDir = process.env.NEXT_DEV_DIST_DIR;",
+		"\tconst tsconfigPath = process.env.NEXT_DEV_TSCONFIG_PATH;",
+		"",
+		"\tif (!distDir) {",
+		"\t\treturn {};",
+		"\t}",
+		"",
+		"\tconst isValidUserDistDir =",
+		'\t\tdistDir === ".next-user" || /^\\.next-user-\\d{4}$/.test(distDir);',
+		"\tconst isValidAgentDistDir = /^\\.next-agent-\\d{4}$/.test(distDir);",
+		"",
+		"\tif (!isValidUserDistDir && !isValidAgentDistDir) {",
+		"\t\tthrow new Error(",
+		'\t\t\t"NEXT_DEV_DIST_DIR must be .next-user, .next-user-<port>, or .next-agent-<port>.",',
+		"\t\t);",
+		"\t}",
+		"",
+		"\tif (!tsconfigPath) {",
+		"\t\tthrow new Error(",
+		'\t\t\t"NEXT_DEV_TSCONFIG_PATH is required when NEXT_DEV_DIST_DIR is set.",',
+		"\t\t);",
+		"\t}",
+		"",
+		"\tconst expectedTsconfigPath = `tsconfig${distDir}.json`;",
+		"",
+		"\tif (tsconfigPath !== expectedTsconfigPath) {",
+		"\t\tthrow new Error(",
+		"\t\t\t`NEXT_DEV_TSCONFIG_PATH must be ${expectedTsconfigPath} for ${distDir}.`,",
+		"\t\t);",
+		"\t}",
+		"",
+		"\treturn {",
+		"\t\tdistDir,",
+		"\t\ttypescript: {",
+		"\t\t\ttsconfigPath,",
+		"\t\t},",
+		"\t};",
+		"};",
+		"",
+		"const getCodeInspectorPort = () => {",
+		"\tconst distDir = process.env.NEXT_DEV_DIST_DIR;",
+		"\tconst distDirPort =",
+		'\t\tdistDir === ".next-user"',
+		"\t\t\t? 3000",
+		'\t\t\t: Number.parseInt(distDir?.match(/-(\\d{4})$/)?.[1] ?? "", 10);',
+		'\tconst envPort = Number.parseInt(process.env.PORT ?? "", 10);',
+		"\tconst devServerPort = Number.isFinite(distDirPort) ? distDirPort : envPort;",
+		"",
+		"\tif (!Number.isFinite(devServerPort)) {",
+		"\t\treturn 5678;",
+		"\t}",
+		"",
+		"\treturn 5678 + Math.max(devServerPort - 3000, 0);",
+		"};",
+		"",
+		"const shouldEnableCodeInspector = (phase: string) =>",
+		"\tphase === PHASE_DEVELOPMENT_SERVER &&",
+		'\tprocess.env.NODE_ENV === "development" &&',
+		'\tprocess.env.NEXT_DEV_SERVER_MODE !== "agent";',
+		"",
+		"const createNextConfig = (phase: string): NextConfig => ({",
+		"\t...getDevIsolationConfig(phase),",
+		"\timages: {",
+		"\t\tremotePatterns: [",
+		"\t\t\t{",
+		'\t\t\t\tprotocol: "https",',
+		'\t\t\t\thostname: "cdn.example.com",',
+		"\t\t\t},",
+		"\t\t],",
+		"\t},",
+		"\tturbopack: {",
+		"\t\trules: shouldEnableCodeInspector(phase)",
+		"\t\t\t? codeInspectorPlugin({",
+		'\t\t\t\t\tbundler: "turbopack",',
+		"\t\t\t\t\tdev: true,",
+		'\t\t\t\t\teditor: "code",',
+		'\t\t\t\t\tlaunchType: "open",',
+		"\t\t\t\t\tport: getCodeInspectorPort(),",
+		"\t\t\t\t\tprintServer: true,",
+		"\t\t\t\t})",
+		"\t\t\t: {},",
+		"\t},",
+		"});",
+		"",
+		"export default createNextConfig;",
+		"",
+	].join("\n");
+}
+
+function renderTsconfigFile(state) {
+	if (state.hasPayload) return null;
+
+	return [
+		"{",
+		'\t"compilerOptions": {',
+		'\t\t"target": "ES2017",',
+		'\t\t"lib": ["dom", "dom.iterable", "esnext"],',
+		'\t\t"allowJs": true,',
+		'\t\t"skipLibCheck": true,',
+		'\t\t"strict": true,',
+		'\t\t"noEmit": true,',
+		'\t\t"esModuleInterop": true,',
+		'\t\t"module": "esnext",',
+		'\t\t"moduleResolution": "bundler",',
+		'\t\t"resolveJsonModule": true,',
+		'\t\t"isolatedModules": true,',
+		'\t\t"jsx": "react-jsx",',
+		'\t\t"incremental": true,',
+		'\t\t"plugins": [',
+		"\t\t\t{",
+		'\t\t\t\t"name": "next"',
+		"\t\t\t}",
+		"\t\t],",
+		'\t\t"paths": {',
+		'\t\t\t"@/*": ["./src/*"]',
 		"\t\t}",
-		"",
-		"\t\tconst handleScroll = () => {",
-		"\t\t\tconst currentY = window.scrollY;",
-		"\t\t\tsetAtTop(currentY <= 50);",
-		"\t\t\tsetHide(currentY > lastScrollRef.current && currentY > 10);",
-		"\t\t\tlastScrollRef.current = currentY;",
-		"\t\t};",
-		"",
-		"\t\thandleScroll();",
-		'\t\twindow.addEventListener("scroll", handleScroll, { passive: true });',
-		'\t\treturn () => window.removeEventListener("scroll", handleScroll);',
-		"\t}, [motionAllowed]);",
-		"",
-		"\tuseEffect(() => {",
-		"\t\tif (!motionAllowed) return;",
-		"\t\tsetAtTop(window.scrollY <= 50);",
-		"\t}, [motionAllowed]);",
-		"",
-		"\treturn (",
-		"\t\t<header",
-		"\t\t\tclassName={clsx(",
-		'\t\t\t\t"h-[100px] fixed z-50 px-section-x pointer-events-none left-1/2 flex justify-center items-center -translate-x-1/2 w-full group",',
-		"\t\t\t\tclassName,",
-		"\t\t\t)}",
-		"\t\t\tdata-top={atTop}",
-		"\t\t\tdata-hide={hide}",
-		"\t\t>",
-		'\t\t\t<div className="max-w-section-max w-full flex items-center h-full">',
-		'\t\t\t\t<div className="flex justify-between items-center w-full h-fit">',
-		'\t\t\t\t\t<div className=" min-w-[400px]">',
-		'\t\t\t\t\t\t<Logo size="md" className="pointer-events-auto" />',
-		"\t\t\t\t\t</div>",
-		"\t\t\t\t\t<motion.nav",
-		'\t\t\t\t\t\tclassName="relative pointer-events-auto flex h-full items-center justify-center gap-5"',
-		"\t\t\t\t\t\tanimate={motionAllowed ? { y: hide ? -80 : 0 } : { y: 0 }}",
-		"\t\t\t\t\t\ttransition={motionAllowed ? springs.soft : { duration: 0 }}",
-		"\t\t\t\t\t>",
-		"\t\t\t\t\t\t{MARKETING_NAV_LINKS.map((item) => (",
-		"\t\t\t\t\t\t\t<Button",
-		"\t\t\t\t\t\t\t\thref={hrefFor(item.routeId)}",
-		"\t\t\t\t\t\t\t\tkey={item.name}",
-		'\t\t\t\t\t\t\t\tvariant="ghost"',
-		"\t\t\t\t\t\t\t>",
-		"\t\t\t\t\t\t\t\t{item.name}",
-		"\t\t\t\t\t\t\t</Button>",
-		"\t\t\t\t\t\t))}",
-		"\t\t\t\t\t</motion.nav>",
-		'\t\t\t\t\t<div className="flex justify-end items-center gap-3 pointer-events-auto min-w-[400px]">',
-		"\t\t\t\t\t\t<MarketingContentSearch",
-		'\t\t\t\t\t\t\tfield={{ className: "min-w-0" }}',
-		"\t\t\t\t\t\t\tinput={{",
-		'\t\t\t\t\t\t\t\tsize: "sm",',
-		'\t\t\t\t\t\t\t\tclassName: "w-[14rem] xl:w-[16rem]",',
-		'\t\t\t\t\t\t\t\ttextClassName: "text-sm",',
-		"\t\t\t\t\t\t\t}}",
-		`\t\t\t\t\t\t/>${ctaBlock}`,
-		"\t\t\t\t\t</div>",
-		"\t\t\t\t</div>",
-		"\t\t\t</div>",
-		"\t\t</header>",
-		"\t);",
+		"\t},",
+		'\t"include": [',
+		'\t\t"next-env.d.ts",',
+		'\t\t"**/*.ts",',
+		'\t\t"**/*.tsx",',
+		'\t\t".next/types/**/*.ts",',
+		'\t\t".next/dev/types/**/*.ts"',
+		"\t],",
+		'\t"exclude": ["node_modules"]',
 		"}",
 		"",
 	].join("\n");
@@ -649,7 +960,7 @@ function renderApiIndexFile(state) {
 }
 
 function getRewriteTargets(state) {
-	return [
+	const targets = [
 		{
 			path: "src/config/routes.ts",
 			content: renderRoutesFile(state),
@@ -671,10 +982,28 @@ function getRewriteTargets(state) {
 			content: renderMarketingContentSearchFile(state),
 		},
 		{
-			path: "src/app/(site)/(marketing)/_components/layout/HeaderFull.tsx",
-			content: renderHeaderFullFile(state),
+			path: "src/lib/marketing-content/fallback.ts",
+			content: renderMarketingContentFallbackFile(state),
 		},
 	];
+
+	const nextConfigContent = renderNextConfigFile(state);
+	if (nextConfigContent) {
+		targets.push({
+			path: "next.config.ts",
+			content: nextConfigContent,
+		});
+	}
+
+	const tsconfigContent = renderTsconfigFile(state);
+	if (tsconfigContent) {
+		targets.push({
+			path: "tsconfig.json",
+			content: tsconfigContent,
+		});
+	}
+
+	return targets;
 }
 
 async function writeFileIfChanged(targetPath, content) {
@@ -714,6 +1043,53 @@ async function removeEmptyConcreteInternalDirIfNeeded(shouldRemove) {
 			recursive: true,
 			force: true,
 		});
+	}
+}
+
+async function removePackageDependencies(dependencyNames) {
+	if (dependencyNames.length === 0) return false;
+
+	const packageJsonPath = path.join(ROOT, "package.json");
+	const raw = await fs.readFile(packageJsonPath, "utf8");
+	const pkg = JSON.parse(raw);
+	let changed = false;
+
+	for (const dependencyName of dependencyNames) {
+		if (pkg.dependencies?.[dependencyName]) {
+			delete pkg.dependencies[dependencyName];
+			changed = true;
+		}
+
+		if (pkg.devDependencies?.[dependencyName]) {
+			delete pkg.devDependencies[dependencyName];
+			changed = true;
+		}
+	}
+
+	if (!changed) return false;
+
+	await fs.writeFile(
+		packageJsonPath,
+		`${JSON.stringify(pkg, null, "\t")}\n`,
+		"utf8",
+	);
+
+	return true;
+}
+
+function refreshPackageLock() {
+	const result = spawnSync(
+		"npm",
+		["install", "--package-lock-only", "--ignore-scripts"],
+		{
+			cwd: ROOT,
+			stdio: "inherit",
+			shell: process.platform === "win32",
+		},
+	);
+
+	if (result.status !== 0) {
+		throw new Error("Package lock refresh failed after pruning Payload.");
 	}
 }
 
@@ -810,6 +1186,14 @@ function printPlan(plan) {
 		console.log(`- ${filePath}`);
 	}
 
+	if (plan.packageDependencies.length > 0) {
+		console.log("\nPackage dependencies to remove");
+		for (const dependencyName of plan.packageDependencies) {
+			console.log(`- ${dependencyName}`);
+		}
+		console.log("- package-lock.json (refreshed)");
+	}
+
 	console.log("\nWarnings");
 	console.log("- unresolved reference validation runs after mutation");
 	console.log("- build validation runs after mutation");
@@ -881,6 +1265,14 @@ async function main() {
 
 	await removeEmptyInternalDirIfNeeded(plan.removeInternalDir);
 	await removeEmptyConcreteInternalDirIfNeeded(plan.removeConcreteInternalDir);
+
+	const packageJsonChanged = await removePackageDependencies(
+		plan.packageDependencies,
+	);
+	if (packageJsonChanged) {
+		refreshPackageLock();
+	}
+
 	await validateRemovedSurfaceReferences(parsed.surfaceIds);
 	runBuild();
 

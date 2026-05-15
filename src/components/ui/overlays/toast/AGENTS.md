@@ -19,9 +19,11 @@ Shared transient-feedback host for success, error, info, and loading toasts.
 - Dismiss controls and interactive content inside toasts must preserve visible focus.
 - Initial page loads should not show toasts. Use skeletons or inline loading states for first render.
 - Toast copy should stay short, neutral, and server-driven when possible.
+- Toast titles are part of the shared pattern. `ToastHost` supplies defaults for success, error, loading, and info; pass `{ title }` to simple helpers only when the flow needs a more specific title.
 
 ## How To Use It
 - Use `showToast.promise` for async workflows that move from loading to success or error.
+- For promise flows, use `loadingTitle`, `successTitle`, and `errorTitle` when the default titles are too generic.
 - Use `showToast.loading` when a long-running, user-initiated process starts and update or dismiss it later.
 - Use inline field messaging through `Field` for form validation instead of showing validation toasts.
 - For mixed flows, fetch directly on initial load and switch to toast-wrapped fetches only for explicit user actions like apply, submit, retry, or manual refresh.

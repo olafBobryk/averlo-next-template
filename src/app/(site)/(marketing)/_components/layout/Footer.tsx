@@ -1,9 +1,15 @@
 import Logo from "@/components/branding/Logo";
 import { Button } from "@/components/ui/primitives/Button";
-import { hrefFor } from "@/lib/routes";
-import { MARKETING_NAV_LINKS, MARKETING_SOCIAL_LINKS } from "./marketingNav";
+import { getMarketingLinkHref } from "@/lib/marketing-content/links";
+import type { SiteLayoutDocument } from "@/lib/marketing-content/types";
 
-export default function Footer({ className = "" }: { className?: string }) {
+export default function Footer({
+	className = "",
+	layout,
+}: {
+	className?: string;
+	layout: SiteLayoutDocument["footer"];
+}) {
 	return (
 		<footer
 			className={
@@ -14,20 +20,20 @@ export default function Footer({ className = "" }: { className?: string }) {
 			<div className="flex flex-col justify-center items-center max-w-section-max relative gap-[25px] ">
 				<Logo size="md" />
 				<div className="flex justify-center gap-y-[10px] flex-wrap items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-[45px] p-2.5">
-					{MARKETING_NAV_LINKS.map((item) => (
+					{layout.navLinks.map((item) => (
 						<Button
-							href={hrefFor(item.routeId)}
-							key={item.name}
+							href={getMarketingLinkHref(item)}
+							key={`${item.label}-${getMarketingLinkHref(item)}`}
 							variant="ghost"
 						>
-							{item.name}
+							{item.label}
 						</Button>
 					))}
 				</div>
 				<div className="flex flex-wrap justify-center items-center flex-grow-0 flex-shrink-0 gap-2.5">
-					{MARKETING_SOCIAL_LINKS.map((item) => (
+					{layout.socialLinks.map((item) => (
 						<Button
-							key={item.name}
+							key={item.label}
 							variant="outline"
 							className="w-[50px] h-[50px] !p-0 rounded-full"
 							iconSize={15}

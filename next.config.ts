@@ -1,3 +1,4 @@
+import { withPayload } from "@payloadcms/next/withPayload";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
@@ -69,4 +70,7 @@ const createNextConfig = (phase: string): NextConfig => ({
 	},
 });
 
-export default createNextConfig;
+const createPayloadNextConfig = (phase: string) =>
+	withPayload(createNextConfig(phase));
+
+export default createPayloadNextConfig;
