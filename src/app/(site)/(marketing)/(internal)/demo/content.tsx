@@ -2468,13 +2468,13 @@ export const demoPages: DemoPage[] = [
 							return (
 								<ScrollBorders className="h-40 overflow-y-auto bg-surface px-4 py-3">
 									<div className="flex flex-col gap-3">
-										{Array.from({ length: 10 }, (_, index) => (
+										{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((sectionNumber) => (
 											<div
-												key={`scroll-borders-demo-${index + 1}`}
+												key={`scroll-borders-demo-${sectionNumber}`}
 												className="rounded-md border border-border/10 bg-background px-3 py-2"
 											>
 												<Text as="p" variant="bodyStrong">
-													Section {index + 1}
+													Section {sectionNumber}
 												</Text>
 												<Text as="p" variant="body" tone="muted">
 													Keep longer scroll regions readable without inventing
@@ -2493,13 +2493,13 @@ export const demoPages: DemoPage[] = [
 								return (
 									<ScrollBorders.Skeleton className="h-40 rounded-lg bg-surface px-4 py-3">
 										<div className="flex flex-col gap-3">
-											{Array.from({ length: 5 }, (_, index) => (
+											{[1, 2, 3, 4, 5].map((sectionNumber) => (
 												<div
-													key={`scroll-borders-skeleton-${index + 1}`}
+													key={`scroll-borders-skeleton-${sectionNumber}`}
 													className="rounded-md border border-border/10 bg-background px-3 py-2"
 												>
 													<Text.Skeleton as="p" variant="bodyStrong">
-														Section {index + 1}
+														Section {sectionNumber}
 													</Text.Skeleton>
 													<Text.Skeleton as="p" variant="body">
 														Keep longer scroll regions readable without

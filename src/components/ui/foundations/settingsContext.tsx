@@ -114,7 +114,7 @@ export function SettingsProvider({
 			setTextScale(stored.textScale);
 		}
 		hasHydrated.current = true;
-	}, [smoothScrollAvailable, storageKey]);
+	}, [storageKey]);
 
 	React.useEffect(() => {
 		if (!storageKey) return;
@@ -139,7 +139,7 @@ export function SettingsProvider({
 
 		window.addEventListener("storage", handleStorage);
 		return () => window.removeEventListener("storage", handleStorage);
-	}, [smoothScrollAvailable, storageKey]);
+	}, [storageKey]);
 
 	return (
 		<SettingsContext.Provider

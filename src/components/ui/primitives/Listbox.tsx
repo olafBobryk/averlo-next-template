@@ -129,8 +129,9 @@ export function Listbox<T>({
 					});
 
 					if (option.unwrapped) {
+						const optionKey = String(option.key ?? index);
 						const unwrappedOptionProps = {
-							key: option.key ?? `${index}`,
+							key: optionKey,
 							"data-option-index": index,
 							id: optionId,
 							"aria-disabled": isDisabled ? true : undefined,

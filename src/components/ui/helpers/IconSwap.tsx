@@ -1,9 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import type * as React from "react";
+import * as React from "react";
 
 type IconSwapItem = {
+	key?: React.Key;
 	icon: React.ReactNode;
 	className?: string;
 	activeClassName?: string;
@@ -26,6 +27,15 @@ const sizeClasses: Record<IconSwapSize, string> = {
 	lg: "h-6 w-6",
 };
 
+const getIconSwapItemKey = (item: IconSwapItem): React.Key => {
+	if (item.key != null) return item.key;
+	if (React.isValidElement<{ name?: unknown }>(item.icon)) {
+		if (item.icon.key != null) return item.icon.key;
+		if (typeof item.icon.props.name === "string") return item.icon.props.name;
+	}
+	return String(item.icon);
+};
+
 export function IconSwap({
 	items,
 	activeIndex,
@@ -45,7 +55,7 @@ export function IconSwap({
 				const isActive = index === activeIndex;
 				return (
 					<span
-						key={`${index}-${String(item.icon)}`}
+						key={getIconSwapItemKey(item)}
 						className={clsx(
 							"absolute inset-0 flex items-center justify-center transition-all motion-micro",
 							sizeClasses[size],
