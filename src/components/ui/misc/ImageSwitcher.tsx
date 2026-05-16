@@ -24,6 +24,11 @@ type ImageSwitcherLayer = {
 	key: number;
 };
 
+type ImageSwitcherPreloadItem = {
+	image: ImageSwitcherImage;
+	key: string;
+};
+
 export type ImageSwitcherProps = {
 	images: readonly ImageSwitcherImage[];
 	initialIndex?: number;
@@ -53,6 +58,23 @@ function getWrappedImageIndex(index: number, total: number) {
 
 function getImageKey(image: ImageSwitcherImage) {
 	return image.src;
+}
+
+function getImagePreloadItems(
+	images: readonly ImageSwitcherImage[],
+): ImageSwitcherPreloadItem[] {
+	const seenImageKeys = new Map<string, number>();
+
+	return images.map((image) => {
+		const imageKey = getImageKey(image);
+		const occurrence = seenImageKeys.get(imageKey) ?? 0;
+		seenImageKeys.set(imageKey, occurrence + 1);
+
+		return {
+			image,
+			key: occurrence === 0 ? imageKey : `${imageKey}-${occurrence}`,
+		};
+	});
 }
 
 function getImagePlaceholder(
@@ -122,6 +144,10 @@ export function ImageSwitcher({
 	const incomingClearFrameRef = React.useRef<number | null>(null);
 	const baseImage = images[settledIndex] ?? images[0];
 	const incomingImage = incomingLayer ? images[incomingLayer.index] : null;
+	const preloadItems = React.useMemo(
+		() => getImagePreloadItems(images),
+		[images],
+	);
 
 	React.useEffect(() => {
 		activeIndexRef.current = activeIndex;
@@ -355,11 +381,8 @@ export function ImageSwitcher({
 					aria-hidden="true"
 					className="pointer-events-none absolute inset-0 opacity-0"
 				>
-					{images.map((image, index) => (
-						<span
-							key={`${getImageKey(image)}-${index}`}
-							className="absolute inset-0"
-						>
+					{preloadItems.map(({ image, key }) => (
+						<span key={key} className="absolute inset-0">
 							<Image
 								src={image.src}
 								alt=""
