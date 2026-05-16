@@ -355,8 +355,11 @@ export function ImageSwitcher({
 					aria-hidden="true"
 					className="pointer-events-none absolute inset-0 opacity-0"
 				>
-					{images.map((image) => (
-						<span key={getImageKey(image)} className="absolute inset-0">
+					{images.map((image, index) => (
+						<span
+							key={`${getImageKey(image)}-${index}`}
+							className="absolute inset-0"
+						>
 							<Image
 								src={image.src}
 								alt=""
