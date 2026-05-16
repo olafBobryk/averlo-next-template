@@ -37,7 +37,7 @@ const SlotWithRef = forwardRef<HTMLElement, ComponentProps<typeof Slot>>(
 	(props, ref) => <Slot ref={ref} {...props} />,
 );
 SlotWithRef.displayName = "SlotWithRef";
-const MotionSlot = motion(SlotWithRef);
+const MotionSlot = motion.create(SlotWithRef);
 
 type RevealRegisteredItem = {
 	id: string;
@@ -63,9 +63,10 @@ type RevealRootContextValue = {
 };
 
 type RevealGroupContextValue = {
-	active?: boolean;
-	sceneReady: boolean;
-	registerItem: (id: string) => () => void;
+	started: boolean;
+	disabled: boolean;
+	registerItem: RevealRootContextValue["registerItem"];
+	markReady: RevealRootContextValue["markReady"];
 	completeItem: (id: string) => void;
 };
 
@@ -74,6 +75,13 @@ const RevealGroupContext = createContext<RevealGroupContextValue | null>(null);
 
 function getStaticRevealTag(as?: ElementType) {
 	return typeof as === "string" ? as : "div";
+}
+
+function waitForDelay(delay: number) {
+	if (delay <= 0) return Promise.resolve();
+	return new Promise<void>((resolve) => {
+		window.setTimeout(resolve, delay * 1000);
+	});
 }
 
 function sortByDocumentOrder(
@@ -243,59 +251,187 @@ export type RevealGroupProps = {
 	as?: ElementType;
 	className?: string;
 	stagger?: number;
+	/** @deprecated RevealGroup is now a boundary-only local scheduler. */
 	delay?: number;
+	/** @deprecated RevealGroup item duration is controlled by RevealGroupItem. */
 	duration?: number;
+	/** @deprecated Reveal groups play once through the root scheduler. */
 	once?: boolean;
 	active?: boolean;
 	waitFor?: MotionSceneStageInput;
 	unlockStage?: MotionSceneStageInput;
 	disableWhenReducedMotion?: boolean;
+	viewportAmount?: number;
 };
 
-export function RevealGroup({
+export function RevealGroup(props: RevealGroupProps) {
+	const root = useContext(RevealRootContext);
+
+	if (!root) {
+		return (
+			<RevealRoot disableWhenReducedMotion={props.disableWhenReducedMotion}>
+				<RevealGroupInner {...props} />
+			</RevealRoot>
+		);
+	}
+
+	return <RevealGroupInner {...props} />;
+}
+
+function RevealGroupInner({
 	children,
 	as = "div",
 	className,
+	stagger = 0.18,
 	active,
 	waitFor,
 	unlockStage,
 	disableWhenReducedMotion = true,
+	viewportAmount = 0.2,
 }: RevealGroupProps) {
-	const disabled = useRevealAnimationsDisabled(disableWhenReducedMotion);
-	const registeredItemsRef = useRef(new Set<string>());
+	const id = useId();
+	const root = useContext(RevealRootContext);
+	const appReady = useAppReady();
+	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const disabled = root?.disabled || !motionAllowed;
+	const [hasPlayed, setHasPlayed] = useState(false);
+	const [started, setStarted] = useState(false);
+	const viewportRef = useRef<HTMLElement | null>(null);
+	const mountedRef = useRef(false);
+	const startedRef = useRef(false);
+	const itemsRef = useRef(new Map<string, RevealRegisteredItem>());
 	const completedItemsRef = useRef(new Set<string>());
+	const orderRef = useRef(0);
+	const flushFrameRef = useRef<number | null>(null);
 	const completionFrameRef = useRef<number | null>(null);
+	const completionResolverRef = useRef<(() => void) | null>(null);
+	const playRef = useRef<RevealRegisteredItem["play"]>(() => undefined);
+	const showImmediatelyRef = useRef<RevealRegisteredItem["showImmediately"]>(
+		() => undefined,
+	);
+	const onCompleteRef = useRef<RevealRegisteredItem["onComplete"]>(
+		() => undefined,
+	);
+	const isInViewport = useInView(viewportRef, {
+		once: true,
+		amount: viewportAmount,
+	});
 	const { sceneReady, markReady } = useMotionSceneGate("RevealGroup", {
 		waitFor,
 		unlockStage,
 	});
+	const isReady =
+		disabled || (appReady && isInViewport && active !== false && sceneReady);
+
+	const finishGroup = useCallback(() => {
+		if (mountedRef.current) {
+			setHasPlayed(true);
+		}
+		const resolve = completionResolverRef.current;
+		completionResolverRef.current = null;
+		resolve?.();
+	}, []);
 
 	const checkCompletion = useCallback(() => {
 		completionFrameRef.current = null;
-		if (registeredItemsRef.current.size === 0) {
-			if (disabled || sceneReady) markReady();
+		if (!startedRef.current) return;
+
+		const connectedItems = [...itemsRef.current.values()].filter(
+			(item) => item.element.isConnected,
+		);
+		if (connectedItems.length === 0) {
+			finishGroup();
 			return;
 		}
-		if (completedItemsRef.current.size < registeredItemsRef.current.size)
-			return;
-		markReady();
-	}, [disabled, markReady, sceneReady]);
+
+		const allComplete = connectedItems.every((item) =>
+			completedItemsRef.current.has(item.id),
+		);
+		if (allComplete) {
+			finishGroup();
+		}
+	}, [finishGroup]);
 
 	const scheduleCompletionCheck = useCallback(() => {
 		if (completionFrameRef.current !== null) return;
 		completionFrameRef.current = requestAnimationFrame(checkCompletion);
 	}, [checkCompletion]);
 
+	const flushReadyItems = useCallback(() => {
+		flushFrameRef.current = null;
+		if (!startedRef.current) return;
+
+		const readyItems = [...itemsRef.current.values()]
+			.filter((item) => item.ready && !item.played && item.element.isConnected)
+			.sort(sortByDocumentOrder);
+
+		readyItems.forEach((item, index) => {
+			item.played = true;
+
+			if (disabled) {
+				item.showImmediately();
+				item.onComplete();
+				return;
+			}
+
+			Promise.resolve(item.play(index * stagger)).finally(item.onComplete);
+		});
+
+		scheduleCompletionCheck();
+	}, [disabled, scheduleCompletionCheck, stagger]);
+
+	const scheduleFlush = useCallback(() => {
+		if (flushFrameRef.current !== null) return;
+		flushFrameRef.current = requestAnimationFrame(flushReadyItems);
+	}, [flushReadyItems]);
+
 	const registerItem = useCallback(
-		(id: string) => {
-			registeredItemsRef.current.add(id);
+		({
+			id,
+			element,
+			play,
+			showImmediately,
+			onComplete,
+		}: {
+			id: string;
+			element: HTMLElement;
+			play: RevealRegisteredItem["play"];
+			showImmediately: RevealRegisteredItem["showImmediately"];
+			onComplete: RevealRegisteredItem["onComplete"];
+		}) => {
+			itemsRef.current.set(id, {
+				id,
+				element,
+				play,
+				showImmediately,
+				onComplete,
+				order: orderRef.current,
+				ready: false,
+				played: false,
+			});
+			orderRef.current += 1;
+
+			if (startedRef.current) {
+				scheduleCompletionCheck();
+			}
+
 			return () => {
-				registeredItemsRef.current.delete(id);
+				itemsRef.current.delete(id);
 				completedItemsRef.current.delete(id);
 				scheduleCompletionCheck();
 			};
 		},
 		[scheduleCompletionCheck],
+	);
+
+	const markItemReady = useCallback(
+		(id: string) => {
+			const item = itemsRef.current.get(id);
+			if (!item || item.ready || item.played) return;
+			item.ready = true;
+			scheduleFlush();
+		},
+		[scheduleFlush],
 	);
 
 	const completeItem = useCallback(
@@ -306,13 +442,107 @@ export function RevealGroup({
 		[scheduleCompletionCheck],
 	);
 
-	useEffect(() => {
-		if (!disabled && !sceneReady) return;
+	const startGroup = useCallback(() => {
+		startedRef.current = true;
+		if (mountedRef.current) {
+			setStarted(true);
+		}
+		scheduleFlush();
 		scheduleCompletionCheck();
-	}, [disabled, sceneReady, scheduleCompletionCheck]);
+	}, [scheduleCompletionCheck, scheduleFlush]);
+
+	const play = useCallback(
+		async (delay: number) => {
+			await waitForDelay(delay);
+			if (!mountedRef.current) return;
+
+			return new Promise<void>((resolve) => {
+				completionResolverRef.current = resolve;
+				startGroup();
+			});
+		},
+		[startGroup],
+	);
+
+	const showImmediately = useCallback(() => {
+		if (!mountedRef.current) return;
+
+		completionResolverRef.current = null;
+		startedRef.current = true;
+		setStarted(true);
+
+		for (const item of itemsRef.current.values()) {
+			if (item.played || !item.element.isConnected) continue;
+			item.ready = true;
+			item.played = true;
+			item.showImmediately();
+			item.onComplete();
+		}
+
+		finishGroup();
+	}, [finishGroup]);
+
+	const onComplete = useCallback(() => {
+		markReady();
+	}, [markReady]);
+
+	playRef.current = play;
+	showImmediatelyRef.current = showImmediately;
+	onCompleteRef.current = onComplete;
+
+	const registeredPlay = useCallback((delay: number) => {
+		return playRef.current(delay);
+	}, []);
+
+	const registeredShowImmediately = useCallback(() => {
+		showImmediatelyRef.current();
+	}, []);
+
+	const registeredOnComplete = useCallback(() => {
+		onCompleteRef.current();
+	}, []);
+
+	useLayoutEffect(() => {
+		mountedRef.current = true;
+
+		return () => {
+			mountedRef.current = false;
+		};
+	}, []);
+
+	useEffect(() => {
+		if (hasPlayed) return;
+		const node = viewportRef.current;
+		if (!node || !root) return;
+		const unregisterRoot = root.registerItem({
+			id,
+			element: node,
+			play: registeredPlay,
+			showImmediately: registeredShowImmediately,
+			onComplete: registeredOnComplete,
+		});
+
+		return () => unregisterRoot();
+	}, [
+		hasPlayed,
+		id,
+		registeredOnComplete,
+		registeredPlay,
+		registeredShowImmediately,
+		root,
+	]);
+
+	useEffect(() => {
+		if (hasPlayed) return;
+		if (!isReady || !root) return;
+		root.markReady(id);
+	}, [hasPlayed, id, isReady, root]);
 
 	useEffect(() => {
 		return () => {
+			if (flushFrameRef.current !== null) {
+				cancelAnimationFrame(flushFrameRef.current);
+			}
 			if (completionFrameRef.current !== null) {
 				cancelAnimationFrame(completionFrameRef.current);
 			}
@@ -321,18 +551,21 @@ export function RevealGroup({
 
 	const contextValue = useMemo(
 		() => ({
-			active,
-			sceneReady: disabled || sceneReady,
+			started,
+			disabled,
 			registerItem,
+			markReady: markItemReady,
 			completeItem,
 		}),
-		[active, completeItem, disabled, registerItem, sceneReady],
+		[completeItem, disabled, markItemReady, registerItem, started],
 	);
 	const Tag = as ?? "div";
 
 	return (
 		<RevealGroupContext.Provider value={contextValue}>
-			<Tag className={className}>{children}</Tag>
+			<Tag ref={viewportRef} className={className}>
+				{children}
+			</Tag>
 		</RevealGroupContext.Provider>
 	);
 }
@@ -385,7 +618,6 @@ function RevealItemInner({
 }: RevealItemProps) {
 	const id = useId();
 	const root = useContext(RevealRootContext);
-	const group = useContext(RevealGroupContext);
 	const appReady = useAppReady();
 	const itemMotionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const disabled = root?.disabled || !itemMotionAllowed;
@@ -395,6 +627,7 @@ function RevealItemInner({
 	const childRef = useRef<HTMLElement | null>(null);
 	const viewportRef = useRef<HTMLElement | null>(null);
 	const measureRef = asChild ? childRef : viewportRef;
+	const mountedRef = useRef(false);
 	const isInViewport = useInView(measureRef, {
 		once: true,
 		amount: viewportAmount,
@@ -402,18 +635,27 @@ function RevealItemInner({
 	const originalTransitionRef = useRef<string | null>(null);
 	const restoreRafRef = useRef<number | null>(null);
 	const timeoutRef = useRef<number | null>(null);
+	const playRef = useRef<RevealRegisteredItem["play"]>(() => undefined);
+	const showImmediatelyRef = useRef<RevealRegisteredItem["showImmediately"]>(
+		() => undefined,
+	);
+	const onCompleteRef = useRef<RevealRegisteredItem["onComplete"]>(
+		() => undefined,
+	);
 	const { sceneReady, markReady } = useMotionSceneGate("RevealItem", {
 		waitFor,
 		unlockStage,
 	});
-	const isActive = active !== false && group?.active !== false;
 	const isReady =
-		disabled ||
-		(appReady &&
-			isInViewport &&
-			isActive &&
-			sceneReady &&
-			group?.sceneReady !== false);
+		disabled || (appReady && isInViewport && active !== false && sceneReady);
+
+	useLayoutEffect(() => {
+		mountedRef.current = true;
+
+		return () => {
+			mountedRef.current = false;
+		};
+	}, []);
 
 	useLayoutEffect(() => {
 		if (!asChild || !handoffAfterReveal || disabled || hasPlayed) return;
@@ -435,14 +677,22 @@ function RevealItemInner({
 	}, []);
 
 	const completeReveal = useCallback(async () => {
+		if (!mountedRef.current) return;
+
 		if (asChild && handoffAfterReveal) {
 			await restoreChildTransition({
 				node: childRef.current,
 				originalTransition: originalTransitionRef.current,
-				onRestored: () => setHasPlayed(true),
+				onRestored: () => {
+					if (mountedRef.current) {
+						setHasPlayed(true);
+					}
+				},
 			});
 			return;
 		}
+
+		if (!mountedRef.current) return;
 		setHasPlayed(true);
 	}, [asChild, handoffAfterReveal]);
 
@@ -455,7 +705,10 @@ function RevealItemInner({
 						resolve();
 					}, delay * 1000);
 				});
+				if (!mountedRef.current) return;
+
 				await controls.start("show");
+				if (!mountedRef.current) return;
 				await completeReveal();
 				return;
 			}
@@ -472,44 +725,293 @@ function RevealItemInner({
 						transitionEnd: { transform: "none", y: 0 },
 					};
 
+			if (!mountedRef.current) return;
 			await controls.start(target);
+			if (!mountedRef.current) return;
 			await completeReveal();
 		},
 		[completeReveal, controls, disableTransform, revealTiming, variants],
 	);
 
 	const showImmediately = useCallback(() => {
+		if (!mountedRef.current) return;
 		controls.set(disableTransform ? { opacity: 1 } : { opacity: 1, y: 0 });
 		setHasPlayed(true);
 	}, [controls, disableTransform]);
 
 	const onComplete = useCallback(() => {
 		markReady();
-		group?.completeItem(id);
-	}, [group, id, markReady]);
+	}, [markReady]);
+
+	playRef.current = play;
+	showImmediatelyRef.current = showImmediately;
+	onCompleteRef.current = onComplete;
+
+	const registeredPlay = useCallback((delay: number) => {
+		return playRef.current(delay);
+	}, []);
+
+	const registeredShowImmediately = useCallback(() => {
+		showImmediatelyRef.current();
+	}, []);
+
+	const registeredOnComplete = useCallback(() => {
+		onCompleteRef.current();
+	}, []);
 
 	useEffect(() => {
+		if (hasPlayed) return;
 		const node = measureRef.current;
 		if (!node || !root) return;
 		const unregisterRoot = root.registerItem({
 			id,
 			element: node,
-			play,
-			showImmediately,
-			onComplete,
+			play: registeredPlay,
+			showImmediately: registeredShowImmediately,
+			onComplete: registeredOnComplete,
 		});
-		const unregisterGroup = group?.registerItem(id);
 
-		return () => {
-			unregisterGroup?.();
-			unregisterRoot();
-		};
-	}, [group, id, measureRef, onComplete, play, root, showImmediately]);
+		return () => unregisterRoot();
+	}, [
+		hasPlayed,
+		id,
+		measureRef,
+		registeredOnComplete,
+		registeredPlay,
+		registeredShowImmediately,
+		root,
+	]);
 
 	useEffect(() => {
+		if (hasPlayed) return;
 		if (!isReady || !root) return;
 		root.markReady(id);
-	}, [id, isReady, root]);
+	}, [hasPlayed, id, isReady, root]);
+
+	const usePlainAsChild = asChild && handoffAfterReveal && hasPlayed;
+
+	if (disabled || usePlainAsChild) {
+		if (asChild) {
+			return (
+				<SlotWithRef ref={childRef} className={className}>
+					{children}
+				</SlotWithRef>
+			);
+		}
+
+		const Tag = getStaticRevealTag(staticAs ?? as);
+		return createElement(Tag, { ref: viewportRef, className }, children);
+	}
+
+	const MotionTag = asChild ? MotionSlot : (as ?? motion.div);
+	const baseVariants: Variants =
+		variants ??
+		({
+			hidden: disableTransform ? { opacity: 0 } : { opacity: 0, y: 12 },
+			show: disableTransform
+				? { opacity: 1, transition: revealTiming }
+				: {
+						opacity: 1,
+						y: 0,
+						transition: revealTiming,
+						transitionEnd: { transform: "none", y: 0 },
+					},
+		} as const);
+
+	return (
+		<MotionTag
+			ref={asChild ? childRef : viewportRef}
+			initial="hidden"
+			animate={controls}
+			variants={baseVariants}
+			className={className}
+		>
+			{children}
+		</MotionTag>
+	);
+}
+
+export type RevealGroupItemProps = Omit<
+	RevealItemProps,
+	"active" | "waitFor" | "unlockStage" | "useViewport" | "viewportAmount"
+>;
+
+export function RevealGroupItem(props: RevealGroupItemProps) {
+	const group = useContext(RevealGroupContext);
+
+	if (!group) {
+		return <RevealItem {...props} />;
+	}
+
+	return <RevealGroupItemInner {...props} />;
+}
+
+function RevealGroupItemInner({
+	children,
+	as = motion.div,
+	staticAs,
+	asChild = false,
+	handoffAfterReveal = false,
+	className,
+	variants,
+	disableTransform = false,
+}: RevealGroupItemProps) {
+	const id = useId();
+	const group = useContext(RevealGroupContext);
+	const controls = useAnimationControls();
+	const revealTiming = getMotionTiming("grand");
+	const [hasPlayed, setHasPlayed] = useState(false);
+	const childRef = useRef<HTMLElement | null>(null);
+	const viewportRef = useRef<HTMLElement | null>(null);
+	const measureRef = asChild ? childRef : viewportRef;
+	const mountedRef = useRef(false);
+	const originalTransitionRef = useRef<string | null>(null);
+	const timeoutRef = useRef<number | null>(null);
+	const playRef = useRef<RevealRegisteredItem["play"]>(() => undefined);
+	const showImmediatelyRef = useRef<RevealRegisteredItem["showImmediately"]>(
+		() => undefined,
+	);
+	const onCompleteRef = useRef<RevealRegisteredItem["onComplete"]>(
+		() => undefined,
+	);
+	const disabled = group?.disabled === true;
+	const isReady = disabled || group?.started === true;
+
+	useLayoutEffect(() => {
+		mountedRef.current = true;
+
+		return () => {
+			mountedRef.current = false;
+		};
+	}, []);
+
+	useLayoutEffect(() => {
+		if (!asChild || !handoffAfterReveal || disabled || hasPlayed) return;
+		const node = childRef.current;
+		if (!node) return;
+		originalTransitionRef.current = node.style.transition;
+		node.style.transition = "none";
+	}, [asChild, disabled, handoffAfterReveal, hasPlayed]);
+
+	useEffect(() => {
+		return () => {
+			if (timeoutRef.current !== null) {
+				window.clearTimeout(timeoutRef.current);
+			}
+		};
+	}, []);
+
+	const completeReveal = useCallback(async () => {
+		if (!mountedRef.current) return;
+
+		if (asChild && handoffAfterReveal) {
+			await restoreChildTransition({
+				node: childRef.current,
+				originalTransition: originalTransitionRef.current,
+				onRestored: () => {
+					if (mountedRef.current) {
+						setHasPlayed(true);
+					}
+				},
+			});
+			return;
+		}
+
+		if (!mountedRef.current) return;
+		setHasPlayed(true);
+	}, [asChild, handoffAfterReveal]);
+
+	const play = useCallback(
+		async (delay: number) => {
+			if (variants) {
+				await new Promise<void>((resolve) => {
+					timeoutRef.current = window.setTimeout(() => {
+						timeoutRef.current = null;
+						resolve();
+					}, delay * 1000);
+				});
+				if (!mountedRef.current) return;
+
+				await controls.start("show");
+				if (!mountedRef.current) return;
+				await completeReveal();
+				return;
+			}
+
+			const target: TargetAndTransition = disableTransform
+				? {
+						opacity: 1,
+						transition: { ...revealTiming, delay },
+					}
+				: {
+						opacity: 1,
+						y: 0,
+						transition: { ...revealTiming, delay },
+						transitionEnd: { transform: "none", y: 0 },
+					};
+
+			if (!mountedRef.current) return;
+			await controls.start(target);
+			if (!mountedRef.current) return;
+			await completeReveal();
+		},
+		[completeReveal, controls, disableTransform, revealTiming, variants],
+	);
+
+	const showImmediately = useCallback(() => {
+		if (!mountedRef.current) return;
+		controls.set(disableTransform ? { opacity: 1 } : { opacity: 1, y: 0 });
+		setHasPlayed(true);
+	}, [controls, disableTransform]);
+
+	const onComplete = useCallback(() => {
+		group?.completeItem(id);
+	}, [group, id]);
+
+	playRef.current = play;
+	showImmediatelyRef.current = showImmediately;
+	onCompleteRef.current = onComplete;
+
+	const registeredPlay = useCallback((delay: number) => {
+		return playRef.current(delay);
+	}, []);
+
+	const registeredShowImmediately = useCallback(() => {
+		showImmediatelyRef.current();
+	}, []);
+
+	const registeredOnComplete = useCallback(() => {
+		onCompleteRef.current();
+	}, []);
+
+	useEffect(() => {
+		if (hasPlayed) return;
+		const node = measureRef.current;
+		if (!node || !group) return;
+		const unregisterGroup = group.registerItem({
+			id,
+			element: node,
+			play: registeredPlay,
+			showImmediately: registeredShowImmediately,
+			onComplete: registeredOnComplete,
+		});
+
+		return () => unregisterGroup();
+	}, [
+		group,
+		hasPlayed,
+		id,
+		measureRef,
+		registeredOnComplete,
+		registeredPlay,
+		registeredShowImmediately,
+	]);
+
+	useEffect(() => {
+		if (hasPlayed) return;
+		if (!isReady || !group) return;
+		group.markReady(id);
+	}, [group, hasPlayed, id, isReady]);
 
 	const usePlainAsChild = asChild && handoffAfterReveal && hasPlayed;
 

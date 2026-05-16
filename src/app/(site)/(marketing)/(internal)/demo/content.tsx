@@ -65,6 +65,7 @@ import { LetterWave } from "@/components/ui/motion/LetterWave";
 import { MotionScene } from "@/components/ui/motion/MotionScene";
 import {
 	RevealGroup,
+	RevealGroupItem,
 	RevealItem,
 	RevealRoot,
 } from "@/components/ui/motion/Reveal";
@@ -424,13 +425,14 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: [],
 	},
 	RevealRoot: { uses: [], usedIn: [] },
-	RevealGroup: { uses: [], usedIn: [] },
+	RevealGroup: { uses: ["RevealGroupItem"], usedIn: [] },
+	RevealGroupItem: { uses: [], usedIn: ["RevealGroup"] },
 	RevealItem: { uses: [], usedIn: [] },
 	RevealImage: {
 		uses: ["RevealItem", "Skeleton", "motionTiming"],
 		usedIn: ["ImageInspectModal"],
 	},
-	RevealText: { uses: ["RevealGroup"], usedIn: [] },
+	RevealText: { uses: ["RevealItem"], usedIn: [] },
 	LetterWave: { uses: ["Text"], usedIn: [] },
 	ScrambleReveal: { uses: ["motionTiming"], usedIn: [] },
 	ScrollHighlightText: { uses: [], usedIn: [] },
@@ -2977,17 +2979,17 @@ export const demoPages: DemoPage[] = [
 						id: "reveal-group",
 						kind: "component",
 						name: "RevealGroup",
-						label: "Compatibility scope",
+						label: "Local stagger boundary",
 						related: relatedMap.RevealGroup,
 						Render() {
 							return (
-								<RevealGroup className="flex flex-col gap-2" stagger={0.08}>
-									<RevealItem>
+								<RevealGroup className="flex flex-col gap-2" stagger={0.16}>
+									<RevealGroupItem>
 										<Text variant="bodyStrong">Scoped reveal 1</Text>
-									</RevealItem>
-									<RevealItem>
+									</RevealGroupItem>
+									<RevealGroupItem>
 										<Text variant="bodyStrong">Scoped reveal 2</Text>
-									</RevealItem>
+									</RevealGroupItem>
 								</RevealGroup>
 							);
 						},
@@ -3020,9 +3022,9 @@ export const demoPages: DemoPage[] = [
 						related: relatedMap.RevealText,
 						Render() {
 							return (
-								<RevealGroup className="flex flex-col gap-2" stagger={0.08}>
+								<div className="flex flex-col gap-2">
 									<RevealText as="h3" variant="headingSm">
-										Character reveals can inherit the parent stagger.
+										Character reveals run as one scheduled reveal item.
 									</RevealText>
 									<RevealItem>
 										<Text variant="body" tone="muted">
@@ -3030,7 +3032,7 @@ export const demoPages: DemoPage[] = [
 											more deliberate than a plain line fade.
 										</Text>
 									</RevealItem>
-								</RevealGroup>
+								</div>
 							);
 						},
 					},
@@ -3095,19 +3097,19 @@ export const demoPages: DemoPage[] = [
 									<RevealGroup
 										active={imageReady}
 										className="flex flex-col gap-2"
-										stagger={0.08}
+										stagger={0.16}
 									>
-										<RevealItem active={imageReady}>
+										<RevealGroupItem>
 											<Text variant="bodyStrong">
 												Caption appears after reveal
 											</Text>
-										</RevealItem>
-										<RevealItem active={imageReady}>
+										</RevealGroupItem>
+										<RevealGroupItem>
 											<Text variant="body" tone="muted">
 												Use <code>onRevealStateChange</code> to gate the next
 												stagger explicitly.
 											</Text>
-										</RevealItem>
+										</RevealGroupItem>
 									</RevealGroup>
 								</div>
 							);
@@ -3157,19 +3159,19 @@ export const demoPages: DemoPage[] = [
 												waitFor="media"
 												unlockStage="content"
 												className="flex flex-col gap-2"
-												stagger={0.08}
+												stagger={0.16}
 											>
-												<RevealItem>
+												<RevealGroupItem>
 													<Text variant="headingSm">
 														Content waits for the media reveal to finish.
 													</Text>
-												</RevealItem>
-												<RevealItem>
+												</RevealGroupItem>
+												<RevealGroupItem>
 													<Text variant="body" tone="muted">
 														This keeps the section API declarative instead of
 														wiring image state through page-local booleans.
 													</Text>
-												</RevealItem>
+												</RevealGroupItem>
 											</RevealGroup>
 											<Text variant="bodyStrong" as="span">
 												<ScrambleReveal
@@ -3182,14 +3184,14 @@ export const demoPages: DemoPage[] = [
 											<RevealGroup
 												waitFor="accent"
 												className="flex gap-2"
-												stagger={0.06}
+												stagger={0.12}
 											>
-												<RevealItem className="rounded-full border border-border/10 bg-surface px-3 py-1">
+												<RevealGroupItem className="rounded-full border border-border/10 bg-surface px-3 py-1">
 													<Text variant="caption">Scene</Text>
-												</RevealItem>
-												<RevealItem className="rounded-full border border-border/10 bg-surface px-3 py-1">
+												</RevealGroupItem>
+												<RevealGroupItem className="rounded-full border border-border/10 bg-surface px-3 py-1">
 													<Text variant="caption">Unlocked</Text>
-												</RevealItem>
+												</RevealGroupItem>
 											</RevealGroup>
 										</div>
 									</MotionScene>
@@ -3230,7 +3232,7 @@ export const demoPages: DemoPage[] = [
 						label: "Staged usage",
 						related: relatedMap.MotionScene,
 						snippet: `import { MotionScene } from "@/components/ui/motion/MotionScene";
-import { RevealGroup, RevealItem, RevealRoot } from "@/components/ui/motion/Reveal";
+import { RevealGroup, RevealGroupItem, RevealRoot } from "@/components/ui/motion/Reveal";
 import { RevealImage } from "@/components/ui/motion/RevealImage";
 import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 
@@ -3238,7 +3240,7 @@ import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 	<MotionScene>
 		<RevealImage waitFor="app" unlockStage="media" {...imageProps} />
 		<RevealGroup waitFor="media" unlockStage="content">
-			<RevealItem>...</RevealItem>
+			<RevealGroupItem>...</RevealGroupItem>
 		</RevealGroup>
 		<ScrambleReveal waitFor="content" text="..." maintainSpace />
 	</MotionScene>

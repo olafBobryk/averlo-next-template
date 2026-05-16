@@ -32,7 +32,7 @@ For any new reusable UI-library feature:
 - **Input shell invariant:** Text-like controls should use `InputFrame` for the shell and `inputVariants` or `inputSizeClasses` for the actual input element. Padding belongs on the input, not the wrapper.
 - **Typography invariant:** Use `Text` variants or the shared font utilities. Do not hardcode font families in component-level UI.
 - **Motion invariant:** CSS motion utilities are the default. Use `motion/react` only where the library already does or where layout/reveal motion truly needs it. Respect reduced motion via `useMotionAllowed`.
-  - For entrance reveals, prefer the canonical scheduler in `RevealRoot` / `RevealItem`. Marketing pages already provide a route-level `RevealRoot`; isolated surfaces can rely on the local fallback or add a scoped root.
+  - For entrance reveals, prefer the canonical scheduler in `RevealRoot` / `RevealItem`. Use `RevealGroup` plus `RevealGroupItem` when a section should enter as one root-scheduled boundary with local child stagger. Marketing pages already provide a route-level `RevealRoot`; isolated surfaces can rely on the local fallback or add a scoped root.
   - For screenshot scripts and AI traversal, disable reveal motion at the root with the motion setting or a URL override such as `?motion=off` / `?reveal=off`; disabled roots render reveal content visible immediately.
   - For load-aware media reveals, prefer `RevealImage` with scheduler gates, `waitFor`, and `unlockStage` instead of page-local image-loading animation code.
   - For multi-step choreography across intro completion, media reveal, and later copy or accents, prefer `MotionScene` over page-local booleans and ad hoc callback chains.

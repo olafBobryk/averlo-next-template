@@ -11,9 +11,9 @@ const playgroundGroups = [
 		links: [
 			{
 				href: "/internal/playground/motion/reveal-root",
-				title: "Reveal Root",
+				title: "Reveal Group Scheduler",
 				description:
-					"Route-local reveal scheduler where visible items join one stagger queue.",
+					"Root items, root-scheduled groups, and group-local stagger verification.",
 			},
 		],
 	},
