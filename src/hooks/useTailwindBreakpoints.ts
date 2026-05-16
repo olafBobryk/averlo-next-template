@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useMediaQuery } from "react-responsive";
 
 /**
@@ -14,6 +15,12 @@ import { useMediaQuery } from "react-responsive";
  * Import and call this hook inside client components.
  */
 export function useTailwindBreakpoints() {
+	const [hasMounted, setHasMounted] = React.useState(false);
+
+	React.useEffect(() => {
+		setHasMounted(true);
+	}, []);
+
 	// "Only" ranges (non-overlapping)
 	const isXs = useMediaQuery({ maxWidth: 639.98 }); // < 640
 	const isSm = useMediaQuery({ minWidth: 640, maxWidth: 767.98 });
@@ -35,6 +42,32 @@ export function useTailwindBreakpoints() {
 	const isLgDown = useMediaQuery({ maxWidth: 1023.98 });
 	const isXlDown = useMediaQuery({ maxWidth: 1279.98 });
 	const is2xlDown = useMediaQuery({ maxWidth: 1535.98 });
+
+	if (!hasMounted) {
+		return {
+			// only
+			isXs: false,
+			isSm: false,
+			isMd: false,
+			isLg: false,
+			isXl: false,
+			is2xl: false,
+
+			// up
+			isSmUp: false,
+			isMdUp: false,
+			isLgUp: false,
+			isXlUp: false,
+			is2xlUp: false,
+
+			// down
+			isSmDown: false,
+			isMdDown: false,
+			isLgDown: false,
+			isXlDown: false,
+			is2xlDown: false,
+		};
+	}
 
 	return {
 		// only

@@ -12,6 +12,8 @@ type PaginationControlsProps = {
 	disablePrev?: boolean;
 	disableNext?: boolean;
 	variant?: ButtonProps["variant"];
+	buttonSize?: ButtonProps["size"];
+	preserveIconDirection?: boolean;
 	textVariant?: TextProps["variant"];
 	textClassName?: string;
 	className?: string;
@@ -27,20 +29,24 @@ export function PaginationControls({
 	disablePrev,
 	disableNext,
 	variant = "solid",
+	buttonSize = "icon-sm",
+	preserveIconDirection = false,
 	textVariant = "body",
 	textClassName,
 	className,
 }: PaginationControlsProps) {
+	const iconClassName = preserveIconDirection ? "rtl:-scale-x-100" : undefined;
+
 	return (
 		<div className={`flex items-center gap-[15px] ${className ?? ""}`}>
 			<Button
 				variant={variant}
-				size="icon-sm"
+				size={buttonSize}
 				onClick={onPrev}
 				aria-label={prevLabel}
 				disabled={disablePrev}
 			>
-				<Icon name="caret-left" />
+				<Icon name="caret-left" className={iconClassName} />
 			</Button>
 			<Text
 				variant={textVariant}
@@ -50,12 +56,12 @@ export function PaginationControls({
 			</Text>
 			<Button
 				variant={variant}
-				size="icon-sm"
+				size={buttonSize}
 				onClick={onNext}
 				aria-label={nextLabel}
 				disabled={disableNext}
 			>
-				<Icon name="caret-right" />
+				<Icon name="caret-right" className={iconClassName} />
 			</Button>
 		</div>
 	);

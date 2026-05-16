@@ -14,6 +14,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - `src/components/ui/misc/FileGallery.tsx`: horizontal gallery for pending and uploaded file previews.
 - `src/components/ui/misc/FileInspectModal.tsx`: modal body for PDFs and unsupported file previews.
 - `src/components/ui/misc/HealthCheckIndicator.tsx`: compact service health display backed by a health endpoint.
+- `src/components/ui/misc/ImageSwitcher.tsx`: reusable image switcher with stable transitions, eager preloading, swipe support, and shared pagination controls.
 - `src/components/ui/misc/Loader.tsx`: spinner loader.
 - `src/components/ui/misc/MoreMenuDropdown.tsx`: overflow action menu.
 - `src/components/ui/misc/PaginationControls.tsx`: compact previous or next pagination controls.
@@ -52,6 +53,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - Use `Tooltip` for short helper copy on hover or focus instead of hand-rolled positioned labels.
 - Use `InspectableImage` for click-to-zoom image behavior.
 - Use `HealthCheckIndicator` for compact live service status instead of page-local polling badges.
+- Use `ImageSwitcher` for small image carousels or before/after-style media switchers before building page-local slideshow state.
 - Use `Warning` for cautionary messaging; use `variant="panel"` when the warning should be visually separated from surrounding content.
 - Use `Pill` for compact labels and statuses when the element is not itself an action.
 - Use `ProfilePicture` for avatar display before assembling image, initial, or fallback badges by hand.

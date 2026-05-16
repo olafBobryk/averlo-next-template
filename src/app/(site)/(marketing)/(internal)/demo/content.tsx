@@ -42,6 +42,10 @@ import {
 	type FilePreviewItem,
 } from "@/components/ui/misc/FilePreview";
 import { HealthCheckIndicator } from "@/components/ui/misc/HealthCheckIndicator";
+import {
+	ImageSwitcher,
+	type ImageSwitcherImage,
+} from "@/components/ui/misc/ImageSwitcher";
 import { InspectableImage } from "@/components/ui/misc/InspectableImage";
 import { Loader } from "@/components/ui/misc/Loader";
 import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
@@ -183,6 +187,21 @@ const mockHealthErrorClient = createApiClient({
 		},
 	]),
 });
+
+const imageSwitcherDemoImages = [
+	{
+		src: "/test/mercury.png",
+		alt: "Mercury-like abstract surface",
+		blurDataURL:
+			"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAyMCAxMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAiIGhlaWdodD0iMTIiIGZpbGw9IiNkOGQ4ZDAiLz48Y2lyY2xlIGN4PSIxNCIgY3k9IjYiIHI9IjUiIGZpbGw9IiNhZWE4OTgiLz48L3N2Zz4=",
+	},
+	{
+		src: "/test/blob.png",
+		alt: "Soft abstract blob",
+		blurDataURL:
+			"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAyMCAxMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAiIGhlaWdodD0iMTIiIGZpbGw9IiNmMWY1ZjkiLz48Y2lyY2xlIGN4PSI4IiBjeT0iNiIgcj0iNSIgZmlsbD0iIzk0YTNmNyIvPjwvc3ZnPg==",
+	},
+] satisfies ImageSwitcherImage[];
 
 const relatedMap: Record<string, RelatedInfo> = {
 	Logo: { uses: [], usedIn: ["Footer", "HeaderCompact", "HeaderFull"] },
@@ -589,9 +608,13 @@ const relatedMap: Record<string, RelatedInfo> = {
 		uses: ["Button", "Dropdown", "Icon", "Listbox"],
 		usedIn: [],
 	},
+	ImageSwitcher: {
+		uses: ["Image", "PaginationControls", "motionTiming"],
+		usedIn: [],
+	},
 	PaginationControls: {
 		uses: ["Button", "Icon", "Text"],
-		usedIn: [],
+		usedIn: ["ImageSwitcher"],
 	},
 	ScrollBorders: {
 		uses: ["Button", "focus", "motionTiming"],
@@ -2456,6 +2479,41 @@ export const demoPages: DemoPage[] = [
   onNext={() => setPage((value) => Math.min(totalPages, value + 1))}
   disablePrev={page <= 1}
   disableNext={page >= totalPages}
+/>`,
+					},
+					{
+						id: "image-switcher",
+						kind: "component",
+						name: "ImageSwitcher",
+						label: "Preloaded image switcher",
+						related: relatedMap.ImageSwitcher,
+						Render() {
+							return (
+								<ImageSwitcher
+									images={imageSwitcherDemoImages}
+									frameClassName="h-64 max-w-xl"
+									imageClassName="object-cover"
+									controlsClassName="justify-center"
+									paginationButtonSize="icon"
+									preserveIconDirection
+									sizes="(min-width: 768px) 36rem, 100vw"
+								/>
+							);
+						},
+					},
+					{
+						id: "image-switcher-usage",
+						kind: "usage",
+						name: "ImageSwitcher",
+						label: "Usage",
+						snippet: `<ImageSwitcher
+  images={[
+    { src: "/test/mercury.png", alt: "Mercury-like abstract surface" },
+    { src: "/test/blob.png", alt: "Soft abstract blob" },
+  ]}
+  frameClassName="h-64 max-w-xl"
+  controlsClassName="justify-center"
+  sizes="(min-width: 768px) 36rem, 100vw"
 />`,
 					},
 					{
