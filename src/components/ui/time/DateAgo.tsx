@@ -5,8 +5,12 @@ import * as React from "react";
 import { Text, type TextProps } from "@/components/ui/primitives/Text";
 
 type DateInput = string | Date | null | undefined;
+type ParagraphTextProps = Omit<
+	Extract<TextProps, { as: "p" }>,
+	"as" | "children"
+>;
 
-type DateAgoProps = Omit<TextProps, "children" | "as"> & {
+type DateAgoProps = ParagraphTextProps & {
 	date: DateInput;
 	leadingText?: React.ReactNode;
 	trailingText?: React.ReactNode;
@@ -71,7 +75,7 @@ export function DateAgo({
 	const value = parsed ? formatAgo(Date.now() - parsed.getTime()) : null;
 
 	return (
-		<Text as="p" {...(textProps as any)}>
+		<Text as="p" {...textProps}>
 			{leadingText ?? null}
 			{value ?? placeholder}
 			{trailingText ?? null}

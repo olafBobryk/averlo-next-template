@@ -7,7 +7,6 @@ import {
 	InputFrame,
 	type InputFrameSize,
 	inputPaddingXClasses,
-	inputPaddingYClasses,
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
 

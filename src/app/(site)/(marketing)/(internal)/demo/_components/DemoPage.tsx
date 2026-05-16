@@ -21,8 +21,10 @@ export type DemoPageProps = {
 	mode?: "full" | "skeleton";
 };
 
-const buildSkeletonItem = (item: DemoComponentItem): DemoComponentItem => {
-	const skeleton = item.skeleton!;
+const buildSkeletonItem = (
+	item: DemoComponentItem,
+	skeleton: NonNullable<DemoComponentItem["skeleton"]>,
+): DemoComponentItem => {
 	return {
 		id: `${item.id}-skeleton`,
 		kind: "component",
@@ -132,7 +134,7 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 							? group.items.flatMap((item) => {
 									if (item.kind !== "component" || !item.skeleton) return [];
 									const liveItem = buildLiveItem(item);
-									const skeletonItem = buildSkeletonItem(item);
+									const skeletonItem = buildSkeletonItem(item, item.skeleton);
 									return [
 										<div
 											key={`${item.id}-pair`}

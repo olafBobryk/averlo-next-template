@@ -10,12 +10,7 @@ export const manifest = {
 		"src/components/mount/LoadingScreenMount.tsx",
 		"src/components/mount/RiveLoadingAnimation.tsx",
 	],
-	adaptationPoints: [
-		"logo asset",
-		"colors",
-		"timing",
-		"wordmark lockup",
-	],
+	adaptationPoints: ["logo asset", "colors", "timing", "wordmark lockup"],
 	notes: [
 		"Uses a lazily loaded animation surface so runtime failures can fall through timeouts.",
 		"Locks body scroll until the loading screen exits.",

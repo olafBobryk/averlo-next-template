@@ -359,7 +359,10 @@ export const customRegistry = {
 					d="M10 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-1.667a3.333 3.333 0 1 0 0-6.666 3.333 3.333 0 0 0 0 6.666Z"
 					clipRule="evenodd"
 				/>
-				<path fill="currentColor" d="M15 4.167a.833.833 0 1 0 0 1.666.833.833 0 0 0 0-1.667Z" />
+				<path
+					fill="currentColor"
+					d="M15 4.167a.833.833 0 1 0 0 1.666.833.833 0 0 0 0-1.667Z"
+				/>
 				<path
 					fill="currentColor"
 					fillRule="evenodd"

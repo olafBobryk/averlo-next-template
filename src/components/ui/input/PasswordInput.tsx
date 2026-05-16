@@ -2,11 +2,14 @@
 "use client";
 
 import * as React from "react";
-import { CopyStatusIcon, useCopyAction } from "@/components/ui/helpers/useCopyAction";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
-import { Field } from "@/components/ui/primitives/Field";
+import {
+	CopyStatusIcon,
+	useCopyAction,
+} from "@/components/ui/helpers/useCopyAction";
 import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
+import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
 	type InputFrameSize,
@@ -98,9 +101,7 @@ export function PasswordInput({
 	size,
 }: PasswordInputProps) {
 	const isControlled = value !== undefined;
-	const [internalValue, setInternalValue] = React.useState(
-		defaultValue ?? "",
-	);
+	const [internalValue, setInternalValue] = React.useState(defaultValue ?? "");
 
 	const [clientError, setClientError] = React.useState<string | null>(null);
 	const [isVisible, setIsVisible] = React.useState(false);
@@ -116,7 +117,7 @@ export function PasswordInput({
 		[descriptionId, derivedError ? messageId : undefined]
 			.filter(Boolean)
 			.join(" ") || undefined;
-	const currentValue = isControlled ? value ?? "" : internalValue;
+	const currentValue = isControlled ? (value ?? "") : internalValue;
 	const { copied, handleCopy } = useCopyAction({
 		value: currentValue,
 		onCopy,

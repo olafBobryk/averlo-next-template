@@ -2,14 +2,17 @@
 "use client";
 
 import * as React from "react";
-import { CopyStatusIcon, useCopyAction } from "@/components/ui/helpers/useCopyAction";
+import {
+	CopyStatusIcon,
+	useCopyAction,
+} from "@/components/ui/helpers/useCopyAction";
+import { Button } from "@/components/ui/primitives/Button";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
 	type InputFrameSize,
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
-import { Button } from "@/components/ui/primitives/Button";
 
 type TextInputProps = {
 	label: React.ReactNode;
@@ -72,7 +75,7 @@ export function TextInput({
 	const inputRef = React.useRef<HTMLInputElement | null>(null);
 
 	const { copied, handleCopy } = useCopyAction({
-		value: isControlled ? value ?? "" : undefined,
+		value: isControlled ? (value ?? "") : undefined,
 		getValue: !isControlled
 			? () => inputRef.current?.value ?? defaultValue ?? ""
 			: undefined,

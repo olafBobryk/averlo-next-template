@@ -5,7 +5,6 @@
 
 import * as React from "react";
 import { focusRing } from "../foundations/focus";
-import { Icon } from "../icons/Icon";
 import { Dropdown } from "../primitives/Dropdown";
 import { InputFrame, inputSizeClasses } from "../primitives/InputFrame";
 import { Listbox } from "../primitives/Listbox";

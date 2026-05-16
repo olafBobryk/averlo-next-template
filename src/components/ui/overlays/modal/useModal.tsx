@@ -2,12 +2,18 @@
 "use client";
 
 import { useCallback } from "react";
-import { closeAllModals, closeModal, openModal, type OpenModalOptions } from "@/lib/modal";
 import type { ModalRenderFn } from "@/lib/modal";
+import {
+	closeAllModals,
+	closeModal,
+	type OpenModalOptions,
+	openModal,
+} from "@/lib/modal";
 
 export function useModal() {
 	const handleOpen = useCallback(
-		(render: ModalRenderFn, options?: OpenModalOptions) => openModal(render, options),
+		(render: ModalRenderFn, options?: OpenModalOptions) =>
+			openModal(render, options),
 		[],
 	);
 

@@ -1045,6 +1045,16 @@ export const demoPages: DemoPage[] = [
 										<Button size="md">Medium</Button>
 										<Button size="lg">Large</Button>
 										<Button size="icon" leadingIcon="plus" aria-label="Add" />
+										<Button
+											dir="rtl"
+											variant="outline"
+											trailingIcon={{
+												name: "arrow-right",
+												mirrorInRtl: true,
+											}}
+										>
+											RTL action
+										</Button>
 										<Button variant="outline" loading>
 											Loading
 										</Button>
@@ -1432,18 +1442,37 @@ export const demoPages: DemoPage[] = [
 							const iconNames = Object.keys(registry).sort();
 
 							return (
-								<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-									{iconNames.map((name) => (
-										<div
-											key={name}
-											className="flex items-center gap-3 rounded-xl border border-border/10 bg-background/60 px-3 py-2"
-										>
-											<Icon name={name as IconName} size="md" />
+								<div className="flex flex-col gap-4">
+									<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+										{iconNames.map((name) => (
+											<div
+												key={name}
+												className="flex items-center gap-3 rounded-xl border border-border/10 bg-background/60 px-3 py-2"
+											>
+												<Icon name={name as IconName} size="md" />
+												<span className="text-[11px] font-medium text-foreground/70">
+													{name}
+												</span>
+											</div>
+										))}
+									</div>
+									<div className="flex flex-wrap gap-2">
+										<div className="flex items-center gap-3 rounded-xl border border-border/10 bg-background/60 px-3 py-2">
+											<Icon name="arrow-right" size="md" mirrorInRtl />
 											<span className="text-[11px] font-medium text-foreground/70">
-												{name}
+												LTR mirrored icon
 											</span>
 										</div>
-									))}
+										<div
+											dir="rtl"
+											className="flex items-center gap-3 rounded-xl border border-border/10 bg-background/60 px-3 py-2"
+										>
+											<Icon name="arrow-right" size="md" mirrorInRtl />
+											<span className="text-[11px] font-medium text-foreground/70">
+												RTL mirrored icon
+											</span>
+										</div>
+									</div>
 								</div>
 							);
 						},

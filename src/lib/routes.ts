@@ -1,4 +1,4 @@
-import { appRoutes, type AppRouteId } from "@/config/routes";
+import { type AppRouteId, appRoutes } from "@/config/routes";
 
 export type { AppRouteId } from "@/config/routes";
 
@@ -7,7 +7,8 @@ export function hrefFor(routeId: AppRouteId) {
 }
 
 export const routeBuilders = {
-	dashboardSubpage: (...segments: string[]) => `/dashboard/${segments.join("/")}`,
+	dashboardSubpage: (...segments: string[]) =>
+		`/dashboard/${segments.join("/")}`,
 	dictionaryEntry: (...segments: string[]) =>
 		`/dictionary/${segments.join("/")}`,
 };

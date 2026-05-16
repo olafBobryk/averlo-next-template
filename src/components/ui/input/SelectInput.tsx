@@ -3,11 +3,11 @@
 "use client";
 
 import * as React from "react";
+import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { dropdownListClassName } from "@/components/ui/primitives/dropdownStyles";
 import { Field } from "@/components/ui/primitives/Field";
-import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import {
 	InputFrame,
 	type InputFrameSize,
@@ -256,7 +256,7 @@ export function SelectInput<T>({
 
 					return (
 						<InputFrame
-							ref={ref as any}
+							ref={ref as React.Ref<HTMLDivElement>}
 							onMouseEnter={onRootMouseEnter}
 							onMouseLeave={onRootMouseLeave}
 							tone={tone}

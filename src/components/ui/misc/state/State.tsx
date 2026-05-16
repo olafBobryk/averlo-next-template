@@ -1,11 +1,11 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
 import clsx from "clsx";
+import type * as React from "react";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
-import { Text } from "@/components/ui/primitives/Text";
 import { Button } from "@/components/ui/primitives/Button";
+import { Text } from "@/components/ui/primitives/Text";
 
 const stateIndicatorStyles = cva("flex w-full min-w-0", {
 	variants: {

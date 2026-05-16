@@ -1,8 +1,8 @@
 "use client";
 
+import { CopyField } from "@/components/ui/misc/CopyField";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
-import { CopyField } from "@/components/ui/misc/CopyField";
 
 export type RelatedInfo = { uses: string[]; usedIn: string[] };
 

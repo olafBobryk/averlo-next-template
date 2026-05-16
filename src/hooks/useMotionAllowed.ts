@@ -4,6 +4,12 @@
 import { useEffect, useState } from "react";
 import { useSettingsContext } from "@/components/ui/foundations/settingsContext";
 
+type NetworkInformationLike = {
+	saveData?: boolean;
+	addEventListener?: (type: "change", listener: () => void) => void;
+	removeEventListener?: (type: "change", listener: () => void) => void;
+};
+
 export function useMotionAllowed(disableWhenReduced: boolean) {
 	const settings = useSettingsContext();
 	const forcedDisabled = settings?.motionDisabled === true;
@@ -23,7 +29,9 @@ export function useMotionAllowed(disableWhenReduced: boolean) {
 		}
 
 		const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-		const connection = (navigator as any)?.connection;
+		const connection = (
+			navigator as Navigator & { connection?: NetworkInformationLike }
+		).connection;
 
 		const compute = () => {
 			const prefersReduce = media.matches;

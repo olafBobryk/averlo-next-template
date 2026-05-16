@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
 import clsx from "clsx";
+import type * as React from "react";
+import type { IconName } from "@/components/ui/icons/Icon";
 import { StateIndicator, type StateIndicatorProps } from "./State";
-import { IconName } from "@/components/ui/icons/Icon";
 
 export type ErrorStateProps = {
 	title?: React.ReactNode;

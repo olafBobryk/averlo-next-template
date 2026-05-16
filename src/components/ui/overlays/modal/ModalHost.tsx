@@ -3,15 +3,15 @@
 
 import { AnimatePresence } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
-import { ModalShell } from "./ModalShell";
 import {
+	closeModal as dispatchClose,
 	MODAL_CLOSE_ALL_EVENT,
 	MODAL_CLOSE_EVENT,
 	MODAL_OPEN_EVENT,
 	type ModalRenderFn,
 	type OpenModalOptions,
-	closeModal as dispatchClose,
 } from "@/lib/modal";
+import { ModalShell } from "./ModalShell";
 
 type ActiveModal = {
 	id: string;
@@ -28,7 +28,8 @@ export function ModalHost() {
 
 	useEffect(() => {
 		const handleOpen = (event: Event) => {
-			const { id, render, options } = (event as CustomEvent<ActiveModal>).detail;
+			const { id, render, options } = (event as CustomEvent<ActiveModal>)
+				.detail;
 			setModals((prev) => [...prev, { id, render, options }]);
 		};
 
@@ -45,7 +46,10 @@ export function ModalHost() {
 
 		return () => {
 			window.removeEventListener(MODAL_OPEN_EVENT, handleOpen as EventListener);
-			window.removeEventListener(MODAL_CLOSE_EVENT, handleClose as EventListener);
+			window.removeEventListener(
+				MODAL_CLOSE_EVENT,
+				handleClose as EventListener,
+			);
 			window.removeEventListener(MODAL_CLOSE_ALL_EVENT, handleCloseAll);
 		};
 	}, [removeModal]);

@@ -54,6 +54,7 @@ type IconProps = {
 	className?: string;
 	animate?: boolean;
 	weight?: IconWeight;
+	mirrorInRtl?: boolean;
 } & VariantProps<typeof iconSizeStyles> &
 	VariantProps<typeof iconFrameStyles> &
 	Omit<ComponentProps<"span">, "children">;
@@ -81,6 +82,7 @@ const IconRoot = ({
 	className,
 	animate = false,
 	weight,
+	mirrorInRtl = false,
 	...rest
 }: IconProps) => {
 	const registry = useIconRegistry();
@@ -136,6 +138,7 @@ const IconRoot = ({
 		.join(" ");
 	const innerClassName = [
 		iconSizeStyles({ size }),
+		mirrorInRtl ? "rtl:-scale-x-100" : undefined,
 		shouldAnimate ? animatedIconClassMap[name] : undefined,
 		frame === "none" ? className : undefined,
 	]

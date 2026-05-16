@@ -1,9 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { motion, type Transition } from "motion/react";
 import { useId } from "react";
-import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import {
@@ -11,7 +9,6 @@ import {
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
 import { Text } from "@/components/ui/primitives/Text";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { getMarketingLinkHref } from "@/lib/marketing-content/links";
 import type {
 	MarketingLink,
@@ -120,10 +117,6 @@ export function HeaderSearchInput({
 }) {
 	const searchId = useId();
 	const hasValue = value.trim().length > 0;
-	const motionAllowed = useMotionAllowed(true);
-	const iconTransition: Transition = motionAllowed
-		? spring.micro
-		: { duration: 0 };
 
 	return (
 		<InputFrame
@@ -132,7 +125,13 @@ export function HeaderSearchInput({
 				className ??
 				"group/header-search mr-3 w-[220px] min-w-[220px] max-w-[220px] flex-none basis-[220px] text-foreground"
 			}
-			contentClassName="relative flex items-center"
+			start={
+				<Icon
+					name="search"
+					size="md"
+					className="pointer-events-none text-muted"
+				/>
+			}
 			end={
 				<Button
 					type="button"
@@ -155,19 +154,6 @@ export function HeaderSearchInput({
 				</Button>
 			}
 		>
-			<motion.span
-				aria-hidden="true"
-				className="pointer-events-none absolute start-0 flex size-5 items-center justify-center text-muted"
-				initial={false}
-				animate={{
-					x: hasValue ? -8 : 0,
-					opacity: hasValue ? 0 : 1,
-					scale: hasValue ? 0.86 : 1,
-				}}
-				transition={iconTransition}
-			>
-				<Icon name="search" className="size-full" />
-			</motion.span>
 			<input
 				id={searchId}
 				type="search"
@@ -177,8 +163,7 @@ export function HeaderSearchInput({
 				placeholder={placeholder}
 				autoComplete="off"
 				className={clsx(
-					inputVariants({ size: "sm" }),
-					hasValue ? undefined : "ps-7",
+					inputVariants({ size: "sm", hasStart: true, hasEnd: true }),
 					"[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
 				)}
 			/>

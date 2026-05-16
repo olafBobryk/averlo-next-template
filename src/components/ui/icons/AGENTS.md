@@ -18,6 +18,7 @@ Central icon rendering system and registry infrastructure for the component libr
 - Use `Icon` instead of inline SVG for standard library icons.
 - Icon sizing should stay on the shared `sm`, `md`, and `lg` scale unless there is a clear reason to pass explicit dimensions from a parent component.
 - Visual icon animation should remain opt-in and should respect reduced motion where the component already expects that behavior.
+- Directional RTL mirroring should remain opt-in with `mirrorInRtl`; do not automatically flip every left/right icon because some controls represent physical direction.
 - Icons are decorative in most button and control contexts. Keep them `aria-hidden` unless the icon itself is the accessible content.
 - Focus visibility belongs to the control containing the icon, not the icon wrapper.
 - If SVG is inlined in JSX or TSX, use camelCase attribute names like `clipPath`, `strokeWidth`, `colorInterpolationFilters`, `stopColor`, `stopOpacity`, and `maskType`.

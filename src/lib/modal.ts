@@ -32,7 +32,8 @@ export function openModal(
 ): string {
 	if (typeof window === "undefined") return "";
 
-	const id = options?.id ?? `modal_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+	const id =
+		options?.id ?? `modal_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 
 	window.dispatchEvent(
 		new CustomEvent<ModalOpenEventDetail>(MODAL_OPEN_EVENT, {
@@ -46,7 +47,9 @@ export function openModal(
 export function closeModal(id: string) {
 	if (typeof window === "undefined") return;
 	window.dispatchEvent(
-		new CustomEvent<ModalCloseEventDetail>(MODAL_CLOSE_EVENT, { detail: { id } }),
+		new CustomEvent<ModalCloseEventDetail>(MODAL_CLOSE_EVENT, {
+			detail: { id },
+		}),
 	);
 }
 

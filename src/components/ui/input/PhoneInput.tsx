@@ -582,7 +582,7 @@ export function PhoneInput({
 										setActiveIndex(0);
 									}
 								}}
-								onBlur={(event) => {
+								onBlur={() => {
 									if (validate) {
 										setClientError(validate(e164Value, selectedCountryCode));
 									}

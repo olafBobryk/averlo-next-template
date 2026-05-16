@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import Divider from "@/components/ui/primitives/Divider";
 import { Warning } from "@/components/ui/misc/Warning";
 import { Button } from "@/components/ui/primitives/Button";
+import Divider from "@/components/ui/primitives/Divider";
 import { Text } from "@/components/ui/primitives/Text";
 
 type ConfirmationModalProps = {

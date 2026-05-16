@@ -3,8 +3,12 @@ import type * as React from "react";
 import { Text, type TextProps } from "@/components/ui/primitives/Text";
 
 type DateInput = Date | string | number;
+type ParagraphTextProps = Omit<
+	Extract<TextProps, { as: "p" }>,
+	"as" | "children"
+>;
 
-type DateIndicatorProps = Omit<TextProps, "children"> & {
+type DateIndicatorProps = ParagraphTextProps & {
 	date?: DateInput;
 	leadingText?: React.ReactNode;
 };
@@ -53,7 +57,7 @@ export function DateIndicator({
 	const formatted = `${weekday}, ${dayNum}${suffix} ${month}`;
 
 	return (
-		<Text as="p" {...(textProps as any)}>
+		<Text as="p" {...textProps}>
 			{leadingText && <>{leadingText} </>}
 			{formatted}
 		</Text>

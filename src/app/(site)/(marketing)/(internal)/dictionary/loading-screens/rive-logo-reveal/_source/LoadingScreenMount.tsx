@@ -18,7 +18,8 @@ const EXIT_GUARD_MS = 1200;
 
 const RiveLoadingAnimation = lazy(() =>
 	import("./RiveLoadingAnimation").catch(() => ({
-		default: (() => null) as unknown as typeof import("./RiveLoadingAnimation")["default"],
+		default: (() =>
+			null) as unknown as typeof import("./RiveLoadingAnimation")["default"],
 	})),
 );
 

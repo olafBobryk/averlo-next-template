@@ -339,9 +339,13 @@
 	select:-webkit-autofill:hover,
 	select:-webkit-autofill:focus,
 	select:-webkit-autofill:active {
+		/** biome-ignore lint/complexity/noImportantStyles: WebKit autofill requires important to override browser-injected colors. */
 		-webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+		/** biome-ignore lint/complexity/noImportantStyles: WebKit autofill requires important to override browser-injected colors. */
 		-webkit-text-fill-color: inherit !important;
+		/** biome-ignore lint/complexity/noImportantStyles: WebKit autofill requires important to preserve delayed autofill background behavior. */
 		transition: background-color 5000s ease-in-out 0s !important;
+		/** biome-ignore lint/complexity/noImportantStyles: WebKit autofill requires important to override browser-injected colors. */
 		caret-color: rgb(var(--color-foreground-rgb) / 1) !important;
 	}
 }

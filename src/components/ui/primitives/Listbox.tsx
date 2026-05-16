@@ -1,16 +1,19 @@
 // components/ui/primitives/Listbox.tsx
 "use client";
 
-import * as React from "react";
 import clsx from "clsx";
+import type * as React from "react";
 import { Button } from "@/components/ui/primitives/Button";
-import { Text } from "@/components/ui/primitives/Text";
 import {
 	dropdownEmptyStateClassName,
 	dropdownListClassName,
 	dropdownListWrapperClassName,
 	getDropdownOptionClassName,
 } from "@/components/ui/primitives/dropdownStyles";
+import { Text } from "@/components/ui/primitives/Text";
+
+const interactiveDescendantSelector =
+	'input,textarea,select,button,[role="button"]';
 
 export type ListboxOption<T> = {
 	key?: React.Key;
@@ -33,7 +36,7 @@ type ListboxProps<T> = {
 	onSelect?: (
 		option: ListboxOption<T>,
 		index: number,
-		event: React.MouseEvent<HTMLElement>,
+		event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>,
 	) => void;
 	emptyState?: React.ReactNode;
 	listRef?: React.Ref<HTMLDivElement>;
@@ -79,156 +82,177 @@ export function Listbox<T>({
 	multiselectable,
 	disabled,
 }: ListboxProps<T>) {
-	const resolvedEmpty =
-		emptyState ?? (
-			<Text variant="body">No results</Text>
-		);
+	const resolvedEmpty = emptyState ?? <Text variant="body">No results</Text>;
 
-	return (
-		<div
-			ref={listRef}
-			id={listId}
-			role={role}
-			tabIndex={listTabIndex}
-			aria-activedescendant={ariaActivedescendant}
-			aria-multiselectable={
-				role === "listbox" && multiselectable ? true : undefined
-			}
-			onKeyDown={onKeyDown}
-			onFocus={onFocus}
-			className={clsx(dropdownListWrapperClassName, className)}
-		>
-			{options.length === 0 ? (
-				<div className={dropdownEmptyStateClassName}>{resolvedEmpty}</div>
-			) : (
-				<div className={clsx(dropdownListClassName, listClassName)}>
-					{options.map((option, index) => {
-						const isActive = activeIndex === index;
-						const isSelected = Boolean(option.selected);
-						const isDisabled = Boolean(disabled || option.disabled);
-						const optionId = optionIdPrefix
-							? `${optionIdPrefix}-${index}`
-							: undefined;
-						const resolvedOptionClassName = [
-							optionClassName,
-							option.className,
-						]
-							.filter(Boolean)
-							.join(" ");
-						const resolvedActiveClassName = [
-							optionActiveClassName,
-							option.activeClassName,
-						]
-							.filter(Boolean)
-							.join(" ");
-						const resolvedSelectedClassName = [
-							optionSelectedClassName,
-							option.selectedClassName,
-						]
-							.filter(Boolean)
-							.join(" ");
-						const resolvedDisabledClassName = [
-							optionDisabledClassName,
-							option.disabledClassName,
-						]
-							.filter(Boolean)
-							.join(" ");
+	const listContent =
+		options.length === 0 ? (
+			<div className={dropdownEmptyStateClassName}>{resolvedEmpty}</div>
+		) : (
+			<div className={clsx(dropdownListClassName, listClassName)}>
+				{options.map((option, index) => {
+					const isActive = activeIndex === index;
+					const isSelected = Boolean(option.selected);
+					const isDisabled = Boolean(disabled || option.disabled);
+					const optionId = optionIdPrefix
+						? `${optionIdPrefix}-${index}`
+						: undefined;
+					const resolvedOptionClassName = [optionClassName, option.className]
+						.filter(Boolean)
+						.join(" ");
+					const resolvedActiveClassName = [
+						optionActiveClassName,
+						option.activeClassName,
+					]
+						.filter(Boolean)
+						.join(" ");
+					const resolvedSelectedClassName = [
+						optionSelectedClassName,
+						option.selectedClassName,
+					]
+						.filter(Boolean)
+						.join(" ");
+					const resolvedDisabledClassName = [
+						optionDisabledClassName,
+						option.disabledClassName,
+					]
+						.filter(Boolean)
+						.join(" ");
 
-						const optionClasses = getDropdownOptionClassName({
-							active: isActive,
-							selected: isSelected,
-							disabled: isDisabled,
-							className: resolvedOptionClassName,
-							activeClassName: resolvedActiveClassName,
-							selectedClassName: resolvedSelectedClassName,
-							disabledClassName: resolvedDisabledClassName,
-						});
+					const optionClasses = getDropdownOptionClassName({
+						active: isActive,
+						selected: isSelected,
+						disabled: isDisabled,
+						className: resolvedOptionClassName,
+						activeClassName: resolvedActiveClassName,
+						selectedClassName: resolvedSelectedClassName,
+						disabledClassName: resolvedDisabledClassName,
+					});
 
-						if (option.unwrapped) {
+					if (option.unwrapped) {
+						const unwrappedOptionProps = {
+							key: option.key ?? `${index}`,
+							"data-option-index": index,
+							id: optionId,
+							"aria-disabled": isDisabled ? true : undefined,
+							className: optionClasses,
+							onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
+								const target = event.target as HTMLElement;
+								if (target.closest(interactiveDescendantSelector)) {
+									return;
+								}
+								event.preventDefault();
+							},
+							onMouseEnter: () => {
+								if (!isDisabled) onActiveIndexChange?.(index);
+							},
+							onClick: (event: React.MouseEvent<HTMLDivElement>) => {
+								if (isDisabled) {
+									event.preventDefault();
+									return;
+								}
+								const target = event.target as HTMLElement;
+								if (target.closest(interactiveDescendantSelector)) {
+									return;
+								}
+								onSelect?.(option, index, event);
+							},
+							onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
+								if (event.key !== "Enter" && event.key !== " ") return;
+								if (isDisabled) {
+									event.preventDefault();
+									return;
+								}
+								event.preventDefault();
+								onSelect?.(option, index, event);
+							},
+						};
+
+						if (optionRole === "menuitem") {
 							return (
-								<div
-									key={option.key ?? `${index}`}
-									data-option-index={index}
-									id={optionId}
-									role={optionRole}
-									aria-selected={
-										optionRole === "option" ? isSelected : undefined
-									}
-									aria-disabled={isDisabled ? true : undefined}
-									tabIndex={-1}
-									className={optionClasses}
-									onMouseDown={(event) => {
-										const target = event.target as HTMLElement;
-										if (
-											target.closest(
-												"input,textarea,select,button,[role=\"button\"]",
-											)
-										) {
-											return;
-										}
-										event.preventDefault();
-									}}
-									onMouseEnter={() => {
-										if (!isDisabled) onActiveIndexChange?.(index);
-									}}
-									onClick={(event) => {
-										if (isDisabled) {
-											event.preventDefault();
-											return;
-										}
-										const target = event.target as HTMLElement;
-										if (
-											target.closest(
-												"input,textarea,select,button,[role=\"button\"]",
-											)
-										) {
-											return;
-										}
-										onSelect?.(option, index, event);
-									}}
-								>
+								<div {...unwrappedOptionProps} role="menuitem" tabIndex={-1}>
 									{option.content}
 								</div>
 							);
 						}
 
 						return (
-							<Button
-								key={option.key ?? `${index}`}
-								href={option.href}
-								data-option-index={index}
-								id={optionId}
-								role={optionRole}
-								aria-selected={
-									optionRole === "option" ? isSelected : undefined
-								}
-								aria-disabled={isDisabled ? true : undefined}
+							<div
+								{...unwrappedOptionProps}
+								role="option"
+								aria-selected={isSelected}
 								tabIndex={-1}
-								disabled={optionRole === "menuitem" ? undefined : isDisabled}
-								variant="ghost"
-								align="left"
-								size="md"
-								className={optionClasses}
-								onMouseDown={(event: React.MouseEvent<HTMLElement>) => {
-									event.preventDefault();
-								}}
-								onMouseEnter={() => {
-									if (!isDisabled) onActiveIndexChange?.(index);
-								}}
-								onClick={(event: React.MouseEvent<HTMLElement>) => {
-									if (isDisabled) {
-										event.preventDefault();
-										return;
-									}
-									onSelect?.(option, index, event);
-								}}
 							>
 								{option.content}
-							</Button>
+							</div>
 						);
-					})}
-				</div>
-			)}
+					}
+
+					return (
+						<Button
+							key={option.key ?? `${index}`}
+							href={option.href}
+							data-option-index={index}
+							id={optionId}
+							role={optionRole}
+							aria-selected={optionRole === "option" ? isSelected : undefined}
+							aria-disabled={isDisabled ? true : undefined}
+							tabIndex={-1}
+							disabled={optionRole === "menuitem" ? undefined : isDisabled}
+							variant="ghost"
+							align="left"
+							size="md"
+							className={optionClasses}
+							onMouseDown={(event: React.MouseEvent<HTMLElement>) => {
+								event.preventDefault();
+							}}
+							onMouseEnter={() => {
+								if (!isDisabled) onActiveIndexChange?.(index);
+							}}
+							onClick={(event: React.MouseEvent<HTMLElement>) => {
+								if (isDisabled) {
+									event.preventDefault();
+									return;
+								}
+								onSelect?.(option, index, event);
+							}}
+						>
+							{option.content}
+						</Button>
+					);
+				})}
+			</div>
+		);
+
+	if (role === "menu") {
+		return (
+			<div
+				ref={listRef}
+				id={listId}
+				role="menu"
+				tabIndex={listTabIndex}
+				aria-activedescendant={ariaActivedescendant}
+				onKeyDown={onKeyDown}
+				onFocus={onFocus}
+				className={clsx(dropdownListWrapperClassName, className)}
+			>
+				{listContent}
+			</div>
+		);
+	}
+
+	return (
+		<div
+			ref={listRef}
+			id={listId}
+			role="listbox"
+			tabIndex={listTabIndex}
+			aria-activedescendant={ariaActivedescendant}
+			aria-multiselectable={multiselectable ? true : undefined}
+			onKeyDown={onKeyDown}
+			onFocus={onFocus}
+			className={clsx(dropdownListWrapperClassName, className)}
+		>
+			{listContent}
 		</div>
 	);
 }

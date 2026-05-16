@@ -4,8 +4,8 @@ import clsx from "clsx";
 import { motion } from "motion/react";
 import * as React from "react";
 import { spring } from "@/components/ui/foundations/spring";
-import { Button } from "@/components/ui/primitives/Button";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
+import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 

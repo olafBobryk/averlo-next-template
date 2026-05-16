@@ -18,7 +18,9 @@ export type MoreMenuOption = {
 	leadingIcon?: IconProp;
 	trailingIcon?: IconProp;
 	href?: string;
-	onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+	onClick?: (
+		event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>,
+	) => void;
 	disabled?: boolean;
 	active?: boolean;
 	className?: string;

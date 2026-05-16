@@ -1,5 +1,4 @@
 import { withPayload } from "@payloadcms/next/withPayload";
-import { codeInspectorPlugin } from "code-inspector-plugin";
 import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
@@ -49,6 +48,26 @@ const getDevIsolationConfig = (
 	};
 };
 
+const shouldEnableCodeInspector = (phase: string) =>
+	phase === PHASE_DEVELOPMENT_SERVER && process.env.NODE_ENV === "development";
+
+const getCodeInspectorRules = (phase: string) => {
+	if (!shouldEnableCodeInspector(phase)) {
+		return {};
+	}
+
+	const { codeInspectorPlugin } =
+		require("code-inspector-plugin") as typeof import("code-inspector-plugin");
+
+	return codeInspectorPlugin({
+		bundler: "turbopack",
+		dev: true,
+		editor: "code",
+		launchType: "open",
+		printServer: true,
+	});
+};
+
 const createNextConfig = (phase: string): NextConfig => ({
 	...getDevIsolationConfig(phase),
 	images: {
@@ -60,13 +79,7 @@ const createNextConfig = (phase: string): NextConfig => ({
 		],
 	},
 	turbopack: {
-		rules: codeInspectorPlugin({
-			bundler: "turbopack",
-			dev: process.env.NODE_ENV === "development",
-			editor: "code",
-			launchType: "open",
-			printServer: true,
-		}),
+		rules: getCodeInspectorRules(phase),
 	},
 });
 

@@ -10,7 +10,11 @@ import { Loader } from "@/components/ui/misc/Loader";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { Text, type TextProps } from "@/components/ui/primitives/Text";
 
-type IconProp = React.ReactNode | IconName;
+type IconConfig = {
+	name: IconName;
+	mirrorInRtl?: boolean;
+};
+type IconProp = React.ReactNode | IconName | IconConfig;
 
 const buttonStyles = cva(
 	[
@@ -166,6 +170,23 @@ function renderIcon(
 				name={icon as IconName}
 				animate
 				// className={animatedIconClassMap[icon as IconName]}
+				className={className}
+				style={{ width: `${size}px`, height: `${size}px` }}
+			/>
+		);
+	}
+
+	if (
+		typeof icon === "object" &&
+		icon !== null &&
+		!React.isValidElement(icon) &&
+		"name" in icon
+	) {
+		return (
+			<Icon
+				name={icon.name}
+				animate
+				mirrorInRtl={icon.mirrorInRtl}
 				className={className}
 				style={{ width: `${size}px`, height: `${size}px` }}
 			/>
