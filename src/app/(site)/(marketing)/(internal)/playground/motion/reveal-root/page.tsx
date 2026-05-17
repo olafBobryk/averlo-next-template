@@ -267,7 +267,7 @@ export default function RevealRootPlaygroundPage() {
 				<div className="flex flex-col gap-8">
 					<header className="flex max-w-3xl flex-col gap-3">
 						<Button
-							href="/internal/playground"
+							href="/playground"
 							size="sm"
 							variant="ghost"
 							className="w-fit"

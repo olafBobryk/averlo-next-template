@@ -93,7 +93,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				sections: [
 					{
 						label: "Reveal root",
-						href: "/internal/playground/motion/reveal-root",
+						href: "/playground/motion/reveal-root",
 						description: "Motion reveal scheduler playground.",
 					},
 				],

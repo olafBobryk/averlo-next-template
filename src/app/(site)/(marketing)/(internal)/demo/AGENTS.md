@@ -3,7 +3,7 @@
 Centralize the demo catalog in a single source of truth and keep demo pages consistent, discoverable, and quick to extend.
 
 ## Source of Truth
-- All demo content lives in `src/app/(site)/(internal)/demo/content.tsx`.
+- All demo content lives in `src/app/(site)/(marketing)/(internal)/demo/content.tsx`.
 - The page renderer and nav read from this content map; do not hand‑edit multiple page files.
 
 ## Content Schema (Required Fields)

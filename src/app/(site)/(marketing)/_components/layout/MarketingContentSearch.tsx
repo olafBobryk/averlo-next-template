@@ -61,7 +61,7 @@ function getMarketingSearchEntries(
 	addEntry({
 		id: "playground-motion-reveal-root",
 		label: "Playground: Reveal Group Scheduler",
-		href: "/internal/playground/motion/reveal-root",
+		href: "/playground/motion/reveal-root",
 	});
 
 	return entries;

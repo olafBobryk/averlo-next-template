@@ -2,7 +2,7 @@ export const appRoutes = {
 	home: "/",
 	contact: "/contact",
 	demo: "/demo",
-	playground: "/internal/playground",
+	playground: "/playground",
 	settings: "/settings",
 	login: "/login",
 	dashboard: "/dashboard",

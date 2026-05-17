@@ -10,7 +10,7 @@ const playgroundGroups = [
 		description: "Loose prototypes for reveal, scroll, and choreography ideas.",
 		links: [
 			{
-				href: "/internal/playground/motion/reveal-root",
+				href: "/playground/motion/reveal-root",
 				title: "Reveal Group Scheduler",
 				description:
 					"Root items, root-scheduled groups, and group-local stagger verification.",

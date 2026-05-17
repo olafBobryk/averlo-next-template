@@ -35,7 +35,7 @@ export default function DemoIndexPage() {
 				<Text variant="body" tone="muted">
 					Browse the component library demos. All content is driven by
 					<code className="ml-1">
-						src/app/(site)/(internal)/demo/content.tsx
+						src/app/(site)/(marketing)/(internal)/demo/content.tsx
 					</code>
 					.
 				</Text>
