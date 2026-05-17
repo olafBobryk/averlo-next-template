@@ -2998,19 +2998,44 @@ export const demoPages: DemoPage[] = [
 						id: "reveal-image",
 						kind: "component",
 						name: "RevealImage",
-						label: "Load-aware image reveal",
+						label: "Image reveal strategies",
 						related: relatedMap.RevealImage,
 						Render() {
 							return (
-								<RevealImage
-									src="/test/blob.png"
-									alt="Abstract blob"
-									fill
-									useViewport={false}
-									className="w-full"
-									contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
-									imageClassName="object-cover"
-								/>
+								<div className="grid gap-3 md:grid-cols-2">
+									<div className="flex flex-col gap-2">
+										<Text variant="caption" tone="muted">
+											Default: ignores image load
+										</Text>
+										<RevealImage
+											src="/test/blob.png"
+											alt="Abstract blob"
+											fill
+											useViewport={false}
+											className="w-full"
+											contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
+											imageClassName="object-cover"
+										/>
+									</div>
+									<div className="flex flex-col gap-2">
+										<Text variant="caption" tone="muted">
+											Opt-in: waits for image load
+										</Text>
+										<RevealImage
+											src="/test/mercury.png"
+											alt="Mercury-like abstract surface"
+											fill
+											useViewport={false}
+											loadStrategy="wait-for-load"
+											placeholder="blur"
+											blurDataURL={imageSwitcherDemoImages[0].blurDataURL}
+											className="w-full"
+											contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
+											imageClassName="object-cover"
+											fallback={<Skeleton className="h-full w-full" />}
+										/>
+									</div>
+								</div>
 							);
 						},
 					},
@@ -3149,6 +3174,7 @@ export const demoPages: DemoPage[] = [
 												alt="Motion scene image"
 												fill
 												useViewport={false}
+												loadStrategy="wait-for-load"
 												waitFor="app"
 												unlockStage="media"
 												className="w-full"
@@ -3238,7 +3264,7 @@ import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 
 <RevealRoot>
 	<MotionScene>
-		<RevealImage waitFor="app" unlockStage="media" {...imageProps} />
+		<RevealImage loadStrategy="wait-for-load" waitFor="app" unlockStage="media" {...imageProps} />
 		<RevealGroup waitFor="media" unlockStage="content">
 			<RevealGroupItem>...</RevealGroupItem>
 		</RevealGroup>

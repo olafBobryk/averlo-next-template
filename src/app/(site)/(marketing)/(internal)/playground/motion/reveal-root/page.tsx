@@ -221,6 +221,7 @@ function MotionSceneExample() {
 						alt="Motion scene media"
 						fill
 						sizes="(min-width: 1024px) 50vw, 100vw"
+						loadStrategy="wait-for-load"
 						waitFor="app"
 						unlockStage="media"
 						className="w-full"

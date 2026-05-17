@@ -12,9 +12,8 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 ## Prefer These Files
 - `src/components/ui/motion/MotionScene.tsx`: section-scoped stage orchestration for multi-step reveal choreography.
 - `src/components/ui/motion/Reveal.tsx`: exports `RevealRoot`, standalone `RevealItem`, root-scheduled `RevealGroup`, and group-local `RevealGroupItem`.
-- `src/components/ui/motion/RevealImage.tsx`: load-aware image reveal that joins the scheduler only after load, visibility, and scene gates are ready.
+- `src/components/ui/motion/RevealImage.tsx`: image reveal wrapper with explicit load strategies, scheduler gates, visibility, and scene gates.
 - `src/components/ui/motion/RevealText.tsx`: scheduler-based per-character text reveal.
-- `src/components/ui/motion/legacy/`: old group-triggered reveal system; use only for fallback/debugging until pruned.
 - `src/components/ui/motion/LetterWave.tsx`: hover-driven per-character wave text.
 - `src/components/ui/motion/ScrollHighlightText.tsx`: character-by-character highlight sweep driven by scroll progress.
 - `src/components/ui/motion/ScrollLag.tsx`: subtle lagging scroll effect.
@@ -30,6 +29,7 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - `RevealGroup` is a root-scheduled boundary with a local child scheduler. Use `RevealGroupItem` for children that should stagger inside the group.
 - Marketing pages already wrap page content in one root. Add a scoped `RevealRoot` only for isolated tests, resettable demos, or non-marketing surfaces.
 - Reveal motion can be disabled at the root by user settings or URL overrides such as `?motion=off` / `?reveal=off`. Disabled roots render reveal content visible immediately with no stagger or transform.
+- `RevealImage` defaults to `loadStrategy="ignore-load"`, so cache state, blur placeholders, and loading callbacks do not block the entrance reveal. Use `loadStrategy="wait-for-load"` only when reveal completion or `unlockStage` should wait for the actual image load.
 - CSS transition utilities remain the default for micro-interactions. Use these helpers for reveal or scroll motion, not as a replacement for normal component transitions.
 - Focus visibility and keyboard usability must not depend on motion. Motion can enhance presentation but cannot gate access to controls or content.
 - For `motion/react` transitions, use `motionTiming.ts`, `getMotionTiming`, or `spring.ts` instead of hardcoded durations and easings.
@@ -43,7 +43,7 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - Use `RevealGroup` when a section should count as one root-scheduled boundary and then stagger its own children locally.
 - Use `RevealGroupItem` as a direct or descendant child of `RevealGroup` for local group staggering.
 - Use `RevealText` when copy should stagger letter-by-letter as one scheduled reveal item.
-- Use `RevealImage` when an image should fade in after load without flashing, or when image readiness should unlock later reveal stages.
+- Use `RevealImage` when an image should reveal with a loading fallback or when image readiness should unlock later reveal stages. Use `loadStrategy="wait-for-load"` for image-readiness gates.
 - Use `MotionScene` when a section needs explicit sequencing such as image reveal first, copy second, and accent text third.
 - Use `active` on `RevealGroup` or `RevealItem` when reveal timing should be driven by app state instead of viewport entry.
 - Use `ScrollHighlightText` when a short string should brighten progressively as it enters the viewport.
@@ -59,5 +59,4 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - Using `RevealImage` callbacks or page-local booleans for multi-step choreography when `MotionScene` would express the same relationship directly.
 - Expecting ordinary `RevealItem` children to join a group-local stagger; use `RevealGroupItem`.
 - Using `asChild` on `RevealItem` when the wrapped border or transparency pattern depends on a stable outer wrapper.
-- Adding new imports from `src/components/ui/motion/legacy` unless explicitly preserving old behavior during migration.
 - Using `LetterWave` as a replacement for meaningful reveal timing; it is a hover accent, not a sequencing primitive.

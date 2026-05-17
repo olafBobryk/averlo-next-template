@@ -23,6 +23,7 @@ type RevealImageOwnProps = {
 	fallbackClassName?: string;
 	contentClassName?: string;
 	overlay?: React.ReactNode;
+	loadStrategy?: "ignore-load" | "wait-for-load";
 	revealDelay?: number;
 	onLoadStateChange?: (loaded: boolean) => void;
 	onRevealStateChange?: (revealed: boolean) => void;
@@ -67,6 +68,7 @@ export function RevealImage({
 	fallbackClassName,
 	contentClassName,
 	overlay,
+	loadStrategy = "ignore-load",
 	revealDelay = 0,
 	onLoadStateChange,
 	onRevealStateChange,
@@ -82,15 +84,21 @@ export function RevealImage({
 	const scene = useOptionalMotionScene();
 	const { markReady } = useMotionSceneGate("RevealImage", { unlockStage });
 	const sourceKey = getSourceKey(src);
-	const isBlur = placeholder === "blur";
-	const [loaded, setLoaded] = React.useState(isBlur);
+	const imageRef = React.useRef<HTMLImageElement | null>(null);
+	const [loaded, setLoaded] = React.useState(false);
 	const [revealed, setRevealed] = React.useState(false);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset state when the image source identity changes
 	React.useEffect(() => {
-		setLoaded(isBlur);
+		setLoaded(false);
 		setRevealed(false);
-	}, [isBlur, sourceKey]);
+	}, [sourceKey]);
+
+	React.useEffect(() => {
+		const image = imageRef.current;
+		if (!image?.complete || image.naturalWidth <= 0) return;
+		setLoaded(true);
+	});
 
 	React.useEffect(() => {
 		onLoadStateChange?.(loaded);
@@ -107,8 +115,9 @@ export function RevealImage({
 
 	const hasCustomRevealVariants = Boolean(variants);
 	const sceneReady = scene ? scene.isStageReady(waitFor) : true;
+	const loadReady = loadStrategy === "ignore-load" || loaded;
 	const shouldRevealImage =
-		revealDisabled || (loaded && appReady && sceneReady && active !== false);
+		revealDisabled || (loadReady && appReady && sceneReady && active !== false);
 
 	React.useEffect(() => {
 		if (!shouldRevealImage) return;
@@ -201,6 +210,7 @@ export function RevealImage({
 				>
 					<Image
 						key={sourceKey}
+						ref={imageRef}
 						src={src}
 						fill={fill}
 						placeholder={placeholder}

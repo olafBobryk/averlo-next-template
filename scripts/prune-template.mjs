@@ -87,23 +87,6 @@ const SURFACES = {
 			},
 		],
 	},
-	motionLegacy: {
-		id: "motionLegacy",
-		flag: "--no-motion-legacy",
-		description: "Remove the legacy group-triggered reveal implementation.",
-		dependentSurfaces: [],
-		ownedPaths: ["src/components/ui/motion/legacy"],
-		routeIds: [],
-		routeBuilders: [],
-		navRouteIds: [],
-		searchSources: [],
-		postRemovalAssertions: [
-			{
-				label: "legacy motion imports",
-				pattern: /@\/components\/ui\/motion\/legacy/,
-			},
-		],
-	},
 	dictionary: {
 		id: "dictionary",
 		flag: "--no-dictionary",
@@ -183,8 +166,6 @@ Flags:
   --no-dashboard   Remove dashboard routes, auth/login shell, and dashboard auth helpers
   --no-demo        Remove the internal demo surface
   --no-playground  Remove the internal playground surface
-  --no-motion-legacy
-                   Remove the legacy group-triggered reveal implementation
   --no-dictionary  Remove the internal dictionary surface
   --no-reference   Remove the internal reference surface
   --no-payload     Remove the guarded Payload CMS scaffold and dependencies

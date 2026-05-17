@@ -610,6 +610,7 @@ function RevealItemInner({
 	className,
 	variants,
 	disableTransform = false,
+	useViewport = true,
 	active,
 	waitFor,
 	unlockStage,
@@ -647,7 +648,11 @@ function RevealItemInner({
 		unlockStage,
 	});
 	const isReady =
-		disabled || (appReady && isInViewport && active !== false && sceneReady);
+		disabled ||
+		(appReady &&
+			(useViewport ? isInViewport : true) &&
+			active !== false &&
+			sceneReady);
 
 	useLayoutEffect(() => {
 		mountedRef.current = true;
