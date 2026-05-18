@@ -27,12 +27,18 @@ const COMPACT_OPEN_SCROLL_AREA_OFFSET =
 	COMPACT_OPEN_MENU_OFFSET + COMPACT_OPEN_CTA_HEIGHT + 48;
 const COMPACT_CLOSED_HEADER_HEIGHT = 76;
 const COMPACT_CONDENSED_HEADER_HEIGHT = 60;
+const HEADER_ENTRANCE_HIDDEN = { opacity: 0, y: -28, scale: 0.965 };
+const HEADER_ENTRANCE_VISIBLE = { opacity: 1, y: 0, scale: 1 };
 
 export default function HeaderCompact({
+	animateEntrance = false,
+	entranceReady = true,
 	isScrolled,
 	layout,
 	className = "",
 }: {
+	animateEntrance?: boolean;
+	entranceReady?: boolean;
 	isScrolled: boolean;
 	layout: SiteLayoutDocument["header"];
 	className?: string;
@@ -51,6 +57,16 @@ export default function HeaderCompact({
 	const heightTransition: Transition = motionAllowed
 		? spring.component
 		: { duration: 0 };
+	const shouldAnimateEntrance = animateEntrance && motionAllowed;
+	const headerHeight = isMenuOpen
+		? "100vh"
+		: isCondensed
+			? COMPACT_CONDENSED_HEADER_HEIGHT
+			: COMPACT_CLOSED_HEADER_HEIGHT;
+	const entranceState =
+		shouldAnimateEntrance && !entranceReady
+			? HEADER_ENTRANCE_HIDDEN
+			: HEADER_ENTRANCE_VISIBLE;
 	const closeMenu = () => {
 		setSearchQuery("");
 		setIsMenuOpen(false);
@@ -67,13 +83,14 @@ export default function HeaderCompact({
 	return (
 		<motion.header
 			data-open={isMenuOpen}
-			initial={false}
+			initial={
+				shouldAnimateEntrance
+					? { ...HEADER_ENTRANCE_HIDDEN, height: COMPACT_CLOSED_HEADER_HEIGHT }
+					: false
+			}
 			animate={{
-				height: isMenuOpen
-					? "100vh"
-					: isCondensed
-						? COMPACT_CONDENSED_HEADER_HEIGHT
-						: COMPACT_CLOSED_HEADER_HEIGHT,
+				height: headerHeight,
+				...entranceState,
 			}}
 			transition={heightTransition}
 			className={clsx(

@@ -53,6 +53,43 @@ vercel env pull .env.local --yes
 created when Blob storage is added to the Vercel project. `PAYLOAD_SECRET` must
 be generated per project and never committed.
 
+## Local Magic Login
+
+Payload-powered local development can optionally expose a localhost-only
+bootstrap link that signs into an existing Payload admin user. This is disabled
+by default and must never be configured in Vercel Preview or Production.
+
+Add these values to `.env.local` only:
+
+```bash
+PAYLOAD_DEV_MAGIC_LOGIN=1
+PAYLOAD_DEV_MAGIC_EMAIL="admin@example.com"
+PAYLOAD_DEV_MAGIC_PASSWORD="local-admin-password"
+```
+
+When `PAYLOAD_DEV_MAGIC_LOGIN=1`, the dev-server wrapper prints a stable
+`Payload Admin URL` beside the local preview URLs. Opening that URL logs in with
+the server-only credentials, sets Payload's normal HttpOnly auth cookie, and
+redirects to `/admin`.
+
+The magic-login route does not create users and does not include credentials or
+tokens in the URL. It only works in `NODE_ENV=development`, on loopback hosts,
+outside Vercel, with `DATABASE_URL` and `PAYLOAD_SECRET` configured.
+
+Test the local magic-login setup before relying on it:
+
+1. Run `npm run dev:agent -- --dry-run` without `PAYLOAD_DEV_MAGIC_LOGIN`; it
+   should not print a `Payload Admin URL`.
+2. Run `PAYLOAD_DEV_MAGIC_LOGIN=1 npm run dev:agent -- --dry-run`; it should
+   print a localhost `Payload Admin URL` for the isolated agent port.
+3. Start the local dev server with the env values above and an existing Payload
+   admin user, then open the printed `Payload Admin URL`.
+4. Confirm the link redirects to `/admin` and the browser is signed in.
+5. Confirm an external redirect such as
+   `/api/dev/payload-login?next=https://example.com` does not leave localhost.
+6. Confirm the route returns unavailable when `PAYLOAD_DEV_MAGIC_LOGIN` is
+   unset or when required credentials are missing.
+
 ## Neon Setup
 
 1. Open the Vercel project dashboard.

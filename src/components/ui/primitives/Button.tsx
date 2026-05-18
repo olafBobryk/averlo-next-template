@@ -72,12 +72,18 @@ const buttonStyles = cva(
 				pill: "rounded-[6.25rem]",
 				sm: "rounded-[6px]",
 			},
+			hitArea: {
+				none: "",
+				touch:
+					"before:absolute before:left-1/2 before:top-1/2 before:min-h-11 before:min-w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']",
+			},
 		},
 		defaultVariants: {
 			variant: "outline",
 			size: "md",
 			align: "left",
 			radius: "pill",
+			hitArea: "none",
 		},
 	},
 );
@@ -344,6 +350,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			size = "md",
 			align = "center",
 			radius,
+			hitArea,
 			loading,
 			iconSize = DEFAULT_ICON_SIZE,
 			focusable = true,
@@ -358,7 +365,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			loading === undefined ? undefined : loading ? "true" : "false";
 
 		const mergedClassName = clsx(
-			buttonStyles({ variant, size, align, radius }),
+			buttonStyles({ variant, size, align, radius, hitArea }),
 			variant === "outline"
 				? "drop-shadow-[2px_4px_15px_rgba(2,2,2,0.03)]"
 				: variant === "ghost"

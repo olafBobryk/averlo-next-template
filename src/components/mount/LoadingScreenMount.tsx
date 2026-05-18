@@ -16,6 +16,7 @@ type Phase = "loading" | "revealing" | "transitioning" | "done";
 
 // Matches getMotionTiming("grand") duration in ms
 const GRAND_MS = 940;
+const EXIT_REVEAL_HANDOFF_MS = 180;
 
 export default function LoadingScreenMount() {
 	const immediateIntroDisabled = hasMotionDisabledSearchParam();
@@ -64,12 +65,23 @@ export default function LoadingScreenMount() {
 		};
 	}, [introDisabled]);
 
+	useEffect(() => {
+		if (introDisabled || phase !== "transitioning") return;
+		const readyId = setTimeout(() => {
+			markAppReady();
+		}, EXIT_REVEAL_HANDOFF_MS);
+
+		return () => clearTimeout(readyId);
+	}, [introDisabled, phase]);
+
 	if (introDisabled || phase === "done") return null;
 
 	return (
 		<motion.div
 			aria-hidden="true"
-			className="fixed inset-0 z-[9999] flex items-center justify-center bg-white pointer-events-none"
+			className={`fixed inset-0 flex items-center justify-center bg-white pointer-events-none ${
+				phase === "transitioning" ? "z-40" : "z-[9999]"
+			}`}
 			data-loading-screen-mount="true"
 			animate={{ opacity: phase === "transitioning" ? 0 : 1 }}
 			transition={getMotionTiming("grand")}

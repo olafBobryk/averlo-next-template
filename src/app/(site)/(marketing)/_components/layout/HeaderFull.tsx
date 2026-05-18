@@ -29,6 +29,8 @@ const HEADER_EXPANDED_HEIGHT = 100;
 const HEADER_COMPACT_HEIGHT = 70;
 const HEADER_MENU_TOP_PADDING = 22;
 const HEADER_MENU_BOTTOM_PADDING = 32;
+const HEADER_ENTRANCE_HIDDEN = { opacity: 0, y: -28, scale: 0.965 };
+const HEADER_ENTRANCE_VISIBLE = { opacity: 1, y: 0, scale: 1 };
 
 function HeaderTopNavLink({
 	link,
@@ -58,10 +60,14 @@ function HeaderTopNavLink({
 }
 
 export default function HeaderFull({
+	animateEntrance = false,
+	entranceReady = true,
 	isScrolled,
 	layout,
 	className = "",
 }: {
+	animateEntrance?: boolean;
+	entranceReady?: boolean;
 	isScrolled: boolean;
 	layout: SiteLayoutDocument["header"];
 	className?: string;
@@ -93,6 +99,7 @@ export default function HeaderFull({
 	const menuTransition: Transition = motionAllowed
 		? spring.component
 		: { duration: 0 };
+	const shouldAnimateEntrance = animateEntrance && motionAllowed;
 
 	const closeMenu = () => {
 		setSearchQuery("");
@@ -137,8 +144,17 @@ export default function HeaderFull({
 	}, [isMenuOpen]);
 
 	return (
-		<header
+		<motion.header
 			ref={headerRef}
+			initial={shouldAnimateEntrance ? HEADER_ENTRANCE_HIDDEN : false}
+			animate={
+				shouldAnimateEntrance
+					? entranceReady
+						? HEADER_ENTRANCE_VISIBLE
+						: HEADER_ENTRANCE_HIDDEN
+					: undefined
+			}
+			transition={headerTransition}
 			className={clsx(
 				"pointer-events-none fixed inset-x-0 top-0 z-50 overflow-hidden px-section-x",
 				className,
@@ -300,6 +316,6 @@ export default function HeaderFull({
 					) : null}
 				</AnimatePresence>
 			</div>
-		</header>
+		</motion.header>
 	);
 }

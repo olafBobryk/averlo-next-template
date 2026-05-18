@@ -59,6 +59,13 @@ const findAvailablePort = async (start, end) => {
 	return null;
 };
 
+const getPayloadAdminUrl = (url) => {
+	const loginUrl = new URL("/api/dev/payload-login", url);
+	loginUrl.searchParams.set("next", "/admin");
+
+	return loginUrl.toString();
+};
+
 const getServerTarget = async () => {
 	if (mode === "user") {
 		const port = await findAvailablePort(USER_PORT, USER_PORT_END);
@@ -114,6 +121,9 @@ const start = async () => {
 	console.log(`URL: ${url}`);
 	if (target.label === "agent") {
 		console.log(`Automation URL: ${url}?motion=off&reveal=off`);
+	}
+	if (process.env.PAYLOAD_DEV_MAGIC_LOGIN === "1") {
+		console.log(`Payload Admin URL: ${getPayloadAdminUrl(url)}`);
 	}
 	console.log(`Next distDir: ${target.distDir}`);
 	console.log(`TypeScript config: ${target.tsconfigPath}`);

@@ -1,7 +1,24 @@
 "use client";
 
-import * as React from "react";
-import { useMediaQuery } from "react-responsive";
+import { useEffect, useState } from "react";
+
+function useBreakpointQuery(query: string) {
+	const [matches, setMatches] = useState(false);
+
+	useEffect(() => {
+		const mediaQuery = window.matchMedia(query);
+		const updateMatches = () => setMatches(mediaQuery.matches);
+
+		updateMatches();
+		mediaQuery.addEventListener("change", updateMatches);
+
+		return () => {
+			mediaQuery.removeEventListener("change", updateMatches);
+		};
+	}, [query]);
+
+	return matches;
+}
 
 /**
  * Tailwind default breakpoints:
@@ -15,59 +32,35 @@ import { useMediaQuery } from "react-responsive";
  * Import and call this hook inside client components.
  */
 export function useTailwindBreakpoints() {
-	const [hasMounted, setHasMounted] = React.useState(false);
-
-	React.useEffect(() => {
-		setHasMounted(true);
-	}, []);
-
 	// "Only" ranges (non-overlapping)
-	const isXs = useMediaQuery({ maxWidth: 639.98 }); // < 640
-	const isSm = useMediaQuery({ minWidth: 640, maxWidth: 767.98 });
-	const isMd = useMediaQuery({ minWidth: 768, maxWidth: 1023.98 });
-	const isLg = useMediaQuery({ minWidth: 1024, maxWidth: 1279.98 });
-	const isXl = useMediaQuery({ minWidth: 1280, maxWidth: 1535.98 });
-	const is2xl = useMediaQuery({ minWidth: 1536 });
+	const isXs = useBreakpointQuery("(max-width: 639.98px)"); // < 640
+	const isSm = useBreakpointQuery(
+		"(min-width: 640px) and (max-width: 767.98px)",
+	);
+	const isMd = useBreakpointQuery(
+		"(min-width: 768px) and (max-width: 1023.98px)",
+	);
+	const isLg = useBreakpointQuery(
+		"(min-width: 1024px) and (max-width: 1279.98px)",
+	);
+	const isXl = useBreakpointQuery(
+		"(min-width: 1280px) and (max-width: 1535.98px)",
+	);
+	const is2xl = useBreakpointQuery("(min-width: 1536px)");
 
 	// "Up" helpers (inclusive)
-	const isSmUp = useMediaQuery({ minWidth: 640 });
-	const isMdUp = useMediaQuery({ minWidth: 768 });
-	const isLgUp = useMediaQuery({ minWidth: 1024 });
-	const isXlUp = useMediaQuery({ minWidth: 1280 });
-	const is2xlUp = useMediaQuery({ minWidth: 1536 });
+	const isSmUp = useBreakpointQuery("(min-width: 640px)");
+	const isMdUp = useBreakpointQuery("(min-width: 768px)");
+	const isLgUp = useBreakpointQuery("(min-width: 1024px)");
+	const isXlUp = useBreakpointQuery("(min-width: 1280px)");
+	const is2xlUp = useBreakpointQuery("(min-width: 1536px)");
 
 	// "Down" helpers (inclusive)
-	const isSmDown = useMediaQuery({ maxWidth: 639.98 });
-	const isMdDown = useMediaQuery({ maxWidth: 767.98 });
-	const isLgDown = useMediaQuery({ maxWidth: 1023.98 });
-	const isXlDown = useMediaQuery({ maxWidth: 1279.98 });
-	const is2xlDown = useMediaQuery({ maxWidth: 1535.98 });
-
-	if (!hasMounted) {
-		return {
-			// only
-			isXs: false,
-			isSm: false,
-			isMd: false,
-			isLg: false,
-			isXl: false,
-			is2xl: false,
-
-			// up
-			isSmUp: false,
-			isMdUp: false,
-			isLgUp: false,
-			isXlUp: false,
-			is2xlUp: false,
-
-			// down
-			isSmDown: false,
-			isMdDown: false,
-			isLgDown: false,
-			isXlDown: false,
-			is2xlDown: false,
-		};
-	}
+	const isSmDown = useBreakpointQuery("(max-width: 639.98px)");
+	const isMdDown = useBreakpointQuery("(max-width: 767.98px)");
+	const isLgDown = useBreakpointQuery("(max-width: 1023.98px)");
+	const isXlDown = useBreakpointQuery("(max-width: 1279.98px)");
+	const is2xlDown = useBreakpointQuery("(max-width: 1535.98px)");
 
 	return {
 		// only

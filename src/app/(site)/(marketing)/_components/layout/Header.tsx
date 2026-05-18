@@ -2,6 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import { useAppReady } from "@/hooks/useAppReady";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import type { SiteLayoutDocument } from "@/lib/marketing-content/types";
 import HeaderCompact from "./HeaderCompact";
 import HeaderFull from "./HeaderFull";
@@ -30,6 +33,10 @@ function getIsScrolled() {
 export default function Header({ className = "", layout }: HeaderProps) {
 	const pathname = usePathname();
 	const [isScrolled, setIsScrolled] = useState(false);
+	const appReady = useAppReady();
+	const motionAllowed = useMotionAllowed(true);
+	const motionDisabled = useMotionDisableOverride();
+	const shouldAnimate = motionAllowed && !motionDisabled;
 
 	useEffect(() => {
 		let frameId: number | null = null;
@@ -108,13 +115,25 @@ export default function Header({ className = "", layout }: HeaderProps) {
 	}, [pathname]);
 
 	return (
-		<div className={className}>
+		<>
 			<div className="hidden lg:block">
-				<HeaderFull isScrolled={isScrolled} layout={layout} />
+				<HeaderFull
+					animateEntrance={shouldAnimate}
+					entranceReady={appReady}
+					isScrolled={isScrolled}
+					layout={layout}
+					className={className}
+				/>
 			</div>
 			<div className="block lg:hidden">
-				<HeaderCompact isScrolled={isScrolled} layout={layout} />
+				<HeaderCompact
+					animateEntrance={shouldAnimate}
+					entranceReady={appReady}
+					isScrolled={isScrolled}
+					layout={layout}
+					className={className}
+				/>
 			</div>
-		</div>
+		</>
 	);
 }
