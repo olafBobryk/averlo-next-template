@@ -6,11 +6,11 @@ import {
 	ComponentCard,
 	ComponentGroup,
 	UsageCard,
-} from "@/app/(site)/(marketing)/(internal)/demo/_components/demo-cards";
+} from "@/app/(site)/(marketing)/internal/demo/_components/demo-cards";
 import type {
 	DemoComponentItem,
 	DemoPage as DemoPageType,
-} from "@/app/(site)/(marketing)/(internal)/demo/content";
+} from "@/app/(site)/(marketing)/internal/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { Panel } from "@/components/ui/primitives/Panel";
@@ -60,7 +60,7 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 				</header>
 				<Panel display="flex" padding="sm" gap="sm" shadow="none">
 					<Text variant="body">Go back to the demo index.</Text>
-					<Button href="/demo" variant="outline" size="sm">
+					<Button href="/internal/demo" variant="outline" size="sm">
 						Open demo index
 					</Button>
 				</Panel>
@@ -74,7 +74,9 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 		),
 	);
 	const isSkeletonMode = mode === "skeleton";
-	const basePath = page.slug.length ? `/demo/${page.slug.join("/")}` : "/demo";
+	const basePath = page.slug.length
+		? `/internal/demo/${page.slug.join("/")}`
+		: "/internal/demo";
 	const skeletonPath = `${basePath}/skeleton`;
 
 	const visibleGroups = isSkeletonMode
@@ -105,8 +107,8 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 					<Text variant="caption" tone="muted" className="text-xs">
 						Path:{" "}
 						<Link
-							href={`/demo/${page.slug.join("/")}`}
-						>{`/demo/${page.slug.join("/")}`}</Link>
+							href={`/internal/demo/${page.slug.join("/")}`}
+						>{`/internal/demo/${page.slug.join("/")}`}</Link>
 					</Text>
 				) : null}
 				{hasSkeletons && page.slug.length > 0 ? (

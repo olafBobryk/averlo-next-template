@@ -1,6 +1,6 @@
 "use client";
 
-import { getVisibleDemoPages } from "@/app/(site)/(marketing)/(internal)/demo/content";
+import { getVisibleDemoPages } from "@/app/(site)/(marketing)/internal/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { Panel } from "@/components/ui/primitives/Panel";
@@ -35,7 +35,7 @@ export default function DemoIndexPage() {
 				<Text variant="body" tone="muted">
 					Browse the component library demos. All content is driven by
 					<code className="ml-1">
-						src/app/(site)/(marketing)/(internal)/demo/content.tsx
+						src/app/(site)/(marketing)/internal/demo/content.tsx
 					</code>
 					.
 				</Text>
@@ -45,7 +45,7 @@ export default function DemoIndexPage() {
 				<Text variant="body">
 					Need to add a demo? Update the content map and it appears everywhere.
 				</Text>
-				<Button href="/demo/ui/primitives" variant="primary" size="sm">
+				<Button href="/internal/demo/ui/primitives" variant="primary" size="sm">
 					Jump to UI Primitives
 				</Button>
 			</Panel>
@@ -69,7 +69,7 @@ export default function DemoIndexPage() {
 								{group.pages.map((page) => (
 									<Button
 										key={page.id}
-										href={`/demo/${page.slug.join("/")}`}
+										href={`/internal/demo/${page.slug.join("/")}`}
 										variant="outline"
 										size="sm"
 									>

@@ -198,38 +198,34 @@ function ToastItemCard({
 		toast.type === "success"
 			? {
 					title: toast.title ?? "Success",
-					ringOuter: "bg-success/5",
-					ringInner: "bg-success/15",
-					iconColor: "text-success",
-					barColor: "bg-success",
+					indicatorColor: "text-success",
+					fillColor: "bg-success",
+					iconColor: "text-white",
+					iconIndex: 1,
 				}
 			: toast.type === "error"
 				? {
 						title: toast.title ?? "Failed",
-						ringOuter: "bg-danger/5",
-						ringInner: "bg-danger/15",
-						iconColor: "text-danger",
-						barColor: "bg-danger",
+						indicatorColor: "text-danger",
+						fillColor: "bg-danger",
+						iconColor: "text-white",
+						iconIndex: 2,
 					}
 				: toast.type === "loading"
 					? {
 							title: toast.title ?? "Loading",
-							ringOuter: "bg-foreground/5",
-							ringInner: "bg-foreground/15",
-							iconColor: "text-foreground",
-							barColor: "bg-foreground",
+							indicatorColor: "text-foreground/70",
+							fillColor: "bg-foreground/70",
+							iconColor: "text-transparent",
+							iconIndex: 0,
 						}
 					: {
 							title: toast.title ?? "Info",
-							ringOuter: "bg-primary/5",
-							ringInner: "bg-primary/15",
-							iconColor: "text-primary",
-							barColor: "bg-primary",
+							indicatorColor: "text-primary",
+							fillColor: "bg-primary",
+							iconColor: "text-primary-foreground",
+							iconIndex: 1,
 						};
-
-	const showProgress = toast.type !== "loading" && Boolean(toast.durationMs);
-	const ringVisibility =
-		toast.type === "loading" ? "opacity-0 scale-50" : "opacity-100 scale-100";
 
 	return (
 		<Panel
@@ -244,105 +240,117 @@ function ToastItemCard({
 			}
 			transition={motionAllowed ? spring.interactive : { duration: 0 }}
 			display="flex"
-			gap="sm"
-			padding="md"
+			gap="none"
+			padding="sm"
 			background="white"
 			className={clsx(
-				"pointer-events-auto w-full max-w-sm flex-col",
+				"pointer-events-auto w-full max-w-[22rem]",
 				"transition-colors motion-interactive",
 			)}
 			aria-live="polite"
 		>
-			<div className="flex items-start justify-between gap-5">
-				<div className="flex items-start gap-5">
-					<div className="relative">
-						<div
-							className={clsx(
-								"flex items-center gap-2.5 p-[5px] rounded-full transition-all motion-micro origin-center",
-								tone.ringOuter,
-							)}
-						>
-							<div
-								className={clsx(
-									"flex items-center gap-2.5 rounded-full p-[5px] transition-all motion-micro origin-center",
-									tone.ringInner,
-									ringVisibility,
-								)}
-							>
-								<div className="w-[15px] h-[15px]" />
-							</div>
-						</div>
-						<div className="absolute inset-0 flex items-center justify-center">
-							<IconSwap
-								size="md"
-								className={clsx(tone.iconColor, "")}
-								activeIndex={
-									toast.type === "loading"
-										? 0
-										: toast.type === "success"
-											? 1
-											: toast.type === "error"
-												? 2
-												: 1
-								}
-								items={[
-									{ icon: <Icon name="spinner" size="md" animate /> },
-									{ icon: <Icon name="check" size="sm" /> },
-									{
-										icon: (
-											<Icon name="close" size="sm" className="h-2.5 w-2.5" />
-										),
-									},
-								]}
-							/>
-						</div>
-					</div>
-					<div className="flex flex-col gap-[5px]">
-						<Text as="p" variant="bodyStrong">
-							{tone.title}
-						</Text>
-						<Text
-							as="p"
-							variant="body"
-							className="text-left break-words whitespace-normal"
-						>
-							{toast.message}
-						</Text>
-					</div>
+			<div className="flex min-w-0 items-start gap-3">
+				<ToastStatusIndicator
+					type={toast.type}
+					motionAllowed={motionAllowed}
+					indicatorColor={tone.indicatorColor}
+					fillColor={tone.fillColor}
+					iconColor={tone.iconColor}
+					iconIndex={tone.iconIndex}
+				/>
+				<div className="flex min-w-0 flex-1 flex-col gap-0.5 pt-[1px]">
+					<Text as="p" variant="bodyStrong">
+						{tone.title}
+					</Text>
+					<Text
+						as="p"
+						variant="caption"
+						tone="muted"
+						className="text-left break-words whitespace-normal"
+					>
+						{toast.message}
+					</Text>
 				</div>
 				<Button
 					onClick={onDismiss}
 					variant="ghost"
+					size="icon-sm"
+					aria-label="Dismiss toast"
 					className="transition-colors motion-interactive hover:text-foreground text-foreground/50"
 				>
 					<Icon name="close" size="sm" />
 				</Button>
 			</div>
+		</Panel>
+	);
+}
+
+type ToastStatusIndicatorProps = {
+	type: ToastType;
+	motionAllowed: boolean;
+	indicatorColor: string;
+	fillColor: string;
+	iconColor: string;
+	iconIndex: number;
+};
+
+function ToastStatusIndicator({
+	type,
+	motionAllowed,
+	indicatorColor,
+	fillColor,
+	iconColor,
+	iconIndex,
+}: ToastStatusIndicatorProps) {
+	const isLoading = type === "loading";
+	const ringStyle = isLoading
+		? {
+				background:
+					"conic-gradient(currentColor 0deg 112deg, transparent 112deg 360deg)",
+			}
+		: undefined;
+
+	return (
+		<div
+			className={clsx(
+				"relative h-8 w-8 shrink-0 overflow-hidden rounded-full",
+				indicatorColor,
+			)}
+			aria-hidden="true"
+		>
+			<div className="absolute inset-0 rounded-full bg-foreground/10" />
 			<div
 				className={clsx(
-					"transition-all motion-micro overflow-hidden -mt-[15px]",
-					showProgress ? "max-h-[18px]" : "max-h-0",
+					"absolute inset-0 rounded-full transition-all motion-component",
+					isLoading ? indicatorColor : fillColor,
+					isLoading && motionAllowed ? "animate-spin-smooth" : "",
 				)}
-			>
-				<div className="relative h-[3px] w-full mt-[15px]">
-					<div className="absolute inset-0 rounded-full bg-foreground/10" />
-					{showProgress ? (
-						<motion.div
-							key={`${toast.id}-${toast.type}`}
-							className={clsx(
-								"absolute inset-y-0 left-0 rounded-full",
-								tone.barColor,
-							)}
-							initial={{ width: "100%" }}
-							animate={{ width: "0%" }}
-							transition={{
-								duration: (toast.durationMs ?? DEFAULT_DURATION) / 1000,
-								ease: "linear",
-							}}
-						/>
-					) : null}
-				</div>
+				style={ringStyle}
+			/>
+			<div
+				className={clsx(
+					"absolute inset-[4px] rounded-full bg-surface transition-all motion-component",
+					isLoading ? "scale-100 opacity-100" : "scale-50 opacity-0",
+				)}
+			/>
+			<div className="absolute inset-0 flex items-center justify-center">
+				<IconSwap
+					size="sm"
+					className={clsx(
+						"transition-colors motion-micro",
+						isLoading ? "text-transparent" : iconColor,
+					)}
+					activeIndex={iconIndex}
+					items={[
+						{ key: "empty", icon: <span className="h-3 w-3" /> },
+						{ key: "check", icon: <Icon name="check" size="sm" /> },
+						{
+							key: "close",
+							icon: <Icon name="close" size="sm" className="h-2.5 w-2.5" />,
+						},
+					]}
+				/>
 			</div>
-		</Panel>
+		</div>
 	);
 }

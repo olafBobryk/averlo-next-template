@@ -1,6 +1,6 @@
 "use client";
 
-import { getVisibleDemoPages } from "@/app/(site)/(marketing)/(internal)/demo/content";
+import { getVisibleDemoPages } from "@/app/(site)/(marketing)/internal/demo/content";
 import {
 	ContentSearch,
 	type ContentSearchEntry,
@@ -54,14 +54,14 @@ function getMarketingSearchEntries(
 		addEntry({
 			id: `demo-${page.id}`,
 			label: `Demo: ${page.title}`,
-			href: `/demo/${page.slug.join("/")}`,
+			href: `/internal/demo/${page.slug.join("/")}`,
 		});
 	}
 
 	addEntry({
 		id: "playground-motion-reveal-root",
 		label: "Playground: Reveal Group Scheduler",
-		href: "/playground/motion/reveal-root",
+		href: "/internal/playground/motion/reveal-root",
 	});
 
 	return entries;

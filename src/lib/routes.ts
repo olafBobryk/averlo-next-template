@@ -10,5 +10,5 @@ export const routeBuilders = {
 	dashboardSubpage: (...segments: string[]) =>
 		`/dashboard/${segments.join("/")}`,
 	dictionaryEntry: (...segments: string[]) =>
-		`/dictionary/${segments.join("/")}`,
+		`/internal/dictionary/${segments.join("/")}`,
 };

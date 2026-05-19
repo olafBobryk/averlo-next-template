@@ -11,10 +11,6 @@ const ROOT = process.cwd();
 const SRC_DIR = path.join(ROOT, "src");
 const INTERNAL_MARKETING_DIR = path.join(
 	ROOT,
-	"src/app/(site)/(marketing)/(internal)",
-);
-const CONCRETE_INTERNAL_MARKETING_DIR = path.join(
-	ROOT,
 	"src/app/(site)/(marketing)/internal",
 );
 
@@ -51,7 +47,7 @@ const SURFACES = {
 		flag: "--no-demo",
 		description: "Remove the internal demo surface and demo search indexing.",
 		dependentSurfaces: [],
-		ownedPaths: ["src/app/(site)/(marketing)/(internal)/demo"],
+		ownedPaths: ["src/app/(site)/(marketing)/internal/demo"],
 		routeIds: ["demo"],
 		routeBuilders: [],
 		navRouteIds: ["demo"],
@@ -64,7 +60,7 @@ const SURFACES = {
 			{
 				label: "demo content import",
 				pattern:
-					/from\s+["']@\/app\/\(site\)\/\(marketing\)\/\(internal\)\/demo\/content["']/,
+					/from\s+["']@\/app\/\(site\)\/\(marketing\)\/internal\/demo\/content["']/,
 			},
 		],
 	},
@@ -93,7 +89,7 @@ const SURFACES = {
 		description:
 			"Remove the internal dictionary surface, its route ids, and dictionary search/nav references.",
 		dependentSurfaces: [],
-		ownedPaths: ["src/app/(site)/(marketing)/(internal)/dictionary"],
+		ownedPaths: ["src/app/(site)/(marketing)/internal/dictionary"],
 		routeIds: [
 			"dictionary",
 			"dictionaryRiveLogoReveal",
@@ -115,7 +111,7 @@ const SURFACES = {
 		flag: "--no-reference",
 		description: "Remove the internal reference/docs surface.",
 		dependentSurfaces: [],
-		ownedPaths: ["src/app/(site)/(marketing)/(internal)/reference"],
+		ownedPaths: ["src/app/(site)/(marketing)/internal/reference"],
 		routeIds: [],
 		routeBuilders: [],
 		navRouteIds: [],
@@ -257,9 +253,9 @@ async function collectPlan(surfaceIds) {
 	const uniqueDeletedPaths = [...new Set(deletedPaths)].sort();
 	const removeInternalDir =
 		surfaceIds.includes("demo") &&
+		surfaceIds.includes("playground") &&
 		surfaceIds.includes("dictionary") &&
 		surfaceIds.includes("reference");
-	const removeConcreteInternalDir = surfaceIds.includes("playground");
 
 	return {
 		surfaces: surfaceIds.map((surfaceId) => SURFACES[surfaceId]),
@@ -275,7 +271,6 @@ async function collectPlan(surfaceIds) {
 			? [...PAYLOAD_PACKAGE_DEPENDENCIES]
 			: [],
 		removeInternalDir,
-		removeConcreteInternalDir,
 	};
 }
 
@@ -287,7 +282,7 @@ function renderRoutesFile(state) {
 	];
 
 	if (state.hasDemo) {
-		lines.push(`\tdemo: "/demo",`);
+		lines.push(`\tdemo: "/internal/demo",`);
 	}
 
 	if (state.hasPlayground) {
@@ -304,17 +299,17 @@ function renderRoutesFile(state) {
 	}
 
 	if (state.hasDictionary) {
-		lines.push(`\tdictionary: "/dictionary",`);
+		lines.push(`\tdictionary: "/internal/dictionary",`);
 		lines.push(
-			`\tdictionaryRiveLogoReveal: "/dictionary/loading-screens/rive-logo-reveal",`,
+			`\tdictionaryRiveLogoReveal: "/internal/dictionary/loading-screens/rive-logo-reveal",`,
 		);
 		lines.push(
-			`\tdictionarySpamProtectedForm: "/dictionary/forms/spam-protected-form",`,
+			`\tdictionarySpamProtectedForm: "/internal/dictionary/forms/spam-protected-form",`,
 		);
 	}
 
 	if (state.hasReference) {
-		lines.push(`\treference: "/reference",`);
+		lines.push(`\treference: "/internal/reference",`);
 	}
 
 	lines.push(
@@ -338,7 +333,7 @@ function renderLibRoutesFile(state) {
 
 	if (state.hasDictionary) {
 		builderLines.push(
-			'\tdictionaryEntry: (...segments: string[]) => `/dictionary/${segments.join("/")}`,',
+			'\tdictionaryEntry: (...segments: string[]) => `/internal/dictionary/${segments.join("/")}`,',
 		);
 	}
 
@@ -433,7 +428,7 @@ function renderMarketingContentSearchFile(state) {
 		'"use client";',
 		"",
 		state.hasDemo
-			? 'import { getVisibleDemoPages } from "@/app/(site)/(marketing)/(internal)/demo/content";'
+			? 'import { getVisibleDemoPages } from "@/app/(site)/(marketing)/internal/demo/content";'
 			: null,
 		"import {",
 		"\tContentSearch,",
@@ -490,7 +485,7 @@ function renderMarketingContentSearchFile(state) {
 			"\t\taddEntry({",
 			"\t\t\tid: `demo-${page.id}`,",
 			"\t\t\tlabel: `Demo: ${page.title}`,",
-			'\t\t\thref: `/demo/${page.slug.join("/")}`,',
+			'\t\t\thref: `/internal/demo/${page.slug.join("/")}`,',
 			"\t\t});",
 			"\t}",
 		);
@@ -558,12 +553,12 @@ function renderMarketingContentFallbackFile(state) {
 			"\t\t\t\tsections: [",
 			"\t\t\t\t\t{",
 			'\t\t\t\t\t\tlabel: "Header",',
-			'\t\t\t\t\t\thref: "/demo/layout/header",',
+			'\t\t\t\t\t\thref: "/internal/demo/layout/header",',
 			'\t\t\t\t\t\tdescription: "Responsive marketing header patterns.",',
 			"\t\t\t\t\t},",
 			"\t\t\t\t\t{",
 			'\t\t\t\t\t\tlabel: "Toast",',
-			'\t\t\t\t\t\thref: "/demo/ui/overlays/toast",',
+			'\t\t\t\t\t\thref: "/internal/demo/ui/overlays/toast",',
 			'\t\t\t\t\t\tdescription: "Transient feedback examples.",',
 			"\t\t\t\t\t},",
 			"\t\t\t\t],",
@@ -1023,19 +1018,6 @@ async function removeEmptyInternalDirIfNeeded(shouldRemove) {
 	}
 }
 
-async function removeEmptyConcreteInternalDirIfNeeded(shouldRemove) {
-	if (!shouldRemove) return;
-	if (!(await pathExists(CONCRETE_INTERNAL_MARKETING_DIR))) return;
-
-	const children = await fs.readdir(CONCRETE_INTERNAL_MARKETING_DIR);
-	if (children.length === 0) {
-		await fs.rm(CONCRETE_INTERNAL_MARKETING_DIR, {
-			recursive: true,
-			force: true,
-		});
-	}
-}
-
 async function removePackageDependencies(dependencyNames) {
 	if (dependencyNames.length === 0) return false;
 
@@ -1165,12 +1147,6 @@ function printPlan(plan) {
 		);
 	}
 
-	if (plan.removeConcreteInternalDir) {
-		console.log(
-			`- ${relativePath(CONCRETE_INTERNAL_MARKETING_DIR)} (if empty after prune)`,
-		);
-	}
-
 	console.log("\nCentral files to rewrite");
 	for (const filePath of plan.rewriteFiles) {
 		console.log(`- ${filePath}`);
@@ -1254,7 +1230,6 @@ async function main() {
 	}
 
 	await removeEmptyInternalDirIfNeeded(plan.removeInternalDir);
-	await removeEmptyConcreteInternalDirIfNeeded(plan.removeConcreteInternalDir);
 
 	const packageJsonChanged = await removePackageDependencies(
 		plan.packageDependencies,

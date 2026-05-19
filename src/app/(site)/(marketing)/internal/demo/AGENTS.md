@@ -3,7 +3,7 @@
 Centralize the demo catalog in a single source of truth and keep demo pages consistent, discoverable, and quick to extend.
 
 ## Source of Truth
-- All demo content lives in `src/app/(site)/(marketing)/(internal)/demo/content.tsx`.
+- All demo content lives in `src/app/(site)/(marketing)/internal/demo/content.tsx`.
 - The page renderer and nav read from this content map; do not hand‑edit multiple page files.
 
 ## Content Schema (Required Fields)
@@ -43,8 +43,8 @@ For `kind: "usage"`:
 2. Add items using the same card types.
 3. If needed, add new `relatedMap` entries to support “Uses / Used by”.
 4. Keep slug segments aligned with the source folder being documented, usually `src/components` and, where relevant, shared utilities like `src/lib`.
-5. For skeleton support, add a `skeleton` config and verify `/demo/**/skeleton`.
-6. Use `visibility: "dev-only"` for playground pages such as `/demo/test`; they stay routable but are hidden from overview and sidebar in production.
+5. For skeleton support, add a `skeleton` config and verify `/internal/demo/**/skeleton`.
+6. Use `visibility: "dev-only"` for playground pages such as `/internal/demo/test`; they stay routable but are hidden from overview and sidebar in production.
 
 ## Demo Requirement
 - New reusable features in `src/components` should normally add demo coverage in this file.
@@ -99,7 +99,7 @@ For `kind: "usage"`:
 ```
 
 ## Skeleton View
-- Any page with skeletons automatically has a `/demo/**/skeleton` view.
+- Any page with skeletons automatically has a `/internal/demo/**/skeleton` view.
 - Default demo pages do **not** show skeletons.
 - Skeleton view renders paired cards (live + skeleton) for direct comparison.
 

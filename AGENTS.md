@@ -20,7 +20,20 @@
 - Keep the frontend contract lightweight. Marketing components should render page, section, and site layout data; they should not depend on full Payload document shapes.
 - Put source-specific details in server-side resolvers/adapters. Payload-only metadata such as relationships, media records, drafts, SEO fields, localization, redirects, and taxonomies should be resolved before it reaches section renderers.
 
+## WhatsApp Deploy Bot Registration
+
+- When a clone becomes a live Vercel project, register it with the WhatsApp deploy bot whitelist as soon as the Vercel deploy hooks exist.
+- Use `WHATSAPP_DEPLOY_BOT_ADMIN_URL` and `WHATSAPP_DEPLOY_BOT_ADMIN_TOKEN` from the agent environment.
+- Call `POST /api/admin/projects` with the project slug, display name, aliases, and staging/production deploy hook URLs.
+- Use lowercase kebab-case for `slug`; include the package/repo/client names as aliases when useful.
+- Do not expose deploy hook URLs or admin tokens in commits, docs, chat summaries, logs, or screenshots.
+
 ## Halo UI Primitives
 
 - Treat `ToastHost` plus `showToast` as the shared transient-feedback system. Simple toast helpers accept `{ title }`; promise toasts accept `loadingTitle`, `successTitle`, and `errorTitle`.
 - Treat `ConfirmationModal` and `useConfirmationModal` as the shared confirm-before-action primitive. Do not create page-local confirmation dialogs for standard destructive or confirm flows.
+
+## Responsive Rendering
+
+- Use Tailwind responsive classes for visual breakpoint changes and lightweight markup.
+- Use `useTailwindBreakpoints` only when a hidden branch would still mount expensive client work such as animation scenes, observers, canvas/WebGL/Rive, media, or duplicated decorative DOM. See `docs/responsive-rendering.md`.

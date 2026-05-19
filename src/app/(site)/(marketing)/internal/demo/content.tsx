@@ -784,8 +784,8 @@ export const demoPages: DemoPage[] = [
 							return (
 								<OverviewLinks
 									links={[
-										{ href: "/demo/layout/header", label: "Header" },
-										{ href: "/demo/layout/footer", label: "Footer" },
+										{ href: "/internal/demo/layout/header", label: "Header" },
+										{ href: "/internal/demo/layout/footer", label: "Footer" },
 									]}
 								/>
 							);
@@ -945,15 +945,21 @@ export const demoPages: DemoPage[] = [
 							return (
 								<OverviewLinks
 									links={[
-										{ href: "/demo/ui/primitives", label: "Primitives" },
-										{ href: "/demo/ui/helpers", label: "Helpers" },
-										{ href: "/demo/ui/icons", label: "Icons" },
-										{ href: "/demo/ui/input", label: "Input" },
-										{ href: "/demo/ui/misc", label: "Misc" },
-										{ href: "/demo/ui/motion", label: "Motion" },
-										{ href: "/demo/ui/overlays", label: "Overlays" },
-										{ href: "/demo/ui/time", label: "Time" },
-										{ href: "/demo/ui/foundations", label: "Foundations" },
+										{
+											href: "/internal/demo/ui/primitives",
+											label: "Primitives",
+										},
+										{ href: "/internal/demo/ui/helpers", label: "Helpers" },
+										{ href: "/internal/demo/ui/icons", label: "Icons" },
+										{ href: "/internal/demo/ui/input", label: "Input" },
+										{ href: "/internal/demo/ui/misc", label: "Misc" },
+										{ href: "/internal/demo/ui/motion", label: "Motion" },
+										{ href: "/internal/demo/ui/overlays", label: "Overlays" },
+										{ href: "/internal/demo/ui/time", label: "Time" },
+										{
+											href: "/internal/demo/ui/foundations",
+											label: "Foundations",
+										},
 									]}
 								/>
 							);
@@ -3385,8 +3391,14 @@ import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 							return (
 								<OverviewLinks
 									links={[
-										{ href: "/demo/ui/overlays/modal", label: "Modal" },
-										{ href: "/demo/ui/overlays/toast", label: "Toast" },
+										{
+											href: "/internal/demo/ui/overlays/modal",
+											label: "Modal",
+										},
+										{
+											href: "/internal/demo/ui/overlays/toast",
+											label: "Toast",
+										},
 									]}
 								/>
 							);

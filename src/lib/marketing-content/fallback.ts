@@ -77,12 +77,12 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				sections: [
 					{
 						label: "Header",
-						href: "/demo/layout/header",
+						href: "/internal/demo/layout/header",
 						description: "Responsive marketing header patterns.",
 					},
 					{
 						label: "Toast",
-						href: "/demo/ui/overlays/toast",
+						href: "/internal/demo/ui/overlays/toast",
 						description: "Transient feedback examples.",
 					},
 				],
@@ -93,7 +93,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				sections: [
 					{
 						label: "Reveal root",
-						href: "/playground/motion/reveal-root",
+						href: "/internal/playground/motion/reveal-root",
 						description: "Motion reveal scheduler playground.",
 					},
 				],

@@ -31,11 +31,8 @@ const siteUrl = normalizeSiteUrl(resolveSiteUrl());
 function isExcludedPath(path) {
 	return (
 		path === "/settings" ||
-		path === "/demo" ||
-		path.startsWith("/demo/") ||
-		path === "/dictionary" ||
-		path.startsWith("/dictionary/") ||
-		path === "/reference" ||
+		path === "/internal" ||
+		path.startsWith("/internal/") ||
 		/\.(png|svg|json|xml|txt|ico)$/i.test(path)
 	);
 }

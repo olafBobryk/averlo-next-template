@@ -11,7 +11,7 @@ import { getVisibleDemoPages } from "../content";
 const NAV_PADDING_BASE = 12;
 
 function buildPath(slug: string[]) {
-	return `/demo/${slug.join("/")}`;
+	return `/internal/demo/${slug.join("/")}`;
 }
 
 export type DemoShellProps = {
@@ -34,7 +34,7 @@ export function DemoShell({ children }: DemoShellProps) {
 							<Text variant="caption" tone="muted" className="text-xs">
 								UI system showcase derived from a single content map.
 							</Text>
-							<Button href="/demo" size="sm" variant="outline">
+							<Button href="/internal/demo" size="sm" variant="outline">
 								Overview
 							</Button>
 						</div>

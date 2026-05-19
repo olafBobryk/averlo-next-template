@@ -7,9 +7,9 @@ It provides:
 - a shared component library under `src/components`
 - a marketing site shell under `src/app/(site)/(marketing)`
 - an optional dashboard shell under `src/app/(site)/dashboard`
-- a centralized demo/catalog system under `src/app/(site)/(marketing)/(internal)/demo`
-- a dictionary area under `src/app/(site)/(marketing)/(internal)/dictionary`
-- an internal reference area under `src/app/(site)/(marketing)/(internal)/reference`
+- a centralized demo/catalog system under `src/app/(site)/(marketing)/internal/demo`
+- a dictionary area under `src/app/(site)/(marketing)/internal/dictionary`
+- an internal reference area under `src/app/(site)/(marketing)/internal/reference`
 - optional Payload-ready content scaffolding for CMS-capable websites
 - reusable UI, motion, overlay, and feedback patterns for Webvizion site builds
 
@@ -42,8 +42,8 @@ The template currently ships with four route-level surfaces:
 
 - `/(marketing)`: the public website shell
 - `/dashboard`: the optional dashboard shell with its own providers, auth gate, and sidebar
-- `/(marketing)/(internal)/demo`: internal component and utility demos
-- `/(marketing)/(internal)/dictionary`: structured reference patterns and source material
+- `/internal/demo`: internal component and utility demos
+- `/internal/dictionary`: structured reference patterns and source material
 - `/(payload)`: guarded Payload admin/API stubs for Payload-ready clones
 
 The internal surfaces are useful while authoring the template. New project clones do not need to keep all of them.
@@ -98,9 +98,9 @@ The prune command deletes owned route trees and rewrites the centralized route, 
 - `src/app`: application routes, layouts, and pages
 - `src/app/(site)/(marketing)`: public site routes and marketing shell assembly
 - `src/app/(site)/dashboard`: optional dashboard shell and dashboard pages
-- `src/app/(site)/(marketing)/(internal)/demo`: internal component demo and documentation system
-- `src/app/(site)/(marketing)/(internal)/dictionary`: structured pattern vault for source material
-- `src/app/(site)/(marketing)/(internal)/reference`: repo-level utility links and operational notes
+- `src/app/(site)/(marketing)/internal/demo`: internal component demo and documentation system
+- `src/app/(site)/(marketing)/internal/dictionary`: structured pattern vault for source material
+- `src/app/(site)/(marketing)/internal/reference`: repo-level utility links and operational notes
 - `src/components`: shared Webvizion UI library
 - `src/lib`: reusable non-UI utilities such as API, feedback, and mocks
 - `src/lib/marketing-content`: lightweight content resolvers, fallbacks, and section renderers
@@ -109,14 +109,14 @@ The prune command deletes owned route trees and rewrites the centralized route, 
 
 ## Demo System
 
-The component demo system lives under `src/app/(site)/(marketing)/(internal)/demo`.
+The component demo system lives under `src/app/(site)/(marketing)/internal/demo`.
 
 It is useful for:
 - browsing available UI primitives and higher-level components
 - validating interaction states and variants
 - documenting reusable patterns for future Webvizion websites
 
-Most demo content is centralized in `src/app/(site)/(marketing)/(internal)/demo/content.tsx`.
+Most demo content is centralized in `src/app/(site)/(marketing)/internal/demo/content.tsx`.
 
 ## Dictionary
 
@@ -148,6 +148,9 @@ If a project is purely marketing-site work, remove it with `npm run prune:templa
 - Prefer extending the shared component system instead of building page-local one-off UI.
 - Check the nearest `AGENTS.md` file before adding new reusable features.
 - Keep demos and documentation updated when shared components change.
+- Use Tailwind responsive classes for visual breakpoint changes, and reserve
+  `useTailwindBreakpoints` for branches where hidden content would still mount
+  expensive client work. See `docs/responsive-rendering.md`.
 
 ## Deployment
 
