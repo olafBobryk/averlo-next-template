@@ -2,6 +2,7 @@ export const appRoutes = {
 	home: "/",
 	contact: "/contact",
 	demo: "/internal/demo",
+	intelligence: "/internal/intelligence",
 	playground: "/internal/playground",
 	settings: "/settings",
 	login: "/login",

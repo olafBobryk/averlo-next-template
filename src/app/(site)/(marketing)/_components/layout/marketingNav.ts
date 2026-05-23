@@ -15,6 +15,7 @@ export type MarketingSocialLink = {
 export const MARKETING_NAV_LINKS: MarketingNavLink[] = [
 	{ name: "Home", routeId: "home" },
 	{ name: "Demo", routeId: "demo" },
+	{ name: "Intelligence", routeId: "intelligence" },
 	{ name: "Playground", routeId: "playground" },
 	{ name: "Settings", routeId: "settings" },
 	{ name: "Dictionary", routeId: "dictionary" },

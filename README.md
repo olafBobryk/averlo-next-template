@@ -10,6 +10,7 @@ It provides:
 - a centralized demo/catalog system under `src/app/(site)/(marketing)/internal/demo`
 - a dictionary area under `src/app/(site)/(marketing)/internal/dictionary`
 - an internal reference area under `src/app/(site)/(marketing)/internal/reference`
+- an optional internal intelligence surface under `src/app/(site)/(marketing)/internal/intelligence`
 - optional Payload-ready content scaffolding for CMS-capable websites
 - reusable UI, motion, overlay, and feedback patterns for Webvizion site builds
 
@@ -44,6 +45,7 @@ The template currently ships with four route-level surfaces:
 - `/dashboard`: the optional dashboard shell with its own providers, auth gate, and sidebar
 - `/internal/demo`: internal component and utility demos
 - `/internal/dictionary`: structured reference patterns and source material
+- `/internal/intelligence`: generated repo-intelligence map for template maintainers and agents
 - `/(payload)`: guarded Payload admin/API stubs for Payload-ready clones
 
 The internal surfaces are useful while authoring the template. New project clones do not need to keep all of them.
@@ -72,6 +74,7 @@ Available flags:
 
 - `--no-dashboard`: removes `/dashboard`, `/login`, and dashboard-only auth helpers
 - `--no-demo`: removes the internal demo surface
+- `--no-intelligence`: removes the internal intelligence surface and generated-index tooling
 - `--no-dictionary`: removes the internal dictionary surface
 - `--no-reference`: removes the internal reference/docs surface
 - `--no-payload`: removes the guarded Payload scaffold and Payload packages

@@ -3,6 +3,11 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
+		"intelligence:generate": "node scripts/generate-template-intelligence.mjs",
+		"predev": "npm run intelligence:generate",
+		"predev:user": "npm run intelligence:generate",
+		"predev:agent": "npm run intelligence:generate",
+		"prebuild": "npm run intelligence:generate",
 		"dev": "node scripts/dev-server.mjs user",
 		"dev:user": "node scripts/dev-server.mjs user",
 		"dev:agent": "node scripts/dev-server.mjs agent",

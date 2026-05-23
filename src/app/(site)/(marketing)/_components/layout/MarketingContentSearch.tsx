@@ -59,6 +59,12 @@ function getMarketingSearchEntries(
 	}
 
 	addEntry({
+		id: "intelligence",
+		label: "Intelligence: Concept Map",
+		href: "/internal/intelligence",
+	});
+
+	addEntry({
 		id: "playground-motion",
 		label: "Playground: Motion System QA",
 		href: "/internal/playground/motion",

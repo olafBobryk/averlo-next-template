@@ -40,6 +40,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				label: "Template",
 				links: [
 					{ label: "Demo", routeId: "demo" },
+					{ label: "Intelligence", routeId: "intelligence" },
 					{ label: "Playground", routeId: "playground" },
 					{ label: "Dictionary", routeId: "dictionary" },
 					{ label: "Reference", routeId: "reference" },
@@ -88,6 +89,17 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				],
 			},
 			{
+				label: "Intelligence",
+				routeId: "intelligence",
+				sections: [
+					{
+						label: "Concept map",
+						href: "/internal/intelligence",
+						description: "Generated template intelligence overview.",
+					},
+				],
+			},
+			{
 				label: "Playground",
 				routeId: "playground",
 				sections: [
@@ -117,6 +129,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				label: "Template",
 				links: [
 					{ label: "Demo", routeId: "demo" },
+					{ label: "Intelligence", routeId: "intelligence" },
 					{ label: "Playground", routeId: "playground" },
 					{ label: "Dictionary", routeId: "dictionary" },
 					{ label: "Reference", routeId: "reference" },
@@ -134,6 +147,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 		topNavLinks: [
 			{ label: "Home", routeId: "home" },
 			{ label: "Demo", routeId: "demo" },
+			{ label: "Intelligence", routeId: "intelligence" },
 			{ label: "Settings", routeId: "settings" },
 		],
 	},
@@ -141,6 +155,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 		navLinks: [
 			{ label: "Home", routeId: "home" },
 			{ label: "Demo", routeId: "demo" },
+			{ label: "Intelligence", routeId: "intelligence" },
 			{ label: "Playground", routeId: "playground" },
 			{ label: "Settings", routeId: "settings" },
 			{ label: "Dictionary", routeId: "dictionary" },

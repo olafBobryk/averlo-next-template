@@ -64,6 +64,36 @@ const SURFACES = {
 			},
 		],
 	},
+	intelligence: {
+		id: "intelligence",
+		flag: "--no-intelligence",
+		description:
+			"Remove the internal template intelligence surface, generated-index script, docs, and nav/search references.",
+		dependentSurfaces: [],
+		ownedPaths: [
+			"src/app/(site)/(marketing)/internal/intelligence",
+			"src/lib/template-intelligence",
+			"scripts/generate-template-intelligence.mjs",
+			"docs/template-intelligence.md",
+			"docs/worklogs/template-intelligence-ledger.md",
+			"docs/worklogs/template-intelligence-handoff.md",
+		],
+		routeIds: ["intelligence"],
+		routeBuilders: [],
+		navRouteIds: ["intelligence"],
+		searchSources: [],
+		postRemovalAssertions: [
+			{
+				label: "intelligence route ids and links",
+				pattern:
+					/(hrefFor\("intelligence"\)|routeId:\s*"intelligence"|\/internal\/intelligence|template-intelligence|Template Intelligence)/,
+			},
+			{
+				label: "template intelligence imports",
+				pattern: /from\s+["']@\/lib\/template-intelligence["']/,
+			},
+		],
+	},
 	playground: {
 		id: "playground",
 		flag: "--no-playground",
@@ -155,12 +185,21 @@ const PAYLOAD_PACKAGE_DEPENDENCIES = [
 	"sharp",
 ];
 
+const INTELLIGENCE_PACKAGE_SCRIPTS = [
+	"intelligence:generate",
+	"predev",
+	"predev:user",
+	"predev:agent",
+	"prebuild",
+];
+
 function printUsage() {
 	console.log(`Usage: npm run prune:template -- [flags]
 
 Flags:
   --no-dashboard   Remove dashboard routes, auth/login shell, and dashboard auth helpers
   --no-demo        Remove the internal demo surface
+  --no-intelligence Remove the internal template intelligence surface
   --no-playground  Remove the internal playground surface
   --no-dictionary  Remove the internal dictionary surface
   --no-reference   Remove the internal reference surface
@@ -231,6 +270,7 @@ function buildState(surfaceIds) {
 	return {
 		hasDashboard: !removed.has("dashboard"),
 		hasDemo: !removed.has("demo"),
+		hasIntelligence: !removed.has("intelligence"),
 		hasPlayground: !removed.has("playground"),
 		hasDictionary: !removed.has("dictionary"),
 		hasReference: !removed.has("reference"),
@@ -253,6 +293,7 @@ async function collectPlan(surfaceIds) {
 	const uniqueDeletedPaths = [...new Set(deletedPaths)].sort();
 	const removeInternalDir =
 		surfaceIds.includes("demo") &&
+		surfaceIds.includes("intelligence") &&
 		surfaceIds.includes("playground") &&
 		surfaceIds.includes("dictionary") &&
 		surfaceIds.includes("reference");
@@ -266,9 +307,13 @@ async function collectPlan(surfaceIds) {
 			...(surfaceIds.includes("payload")
 				? ["next.config.ts", "tsconfig.json", "package.json"]
 				: []),
+			...(surfaceIds.includes("intelligence") ? ["package.json"] : []),
 		],
 		packageDependencies: surfaceIds.includes("payload")
 			? [...PAYLOAD_PACKAGE_DEPENDENCIES]
+			: [],
+		packageScripts: surfaceIds.includes("intelligence")
+			? [...INTELLIGENCE_PACKAGE_SCRIPTS]
 			: [],
 		removeInternalDir,
 	};
@@ -283,6 +328,10 @@ function renderRoutesFile(state) {
 
 	if (state.hasDemo) {
 		lines.push(`\tdemo: "/internal/demo",`);
+	}
+
+	if (state.hasIntelligence) {
+		lines.push(`\tintelligence: "/internal/intelligence",`);
 	}
 
 	if (state.hasPlayground) {
@@ -357,6 +406,10 @@ function renderMarketingNavFile(state) {
 
 	if (state.hasDemo) {
 		navEntries.push('\t{ name: "Demo", routeId: "demo" },');
+	}
+
+	if (state.hasIntelligence) {
+		navEntries.push('\t{ name: "Intelligence", routeId: "intelligence" },');
 	}
 
 	if (state.hasPlayground) {
@@ -491,6 +544,17 @@ function renderMarketingContentSearchFile(state) {
 		);
 	}
 
+	if (state.hasIntelligence) {
+		header.push(
+			"",
+			"\taddEntry({",
+			'\t\tid: "intelligence",',
+			'\t\tlabel: "Intelligence: Concept Map",',
+			'\t\thref: "/internal/intelligence",',
+			"\t});",
+		);
+	}
+
 	if (state.hasPlayground) {
 		header.push(
 			"",
@@ -566,6 +630,22 @@ function renderMarketingContentFallbackFile(state) {
 		);
 	}
 
+	if (state.hasIntelligence) {
+		navEntries.push(
+			"\t\t\t{",
+			'\t\t\t\tlabel: "Intelligence",',
+			'\t\t\t\trouteId: "intelligence",',
+			"\t\t\t\tsections: [",
+			"\t\t\t\t\t{",
+			'\t\t\t\t\t\tlabel: "Concept map",',
+			'\t\t\t\t\t\thref: "/internal/intelligence",',
+			'\t\t\t\t\t\tdescription: "Generated template intelligence overview.",',
+			"\t\t\t\t\t},",
+			"\t\t\t\t],",
+			"\t\t\t},",
+		);
+	}
+
 	if (state.hasPlayground) {
 		navEntries.push(
 			"\t\t\t{",
@@ -592,9 +672,40 @@ function renderMarketingContentFallbackFile(state) {
 		navEntries.push('\t\t\t{ label: "Reference", routeId: "reference" },');
 	}
 
+	const footerNavEntries = ['\t\t\t{ label: "Home", routeId: "home" },'];
+	if (state.hasDemo) {
+		footerNavEntries.push('\t\t\t{ label: "Demo", routeId: "demo" },');
+	}
+	if (state.hasIntelligence) {
+		footerNavEntries.push(
+			'\t\t\t{ label: "Intelligence", routeId: "intelligence" },',
+		);
+	}
+	if (state.hasPlayground) {
+		footerNavEntries.push(
+			'\t\t\t{ label: "Playground", routeId: "playground" },',
+		);
+	}
+	footerNavEntries.push('\t\t\t{ label: "Settings", routeId: "settings" },');
+	if (state.hasDictionary) {
+		footerNavEntries.push(
+			'\t\t\t{ label: "Dictionary", routeId: "dictionary" },',
+		);
+	}
+	if (state.hasReference) {
+		footerNavEntries.push(
+			'\t\t\t{ label: "Reference", routeId: "reference" },',
+		);
+	}
+
 	const templateMenuLinks = [];
 	if (state.hasDemo) {
 		templateMenuLinks.push('\t\t\t\t\t{ label: "Demo", routeId: "demo" },');
+	}
+	if (state.hasIntelligence) {
+		templateMenuLinks.push(
+			'\t\t\t\t\t{ label: "Intelligence", routeId: "intelligence" },',
+		);
 	}
 	if (state.hasPlayground) {
 		templateMenuLinks.push(
@@ -650,6 +761,11 @@ function renderMarketingContentFallbackFile(state) {
 	const topNavEntries = ['\t\t\t{ label: "Home", routeId: "home" },'];
 	if (state.hasDemo) {
 		topNavEntries.push('\t\t\t{ label: "Demo", routeId: "demo" },');
+	}
+	if (state.hasIntelligence) {
+		topNavEntries.push(
+			'\t\t\t{ label: "Intelligence", routeId: "intelligence" },',
+		);
 	}
 	topNavEntries.push('\t\t\t{ label: "Settings", routeId: "settings" },');
 
@@ -708,7 +824,7 @@ function renderMarketingContentFallbackFile(state) {
 		"\t},",
 		"\tfooter: {",
 		"\t\tnavLinks: [",
-		...navEntries,
+		...footerNavEntries,
 		"\t\t],",
 		"\t\tsocialLinks: [",
 		"\t\t\t{",
@@ -1049,6 +1165,32 @@ async function removePackageDependencies(dependencyNames) {
 	return true;
 }
 
+async function removePackageScripts(scriptNames) {
+	if (scriptNames.length === 0) return false;
+
+	const packageJsonPath = path.join(ROOT, "package.json");
+	const raw = await fs.readFile(packageJsonPath, "utf8");
+	const pkg = JSON.parse(raw);
+	let changed = false;
+
+	for (const scriptName of scriptNames) {
+		if (pkg.scripts?.[scriptName]) {
+			delete pkg.scripts[scriptName];
+			changed = true;
+		}
+	}
+
+	if (!changed) return false;
+
+	await fs.writeFile(
+		packageJsonPath,
+		`${JSON.stringify(pkg, null, "\t")}\n`,
+		"utf8",
+	);
+
+	return true;
+}
+
 function refreshPackageLock() {
 	const result = spawnSync(
 		"npm",
@@ -1160,6 +1302,13 @@ function printPlan(plan) {
 		console.log("- package-lock.json (refreshed)");
 	}
 
+	if (plan.packageScripts.length > 0) {
+		console.log("\nPackage scripts to remove");
+		for (const scriptName of plan.packageScripts) {
+			console.log(`- ${scriptName}`);
+		}
+	}
+
 	console.log("\nWarnings");
 	console.log("- unresolved reference validation runs after mutation");
 	console.log("- build validation runs after mutation");
@@ -1234,6 +1383,7 @@ async function main() {
 	const packageJsonChanged = await removePackageDependencies(
 		plan.packageDependencies,
 	);
+	await removePackageScripts(plan.packageScripts);
 	if (packageJsonChanged) {
 		refreshPackageLock();
 	}
