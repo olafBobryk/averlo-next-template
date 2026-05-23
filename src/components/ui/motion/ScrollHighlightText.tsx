@@ -3,10 +3,9 @@
 import type { MotionValue } from "motion/react";
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef } from "react";
+import { getSpring } from "@/components/ui/foundations/spring";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
-
-const highlightSpring = { stiffness: 30, damping: 18, mass: 1.2 } as const;
 
 type Props = {
 	children: string;
@@ -23,7 +22,10 @@ export function ScrollHighlightText({ children, className }: Props) {
 			? { target: ref, offset: ["start end", "start center"] }
 			: { offset: ["start end", "start center"] },
 	);
-	const scrollYProgress = useSpring(rawProgress, highlightSpring);
+	const scrollYProgress = useSpring(
+		rawProgress,
+		getSpring("scroll", { expressive: 1, intensity: "hero" }),
+	);
 
 	const chars = children.split("");
 

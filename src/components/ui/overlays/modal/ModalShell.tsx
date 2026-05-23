@@ -8,6 +8,7 @@ import {
 	type ReactNode,
 	useEffect,
 } from "react";
+import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
 import Portal from "@/components/ui/overlays/Portal";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -31,15 +32,8 @@ type ModalShellProps = {
 	panelStyle?: CSSProperties;
 };
 
-const overlayTransition = {
-	duration: 0.32,
-	ease: [0.2, 0.8, 0.2, 1] as const,
-};
-
-const panelTransition = {
-	duration: 0.26,
-	ease: [0.16, 1, 0.3, 1] as const,
-};
+const overlayTransition = resolveMotionTransition("overlay");
+const panelTransition = resolveMotionTransition("disclosure");
 
 const DEFAULT_PANEL =
 	"flex will-change-opacity max-w-full w-[450px] max-w-lg overflow-hidden overflow-y-auto";

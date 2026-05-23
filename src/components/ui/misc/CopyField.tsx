@@ -17,6 +17,7 @@ type CopyFieldProps = {
 	copiedDurationMs?: number;
 	onCopy?: (value: string) => void | Promise<void>;
 	toastMessage?: string | false;
+	type?: "phone" | "string";
 	onClick?: React.MouseEventHandler<HTMLButtonElement>;
 	loading?: boolean;
 	disabled?: boolean;
@@ -24,6 +25,7 @@ type CopyFieldProps = {
 	buttonSize?: CopyFieldButtonSize;
 	textVariant?: React.ComponentProps<typeof Text>["variant"];
 	textTone?: React.ComponentProps<typeof Text>["tone"];
+	showIcon?: boolean;
 	className?: string;
 	textClassName?: string;
 	iconClassName?: string;
@@ -45,6 +47,7 @@ function CopyFieldRoot({
 	copiedDurationMs = 1500,
 	onCopy,
 	toastMessage,
+	type = "string",
 	onClick,
 	loading,
 	disabled,
@@ -52,6 +55,7 @@ function CopyFieldRoot({
 	buttonSize = "md",
 	textVariant = "body",
 	textTone,
+	showIcon = true,
 	className,
 	textClassName,
 	iconClassName,
@@ -82,6 +86,7 @@ function CopyFieldRoot({
 	);
 	const content = isPrimitive ? (
 		<Text
+			dir={type === "phone" ? "ltr" : undefined}
 			as="span"
 			variant={textVariant}
 			tone={textTone}
@@ -106,7 +111,7 @@ function CopyFieldRoot({
 			loading={loading}
 			disabled={disabled}
 			onClick={handleCopyClick}
-			trailingIcon={iconNode}
+			trailingIcon={showIcon ? iconNode : undefined}
 			className={clsx(
 				buttonVariant === "solid" && buttonSize === "md"
 					? "w-full min-w-0 !rounded-full !px-[15px] !py-[12px]"

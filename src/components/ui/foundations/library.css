@@ -10,18 +10,32 @@
 	--font-heading: var(--font-sans-fallback);
 	--text-scale: 1;
 
-	--motion-micro-duration: 140ms;
-	--motion-micro-ease: cubic-bezier(0.33, 0.1, 0.2, 1);
-	--motion-interactive-duration: 200ms;
-	--motion-interactive-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
-	--motion-component-duration: 260ms;
-	--motion-component-ease: cubic-bezier(0.16, 1, 0.3, 1);
-	--motion-macro-duration: 320ms;
-	--motion-macro-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-	--motion-grand-duration: 940ms;
-	--motion-grand-ease: cubic-bezier(0.32, 0.04, 0.18, 1);
-	--motion-decorative-duration: 900ms;
-	--motion-decorative-ease: cubic-bezier(0.33, 0, 0.2, 1);
+	--motion-feedback-duration: 140ms;
+	--motion-feedback-ease: cubic-bezier(0.33, 0.1, 0.2, 1);
+	--motion-interaction-duration: 200ms;
+	--motion-interaction-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+	--motion-disclosure-duration: 260ms;
+	--motion-disclosure-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--motion-overlay-duration: 320ms;
+	--motion-overlay-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+	--motion-reveal-duration: 940ms;
+	--motion-reveal-ease: cubic-bezier(0.32, 0.04, 0.18, 1);
+	--motion-ambient-duration: 900ms;
+	--motion-ambient-ease: cubic-bezier(0.33, 0, 0.2, 1);
+	--motion-scroll-duration: 260ms;
+	--motion-scroll-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--motion-micro-duration: var(--motion-feedback-duration);
+	--motion-micro-ease: var(--motion-feedback-ease);
+	--motion-interactive-duration: var(--motion-interaction-duration);
+	--motion-interactive-ease: var(--motion-interaction-ease);
+	--motion-component-duration: var(--motion-disclosure-duration);
+	--motion-component-ease: var(--motion-disclosure-ease);
+	--motion-macro-duration: var(--motion-overlay-duration);
+	--motion-macro-ease: var(--motion-overlay-ease);
+	--motion-grand-duration: var(--motion-reveal-duration);
+	--motion-grand-ease: var(--motion-reveal-ease);
+	--motion-decorative-duration: var(--motion-ambient-duration);
+	--motion-decorative-ease: var(--motion-ambient-ease);
 	--motion-ring-ease: cubic-bezier(0.36, 0.07, 0.19, 0.97);
 	--motion-spin-duration: 2s;
 	--motion-spin-ease: cubic-bezier(0.75, 0.25, 0.25, 0.75);
@@ -178,9 +192,10 @@
 	 * - The chevron SVG on dropdown triggers when you toggle `rotate-180`.
 	 * - Small elements that should feel snappy and responsive with almost no lag.
 	 */
-	.motion-micro {
-		transition-duration: var(--motion-micro-duration);
-		transition-timing-function: var(--motion-micro-ease);
+	.motion-micro,
+	.motion-feedback {
+		transition-duration: var(--motion-feedback-duration);
+		transition-timing-function: var(--motion-feedback-ease);
 	}
 
 	/*
@@ -200,9 +215,10 @@
 	 * - Cards that slightly lift with a shadow when hovered.
 	 * - A button that grows in width when loading text appears ("Save" -> "Saving…").
 	 */
-	.motion-interactive {
-		transition-duration: var(--motion-interactive-duration);
-		transition-timing-function: var(--motion-interactive-ease);
+	.motion-interactive,
+	.motion-interaction {
+		transition-duration: var(--motion-interaction-duration);
+		transition-timing-function: var(--motion-interaction-ease);
 	}
 
 	/*
@@ -222,9 +238,10 @@
 	 * - A details row expanding inside a table to show extra information.
 	 * - A "more options" panel inside a card that fades and slides down into view.
 	 */
-	.motion-component {
-		transition-duration: var(--motion-component-duration);
-		transition-timing-function: var(--motion-component-ease);
+	.motion-component,
+	.motion-disclosure {
+		transition-duration: var(--motion-disclosure-duration);
+		transition-timing-function: var(--motion-disclosure-ease);
 	}
 
 	/*
@@ -244,9 +261,10 @@
 	 * - The main content shifting right when a left sidebar expands.
 	 * - A hero section height expanding when a "show more" description is opened.
 	 */
-	.motion-macro {
-		transition-duration: var(--motion-macro-duration);
-		transition-timing-function: var(--motion-macro-ease);
+	.motion-macro,
+	.motion-overlay {
+		transition-duration: var(--motion-overlay-duration);
+		transition-timing-function: var(--motion-overlay-ease);
 	}
 
 	/*
@@ -259,9 +277,10 @@
 	 * - Layered reveal choreography across multiple sections.
 	 * - Large decorative transforms that should settle with more weight than macro UI motion.
 	 */
-	.motion-grand {
-		transition-duration: var(--motion-grand-duration);
-		transition-timing-function: var(--motion-grand-ease);
+	.motion-grand,
+	.motion-reveal {
+		transition-duration: var(--motion-reveal-duration);
+		transition-timing-function: var(--motion-reveal-ease);
 	}
 
 	/*
@@ -276,9 +295,17 @@
 	 * Use on:
 	 * - Elements with a keyframe animation where you want consistent timing.
 	 */
-	.motion-decorative {
-		animation-duration: var(--motion-decorative-duration);
-		animation-timing-function: var(--motion-decorative-ease);
+	.motion-decorative,
+	.motion-ambient {
+		animation-duration: var(--motion-ambient-duration);
+		animation-timing-function: var(--motion-ambient-ease);
+		transition-duration: var(--motion-ambient-duration);
+		transition-timing-function: var(--motion-ambient-ease);
+	}
+
+	.motion-scroll {
+		transition-duration: var(--motion-scroll-duration);
+		transition-timing-function: var(--motion-scroll-ease);
 	}
 }
 

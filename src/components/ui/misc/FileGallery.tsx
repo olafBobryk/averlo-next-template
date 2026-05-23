@@ -5,6 +5,7 @@ import * as React from "react";
 import {
 	FilePreview,
 	type FilePreviewItem,
+	type FilePreviewLabels,
 	type FilePreviewTag,
 } from "./FilePreview";
 import { IdleState } from "./state/IdleState";
@@ -39,6 +40,7 @@ type FileGalleryProps = {
 	onRemovePendingItem?: (item: FileGalleryPendingItem) => void;
 	emptyTitle?: React.ReactNode;
 	emptyDescription?: React.ReactNode;
+	labels?: FilePreviewLabels;
 	className?: string;
 };
 
@@ -80,6 +82,7 @@ export function FileGallery({
 	onRemovePendingItem,
 	emptyTitle = "No files yet",
 	emptyDescription = "Uploaded files will appear here.",
+	labels,
 	className,
 }: FileGalleryProps) {
 	const [pendingPreviews, setPendingPreviews] = React.useState<
@@ -178,6 +181,7 @@ export function FileGallery({
 							}
 							hideRemove={hideRemove}
 							previewHeight={previewHeight}
+							labels={labels}
 							onRemovePending={(url) => {
 								const preview = pendingPreviews.find(
 									(entry) => entry.url === url,

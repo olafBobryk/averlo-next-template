@@ -1,5 +1,5 @@
 import ScrollController from "@/components/mount/ScrollController";
-import { RevealRoot } from "@/components/ui/motion/Reveal";
+import { Reveal } from "@/components/ui/motion";
 import type { SiteLayoutDocument } from "@/lib/marketing-content/types";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -14,7 +14,7 @@ export function MarketingShell({
 	return (
 		<>
 			<Header layout={siteLayout.header} />
-			<RevealRoot>{children}</RevealRoot>
+			<Reveal.Root>{children}</Reveal.Root>
 			<Footer layout={siteLayout.footer} />
 			<ScrollController />
 		</>

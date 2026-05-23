@@ -92,9 +92,9 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				routeId: "playground",
 				sections: [
 					{
-						label: "Reveal root",
-						href: "/internal/playground/motion/reveal-root",
-						description: "Motion reveal scheduler playground.",
+						label: "Motion QA",
+						href: "/internal/playground/motion",
+						description: "Motion system QA playground.",
 					},
 				],
 			},

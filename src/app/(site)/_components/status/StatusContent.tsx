@@ -2,8 +2,8 @@
 
 import clsx from "clsx";
 import Logo from "@/components/branding/Logo";
+import { Reveal } from "@/components/ui/motion";
 import { MotionScene } from "@/components/ui/motion/MotionScene";
-import { RevealGroup, RevealGroupItem } from "@/components/ui/motion/Reveal";
 import { Text } from "@/components/ui/primitives/Text";
 
 type StatusContentProps = {
@@ -32,28 +32,28 @@ export function StatusContent({
 		>
 			{enableRevealMotion ? (
 				<MotionScene>
-					<RevealGroup className="flex w-full flex-col items-center justify-center gap-3">
-						<RevealGroupItem>
+					<Reveal.List className="flex w-full flex-col items-center justify-center gap-3">
+						<Reveal.Item>
 							<Logo size="md" variant="mark" />
-						</RevealGroupItem>
-						<RevealGroupItem>
+						</Reveal.Item>
+						<Reveal.Item>
 							<Text as="h1" variant="headingXl">
 								{heading}
 							</Text>
-						</RevealGroupItem>
-						<RevealGroupItem>
+						</Reveal.Item>
+						<Reveal.Item>
 							<Text variant="body" tone="muted">
 								{body}
 							</Text>
-						</RevealGroupItem>
+						</Reveal.Item>
 						{actions ? (
-							<RevealGroupItem>
+							<Reveal.Item>
 								<div className="mt-2 flex flex-wrap items-center justify-center gap-3">
 									{actions}
 								</div>
-							</RevealGroupItem>
+							</Reveal.Item>
 						) : null}
-					</RevealGroup>
+					</Reveal.List>
 				</MotionScene>
 			) : (
 				<>

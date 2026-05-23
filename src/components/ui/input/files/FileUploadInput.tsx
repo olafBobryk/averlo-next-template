@@ -22,6 +22,10 @@ type FileUploadInputProps = {
 	chooseLabel?: React.ReactNode;
 	cameraLabel?: React.ReactNode;
 	showCamera?: boolean;
+	dropTitle?: React.ReactNode;
+	dropDescription?: React.ReactNode;
+	pendingFilesLabel?: (count: number) => React.ReactNode;
+	showClear?: boolean;
 	className?: string;
 };
 
@@ -41,6 +45,11 @@ export function FileUploadInput({
 	chooseLabel = "Choose files",
 	cameraLabel = "Take photo",
 	showCamera = true,
+	dropTitle = "Drop files here",
+	dropDescription = "Selected files appear in the gallery before they are saved.",
+	pendingFilesLabel = (count) =>
+		`${count} pending ${count === 1 ? "file" : "files"}`,
+	showClear = true,
 	className,
 }: FileUploadInputProps) {
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -152,12 +161,10 @@ export function FileUploadInput({
 			>
 				<div className="flex flex-col gap-1">
 					<Text variant="bodyStrong">
-						{files.length > 0
-							? `${files.length} pending ${files.length === 1 ? "file" : "files"}`
-							: "Drop files here"}
+						{files.length > 0 ? pendingFilesLabel(files.length) : dropTitle}
 					</Text>
 					<Text variant="body" tone="muted">
-						Selected files appear in the gallery before they are saved.
+						{dropDescription}
 					</Text>
 				</div>
 
@@ -179,7 +186,7 @@ export function FileUploadInput({
 							{cameraLabel}
 						</Button>
 					) : null}
-					{files.length > 0 ? (
+					{showClear && files.length > 0 ? (
 						<Button
 							variant="ghost"
 							onClick={() => onFilesChange([])}

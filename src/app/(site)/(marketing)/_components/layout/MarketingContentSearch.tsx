@@ -59,9 +59,9 @@ function getMarketingSearchEntries(
 	}
 
 	addEntry({
-		id: "playground-motion-reveal-root",
-		label: "Playground: Reveal Group Scheduler",
-		href: "/internal/playground/motion/reveal-root",
+		id: "playground-motion",
+		label: "Playground: Motion System QA",
+		href: "/internal/playground/motion",
 	});
 
 	return entries;

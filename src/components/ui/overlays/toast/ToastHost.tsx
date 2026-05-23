@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
+import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon } from "@/components/ui/icons/Icon";
@@ -238,7 +239,7 @@ function ToastItemCard({
 					? { opacity: 0, y: -8, scale: 0.98 }
 					: { opacity: 1, y: 0, scale: 1 }
 			}
-			transition={motionAllowed ? spring.interactive : { duration: 0 }}
+			transition={motionAllowed ? spring.interactive : instantTransition}
 			display="flex"
 			gap="none"
 			padding="sm"

@@ -14,8 +14,9 @@ import { Text } from "../ui/primitives/Text";
 
 type Phase = "loading" | "revealing" | "transitioning" | "done";
 
-// Matches getMotionTiming("grand") duration in ms
-const GRAND_MS = 940;
+const REVEAL_DURATION_MS = Math.round(
+	Number(getMotionTiming("grand").duration ?? 0) * 1000,
+);
 const EXIT_REVEAL_HANDOFF_MS = 180;
 
 export default function LoadingScreenMount() {
@@ -57,7 +58,7 @@ export default function LoadingScreenMount() {
 			t1 = setTimeout(() => {
 				if (cancelled) return;
 				setPhase("transitioning");
-			}, GRAND_MS);
+			}, REVEAL_DURATION_MS);
 		});
 		return () => {
 			cancelled = true;

@@ -15,6 +15,7 @@ import {
 	useEffect,
 	useState,
 } from "react";
+import { getSpring } from "@/components/ui/foundations/spring";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
@@ -36,8 +37,8 @@ export function ScrollLag({
 	className,
 	style,
 	magnitude = 0.15,
-	stiffness = 220,
-	damping = 22,
+	stiffness,
+	damping,
 	velocityClamp = 2000,
 	disableWhenReducedMotion = true,
 	...rest
@@ -63,10 +64,11 @@ export function ScrollLag({
 			: base.get(),
 	);
 
+	const scrollSpring = getSpring("scroll");
 	const smoothVelocity = useSpring(safeVelocity, {
-		stiffness,
-		damping,
-		mass: 1,
+		...scrollSpring,
+		stiffness: stiffness ?? scrollSpring.stiffness,
+		damping: damping ?? scrollSpring.damping,
 		restSpeed: 0.0001,
 	});
 	const y = useTransform(smoothVelocity, (value) =>

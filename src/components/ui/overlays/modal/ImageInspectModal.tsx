@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Loader } from "@/components/ui/misc/Loader";
-import { RevealImage } from "@/components/ui/motion/RevealImage";
+import { Reveal } from "@/components/ui/motion";
 import { Button } from "@/components/ui/primitives/Button";
 import { showToast } from "@/lib/feedback";
 
@@ -65,7 +65,7 @@ export function ImageInspectModal({
 				<Button size="icon" trailingIcon="cross" onClick={onClose} />
 			</div>
 			<div className="relative w-full h-full">
-				<RevealImage
+				<Reveal.Image
 					src={src}
 					alt={alt}
 					fill

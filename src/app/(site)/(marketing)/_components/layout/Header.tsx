@@ -9,7 +9,7 @@ import type { SiteLayoutDocument } from "@/lib/marketing-content/types";
 import HeaderCompact from "./HeaderCompact";
 import HeaderFull from "./HeaderFull";
 
-const TOP_SCROLL_NOISE_PX = 2;
+const TOP_SCROLL_BAND_PX = 25;
 
 type HeaderProps = {
 	className?: string;
@@ -17,17 +17,7 @@ type HeaderProps = {
 };
 
 function getIsScrolled() {
-	const root = document.scrollingElement ?? document.documentElement;
-	const scrollY = Math.max(
-		0,
-		window.scrollY,
-		window.pageYOffset,
-		root.scrollTop,
-		document.documentElement.scrollTop,
-		document.body.scrollTop,
-	);
-
-	return scrollY > TOP_SCROLL_NOISE_PX;
+	return window.scrollY > TOP_SCROLL_BAND_PX;
 }
 
 export default function Header({ className = "", layout }: HeaderProps) {

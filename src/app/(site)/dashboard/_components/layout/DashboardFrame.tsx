@@ -34,7 +34,7 @@ export function DashboardFrame({
 	return (
 		<div
 			className={clsx(
-				"min-h-screen bg-background text-foreground transition-colors",
+				"min-h-screen bg-background text-foreground transition-colors motion-disclosure",
 			)}
 		>
 			<div className="mx-auto flex min-h-screen max-w-section-max gap-8 p-4 lg:p-6">

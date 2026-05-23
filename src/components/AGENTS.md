@@ -32,9 +32,9 @@ For any new reusable UI-library feature:
 - **Input shell invariant:** Text-like controls should use `InputFrame` for the shell and `inputVariants` or `inputSizeClasses` for the actual input element. Padding belongs on the input, not the wrapper.
 - **Typography invariant:** Use `Text` variants or the shared font utilities. Do not hardcode font families in component-level UI.
 - **Motion invariant:** CSS motion utilities are the default. Use `motion/react` only where the library already does or where layout/reveal motion truly needs it. Respect reduced motion via `useMotionAllowed`.
-  - For entrance reveals, prefer the canonical scheduler in `RevealRoot` / `RevealItem`. Use `RevealGroup` plus `RevealGroupItem` when a section should enter as one root-scheduled boundary with local child stagger. Marketing pages already provide a route-level `RevealRoot`; isolated surfaces can rely on the local fallback or add a scoped root.
+  - For entrance reveals, prefer `import { Reveal } from "@/components/ui/motion"` with `Reveal.Root`, `Reveal.List`, and `Reveal.Item`. Marketing pages already provide a route-level `Reveal.Root`; isolated surfaces can rely on the local fallback or add a scoped root.
   - For screenshot scripts and AI traversal, disable reveal motion at the root with the motion setting or a URL override such as `?motion=off` / `?reveal=off`; disabled roots render reveal content visible immediately.
-  - For media reveals, prefer `RevealImage` with scheduler gates, `waitFor`, and `unlockStage` instead of page-local image-loading animation code. Use its default load-ignoring strategy for entrance reveals, and opt into load-gated reveals only when later content must wait for the actual image load.
+  - For media reveals, prefer `Reveal.Image` with scheduler gates, `after`, and `unlock` instead of page-local image-loading animation code. Use its default load-ignoring strategy for entrance reveals, and opt into load-gated reveals only when later content must wait for the actual image load.
   - For multi-step choreography across intro completion, media reveal, and later copy or accents, prefer `MotionScene` over page-local booleans and ad hoc callback chains.
 - **Overlay invariant:** Use the existing portal and host model for modals, dropdowns, and toasts. Do not create page-local overlay stacks.
 - **Hotkey invariant:** Use `@tanstack/react-hotkeys` for reusable shortcuts; keep handlers scoped, documented, and out of page-local global listeners.
@@ -60,7 +60,7 @@ Use these defaults unless product requirements explicitly say otherwise.
 - **Toasts:** Use `showToast` with `ToastHost` for async mutation feedback, but not for initial page-load loading. Toast titles are built in; pass `{ title }` or promise title options when flow-specific titles are needed.
 - **Confirmation flows:** Use `useConfirmationModal` before creating page-specific confirm dialogs. The shared confirmation modal is part of the Halo primitives and should cover standard destructive or confirm-before-action flows.
 - **Image inspection:** Use `InspectableImage` or `useImageInspectModal` for click-to-enlarge image behavior.
-- **Image reveal choreography:** Use `RevealImage` when an image needs a loading fallback, reveal animation, or should gate later reveal content. Default image reveals ignore load state; use `loadStrategy="wait-for-load"` when reveal or stage unlock must wait for the image.
+- **Image reveal choreography:** Use `Reveal.Image` when an image needs a loading fallback, reveal animation, or should gate later reveal content. Default image reveals ignore load state; use `loadStrategy="wait-for-load"` when reveal or stage unlock must wait for the image.
 - **Segmented options:** Use `SegmentedControl` before rolling custom pill selectors.
 - **Disclosure content:** Use `Accordion` before building new expand/collapse rows.
 - **Keyboard shortcuts:** Use the native keyboard behavior of controls first; add reusable shortcuts through the shared hotkey convention only when needed.

@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { motion, type Transition } from "motion/react";
 import { useState } from "react";
 import Logo from "@/components/branding/Logo";
+import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
 import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { Button } from "@/components/ui/primitives/Button";
@@ -53,10 +54,10 @@ export default function HeaderCompact({
 	const motionAllowed = useMotionAllowed(true);
 	const headerTransition: Transition = motionAllowed
 		? spring.macro
-		: { duration: 0 };
+		: instantTransition;
 	const heightTransition: Transition = motionAllowed
 		? spring.component
-		: { duration: 0 };
+		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
 	const headerHeight = isMenuOpen
 		? "100vh"

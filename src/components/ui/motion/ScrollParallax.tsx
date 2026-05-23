@@ -7,6 +7,7 @@ import {
 	type ReactNode,
 	useRef,
 } from "react";
+import { getSpring } from "@/components/ui/foundations/spring";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
@@ -31,8 +32,8 @@ export function ScrollParallax({
 	magnitude = 80,
 	disableWhenReducedMotion = true,
 	direction = "down",
-	stiffness = 140,
-	damping = 18,
+	stiffness,
+	damping,
 	smooth = true,
 	...rest
 }: ScrollParallaxProps) {
@@ -51,10 +52,11 @@ export function ScrollParallax({
 		[0, 0.5, 1],
 		[-amplitude, 0, amplitude],
 	);
+	const scrollSpring = getSpring("scroll");
 	const springY = useSpring(rawY, {
-		stiffness,
-		damping,
-		mass: 1,
+		...scrollSpring,
+		stiffness: stiffness ?? scrollSpring.stiffness,
+		damping: damping ?? scrollSpring.damping,
 		restSpeed: 0.001,
 	});
 	const y = smooth ? springY : rawY;

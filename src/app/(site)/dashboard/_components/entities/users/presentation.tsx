@@ -89,7 +89,7 @@ export const userPresentation = {
 								<a
 									href={`mailto:${user.email}`}
 									onClick={(event) => event.stopPropagation()}
-									className="block w-fit max-w-full truncate text-xs font-medium text-muted underline-offset-2 transition-colors hover:text-foreground hover:underline"
+									className="block w-fit max-w-full truncate text-xs font-medium text-muted underline-offset-2 transition-colors motion-interactive hover:text-foreground hover:underline"
 								>
 									{user.email}
 								</a>

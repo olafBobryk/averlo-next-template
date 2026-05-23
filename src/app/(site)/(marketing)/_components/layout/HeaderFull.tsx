@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { AnimatePresence, motion, type Transition } from "motion/react";
 import { useEffect, useId, useRef, useState } from "react";
 import Logo from "@/components/branding/Logo";
+import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon } from "@/components/ui/icons/Icon";
@@ -95,10 +96,10 @@ export default function HeaderFull({
 	const motionAllowed = useMotionAllowed(true);
 	const headerTransition: Transition = motionAllowed
 		? spring.macro
-		: { duration: 0 };
+		: instantTransition;
 	const menuTransition: Transition = motionAllowed
 		? spring.component
-		: { duration: 0 };
+		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
 
 	const closeMenu = () => {
@@ -261,7 +262,7 @@ export default function HeaderFull({
 							}
 						/>
 					</nav>
-					<div className="flex min-w-[220px] justify-end">
+					<div className="pointer-events-auto flex min-w-[220px] justify-end">
 						<Button
 							href={getMarketingLinkHref(layout.cta)}
 							variant="primary"

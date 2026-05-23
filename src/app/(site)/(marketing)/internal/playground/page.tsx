@@ -16,10 +16,10 @@ const playgroundGroups = [
 					"Typography and indicator comparisons for transient feedback.",
 			},
 			{
-				href: "/internal/playground/motion/reveal-root",
-				title: "Reveal Group Scheduler",
+				href: "/internal/playground/motion",
+				title: "Motion System QA",
 				description:
-					"Root items, root-scheduled groups, and group-local stagger verification.",
+					"Scoped motion character, timing moments, reveal primitives, and automation checks.",
 			},
 		],
 	},

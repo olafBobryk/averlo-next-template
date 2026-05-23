@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { focusRing } from "../foundations/focus";
-import { motionTiming } from "../foundations/motionTiming";
+import { instantTransition, motionTiming } from "../foundations/motionTiming";
 import { Button } from "../primitives/Button";
 
 type ScrollBordersProps = {
@@ -155,7 +155,7 @@ const ScrollBordersRoot = React.forwardRef<HTMLDivElement, ScrollBordersProps>(
 								}}
 								exit={{ opacity: 0, y: 0 }}
 								transition={
-									motionAllowed ? motionTiming.component : { duration: 0 }
+									motionAllowed ? motionTiming.scroll : instantTransition
 								}
 							>
 								<Button

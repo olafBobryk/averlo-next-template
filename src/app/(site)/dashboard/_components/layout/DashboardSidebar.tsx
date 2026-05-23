@@ -5,7 +5,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import Logo from "@/components/branding/Logo";
-import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
+import {
+	getMotionTiming,
+	instantTransition,
+} from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon } from "@/components/ui/icons/Icon";
@@ -61,13 +64,13 @@ export function DashboardSidebar({
 		dashboardSidebarRouteIds,
 	);
 	const motionAllowed = useMotionAllowed(true);
-	const macroTransition = motionAllowed ? spring.macro : { duration: 0 };
+	const macroTransition = motionAllowed ? spring.macro : instantTransition;
 	const componentTransition = motionAllowed
 		? spring.component
-		: { duration: 0 };
+		: instantTransition;
 	const interactiveTransition = motionAllowed
 		? spring.interactive
-		: { duration: 0 };
+		: instantTransition;
 
 	async function handleLogout() {
 		if (loggingOut) return;
@@ -355,7 +358,7 @@ export function DashboardSidebar({
 								>
 									<span
 										className={clsx(
-											"group-data-[open=false]:grow flex w-full items-center gap-3 rounded-[10px] px-2 py-2.5 transition-[background-color,width] duration-500 will-change-[width] motion-micro",
+											"group-data-[open=false]:grow flex w-full items-center gap-3 rounded-[10px] px-2 py-2.5 transition-[background-color,width] will-change-[width] motion-feedback",
 											isExpanded
 												? "hover:bg-background"
 												: "justify-center hover:bg-background",

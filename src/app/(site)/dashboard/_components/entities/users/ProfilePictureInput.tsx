@@ -105,11 +105,11 @@ export function ProfilePictureInput({
 						size="lg"
 						className="h-full w-full rounded-full border-0"
 					/>
-					<span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/30">
+					<span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors motion-interactive group-hover:bg-black/30">
 						<Icon
 							name="camera"
 							size="md"
-							className="opacity-0 text-white transition-opacity group-hover:opacity-100"
+							className="opacity-0 text-white transition-opacity motion-interactive group-hover:opacity-100"
 						/>
 					</span>
 				</Button>

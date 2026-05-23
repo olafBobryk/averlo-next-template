@@ -5,6 +5,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
+import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
 import Portal from "@/components/ui/overlays/Portal";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { Icon } from "../icons/Icon";
@@ -524,7 +525,7 @@ export function Dropdown({
 					initial={{ opacity: 0, y: menuMotionY }}
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: menuMotionY }}
-					transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+					transition={resolveMotionTransition("disclosure")}
 					style={menuStyle}
 					className={resolvedMenuClassName}
 					onMouseEnter={clearHoverTimeout}

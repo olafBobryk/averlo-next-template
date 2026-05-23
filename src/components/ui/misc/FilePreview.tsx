@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import * as React from "react";
+import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
 import { Pill, type PillTone } from "@/components/ui/misc/Pill";
 import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirmationModal";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
@@ -13,6 +14,17 @@ import { InspectableImage } from "./InspectableImage";
 export type FilePreviewTag = {
 	label: React.ReactNode;
 	tone?: PillTone;
+};
+
+export type FilePreviewLabels = {
+	file?: React.ReactNode;
+	pdf?: React.ReactNode;
+	pending?: React.ReactNode;
+	removeConfirmLabel?: string;
+	removeDescription?: string;
+	removeTitle?: string;
+	removeWarning?: string;
+	uploaded?: React.ReactNode;
 };
 
 type PendingItem = {
@@ -60,6 +72,7 @@ type Props = {
 	// Called when user removes an uploaded item
 	onRemoveUploaded: (url: string) => void;
 
+	labels?: FilePreviewLabels;
 	className?: string;
 };
 
@@ -73,6 +86,7 @@ export function FilePreview({
 	previewHeight,
 	onRemovePending,
 	onRemoveUploaded,
+	labels,
 	className,
 }: Props) {
 	const isPending = item.status === "pending";
@@ -87,7 +101,9 @@ export function FilePreview({
 		fileType === "application/pdf" ||
 		(!fileType && (urlLooksLikePdf?.(item.url) ?? false));
 	const name = "name" in item && item.name ? item.name : nameFromUrl(item.url);
-	const fileTypeLabel = isPdf ? "PDF" : "File";
+	const fileTypeLabel = isPdf
+		? (labels?.pdf ?? "PDF")
+		: (labels?.file ?? "File");
 
 	const handleOpenFile = React.useCallback(() => {
 		openModal(
@@ -115,7 +131,7 @@ export function FilePreview({
 			initial={{ opacity: 0, y: 6, scale: 0.98 }}
 			animate={{ opacity: 1, y: 0, scale: 1 }}
 			exit={{ opacity: 0, y: -6, scale: 0.98 }}
-			transition={{ duration: 0.2 }}
+			transition={resolveMotionTransition("interaction")}
 			style={
 				previewHeight !== undefined ? { height: previewHeight } : undefined
 			}
@@ -193,7 +209,9 @@ export function FilePreview({
 					tone={isPending ? "warning" : "success"}
 					className="px-2 py-1 text-[10px] font-medium leading-none backdrop-blur-sm"
 				>
-					{isPending ? "Pending" : "Uploaded"}
+					{isPending
+						? (labels?.pending ?? "Pending")
+						: (labels?.uploaded ?? "Uploaded")}
 				</Pill>
 				{item.tag ? (
 					<Pill
@@ -218,10 +236,14 @@ export function FilePreview({
 							return;
 						}
 						openConfirmation({
-							title: "Remove file",
-							description: "This file will be removed from the upload list.",
-							warning: "This file will be lost forever, are you sure?",
-							confirmLabel: "Remove",
+							title: labels?.removeTitle ?? "Remove file",
+							description:
+								labels?.removeDescription ??
+								"This file will be removed from the upload list.",
+							warning:
+								labels?.removeWarning ??
+								"This file will be lost forever, are you sure?",
+							confirmLabel: labels?.removeConfirmLabel ?? "Remove",
 							onConfirm: () => onRemoveUploaded(item.url),
 						});
 					}}

@@ -61,17 +61,13 @@ import { IdleState } from "@/components/ui/misc/state/IdleState";
 import { StateIndicator } from "@/components/ui/misc/state/State";
 import { Tooltip } from "@/components/ui/misc/Tooltip";
 import { Warning } from "@/components/ui/misc/Warning";
+import { Reveal } from "@/components/ui/motion";
+import {
+	ActiveStageHost,
+	useActiveStage,
+} from "@/components/ui/motion/ActiveStageHost";
 import { LetterWave } from "@/components/ui/motion/LetterWave";
 import { MotionScene } from "@/components/ui/motion/MotionScene";
-import {
-	RevealGroup,
-	RevealGroupItem,
-	RevealItem,
-	RevealRoot,
-} from "@/components/ui/motion/Reveal";
-import { RevealImage } from "@/components/ui/motion/RevealImage";
-import { RevealText } from "@/components/ui/motion/RevealText";
-import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
 import { ScrollHighlightText } from "@/components/ui/motion/ScrollHighlightText";
 import { ScrollLag } from "@/components/ui/motion/ScrollLag";
 import { ScrollParallax } from "@/components/ui/motion/ScrollParallax";
@@ -203,6 +199,66 @@ const imageSwitcherDemoImages = [
 			"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAyMCAxMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAiIGhlaWdodD0iMTIiIGZpbGw9IiNmMWY1ZjkiLz48Y2lyY2xlIGN4PSI4IiBjeT0iNiIgcj0iNSIgZmlsbD0iIzk0YTNmNyIvPjwvc3ZnPg==",
 	},
 ] satisfies ImageSwitcherImage[];
+
+const activeStageDemoItems = [
+	{
+		title: "Brief",
+		description: "Gather the highest-risk user need before motion begins.",
+	},
+	{
+		title: "Sequence",
+		description: "Cycle through stages after app readiness or a scene gate.",
+	},
+	{
+		title: "Refine",
+		description: "Pause on hover or focus so users can inspect one state.",
+	},
+];
+
+function ActiveStageHostDemo() {
+	return (
+		<ActiveStageHost
+			count={activeStageDemoItems.length}
+			intervalMs={1800}
+			className="grid gap-3"
+		>
+			<ActiveStageHostDemoContent />
+		</ActiveStageHost>
+	);
+}
+
+function ActiveStageHostDemoContent() {
+	const { activeIndex, getItemProps, stageProgress } = useActiveStage();
+
+	return (
+		<div className="grid gap-3">
+			<div className="h-1 overflow-hidden rounded-full bg-foreground/10">
+				<div
+					className="h-full rounded-full bg-primary"
+					style={{ width: `${Math.round(stageProgress * 100)}%` }}
+				/>
+			</div>
+			<div className="grid gap-2 sm:grid-cols-3">
+				{activeStageDemoItems.map((item, index) => (
+					<button
+						key={item.title}
+						type="button"
+						className="rounded-lg border border-border bg-surface p-3 text-left transition-colors motion-interactive data-[active=true]:border-primary/40 data-[active=true]:bg-primary/10"
+						{...getItemProps(index)}
+					>
+						<Text variant="bodyStrong">{item.title}</Text>
+						<Text variant="caption" tone="muted" className="mt-1 block">
+							{item.description}
+						</Text>
+					</button>
+				))}
+			</div>
+			<Text variant="caption" tone="muted">
+				Active index: {activeIndex + 1} / {activeStageDemoItems.length}
+			</Text>
+		</div>
+	);
+}
 
 const relatedMap: Record<string, RelatedInfo> = {
 	Logo: { uses: [], usedIn: ["Footer", "HeaderCompact", "HeaderFull"] },
@@ -416,25 +472,26 @@ const relatedMap: Record<string, RelatedInfo> = {
 		],
 	},
 	spring: { uses: [], usedIn: ["Accordion", "SegmentedControl", "ToastHost"] },
-	motionTiming: { uses: [], usedIn: ["SuspenseBoundary", "ScrambleReveal"] },
+	motionTiming: { uses: [], usedIn: ["SuspenseBoundary", "Reveal.Scramble"] },
 	createApiClient: { uses: [], usedIn: ["checkHealth"] },
 	createMockFetch: { uses: [], usedIn: [] },
 	checkHealth: { uses: ["createApiClient"], usedIn: [] },
 	MotionScene: {
-		uses: ["RevealRoot", "RevealGroup", "RevealImage", "ScrambleReveal"],
+		uses: ["Reveal.Root", "Reveal.List", "Reveal.Image", "Reveal.Scramble"],
 		usedIn: [],
 	},
-	RevealRoot: { uses: [], usedIn: [] },
-	RevealGroup: { uses: ["RevealGroupItem"], usedIn: [] },
-	RevealGroupItem: { uses: [], usedIn: ["RevealGroup"] },
-	RevealItem: { uses: [], usedIn: [] },
-	RevealImage: {
-		uses: ["RevealItem", "Skeleton", "motionTiming"],
+	ActiveStageHost: { uses: ["MotionScene"], usedIn: [] },
+	"Reveal.Root": { uses: [], usedIn: [] },
+	"Reveal.List": { uses: ["Reveal.Item"], usedIn: [] },
+	"Reveal.Item": { uses: [], usedIn: ["Reveal.List"] },
+	"Reveal.Image": {
+		uses: ["Reveal.Item", "Skeleton", "motionTiming"],
 		usedIn: ["ImageInspectModal"],
 	},
-	RevealText: { uses: ["RevealItem"], usedIn: [] },
+	"Reveal.Text": { uses: ["Reveal.Item"], usedIn: [] },
+	"Reveal.HighlightText": { uses: ["Reveal.Item", "motionTiming"], usedIn: [] },
 	LetterWave: { uses: ["Text"], usedIn: [] },
-	ScrambleReveal: { uses: ["motionTiming"], usedIn: [] },
+	"Reveal.Scramble": { uses: ["motionTiming"], usedIn: [] },
 	ScrollHighlightText: { uses: [], usedIn: [] },
 	ScrollLag: { uses: [], usedIn: [] },
 	ScrollParallax: { uses: [], usedIn: [] },
@@ -691,7 +748,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: ["useConfirmationModal", "useImageInspectModal"],
 	},
 	ImageInspectModal: {
-		uses: ["Button", "Loader", "RevealImage"],
+		uses: ["Button", "Loader", "Reveal.Image"],
 		usedIn: ["useImageInspectModal"],
 	},
 	ToastHost: {
@@ -2273,6 +2330,11 @@ export const demoPages: DemoPage[] = [
 										onFilesChange={setFiles}
 										label="Attachments"
 										description="Select images or PDFs for this workflow."
+										dropTitle="Drop signed files here"
+										dropDescription="PDFs and images appear below before they are saved."
+										pendingFilesLabel={(count) =>
+											`${count} ready ${count === 1 ? "file" : "files"}`
+										}
 									/>
 								</div>
 							);
@@ -2293,6 +2355,11 @@ export const demoPages: DemoPage[] = [
 							return (
 								<FileGallery
 									uploadedUrls={urls}
+									labels={{
+										uploaded: "Saved",
+										removeTitle: "Remove attachment",
+										removeConfirmLabel: "Remove attachment",
+									}}
 									onRemoveUploaded={(url) =>
 										setUrls((current) => current.filter((item) => item !== url))
 									}
@@ -2424,7 +2491,16 @@ export const demoPages: DemoPage[] = [
 						label: "Copy helper",
 						related: relatedMap.CopyField,
 						Render() {
-							return <CopyField value="https://example.com/copy" />;
+							return (
+								<div className="grid gap-2">
+									<CopyField value="https://example.com/copy" />
+									<CopyField
+										value="+31 20 123 4567"
+										type="phone"
+										showIcon={false}
+									/>
+								</div>
+							);
 						},
 						skeleton: {
 							name: "CopyField.Skeleton",
@@ -2965,47 +3041,47 @@ export const demoPages: DemoPage[] = [
 					{
 						id: "reveal-root",
 						kind: "component",
-						name: "RevealRoot",
+						name: "Reveal.Root",
 						label: "Visible-item scheduler",
-						related: relatedMap.RevealRoot,
+						related: relatedMap["Reveal.Root"],
 						Render() {
 							return (
-								<RevealRoot>
-									<RevealItem>
+								<Reveal.Root>
+									<Reveal.Item>
 										<Text variant="bodyStrong">Reveal 1</Text>
-									</RevealItem>
-									<RevealItem>
+									</Reveal.Item>
+									<Reveal.Item>
 										<Text variant="bodyStrong">Reveal 2</Text>
-									</RevealItem>
-								</RevealRoot>
+									</Reveal.Item>
+								</Reveal.Root>
 							);
 						},
 					},
 					{
 						id: "reveal-group",
 						kind: "component",
-						name: "RevealGroup",
+						name: "Reveal.List",
 						label: "Local stagger boundary",
-						related: relatedMap.RevealGroup,
+						related: relatedMap["Reveal.List"],
 						Render() {
 							return (
-								<RevealGroup className="flex flex-col gap-2" stagger={0.16}>
-									<RevealGroupItem>
+								<Reveal.List className="flex flex-col gap-2" stagger={0.16}>
+									<Reveal.Item>
 										<Text variant="bodyStrong">Scoped reveal 1</Text>
-									</RevealGroupItem>
-									<RevealGroupItem>
+									</Reveal.Item>
+									<Reveal.Item>
 										<Text variant="bodyStrong">Scoped reveal 2</Text>
-									</RevealGroupItem>
-								</RevealGroup>
+									</Reveal.Item>
+								</Reveal.List>
 							);
 						},
 					},
 					{
 						id: "reveal-image",
 						kind: "component",
-						name: "RevealImage",
+						name: "Reveal.Image",
 						label: "Image reveal strategies",
-						related: relatedMap.RevealImage,
+						related: relatedMap["Reveal.Image"],
 						Render() {
 							return (
 								<div className="grid gap-3 md:grid-cols-2">
@@ -3013,7 +3089,7 @@ export const demoPages: DemoPage[] = [
 										<Text variant="caption" tone="muted">
 											Default: ignores image load
 										</Text>
-										<RevealImage
+										<Reveal.Image
 											src="/test/blob.png"
 											alt="Abstract blob"
 											fill
@@ -3027,7 +3103,7 @@ export const demoPages: DemoPage[] = [
 										<Text variant="caption" tone="muted">
 											Opt-in: waits for image load
 										</Text>
-										<RevealImage
+										<Reveal.Image
 											src="/test/mercury.png"
 											alt="Mercury-like abstract surface"
 											fill
@@ -3048,21 +3124,51 @@ export const demoPages: DemoPage[] = [
 					{
 						id: "reveal-text",
 						kind: "component",
-						name: "RevealText",
+						name: "Reveal.Text",
 						label: "Character stagger text",
-						related: relatedMap.RevealText,
+						related: relatedMap["Reveal.Text"],
 						Render() {
 							return (
 								<div className="flex flex-col gap-2">
-									<RevealText as="h3" variant="headingSm">
+									<Reveal.Text as="h3" variant="headingSm">
 										Character reveals run as one scheduled reveal item.
-									</RevealText>
-									<RevealItem>
+									</Reveal.Text>
+									<Reveal.Item>
 										<Text variant="body" tone="muted">
 											Use it for short headlines or callouts that should feel
 											more deliberate than a plain line fade.
 										</Text>
-									</RevealItem>
+									</Reveal.Item>
+								</div>
+							);
+						},
+					},
+					{
+						id: "reveal-highlight-text",
+						kind: "component",
+						name: "Reveal.HighlightText",
+						label: "Substring highlight reveal",
+						related: relatedMap["Reveal.HighlightText"],
+						Render() {
+							return (
+								<div className="space-y-3">
+									<Reveal.HighlightText
+										as="h3"
+										variant="headingSm"
+										highlight="primary signal"
+										useViewport={false}
+									>
+										Reveal one primary signal inside a longer line.
+									</Reveal.HighlightText>
+									<Reveal.HighlightText
+										as="p"
+										variant="body"
+										tone="muted"
+										highlight="LTR + RTL"
+										useViewport={false}
+									>
+										Mixed direction copy keeps LTR + RTL text stable.
+									</Reveal.HighlightText>
 								</div>
 							);
 						},
@@ -3087,11 +3193,33 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
+						id: "active-stage-host",
+						kind: "component",
+						name: "ActiveStageHost",
+						label: "Auto-cycling active stage",
+						related: relatedMap.ActiveStageHost,
+						Render() {
+							return <ActiveStageHostDemo />;
+						},
+					},
+					{
+						id: "active-stage-host-usage",
+						kind: "usage",
+						name: "ActiveStageHost",
+						label: "Active stage usage",
+						related: relatedMap.ActiveStageHost,
+						snippet: `import { ActiveStageHost, useActiveStage } from "@/components/ui/motion/ActiveStageHost";
+
+<ActiveStageHost count={items.length} cycleWhen="inView">
+	<YourStageList />
+</ActiveStageHost>`,
+					},
+					{
 						id: "reveal-image-group",
 						kind: "component",
-						name: "RevealImage + RevealGroup",
+						name: "Reveal.Image + Reveal.List",
 						label: "Image-driven stagger",
-						related: relatedMap.RevealImage,
+						related: relatedMap["Reveal.Image"],
 						Render() {
 							const [imageSrc, setImageSrc] = useState("/test/blob.png");
 							const [imageReady, setImageReady] = useState(false);
@@ -3114,7 +3242,7 @@ export const demoPages: DemoPage[] = [
 											Mercury
 										</Button>
 									</div>
-									<RevealImage
+									<Reveal.Image
 										key={imageSrc}
 										src={imageSrc}
 										alt="Image-driven reveal"
@@ -3125,23 +3253,23 @@ export const demoPages: DemoPage[] = [
 										imageClassName="object-cover"
 										onRevealStateChange={setImageReady}
 									/>
-									<RevealGroup
+									<Reveal.List
 										active={imageReady}
 										className="flex flex-col gap-2"
 										stagger={0.16}
 									>
-										<RevealGroupItem>
+										<Reveal.Item>
 											<Text variant="bodyStrong">
 												Caption appears after reveal
 											</Text>
-										</RevealGroupItem>
-										<RevealGroupItem>
+										</Reveal.Item>
+										<Reveal.Item>
 											<Text variant="body" tone="muted">
 												Use <code>onRevealStateChange</code> to gate the next
 												stagger explicitly.
 											</Text>
-										</RevealGroupItem>
-									</RevealGroup>
+										</Reveal.Item>
+									</Reveal.List>
 								</div>
 							);
 						},
@@ -3175,56 +3303,56 @@ export const demoPages: DemoPage[] = [
 									</div>
 									<MotionScene key={imageSrc}>
 										<div className="flex flex-col gap-3">
-											<RevealImage
+											<Reveal.Image
 												src={imageSrc}
 												alt="Motion scene image"
 												fill
 												useViewport={false}
 												loadStrategy="wait-for-load"
-												waitFor="app"
-												unlockStage="media"
+												after="app"
+												unlock="media"
 												className="w-full"
 												contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
 												imageClassName="object-cover"
 											/>
-											<RevealGroup
-												waitFor="media"
-												unlockStage="content"
+											<Reveal.List
+												after="media"
+												unlock="content"
 												className="flex flex-col gap-2"
 												stagger={0.16}
 											>
-												<RevealGroupItem>
+												<Reveal.Item>
 													<Text variant="headingSm">
 														Content waits for the media reveal to finish.
 													</Text>
-												</RevealGroupItem>
-												<RevealGroupItem>
+												</Reveal.Item>
+												<Reveal.Item>
 													<Text variant="body" tone="muted">
 														This keeps the section API declarative instead of
 														wiring image state through page-local booleans.
 													</Text>
-												</RevealGroupItem>
-											</RevealGroup>
+												</Reveal.Item>
+											</Reveal.List>
 											<Text variant="bodyStrong" as="span">
-												<ScrambleReveal
+												<Reveal.Scramble
 													text="Accent copy unlocks after the content stage."
-													waitFor="content"
-													unlockStage="accent"
+													after="content"
+													unlock="accent"
 													maintainSpace
 												/>
 											</Text>
-											<RevealGroup
-												waitFor="accent"
+											<Reveal.List
+												after="accent"
 												className="flex gap-2"
 												stagger={0.12}
 											>
-												<RevealGroupItem className="rounded-full border border-border/10 bg-surface px-3 py-1">
+												<Reveal.Item className="rounded-full border border-border/10 bg-surface px-3 py-1">
 													<Text variant="caption">Scene</Text>
-												</RevealGroupItem>
-												<RevealGroupItem className="rounded-full border border-border/10 bg-surface px-3 py-1">
+												</Reveal.Item>
+												<Reveal.Item className="rounded-full border border-border/10 bg-surface px-3 py-1">
 													<Text variant="caption">Unlocked</Text>
-												</RevealGroupItem>
-											</RevealGroup>
+												</Reveal.Item>
+											</Reveal.List>
 										</div>
 									</MotionScene>
 								</div>
@@ -3234,20 +3362,20 @@ export const demoPages: DemoPage[] = [
 					{
 						id: "scramble-reveal",
 						kind: "component",
-						name: "ScrambleReveal",
+						name: "Reveal.Scramble",
 						label: "Text scramble",
-						related: relatedMap.ScrambleReveal,
+						related: relatedMap["Reveal.Scramble"],
 						Render() {
 							return (
 								<div className="flex flex-col gap-2">
 									<Text variant="bodyStrong" as="span">
-										<ScrambleReveal
+										<Reveal.Scramble
 											text="Signal decoding in progress"
 											maintainSpace
 										/>
 									</Text>
 									<Text variant="body" as="span">
-										<ScrambleReveal
+										<Reveal.Scramble
 											text="Secondary line with delay"
 											delay={0.1}
 											maintainSpace
@@ -3263,20 +3391,18 @@ export const demoPages: DemoPage[] = [
 						name: "MotionScene",
 						label: "Staged usage",
 						related: relatedMap.MotionScene,
-						snippet: `import { MotionScene } from "@/components/ui/motion/MotionScene";
-import { RevealGroup, RevealGroupItem, RevealRoot } from "@/components/ui/motion/Reveal";
-import { RevealImage } from "@/components/ui/motion/RevealImage";
-import { ScrambleReveal } from "@/components/ui/motion/ScrambleReveal";
+						snippet: `import { Reveal } from "@/components/ui/motion";
+import { MotionScene } from "@/components/ui/motion/MotionScene";
 
-<RevealRoot>
+<Reveal.Root>
 	<MotionScene>
-		<RevealImage loadStrategy="wait-for-load" waitFor="app" unlockStage="media" {...imageProps} />
-		<RevealGroup waitFor="media" unlockStage="content">
-			<RevealGroupItem>...</RevealGroupItem>
-		</RevealGroup>
-		<ScrambleReveal waitFor="content" text="..." maintainSpace />
+		<Reveal.Image loadStrategy="wait-for-load" after="app" unlock="media" {...imageProps} />
+		<Reveal.List after="media" unlock="content">
+			<Reveal.Item>...</Reveal.Item>
+		</Reveal.List>
+		<Reveal.Scramble after="content" text="..." maintainSpace />
 	</MotionScene>
-</RevealRoot>`,
+</Reveal.Root>`,
 					},
 					{
 						id: "scroll-highlight-text",

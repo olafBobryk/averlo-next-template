@@ -22,6 +22,7 @@ File selection and upload-oriented controls for forms and document workflows.
 ## How To Use It
 - Use `FileUploadInput` as the default entry point for new file selection UI.
 - Use `FileGallery` when the workflow needs a persistent, editable list of selected or uploaded files.
+- Use `dropTitle`, `dropDescription`, `pendingFilesLabel`, and gallery/preview `labels` when product copy needs to change without forking the file components.
 - If removing a file is destructive or surprising, pair the flow with the shared confirmation modal helpers.
 
 ## Avoid

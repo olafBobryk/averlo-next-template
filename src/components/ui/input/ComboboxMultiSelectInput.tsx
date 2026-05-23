@@ -5,6 +5,7 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
+import { getSpring } from "@/components/ui/foundations/spring";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { ChoiceIndicatorMulti } from "@/components/ui/input/choice/ChoiceIndicators";
 import { Button } from "@/components/ui/primitives/Button";
@@ -163,6 +164,7 @@ export function ComboboxMultiSelectInput<T>({
 	const derivedError = error ?? clientError;
 	const tone = derivedError ? "error" : "default";
 	const motionAllowed = useMotionAllowed(true);
+	const chipTransition = getSpring("feedback", { intensity: "strong" });
 
 	const fallbackId = React.useId();
 	const inputId = id ?? name ?? fallbackId;
@@ -399,11 +401,7 @@ export function ComboboxMultiSelectInput<T>({
 												initial={{ opacity: 0, scale: 0.98 }}
 												animate={{ opacity: 1, scale: 1 }}
 												exit={{ opacity: 0, scale: 0.98 }}
-												transition={{
-													type: "spring",
-													stiffness: 500,
-													damping: 40,
-												}}
+												transition={chipTransition}
 												className={clsx(
 													"flex items-center gap-1.5 border-r border-foreground/25 pr-2 last:pr-0",
 													chipClassName,
@@ -440,11 +438,7 @@ export function ComboboxMultiSelectInput<T>({
 										<motion.input
 											key="combo-input"
 											layout
-											transition={{
-												type: "spring",
-												stiffness: 500,
-												damping: 40,
-											}}
+											transition={chipTransition}
 											ref={inputRef}
 											id={inputId}
 											name={name}
