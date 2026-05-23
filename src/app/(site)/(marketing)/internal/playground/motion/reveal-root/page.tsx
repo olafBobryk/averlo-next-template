@@ -317,6 +317,25 @@ export default function RevealRootPlaygroundPage() {
 						</ExamplePanel>
 
 						<ExamplePanel
+							title="Deferred Interaction"
+							api={
+								<ApiLine>
+									{
+										'<RevealItem deferInteractionUntilRevealed><Button href="..." /></RevealItem>'
+									}
+								</ApiLine>
+							}
+							expected="The link is not clickable or focusable until its reveal completes. Disabled reveal mode unlocks it immediately."
+							happens="RevealItem applies inert, aria-hidden, and pointer-events-none while the item is waiting to reveal."
+						>
+							<RevealItem deferInteractionUntilRevealed className="w-fit">
+								<Button href="/internal/playground" variant="primary">
+									Deferred link
+								</Button>
+							</RevealItem>
+						</ExamplePanel>
+
+						<ExamplePanel
 							title="Single RevealGroup"
 							api={
 								<ApiLine>

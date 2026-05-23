@@ -37,6 +37,7 @@ For any new reusable UI-library feature:
   - For media reveals, prefer `RevealImage` with scheduler gates, `waitFor`, and `unlockStage` instead of page-local image-loading animation code. Use its default load-ignoring strategy for entrance reveals, and opt into load-gated reveals only when later content must wait for the actual image load.
   - For multi-step choreography across intro completion, media reveal, and later copy or accents, prefer `MotionScene` over page-local booleans and ad hoc callback chains.
 - **Overlay invariant:** Use the existing portal and host model for modals, dropdowns, and toasts. Do not create page-local overlay stacks.
+- **Hotkey invariant:** Use `@tanstack/react-hotkeys` for reusable shortcuts; keep handlers scoped, documented, and out of page-local global listeners.
 - **Skeleton invariant:** If a component ships with a skeleton, prefer `Component.Skeleton` over custom placeholders. Keep skeleton sizing driven by real content where possible.
 - **Naming invariant:** When documenting or extending components, use real file paths and real export names so agents can find the correct file quickly.
 - **React Compiler invariant:** Avoid `useCallback`, `useMemo`, and similar memoization wrappers unless they are strictly necessary for correctness or measurable performance. Prefer plain functions and values.
@@ -62,6 +63,7 @@ Use these defaults unless product requirements explicitly say otherwise.
 - **Image reveal choreography:** Use `RevealImage` when an image needs a loading fallback, reveal animation, or should gate later reveal content. Default image reveals ignore load state; use `loadStrategy="wait-for-load"` when reveal or stage unlock must wait for the image.
 - **Segmented options:** Use `SegmentedControl` before rolling custom pill selectors.
 - **Disclosure content:** Use `Accordion` before building new expand/collapse rows.
+- **Keyboard shortcuts:** Use the native keyboard behavior of controls first; add reusable shortcuts through the shared hotkey convention only when needed.
 
 ## App Standards To Preserve
 - **Transparent gradient-border wrappers:** When reusing a transparent gradient-border treatment, keep wrapper and inner surface responsibilities separate.
@@ -93,6 +95,7 @@ Use these defaults unless product requirements explicitly say otherwise.
 - Creating page-local password toggles, custom strength meters, or custom confirmation dialogs.
 - Repeating focus classes instead of using the focus tokens.
 - Re-implementing common UX patterns with slight stylistic changes that could be handled by props, variants, or composition.
+- Adding raw global key listeners for reusable UI shortcuts.
 - Editing multiple folders for one feature before checking whether a higher-level existing component already solves it.
 - Using toasts as a substitute for initial-load skeletons or inline field validation.
 - Memoizing ordinary component-local functions by default.

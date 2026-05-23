@@ -576,6 +576,7 @@ export type RevealItemProps = {
 	staticAs?: ElementType;
 	asChild?: boolean;
 	handoffAfterReveal?: boolean;
+	deferInteractionUntilRevealed?: boolean;
 	className?: string;
 	variants?: Variants;
 	disableTransform?: boolean;
@@ -607,6 +608,7 @@ function RevealItemInner({
 	staticAs,
 	asChild = false,
 	handoffAfterReveal = false,
+	deferInteractionUntilRevealed = false,
 	className,
 	variants,
 	disableTransform = false,
@@ -794,18 +796,34 @@ function RevealItemInner({
 	}, [hasPlayed, id, isReady, root]);
 
 	const usePlainAsChild = asChild && handoffAfterReveal && hasPlayed;
+	const interactionLocked =
+		deferInteractionUntilRevealed && !disabled && !hasPlayed;
+	const revealClassName = interactionLocked
+		? [className, "pointer-events-none"].filter(Boolean).join(" ")
+		: className;
+	const interactionLockProps = interactionLocked
+		? ({ "aria-hidden": true, inert: true } as const)
+		: {};
 
 	if (disabled || usePlainAsChild) {
 		if (asChild) {
 			return (
-				<SlotWithRef ref={childRef} className={className}>
+				<SlotWithRef
+					ref={childRef}
+					className={revealClassName}
+					{...interactionLockProps}
+				>
 					{children}
 				</SlotWithRef>
 			);
 		}
 
 		const Tag = getStaticRevealTag(staticAs ?? as);
-		return createElement(Tag, { ref: viewportRef, className }, children);
+		return createElement(
+			Tag,
+			{ ref: viewportRef, className: revealClassName, ...interactionLockProps },
+			children,
+		);
 	}
 
 	const MotionTag = asChild ? MotionSlot : (as ?? motion.div);
@@ -829,7 +847,8 @@ function RevealItemInner({
 			initial="hidden"
 			animate={controls}
 			variants={baseVariants}
-			className={className}
+			className={revealClassName}
+			{...interactionLockProps}
 		>
 			{children}
 		</MotionTag>
@@ -857,6 +876,7 @@ function RevealGroupItemInner({
 	staticAs,
 	asChild = false,
 	handoffAfterReveal = false,
+	deferInteractionUntilRevealed = false,
 	className,
 	variants,
 	disableTransform = false,
@@ -1019,18 +1039,34 @@ function RevealGroupItemInner({
 	}, [group, hasPlayed, id, isReady]);
 
 	const usePlainAsChild = asChild && handoffAfterReveal && hasPlayed;
+	const interactionLocked =
+		deferInteractionUntilRevealed && !disabled && !hasPlayed;
+	const revealClassName = interactionLocked
+		? [className, "pointer-events-none"].filter(Boolean).join(" ")
+		: className;
+	const interactionLockProps = interactionLocked
+		? ({ "aria-hidden": true, inert: true } as const)
+		: {};
 
 	if (disabled || usePlainAsChild) {
 		if (asChild) {
 			return (
-				<SlotWithRef ref={childRef} className={className}>
+				<SlotWithRef
+					ref={childRef}
+					className={revealClassName}
+					{...interactionLockProps}
+				>
 					{children}
 				</SlotWithRef>
 			);
 		}
 
 		const Tag = getStaticRevealTag(staticAs ?? as);
-		return createElement(Tag, { ref: viewportRef, className }, children);
+		return createElement(
+			Tag,
+			{ ref: viewportRef, className: revealClassName, ...interactionLockProps },
+			children,
+		);
 	}
 
 	const MotionTag = asChild ? MotionSlot : (as ?? motion.div);
@@ -1054,7 +1090,8 @@ function RevealGroupItemInner({
 			initial="hidden"
 			animate={controls}
 			variants={baseVariants}
-			className={className}
+			className={revealClassName}
+			{...interactionLockProps}
 		>
 			{children}
 		</MotionTag>

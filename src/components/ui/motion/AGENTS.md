@@ -44,6 +44,7 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - Use `RevealGroupItem` as a direct or descendant child of `RevealGroup` for local group staggering.
 - Use `RevealText` when copy should stagger letter-by-letter as one scheduled reveal item.
 - Use `RevealImage` when an image should reveal with a loading fallback or when image readiness should unlock later reveal stages. Use `loadStrategy="wait-for-load"` for image-readiness gates.
+- Use `deferInteractionUntilRevealed` on `RevealItem` or `RevealGroupItem` for reveal-wrapped links, buttons, cards, or controls that should not be clicked, hovered, or focusable before visual reveal completes.
 - Use `MotionScene` when a section needs explicit sequencing such as image reveal first, copy second, and accent text third.
 - Use `active` on `RevealGroup` or `RevealItem` when reveal timing should be driven by app state instead of viewport entry.
 - Use `ScrollHighlightText` when a short string should brighten progressively as it enters the viewport.

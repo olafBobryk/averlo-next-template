@@ -19,12 +19,14 @@ Main design-system and UX-system entry point. This folder is where agents should
 - Need focus, motion tokens, or settings: use `src/components/ui/foundations/`.
 - Need modals, toasts, or portal-backed surfaces: use `src/components/ui/overlays/`.
 - Need reveal or parallax-style motion: use `src/components/ui/motion/`.
+- Need keyboard shortcuts: use `@tanstack/react-hotkeys`.
 
 ## Invariants
 - Agents should assume the preferred implementation is already somewhere in this tree.
 - Focus behavior must remain visible and token-driven across all interactive UI.
 - New UI should preserve the existing component taxonomy instead of scattering shared behaviors into page code.
 - Favor additive extension through props, variants, slots, and composition over cloning components into page-local folders.
+- Keep shortcut registration scoped and discoverable.
 - When a folder already has a purpose, put work there instead of creating parallel structure.
 - Initial-load feedback should default to inline loading states or skeletons, not toasts.
 - Memoization helpers should be rare and justified, not automatic.
@@ -41,6 +43,7 @@ Main design-system and UX-system entry point. This folder is where agents should
 - Use `Field` plus the existing input components for form work.
 - Use `PasswordInput` with `showStrength` for sign-up or password-creation UX.
 - Use real `<form>` elements with `onSubmit` for submissions.
+- Use native keyboard behavior first; add reusable shortcuts through `@tanstack/react-hotkeys` only when needed.
 - Use `Dropdown` plus `Listbox` only when an existing higher-level selection component is not already suitable.
 - Use `showToast.promise`, `useConfirmationModal`, and `useImageInspectModal` rather than custom overlay or event systems.
 - Use component skeletons or `Skeleton` for initial-load states before considering toast-based feedback.
@@ -48,4 +51,5 @@ Main design-system and UX-system entry point. This folder is where agents should
 ## Avoid
 - Skipping the library because custom markup feels faster.
 - Building new page-specific patterns that duplicate inputs, overlays, or feedback states already present in `ui/`.
+- Wiring reusable shortcuts with ad hoc global `keydown` listeners.
 - Showing toasts for initial page load or background hydration where inline loading states already fit better.
