@@ -169,7 +169,7 @@ const AGENT_MAP = {
 				"scripts/prune-template.mjs",
 			],
 			notes:
-				"Route IDs live in appRoutes, hrefFor resolves them, internal routes inherit the production guard, and marketing layout/search/fallback consume lightweight link data.",
+				"Route IDs live in appRoutes, hrefFor resolves them, internal routes inherit the production guard for client clones with canonical-template host and env opt-ins, and marketing layout/search/fallback consume lightweight link data.",
 		},
 		{
 			id: "ui-primitives",
@@ -255,7 +255,7 @@ const AGENT_MAP = {
 				"README.md",
 			],
 			notes:
-				"Add template-maintainer tools under /internal so they inherit noindex and production notFound; add prune ownership if clones should remove them.",
+				"Add template-maintainer tools under /internal so they inherit noindex and the client-clone production guard; add prune ownership if clones should remove them.",
 		},
 	],
 };

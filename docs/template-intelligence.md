@@ -2,7 +2,10 @@
 
 Template Intelligence is an internal authoring surface for maintainers and
 agents working inside this template. It generates a local map of repo concepts
-and renders it at `/internal/intelligence` during development.
+and renders it at `/internal/intelligence` during development. Client clones
+keep `/internal/*` dev-only in production by default, while the canonical
+template production deployment may expose those routes as live reference
+material.
 
 The feature is optional template infrastructure. Client clones can remove it
 with:
@@ -150,8 +153,15 @@ The benchmark view is available at:
 Use `example=on` for placeholder visual QA data. Placeholder data must not be
 treated as real benchmark history.
 
-Like the rest of `/internal`, this page is guarded from production by the
-internal marketing layout.
+Like the rest of `/internal`, this page is guarded from client-clone
+production by the internal marketing layout. The canonical
+`webvizion-template.vercel.app` deployment is allowed through by its request or
+Vercel production host, and other template/reference deployments can opt in
+with:
+
+```env
+TEMPLATE_INTERNAL_ROUTES=enabled
+```
 
 ## Understand-Anything Boundary
 
