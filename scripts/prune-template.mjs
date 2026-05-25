@@ -74,9 +74,16 @@ const SURFACES = {
 			"src/app/(site)/(marketing)/internal/intelligence",
 			"src/lib/template-intelligence",
 			"scripts/generate-template-intelligence.mjs",
+			"scripts/record-template-intelligence-benchmark.mjs",
+			"scripts/clear-template-intelligence-benchmark.mjs",
+			"scripts/setup-template-intelligence-serena.mjs",
 			"docs/template-intelligence.md",
 			"docs/worklogs/template-intelligence-ledger.md",
 			"docs/worklogs/template-intelligence-handoff.md",
+			"docs/worklogs/template-intelligence-review-handoff.md",
+			"docs/worklogs/template-intelligence-benchmark.md",
+			"docs/worklogs/template-intelligence-benchmark-runs.jsonl",
+			"docs/worklogs/template-intelligence-benchmark-runs.example.jsonl",
 		],
 		routeIds: ["intelligence"],
 		routeBuilders: [],
@@ -187,10 +194,26 @@ const PAYLOAD_PACKAGE_DEPENDENCIES = [
 
 const INTELLIGENCE_PACKAGE_SCRIPTS = [
 	"intelligence:generate",
+	"intelligence:query",
+	"intelligence:record",
+	"intelligence:record:clear",
+	"intelligence:serena:setup",
 	"predev",
 	"predev:user",
 	"predev:agent",
 	"prebuild",
+];
+
+const INTELLIGENCE_PACKAGE_DEPENDENCIES = [];
+
+const GRAPH_PACKAGE_DEPENDENCIES = [
+	"react-force-graph-2d",
+	"react-force-graph-3d",
+	"d3-force",
+	"three",
+	"three-spritetext",
+	"@types/d3-force",
+	"@types/three",
 ];
 
 function printUsage() {
@@ -280,6 +303,8 @@ function buildState(surfaceIds) {
 
 async function collectPlan(surfaceIds) {
 	const deletedPaths = [];
+	const removesAllGraphConsumers =
+		surfaceIds.includes("intelligence") && surfaceIds.includes("reference");
 
 	for (const surfaceId of surfaceIds) {
 		for (const ownedPath of SURFACES[surfaceId].ownedPaths) {
@@ -287,6 +312,13 @@ async function collectPlan(surfaceIds) {
 			if (await pathExists(absolutePath)) {
 				deletedPaths.push(absolutePath);
 			}
+		}
+	}
+
+	if (removesAllGraphConsumers) {
+		const graphMapPath = path.join(ROOT, "src/components/ui/misc/GraphMap.tsx");
+		if (await pathExists(graphMapPath)) {
+			deletedPaths.push(graphMapPath);
 		}
 	}
 
@@ -309,9 +341,13 @@ async function collectPlan(surfaceIds) {
 				: []),
 			...(surfaceIds.includes("intelligence") ? ["package.json"] : []),
 		],
-		packageDependencies: surfaceIds.includes("payload")
-			? [...PAYLOAD_PACKAGE_DEPENDENCIES]
-			: [],
+		packageDependencies: [
+			...(surfaceIds.includes("payload") ? PAYLOAD_PACKAGE_DEPENDENCIES : []),
+			...(surfaceIds.includes("intelligence")
+				? INTELLIGENCE_PACKAGE_DEPENDENCIES
+				: []),
+			...(removesAllGraphConsumers ? GRAPH_PACKAGE_DEPENDENCIES : []),
+		],
 		packageScripts: surfaceIds.includes("intelligence")
 			? [...INTELLIGENCE_PACKAGE_SCRIPTS]
 			: [],

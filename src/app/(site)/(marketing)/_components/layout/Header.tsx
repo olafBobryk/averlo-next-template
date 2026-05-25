@@ -13,6 +13,8 @@ const TOP_SCROLL_BAND_PX = 25;
 
 type HeaderProps = {
 	className?: string;
+	forceScrolled?: boolean;
+	forceScrolledPathPrefixes?: readonly string[];
 	layout: SiteLayoutDocument["header"];
 };
 
@@ -20,13 +22,24 @@ function getIsScrolled() {
 	return window.scrollY > TOP_SCROLL_BAND_PX;
 }
 
-export default function Header({ className = "", layout }: HeaderProps) {
+export default function Header({
+	className = "",
+	forceScrolled = false,
+	forceScrolledPathPrefixes = [],
+	layout,
+}: HeaderProps) {
 	const pathname = usePathname();
 	const [isScrolled, setIsScrolled] = useState(false);
 	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(true);
 	const motionDisabled = useMotionDisableOverride();
-	const shouldAnimate = motionAllowed && !motionDisabled;
+	const isForceScrolledRoute = forceScrolledPathPrefixes.some((prefix) =>
+		pathname.startsWith(prefix),
+	);
+	const effectiveIsScrolled =
+		forceScrolled || isForceScrolledRoute || isScrolled;
+	const shouldAnimate =
+		motionAllowed && !motionDisabled && !forceScrolled && !isForceScrolledRoute;
 
 	useEffect(() => {
 		let frameId: number | null = null;
@@ -110,7 +123,7 @@ export default function Header({ className = "", layout }: HeaderProps) {
 				<HeaderFull
 					animateEntrance={shouldAnimate}
 					entranceReady={appReady}
-					isScrolled={isScrolled}
+					isScrolled={effectiveIsScrolled}
 					layout={layout}
 					className={className}
 				/>
@@ -119,7 +132,7 @@ export default function Header({ className = "", layout }: HeaderProps) {
 				<HeaderCompact
 					animateEntrance={shouldAnimate}
 					entranceReady={appReady}
-					isScrolled={isScrolled}
+					isScrolled={effectiveIsScrolled}
 					layout={layout}
 					className={className}
 				/>

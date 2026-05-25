@@ -7,11 +7,13 @@ import process from "node:process";
 const ROOT = process.cwd();
 const OUTPUT_DIR = path.join(ROOT, ".template-intelligence");
 const OUTPUT_PATH = path.join(OUTPUT_DIR, "index.json");
+const AGENT_MAP_PATH = path.join(OUTPUT_DIR, "agent-map.json");
 
 const EXCLUDED_DIRS = new Set([
 	".git",
 	".next",
 	".next-user",
+	".serena",
 	".template-intelligence",
 	".understand-anything",
 	".vercel",
@@ -144,6 +146,154 @@ const CONCEPTS = [
 		keywords: ["route", "layout", "page", "dashboard", "internal"],
 	},
 ];
+
+const AGENT_MAP = {
+	schemaVersion: 1,
+	project: "webvizion-template",
+	generator: "scripts/generate-template-intelligence.mjs",
+	artifact: ".template-intelligence/agent-map.json",
+	topics: [
+		{
+			id: "route-architecture",
+			title: "Route and internal marketing architecture",
+			aliases: ["routes", "internal-marketing", "marketing-routes"],
+			paths: [
+				"src/config/routes.ts",
+				"src/lib/routes.ts",
+				"src/app/(site)/(marketing)/internal/layout.tsx",
+				"src/app/(site)/(marketing)/layout.tsx",
+				"src/lib/marketing-content/fallback.ts",
+				"src/lib/marketing-content/types.ts",
+				"src/lib/marketing-content/resolvers.ts",
+				"src/app/(site)/(marketing)/_components/layout/MarketingContentSearch.tsx",
+				"scripts/prune-template.mjs",
+			],
+			notes:
+				"Route IDs live in appRoutes, hrefFor resolves them, internal routes inherit the production guard, and marketing layout/search/fallback consume lightweight link data.",
+		},
+		{
+			id: "ui-primitives",
+			title: "Shared UI primitives and feedback rules",
+			aliases: ["design-system", "toast", "confirmation", "modal"],
+			paths: [
+				"src/components/AGENTS.md",
+				"src/components/ui/AGENTS.md",
+				"src/components/ui/primitives/AGENTS.md",
+				"src/components/ui/overlays/modal/AGENTS.md",
+				"src/components/ui/overlays/toast/AGENTS.md",
+				"src/lib/feedback/toast.ts",
+				"src/components/ui/overlays/toast/ToastHost.tsx",
+				"src/components/ui/overlays/modal/useConfirmationModal.tsx",
+				"src/components/ui/overlays/modal/ConfirmationModal.tsx",
+			],
+			notes:
+				"Start with AGENTS files for rules, then inspect concrete toast and confirmation primitives only if implementation details are needed.",
+		},
+		{
+			id: "prune-behavior",
+			title: "Prune behavior and optional surface ownership",
+			aliases: ["prune", "optional-surfaces", "template-pruning"],
+			paths: [
+				"scripts/prune-template.mjs",
+				"README.md",
+				"docs/template-content-modes.md",
+				"src/config/routes.ts",
+				"src/lib/routes.ts",
+				"src/app/(site)/(marketing)/_components/layout/marketingNav.ts",
+				"src/app/(site)/(marketing)/_components/layout/MarketingContentSearch.tsx",
+				"src/lib/marketing-content/fallback.ts",
+			],
+			notes:
+				"SURFACES owns flags, paths, routes, nav/search references, package changes, and post-removal assertions.",
+		},
+		{
+			id: "content-modes",
+			title: "Static, Payload-ready, and Payload-powered boundaries",
+			aliases: ["payload", "content-architecture", "cms"],
+			paths: [
+				"docs/template-content-modes.md",
+				"docs/payload-vercel-neon-blob.md",
+				"src/lib/marketing-content/resolvers.ts",
+				"src/lib/marketing-content/types.ts",
+				"src/lib/marketing-content/fallback.ts",
+				"payload.config.ts",
+				"src/payload/isPayloadConfigured.ts",
+				"src/app/(payload)/api/[...slug]/route.ts",
+				"src/app/(payload)/admin/[[...segments]]/page.tsx",
+				"scripts/prune-template.mjs",
+			],
+			notes:
+				"Frontend contracts stay lightweight; Payload-specific fields should be resolved server-side before section rendering.",
+		},
+		{
+			id: "dev-server",
+			title: "Agent dev-server isolation",
+			aliases: ["dev-workflow", "dev-agent", "agent-server"],
+			paths: [
+				"AGENTS.md",
+				"package.json",
+				"scripts/dev-server.mjs",
+				"next.config.ts",
+				".gitignore",
+				"scripts/prune-template.mjs",
+			],
+			notes:
+				"Use npm run dev:agent, keep user ports reserved, use isolated dist dirs and generated tsconfig files, and use automation URL query flags for automated traversal.",
+		},
+		{
+			id: "new-internal-surface",
+			title: "New internal authoring surface placement",
+			aliases: ["internal-surface", "authoring-surface", "new-surface"],
+			paths: [
+				"src/app/(site)/(marketing)/internal/layout.tsx",
+				"src/config/routes.ts",
+				"src/lib/routes.ts",
+				"src/app/(site)/(marketing)/_components/layout/marketingNav.ts",
+				"src/app/(site)/(marketing)/_components/layout/MarketingContentSearch.tsx",
+				"src/lib/marketing-content/fallback.ts",
+				"scripts/prune-template.mjs",
+				"README.md",
+			],
+			notes:
+				"Add template-maintainer tools under /internal so they inherit noindex and production notFound; add prune ownership if clones should remove them.",
+		},
+	],
+};
+
+function normalizeTopic(value) {
+	return value.trim().toLowerCase();
+}
+
+function findAgentMapTopic(query) {
+	const normalizedQuery = normalizeTopic(query);
+
+	return AGENT_MAP.topics.find(
+		(topic) =>
+			topic.id === normalizedQuery ||
+			normalizeTopic(topic.title) === normalizedQuery ||
+			topic.aliases.some((alias) => alias === normalizedQuery),
+	);
+}
+
+function printAgentMapTopic(query) {
+	const topic = findAgentMapTopic(query);
+
+	if (!topic) {
+		console.error(`Unknown intelligence topic: ${query}`);
+		console.error(
+			`Available topics: ${AGENT_MAP.topics.map((item) => item.id).join(", ")}`,
+		);
+		process.exit(1);
+	}
+
+	console.log(`${topic.title} (${topic.id})`);
+	console.log(topic.notes);
+	console.log("");
+	console.log("Start here:");
+	for (const filePath of topic.paths) {
+		console.log(`- ${filePath}`);
+	}
+}
 
 function toPosixPath(filePath) {
 	return filePath.split(path.sep).join("/");
@@ -366,10 +516,31 @@ async function buildIndex() {
 }
 
 const index = await buildIndex();
+const args = process.argv.slice(2);
+
+if (args[0] === "--query") {
+	const topicQuery = args[1];
+
+	if (!topicQuery) {
+		console.error("Usage: npm run intelligence:query -- <topic>");
+		console.error(
+			`Available topics: ${AGENT_MAP.topics.map((item) => item.id).join(", ")}`,
+		);
+		process.exit(1);
+	}
+
+	printAgentMapTopic(topicQuery);
+	process.exit(0);
+}
 
 await fs.mkdir(OUTPUT_DIR, { recursive: true });
 await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(index, null, "\t")}\n`);
+await fs.writeFile(
+	AGENT_MAP_PATH,
+	`${JSON.stringify(AGENT_MAP, null, "\t")}\n`,
+);
 
 console.log(
 	`Generated ${path.relative(ROOT, OUTPUT_PATH)} with ${index.fileCount} files and ${index.conceptCount} concepts.`,
 );
+console.log(`Generated ${path.relative(ROOT, AGENT_MAP_PATH)}.`);

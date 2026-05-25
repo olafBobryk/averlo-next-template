@@ -35,6 +35,7 @@ import { TextInput } from "@/components/ui/input/TextInput";
 import { ToggleInput } from "@/components/ui/input/ToggleInput";
 import { UnitNumberInput } from "@/components/ui/input/UnitNumberInput";
 import { Accordion } from "@/components/ui/misc/Accordion";
+import { Chip } from "@/components/ui/misc/Chip";
 import { CopyField } from "@/components/ui/misc/CopyField";
 import { FileGallery } from "@/components/ui/misc/FileGallery";
 import {
@@ -384,6 +385,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"FileGallery",
 		],
 	},
+	Chip: { uses: ["Icon", "Skeleton", "focus"], usedIn: ["GraphMap"] },
 	InputFrame: {
 		uses: ["focus"],
 		usedIn: [
@@ -1106,6 +1108,39 @@ export const demoPages: DemoPage[] = [
 										<Text.Skeleton variant="caption" tone="muted">
 											Caption muted
 										</Text.Skeleton>
+									</div>
+								);
+							},
+						},
+					},
+					{
+						id: "chip",
+						kind: "component",
+						name: "Chip",
+						label: "Compact metadata label",
+						related: relatedMap.Chip,
+						Render() {
+							return (
+								<div className="flex flex-wrap gap-2">
+									<Chip leadingIcon="home" tone="helper" helperIndex={5}>
+										Individual
+									</Chip>
+									<Chip leadingIcon="gear" tone="helper" helperIndex={2}>
+										Company
+									</Chip>
+									<Chip href="/internal/demo" trailingIcon="arrow-right">
+										Linked chip
+									</Chip>
+								</div>
+							);
+						},
+						skeleton: {
+							name: "Chip.Skeleton",
+							Render() {
+								return (
+									<div className="flex flex-wrap gap-2">
+										<Chip.Skeleton leadingIcon>Individual</Chip.Skeleton>
+										<Chip.Skeleton>Linked chip</Chip.Skeleton>
 									</div>
 								);
 							},

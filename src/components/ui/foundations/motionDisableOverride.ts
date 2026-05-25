@@ -18,9 +18,7 @@ export function hasMotionDisabledSearchParam() {
 }
 
 export function useMotionDisableOverride() {
-	const [disabled, setDisabled] = React.useState(() =>
-		hasMotionDisabledSearchParam(),
-	);
+	const [disabled, setDisabled] = React.useState(false);
 
 	React.useEffect(() => {
 		const update = () => setDisabled(hasMotionDisabledSearchParam());

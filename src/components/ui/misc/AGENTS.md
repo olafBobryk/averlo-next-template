@@ -4,11 +4,12 @@
 Cross-cutting UI helpers and feedback components that do not belong to inputs, overlays, or pure primitives.
 
 ## Use This Folder When
-- You need loading, empty, warning, copy, segmented selection, disclosure, skeleton, file preview, or dynamic-state wrappers.
+- You need loading, empty, warning, copy, segmented selection, chip, disclosure, skeleton, file preview, or dynamic-state wrappers.
 - The UX pattern is common across pages but not strictly a form input or overlay primitive.
 
 ## Prefer These Files
 - `src/components/ui/misc/Accordion.tsx`: disclosure UI.
+- `src/components/ui/misc/Chip.tsx`: compact linked, button, or static chip for source references, graph labels, and lightweight token-like navigation.
 - `src/components/ui/misc/CopyField.tsx`: copy-to-clipboard interaction.
 - `src/components/ui/misc/FilePreview.tsx`: file preview tile with shared actions.
 - `src/components/ui/misc/FileGallery.tsx`: horizontal gallery for pending and uploaded file previews.
@@ -32,6 +33,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - Prefer these shared UX patterns before introducing page-local versions.
 - `Accordion` should continue to use `Button`, `IconSwap`, and motion conventions rather than ad hoc disclosure code.
 - `CopyField` should remain the default for copy-to-clipboard UX.
+- `Chip` owns compact interactive or linked label surfaces; keep non-interactive status-only badges on `Pill`.
 - `SegmentedControl` should remain the default for segmented selection instead of custom pill navs.
 - `SuspenseBoundary` and the state components should remain the default path for async loading and error presentation.
   - When a loading fallback is a ghost or skeleton version of the final UI, keep the live and fallback layouts structurally identical so transitions can crossfade without layout jump.
@@ -45,6 +47,8 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 ## How To Use It
 - Use `Accordion` for FAQ rows, expandable settings, and compact disclosure content.
 - Use `CopyField` whenever the user copies a token, URL, or identifier.
+- Use `Chip` for compact source links, removable filters, token-like actions, and graph-label visual tokens.
+  - Use `Chip.Skeleton` with children and explicit `leadingIcon` or `trailingIcon` flags when skeleton-loading a final chip so label width, icon space, height, border, and rounded-full geometry match the loaded state.
 - Use `Loader` inside asynchronous regions, but avoid duplicating loader behavior already built into `Button` or other components.
 - Use `MoreMenuDropdown` for action-overflow menus instead of assembling a new icon-trigger dropdown.
 - Use `PaginationControls` for compact previous or next paging actions before building page-local pager rows.
