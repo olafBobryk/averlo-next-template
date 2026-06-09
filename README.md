@@ -105,21 +105,27 @@ Available flags:
 - `--no-payload`: removes the guarded Payload scaffold and Payload packages
 - `--dry-run`: prints the plan without changing files
 - `--yes`: skips the confirmation prompt
+- `--confirm-template-root`: allows a mutating prune on the canonical template
+  `main` checkout for explicit template-maintenance tests
 
 Examples:
 
 ```bash
-# See what a marketing-only prune would remove
-npm run prune:template -- --dry-run --no-dashboard --no-demo --no-dictionary --no-reference
+# See what a lightweight instance prune would remove
+npm run prune:template -- --dry-run --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
 
-# Remove dashboard/auth from a cloned project
-npm run prune:template -- --yes --no-dashboard
+# Apply the lightweight instance route-surface prune
+npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
 
-# Remove Payload from a static clone
-npm run prune:template -- --yes --no-payload
+# Apply the lightweight route-surface prune and remove Payload for a static clone
+npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground --no-payload
 ```
 
-The prune command deletes owned route trees and rewrites the centralized route, nav, search, and API export files so the cloned project stays buildable.
+The prune command deletes owned route trees and rewrites the centralized route,
+nav, search, API export, and smoke-verification files so the cloned project
+stays buildable. The command is intended to run inside a clone or renamed
+project instance; mutating the canonical template `main` checkout requires
+`--confirm-template-root` so accidental template collapse is harder.
 
 ## Key Areas
 

@@ -122,6 +122,7 @@ const CONCEPTS = [
 			"Optional surfaces and rewrite logic that keep cloned projects buildable after unused template areas are removed.",
 		matches: [
 			"scripts/prune-template.mjs",
+			"scripts/verify-smoke.mjs",
 			"README.md",
 			"docs/template-content-modes.md",
 			"src/config/routes.ts",
@@ -200,6 +201,7 @@ const AGENT_MAP = {
 				"README.md",
 				"docs/template-content-modes.md",
 				"docs/thin-start-creation-boundary.md",
+				"scripts/verify-smoke.mjs",
 				"src/config/routes.ts",
 				"src/lib/routes.ts",
 				"src/app/(site)/(marketing)/_components/layout/marketingNav.ts",
@@ -207,7 +209,7 @@ const AGENT_MAP = {
 				"src/lib/marketing-content/fallback.ts",
 			],
 			notes:
-				"SURFACES owns normal prune flags, paths, routes, nav/search references, package changes, and post-removal assertions. Thin-start is a separate explicit instance activation path; dry-run first, then activate with --in-place --confirm-instance and require strict API review.",
+				"SURFACES owns normal prune flags, paths, routes, nav/search references, smoke-route rewrites, package changes, and post-removal assertions. Lightweight instances should dry-run then apply: npm run prune:template -- --dry-run --no-dashboard --no-demo --no-dictionary --no-reference --no-playground, then npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground. Add --no-payload only for static instances. Thin-start is a separate explicit instance activation path; dry-run first, then activate with --in-place --confirm-instance and require strict API review.",
 		},
 		{
 			id: "content-modes",

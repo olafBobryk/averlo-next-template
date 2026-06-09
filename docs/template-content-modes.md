@@ -53,6 +53,34 @@ media objects, SEO fields, draft state, authors, taxonomies, localization, and
 redirect metadata. Resolve that richer data in adapters before it reaches the
 frontend renderer.
 
+## Lightweight Instances
+
+Use this path when a project should keep the normal Webvizion template runtime
+but drop optional authoring/demo route families. Run the dry-run first in the
+target clone or renamed project instance:
+
+```bash
+npm run prune:template -- --dry-run --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
+```
+
+If the plan is accepted, apply the lightweight route-surface prune:
+
+```bash
+npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
+```
+
+Payload is independent from this route-surface choice. A static lightweight
+instance should opt into Payload removal explicitly:
+
+```bash
+npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground --no-payload
+```
+
+The prune command accepts renamed package identities after template import by
+checking the expected Webvizion template file/script shape. A mutating prune on
+the canonical template `main` checkout requires `--confirm-template-root`;
+dry-runs remain allowed.
+
 ## Render Contract
 
 The shared contract should stay small:

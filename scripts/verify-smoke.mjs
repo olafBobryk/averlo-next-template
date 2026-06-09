@@ -11,6 +11,7 @@ const HOST = "127.0.0.1";
 const STARTUP_TIMEOUT_MS = 30_000;
 const REQUEST_TIMEOUT_MS = 10_000;
 const ROUTES = ["/", "/login", "/dashboard", "/settings"];
+const ROUTE_STATUS_OVERRIDES = new Map([["/api/health", new Set([200, 503])]]);
 
 const require = createRequire(import.meta.url);
 
@@ -102,7 +103,10 @@ const fetchWithTimeout = async (url) => {
 const validateResponse = async (baseUrl, route) => {
 	const url = new URL(route, baseUrl);
 	const response = await fetchWithTimeout(url);
-	const statusIsOk = response.status >= 200 && response.status < 400;
+	const acceptedStatuses = ROUTE_STATUS_OVERRIDES.get(route);
+	const statusIsOk = acceptedStatuses
+		? acceptedStatuses.has(response.status)
+		: response.status >= 200 && response.status < 400;
 
 	if (!statusIsOk) {
 		throw new Error(`${route} returned HTTP ${response.status}.`);

@@ -13,6 +13,15 @@ const INTERNAL_MARKETING_DIR = path.join(
 	ROOT,
 	"src/app/(site)/(marketing)/internal",
 );
+const PACKAGE_JSON_PATH = path.join(ROOT, "package.json");
+const TEMPLATE_SHAPE_FILES = [
+	"scripts/prune-template.mjs",
+	"scripts/verify-smoke.mjs",
+	"src/config/routes.ts",
+	"src/lib/routes.ts",
+	"src/lib/marketing-content/fallback.ts",
+];
+const TEMPLATE_SHAPE_SCRIPTS = ["build", "prune:template", "verify:smoke"];
 
 const SURFACES = {
 	dashboard: {
@@ -229,6 +238,8 @@ Flags:
   --no-payload     Remove the guarded Payload CMS scaffold and dependencies
   --dry-run        Print the prune plan without changing files
   --yes            Skip the confirmation prompt
+  --confirm-template-root
+                  Allow mutating prune on the canonical template main checkout
 `);
 }
 
@@ -246,6 +257,7 @@ function parseArgs(argv) {
 		"--dry-run",
 		"--yes",
 		"--help",
+		"--confirm-template-root",
 		...Object.values(SURFACES).map((surface) => surface.flag),
 	]);
 
@@ -259,6 +271,7 @@ function parseArgs(argv) {
 		dryRun: flags.has("--dry-run"),
 		yes: flags.has("--yes"),
 		help: flags.has("--help"),
+		confirmTemplateRoot: flags.has("--confirm-template-root"),
 	};
 }
 
@@ -275,16 +288,78 @@ async function pathExists(targetPath) {
 	}
 }
 
-async function assertTemplateRoot() {
-	const packageJsonPath = path.join(ROOT, "package.json");
-	const raw = await fs.readFile(packageJsonPath, "utf8");
-	const pkg = JSON.parse(raw);
+async function readPackageJson() {
+	const raw = await fs.readFile(PACKAGE_JSON_PATH, "utf8");
+	return JSON.parse(raw);
+}
 
-	if (pkg.name !== "webvizion-template") {
+async function assertTemplateShape() {
+	const pkg = await readPackageJson();
+	const missingFiles = [];
+	const missingScripts = [];
+
+	for (const filePath of TEMPLATE_SHAPE_FILES) {
+		if (!(await pathExists(path.join(ROOT, filePath)))) {
+			missingFiles.push(filePath);
+		}
+	}
+
+	for (const scriptName of TEMPLATE_SHAPE_SCRIPTS) {
+		if (!pkg.scripts?.[scriptName]) {
+			missingScripts.push(scriptName);
+		}
+	}
+
+	if (missingFiles.length > 0 || missingScripts.length > 0) {
+		const details = [
+			...missingFiles.map((filePath) => `missing file ${filePath}`),
+			...missingScripts.map((scriptName) => `missing npm script ${scriptName}`),
+		];
+
 		throw new Error(
-			`Expected package.json name to be "webvizion-template", received "${pkg.name ?? "unknown"}".`,
+			`Current directory does not match the Webvizion template prune shape: ${details.join(", ")}.`,
 		);
 	}
+
+	return pkg;
+}
+
+function gitOutput(args) {
+	const result = spawnSync("git", args, {
+		cwd: ROOT,
+		encoding: "utf8",
+		shell: process.platform === "win32",
+		stdio: ["ignore", "pipe", "ignore"],
+	});
+
+	if (result.status !== 0) {
+		return "";
+	}
+
+	return result.stdout.trim();
+}
+
+function isCanonicalTemplateRemote(remoteUrl) {
+	return /(?:^|[:/])webvizion-template(?:\.git)?$/i.test(remoteUrl);
+}
+
+function isCanonicalTemplateMainCheckout(pkg) {
+	if (pkg.name !== "webvizion-template") return false;
+
+	const branch = gitOutput(["branch", "--show-current"]);
+	if (branch !== "main") return false;
+
+	const originUrl = gitOutput(["config", "--get", "remote.origin.url"]);
+	return isCanonicalTemplateRemote(originUrl);
+}
+
+function assertTemplateRootMutationAllowed(pkg, parsed) {
+	if (parsed.dryRun || parsed.confirmTemplateRoot) return;
+	if (!isCanonicalTemplateMainCheckout(pkg)) return;
+
+	throw new Error(
+		"Mutating prune on the canonical webvizion-template main checkout requires --confirm-template-root. Run a dry-run, use a clone/instance, or pass the explicit confirmation flag for template-maintenance tests.",
+	);
 }
 
 function buildState(surfaceIds) {
@@ -336,6 +411,7 @@ async function collectPlan(surfaceIds) {
 		rewriteFiles: [
 			...CENTRAL_FILES,
 			"src/lib/marketing-content/fallback.ts",
+			"scripts/verify-smoke.mjs",
 			...(surfaceIds.includes("payload")
 				? ["next.config.ts", "tsconfig.json", "package.json"]
 				: []),
@@ -1096,6 +1172,249 @@ function renderApiIndexFile(state) {
 	return lines.join("\n");
 }
 
+function getSmokeRoutes(state) {
+	const routes = ["/"];
+
+	if (state.hasDashboard) {
+		routes.push("/login", "/dashboard");
+	}
+
+	routes.push("/settings");
+	routes.push("/api/health");
+
+	return routes;
+}
+
+function renderVerifySmokeFile(state) {
+	const routes = JSON.stringify(getSmokeRoutes(state));
+
+	return [
+		"#!/usr/bin/env node",
+		"",
+		'import { spawn } from "node:child_process";',
+		'import { access } from "node:fs/promises";',
+		'import { createRequire } from "node:module";',
+		'import net from "node:net";',
+		"",
+		"const PORT_START = 3100;",
+		"const PORT_END = 3199;",
+		'const HOST = "127.0.0.1";',
+		"const STARTUP_TIMEOUT_MS = 30_000;",
+		"const REQUEST_TIMEOUT_MS = 10_000;",
+		`const ROUTES = ${routes};`,
+		'const ROUTE_STATUS_OVERRIDES = new Map([["/api/health", new Set([200, 503])]]);',
+		"",
+		"const require = createRequire(import.meta.url);",
+		"",
+		"const canListenOnHost = (port, host) =>",
+		"\tnew Promise((resolve, reject) => {",
+		"\t\tconst server = net.createServer();",
+		"",
+		'\t\tserver.once("error", (error) => {',
+		'\t\t\tif (error.code === "EADDRINUSE" || error.code === "EACCES") {',
+		"\t\t\t\tresolve(false);",
+		"\t\t\t\treturn;",
+		"\t\t\t}",
+		"",
+		"\t\t\treject(error);",
+		"\t\t});",
+		"",
+		'\t\tserver.once("listening", () => {',
+		"\t\t\tserver.close(() => resolve(true));",
+		"\t\t});",
+		"",
+		"\t\tserver.listen({ host, port });",
+		"\t});",
+		"",
+		"const findAvailablePort = async () => {",
+		"\tfor (let port = PORT_START; port <= PORT_END; port += 1) {",
+		"\t\tif (await canListenOnHost(port, HOST)) {",
+		"\t\t\treturn port;",
+		"\t\t}",
+		"\t}",
+		"",
+		"\treturn null;",
+		"};",
+		"",
+		"const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));",
+		"",
+		"const canConnect = (port) =>",
+		"\tnew Promise((resolve) => {",
+		"\t\tconst socket = net.createConnection({ host: HOST, port });",
+		"",
+		'\t\tsocket.once("connect", () => {',
+		"\t\t\tsocket.end();",
+		"\t\t\tresolve(true);",
+		"\t\t});",
+		"",
+		'\t\tsocket.once("error", () => {',
+		"\t\t\tresolve(false);",
+		"\t\t});",
+		"",
+		"\t\tsocket.setTimeout(1000, () => {",
+		"\t\t\tsocket.destroy();",
+		"\t\t\tresolve(false);",
+		"\t\t});",
+		"\t});",
+		"",
+		"const waitForServer = async (child, port) => {",
+		"\tconst startedAt = Date.now();",
+		"",
+		"\twhile (Date.now() - startedAt < STARTUP_TIMEOUT_MS) {",
+		"\t\tif (child.exitCode !== null) {",
+		"\t\t\tthrow new Error(`next start exited early with code ${child.exitCode}.`);",
+		"\t\t}",
+		"",
+		"\t\tif (await canConnect(port)) {",
+		"\t\t\treturn;",
+		"\t\t}",
+		"",
+		"\t\tawait wait(250);",
+		"\t}",
+		"",
+		"\tthrow new Error(",
+		"\t\t`Timed out after ${STARTUP_TIMEOUT_MS / 1000}s waiting for next start.`,",
+		"\t);",
+		"};",
+		"",
+		"const fetchWithTimeout = async (url) => {",
+		"\tconst controller = new AbortController();",
+		"\tconst timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);",
+		"",
+		"\ttry {",
+		"\t\treturn await fetch(url, {",
+		'\t\t\tredirect: "manual",',
+		"\t\t\tsignal: controller.signal,",
+		"\t\t});",
+		"\t} finally {",
+		"\t\tclearTimeout(timeout);",
+		"\t}",
+		"};",
+		"",
+		"const validateResponse = async (baseUrl, route) => {",
+		"\tconst url = new URL(route, baseUrl);",
+		"\tconst response = await fetchWithTimeout(url);",
+		"\tconst acceptedStatuses = ROUTE_STATUS_OVERRIDES.get(route);",
+		"\tconst statusIsOk = acceptedStatuses",
+		"\t\t? acceptedStatuses.has(response.status)",
+		"\t\t: response.status >= 200 && response.status < 400;",
+		"",
+		"\tif (!statusIsOk) {",
+		"\t\tthrow new Error(`${route} returned HTTP ${response.status}.`);",
+		"\t}",
+		"",
+		"\tif (response.status >= 300) {",
+		'\t\tconst location = response.headers.get("location");',
+		"\t\tif (!location) {",
+		"\t\t\tthrow new Error(`${route} redirected without a Location header.`);",
+		"\t\t}",
+		"",
+		"\t\tconsole.log(`ok ${route} ${response.status} -> ${location}`);",
+		"\t\treturn;",
+		"\t}",
+		"",
+		"\tconst body = await response.text();",
+		"\tif (body.trim().length === 0) {",
+		"\t\tthrow new Error(`${route} returned an empty response body.`);",
+		"\t}",
+		"",
+		'\tconst contentType = response.headers.get("content-type") ?? "";',
+		"\tif (",
+		'\t\tcontentType.includes("text/html") &&',
+		'\t\t!body.toLowerCase().includes("<html")',
+		"\t) {",
+		"\t\tthrow new Error(`${route} returned HTML without a document marker.`);",
+		"\t}",
+		"",
+		"\tconsole.log(`ok ${route} ${response.status}`);",
+		"};",
+		"",
+		"const assertBuildExists = async () => {",
+		"\ttry {",
+		'\t\tawait access(".next/BUILD_ID");',
+		"\t} catch {",
+		"\t\tthrow new Error(",
+		'\t\t\t"Missing .next/BUILD_ID. Run `npm run build` first, or run `npm run verify`.",',
+		"\t\t);",
+		"\t}",
+		"};",
+		"",
+		"const stopServer = async (child) => {",
+		"\tif (child.exitCode !== null) {",
+		"\t\treturn;",
+		"\t}",
+		"",
+		'\tchild.kill("SIGTERM");',
+		"",
+		"\tconst exited = await new Promise((resolve) => {",
+		"\t\tconst timeout = setTimeout(() => resolve(false), 5000);",
+		"",
+		'\t\tchild.once("exit", () => {',
+		"\t\t\tclearTimeout(timeout);",
+		"\t\t\tresolve(true);",
+		"\t\t});",
+		"\t});",
+		"",
+		"\tif (!exited && child.exitCode === null) {",
+		'\t\tchild.kill("SIGKILL");',
+		"\t}",
+		"};",
+		"",
+		"const start = async () => {",
+		"\tawait assertBuildExists();",
+		"",
+		"\tconst port = await findAvailablePort();",
+		"\tif (!port) {",
+		"\t\tthrow new Error(",
+		"\t\t\t`No available smoke-test ports found in ${PORT_START}-${PORT_END}.`,",
+		"\t\t);",
+		"\t}",
+		"",
+		"\tconst baseUrl = `http://${HOST}:${port}`;",
+		'\tconst nextBin = require.resolve("next/dist/bin/next");',
+		"\tconst child = spawn(",
+		"\t\tprocess.execPath,",
+		'\t\t[nextBin, "start", "--hostname", HOST, "--port", String(port)],',
+		"\t\t{",
+		"\t\t\tenv: {",
+		"\t\t\t\t...process.env,",
+		'\t\t\t\tNODE_ENV: "production",',
+		"\t\t\t\tPORT: String(port),",
+		"\t\t\t},",
+		'\t\t\tstdio: ["ignore", "pipe", "pipe"],',
+		"\t\t},",
+		"\t);",
+		"",
+		'\tchild.stdout.on("data", (chunk) => {',
+		"\t\tprocess.stdout.write(chunk);",
+		"\t});",
+		"",
+		'\tchild.stderr.on("data", (chunk) => {',
+		"\t\tprocess.stderr.write(chunk);",
+		"\t});",
+		"",
+		"\ttry {",
+		"\t\tconsole.log(`Starting smoke server at ${baseUrl}`);",
+		"\t\tawait waitForServer(child, port);",
+		"",
+		"\t\tfor (const route of ROUTES) {",
+		"\t\t\tawait validateResponse(baseUrl, route);",
+		"\t\t}",
+		"",
+		'\t\tconsole.log("Smoke verification passed.");',
+		"\t} finally {",
+		"\t\tawait stopServer(child);",
+		"\t}",
+		"};",
+		"",
+		"start().catch((error) => {",
+		"\tconsole.error(error instanceof Error ? error.message : error);",
+		"\tprocess.exit(1);",
+		"});",
+		"",
+	].join("\n");
+}
+
 function getRewriteTargets(state) {
 	const targets = [
 		{
@@ -1121,6 +1440,10 @@ function getRewriteTargets(state) {
 		{
 			path: "src/lib/marketing-content/fallback.ts",
 			content: renderMarketingContentFallbackFile(state),
+		},
+		{
+			path: "scripts/verify-smoke.mjs",
+			content: renderVerifySmokeFile(state),
 		},
 	];
 
@@ -1243,6 +1566,32 @@ function refreshPackageLock() {
 	}
 }
 
+async function runFormatter(filePaths) {
+	const existingFiles = [];
+
+	for (const filePath of filePaths) {
+		if (await pathExists(path.join(ROOT, filePath))) {
+			existingFiles.push(filePath);
+		}
+	}
+
+	if (existingFiles.length === 0) return;
+
+	const result = spawnSync(
+		"npm",
+		["run", "lint", "--", "--write", ...existingFiles],
+		{
+			cwd: ROOT,
+			stdio: "inherit",
+			shell: process.platform === "win32",
+		},
+	);
+
+	if (result.status !== 0) {
+		throw new Error("Post-prune formatting and import fixes failed.");
+	}
+}
+
 async function walkFiles(targetDir) {
 	const entries = await fs.readdir(targetDir, { withFileTypes: true });
 	const files = [];
@@ -1346,6 +1695,7 @@ function printPlan(plan) {
 	}
 
 	console.log("\nWarnings");
+	console.log("- formatter/import fixes run after mutation");
 	console.log("- unresolved reference validation runs after mutation");
 	console.log("- build validation runs after mutation");
 }
@@ -1389,7 +1739,8 @@ async function main() {
 		return;
 	}
 
-	await assertTemplateRoot();
+	const pkg = await assertTemplateShape();
+	assertTemplateRootMutationAllowed(pkg, parsed);
 
 	const state = buildState(parsed.surfaceIds);
 	const plan = await collectPlan(parsed.surfaceIds);
@@ -1424,6 +1775,7 @@ async function main() {
 		refreshPackageLock();
 	}
 
+	await runFormatter(plan.rewriteFiles);
 	await validateRemovedSurfaceReferences(parsed.surfaceIds);
 	runBuild();
 

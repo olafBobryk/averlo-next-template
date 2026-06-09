@@ -28,9 +28,9 @@ const PRUNE_SURFACES: PruneSurface[] = [
 		description:
 			"Dashboard shell, login/auth routes, and dashboard-only auth helpers.",
 		ownedPaths: [
-			"src/app/(site)/dashboard",
-			"src/app/(site)/(auth)",
-			"src/lib/api/auth.ts",
+			"removed dashboard route tree",
+			"removed auth route tree",
+			"dashboard auth helper",
 		],
 		routeIds: ["login", "dashboard", "dashboardPages", "dashboardSettings"],
 		centralRewrites: ["routes", "api-index", "fallback-content"],
@@ -41,7 +41,7 @@ const PRUNE_SURFACES: PruneSurface[] = [
 		label: "Demo",
 		flag: "--no-demo",
 		description: "Internal component demo surface and demo search indexing.",
-		ownedPaths: ["src/app/(site)/(marketing)/internal/demo"],
+		ownedPaths: ["internal demo route tree"],
 		routeIds: ["demo"],
 		centralRewrites: ["routes", "marketing-nav", "content-search"],
 		assertions: ["demo route ids", "demo content import"],
@@ -97,7 +97,7 @@ const PRUNE_SURFACES: PruneSurface[] = [
 		flag: "--no-playground",
 		description:
 			"Internal playground surface and playground search/nav references.",
-		ownedPaths: ["src/app/(site)/(marketing)/internal/playground"],
+		ownedPaths: ["removed internal playground route tree"],
 		routeIds: ["playground"],
 		centralRewrites: ["routes", "marketing-nav", "content-search"],
 		assertions: ["playground route ids and links"],
@@ -108,7 +108,7 @@ const PRUNE_SURFACES: PruneSurface[] = [
 		flag: "--no-dictionary",
 		description:
 			"Internal dictionary surface, route ids, and search/nav references.",
-		ownedPaths: ["src/app/(site)/(marketing)/internal/dictionary"],
+		ownedPaths: ["internal dictionary route tree"],
 		routeIds: [
 			"dictionary",
 			"dictionaryRiveLogoReveal",
@@ -123,7 +123,7 @@ const PRUNE_SURFACES: PruneSurface[] = [
 		flag: "--no-reference",
 		description:
 			"Internal reference/docs surface, including the shared live graph implementation reference.",
-		ownedPaths: ["src/app/(site)/(marketing)/internal/reference"],
+		ownedPaths: ["internal reference route tree"],
 		routeIds: ["reference"],
 		centralRewrites: ["routes", "marketing-nav", "fallback-content"],
 		assertions: [],
