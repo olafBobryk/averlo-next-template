@@ -41,6 +41,7 @@ yarn-error.log*
 /.codex/preview.json
 /.worktrees/
 /.template-intelligence/
+/.thin-start/
 /.serena/
 /.understand-anything/
 

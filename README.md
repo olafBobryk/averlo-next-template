@@ -150,6 +150,8 @@ If a project is purely marketing-site work, remove it with `npm run prune:templa
 
 - Prefer extending the shared component system instead of building page-local one-off UI.
 - Check the nearest `AGENTS.md` file before adding new reusable features.
+- For the accepted optional thin-start creation boundary, see
+  `docs/thin-start-creation-boundary.md`.
 - Keep demos and documentation updated when shared components change.
 - Use Tailwind responsive classes for visual breakpoint changes, and reserve
   `useTailwindBreakpoints` for branches where hidden content would still mount

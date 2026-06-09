@@ -1,113 +1,50 @@
-// components/ui/primitives/Field.tsx
-"use client";
-
+import clsx from "clsx";
 import type * as React from "react";
-import { Text } from "./Text";
-
-type FieldTone = "default" | "error" | "success";
+import { Text } from "@/components/ui/primitives/Text";
 
 type FieldProps = {
-	label?: React.ReactNode;
-	description?: React.ReactNode;
-	message?: React.ReactNode;
-	tone?: FieldTone;
-	required?: boolean;
-	inputId?: string;
-	descriptionId?: string;
-	messageId?: string;
-	disableMessage?: boolean;
-	className?: string;
 	children: React.ReactNode;
+	className?: string;
+	description?: React.ReactNode;
+	error?: React.ReactNode;
+	id?: string;
+	label?: React.ReactNode;
 };
 
 export function Field({
-	label,
-	description,
-	message,
-	tone = "default",
-	required,
-	inputId,
-	descriptionId,
-	messageId,
-	disableMessage = false,
-	className,
 	children,
+	className,
+	description,
+	error,
+	id,
+	label,
 }: FieldProps) {
-	const hasMessage = Boolean(message);
-	const announceMessage = tone === "error" && hasMessage;
+	const descriptionId = description && id ? `${id}-description` : undefined;
+	const errorId = error && id ? `${id}-error` : undefined;
 
 	return (
-		<div
-			data-tone={tone}
-			className={["group/field flex flex-col gap-3", className]
-				.filter(Boolean)
-				.join(" ")}
-		>
-			{label || description ? (
-				<div className="flex flex-col gap-1">
-					{label ? (
-						<Text
-							as="label"
-							variant="body"
-							htmlFor={inputId}
-							className="pointer-events-none"
-						>
-							<span className="inline-flex items-center gap-1">
-								{label}
-								{required ? (
-									<span aria-hidden="true" className="text-danger">
-										*
-									</span>
-								) : null}
-							</span>
-						</Text>
-					) : null}
-
-					{description ? (
-						<Text
-							as="p"
-							variant="body"
-							tone="muted"
-							className="text-sm"
-							id={descriptionId}
-						>
-							{description}
-						</Text>
-					) : null}
-				</div>
+		<div className={clsx("grid gap-2", className)}>
+			{label ? (
+				<label htmlFor={id} className="text-sm font-medium text-foreground">
+					{label}
+				</label>
 			) : null}
-
+			{description ? (
+				<Text id={descriptionId} variant="support" tone="muted">
+					{description}
+				</Text>
+			) : null}
 			{children}
-
-			{disableMessage ? null : (
-				<div
-					className={[
-						"transition-all motion-micro -mt-2.5 overflow-hidden",
-						message ? "max-h-[26px]" : "max-h-0",
-					].join(" ")}
-					role={announceMessage ? "alert" : undefined}
-					aria-live={announceMessage ? "polite" : undefined}
-					aria-atomic={announceMessage ? "true" : undefined}
+			{error ? (
+				<Text
+					id={errorId}
+					variant="support"
+					className="text-danger"
+					role="alert"
 				>
-					<Text
-						as="p"
-						variant="caption"
-						tone="muted"
-						className={[
-							"transition-all motion-micro mt-2.5", // reserve one line
-							tone === "error"
-								? "!text-danger"
-								: tone === "success"
-									? "!text-success"
-									: "text-transparent",
-						].join(" ")}
-						id={messageId}
-						aria-hidden={!hasMessage}
-					>
-						{message ?? "placeholder"}
-					</Text>
-				</div>
-			)}
+					{error}
+				</Text>
+			) : null}
 		</div>
 	);
 }

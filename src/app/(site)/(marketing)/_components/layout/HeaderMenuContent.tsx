@@ -2,26 +2,103 @@
 
 import clsx from "clsx";
 import { useId } from "react";
-import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import {
 	InputFrame,
-	inputVariants,
+	inputTextClasses,
 } from "@/components/ui/primitives/InputFrame";
 import { Text } from "@/components/ui/primitives/Text";
 import { getMarketingLinkHref } from "@/lib/marketing-content/links";
 import type {
+	HeaderIconName,
 	MarketingLink,
 	MarketingMenuGroup,
 } from "@/lib/marketing-content/types";
 
-const HEADER_MENU_TITLE_LINE_HEIGHT = 21;
-const HEADER_MENU_LINK_LINE_HEIGHT = 17;
+const HEADER_MENU_TITLE_LINE_HEIGHT = 24;
+const HEADER_MENU_LINK_LINE_HEIGHT = 20;
 const HEADER_MENU_TITLE_LINK_GAP = 12;
 const HEADER_MENU_LINK_GAP = 10;
 const HEADER_MENU_GRID_ROW_GAP = 32;
-export const HEADER_MENU_DEFAULT_COLUMNS = 6;
-export const HEADER_MENU_CAPPED_COLUMNS = 5;
+export const HEADER_MENU_DEFAULT_COLUMNS = 4;
+export const HEADER_MENU_CAPPED_COLUMNS = 3;
+
+function HeaderIcon({
+	className,
+	name,
+}: {
+	className?: string;
+	name: HeaderIconName;
+}) {
+	if (name === "search") {
+		return (
+			<svg
+				aria-hidden="true"
+				viewBox="0 0 24 24"
+				className={clsx("size-4", className)}
+			>
+				<path
+					d="m20 20-4.5-4.5m2-5A7 7 0 1 1 3.5 10.5a7 7 0 0 1 14 0Z"
+					fill="none"
+					stroke="currentColor"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth="1.8"
+				/>
+			</svg>
+		);
+	}
+
+	if (name === "close") {
+		return (
+			<svg
+				aria-hidden="true"
+				viewBox="0 0 24 24"
+				className={clsx("size-5", className)}
+			>
+				<path
+					d="m6 6 12 12M18 6 6 18"
+					fill="none"
+					stroke="currentColor"
+					strokeLinecap="round"
+					strokeWidth="1.9"
+				/>
+			</svg>
+		);
+	}
+
+	if (name === "menu") {
+		return (
+			<svg
+				aria-hidden="true"
+				viewBox="0 0 24 24"
+				className={clsx("size-5", className)}
+			>
+				<path
+					d="M5 7h14M5 12h14M5 17h14"
+					fill="none"
+					stroke="currentColor"
+					strokeLinecap="round"
+					strokeWidth="1.9"
+				/>
+			</svg>
+		);
+	}
+
+	return (
+		<span
+			aria-hidden="true"
+			className={clsx("size-2 rounded-full bg-current", className)}
+		/>
+	);
+}
+
+export function HeaderMenuIcon(props: {
+	className?: string;
+	name: HeaderIconName;
+}) {
+	return <HeaderIcon {...props} />;
+}
 
 function getLinkSearchText(link: MarketingLink) {
 	return `${link.label} ${getMarketingLinkHref(link)}`.toLowerCase();
@@ -29,7 +106,7 @@ function getLinkSearchText(link: MarketingLink) {
 
 export function getHeaderSearchGroups(
 	query: string,
-	sourceGroups: readonly MarketingMenuGroup[],
+	sourceGroups: readonly MarketingMenuGroup[] = [],
 ): MarketingMenuGroup[] {
 	const normalizedQuery = query.trim().toLowerCase();
 
@@ -72,7 +149,7 @@ function getMenuGroupHeight(group: MarketingMenuGroup) {
 }
 
 export function getMenuContentHeight(
-	groups: readonly MarketingMenuGroup[],
+	groups: readonly MarketingMenuGroup[] = [],
 	columnCount: number,
 ): number {
 	if (groups.length === 0) {
@@ -99,61 +176,34 @@ export function getMenuContentHeight(
 }
 
 export function HeaderSearchInput({
-	value,
-	onValueChange,
-	onClear,
 	ariaLabel,
-	clearLabel,
-	placeholder,
 	className,
+	clearLabel,
+	onClear,
+	onValueChange,
+	placeholder,
+	value,
 }: {
-	value: string;
-	onValueChange: (value: string) => void;
-	onClear: () => void;
 	ariaLabel: string;
-	clearLabel: string;
-	placeholder?: string;
 	className?: string;
+	clearLabel: string;
+	onClear: () => void;
+	onValueChange: (value: string) => void;
+	placeholder?: string;
+	value: string;
 }) {
 	const searchId = useId();
 	const hasValue = value.trim().length > 0;
 
 	return (
 		<InputFrame
-			size="sm"
-			className={
+			className={clsx(
+				"group/header-search min-h-10 gap-1 px-3 text-foreground",
 				className ??
-				"group/header-search mr-3 w-[220px] min-w-[220px] max-w-[220px] flex-none basis-[220px] text-foreground"
-			}
-			start={
-				<Icon
-					name="search"
-					size="md"
-					className="pointer-events-none text-muted"
-				/>
-			}
-			end={
-				<Button
-					type="button"
-					variant="ghost"
-					size="sm"
-					textVariant="menu-description"
-					textTone="muted"
-					className={clsx(
-						"pointer-events-none opacity-0 transition-opacity motion-micro group-hover/header-search:pointer-events-auto group-focus-within/header-search:pointer-events-auto",
-						hasValue
-							? "group-hover/header-search:opacity-100 group-focus-within/header-search:opacity-100"
-							: undefined,
-					)}
-					contentClassName="w-fit"
-					aria-label={clearLabel}
-					onMouseDown={(event) => event.preventDefault()}
-					onClick={onClear}
-				>
-					{clearLabel}
-				</Button>
-			}
+					"mr-3 w-[220px] min-w-[220px] max-w-[220px] flex-none basis-[220px]",
+			)}
 		>
+			<HeaderIcon name="search" className="text-muted" />
 			<input
 				id={searchId}
 				type="search"
@@ -163,44 +213,51 @@ export function HeaderSearchInput({
 				placeholder={placeholder}
 				autoComplete="off"
 				className={clsx(
-					inputVariants({ size: "sm", hasStart: true, hasEnd: true }),
-					"[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
+					inputTextClasses,
+					"min-w-0 px-1 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
 				)}
 			/>
+			<Button
+				type="button"
+				variant="ghost"
+				className={clsx(
+					"min-h-8 px-2 text-xs text-muted opacity-0 transition-opacity group-hover/header-search:opacity-100 group-focus-within/header-search:opacity-100",
+					!hasValue && "pointer-events-none",
+				)}
+				aria-label={clearLabel}
+				onMouseDown={(event) => event.preventDefault()}
+				onClick={onClear}
+			>
+				{clearLabel}
+			</Button>
 		</InputFrame>
 	);
 }
 
 export function HeaderMenuNoResults({
-	noResultsText,
 	className,
+	noResultsText,
 }: {
-	noResultsText: string;
 	className?: string;
+	noResultsText: string;
 }) {
 	return (
-		<Text
-			as="p"
-			variant="menu-description"
-			tone="inherit"
-			className={clsx("text-foreground/50", className)}
-			interactive={false}
-		>
+		<Text as="p" variant="support" tone="muted" className={className}>
 			{noResultsText}
 		</Text>
 	);
 }
 
 export function HeaderSearchResults({
-	groups,
-	onNavigate,
 	columnCount,
+	groups,
 	noResultsText,
+	onNavigate,
 }: {
-	groups: readonly MarketingMenuGroup[];
-	onNavigate: () => void;
 	columnCount: number;
+	groups: readonly MarketingMenuGroup[];
 	noResultsText: string;
+	onNavigate: () => void;
 }) {
 	if (groups.length === 0) {
 		return <HeaderMenuNoResults noResultsText={noResultsText} />;
@@ -216,15 +273,13 @@ export function HeaderSearchResults({
 }
 
 export function HeaderMenuGroup({
+	className,
 	group,
 	onNavigate,
-	focusable = true,
-	className,
 }: {
+	className?: string;
 	group: MarketingMenuGroup;
 	onNavigate?: () => void;
-	focusable?: boolean;
-	className?: string;
 }) {
 	const hasLinks = Boolean(group.links?.length);
 	const groupHref = group.link ? getMarketingLinkHref(group.link) : undefined;
@@ -235,20 +290,10 @@ export function HeaderMenuGroup({
 				<Button
 					href={groupHref}
 					variant="ghost"
-					align="left"
-					textVariant="menu-title"
-					textTone="inherit"
-					className="w-fit text-foreground hover:!text-foreground active:!text-foreground"
-					contentClassName="w-fit"
-					focusable={focusable}
+					className="w-fit justify-start px-0 text-foreground hover:bg-transparent"
 					leadingIcon={
 						group.icon ? (
-							<Icon
-								name={group.icon}
-								size="md"
-								className="text-foreground"
-								weight="fill"
-							/>
+							<HeaderIcon name={group.icon} className="text-foreground" />
 						) : undefined
 					}
 					onClick={onNavigate}
@@ -256,39 +301,21 @@ export function HeaderMenuGroup({
 					{group.label}
 				</Button>
 			) : (
-				<span className="flex items-center gap-[10px] text-foreground">
+				<span className="flex items-center gap-2 text-sm font-medium text-foreground">
 					{group.icon ? (
-						<Icon
-							name={group.icon}
-							size="md"
-							className="text-foreground"
-							weight="fill"
-						/>
+						<HeaderIcon name={group.icon} className="text-foreground" />
 					) : null}
-					<Text
-						as="span"
-						variant="menu-title"
-						tone="inherit"
-						interactive={false}
-					>
-						{group.label}
-					</Text>
+					{group.label}
 				</span>
 			)}
 			{hasLinks ? (
-				<div className="flex min-w-0 flex-col items-start gap-[10px]">
+				<div className="flex min-w-0 flex-col items-start gap-2">
 					{group.links?.map((item) => (
 						<Button
 							key={`${item.label}-${getMarketingLinkHref(item)}`}
 							href={getMarketingLinkHref(item)}
 							variant="ghost"
-							size="sm"
-							align="left"
-							textVariant="menu-description"
-							textTone="inherit"
-							className="w-fit text-foreground/50 hover:!text-foreground/50 active:!text-foreground/50"
-							contentClassName="w-fit"
-							focusable={focusable}
+							className="min-h-0 w-fit justify-start px-0 py-0 text-sm font-normal text-muted hover:bg-transparent hover:text-foreground"
 							onClick={onNavigate}
 						>
 							{item.label}
@@ -301,29 +328,34 @@ export function HeaderMenuGroup({
 }
 
 export function HeaderMenuGrid({
+	className,
+	columnCount,
 	groups,
 	onNavigate,
-	focusable = true,
-	columnCount,
-	className,
 }: {
+	className?: string;
+	columnCount: number;
 	groups: readonly MarketingMenuGroup[];
 	onNavigate?: () => void;
-	focusable?: boolean;
-	columnCount: number;
-	className?: string;
 }) {
 	const gridColumnClassName =
-		columnCount === HEADER_MENU_CAPPED_COLUMNS ? "grid-cols-5" : "grid-cols-6";
+		columnCount === HEADER_MENU_CAPPED_COLUMNS
+			? "md:grid-cols-3"
+			: "lg:grid-cols-4";
 
 	return (
-		<div className={clsx("grid w-full gap-8", gridColumnClassName, className)}>
+		<div
+			className={clsx(
+				"grid w-full grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2",
+				gridColumnClassName,
+				className,
+			)}
+		>
 			{groups.map((group) => (
 				<HeaderMenuGroup
 					key={group.label}
 					group={group}
 					onNavigate={onNavigate}
-					focusable={focusable}
 				/>
 			))}
 		</div>

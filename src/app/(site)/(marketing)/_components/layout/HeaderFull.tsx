@@ -6,11 +6,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
-import { IconSwap } from "@/components/ui/helpers/IconSwap";
-import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
-import { useTailwindBreakpoints } from "@/hooks/useTailwindBreakpoints";
 import { getMarketingLinkHref } from "@/lib/marketing-content/links";
 import type {
 	MarketingLink,
@@ -22,6 +19,7 @@ import {
 	HEADER_MENU_CAPPED_COLUMNS,
 	HEADER_MENU_DEFAULT_COLUMNS,
 	HeaderMenuGrid,
+	HeaderMenuIcon,
 	HeaderSearchInput,
 	HeaderSearchResults,
 } from "./HeaderMenuContent";
@@ -34,26 +32,20 @@ const HEADER_ENTRANCE_HIDDEN = { opacity: 0, y: -28, scale: 0.965 };
 const HEADER_ENTRANCE_VISIBLE = { opacity: 1, y: 0, scale: 1 };
 
 function HeaderTopNavLink({
-	link,
-	focusable,
 	className,
+	link,
 }: {
-	link: MarketingLink;
-	focusable: boolean;
 	className?: string;
+	link: MarketingLink;
 }) {
 	return (
 		<Button
 			href={getMarketingLinkHref(link)}
 			variant="ghost"
-			size="md"
-			textVariant="nav"
-			textTone="inherit"
 			className={clsx(
-				"text-foreground/50 hover:!text-foreground/50 active:!text-foreground/50",
+				"text-foreground/60 hover:bg-transparent hover:text-foreground",
 				className,
 			)}
-			focusable={focusable}
 		>
 			{link.label}
 		</Button>
@@ -73,21 +65,30 @@ export default function HeaderFull({
 	layout: SiteLayoutDocument["header"];
 	className?: string;
 }) {
-	const { isMd, isLg } = useTailwindBreakpoints();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const headerRef = useRef<HTMLElement>(null);
 	const menuId = useId();
+	const menuGroups = layout.menuGroups ?? [];
+	const mobile = layout.mobile ?? {
+		closeAriaLabel: "Close navigation",
+		openAriaLabel: "Open navigation",
+	};
+	const search = layout.search ?? {
+		ariaLabel: "Search pages",
+		clearLabel: "Clear",
+		noResultsText: "No matching pages",
+	};
+	const searchSourceGroups = layout.searchGroups ?? menuGroups;
+	const topNavLinks = layout.topNavLinks ?? [];
 	const isCompact = isScrolled && !isMenuOpen;
 	const isSearchActive = searchQuery.trim().length > 0;
-	const shouldHideTopNavLinks = isMd || isLg;
-	const areTopNavLinksVisible = !isMenuOpen && !shouldHideTopNavLinks;
-	const shouldUseCappedMenuColumns = isMd || isLg;
-	const searchGroups = getHeaderSearchGroups(searchQuery, layout.searchGroups);
-	const menuColumnCount = shouldUseCappedMenuColumns
+	const areTopNavLinksVisible = !isMenuOpen;
+	const searchGroups = getHeaderSearchGroups(searchQuery, searchSourceGroups);
+	const menuColumnCount = isCompact
 		? HEADER_MENU_CAPPED_COLUMNS
 		: HEADER_MENU_DEFAULT_COLUMNS;
-	const activeMenuGroups = isSearchActive ? searchGroups : layout.menuGroups;
+	const activeMenuGroups = isSearchActive ? searchGroups : menuGroups;
 	const menuContentHeight = getMenuContentHeight(
 		activeMenuGroups,
 		menuColumnCount,
@@ -177,7 +178,7 @@ export default function HeaderFull({
 					}}
 					transition={headerTransition}
 				>
-					<div className="flex min-w-[220px] items-center">
+					<div className="flex min-w-[180px] items-center">
 						<motion.div
 							className="origin-left"
 							initial={false}
@@ -192,7 +193,7 @@ export default function HeaderFull({
 						aria-label="Primary navigation"
 					>
 						<motion.div
-							className="flex items-center justify-center gap-10 overflow-hidden py-2"
+							className="flex items-center justify-center gap-6 overflow-hidden py-2"
 							initial={false}
 							animate={{
 								width: areTopNavLinksVisible ? "auto" : 0,
@@ -201,15 +202,12 @@ export default function HeaderFull({
 							transition={headerTransition}
 							aria-hidden={!areTopNavLinksVisible}
 						>
-							{layout.topNavLinks.map((item, index) => (
+							{topNavLinks.map((item, index) => (
 								<HeaderTopNavLink
 									key={`${item.label}-${getMarketingLinkHref(item)}`}
 									link={item}
-									focusable={areTopNavLinksVisible}
 									className={
-										index === layout.topNavLinks.length - 1
-											? "mr-10"
-											: undefined
+										index === topNavLinks.length - 1 ? "mr-6" : undefined
 									}
 								/>
 							))}
@@ -218,56 +216,28 @@ export default function HeaderFull({
 							value={searchQuery}
 							onValueChange={handleSearchQueryChange}
 							onClear={closeMenu}
-							ariaLabel={layout.search.ariaLabel}
-							clearLabel={layout.search.clearLabel}
+							ariaLabel={search.ariaLabel}
+							clearLabel={search.clearLabel}
 						/>
 						<Button
 							variant="ghost"
-							size="icon"
-							textTone="inherit"
-							className="text-foreground hover:!text-foreground active:!text-foreground"
+							className="min-h-10 px-3 text-foreground hover:bg-background-hover"
 							aria-controls={menuId}
 							aria-expanded={isMenuOpen}
 							aria-label={
-								isMenuOpen
-									? layout.mobile.closeAriaLabel
-									: layout.mobile.openAriaLabel
+								isMenuOpen ? mobile.closeAriaLabel : mobile.openAriaLabel
 							}
 							onClick={toggleMenu}
 							leadingIcon={
-								<IconSwap
-									activeIndex={isMenuOpen ? 1 : 0}
-									size="lg"
-									items={[
-										{
-											icon: (
-												<Icon
-													name="menu"
-													className="size-full text-foreground"
-													style={{ width: "100%", height: "100%" }}
-												/>
-											),
-										},
-										{
-											icon: (
-												<Icon
-													name="close"
-													className="size-full text-foreground"
-													style={{ width: "100%", height: "100%" }}
-												/>
-											),
-										},
-									]}
+								<HeaderMenuIcon
+									name={isMenuOpen ? "close" : "menu"}
+									className="text-foreground"
 								/>
 							}
 						/>
 					</nav>
-					<div className="pointer-events-auto flex min-w-[220px] justify-end">
-						<Button
-							href={getMarketingLinkHref(layout.cta)}
-							variant="primary"
-							size="md"
-						>
+					<div className="pointer-events-auto flex min-w-[180px] justify-end">
+						<Button href={getMarketingLinkHref(layout.cta)} variant="primary">
 							{layout.cta.label}
 						</Button>
 					</div>
@@ -301,11 +271,11 @@ export default function HeaderFull({
 												groups={searchGroups}
 												onNavigate={closeMenu}
 												columnCount={menuColumnCount}
-												noResultsText={layout.search.noResultsText}
+												noResultsText={search.noResultsText}
 											/>
 										) : (
 											<HeaderMenuGrid
-												groups={layout.menuGroups}
+												groups={menuGroups}
 												onNavigate={closeMenu}
 												columnCount={menuColumnCount}
 											/>
