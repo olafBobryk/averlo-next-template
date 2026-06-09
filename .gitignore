@@ -40,6 +40,7 @@ yarn-error.log*
 # local agent/worktree metadata
 /.codex/preview.json
 /.worktrees/
+/.thin-start/
 /.template-intelligence/
 /.serena/
 /.understand-anything/
