@@ -1,5 +1,6 @@
 import { getSiteLayout } from "@/lib/marketing-content/resolvers";
 import { MarketingShell } from "./_components/layout/MarketingShell";
+import { MarketingSettingsProvider } from "./_components/providers/MarketingSettingsProvider";
 
 export default async function MarketingLayout({
 	children,
@@ -8,5 +9,9 @@ export default async function MarketingLayout({
 }>) {
 	const siteLayout = await getSiteLayout();
 
-	return <MarketingShell siteLayout={siteLayout}>{children}</MarketingShell>;
+	return (
+		<MarketingSettingsProvider>
+			<MarketingShell siteLayout={siteLayout}>{children}</MarketingShell>
+		</MarketingSettingsProvider>
+	);
 }

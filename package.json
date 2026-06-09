@@ -24,8 +24,6 @@
 		"verify:smoke": "node scripts/verify-smoke.mjs",
 		"verify": "npm run verify:static && npm run verify:build && npm run verify:smoke",
 		"format": "biome format --write",
-		"create:thin-start": "node scripts/create-thin-start.mjs",
-		"review:thin-start-api": "node scripts/review-thin-start-api.mjs",
 		"prune:template": "node scripts/prune-template.mjs",
 		"postinstall": "node scripts/pin-deps.mjs",
 		"postbuild": "node scripts/postbuild.mjs"
@@ -53,7 +51,6 @@
 		"react-phone-number-input": "^3.4.14",
 		"react-responsive": "^10.0.1",
 		"sharp": "^0.34.5",
-		"sonner": "^2.0.7",
 		"three": "^0.184.0",
 		"three-spritetext": "^1.10.0"
 	},
