@@ -6,7 +6,6 @@ import { useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
-import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { Button } from "@/components/ui/primitives/Button";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { getMarketingLinkHref } from "@/lib/marketing-content/links";
@@ -14,6 +13,7 @@ import type { SiteLayoutDocument } from "@/lib/marketing-content/types";
 import {
 	getHeaderSearchGroups,
 	HeaderMenuGroup,
+	HeaderMenuIcon,
 	HeaderMenuNoResults,
 	HeaderSearchInput,
 } from "./HeaderMenuContent";
@@ -46,11 +46,23 @@ export default function HeaderCompact({
 }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
+	const menuGroups = layout.menuGroups ?? [];
+	const mobile = layout.mobile ?? {
+		closeAriaLabel: "Close navigation",
+		menuLabel: "Menu",
+		openAriaLabel: "Open navigation",
+	};
+	const search = layout.search ?? {
+		ariaLabel: "Search pages",
+		clearLabel: "Clear",
+		noResultsText: "No matching pages",
+	};
+	const searchSourceGroups = layout.searchGroups ?? menuGroups;
 	const showHeaderSurface = isScrolled || isMenuOpen;
 	const isCondensed = isScrolled && !isMenuOpen;
 	const isSearchActive = searchQuery.trim().length > 0;
-	const searchGroups = getHeaderSearchGroups(searchQuery, layout.searchGroups);
-	const activeMenuGroups = isSearchActive ? searchGroups : layout.menuGroups;
+	const searchGroups = getHeaderSearchGroups(searchQuery, searchSourceGroups);
+	const activeMenuGroups = isSearchActive ? searchGroups : menuGroups;
 	const motionAllowed = useMotionAllowed(true);
 	const headerTransition: Transition = motionAllowed
 		? spring.macro
@@ -68,10 +80,12 @@ export default function HeaderCompact({
 		shouldAnimateEntrance && !entranceReady
 			? HEADER_ENTRANCE_HIDDEN
 			: HEADER_ENTRANCE_VISIBLE;
+
 	const closeMenu = () => {
 		setSearchQuery("");
 		setIsMenuOpen(false);
 	};
+
 	const toggleMenu = () => {
 		if (isMenuOpen) {
 			closeMenu();
@@ -131,18 +145,20 @@ export default function HeaderCompact({
 					</motion.div>
 					<Button
 						variant="ghost"
-						size="sm"
-						align="center"
-						trailingIcon={isMenuOpen ? "minus" : "plus"}
+						className="min-h-10 gap-2 px-3"
+						leadingIcon={
+							<HeaderMenuIcon
+								name={isMenuOpen ? "close" : "menu"}
+								className="text-foreground"
+							/>
+						}
 						onClick={toggleMenu}
 						aria-expanded={isMenuOpen}
 						aria-label={
-							isMenuOpen
-								? layout.mobile.closeAriaLabel
-								: layout.mobile.openAriaLabel
+							isMenuOpen ? mobile.closeAriaLabel : mobile.openAriaLabel
 						}
 					>
-						{layout.mobile.menuLabel}
+						{mobile.menuLabel}
 					</Button>
 				</motion.div>
 				<div
@@ -155,23 +171,22 @@ export default function HeaderCompact({
 					}}
 				>
 					<div className="overflow-hidden">
-						<ScrollBorders
-							showBackToTop={false}
-							className="overflow-scroll"
+						<div
+							className="overflow-auto"
 							style={{
 								maxHeight: `calc(100vh - ${COMPACT_OPEN_SCROLL_AREA_OFFSET}px)`,
 							}}
 						>
-							<div className="flex min-h-full flex-col gap-3">
+							<div className="flex min-h-full flex-col gap-3 px-3 pb-8">
 								<div className="mb-6">
 									<HeaderSearchInput
 										value={searchQuery}
 										onValueChange={setSearchQuery}
 										onClear={() => setSearchQuery("")}
-										ariaLabel={layout.search.ariaLabel}
-										clearLabel={layout.search.clearLabel}
-										placeholder={layout.search.ariaLabel}
-										className="group/header-search w-full text-sm text-foreground"
+										ariaLabel={search.ariaLabel}
+										clearLabel={search.clearLabel}
+										placeholder={search.ariaLabel}
+										className="w-full"
 									/>
 								</div>
 								{activeMenuGroups.length > 0 ? (
@@ -183,9 +198,7 @@ export default function HeaderCompact({
 										))}
 									</div>
 								) : (
-									<HeaderMenuNoResults
-										noResultsText={layout.search.noResultsText}
-									/>
+									<HeaderMenuNoResults noResultsText={search.noResultsText} />
 								)}
 								<div className="mt-auto flex flex-col gap-8 pt-5">
 									<Button
@@ -193,13 +206,12 @@ export default function HeaderCompact({
 										href={getMarketingLinkHref(layout.cta)}
 										onClick={closeMenu}
 										className="w-full"
-										contentClassName="justify-center"
 									>
 										{layout.cta.label}
 									</Button>
 								</div>
 							</div>
-						</ScrollBorders>
+						</div>
 					</div>
 				</div>
 			</motion.div>

@@ -8,48 +8,28 @@ import {
 import { buildTemplateIntelligenceGraphs } from "@/lib/template-intelligence/graphs";
 import { TemplateIntelligenceGraph } from "../TemplateIntelligenceGraph";
 
-function MissingGraphIndexState({ path }: { path: string }) {
-	return (
-		<main>
-			<Section padding="hero">
-				<div className="flex max-w-3xl flex-col gap-6">
-					<header className="flex flex-col gap-2">
-						<Text as="h1" variant="headingLg">
-							Template Intelligence
-						</Text>
-						<Text variant="body" tone="muted">
-							The generated repo intelligence index is not available yet.
-						</Text>
-					</header>
-
-					<div className="grid gap-4">
-						<Text variant="body">
-							Run <code>npm run intelligence:generate</code> to create{" "}
-							<code>{path}</code>.
-						</Text>
-						<Button
-							href="/internal/intelligence"
-							variant="outline"
-							size="sm"
-							className="w-fit"
-						>
-							Back to overview
-						</Button>
-					</div>
-				</div>
-			</Section>
-		</main>
-	);
-}
-
 export default async function TemplateIntelligenceGraphPage() {
 	const [indexResult, agentMapResult] = await Promise.all([
 		readTemplateIntelligenceIndex(),
 		readTemplateIntelligenceAgentMap(),
 	]);
 
-	if (indexResult.status === "missing") {
-		return <MissingGraphIndexState path={indexResult.path} />;
+	if (indexResult.status !== "ready") {
+		return (
+			<main>
+				<Section padding="hero">
+					<div className="mx-auto grid max-w-section-max gap-4">
+						<Text as="h1" variant="heading">
+							Template Intelligence
+						</Text>
+						<Text tone="muted">Run npm run intelligence:generate first.</Text>
+						<Button href="/internal/intelligence" variant="ghost">
+							Back
+						</Button>
+					</div>
+				</Section>
+			</main>
+		);
 	}
 
 	const graphs = buildTemplateIntelligenceGraphs({
@@ -58,5 +38,21 @@ export default async function TemplateIntelligenceGraphPage() {
 			agentMapResult.status === "ready" ? agentMapResult.agentMap : null,
 	});
 
-	return <TemplateIntelligenceGraph graphs={graphs} />;
+	return (
+		<main>
+			<Section padding="hero">
+				<div className="mx-auto grid max-w-section-max gap-6">
+					<header className="grid gap-3">
+						<Text as="h1" variant="heading">
+							Graph Summary
+						</Text>
+						<Text tone="muted">
+							Route-owned summary of generated intelligence graphs.
+						</Text>
+					</header>
+					<TemplateIntelligenceGraph graphs={graphs} />
+				</div>
+			</Section>
+		</main>
+	);
 }

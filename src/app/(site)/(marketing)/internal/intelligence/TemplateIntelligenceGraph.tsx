@@ -1,10 +1,5 @@
-"use client";
-
-import { GraphMap } from "@/components/ui/misc/GraphMap";
-import type {
-	TemplateIntelligenceGraphView,
-	TemplateIntelligenceGraphViewId,
-} from "@/lib/template-intelligence";
+import type { TemplateIntelligenceGraphView } from "@/lib/template-intelligence";
+import { InternalCard } from "./_components/InternalCard";
 
 export function TemplateIntelligenceGraph({
 	graphs,
@@ -12,10 +7,15 @@ export function TemplateIntelligenceGraph({
 	graphs: TemplateIntelligenceGraphView[];
 }) {
 	return (
-		<GraphMap<TemplateIntelligenceGraphViewId>
-			graphs={graphs}
-			ariaLabel="Template intelligence graph"
-			backHref="/internal/intelligence"
-		/>
+		<div className="grid gap-4">
+			{graphs.map((graph) => (
+				<InternalCard key={graph.id}>
+					<h2 className="text-lg font-semibold">{graph.title}</h2>
+					<p className="mt-2 text-sm text-muted">
+						{graph.nodes.length} nodes, {graph.links.length} links
+					</p>
+				</InternalCard>
+			))}
+		</div>
 	);
 }

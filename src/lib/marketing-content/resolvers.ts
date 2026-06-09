@@ -5,27 +5,6 @@ import type {
 	SiteLayoutDocument,
 } from "./types";
 
-const MENU_GROUP_LINK_LIMIT = 6;
-
-const limitMenuGroupLinks = (
-	groups: SiteLayoutDocument["header"]["menuGroups"],
-) =>
-	groups.map((group) => ({
-		...group,
-		links: group.links?.slice(0, MENU_GROUP_LINK_LIMIT),
-	}));
-
-const limitSiteLayoutMenuGroups = (
-	layout: SiteLayoutDocument,
-): SiteLayoutDocument => ({
-	...layout,
-	header: {
-		...layout.header,
-		menuGroups: limitMenuGroupLinks(layout.header.menuGroups),
-		searchGroups: limitMenuGroupLinks(layout.header.searchGroups),
-	},
-});
-
 export async function getMarketingPage(
 	slug: MarketingPageSlug,
 ): Promise<MarketingPageDocument> {
@@ -37,5 +16,5 @@ export async function getMarketingPage(
 }
 
 export async function getSiteLayout(): Promise<SiteLayoutDocument> {
-	return limitSiteLayoutMenuGroups(fallbackSiteLayout);
+	return fallbackSiteLayout;
 }

@@ -43,7 +43,6 @@ export default function Header({
 
 	useEffect(() => {
 		let frameId: number | null = null;
-		let followUntil = 0;
 
 		const measure = () => {
 			setIsScrolled((current) => {
@@ -58,51 +57,23 @@ export default function Header({
 			frameId = window.requestAnimationFrame(() => {
 				frameId = null;
 				measure();
-
-				if (performance.now() < followUntil) {
-					scheduleMeasure();
-				}
 			});
-		};
-
-		const handleScrollIntent = () => {
-			followUntil = performance.now() + 700;
-			scheduleMeasure();
 		};
 
 		measure();
 		window.addEventListener("scroll", scheduleMeasure, { passive: true });
-		document.addEventListener("scroll", scheduleMeasure, {
-			capture: true,
-			passive: true,
-		});
-		window.addEventListener("wheel", handleScrollIntent, { passive: true });
-		window.addEventListener("touchmove", handleScrollIntent, { passive: true });
-		window.addEventListener("touchend", handleScrollIntent, { passive: true });
-		window.addEventListener("keydown", handleScrollIntent);
-		window.addEventListener("hashchange", handleScrollIntent);
-		document.addEventListener(
-			"scrollcontroller:anchor-scroll",
-			handleScrollIntent,
-		);
+		window.addEventListener("wheel", scheduleMeasure, { passive: true });
+		window.addEventListener("touchmove", scheduleMeasure, { passive: true });
+		window.addEventListener("hashchange", scheduleMeasure);
 
 		return () => {
 			if (frameId !== null) {
 				window.cancelAnimationFrame(frameId);
 			}
 			window.removeEventListener("scroll", scheduleMeasure);
-			document.removeEventListener("scroll", scheduleMeasure, {
-				capture: true,
-			});
-			window.removeEventListener("wheel", handleScrollIntent);
-			window.removeEventListener("touchmove", handleScrollIntent);
-			window.removeEventListener("touchend", handleScrollIntent);
-			window.removeEventListener("keydown", handleScrollIntent);
-			window.removeEventListener("hashchange", handleScrollIntent);
-			document.removeEventListener(
-				"scrollcontroller:anchor-scroll",
-				handleScrollIntent,
-			);
+			window.removeEventListener("wheel", scheduleMeasure);
+			window.removeEventListener("touchmove", scheduleMeasure);
+			window.removeEventListener("hashchange", scheduleMeasure);
 		};
 	}, []);
 
