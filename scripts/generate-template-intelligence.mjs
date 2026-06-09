@@ -195,8 +195,11 @@ const AGENT_MAP = {
 			aliases: ["prune", "optional-surfaces", "template-pruning"],
 			paths: [
 				"scripts/prune-template.mjs",
+				"scripts/create-thin-start.mjs",
+				"scripts/review-thin-start-api.mjs",
 				"README.md",
 				"docs/template-content-modes.md",
+				"docs/thin-start-creation-boundary.md",
 				"src/config/routes.ts",
 				"src/lib/routes.ts",
 				"src/app/(site)/(marketing)/_components/layout/marketingNav.ts",
@@ -204,7 +207,7 @@ const AGENT_MAP = {
 				"src/lib/marketing-content/fallback.ts",
 			],
 			notes:
-				"SURFACES owns flags, paths, routes, nav/search references, package changes, and post-removal assertions.",
+				"SURFACES owns normal prune flags, paths, routes, nav/search references, package changes, and post-removal assertions. Thin-start is a separate explicit instance activation path; dry-run first, then activate with --in-place --confirm-instance and require strict API review.",
 		},
 		{
 			id: "content-modes",

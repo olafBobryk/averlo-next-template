@@ -65,3 +65,35 @@ The shared contract should stay small:
 Avoid making static or Payload-ready builds speak a full Payload-shaped contract.
 The frontend should speak "render this page"; Payload is one source that can feed
 that shape.
+
+## Thin-Start Instances
+
+Thin-start is an optional instance creation path, not a fourth content source
+and not the default template state. Use it when a new project should begin with
+the smallest accepted live primitive surface while keeping the original
+Webvizion component system parked as reference-only code.
+
+Run the dry-run first in the target instance:
+
+```bash
+npm run create:thin-start -- --dry-run --in-place
+```
+
+If the plan is accepted, activate thin-start explicitly:
+
+```bash
+npm run create:thin-start -- --yes --in-place --confirm-instance
+npm install
+npm run review:thin-start-api -- --strict
+npm run build
+```
+
+The `--confirm-instance` flag is intentional friction: it means the operator is
+running the command in a new/disposable project instance, not on the canonical
+default template. After activation, `.thin-start/` is an ignored parked
+reference and must not enter the live import graph.
+
+Use normal `npm run prune:template -- [flags]` for broad route/content-mode
+surface removal. Use thin-start activation only when the desired instance shape
+is the accepted minimal primitive surface. The detailed boundary lives in
+`docs/thin-start-creation-boundary.md`.

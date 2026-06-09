@@ -62,6 +62,30 @@ The frontend should speak a small rendering contract: pages, sections, and site 
 
 See `docs/template-content-modes.md` for the mode model and `docs/payload-vercel-neon-blob.md` for the Vercel activation path.
 
+## Instance Starting Points
+
+Most project instances should start from the full Webvizion template and then
+prune only the optional route surfaces they do not need.
+
+For a minimal thin-start instance, use the explicit thin-start activation path
+instead of treating thin-start as the default template state:
+
+```bash
+npm run create:thin-start -- --dry-run --in-place
+npm run create:thin-start -- --yes --in-place --confirm-instance
+npm install
+npm run review:thin-start-api -- --strict
+npm run build
+```
+
+Thin-start activation parks the current Webvizion component system under the
+ignored `.thin-start/` reference directory, rewrites the live instance to the
+accepted small primitive surface, and then requires exported API review before
+the instance is considered ready.
+
+See `docs/thin-start-creation-boundary.md` for the thin-start boundary and
+review gate.
+
 ## Pruning a Clone
 
 After cloning the repo, you can remove optional surfaces in place with:
@@ -75,6 +99,7 @@ Available flags:
 - `--no-dashboard`: removes `/dashboard`, `/login`, and dashboard-only auth helpers
 - `--no-demo`: removes the internal demo surface
 - `--no-intelligence`: removes the internal intelligence surface and generated-index tooling
+- `--no-playground`: removes the internal playground surface
 - `--no-dictionary`: removes the internal dictionary surface
 - `--no-reference`: removes the internal reference/docs surface
 - `--no-payload`: removes the guarded Payload scaffold and Payload packages
