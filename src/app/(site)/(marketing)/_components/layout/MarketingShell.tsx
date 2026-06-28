@@ -15,7 +15,7 @@ export function MarketingShell({
 		<>
 			<Header layout={siteLayout.header} />
 			<Reveal.Root>{children}</Reveal.Root>
-			<Footer layout={siteLayout.footer} />
+			<Footer layout={siteLayout.footer} socialLinks={siteLayout.socialLinks} />
 			<ScrollController />
 		</>
 	);

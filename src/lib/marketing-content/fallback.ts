@@ -98,6 +98,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 			{ label: "Intelligence", routeId: "intelligence" },
 		],
 	},
+	socialLinks: [],
 	footer: {
 		navLinks: [
 			{ label: "Home", routeId: "home" },

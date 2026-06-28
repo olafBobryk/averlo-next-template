@@ -5,8 +5,10 @@ import type { SiteLayoutDocument } from "@/lib/marketing-content/types";
 
 export default function Footer({
 	layout,
+	socialLinks,
 }: {
 	layout: SiteLayoutDocument["footer"];
+	socialLinks: SiteLayoutDocument["socialLinks"];
 }) {
 	return (
 		<footer className="border-t border-border px-section-x py-10">
@@ -23,6 +25,15 @@ export default function Footer({
 						</Button>
 					))}
 				</div>
+				{socialLinks.length > 0 ? (
+					<div className="flex flex-wrap justify-center gap-2">
+						{socialLinks.map((item) => (
+							<Button key={item.label} href={item.href} variant="ghost">
+								{item.label}
+							</Button>
+						))}
+					</div>
+				) : null}
 			</div>
 		</footer>
 	);

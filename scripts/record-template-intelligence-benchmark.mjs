@@ -5,6 +5,12 @@ import path from "node:path";
 import process from "node:process";
 
 const ROOT = process.cwd();
+const VALID_STRATEGIES = new Set([
+	"Hybrid",
+	"TemplateIntelligence",
+	"Serena",
+	"Control",
+]);
 const RUNS_PATH = path.join(
 	ROOT,
 	"docs/worklogs/template-intelligence-benchmark-runs.jsonl",
@@ -75,6 +81,18 @@ if (!taskId || !taskName || !strategy) {
 const shellCommands = readNumber(values, "shell-commands");
 const semanticCalls = readNumber(values, "semantic-calls");
 const correctness = readNumber(values, "correctness");
+
+if (!VALID_STRATEGIES.has(strategy)) {
+	throw new Error(
+		`--strategy must be one of: ${Array.from(VALID_STRATEGIES).join(", ")}.`,
+	);
+}
+
+if (strategy === "Hybrid" && semanticCalls === 0) {
+	throw new Error(
+		"--strategy Hybrid requires --semantic-calls greater than 0. Use --strategy TemplateIntelligence for task-map-only runs.",
+	);
+}
 
 if (correctness > 3) {
 	throw new Error("--correctness must be between 0 and 3.");

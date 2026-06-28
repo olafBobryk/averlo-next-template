@@ -97,6 +97,7 @@ export default function HeaderCompact({
 
 	return (
 		<motion.header
+			data-site-header
 			data-open={isMenuOpen}
 			initial={
 				shouldAnimateEntrance

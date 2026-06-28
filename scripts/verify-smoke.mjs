@@ -10,7 +10,7 @@ const PORT_END = 3199;
 const HOST = "127.0.0.1";
 const STARTUP_TIMEOUT_MS = 30_000;
 const REQUEST_TIMEOUT_MS = 10_000;
-const ROUTES = ["/", "/login", "/dashboard", "/settings"];
+const ROUTES = ["/", "/internal/intelligence", "/api/health"];
 const ROUTE_STATUS_OVERRIDES = new Map([["/api/health", new Set([200, 503])]]);
 
 const require = createRequire(import.meta.url);
@@ -189,6 +189,7 @@ const start = async () => {
 				...process.env,
 				NODE_ENV: "production",
 				PORT: String(port),
+				TEMPLATE_INTERNAL_ROUTES: "enabled",
 			},
 			stdio: ["ignore", "pipe", "pipe"],
 		},

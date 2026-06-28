@@ -1,5 +1,14 @@
 # Agent Instructions
 
+## Hybrid Intelligence Baseline
+
+- Before substantial planning or implementation work, use the enforced hybrid preset: `npm run intelligence:hybrid -- --task-id <id> --task-name "<name>" --topics <topic-a>,<topic-b> --serena-file <path> --serena-symbol <symbol>`.
+- The preset generates Template Intelligence, queries the relevant task topics, indexes and health-checks Serena, performs a real Serena semantic lookup, and records the benchmark only after the semantic lookup succeeds.
+- Treat `.template-intelligence/agent-map.json` as the first-pass map for where to read next. Use it to narrow file inspection before broad `rg` sweeps.
+- `Hybrid` benchmark rows require `semanticCalls > 0`; task-map-only or Serena-unavailable runs must not be recorded as `Hybrid`.
+- Serena is user-local. Check `npm run intelligence:serena:setup -- --dry-run` for the setup commands; do not add Serena packages or generated indexes to the repo. If installed under `$HOME/.local/bin`, run the preset with `PATH="$HOME/.local/bin:$PATH"`. If the preset fails during local port discovery, run `npm run intelligence:serena:debug` to distinguish sandbox loopback-bind failures from real port exhaustion.
+- Do not commit `.template-intelligence/**`, `.serena/**`, or `.understand-anything/**`; these are local/generated context artifacts.
+
 ## Dev Server Isolation
 
 - If available, use `$agent-dev-workflow` before starting dev servers, opening localhost, or running browser/Playwright verification.

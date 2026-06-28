@@ -7,6 +7,8 @@
 		"intelligence:query": "node scripts/generate-template-intelligence.mjs --query",
 		"intelligence:record": "node scripts/record-template-intelligence-benchmark.mjs",
 		"intelligence:record:clear": "node scripts/clear-template-intelligence-benchmark.mjs",
+		"intelligence:hybrid": "node scripts/run-template-intelligence-hybrid.mjs",
+		"intelligence:serena:debug": "node scripts/run-template-intelligence-hybrid.mjs --debug-port-discovery",
 		"intelligence:serena:setup": "node scripts/setup-template-intelligence-serena.mjs",
 		"predev": "npm run intelligence:generate",
 		"predev:user": "npm run intelligence:generate",
