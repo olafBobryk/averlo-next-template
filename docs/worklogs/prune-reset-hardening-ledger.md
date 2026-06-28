@@ -27,7 +27,7 @@ removed route families.
 
 - Replace the exact `package.json.name` prune guard with a generic template
   shape assertion based on expected files and npm scripts.
-- Add inverted safety for the canonical `verilo-next-template` `main` checkout:
+- Add inverted safety for the canonical `averlo-next-template` `main` checkout:
   dry-runs are allowed, but mutating prune requires `--confirm-template-root`.
 - Document the official lightweight instance recipe as the full explicit route
   prune:
@@ -46,10 +46,10 @@ npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-re
 - Passed: lightweight route-surface dry-run.
 - Passed: lightweight static dry-run with `--no-payload`.
 - Passed: `npm run intelligence:query -- prune` returns the lightweight recipe.
-- Passed: simulated canonical `verilo-next-template` `main` dry-run is allowed.
-- Passed: simulated canonical `verilo-next-template` `main` mutating prune
+- Passed: simulated canonical `averlo-next-template` `main` dry-run is allowed.
+- Passed: simulated canonical `averlo-next-template` `main` mutating prune
   hard-stops without `--confirm-template-root`.
-- Passed: disposable renamed instance at `/tmp/verilo-prune-reset.ACGxLF`
+- Passed: disposable renamed instance at `/tmp/averlo-prune-reset.ACGxLF`
   applied the full lightweight prune and passed `verify:static`,
   `verify:build`, and `verify:smoke`.
 - Passed: retained routes `/`, `/settings`, `/internal/intelligence`,

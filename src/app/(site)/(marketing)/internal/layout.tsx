@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 const CANONICAL_TEMPLATE_PRODUCTION_HOSTS = new Set([
-	"verilo-next-template.vercel.app",
+	"averlo-next-template.vercel.app",
 ]);
 const INTERNAL_ROUTES_ENABLED_VALUES = new Set(["1", "true", "yes", "enabled"]);
 

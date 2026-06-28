@@ -1,4 +1,4 @@
-# Verilo Next Template
+# Averlo Next Template
 
 For stable screenshots or automated traversal, append `?motion=off&reveal=off`
 to disable reveal animations and skip the first-load intro for that page load.

@@ -4,7 +4,7 @@ import { KEYWORDS } from "@/config/metadataConfig";
 import { roboto } from "@/font";
 
 export const metadata: Metadata = {
-	title: "Verilo Next Template",
+	title: "Averlo Next Template",
 	description:
 		"An agent-ready Next.js template for lightweight design-system scaffolds.",
 	keywords: KEYWORDS,

@@ -320,7 +320,7 @@ async function assertTemplateShape() {
 		];
 
 		throw new Error(
-			`Current directory does not match the Verilo template prune shape: ${details.join(", ")}.`,
+			`Current directory does not match the Averlo template prune shape: ${details.join(", ")}.`,
 		);
 	}
 
@@ -343,11 +343,11 @@ function gitOutput(args) {
 }
 
 function isCanonicalTemplateRemote(remoteUrl) {
-	return /(?:^|[:/])verilo-next-template(?:\.git)?$/i.test(remoteUrl);
+	return /(?:^|[:/])averlo-next-template(?:\.git)?$/i.test(remoteUrl);
 }
 
 function isCanonicalTemplateMainCheckout(pkg) {
-	if (pkg.name !== "verilo-next-template") return false;
+	if (pkg.name !== "averlo-next-template") return false;
 
 	const branch = gitOutput(["branch", "--show-current"]);
 	if (branch !== "main") return false;
@@ -361,7 +361,7 @@ function assertTemplateRootMutationAllowed(pkg, parsed) {
 	if (!isCanonicalTemplateMainCheckout(pkg)) return;
 
 	throw new Error(
-		"Mutating prune on the canonical verilo-next-template main checkout requires --confirm-template-root. Run a dry-run, use a clone/instance, or pass the explicit confirmation flag for template-maintenance tests.",
+		"Mutating prune on the canonical averlo-next-template main checkout requires --confirm-template-root. Run a dry-run, use a clone/instance, or pass the explicit confirmation flag for template-maintenance tests.",
 	);
 }
 

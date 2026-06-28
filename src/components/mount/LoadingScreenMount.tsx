@@ -105,7 +105,7 @@ export default function LoadingScreenMount() {
 				>
 					<div className="min-w-0.5 rounded-full bg-primary h-full mx-3" />
 					<Text variant="heading2xxl" className="font-black!">
-						VERILO
+						AVERLO
 					</Text>
 				</motion.div>
 			</motion.div>

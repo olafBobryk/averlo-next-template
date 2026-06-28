@@ -5,7 +5,7 @@ import net from "node:net";
 import process from "node:process";
 
 const ROOT = process.cwd();
-const PROJECT_NAME = "verilo-next-template";
+const PROJECT_NAME = "averlo-next-template";
 const LOCAL_BIN_HINT = "$HOME/.local/bin";
 const BOOLEAN_FLAGS = new Set(["debug-port-discovery"]);
 

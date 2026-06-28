@@ -175,7 +175,7 @@ treated as real benchmark history.
 
 Like the rest of `/internal`, this page is guarded from client-clone
 production by the internal marketing layout. The canonical
-`verilo-next-template.vercel.app` deployment is allowed through by its request or
+`averlo-next-template.vercel.app` deployment is allowed through by its request or
 Vercel production host, and other template/reference deployments can opt in
 with:
 
@@ -214,5 +214,5 @@ project-server calls should use that shape:
 
 ```http
 POST /query_project
-{"project_name":"verilo-next-template","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
+{"project_name":"averlo-next-template","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
 ```

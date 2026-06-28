@@ -2,13 +2,13 @@
 
 This document records the accepted boundary for the optional thin-start creation
 path and the local command that prepares it. The command is optional-only: the
-default Verilo template remains unchanged unless thin-start activation is
+default Averlo template remains unchanged unless thin-start activation is
 explicitly selected in a target instance.
 
 ## Decision
 
 Thin-start is an optional creation-time mode. It does not replace the normal
-Verilo template path, and it is not a forced parking, reset, or cleanup path
+Averlo template path, and it is not a forced parking, reset, or cleanup path
 for standard setup.
 
 The explicit tooling entrypoint is:
@@ -33,7 +33,7 @@ template:
 npm run create:thin-start -- --yes --in-place --confirm-instance
 ```
 
-In-place mode parks the current Verilo reference first, updates that
+In-place mode parks the current Averlo reference first, updates that
 instance for the selected activation dependencies, then applies the selected
 thin-start live rewrite: shared primitive templates, Sonner-backed toast,
 route-owned internal intelligence components, and removal of broad
@@ -46,7 +46,7 @@ building or shipping that instance:
 npm install
 ```
 
-When thin-start is selected, the existing Verilo component system is copied
+When thin-start is selected, the existing Averlo component system is copied
 to a parked, reference-only location outside the live import graph. Agents may
 inspect that parked API, but live promotion should bring forward only the
 minimal API needed for the current website.
@@ -68,7 +68,7 @@ interaction behavior, and limited input/select integration patterns stay intact.
 thin-start primitive surface.
 
 Thin-start toast behavior should use a shadcn/Sonner-style default instead of
-carrying forward the current custom Verilo toast system. Other overlays may
+carrying forward the current custom Averlo toast system. Other overlays may
 remain only when scaffold-critical, and they must stay small without dragging
 broad misc, panel, or visual-state dependencies into shared primitives.
 
@@ -101,13 +101,13 @@ npm run review:thin-start-api
 ```
 
 Use `-- --strict` only when the current checkout is expected to satisfy the
-thin-start allowlist. The full Verilo default path is broader by design.
+thin-start allowlist. The full Averlo default path is broader by design.
 
 ## Source Status
 
-The current repository documents the full Verilo default component system,
+The current repository documents the full Averlo default component system,
 optional internal surfaces, prune behavior, content modes, Template
 Intelligence, and dev workflow. The thin-start-specific boundary above was
 accepted in the thin-start consolidation discussion. The shipped default path is
-the full Verilo template; thin-start is created only by the explicit command
+the full Averlo template; thin-start is created only by the explicit command
 above.

@@ -55,7 +55,7 @@ frontend renderer.
 
 ## Lightweight Instances
 
-Use this path when a project should keep the normal Verilo template runtime
+Use this path when a project should keep the normal Averlo template runtime
 but drop optional authoring/demo route families. Run the dry-run first in the
 target clone or renamed project instance:
 
@@ -77,7 +77,7 @@ npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-re
 ```
 
 The prune command accepts renamed package identities after template import by
-checking the expected Verilo template file/script shape. A mutating prune on
+checking the expected Averlo template file/script shape. A mutating prune on
 the canonical template `main` checkout requires `--confirm-template-root`;
 dry-runs remain allowed.
 
@@ -99,7 +99,7 @@ that shape.
 Thin-start is an optional instance creation path, not a fourth content source
 and not the default template state. Use it when a new project should begin with
 the smallest accepted live primitive surface while keeping the original
-Verilo component system parked as reference-only code.
+Averlo component system parked as reference-only code.
 
 Run the dry-run first in the target instance:
 
