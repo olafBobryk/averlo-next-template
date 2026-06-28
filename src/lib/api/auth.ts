@@ -19,13 +19,13 @@ type LogoutResponse = {
 	message: string;
 };
 
-const STORAGE_KEY = "webvizion-dashboard-session";
+const STORAGE_KEY = "averlo-dashboard-session";
 const DEFAULT_DELAY_MS = 200;
 
 const DEFAULT_USER: SessionUser = {
 	id: "demo-user",
 	name: "Template Operator",
-	email: "operator@webvizion.local",
+	email: "operator@averlo.local",
 	role: "admin",
 	isBanned: false,
 };

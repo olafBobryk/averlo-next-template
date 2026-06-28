@@ -8,7 +8,7 @@ direction, implementation quality, and ship readiness.
 ## Current State
 
 - Main checkout:
-  `/Users/olafbobryk/Documents/Code/Personal/2025/webvizion-template`
+  `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template`
 - Template Intelligence is optional template infrastructure.
 - Generated artifacts stay ignored:
   `.template-intelligence/`, `.serena/`, `.next-*`, `tsconfig.next-*.json`.

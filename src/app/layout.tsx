@@ -4,8 +4,9 @@ import { KEYWORDS } from "@/config/metadataConfig";
 import { roboto } from "@/font";
 
 export const metadata: Metadata = {
-	title: "WebVizion Template",
-	description: "A template to make things easier to setup",
+	title: "Averlo Next Template",
+	description:
+		"An agent-ready Next.js template for lightweight design-system scaffolds.",
 	keywords: KEYWORDS,
 	icons: {
 		icon: "/favicon-32x32.png",

@@ -12,13 +12,8 @@ export default function MarketingErrorPage({
 	reset: () => void;
 }) {
 	return (
-		<main className="min-h-[70vh]">
-			<Section
-				className="h-full"
-				innerClassName="h-full"
-				align="center"
-				justify={"center"}
-			>
+		<main>
+			<Section height="hero" align="center" justify="center">
 				<StatusErrorState
 					error={error}
 					reset={reset}

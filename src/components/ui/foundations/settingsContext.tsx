@@ -27,7 +27,7 @@ type StoredSettings = {
 	textScale?: number;
 };
 
-const DEFAULT_STORAGE_KEY = "webvizion-ui-settings";
+const DEFAULT_STORAGE_KEY = "averlo-ui-settings";
 
 const SettingsContext = React.createContext<SettingsContextValue | undefined>(
 	undefined,

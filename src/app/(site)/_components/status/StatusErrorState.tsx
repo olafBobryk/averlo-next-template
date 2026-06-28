@@ -20,10 +20,35 @@ export function StatusErrorState({
 	enableRevealMotion = true,
 }: StatusErrorStateProps) {
 	const [showDetails, setShowDetails] = useState(false);
+	const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
+		"idle",
+	);
+	const errorDetails = `${String(error.message || "Unknown error")}${
+		error.digest ? `\n\nDigest: ${error.digest}` : ""
+	}`;
 
 	useEffect(() => {
 		console.error(error);
 	}, [error]);
+
+	useEffect(() => {
+		if (copyStatus === "idle") {
+			return;
+		}
+
+		const timeout = window.setTimeout(() => setCopyStatus("idle"), 1600);
+
+		return () => window.clearTimeout(timeout);
+	}, [copyStatus]);
+
+	async function handleCopyDetails() {
+		try {
+			await navigator.clipboard.writeText(errorDetails);
+			setCopyStatus("copied");
+		} catch {
+			setCopyStatus("failed");
+		}
+	}
 
 	return (
 		<StatusContent
@@ -48,10 +73,18 @@ export function StatusErrorState({
 			}
 			details={
 				showDetails ? (
-					<pre className="mt-4 max-h-48 w-full overflow-auto rounded-lg border border-border/15 bg-surface p-4 text-left text-xs leading-relaxed text-foreground/80">
-						{String(error.message || "Unknown error")}
-						{error.digest ? `\n\nDigest: ${error.digest}` : ""}
-					</pre>
+					<div className="mt-4 flex w-full flex-col items-center gap-3">
+						<pre className="max-h-48 w-full overflow-auto rounded-lg border border-border/15 bg-surface p-4 text-left text-xs leading-relaxed text-foreground/80">
+							{errorDetails}
+						</pre>
+						<Button variant="outline" onClick={handleCopyDetails}>
+							{copyStatus === "copied"
+								? "Copied"
+								: copyStatus === "failed"
+									? "Copy failed"
+									: "Copy error"}
+						</Button>
+					</div>
 				) : null
 			}
 		/>

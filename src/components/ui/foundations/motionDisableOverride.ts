@@ -17,11 +17,21 @@ export function hasMotionDisabledSearchParam() {
 	);
 }
 
+function hasMotionDisabledDocumentOverride() {
+	if (typeof document === "undefined") return false;
+	return document.documentElement.dataset.motionOverride === "off";
+}
+
 export function useMotionDisableOverride() {
-	const [disabled, setDisabled] = React.useState(false);
+	const [disabled, setDisabled] = React.useState(
+		() => hasMotionDisabledDocumentOverride() || hasMotionDisabledSearchParam(),
+	);
 
 	React.useEffect(() => {
-		const update = () => setDisabled(hasMotionDisabledSearchParam());
+		const update = () =>
+			setDisabled(
+				hasMotionDisabledDocumentOverride() || hasMotionDisabledSearchParam(),
+			);
 		update();
 		window.addEventListener("popstate", update);
 		return () => window.removeEventListener("popstate", update);

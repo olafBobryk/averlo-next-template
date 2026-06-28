@@ -135,14 +135,34 @@ docs/worklogs/template-intelligence-benchmark-runs.jsonl
 Record intentional runs with:
 
 ```bash
-npm run intelligence:record -- \
+PATH="$HOME/.local/bin:$PATH" npm run intelligence:hybrid -- \
   --task-id T1 \
   --task-name "Route architecture" \
-  --strategy Hybrid \
-  --shell-commands 15 \
-  --semantic-calls 0 \
-  --correctness 3
+  --topics route-architecture,dev-server \
+  --serena-file src/config/routes.ts \
+  --serena-symbol appRoutes
 ```
+
+If the preset fails before Serena starts with a local port-discovery error, run:
+
+```bash
+npm run intelligence:serena:debug
+```
+
+The debug command checks `uv`, `serena`, and the default
+`127.0.0.1:9121-9170` bind range. `EPERM` across the range usually means the
+current shell sandbox cannot bind loopback ports. It is different from
+`EADDRINUSE`, which means the ports are occupied. You can narrow the check with:
+
+```bash
+npm run intelligence:serena:debug -- --serena-port 9121
+npm run intelligence:serena:debug -- --port-range-start 9200 --port-range-count 20
+```
+
+`Hybrid` benchmark rows require Template Intelligence plus at least one
+successful Serena semantic call. The lower-level `npm run intelligence:record`
+command rejects `--strategy Hybrid` when `--semantic-calls` is `0`; use
+`TemplateIntelligence` for task-map-only diagnostic rows.
 
 The benchmark view is available at:
 
@@ -155,7 +175,7 @@ treated as real benchmark history.
 
 Like the rest of `/internal`, this page is guarded from client-clone
 production by the internal marketing layout. The canonical
-`webvizion-template.vercel.app` deployment is allowed through by its request or
+`averlo-next-template.vercel.app` deployment is allowed through by its request or
 Vercel production host, and other template/reference deployments can opt in
 with:
 
@@ -185,11 +205,14 @@ the starting file set. Keep it user-local:
 
 ```bash
 npm run intelligence:serena:setup -- --dry-run
+npm run intelligence:serena:debug
 ```
 
-When a local Serena project server is available, use this shape:
+The enforced preset starts the Serena project server and calls its current
+tool endpoint with `project_name`, `tool_name`, and `tool_params_json`. Direct
+project-server calls should use that shape:
 
 ```http
 POST /query_project
-{"query":"Find the symbols and references relevant to <task> after reading the Template Intelligence task-map starting files."}
+{"project_name":"averlo-next-template","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
 ```

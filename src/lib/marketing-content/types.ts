@@ -32,6 +32,12 @@ export type MarketingMenuGroup = {
 	links?: MarketingLink[];
 };
 
+export type MarketingSocialLink = {
+	label: string;
+	href: string;
+	icon?: string;
+};
+
 export type MarketingSectionBase<TBlockType extends string> = {
 	id?: string;
 	blockType: TBlockType;
@@ -71,6 +77,7 @@ export type SiteLayoutDocument = {
 		searchGroups: MarketingMenuGroup[];
 		topNavLinks: MarketingLink[];
 	};
+	socialLinks: MarketingSocialLink[];
 	footer: {
 		navLinks: MarketingLink[];
 	};

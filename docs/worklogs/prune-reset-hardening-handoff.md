@@ -30,4 +30,4 @@ routes, or retained intelligence references to removed route families.
   separate primitive-surface activation command.
 - Keep `verify:smoke`; prune should rewrite its route list to retained routes.
 - The final disposable verification copy was
-  `/tmp/webvizion-prune-reset.ACGxLF`.
+  `/tmp/averlo-prune-reset.ACGxLF`.

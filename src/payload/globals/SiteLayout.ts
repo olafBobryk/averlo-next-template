@@ -54,6 +54,14 @@ const menuGroupFields = [
 	},
 ] satisfies GlobalConfig["fields"];
 
+const socialLinkFields = [
+	...linkFields,
+	{
+		name: "icon",
+		type: "text",
+	},
+] satisfies GlobalConfig["fields"];
+
 export const SiteLayout: GlobalConfig = {
 	slug: "site-layout",
 	label: "Site layout",
@@ -140,6 +148,11 @@ export const SiteLayout: GlobalConfig = {
 			],
 		},
 		{
+			name: "socialLinks",
+			type: "array",
+			fields: socialLinkFields,
+		},
+		{
 			name: "footer",
 			type: "group",
 			fields: [
@@ -147,18 +160,6 @@ export const SiteLayout: GlobalConfig = {
 					name: "navLinks",
 					type: "array",
 					fields: linkFields,
-				},
-				{
-					name: "socialLinks",
-					type: "array",
-					fields: [
-						...linkFields,
-						{
-							name: "icon",
-							type: "text",
-							required: true,
-						},
-					],
 				},
 			],
 		},

@@ -147,6 +147,7 @@ export default function HeaderFull({
 
 	return (
 		<motion.header
+			data-site-header
 			ref={headerRef}
 			initial={shouldAnimateEntrance ? HEADER_ENTRANCE_HIDDEN : false}
 			animate={
@@ -154,7 +155,7 @@ export default function HeaderFull({
 					? entranceReady
 						? HEADER_ENTRANCE_VISIBLE
 						: HEADER_ENTRANCE_HIDDEN
-					: undefined
+					: HEADER_ENTRANCE_VISIBLE
 			}
 			transition={headerTransition}
 			className={clsx(
