@@ -1,193 +1,196 @@
-# Webvizion Website Template
+![Webvizion Template banner](public/webvizion-template-banner.png)
 
-This repository is the base template for building Webvizion websites.
+# Webvizion Template
 
-It provides:
-- a Next.js app-router foundation
-- a shared component library under `src/components`
-- a marketing site shell under `src/app/(site)/(marketing)`
-- an optional dashboard shell under `src/app/(site)/dashboard`
-- a centralized demo/catalog system under `src/app/(site)/(marketing)/internal/demo`
-- a dictionary area under `src/app/(site)/(marketing)/internal/dictionary`
-- an internal reference area under `src/app/(site)/(marketing)/internal/reference`
-- an optional internal intelligence surface under `src/app/(site)/(marketing)/internal/intelligence`
-- optional Payload-ready content scaffolding for CMS-capable websites
-- reusable UI, motion, overlay, and feedback patterns for Webvizion site builds
+An agent-ready Next.js website template for starting with a lightweight page
+scaffold, then growing only the design-system and content pieces a project
+actually needs.
 
-## What This Project Is For
+The main path is intentionally small: a marketing shell, a typed section
+renderer, fallback content, shared primitives, motion foundations, and optional
+CMS scaffolding. Agents can implement a project-specific design system without
+first dismantling a large demo application, while still having richer template
+infrastructure available when a build needs it.
 
-Use this template when starting or extending a Webvizion website.
-
-It is intended to give Webvizion projects:
-- a consistent component and layout system
-- reusable interaction patterns instead of page-local UI
-- a demo environment for documenting and testing components
-- an optional dashboard/auth shell when the project needs a product area
-- a lightweight content-rendering layer that can stay static or later be backed
-  by Payload
-- a shared baseline for future site work
-
-## Getting Started
-
-Run the development server:
+## Quick Start
 
 ```bash
+npm install
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Open the printed local URL. The default human development command uses the
+user dev-server path. Agents that need browser automation should use the
+isolated server instead:
 
-## Included Surfaces
+```bash
+npm run dev:agent
+```
 
-The template currently ships with four route-level surfaces:
+Run the main checks with:
 
-- `/(marketing)`: the public website shell
-- `/dashboard`: the optional dashboard shell with its own providers, auth gate, and sidebar
-- `/internal/demo`: internal component and utility demos
-- `/internal/dictionary`: structured reference patterns and source material
-- `/internal/intelligence`: generated repo-intelligence map for template maintainers and agents
-- `/(payload)`: guarded Payload admin/API stubs for Payload-ready clones
+```bash
+npm run verify:static
+npm run build
+```
 
-The internal surfaces are useful while authoring the template. New project clones do not need to keep all of them.
+## The Main Path
+
+Use this template when you want agents to start from useful structure instead of
+a blank app:
+
+1. Keep the marketing route shell under `src/app/(site)/(marketing)`.
+2. Add or replace sections through `src/lib/marketing-content/types.ts`,
+   `src/lib/marketing-content/sections/registry.tsx`, and the fallback content
+   in `src/lib/marketing-content/fallback.ts`.
+3. Build the project design system in `src/components/ui` and
+   `src/components/branding`.
+4. Keep page data lightweight: pages, sections, navigation, CTA, footer, and
+   social links.
+5. Resolve source-specific details in server-side adapters before they reach
+   React section components.
+
+That keeps the frontend contract simple enough for static sites, while leaving
+a clean upgrade path to Payload when a project needs CMS editing.
+
+## What Ships Here
+
+- **Next.js App Router foundation:** route groups for the public site, guarded
+  Payload stubs, API routes, metadata, sitemap generation, and error states.
+- **Marketing shell:** header, compact/full navigation, menu/search data,
+  footer, scroll controller, and route-level reveal motion.
+- **Typed section renderer:** a small `MarketingSection` contract, renderer
+  registry, fallback page data, and a starter home hero block.
+- **Design-system starting point:** primitives, inputs, overlays, motion
+  helpers, focus/motion foundations, branding, and mount components.
+- **Content modes:** static fallback content, Payload-ready scaffold, or
+  Payload-powered Vercel setup.
+- **Template Intelligence:** generated repo maps and topic queries that help
+  agents find the right files before broad searching.
+- **Agent-safe dev server wrapper:** `npm run dev:agent` isolates ports and
+  generated Next.js build directories from the user's dev server.
+- **Template pruning:** scripts for removing optional surfaces and Payload when
+  a cloned project should be lighter.
+- **Thin-start activation:** an explicit instance-only path that parks the
+  broader reference system and rewrites the live primitive surface to a minimal
+  allowlist.
+
+## Directory Map
+
+| Path | Purpose |
+| --- | --- |
+| `src/app/(site)/(marketing)` | Public website route shell, home page, fallback route, layout, internal intelligence surface, and shared marketing layout components. |
+| `src/lib/marketing-content` | Lightweight page, section, navigation, and layout data contracts plus fallback resolvers. |
+| `src/lib/marketing-content/sections` | Section renderer registry and section implementations. |
+| `src/components/ui` | Shared UI primitives, inputs, overlays, motion helpers, and foundations. |
+| `src/components/branding` | Brand-level presentation primitives such as the logo. |
+| `src/components/mount` | Client-only mounts for toasts, modals, validation, loading, and scroll behavior. |
+| `src/payload` | Payload collections, globals, blocks, and activation helpers. |
+| `scripts` | Template intelligence, dev server, prune, thin-start, smoke, and maintenance tooling. |
+| `docs` | Content-mode, Payload, responsive rendering, thin-start, and template-intelligence notes. |
+| `public` | Static public assets, including the README banner. |
 
 ## Content Modes
 
-The template supports three content modes:
+The frontend should render a small page/section contract regardless of where
+content comes from.
 
-- **Static:** remove Payload with `npm run prune:template -- --no-payload` and build from plain TypeScript fallback content.
-- **Payload-ready:** keep the guarded Payload scaffold while the CMS decision is open. Build sections from lightweight fallback/render data, then activate Payload later by adapting CMS documents into that same render shape.
-- **Payload-powered Vercel:** enable real Payload admin/API routes, provision Neon Postgres and Vercel Blob in Vercel, and read Payload through server-side content resolvers.
+- **Static:** remove Payload with `npm run prune:template -- --no-payload` and
+  build from TypeScript fallback content.
+- **Payload-ready:** keep guarded Payload files in the repo, but do not expose
+  live admin/API routes until the project commits to CMS editing.
+- **Payload-powered Vercel:** enable real Payload admin/API routes, provision
+  Neon Postgres and Vercel Blob, and adapt Payload documents into the same
+  lightweight render props.
 
-The frontend should speak a small rendering contract: pages, sections, and site layout data. It should not speak a full Payload schema. Payload-specific metadata belongs in Payload schemas and adapter code.
+Read `docs/template-content-modes.md` for the mode boundaries and
+`docs/payload-vercel-neon-blob.md` before activating Payload on Vercel.
 
-See `docs/template-content-modes.md` for the mode model and `docs/payload-vercel-neon-blob.md` for the Vercel activation path.
+## Creating a Lightweight Instance
 
-## Instance Starting Points
+For most new projects, clone or use this template and prune only the optional
+route families that are not needed. Always dry-run first:
 
-Most project instances should start from the full Webvizion template and then
-prune only the optional route surfaces they do not need.
+```bash
+npm run prune:template -- --dry-run --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
+```
 
-For a minimal thin-start instance, use the explicit thin-start activation path
-instead of treating thin-start as the default template state:
+Then apply the lightweight route-surface prune:
+
+```bash
+npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
+```
+
+For a static site, remove Payload explicitly:
+
+```bash
+npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground --no-payload
+```
+
+The prune script owns route, navigation, search, package, and smoke-test
+rewrites so the clone stays buildable after surfaces are removed.
+
+## Thin-Start Mode
+
+Thin-start is not the default template state. It is an explicit instance
+activation path for projects that should begin with the smallest accepted live
+primitive surface while keeping the original Webvizion system parked as
+reference-only code.
+
+Preview the mutation:
 
 ```bash
 npm run create:thin-start -- --dry-run --in-place
+```
+
+Apply it only inside a target project instance:
+
+```bash
 npm run create:thin-start -- --yes --in-place --confirm-instance
 npm install
 npm run review:thin-start-api -- --strict
 npm run build
 ```
 
-Thin-start activation parks the current Webvizion component system under the
-ignored `.thin-start/` reference directory, rewrites the live instance to the
-accepted small primitive surface, and then requires exported API review before
-the instance is considered ready.
+Read `docs/thin-start-creation-boundary.md` before using this path.
 
-See `docs/thin-start-creation-boundary.md` for the thin-start boundary and
-review gate.
+## Template Intelligence
 
-## Pruning a Clone
-
-After cloning the repo, you can remove optional surfaces in place with:
+The template includes local map generation for agents:
 
 ```bash
-npm run prune:template -- [flags]
+npm run intelligence:generate
+npm run intelligence:query -- route-architecture
+npm run intelligence:query -- ui-primitives
+npm run intelligence:query -- content-modes
 ```
 
-Available flags:
+The generated `.template-intelligence/` and `.serena/` folders are local
+artifacts and are intentionally ignored. See `docs/template-intelligence.md`
+for the full workflow.
 
-- `--no-dashboard`: removes `/dashboard`, `/login`, and dashboard-only auth helpers
-- `--no-demo`: removes the internal demo surface
-- `--no-intelligence`: removes the internal intelligence surface and generated-index tooling
-- `--no-playground`: removes the internal playground surface
-- `--no-dictionary`: removes the internal dictionary surface
-- `--no-reference`: removes the internal reference/docs surface
-- `--no-payload`: removes the guarded Payload scaffold and Payload packages
-- `--dry-run`: prints the plan without changing files
-- `--yes`: skips the confirmation prompt
-- `--confirm-template-root`: allows a mutating prune on the canonical template
-  `main` checkout for explicit template-maintenance tests
+## Useful Scripts
 
-Examples:
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Human local development server. |
+| `npm run dev:agent` | Isolated development server for agent browser testing. |
+| `npm run build` | Production Next.js build. |
+| `npm run lint` | Biome checks. |
+| `npm run typecheck` | TypeScript check without emit. |
+| `npm run verify:static` | Lint plus typecheck. |
+| `npm run verify:smoke` | Route smoke verification. |
+| `npm run verify` | Static checks, build, and smoke verification. |
+| `npm run prune:template` | Remove optional template surfaces in a clone. |
+| `npm run create:thin-start` | Activate the optional thin-start instance path. |
+| `npm run review:thin-start-api` | Review exported API surface after thin-start activation. |
 
-```bash
-# See what a lightweight instance prune would remove
-npm run prune:template -- --dry-run --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
+## Deployment Notes
 
-# Apply the lightweight instance route-surface prune
-npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
+The template is designed for Vercel. Static and Payload-ready projects can ship
+without live Payload routes. Payload-powered projects should use Neon Postgres
+for `DATABASE_URL`, Vercel Blob for `BLOB_READ_WRITE_TOKEN`, and a
+project-specific `PAYLOAD_SECRET`.
 
-# Apply the lightweight route-surface prune and remove Payload for a static clone
-npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground --no-payload
-```
-
-The prune command deletes owned route trees and rewrites the centralized route,
-nav, search, API export, and smoke-verification files so the cloned project
-stays buildable. The command is intended to run inside a clone or renamed
-project instance; mutating the canonical template `main` checkout requires
-`--confirm-template-root` so accidental template collapse is harder.
-
-## Key Areas
-
-- `src/app`: application routes, layouts, and pages
-- `src/app/(site)/(marketing)`: public site routes and marketing shell assembly
-- `src/app/(site)/dashboard`: optional dashboard shell and dashboard pages
-- `src/app/(site)/(marketing)/internal/demo`: internal component demo and documentation system
-- `src/app/(site)/(marketing)/internal/dictionary`: structured pattern vault for source material
-- `src/app/(site)/(marketing)/internal/reference`: repo-level utility links and operational notes
-- `src/components`: shared Webvizion UI library
-- `src/lib`: reusable non-UI utilities such as API, feedback, and mocks
-- `src/lib/marketing-content`: lightweight content resolvers, fallbacks, and section renderers
-- `src/payload`: Payload collections, globals, blocks, and CMS helpers
-- `docs`: template mode, Payload, and setup documentation
-
-## Demo System
-
-The component demo system lives under `src/app/(site)/(marketing)/internal/demo`.
-
-It is useful for:
-- browsing available UI primitives and higher-level components
-- validating interaction states and variants
-- documenting reusable patterns for future Webvizion websites
-
-Most demo content is centralized in `src/app/(site)/(marketing)/internal/demo/content.tsx`.
-
-## Dictionary
-
-The dictionary is not the canonical live app. It is a structured pattern vault for reusable source material.
-
-Use it to:
-
-- inspect reference implementations
-- copy or adapt `_source/` files into live template code
-- review `manifest.ts` notes before porting a pattern
-
-The live template design system remains the source of truth. Borrow structure and interaction logic first; do not copy dictionary styling blindly.
-
-## Dashboard
-
-The dashboard lives under `src/app/(site)/dashboard` and is route-scoped on purpose.
-
-It currently provides:
-
-- a dedicated dashboard layout chain
-- a mock auth flow and `/login` route
-- a responsive sidebar and dashboard page wrapper
-- dashboard-scoped status, error, and not-found surfaces
-
-If a project is purely marketing-site work, remove it with `npm run prune:template -- --no-dashboard`.
-
-## Development Notes
-
-- Prefer extending the shared component system instead of building page-local one-off UI.
-- Check the nearest `AGENTS.md` file before adding new reusable features.
-- Keep demos and documentation updated when shared components change.
-- Use Tailwind responsive classes for visual breakpoint changes, and reserve
-  `useTailwindBreakpoints` for branches where hidden content would still mount
-  expensive client work. See `docs/responsive-rendering.md`.
-
-## Deployment
-
-This project is designed to be deployed as a Webvizion website, typically on Vercel.
-
-For Payload-powered Vercel projects, use Neon Postgres for `DATABASE_URL`, Vercel Blob for `BLOB_READ_WRITE_TOKEN`, and a project-specific `PAYLOAD_SECRET`. The guarded admin/API stubs are not a live CMS; activate them only when the project is intentionally Payload-powered.
+Keep secrets in ignored local or platform environment stores. Do not commit
+tokens, deploy hooks, database URLs, or Payload secrets.
