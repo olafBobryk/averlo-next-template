@@ -150,7 +150,7 @@ const CONCEPTS = [
 
 const AGENT_MAP = {
 	schemaVersion: 1,
-	project: "webvizion-template",
+	project: "verilo-next-template",
 	generator: "scripts/generate-template-intelligence.mjs",
 	artifact: ".template-intelligence/agent-map.json",
 	topics: [
@@ -509,7 +509,7 @@ async function buildIndex() {
 
 	return {
 		schemaVersion: 1,
-		project: "webvizion-template",
+		project: "verilo-next-template",
 		generator: "scripts/generate-template-intelligence.mjs",
 		artifact: ".template-intelligence/index.json",
 		fileCount: uniqueFiles.length,

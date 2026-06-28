@@ -19,13 +19,13 @@ type LogoutResponse = {
 	message: string;
 };
 
-const STORAGE_KEY = "webvizion-dashboard-session";
+const STORAGE_KEY = "verilo-dashboard-session";
 const DEFAULT_DELAY_MS = 200;
 
 const DEFAULT_USER: SessionUser = {
 	id: "demo-user",
 	name: "Template Operator",
-	email: "operator@webvizion.local",
+	email: "operator@verilo.local",
 	role: "admin",
 	isBanned: false,
 };

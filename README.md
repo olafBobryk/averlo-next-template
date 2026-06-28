@@ -1,6 +1,6 @@
-![Webvizion Template banner](public/webvizion-template-banner.png)
+![Verilo Next Template banner](public/verilo-next-template-banner.png)
 
-# Webvizion Template
+# Verilo Next Template
 
 An agent-ready Next.js website template for starting with a lightweight page
 scaffold, then growing only the design-system and content pieces a project
@@ -134,7 +134,7 @@ rewrites so the clone stays buildable after surfaces are removed.
 
 Thin-start is not the default template state. It is an explicit instance
 activation path for projects that should begin with the smallest accepted live
-primitive surface while keeping the original Webvizion system parked as
+primitive surface while keeping the original Verilo system parked as
 reference-only code.
 
 Preview the mutation:

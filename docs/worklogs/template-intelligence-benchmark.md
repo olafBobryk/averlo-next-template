@@ -55,5 +55,5 @@ does not append a benchmark row.
 
 ```http
 POST /query_project
-{"project_name":"webvizion-template","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
+{"project_name":"verilo-next-template","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
 ```

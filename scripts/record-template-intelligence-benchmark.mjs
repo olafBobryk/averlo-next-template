@@ -101,7 +101,7 @@ if (correctness > 3) {
 const run = {
 	schemaVersion: 1,
 	date: readString(values, "date") ?? new Date().toISOString().slice(0, 10),
-	project: "webvizion-template",
+	project: "verilo-next-template",
 	taskId,
 	taskName,
 	strategy,

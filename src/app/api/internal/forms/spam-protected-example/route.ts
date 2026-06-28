@@ -9,7 +9,7 @@ import {
 const EXAMPLE_FORM_POLICY = {
 	honeypot: { fieldName: "website" },
 	cooldown: {
-		cookieName: "webvizion-example-form-cooldown",
+		cookieName: "verilo-example-form-cooldown",
 		windowSeconds: 60,
 	},
 	files: {

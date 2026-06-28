@@ -29,7 +29,7 @@ const BROAD_UI_PREFIXES = [
 	"@/components/ui/time/",
 ];
 const PARKED_IMPORT_PATTERN =
-	/(\.thin-start|thin-start\/reference|reference\/webvizion-components)/;
+	/(\.thin-start|thin-start\/reference|reference\/verilo-components)/;
 const COMPATIBILITY_PROP_PATTERN =
 	/\b(compat|compatibility|legacy|deprecated)\b/i;
 const COMPATIBILITY_MARKER_EXEMPTIONS = new Set([

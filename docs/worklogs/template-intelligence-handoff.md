@@ -106,7 +106,7 @@ Use $agent-worktree-workflow
 
 ## Context
 
-- Repo/workspace: `/Users/olafbobryk/Documents/Code/Personal/2025/webvizion-template`
+- Repo/workspace: `/Users/olafbobryk/Documents/Code/Personal/2025/verilo-next-template`
 - Branch: current checkout
 - Preview: start with `npm run dev:agent`
 - Automation: use the printed automation URL with `motion=off&reveal=off`
@@ -120,7 +120,7 @@ Use $agent-worktree-workflow
 - Serena dry run: `npm run intelligence:serena:setup -- --dry-run`
 - Run: `npm run dev:agent`
 - Verify: `npm run lint`, `npm run build`, `npm run prune:template -- --dry-run --no-intelligence`
-- Disposable prune verification used: copy worktree to `/tmp/webvizion-template-prune-verify`, install, then run `npm run prune:template -- --yes --no-intelligence`
+- Disposable prune verification used: copy worktree to `/tmp/verilo-next-template-prune-verify`, install, then run `npm run prune:template -- --yes --no-intelligence`
 
 ## Human Gates
 
