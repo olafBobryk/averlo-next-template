@@ -56,9 +56,10 @@ export function ModalHost() {
 
 	return (
 		<AnimatePresence>
-			{modals.map(({ id, render, options }) => (
+			{modals.map(({ id, render, options }, index) => (
 				<ModalShell
 					key={id}
+					isTopMost={index === modals.length - 1}
 					onClose={() => {
 						removeModal(id);
 						dispatchClose(id);

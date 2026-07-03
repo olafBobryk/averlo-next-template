@@ -7,6 +7,7 @@ import {
 	type MouseEvent,
 	type ReactNode,
 	useEffect,
+	useRef,
 } from "react";
 import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
 import Portal from "@/components/ui/overlays/Portal";
@@ -30,6 +31,7 @@ type ModalShellProps = {
 	panelWrapperClassName?: string;
 	backdropClassName?: string;
 	panelStyle?: CSSProperties;
+	isTopMost?: boolean;
 };
 
 const overlayTransition = resolveMotionTransition("overlay");
@@ -37,6 +39,26 @@ const panelTransition = resolveMotionTransition("disclosure");
 
 const DEFAULT_PANEL =
 	"flex will-change-opacity max-w-full w-[450px] max-w-lg overflow-hidden overflow-y-auto";
+
+const FOCUSABLE_SELECTOR = [
+	"a[href]",
+	"button:not([disabled])",
+	"textarea:not([disabled])",
+	"input:not([disabled])",
+	"select:not([disabled])",
+	"[tabindex]:not([tabindex='-1'])",
+].join(",");
+
+function getFocusableElements(root: HTMLElement) {
+	return Array.from(
+		root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+	).filter(
+		(node) =>
+			node.tabIndex >= 0 &&
+			node.getAttribute("aria-hidden") !== "true" &&
+			!node.closest("[inert]"),
+	);
+}
 
 export function ModalShell({
 	onClose,
@@ -49,14 +71,81 @@ export function ModalShell({
 	panelWrapperClassName,
 	backdropClassName,
 	panelStyle,
+	isTopMost = true,
 }: ModalShellProps) {
+	const wrapperRef = useRef<HTMLDivElement | null>(null);
+	const previousActiveElementRef = useRef<HTMLElement | null>(null);
+
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === "Escape") onClose();
+			if (!isTopMost) return;
+
+			if (event.key === "Escape") {
+				event.preventDefault();
+				event.stopPropagation();
+				onClose();
+				return;
+			}
+
+			if (event.key !== "Tab") return;
+
+			const wrapper = wrapperRef.current;
+			if (!wrapper) return;
+
+			const focusable = getFocusableElements(wrapper);
+			if (focusable.length === 0) {
+				event.preventDefault();
+				wrapper.focus({ preventScroll: true });
+				return;
+			}
+
+			const first = focusable[0];
+			const last = focusable[focusable.length - 1];
+			const active = document.activeElement;
+
+			if (!active || !wrapper.contains(active)) {
+				event.preventDefault();
+				(event.shiftKey ? last : first)?.focus({ preventScroll: true });
+				return;
+			}
+
+			if (event.shiftKey && active === first) {
+				event.preventDefault();
+				last?.focus({ preventScroll: true });
+				return;
+			}
+
+			if (!event.shiftKey && active === last) {
+				event.preventDefault();
+				first?.focus({ preventScroll: true });
+			}
 		};
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [onClose]);
+	}, [isTopMost, onClose]);
+
+	useEffect(() => {
+		previousActiveElementRef.current =
+			document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
+
+		const frame = window.requestAnimationFrame(() => {
+			const wrapper = wrapperRef.current;
+			if (!wrapper || !isTopMost) return;
+
+			const [firstFocusable] = getFocusableElements(wrapper);
+			(firstFocusable ?? wrapper).focus({ preventScroll: true });
+		});
+
+		return () => {
+			window.cancelAnimationFrame(frame);
+			const previous = previousActiveElementRef.current;
+			if (previous && document.contains(previous)) {
+				previous.focus({ preventScroll: true });
+			}
+		};
+	}, [isTopMost]);
 
 	useEffect(() => {
 		const body = document.body;
@@ -176,6 +265,7 @@ export function ModalShell({
 				/>
 
 				<motion.div
+					ref={wrapperRef}
 					key="modal-panel-wrapper"
 					className={[
 						"relative z-[82] flex will-change-opacity h-full w-full items-center justify-center p-[50px]",
@@ -189,6 +279,7 @@ export function ModalShell({
 					transition={motionAllowed ? overlayTransition : undefined}
 					aria-modal="true"
 					role="dialog"
+					tabIndex={-1}
 					onClick={onClose}
 				>
 					<Panel
