@@ -16,6 +16,7 @@ Shared non-UI application utilities. This folder is for transport, state helpers
 - `src/lib/mock/createFakeFetcher.ts`: convenience fake fetcher built on top of `createMockFetch`.
 - `src/lib/feedback/toast.ts`: shared toast helpers.
 - `src/lib/modal.ts`: shared modal state helpers.
+- `src/lib/metadata.ts`: shared Next metadata factories backed by `src/config/metadataConfig.ts`.
 
 ## New Feature Workflow
 For any new reusable lib feature:
@@ -44,6 +45,7 @@ For any new reusable lib feature:
 - `src/lib/forms/`
 - `src/lib/mock/`
 - `src/lib/feedback/`
+- `src/lib/metadata.ts`
 
 ## Avoid
 - Putting API helpers in `src/components`.

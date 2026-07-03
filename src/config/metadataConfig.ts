@@ -1,1 +1,47 @@
-export const KEYWORDS = ["agency", "template"];
+import type { Metadata } from "next";
+import type { AppRouteId } from "@/config/routes";
+
+export type StaticPageMetadataConfig = {
+	absoluteTitle?: boolean;
+	description: string;
+	path: string;
+	title: string;
+};
+
+export type SiteMetadataConfig = {
+	baseUrl?: string;
+	defaultDescription: string;
+	icons?: Metadata["icons"];
+	keywords: string[];
+	manifest?: string;
+	name: string;
+};
+
+const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || undefined;
+
+export const siteMetadata = {
+	name: "Averlo Next Template",
+	baseUrl: siteBaseUrl,
+	defaultDescription:
+		"An agent-ready Next.js template for lightweight design-system scaffolds.",
+	keywords: ["agency", "template"],
+	icons: {
+		icon: "/favicon-32x32.png",
+		shortcut: "/favicon.ico",
+		apple: "/apple-touch-icon.png",
+	},
+	manifest: "/site.webmanifest",
+} satisfies SiteMetadataConfig;
+
+export const staticPageMetadata = {
+	home: {
+		title: siteMetadata.name,
+		description: siteMetadata.defaultDescription,
+		path: "/",
+		absoluteTitle: true,
+	},
+} satisfies Partial<Record<AppRouteId, StaticPageMetadataConfig>>;
+
+export type StaticPageMetadataKey = keyof typeof staticPageMetadata;
+
+export const KEYWORDS = siteMetadata.keywords;

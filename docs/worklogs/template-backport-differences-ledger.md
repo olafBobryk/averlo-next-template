@@ -72,7 +72,7 @@
 | ARB-UI-001 | Averlo Rebrand / Historical Template UI | UI primitive affordances: loading buttons, touch hit areas, stable field errors, chip multiselect, and scroll borders. | `src/components/ui/primitives/Button.tsx`<br>`src/components/ui/primitives/Field.tsx`<br>`src/components/ui/input/ButtonMultiSelectInput.tsx`<br>`src/components/ui/misc/ScrollBorders.tsx` | UI primitives, inputs, and misc | Adapt | Implemented from history/adapted | Generic `ScrollBorders` added; historical Button touch hit areas, loading overlay, skeleton behavior, `Field`, and historical multiselect/combobox controls restored. `ButtonMultiSelectInput` was not a historical template file and was not added. | Complete for reusable primitive/input affordances. |
 | ARB-MOTION-001 | Averlo Rebrand | Motion/reveal primitive upgrades: corner-clip image reveal, numeric reveal, and automation-friendly motion flags. | `src/components/ui/motion/reveal/RevealImage.tsx`<br>`src/components/ui/motion/reveal/RevealNumeric.tsx`<br>`src/components/ui/foundations/motionDisableOverride.ts` | Motion primitives and foundations | Adapt | Implemented | Product loading SVG data was not ported; intro/loading URL override integration was wired into the loading mount. | Browser verification remains optional for future consumers using these primitives. |
 | ARB-SHELL-001 | Averlo Rebrand | Shell-owned CTA and shared layout provider pattern. | `src/app/(site)/(marketing)/_components/layout/MarketingShell.tsx`<br>`src/app/(site)/(marketing)/_components/layout/MarketingSharedLayout.tsx`<br>`src/app/(site)/(marketing)/_components/layout/Cta.tsx` | Marketing shell slots | Defer | Deferred | Current CTA is visual, product, asset, and provider bound; shared layout provider is tied to Averlo hero media. | Reconsider only as a generic shell slot API, not as a direct source port. |
-| ARB-META-001 | Averlo Rebrand | Static metadata factory and root metadata helper. | `src/lib/site-content/metadata.ts`<br>`src/config/metadataConfig.ts` | Generic metadata helper/config | Adapt | Good small candidate | Product URL, keywords, icons, route list, and manifest assets must not port. | Create a generic helper using template defaults and route-safe keys. |
+| ARB-META-001 | Averlo Rebrand | Static metadata factory and root metadata helper. | `src/lib/site-content/metadata.ts`<br>`src/config/metadataConfig.ts` | Generic metadata helper/config | Adapt | Implemented | Added typed `siteMetadata`, route-keyed `staticPageMetadata`, and shared root/page metadata factories using template defaults; Averlo product URL, route list, copy, and assets were not ported. | Complete for this pass. |
 
 ## Skip/Gate List
 
@@ -119,6 +119,7 @@
 | 2026-07-03 | Close the old file/media/profile and graph/health gates as complete. | `948efcd` restored `FileGallery`, `FilePreview`, `FileInspectModal`, `ImageSwitcher`, `InspectableImage`, `FileUploadInput`, `ProfilePictureInput`, `GraphMap`, `InteractionGate`, and `HealthCheckIndicator`. | accepted |
 | 2026-07-03 | Reopen only the modal focus-management slice of `INF-UI-006`. | The template has modal scroll-lock and shell behavior, but not Inference's focus trap, initial focus, focus restore, or top-most Escape guard. | accepted |
 | 2026-07-03 | Complete the modal focus-management slice of `INF-UI-006`. | The accepted port is generic overlay accessibility behavior in shared primitives; source-specific backdrop, sizing, and motion visuals remain out of scope. | accepted |
+| 2026-07-03 | Complete `ARB-META-001` as a small generic metadata helper. | The accepted slice keeps only typed site/page metadata factories and route-keyed config; Averlo product URL, route list, copy, and assets remain skipped. | accepted |
 
 ## Explorer Runs
 
@@ -145,7 +146,6 @@
 
 | Packet | Candidate IDs | Purpose | Required checks |
 | --- | --- | --- | --- |
-| Metadata helper | `ARB-META-001` | Add a generic static metadata helper/config using template defaults and route-safe keys. | `npm run lint`; `npm run typecheck`; `npm run build`. |
 | Content-page renderer gate | `ARB-CONTENT-001` | Decide whether to ship a generic markdown/legal content-page renderer and fixture; omit Averlo contact-copy behavior. | Parser tests or fixture route; `npm run lint`; `npm run typecheck`; content route smoke checks if routes are added. |
 | Scroll-performance tooling gate | `ARB-TOOL-001` | Decide whether a deterministic scroll harness belongs in the template; if accepted, keep only generic `control`, `default`, and `stress` scenarios. | Dependency gate for Playwright; prune dry-run; ignored-output check; browser fixture check. |
 | Orchestration starter examples | `ARB-ORG-001` | Decide whether the template should ship starter project-local shapes beyond the generic strategy support docs. | Shape-strategy adapter check; no product graph references. |
@@ -192,3 +192,5 @@
 | 2026-07-03 | `npm run intelligence:hybrid -- --task-id resume-template-backport ...` | passed | First attempt used an invalid topic and recorded nothing; rerun queried `ui-primitives`, `prune-behavior`, and `dev-server`, made two Serena semantic calls, and recorded a Hybrid benchmark row. |
 | 2026-07-03 | `npm run intelligence:hybrid -- --task-id INF-UI-006-modal-a11y ...` | passed | Generated Template Intelligence, queried `ui-primitives`, made two Serena semantic calls for `ModalShell`, and recorded a Hybrid benchmark row. |
 | 2026-07-03 | `npm run typecheck`, `npm run lint`, `npm run build`, `git diff --check` | passed | Verification after completing modal focus trap, focus restore, and top-most modal guard; lint reported existing Biome config info only. |
+| 2026-07-03 | `npm run intelligence:hybrid -- --task-id ARB-META-001-metadata-helper ...` | passed | Generated Template Intelligence, queried `content-modes`, made two Serena semantic calls for root metadata, and recorded a Hybrid benchmark row. |
+| 2026-07-03 | `npm run typecheck`, `npm run lint`, `npm run build`, `git diff --check` | passed | Verification after adding the generic metadata config/helper; lint reported existing Biome config info only. |
