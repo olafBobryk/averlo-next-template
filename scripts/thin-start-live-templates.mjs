@@ -692,7 +692,6 @@ export function ConfirmationModal({
 		path: "src/components/ui/overlays/modal/ImageInspectModal.tsx",
 		content: `"use client";
 
-import Image from "next/image";
 import { Button } from "@/components/ui/primitives/Button";
 
 type ImageInspectModalProps = {
@@ -710,15 +709,7 @@ export function ImageInspectModal({
 }: ImageInspectModalProps) {
 	return (
 		<div className="grid gap-4">
-			<div className="relative h-[70vh] w-full overflow-hidden rounded-md">
-				<Image
-					src={src}
-					alt={alt}
-					fill
-					className="object-contain"
-					sizes="90vw"
-				/>
-			</div>
+			<img src={src} alt={alt} className="max-h-[70vh] w-full rounded-md object-contain" />
 			<div className="flex justify-end">
 				<Button type="button" variant="ghost" onClick={onClose}>
 					Close
@@ -1299,8 +1290,8 @@ import {
 	readTemplateIntelligenceBenchmarkRuns,
 	readTemplateIntelligenceIndex,
 } from "@/lib/template-intelligence";
-import { InternalCard } from "./_components/InternalCard";
 import { BenchmarkRunToggle } from "./BenchmarkRunToggle";
+import { InternalCard } from "./_components/InternalCard";
 
 type SearchParams = Promise<
 	Record<string, string | string[] | undefined> | undefined
@@ -1379,10 +1370,7 @@ export default async function TemplateIntelligencePage({
 						<Button href="/internal/intelligence/graph" variant="ghost">
 							Graph summary
 						</Button>
-						<Button
-							href="/internal/intelligence?view=benchmarks"
-							variant="ghost"
-						>
+						<Button href="/internal/intelligence?view=benchmarks" variant="ghost">
 							Benchmarks
 						</Button>
 					</div>
@@ -1400,9 +1388,7 @@ export default async function TemplateIntelligencePage({
 								Files
 							</Text>
 							<Text as="p" variant="heading" className="text-2xl">
-								{indexResult.status === "ready"
-									? indexResult.index.files.length
-									: 0}
+								{indexResult.status === "ready" ? indexResult.index.files.length : 0}
 							</Text>
 						</InternalCard>
 						<InternalCard>

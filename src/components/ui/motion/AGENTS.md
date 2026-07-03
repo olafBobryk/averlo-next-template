@@ -20,6 +20,7 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - `src/components/ui/motion/ScrollParallax.tsx`: scroll-based offset effect.
 - `src/components/ui/motion/ScrollWidth.tsx`: scroll-driven frame mask for progressive width reveals.
 - `src/components/ui/motion/reveal/RevealScramble.tsx`: text scramble reveal effect.
+- `src/components/ui/motion/reveal/RevealNumeric.tsx`: numeric text reveal, scroll, and count-up effects exposed as `Reveal.Numeric`.
 
 ## Invariants
 - Use these helpers only when motion adds value; do not animate everything by default.
@@ -30,6 +31,8 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - Marketing pages already wrap page content in one root. Add a scoped `Reveal.Root` only for isolated tests, resettable demos, or non-marketing surfaces.
 - Reveal motion can be disabled at the root by user settings or URL overrides such as `?motion=off` / `?reveal=off`. Disabled roots render reveal content visible immediately with no stagger or transform.
 - `Reveal.Image` defaults to `loadStrategy="ignore-load"`, so cache state, blur placeholders, and loading callbacks do not block the entrance reveal. Use `loadStrategy="wait-for-load"` only when reveal completion or `unlock` should wait for the actual image load.
+- `Reveal.Image` supports a shared corner clip-path reveal via `revealVariant="corner-clip"` plus `revealOrigin`, `revealFinalRadius`, and `revealTransition`. Use it for generic media blocks that should wipe in from a chosen corner.
+- When using the shared corner clip-path reveal, let `Reveal.Image` own the reveal mask and final radius instead of duplicating outer overflow or rounded-corner wrappers for the same mask.
 - CSS transition utilities remain the default for micro-interactions. Use these helpers for reveal or scroll motion, not as a replacement for normal component transitions.
 - Focus visibility and keyboard usability must not depend on motion. Motion can enhance presentation but cannot gate access to controls or content.
 - For `motion/react` transitions, use `motionTiming.ts`, `getMotionTiming`, or `spring.ts` instead of hardcoded durations and easings.
@@ -42,6 +45,7 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - Use `Reveal.List` when a section should count as one root-scheduled boundary and then stagger its own children locally.
 - Use `Reveal.Text` when copy should stagger letter-by-letter as one scheduled reveal item.
 - Use `Reveal.Image` when an image should reveal with a loading fallback or when image readiness should unlock later reveal stages. Use `loadStrategy="wait-for-load"` for image-readiness gates.
+- Use `Reveal.Image` with `revealVariant="corner-clip"` when a media block should wipe in from a chosen corner without waiting for image load, including cases that still need Next blur placeholders.
 - Use `deferInteractionUntilRevealed` on reveal-wrapped links, buttons, cards, or controls that should not be clicked, hovered, or focusable before visual reveal completes.
 - Use `MotionScene` when a section needs explicit sequencing such as image reveal first, copy second, and accent text third.
 - Use `ActiveStageHost` when a section should cycle through a finite set of active items after app readiness or after a scene stage unlocks.
@@ -50,7 +54,7 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - Use `ScrollHighlightText` when a short string should brighten progressively as it enters the viewport.
 - Use `ScrollParallax` and `ScrollLag` sparingly for decorative depth effects.
 - Use `ScrollWidth` when a panel or media block should reveal from a narrow inset to a full-width frame while preserving rounded corners.
-- Use `Reveal.Scramble` for decoding or numeric reveal text; prefer `maintainSpace` when layout must remain stable.
+- Use `Reveal.Numeric` for metric values that should count up or reveal digit by digit. Use `Reveal.Scramble` for decoding text; prefer `maintainSpace` when scramble layout must remain stable.
 - Use `LetterWave` for hover-only accent text. Give it a parent with the `group` class.
 - If a component already animates itself sufficiently, do not wrap it in extra motion without a clear UX payoff.
 

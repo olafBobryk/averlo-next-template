@@ -10,6 +10,8 @@
 		"intelligence:hybrid": "node scripts/run-template-intelligence-hybrid.mjs",
 		"intelligence:serena:debug": "node scripts/run-template-intelligence-hybrid.mjs --debug-port-discovery",
 		"intelligence:serena:setup": "node scripts/setup-template-intelligence-serena.mjs",
+		"orchestration": "node scripts/orchestration.mjs",
+		"orchestration-state": "node scripts/orchestration.mjs state",
 		"predev": "npm run intelligence:generate",
 		"predev:user": "npm run intelligence:generate",
 		"predev:agent": "npm run intelligence:generate",
@@ -55,7 +57,6 @@
 		"react-phone-number-input": "^3.4.14",
 		"react-responsive": "^10.0.1",
 		"sharp": "^0.34.5",
-		"sonner": "^2.0.7",
 		"three": "^0.184.0",
 		"three-spritetext": "^1.10.0"
 	},

@@ -14,9 +14,12 @@ const require = createRequire(import.meta.url);
 const args = process.argv.slice(2);
 const mode = args.find((arg) => !arg.startsWith("-")) ?? "user";
 const isDryRun = args.includes("--dry-run");
+const useRandomPort = args.includes("--random");
 
 const printUsageAndExit = () => {
-	console.error("Usage: node scripts/dev-server.mjs <user|agent> [--dry-run]");
+	console.error(
+		"Usage: node scripts/dev-server.mjs <user|agent> [--dry-run] [--random]",
+	);
 	process.exit(1);
 };
 
@@ -59,6 +62,28 @@ const findAvailablePort = async (start, end) => {
 	return null;
 };
 
+const findRandomAvailablePort = async (start, end) => {
+	const ports = Array.from(
+		{ length: end - start + 1 },
+		(_, index) => start + index,
+	);
+
+	for (let index = ports.length - 1; index > 0; index -= 1) {
+		const swapIndex = Math.floor(Math.random() * (index + 1));
+		const current = ports[index];
+		ports[index] = ports[swapIndex];
+		ports[swapIndex] = current;
+	}
+
+	for (const port of ports) {
+		if (await isPortAvailable(port)) {
+			return port;
+		}
+	}
+
+	return null;
+};
+
 const getPayloadAdminUrl = (url) => {
 	const loginUrl = new URL("/api/dev/payload-login", url);
 	loginUrl.searchParams.set("next", "/admin");
@@ -93,7 +118,9 @@ const getServerTarget = async () => {
 	}
 
 	if (mode === "agent") {
-		const port = await findAvailablePort(AGENT_PORT_START, AGENT_PORT_END);
+		const port = useRandomPort
+			? await findRandomAvailablePort(AGENT_PORT_START, AGENT_PORT_END)
+			: await findAvailablePort(AGENT_PORT_START, AGENT_PORT_END);
 
 		if (!port) {
 			console.error(

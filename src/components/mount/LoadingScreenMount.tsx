@@ -4,8 +4,8 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import {
-	hasMotionDisabledSearchParam,
-	useMotionDisableOverride,
+	hasIntroDisabledSearchParam,
+	useIntroDisableOverride,
 } from "@/components/ui/foundations/motionDisableOverride";
 import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -20,14 +20,14 @@ const REVEAL_DURATION_MS = Math.round(
 const EXIT_REVEAL_HANDOFF_MS = 180;
 
 export default function LoadingScreenMount() {
-	const immediateIntroDisabled = hasMotionDisabledSearchParam();
+	const immediateIntroDisabled = hasIntroDisabledSearchParam();
 	const [phase, setPhase] = useState<Phase>(() =>
-		hasMotionDisabledSearchParam() ? "done" : "loading",
+		hasIntroDisabledSearchParam() ? "done" : "loading",
 	);
 	const motionAllowed = useMotionAllowed(true);
-	const motionDisabled = useMotionDisableOverride();
+	const introOverrideDisabled = useIntroDisableOverride();
 	const introDisabled =
-		immediateIntroDisabled || motionDisabled || !motionAllowed;
+		immediateIntroDisabled || introOverrideDisabled || !motionAllowed;
 
 	useEffect(() => {
 		if (!introDisabled) return;

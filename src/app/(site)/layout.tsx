@@ -4,6 +4,8 @@ import ModalClientMount from "@/components/mount/ModalClientMount";
 import ToastClientMount from "@/components/mount/ToastClientMount";
 import { MotionProvider } from "@/components/ui/foundations/MotionProvider";
 import { SettingsProvider } from "@/components/ui/foundations/settingsContext";
+import { IconProvider } from "@/components/ui/icons/iconRegistry";
+import { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";
 
 const motionOverrideScript = `
 (() => {
@@ -49,16 +51,18 @@ export default function SiteLayout({
 	return (
 		<SettingsProvider>
 			<MotionProvider expressive={0}>
-				<script
-					// Runs before the loading mount appears so automation URLs never see it.
-					// biome-ignore lint/security/noDangerouslySetInnerHtml: Static bootstrap script reads URL params before hydration.
-					dangerouslySetInnerHTML={{ __html: motionOverrideScript }}
-				/>
-				{children}
-				<FormValidationClientMount />
-				<LoadingScreenMount />
-				<ModalClientMount />
-				<ToastClientMount />
+				<IconProvider registry={phosphorIconRegistry}>
+					<script
+						// Runs before the loading mount appears so automation URLs never see it.
+						// biome-ignore lint/security/noDangerouslySetInnerHtml: Static bootstrap script reads URL params before hydration.
+						dangerouslySetInnerHTML={{ __html: motionOverrideScript }}
+					/>
+					{children}
+					<FormValidationClientMount />
+					<LoadingScreenMount />
+					<ModalClientMount />
+					<ToastClientMount />
+				</IconProvider>
 			</MotionProvider>
 		</SettingsProvider>
 	);

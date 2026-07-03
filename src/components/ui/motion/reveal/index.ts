@@ -2,6 +2,7 @@ import { RevealHighlightText } from "./RevealHighlightText";
 import { RevealImage } from "./RevealImage";
 import { RevealItem } from "./RevealItem";
 import { RevealList } from "./RevealList";
+import { NumericReveal } from "./RevealNumeric";
 import { RevealRoot } from "./RevealRoot";
 import { RevealScene } from "./RevealScene";
 import { ScrambleReveal } from "./RevealScramble";
@@ -18,9 +19,20 @@ export {
 	useRevealAnimationsDisabled,
 } from "./legacyCore";
 export { RevealHighlightText } from "./RevealHighlightText";
-export { RevealImage } from "./RevealImage";
+export {
+	getCornerClipRevealVariants,
+	RevealImage,
+	type RevealImageClipRevealOrigin,
+	type RevealImageClipRevealTransition,
+	type RevealImageProps,
+} from "./RevealImage";
 export { RevealItem, type RevealItemProps } from "./RevealItem";
 export { RevealList, type RevealListProps } from "./RevealList";
+export {
+	NumericReveal,
+	type NumericRevealAnimation,
+	type NumericRevealProps,
+} from "./RevealNumeric";
 export { RevealRoot, type RevealRootProps } from "./RevealRoot";
 export { RevealScene } from "./RevealScene";
 export { ScrambleReveal } from "./RevealScramble";
@@ -36,4 +48,5 @@ export const Reveal = {
 	HighlightText: RevealHighlightText,
 	Text: RevealText,
 	Scramble: ScrambleReveal,
+	Numeric: NumericReveal,
 };

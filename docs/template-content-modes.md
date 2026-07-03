@@ -79,7 +79,10 @@ npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-re
 The prune command accepts renamed package identities after template import by
 checking the expected Averlo template file/script shape. A mutating prune on
 the canonical template `main` checkout requires `--confirm-template-root`;
-dry-runs remain allowed.
+dry-runs remain allowed. When the command detects the canonical template
+`main` checkout, it also prints a warning before the plan because pruning that
+checkout can collapse the full template into a reduced instance shape. Prefer a
+clone, branch, or worktree for project-specific pruning.
 
 ## Render Contract
 

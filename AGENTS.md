@@ -13,11 +13,18 @@
 
 - If available, use `$agent-dev-workflow` before starting dev servers, opening localhost, or running browser/Playwright verification.
 - Do not run `next dev` or `npx next dev` directly in this repository.
-- Use `npm run dev:agent` when browser testing as an agent.
+- Use `npm run dev:agent -- --random` when browser testing as an agent,
+  especially for temporary worker previews or when preview ownership is unclear.
 - For Playwright, screenshots, or automated traversal, open the printed automation URL with `?motion=off&reveal=off`.
 - Do not stop, kill, or reuse the user's `3000` dev server unless explicitly asked.
 - `npm run dev` and `npm run dev:user` are reserved for the user's server. They try `http://localhost:3000` first, then fall forward through `3001-3010` before failing.
-- Agent dev servers must use the isolated port and build directory chosen by `npm run dev:agent`.
+- Agent dev servers must use the isolated random port and build directory
+  chosen by `npm run dev:agent -- --random`. Treat the printed URL as the
+  source of truth for review links after each restart.
+- For section-scoped UI review, report a direct section-anchor URL on the
+  verified agent preview. If the expected anchor is missing, say
+  `section anchor missing`, name the expected section id, and provide the nearest
+  verified page URL only as a fallback.
 - Do not edit generated `tsconfig.next-*.json` files; the dev server wrapper owns them.
 
 ## Template Content Modes

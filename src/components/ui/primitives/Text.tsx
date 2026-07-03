@@ -1,75 +1,213 @@
-import { cva } from "class-variance-authority";
+// components/ui/Text.tsx
+import { cva, type VariantProps } from "class-variance-authority";
+import clsx from "clsx";
 import type * as React from "react";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 
 export const textVariants = cva("", {
 	variants: {
 		variant: {
-			heading:
-				"text-3xl font-semibold leading-tight tracking-normal md:text-5xl",
-			body: "text-base leading-7",
-			support: "text-sm leading-6",
-			headingHero: "text-4xl font-semibold leading-tight md:text-6xl",
-			heading2xxl: "text-4xl font-semibold leading-tight md:text-6xl",
-			headingXl: "text-3xl font-semibold leading-tight md:text-5xl",
-			headingLg: "text-2xl font-semibold leading-tight md:text-4xl",
-			headingMd: "text-xl font-semibold leading-tight",
-			headingSm: "text-lg font-semibold leading-tight",
-			headingXs: "text-base font-semibold leading-snug",
-			bodyStrong: "text-base font-semibold leading-7",
-			caption: "text-sm leading-6",
+			headingHero:
+				"[font-family:var(--font-heading)] text-[calc(70px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
+			heading2xxl:
+				"[font-family:var(--font-heading)] text-[calc(50px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
+			headingXxl:
+				"[font-family:var(--font-heading)] text-[calc(36px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+			headingXl:
+				"[font-family:var(--font-heading)] text-[calc(26px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+			headingLg:
+				"[font-family:var(--font-heading)] text-[calc(1.25rem*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+			headingMd:
+				"[font-family:var(--font-heading)] text-[calc(1.25rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+			headingSm:
+				"[font-family:var(--font-heading)] text-[calc(1.125rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+			headingXs:
+				"[font-family:var(--font-heading)] text-[calc(1rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+			body: "text-[calc(0.875rem*var(--text-scale,1))] font-normal",
+			bodyStrong:
+				"text-[calc(0.875rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+			caption: "text-[calc(0.75rem*var(--text-scale,1))] font-normal",
+			nav: "text-[calc(0.875rem*var(--text-scale,1))] font-medium leading-none",
+			"menu-title":
+				"text-[calc(0.875rem*var(--text-scale,1))] font-medium leading-[1.15]",
+			"menu-description":
+				"text-[calc(0.75rem*var(--text-scale,1))] font-normal leading-[1.2]",
 		},
 		tone: {
-			default: "text-foreground",
-			muted: "text-muted",
-			inherit: "text-inherit",
+			default: "",
+			muted: "",
+			inherit: "",
+		},
+		theme: {
+			dark: "",
+			light: "",
+			inherit: "",
+		},
+		interactive: {
+			true: "transition-colors motion-interactive",
+			false: "",
 		},
 	},
+	compoundVariants: [
+		{
+			theme: "dark",
+			tone: "default",
+			class: "text-foreground",
+		},
+		{
+			theme: "dark",
+			tone: "muted",
+			class: "text-muted/60",
+		},
+		{
+			theme: "light",
+			tone: "default",
+			class: "text-background",
+		},
+		{
+			theme: "light",
+			tone: "muted",
+			class: "text-background/70",
+		},
+	],
 	defaultVariants: {
 		variant: "body",
 		tone: "default",
+		theme: "dark",
+		interactive: true,
 	},
 });
 
-export type TextVariant =
-	| "heading"
-	| "body"
-	| "support"
-	| "headingHero"
-	| "heading2xxl"
-	| "headingXl"
-	| "headingLg"
-	| "headingMd"
-	| "headingSm"
-	| "headingXs"
-	| "bodyStrong"
-	| "caption"
-	| null;
-export type TextTone = "default" | "muted" | "inherit" | null;
-
-type TextOwnProps = {
-	as?: React.ElementType;
-	children?: React.ReactNode;
+type BaseProps = {
+	as?: "span" | "p" | "div" | "label" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 	className?: string;
-	tone?: TextTone;
-	variant?: TextVariant;
-};
+	children?: React.ReactNode;
+} & VariantProps<typeof textVariants>;
 
-export type TextProps = TextOwnProps &
-	Omit<React.HTMLAttributes<HTMLElement>, keyof TextOwnProps>;
+type SpanProps = BaseProps & {
+	as?: "span";
+} & React.HTMLAttributes<HTMLSpanElement>;
+type PProps = BaseProps & {
+	as: "p";
+} & React.HTMLAttributes<HTMLParagraphElement>;
+type DivProps = BaseProps & {
+	as: "div";
+} & React.HTMLAttributes<HTMLDivElement>;
+type LabelProps = BaseProps & {
+	as: "label";
+} & React.LabelHTMLAttributes<HTMLLabelElement>;
+type HeadingProps = BaseProps & {
+	as: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+} & React.HTMLAttributes<HTMLHeadingElement>;
 
-export function Text({
-	as,
-	children,
+export type TextSpanProps = SpanProps;
+
+export type TextProps =
+	| SpanProps
+	| PProps
+	| DivProps
+	| LabelProps
+	| HeadingProps;
+
+type TextSkeletonProps = Omit<
+	React.ComponentPropsWithoutRef<typeof Skeleton>,
+	"children"
+> &
+	VariantProps<typeof textVariants> & {
+		as?:
+			| "span"
+			| "p"
+			| "div"
+			| "label"
+			| "h1"
+			| "h2"
+			| "h3"
+			| "h4"
+			| "h5"
+			| "h6";
+		children?: React.ReactNode;
+		textClassName?: string;
+	};
+
+function TextSkeleton({
+	as = "span",
+	variant,
+	tone,
+	theme,
+	interactive,
 	className,
-	tone = "default",
-	variant = "body",
+	textClassName,
+	children,
 	...rest
-}: TextProps) {
-	const Tag = as ?? (variant === "heading" ? "h2" : "p");
+}: TextSkeletonProps) {
+	const Tag = as as
+		| "span"
+		| "p"
+		| "div"
+		| "label"
+		| "h1"
+		| "h2"
+		| "h3"
+		| "h4"
+		| "h5"
+		| "h6";
+	const resolvedVariant = textVariants({
+		variant,
+		tone,
+		theme,
+		interactive,
+		className: textClassName,
+	});
 
 	return (
-		<Tag className={textVariants({ variant, tone, className })} {...rest}>
+		<Skeleton
+			className={clsx(
+				"w-fit",
+				textVariants({ variant, tone, theme, interactive, className }),
+			)}
+			{...rest}
+		>
+			<Tag className={resolvedVariant}>{children ?? "Loading"}</Tag>
+		</Skeleton>
+	);
+}
+
+// Overloads (gives you correct props per tag)
+function TextRoot(props: SpanProps): React.ReactElement;
+function TextRoot(props: PProps): React.ReactElement;
+function TextRoot(props: DivProps): React.ReactElement;
+function TextRoot(props: LabelProps): React.ReactElement;
+function TextRoot(props: HeadingProps): React.ReactElement;
+
+function TextRoot({
+	as = "span",
+	variant,
+	tone,
+	theme,
+	interactive,
+	className,
+	children,
+	...rest
+}: TextProps) {
+	const Tag = as as
+		| "span"
+		| "p"
+		| "div"
+		| "label"
+		| "h1"
+		| "h2"
+		| "h3"
+		| "h4"
+		| "h5"
+		| "h6";
+	return (
+		<Tag
+			className={textVariants({ variant, tone, theme, interactive, className })}
+			{...(rest as Record<string, unknown>)}
+		>
 			{children}
 		</Tag>
 	);
 }
+
+export const Text = Object.assign(TextRoot, { Skeleton: TextSkeleton });

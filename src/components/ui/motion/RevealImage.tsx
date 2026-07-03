@@ -1,3 +1,9 @@
 "use client";
 
-export { RevealImage, type RevealImageProps } from "./reveal/RevealImage";
+export {
+	getCornerClipRevealVariants,
+	RevealImage,
+	type RevealImageClipRevealOrigin,
+	type RevealImageClipRevealTransition,
+	type RevealImageProps,
+} from "./reveal/RevealImage";

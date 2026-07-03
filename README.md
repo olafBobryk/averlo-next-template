@@ -128,6 +128,12 @@ For a static site, remove Payload explicitly:
 npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground --no-payload
 ```
 
+When `prune:template` detects the canonical `averlo-next-template` `main`
+checkout, it prints a warning because pruning that checkout can collapse the
+full template into a reduced instance shape. Dry-runs remain allowed, but
+mutating prunes on canonical `main` require `--confirm-template-root`; use a
+clone, branch, or worktree for project-specific pruning.
+
 ### Thin-Start Mode
 
 Thin-start is an explicit instance activation path, not the default template

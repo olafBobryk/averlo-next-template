@@ -16,6 +16,7 @@ const INTERNAL_MARKETING_DIR = path.join(
 const PACKAGE_JSON_PATH = path.join(ROOT, "package.json");
 const TEMPLATE_SHAPE_FILES = [
 	"scripts/prune-template.mjs",
+	"scripts/_lib/local-production-preview.mjs",
 	"scripts/verify-smoke.mjs",
 	"src/config/routes.ts",
 	"src/lib/routes.ts",
@@ -362,6 +363,23 @@ function assertTemplateRootMutationAllowed(pkg, parsed) {
 
 	throw new Error(
 		"Mutating prune on the canonical averlo-next-template main checkout requires --confirm-template-root. Run a dry-run, use a clone/instance, or pass the explicit confirmation flag for template-maintenance tests.",
+	);
+}
+
+function warnCanonicalTemplateMainPrune(pkg, parsed) {
+	if (!isCanonicalTemplateMainCheckout(pkg)) return;
+
+	const runMode = parsed.dryRun ? "dry-run" : "mutating";
+	console.warn("");
+	console.warn("WARNING: canonical template main prune target detected.");
+	console.warn(
+		`This ${runMode} is running in averlo-next-template on main. Pruning this checkout can collapse the full template into a reduced instance shape.`,
+	);
+	console.warn(
+		"Use a clone, branch, or worktree for project-specific pruning whenever possible.",
+	);
+	console.warn(
+		"Mutating canonical-template prunes remain blocked unless --confirm-template-root is passed.",
 	);
 }
 
@@ -941,7 +959,8 @@ function renderMarketingContentFallbackFile(state) {
 		"\t\tnavLinks: [",
 		...footerNavEntries,
 		"\t\t],",
-		"\t\tsocialLinks: [",
+		"\t},",
+		"\tsocialLinks: [",
 		"\t\t\t{",
 		'\t\t\t\tlabel: "X",',
 		'\t\t\t\ticon: "x",',
@@ -967,8 +986,7 @@ function renderMarketingContentFallbackFile(state) {
 		'\t\t\t\ticon: "youtube",',
 		'\t\t\t\thref: "",',
 		"\t\t\t},",
-		"\t\t],",
-		"\t},",
+		"\t],",
 		"};",
 		"",
 	].join("\n");
@@ -1178,11 +1196,10 @@ function renderApiIndexFile(state) {
 function getSmokeRoutes(state) {
 	const routes = ["/"];
 
-	if (state.hasDashboard) {
-		routes.push("/login", "/dashboard");
+	if (state.hasIntelligence) {
+		routes.push("/internal/intelligence");
 	}
 
-	routes.push("/settings");
 	routes.push("/api/health");
 
 	return routes;
@@ -1194,91 +1211,14 @@ function renderVerifySmokeFile(state) {
 	return [
 		"#!/usr/bin/env node",
 		"",
-		'import { spawn } from "node:child_process";',
-		'import { access } from "node:fs/promises";',
-		'import { createRequire } from "node:module";',
-		'import net from "node:net";',
+		"import {",
+		"\tstartLocalProductionServer,",
+		"\tstopServer,",
+		'} from "./_lib/local-production-preview.mjs";',
 		"",
-		"const PORT_START = 3100;",
-		"const PORT_END = 3199;",
-		'const HOST = "127.0.0.1";',
-		"const STARTUP_TIMEOUT_MS = 30_000;",
 		"const REQUEST_TIMEOUT_MS = 10_000;",
 		`const ROUTES = ${routes};`,
 		'const ROUTE_STATUS_OVERRIDES = new Map([["/api/health", new Set([200, 503])]]);',
-		"",
-		"const require = createRequire(import.meta.url);",
-		"",
-		"const canListenOnHost = (port, host) =>",
-		"\tnew Promise((resolve, reject) => {",
-		"\t\tconst server = net.createServer();",
-		"",
-		'\t\tserver.once("error", (error) => {',
-		'\t\t\tif (error.code === "EADDRINUSE" || error.code === "EACCES") {',
-		"\t\t\t\tresolve(false);",
-		"\t\t\t\treturn;",
-		"\t\t\t}",
-		"",
-		"\t\t\treject(error);",
-		"\t\t});",
-		"",
-		'\t\tserver.once("listening", () => {',
-		"\t\t\tserver.close(() => resolve(true));",
-		"\t\t});",
-		"",
-		"\t\tserver.listen({ host, port });",
-		"\t});",
-		"",
-		"const findAvailablePort = async () => {",
-		"\tfor (let port = PORT_START; port <= PORT_END; port += 1) {",
-		"\t\tif (await canListenOnHost(port, HOST)) {",
-		"\t\t\treturn port;",
-		"\t\t}",
-		"\t}",
-		"",
-		"\treturn null;",
-		"};",
-		"",
-		"const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));",
-		"",
-		"const canConnect = (port) =>",
-		"\tnew Promise((resolve) => {",
-		"\t\tconst socket = net.createConnection({ host: HOST, port });",
-		"",
-		'\t\tsocket.once("connect", () => {',
-		"\t\t\tsocket.end();",
-		"\t\t\tresolve(true);",
-		"\t\t});",
-		"",
-		'\t\tsocket.once("error", () => {',
-		"\t\t\tresolve(false);",
-		"\t\t});",
-		"",
-		"\t\tsocket.setTimeout(1000, () => {",
-		"\t\t\tsocket.destroy();",
-		"\t\t\tresolve(false);",
-		"\t\t});",
-		"\t});",
-		"",
-		"const waitForServer = async (child, port) => {",
-		"\tconst startedAt = Date.now();",
-		"",
-		"\twhile (Date.now() - startedAt < STARTUP_TIMEOUT_MS) {",
-		"\t\tif (child.exitCode !== null) {",
-		"\t\t\tthrow new Error(`next start exited early with code ${child.exitCode}.`);",
-		"\t\t}",
-		"",
-		"\t\tif (await canConnect(port)) {",
-		"\t\t\treturn;",
-		"\t\t}",
-		"",
-		"\t\tawait wait(250);",
-		"\t}",
-		"",
-		"\tthrow new Error(",
-		"\t\t`Timed out after ${STARTUP_TIMEOUT_MS / 1000}s waiting for next start.`,",
-		"\t);",
-		"};",
 		"",
 		"const fetchWithTimeout = async (url) => {",
 		"\tconst controller = new AbortController();",
@@ -1306,7 +1246,7 @@ function renderVerifySmokeFile(state) {
 		"\t\tthrow new Error(`${route} returned HTTP ${response.status}.`);",
 		"\t}",
 		"",
-		"\tif (response.status >= 300) {",
+		"\tif (response.status >= 300 && response.status < 400) {",
 		'\t\tconst location = response.headers.get("location");',
 		"\t\tif (!location) {",
 		"\t\t\tthrow new Error(`${route} redirected without a Location header.`);",
@@ -1332,74 +1272,15 @@ function renderVerifySmokeFile(state) {
 		"\tconsole.log(`ok ${route} ${response.status}`);",
 		"};",
 		"",
-		"const assertBuildExists = async () => {",
-		"\ttry {",
-		'\t\tawait access(".next/BUILD_ID");',
-		"\t} catch {",
-		"\t\tthrow new Error(",
-		'\t\t\t"Missing .next/BUILD_ID. Run `npm run build` first, or run `npm run verify`.",',
-		"\t\t);",
-		"\t}",
-		"};",
-		"",
-		"const stopServer = async (child) => {",
-		"\tif (child.exitCode !== null) {",
-		"\t\treturn;",
-		"\t}",
-		"",
-		'\tchild.kill("SIGTERM");',
-		"",
-		"\tconst exited = await new Promise((resolve) => {",
-		"\t\tconst timeout = setTimeout(() => resolve(false), 5000);",
-		"",
-		'\t\tchild.once("exit", () => {',
-		"\t\t\tclearTimeout(timeout);",
-		"\t\t\tresolve(true);",
-		"\t\t});",
-		"\t});",
-		"",
-		"\tif (!exited && child.exitCode === null) {",
-		'\t\tchild.kill("SIGKILL");',
-		"\t}",
-		"};",
-		"",
 		"const start = async () => {",
-		"\tawait assertBuildExists();",
-		"",
-		"\tconst port = await findAvailablePort();",
-		"\tif (!port) {",
-		"\t\tthrow new Error(",
-		"\t\t\t`No available smoke-test ports found in ${PORT_START}-${PORT_END}.`,",
-		"\t\t);",
-		"\t}",
-		"",
-		"\tconst baseUrl = `http://${HOST}:${port}`;",
-		'\tconst nextBin = require.resolve("next/dist/bin/next");',
-		"\tconst child = spawn(",
-		"\t\tprocess.execPath,",
-		'\t\t[nextBin, "start", "--hostname", HOST, "--port", String(port)],',
-		"\t\t{",
-		"\t\t\tenv: {",
-		"\t\t\t\t...process.env,",
-		'\t\t\t\tNODE_ENV: "production",',
-		"\t\t\t\tPORT: String(port),",
-		"\t\t\t},",
-		'\t\t\tstdio: ["ignore", "pipe", "pipe"],',
+		"\tconst { baseUrl, child } = await startLocalProductionServer({",
+		"\t\tenv: {",
+		'\t\t\tTEMPLATE_INTERNAL_ROUTES: "enabled",',
 		"\t\t},",
-		"\t);",
-		"",
-		'\tchild.stdout.on("data", (chunk) => {',
-		"\t\tprocess.stdout.write(chunk);",
-		"\t});",
-		"",
-		'\tchild.stderr.on("data", (chunk) => {',
-		"\t\tprocess.stderr.write(chunk);",
 		"\t});",
 		"",
 		"\ttry {",
 		"\t\tconsole.log(`Starting smoke server at ${baseUrl}`);",
-		"\t\tawait waitForServer(child, port);",
-		"",
 		"\t\tfor (const route of ROUTES) {",
 		"\t\t\tawait validateResponse(baseUrl, route);",
 		"\t\t}",
@@ -1439,6 +1320,7 @@ function getRewriteTargets(state) {
 		{
 			path: "src/app/(site)/(marketing)/_components/layout/MarketingContentSearch.tsx",
 			content: renderMarketingContentSearchFile(state),
+			optional: true,
 		},
 		{
 			path: "src/lib/marketing-content/fallback.ts",
@@ -1469,10 +1351,20 @@ function getRewriteTargets(state) {
 	return targets;
 }
 
-async function writeFileIfChanged(targetPath, content) {
+async function writeFileIfChanged(targetPath, content, options = {}) {
 	const absolutePath = path.join(ROOT, targetPath);
 	const nextContent = content.endsWith("\n") ? content : `${content}\n`;
-	const current = await fs.readFile(absolutePath, "utf8");
+	let current = "";
+
+	try {
+		current = await fs.readFile(absolutePath, "utf8");
+	} catch (error) {
+		if (options.optional && error?.code === "ENOENT") {
+			return false;
+		}
+
+		throw error;
+	}
 
 	if (current === nextContent) return false;
 
@@ -1743,6 +1635,7 @@ async function main() {
 	}
 
 	const pkg = await assertTemplateShape();
+	warnCanonicalTemplateMainPrune(pkg, parsed);
 	assertTemplateRootMutationAllowed(pkg, parsed);
 
 	const state = buildState(parsed.surfaceIds);
@@ -1765,7 +1658,9 @@ async function main() {
 	await deleteOwnedPaths(plan.deletedPaths);
 
 	for (const target of getRewriteTargets(state)) {
-		await writeFileIfChanged(target.path, target.content);
+		await writeFileIfChanged(target.path, target.content, {
+			optional: target.optional,
+		});
 	}
 
 	await removeEmptyInternalDirIfNeeded(plan.removeInternalDir);

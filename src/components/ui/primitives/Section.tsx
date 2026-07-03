@@ -26,7 +26,7 @@ const outerStyles = cva("w-full", {
 		},
 		height: {
 			auto: "h-auto",
-			hero: "sm:h-svh max-h-[1000px] min-h-fit",
+			hero: "min-h-svh max-h-[1000px] sm:h-svh sm:min-h-0",
 		},
 	},
 	defaultVariants: {
@@ -133,6 +133,7 @@ function SectionRoot<T extends ElementType = "section">({
 		.join(" ");
 	const innerClass = [
 		innerStyles({ maxWidth, align, justify, size }),
+		height === "hero" ? "min-h-svh sm:h-full sm:min-h-0" : undefined,
 		hasBackground ? "relative z-10" : undefined,
 		innerClassName,
 	]

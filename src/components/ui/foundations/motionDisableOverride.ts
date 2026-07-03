@@ -17,9 +17,48 @@ export function hasMotionDisabledSearchParam() {
 	);
 }
 
+export function hasIntroDisabledSearchParam() {
+	if (typeof window === "undefined") return false;
+
+	const params = new URLSearchParams(window.location.search);
+	const intro = params.get("intro")?.toLowerCase();
+	const loading = params.get("loading")?.toLowerCase();
+
+	return (
+		intro === "off" ||
+		intro === "false" ||
+		loading === "off" ||
+		loading === "false" ||
+		hasMotionDisabledSearchParam()
+	);
+}
+
+function hasIntroDisabledDocumentOverride() {
+	if (typeof document === "undefined") return false;
+	return document.documentElement.dataset.loadingOverride === "off";
+}
+
 function hasMotionDisabledDocumentOverride() {
 	if (typeof document === "undefined") return false;
 	return document.documentElement.dataset.motionOverride === "off";
+}
+
+export function useIntroDisableOverride() {
+	const [disabled, setDisabled] = React.useState(
+		() => hasIntroDisabledDocumentOverride() || hasIntroDisabledSearchParam(),
+	);
+
+	React.useEffect(() => {
+		const update = () =>
+			setDisabled(
+				hasIntroDisabledDocumentOverride() || hasIntroDisabledSearchParam(),
+			);
+		update();
+		window.addEventListener("popstate", update);
+		return () => window.removeEventListener("popstate", update);
+	}, []);
+
+	return disabled;
 }
 
 export function useMotionDisableOverride() {

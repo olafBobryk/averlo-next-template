@@ -1,8 +1,7 @@
+import type { IconName } from "@/components/ui/icons/Icon";
 import type { AppRouteId } from "@/config/routes";
 
 export type MarketingPageSlug = "home";
-
-export type HeaderIconName = "close" | "menu" | "search" | "dot";
 
 export type MarketingLink =
 	| {
@@ -18,7 +17,7 @@ export type MarketingLink =
 
 export type MarketingNavSection = MarketingLink & {
 	description?: string;
-	icon?: HeaderIconName;
+	icon?: IconName;
 };
 
 export type MarketingNavLink = MarketingLink & {
@@ -27,15 +26,15 @@ export type MarketingNavLink = MarketingLink & {
 
 export type MarketingMenuGroup = {
 	label: string;
-	icon?: HeaderIconName;
+	icon?: IconName;
 	link?: MarketingLink;
 	links?: MarketingLink[];
 };
 
 export type MarketingSocialLink = {
 	label: string;
+	icon: IconName;
 	href: string;
-	icon?: string;
 };
 
 export type MarketingSectionBase<TBlockType extends string> = {
@@ -48,7 +47,10 @@ export type HomeHeroSectionBlock = MarketingSectionBase<"homeHero"> & {
 	descriptions: Array<{
 		text: string;
 	}>;
-	cta: MarketingLink;
+	cta: {
+		label: string;
+		href: string;
+	};
 };
 
 export type MarketingSection = HomeHeroSectionBlock;

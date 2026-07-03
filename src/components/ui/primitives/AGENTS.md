@@ -15,9 +15,9 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - `src/components/ui/primitives/Field.tsx`: canonical label, description, and message wrapper.
 - `src/components/ui/primitives/Dropdown.tsx`: canonical trigger-plus-menu overlay primitive.
 - `src/components/ui/primitives/Listbox.tsx`: canonical accessible option list for menus and selectors.
-- `src/components/ui/primitives/Panel.tsx`: surface container.
+- `src/components/ui/primitives/Panel.tsx`: surface container for grouped content, cards, and transparent-border inner panels.
 - `src/components/ui/primitives/Section.tsx`: page section wrapper.
-- `src/components/ui/primitives/Divider.tsx`: subtle separator.
+- `src/components/ui/primitives/Divider.tsx`: horizontal or vertical separator with optional horizontal label.
 - `src/components/ui/primitives/dropdownStyles.ts`: shared dropdown classnames.
 
 ## Invariants
@@ -44,6 +44,8 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - Use `Dropdown` when you need a trigger and floating menu; use `Listbox` when the menu is fundamentally a list of options.
   - Prefer the default fixed strategy for filter menus and controls inside scrolling layouts.
 - Use `Panel`, `Section`, and `Divider` to preserve shared container spacing and surface rhythm.
+  - Use `Panel` instead of raw bordered boxes when a reusable surface needs padding, columns, gap, background, border, or shadow variants.
+  - Use `Divider` instead of ad hoc border divs when separating content groups or labeling a horizontal break.
 - Use `Section.Background` when a section needs image, gradient, or node-based background media behind its normal content flow.
   - The background spans the full section, not the inner max-width container.
   - It is decorative by default; set `interactive` only when the background truly needs live controls.

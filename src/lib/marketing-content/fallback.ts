@@ -7,15 +7,15 @@ export const fallbackHomePage: MarketingPageDocument = {
 		{
 			id: "home-hero",
 			blockType: "homeHero",
-			headline: "A focused website starter.",
+			headline: "A design system built for full control.",
 			descriptions: [
 				{
-					text: "Start with the smallest useful primitive surface, then add only the components this website needs.",
+					text: "Compose pages from shared primitives, motion, and layout building blocks so every screen stays consistent, adaptable, and easy to extend.",
 				},
 			],
 			cta: {
-				label: "Start",
-				href: "/#hero",
+				label: "Contact",
+				href: "/contact",
 			},
 		},
 	],
@@ -24,25 +24,34 @@ export const fallbackHomePage: MarketingPageDocument = {
 export const fallbackSiteLayout: SiteLayoutDocument = {
 	header: {
 		cta: {
-			label: "Start",
-			href: "/#hero",
+			label: "Join Now",
+			href: "/contact",
 		},
 		menuGroups: [
 			{
 				label: "Start",
-				icon: "dot",
 				link: { label: "Home", routeId: "home" },
 				links: [
 					{ label: "Hero", href: "/#hero" },
+					{ label: "Settings", routeId: "settings" },
+				],
+			},
+			{
+				label: "Template",
+				links: [
+					{ label: "Demo", routeId: "demo" },
 					{ label: "Intelligence", routeId: "intelligence" },
+					{ label: "Playground", routeId: "playground" },
+					{ label: "Dictionary", routeId: "dictionary" },
+					{ label: "Reference", routeId: "reference" },
 				],
 			},
 			{
 				label: "Build",
-				icon: "dot",
 				links: [
-					{ label: "Home", routeId: "home" },
-					{ label: "Contact", routeId: "contact" },
+					{ label: "Dashboard", routeId: "dashboard" },
+					{ label: "Pages", routeId: "dashboardPages" },
+					{ label: "Dashboard settings", routeId: "dashboardSettings" },
 				],
 			},
 		],
@@ -64,6 +73,22 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				],
 			},
 			{
+				label: "Demo",
+				routeId: "demo",
+				sections: [
+					{
+						label: "Header",
+						href: "/internal/demo/layout/header",
+						description: "Responsive marketing header patterns.",
+					},
+					{
+						label: "Toast",
+						href: "/internal/demo/ui/overlays/toast",
+						description: "Transient feedback examples.",
+					},
+				],
+			},
+			{
 				label: "Intelligence",
 				routeId: "intelligence",
 				sections: [
@@ -74,6 +99,20 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 					},
 				],
 			},
+			{
+				label: "Playground",
+				routeId: "playground",
+				sections: [
+					{
+						label: "Motion QA",
+						href: "/internal/playground/motion",
+						description: "Motion system QA playground.",
+					},
+				],
+			},
+			{ label: "Settings", routeId: "settings" },
+			{ label: "Dictionary", routeId: "dictionary" },
+			{ label: "Reference", routeId: "reference" },
 		],
 		search: {
 			ariaLabel: "Search pages",
@@ -83,26 +122,71 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 		searchGroups: [
 			{
 				label: "Home",
-				icon: "dot",
 				link: { label: "Home", routeId: "home" },
 				links: [{ label: "Hero", href: "/#hero" }],
 			},
 			{
-				label: "Internal",
-				icon: "dot",
-				links: [{ label: "Intelligence", routeId: "intelligence" }],
+				label: "Template",
+				links: [
+					{ label: "Demo", routeId: "demo" },
+					{ label: "Intelligence", routeId: "intelligence" },
+					{ label: "Playground", routeId: "playground" },
+					{ label: "Dictionary", routeId: "dictionary" },
+					{ label: "Reference", routeId: "reference" },
+				],
+			},
+			{
+				label: "Dashboard",
+				link: { label: "Dashboard", routeId: "dashboard" },
+				links: [
+					{ label: "Pages", routeId: "dashboardPages" },
+					{ label: "Settings", routeId: "dashboardSettings" },
+				],
 			},
 		],
 		topNavLinks: [
 			{ label: "Home", routeId: "home" },
+			{ label: "Demo", routeId: "demo" },
 			{ label: "Intelligence", routeId: "intelligence" },
+			{ label: "Settings", routeId: "settings" },
 		],
 	},
-	socialLinks: [],
+	socialLinks: [
+		{
+			label: "X",
+			icon: "x",
+			href: "",
+		},
+		{
+			label: "Instagram",
+			icon: "instagram",
+			href: "",
+		},
+		{
+			label: "LinkedIn",
+			icon: "linked-in",
+			href: "",
+		},
+		{
+			label: "Meta",
+			icon: "meta",
+			href: "",
+		},
+		{
+			label: "You Tube",
+			icon: "youtube",
+			href: "",
+		},
+	],
 	footer: {
 		navLinks: [
 			{ label: "Home", routeId: "home" },
+			{ label: "Demo", routeId: "demo" },
 			{ label: "Intelligence", routeId: "intelligence" },
+			{ label: "Playground", routeId: "playground" },
+			{ label: "Settings", routeId: "settings" },
+			{ label: "Dictionary", routeId: "dictionary" },
+			{ label: "Reference", routeId: "reference" },
 		],
 	},
 };
