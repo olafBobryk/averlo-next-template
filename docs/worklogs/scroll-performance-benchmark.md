@@ -55,21 +55,58 @@ Each recorded aggregate run stores:
 - `target_path`
 - `p95_frame_ms`
 - `p99_frame_ms`
+- `max_frame_ms`
+- `top_3_frame_avg_ms`
+- `frame_count`
+- `measurement_duration_ms`
 - `frames_over_16_7ms`
 - `frames_over_33ms`
+- `frames_over_16_7_per_1000px`
+- `frames_over_33_per_1000px`
+- `jank_budget_ms`
+- `jank_budget_ms_per_1000px`
+- `severe_jank_budget_ms`
+- `severe_jank_budget_ms_per_1000px`
 - `long_task_ms`
+- `long_task_count`
+- `long_task_ms_per_1000px`
 - `script_ms`
+- `script_ms_per_1000px`
 - `layout_ms`
+- `layout_ms_per_1000px`
 - `paint_ms`
+- `paint_ms_per_1000px`
+- `scroll_height_px`
+- `scrollable_height_px`
+- `scroll_distance_px`
+- `start_scroll_y`
+- `end_scroll_y`
+- `viewport_height_px`
 - `viewport`
 - `commit`
 - `status`
 - `notes`
 
+Additive work and jank metrics include a `*_per_1000px` normalized form so the
+score does not reward candidates that reduce page height or measured scroll
+distance. Tail frame metrics such as `p95_frame_ms`, `p99_frame_ms`,
+`max_frame_ms`, and `top_3_frame_avg_ms` stay in milliseconds because a stutter
+is experienced as time. Those metrics are protected by the geometry gate below.
+
 ## V1 Keep Rule
 
 - Fast pass: one run.
 - Confirm pass: three runs.
+- A candidate is gated before performance scoring if it changes the measured
+  page shape beyond the tolerance:
+  - exact `target_path` match,
+  - exact `viewport` match,
+  - `scrollable_height_px` within `2%` or `80px`,
+  - `scroll_distance_px` within `2%` or `80px`,
+  - `viewport_height_px` within `1px`.
+- A gated candidate is recorded as `gate`, reset back to the accepted baseline,
+  and should be reviewed as a visual/layout change rather than auto-kept as a
+  performance win.
 - A kept result must improve at least one primary metric:
   - `p95_frame_ms`, or
   - `frames_over_33ms`

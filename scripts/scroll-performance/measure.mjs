@@ -18,6 +18,7 @@ import {
 const PROJECT = "averlo-next-template";
 const DEFAULT_RUNS = 1;
 const DEFAULT_VIEWPORT = { width: 1440, height: 900 };
+const NORMALIZATION_DISTANCE_PX = 1000;
 const WARMUP_MS = 500;
 const STEP_SETTLE_MS = 180;
 const FINAL_SETTLE_MS = 900;
@@ -178,6 +179,28 @@ function quantile(values, ratio) {
 	return sorted[position];
 }
 
+function sumFrameBudget(frameDurations, threshold) {
+	return roundMetric(
+		frameDurations.reduce(
+			(sum, duration) => sum + Math.max(0, duration - threshold),
+			0,
+		),
+	);
+}
+
+function averageLargest(values, count) {
+	if (values.length === 0) return 0;
+	const largest = [...values].sort((a, b) => b - a).slice(0, count);
+	return roundMetric(
+		largest.reduce((sum, value) => sum + value, 0) / largest.length,
+	);
+}
+
+function perNormalizedDistance(value, scrollDistancePx) {
+	if (!Number.isFinite(scrollDistancePx) || scrollDistancePx <= 0) return 0;
+	return roundMetric((value / scrollDistancePx) * NORMALIZATION_DISTANCE_PX);
+}
+
 function getCommit() {
 	const result = spawnSync("git", ["rev-parse", "--short", "HEAD"], {
 		encoding: "utf8",
@@ -257,23 +280,72 @@ function buildRunResult({
 	longTasks,
 	notes,
 	paintMs,
+	scrollMetrics,
 	scriptMs,
 	targetPath,
 	viewport,
 }) {
+	const framesOver16 = frameDurations.filter((value) => value > 16.7).length;
+	const framesOver33 = frameDurations.filter((value) => value > 33).length;
+	const jankBudgetMs = sumFrameBudget(frameDurations, 16.7);
+	const severeJankBudgetMs = sumFrameBudget(frameDurations, 33);
+	const longTaskMs = roundMetric(
+		longTasks.reduce((sum, value) => sum + value, 0),
+	);
+	const measurementDurationMs = roundMetric(
+		frameDurations.reduce((sum, value) => sum + value, 0),
+	);
+	const scrollDistancePx = roundMetric(scrollMetrics.scrollDistancePx, 0);
+
 	return {
 		commit,
-		frames_over_16_7ms: frameDurations.filter((value) => value > 16.7).length,
-		frames_over_33ms: frameDurations.filter((value) => value > 33).length,
+		end_scroll_y: roundMetric(scrollMetrics.endScrollY, 0),
+		frame_count: frameDurations.length,
+		frames_over_16_7_per_1000px: perNormalizedDistance(
+			framesOver16,
+			scrollDistancePx,
+		),
+		frames_over_16_7ms: framesOver16,
+		frames_over_33_per_1000px: perNormalizedDistance(
+			framesOver33,
+			scrollDistancePx,
+		),
+		frames_over_33ms: framesOver33,
+		jank_budget_ms: jankBudgetMs,
+		jank_budget_ms_per_1000px: perNormalizedDistance(
+			jankBudgetMs,
+			scrollDistancePx,
+		),
 		layout_ms: roundMetric(layoutMs),
-		long_task_ms: roundMetric(longTasks.reduce((sum, value) => sum + value, 0)),
+		layout_ms_per_1000px: perNormalizedDistance(layoutMs, scrollDistancePx),
+		long_task_count: longTasks.length,
+		long_task_ms: longTaskMs,
+		long_task_ms_per_1000px: perNormalizedDistance(
+			longTaskMs,
+			scrollDistancePx,
+		),
+		max_frame_ms: roundMetric(Math.max(0, ...frameDurations)),
+		measurement_duration_ms: measurementDurationMs,
 		notes,
 		p95_frame_ms: roundMetric(quantile(frameDurations, 0.95)),
 		p99_frame_ms: roundMetric(quantile(frameDurations, 0.99)),
 		paint_ms: roundMetric(paintMs),
+		paint_ms_per_1000px: perNormalizedDistance(paintMs, scrollDistancePx),
+		scroll_distance_px: scrollDistancePx,
+		scroll_height_px: roundMetric(scrollMetrics.scrollHeightPx, 0),
+		scrollable_height_px: roundMetric(scrollMetrics.scrollableHeightPx, 0),
+		script_ms_per_1000px: perNormalizedDistance(scriptMs, scrollDistancePx),
+		severe_jank_budget_ms: severeJankBudgetMs,
+		severe_jank_budget_ms_per_1000px: perNormalizedDistance(
+			severeJankBudgetMs,
+			scrollDistancePx,
+		),
 		script_ms: roundMetric(scriptMs),
+		start_scroll_y: roundMetric(scrollMetrics.startScrollY, 0),
 		status: "measured",
 		target_path: targetPath,
+		top_3_frame_avg_ms: averageLargest(frameDurations, 3),
+		viewport_height_px: roundMetric(scrollMetrics.viewportHeightPx, 0),
 		viewport: `${viewport.width}x${viewport.height}`,
 	};
 }
@@ -287,10 +359,24 @@ function averageMetric(runs, key) {
 function buildAggregate({ commit, notes, runs, targetPath, viewport }) {
 	return {
 		commit,
+		end_scroll_y: averageMetric(runs, "end_scroll_y"),
+		frame_count: averageMetric(runs, "frame_count"),
+		frames_over_16_7_per_1000px: averageMetric(
+			runs,
+			"frames_over_16_7_per_1000px",
+		),
 		frames_over_16_7ms: averageMetric(runs, "frames_over_16_7ms"),
+		frames_over_33_per_1000px: averageMetric(runs, "frames_over_33_per_1000px"),
 		frames_over_33ms: averageMetric(runs, "frames_over_33ms"),
+		jank_budget_ms: averageMetric(runs, "jank_budget_ms"),
+		jank_budget_ms_per_1000px: averageMetric(runs, "jank_budget_ms_per_1000px"),
 		layout_ms: averageMetric(runs, "layout_ms"),
+		layout_ms_per_1000px: averageMetric(runs, "layout_ms_per_1000px"),
+		long_task_count: averageMetric(runs, "long_task_count"),
 		long_task_ms: averageMetric(runs, "long_task_ms"),
+		long_task_ms_per_1000px: averageMetric(runs, "long_task_ms_per_1000px"),
+		max_frame_ms: averageMetric(runs, "max_frame_ms"),
+		measurement_duration_ms: averageMetric(runs, "measurement_duration_ms"),
 		notes:
 			notes ??
 			(runs.length > 1
@@ -299,15 +385,30 @@ function buildAggregate({ commit, notes, runs, targetPath, viewport }) {
 		p95_frame_ms: averageMetric(runs, "p95_frame_ms"),
 		p99_frame_ms: averageMetric(runs, "p99_frame_ms"),
 		paint_ms: averageMetric(runs, "paint_ms"),
+		paint_ms_per_1000px: averageMetric(runs, "paint_ms_per_1000px"),
 		run_count: runs.length,
+		scroll_distance_px: averageMetric(runs, "scroll_distance_px"),
+		scroll_height_px: averageMetric(runs, "scroll_height_px"),
+		scrollable_height_px: averageMetric(runs, "scrollable_height_px"),
+		script_ms_per_1000px: averageMetric(runs, "script_ms_per_1000px"),
+		severe_jank_budget_ms: averageMetric(runs, "severe_jank_budget_ms"),
+		severe_jank_budget_ms_per_1000px: averageMetric(
+			runs,
+			"severe_jank_budget_ms_per_1000px",
+		),
 		script_ms: averageMetric(runs, "script_ms"),
+		start_scroll_y: averageMetric(runs, "start_scroll_y"),
 		status: runs.length > 1 ? "confirm" : "fast",
 		target_path: targetPath,
+		top_3_frame_avg_ms: averageMetric(runs, "top_3_frame_avg_ms"),
+		viewport_height_px: averageMetric(runs, "viewport_height_px"),
 		viewport: `${viewport.width}x${viewport.height}`,
 	};
 }
 
 async function performScrollPath(page) {
+	const positions = [await page.evaluate(() => Math.round(window.scrollY))];
+
 	await page.mouse.move(
 		Math.round(DEFAULT_VIEWPORT.width / 2),
 		Math.round(DEFAULT_VIEWPORT.height / 2),
@@ -316,9 +417,26 @@ async function performScrollPath(page) {
 	for (const deltaY of SCROLL_PLAN) {
 		await page.mouse.wheel(0, deltaY);
 		await page.waitForTimeout(STEP_SETTLE_MS);
+		positions.push(await page.evaluate(() => Math.round(window.scrollY)));
 	}
 
 	await page.waitForTimeout(FINAL_SETTLE_MS);
+
+	const endScrollY = await page.evaluate(() => Math.round(window.scrollY));
+	if (positions.at(-1) !== endScrollY) {
+		positions.push(endScrollY);
+	}
+
+	let scrollDistancePx = 0;
+	for (let index = 1; index < positions.length; index += 1) {
+		scrollDistancePx += Math.abs(positions[index] - positions[index - 1]);
+	}
+
+	return {
+		endScrollY,
+		scrollDistancePx,
+		startScrollY: positions[0] ?? 0,
+	};
 }
 
 async function runMeasurement({
@@ -351,7 +469,7 @@ async function runMeasurement({
 			window.__scrollPerformanceHarness?.start();
 		});
 
-		await performScrollPath(page);
+		const scrollPath = await performScrollPath(page);
 
 		const snapshot = await page.evaluate(() => {
 			performance.mark("scroll-performance-end");
@@ -366,6 +484,14 @@ async function runMeasurement({
 		for (let index = 1; index < snapshot.frames.length; index += 1) {
 			frameDurations.push(snapshot.frames[index] - snapshot.frames[index - 1]);
 		}
+		const viewportHeightPx = await page.evaluate(() => window.innerHeight);
+		const scrollHeightPx = Number(snapshot.scrollHeight) || 0;
+		const scrollMetrics = {
+			...scrollPath,
+			scrollHeightPx,
+			scrollableHeightPx: Math.max(0, scrollHeightPx - viewportHeightPx),
+			viewportHeightPx,
+		};
 
 		return buildRunResult({
 			commit,
@@ -377,8 +503,9 @@ async function runMeasurement({
 				endTs,
 			),
 			longTasks: snapshot.longTasks,
-			notes: `scrollY=${Math.round(snapshot.scrollY)} of ${Math.round(snapshot.scrollHeight)}`,
+			notes: `scrollY=${Math.round(snapshot.scrollY)} of ${Math.round(snapshot.scrollHeight)}; distance=${Math.round(scrollMetrics.scrollDistancePx)}`,
 			paintMs: sumTraceDuration(traceEvents, PAINT_EVENT_NAMES, startTs, endTs),
+			scrollMetrics,
 			scriptMs: sumTraceDuration(
 				traceEvents,
 				SCRIPT_EVENT_NAMES,

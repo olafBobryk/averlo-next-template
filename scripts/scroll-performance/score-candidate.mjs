@@ -304,6 +304,11 @@ async function main() {
 		accepted: state.accepted.metrics,
 		candidate: aggregate,
 	});
+	const decisionLabel = decision.keep
+		? "keep"
+		: decision.gated
+			? "gate"
+			: "discard";
 	const recordedAt = new Date().toISOString();
 
 	await appendJsonLine(runtimePaths.resultsPath, {
@@ -317,8 +322,11 @@ async function main() {
 		candidate_commit: currentCommit,
 		candidate_head: currentHead,
 		changed_files: changedFiles,
-		decision: decision.keep ? "keep" : "discard",
+		decision: decisionLabel,
 		deltas: decision.deltas,
+		gated: decision.gated,
+		geometry_deltas: decision.geometryDeltas,
+		geometry_failures: decision.geometryFailures,
 		label: commitLabel,
 		pass: nextPass,
 		primary_metric: decision.primaryMetric,
@@ -333,8 +341,11 @@ async function main() {
 	state.completedPasses = nextPass;
 	state.lastDecision = {
 		at: recordedAt,
-		decision: decision.keep ? "keep" : "discard",
+		decision: decisionLabel,
 		deltas: decision.deltas,
+		gated: decision.gated,
+		geometryDeltas: decision.geometryDeltas,
+		geometryFailures: decision.geometryFailures,
 		label: commitLabel,
 		pass: nextPass,
 		primaryMetric: decision.primaryMetric,
@@ -360,11 +371,13 @@ async function main() {
 	}
 
 	git(["reset", "--hard", state.accepted.head], { cwd: repoRoot });
-	logLines.push("Decision: DISCARD");
+	logLines.push(decision.gated ? "Decision: GATE" : "Decision: DISCARD");
 	logLines.push(decision.reason);
 	await writeJsonFile(runtimePaths.statePath, state);
 	await writeRunLog(runtimePaths, logLines);
-	console.log(`DISCARDED ${currentCommit}: ${decision.reason}`);
+	console.log(
+		`${decision.gated ? "GATED" : "DISCARDED"} ${currentCommit}: ${decision.reason}`,
+	);
 	console.log(`Reset branch back to ${state.accepted.commit}.`);
 }
 
