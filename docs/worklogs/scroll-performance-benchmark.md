@@ -2,30 +2,26 @@
 
 ## Purpose
 
-Track deterministic scroll-performance measurements on the dedicated internal
-review surface without conflating benchmark history with public-page behavior.
-Live measurement output belongs in local runtime files; the committed example
-log remains schema reference only.
+Track deterministic scroll-performance measurements against real existing page
+paths. The template owns the measurement harness and disposable worktree loop;
+project instances choose the target page and the mutable file scopes.
 
-## Route
-
-```text
-/internal/scroll-performance?scenario=default
-```
-
-Available generic scenarios:
-
-- `control`
-- `default`
-- `stress`
+Live measurement output belongs in local runtime files under `tmp/`. The
+committed example log remains schema reference only.
 
 ## Commands
 
-Run a fast single measurement:
+Run a fast single measurement against a page:
 
 ```bash
 npm run build
-npm run measure:scroll-performance -- --scenario default --output tmp/scroll-performance.json
+npm run measure:scroll-performance -- --path /internal/demo/ui/primitives --output tmp/scroll-performance.json
+```
+
+For pages that need a specific element before measurement starts, add:
+
+```bash
+npm run measure:scroll-performance -- --path / --ready-selector "#home-hero" --output tmp/home-scroll.json
 ```
 
 Record the aggregate result:
@@ -34,34 +30,29 @@ Record the aggregate result:
 npm run record:scroll-performance -- --input tmp/scroll-performance.json
 ```
 
-Default local output:
-
-```text
-tmp/scroll-performance-runs.jsonl
-```
-
-Run a confirm pass:
+Create a disposable autoresearch worktree for a real page target:
 
 ```bash
-npm run measure:scroll-performance -- --scenario default --runs 3 --output tmp/scroll-performance-confirm.json
+npm run setup:scroll-performance-autoresearch -- --tag home-hero --path / --mutable src/lib/marketing-content/sections/homeHero
 ```
 
-Create a disposable autoresearch worktree:
+Preview the setup without creating a worktree:
 
 ```bash
-npm run setup:scroll-performance-autoresearch -- --tag trial-01
+npm run setup:scroll-performance-autoresearch -- --tag page-smoke --path /internal/demo/ui/primitives --mutable src/components/ui/primitives --dry-run
 ```
 
 Score the accepted baseline or one committed candidate inside the worktree:
 
 ```bash
-npm run score:scroll-performance -- --tag trial-01
+npm run score:scroll-performance -- --tag home-hero
 ```
 
 ## Result Schema
 
 Each recorded aggregate run stores:
 
+- `target_path`
 - `p95_frame_ms`
 - `p99_frame_ms`
 - `frames_over_16_7ms`
@@ -70,7 +61,6 @@ Each recorded aggregate run stores:
 - `script_ms`
 - `layout_ms`
 - `paint_ms`
-- `scenario`
 - `viewport`
 - `commit`
 - `status`
@@ -92,21 +82,18 @@ Each recorded aggregate run stores:
 
 ## Prune Ownership
 
-`npm run prune:template -- --no-scroll-performance` removes the internal route,
-measurement scripts, benchmark docs, package scripts, and Playwright dependency.
-The surface is separate from `--no-demo` so project instances can keep component
-demos while dropping benchmark/autoresearch tooling.
+`npm run prune:template -- --no-scroll-performance` removes the grouped scripts,
+benchmark docs, package scripts, and Playwright dependency. It does not own an
+internal route because measurements run against real page paths.
 
-Thin-start does not include this route by default. If a thin-start instance needs
-scroll-performance tooling, add it intentionally after activation.
+Thin-start does not include this tooling by default. If a thin-start instance
+needs scroll-performance measurement, add it intentionally after activation.
 
 ## Notes
 
 - Scoring uses a production-like local build with `TEMPLATE_INTERNAL_ROUTES=1`.
-- The benchmark surface is review infrastructure only; it does not authorize
-  Home changes by itself.
-- Manual visual QA may still use `?motion=off&reveal=off`, but the score runner
-  measures without those overrides.
+- The benchmark surface is process infrastructure only; it does not authorize
+  page changes by itself.
 - Disposable loop runs keep `results.jsonl`, `latest-measurement.json`,
   `state.json`, and optional `run.log` under
   `tmp/scroll-performance-autoresearch/<tag>/`.

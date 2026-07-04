@@ -5,28 +5,30 @@ import fs from "node:fs/promises";
 import process from "node:process";
 import {
 	DEFAULT_AUTORESEARCH_PASS_LIMIT,
-	DEFAULT_SCROLL_PERFORMANCE_SCENARIO,
+	DEFAULT_TARGET_PATH,
 	ensureJsonLineFile,
 	getAutoresearchBranchName,
 	getAutoresearchWorktreePath,
-	MUTABLE_SCOPE_ALLOWLIST,
+	normalizeScopePath,
+	normalizeTargetPath,
 	PRIMARY_METRIC_TOLERANCES,
 	READ_ONLY_SCOPE,
 	resolveAutoresearchRuntimePaths,
-	SCROLL_PERFORMANCE_SCENARIOS,
 	sanitizeTag,
 	writeJsonFile,
-} from "./_lib/scroll-performance-autoresearch.mjs";
+} from "./lib/scroll-performance.mjs";
 
 function printUsage() {
-	console.log(`Usage: npm run setup:scroll-performance-autoresearch -- --tag <tag> [options]
+	console.log(`Usage: npm run setup:scroll-performance-autoresearch -- --tag <tag> --mutable <path> [options]
 
 Options:
-  --tag <tag>               Required run tag used for branch, worktree, and runtime files
-  --passes 12               Candidate pass cap (default: ${DEFAULT_AUTORESEARCH_PASS_LIMIT})
-  --allow-over-12           Required when --passes exceeds ${DEFAULT_AUTORESEARCH_PASS_LIMIT}
-  --scenario default        Scenario to score in this worktree (default: ${DEFAULT_SCROLL_PERFORMANCE_SCENARIO})
-                            Supported: control, default, stress
+  --tag <tag>                 Required run tag used for branch, worktree, and runtime files
+  --path /                    Page path to measure (default: ${DEFAULT_TARGET_PATH})
+  --ready-selector "[data]"   Optional selector to wait for before scoring
+  --mutable <path>            Allowed candidate mutation scope; repeatable
+  --passes 12                 Candidate pass cap (default: ${DEFAULT_AUTORESEARCH_PASS_LIMIT})
+  --allow-over-12             Required when --passes exceeds ${DEFAULT_AUTORESEARCH_PASS_LIMIT}
+  --dry-run                   Print setup plan without creating a worktree
 `);
 }
 
@@ -43,9 +45,22 @@ function parseArgs(argv) {
 		}
 
 		const [rawKey, inlineValue] = arg.slice(2).split("=");
+		const key = rawKey.trim();
 		const nextValue = inlineValue ?? argv[index + 1];
 		if (inlineValue === undefined) index += 1;
-		values.set(rawKey.trim(), nextValue);
+
+		if (values.has(key)) {
+			const existing = values.get(key);
+			values.set(
+				key,
+				Array.isArray(existing)
+					? [...existing, nextValue]
+					: [existing, nextValue],
+			);
+			continue;
+		}
+
+		values.set(key, nextValue);
 	}
 
 	return { flags, values };
@@ -54,6 +69,18 @@ function parseArgs(argv) {
 function readString(values, key) {
 	const value = values.get(key);
 	return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function readStringList(values, key) {
+	const value = values.get(key);
+	const valuesList = Array.isArray(value)
+		? value
+		: value === undefined
+			? []
+			: [value];
+	return valuesList
+		.map((item) => (typeof item === "string" ? item.trim() : ""))
+		.filter(Boolean);
 }
 
 function readPositiveInteger(values, key, fallback) {
@@ -108,6 +135,28 @@ async function pathExists(filePath) {
 	}
 }
 
+function printDryRunPlan({
+	branchName,
+	mutableScopeAllowlist,
+	passLimit,
+	readySelector,
+	targetPath,
+	worktreePath,
+}) {
+	console.log("Scroll-performance autoresearch setup plan");
+	console.log("============================================");
+	console.log(`Branch: ${branchName}`);
+	console.log(`Worktree: ${worktreePath}`);
+	console.log(`Target path: ${targetPath}`);
+	console.log(`Ready selector: ${readySelector ?? "(none)"}`);
+	console.log(`Pass limit: ${passLimit}`);
+	console.log("Mutable scope allowlist:");
+	for (const scopePath of mutableScopeAllowlist) {
+		console.log(`- ${scopePath}`);
+	}
+	console.log("Dry run complete. No worktree was created.");
+}
+
 async function main() {
 	const args = parseArgs(process.argv.slice(2));
 	if (args.flags.has("help")) {
@@ -121,12 +170,16 @@ async function main() {
 		"passes",
 		DEFAULT_AUTORESEARCH_PASS_LIMIT,
 	);
-	const scenario =
-		readString(args.values, "scenario") ?? DEFAULT_SCROLL_PERFORMANCE_SCENARIO;
+	const targetPath = normalizeTargetPath(readString(args.values, "path"));
+	const readySelector = readString(args.values, "ready-selector");
+	const mutableScopeAllowlist = readStringList(args.values, "mutable").map(
+		normalizeScopePath,
+	);
+	const dryRun = args.flags.has("dry-run");
 
-	if (!SCROLL_PERFORMANCE_SCENARIOS.has(scenario)) {
+	if (mutableScopeAllowlist.length === 0 && !dryRun) {
 		throw new Error(
-			`Unsupported scenario "${scenario}". Use control, default, or stress.`,
+			"Provide at least one --mutable <path> for non-dry-run setup.",
 		);
 	}
 
@@ -140,8 +193,6 @@ async function main() {
 	}
 
 	const repoRoot = getRepoRoot(process.cwd());
-	requireCleanWorkingTree(repoRoot);
-
 	const branchAtSetup = git(["branch", "--show-current"], {
 		cwd: repoRoot,
 	}).stdout.trim();
@@ -163,6 +214,20 @@ async function main() {
 		cwd: worktreePath,
 		tag,
 	});
+
+	if (dryRun) {
+		printDryRunPlan({
+			branchName,
+			mutableScopeAllowlist,
+			passLimit,
+			readySelector,
+			targetPath,
+			worktreePath,
+		});
+		return;
+	}
+
+	requireCleanWorkingTree(repoRoot);
 
 	if (
 		git(["show-ref", "--verify", "--quiet", `refs/heads/${branchName}`], {
@@ -187,7 +252,7 @@ async function main() {
 			commit: acceptedCommit,
 			establishedAt: null,
 			head: acceptedHead,
-			label: "accepted harness baseline",
+			label: "accepted page target baseline",
 			metrics: null,
 		},
 		benchmark: {
@@ -199,11 +264,10 @@ async function main() {
 		completedPasses: 0,
 		createdAt: new Date().toISOString(),
 		lastDecision: null,
-		mutableScopeAllowlist: MUTABLE_SCOPE_ALLOWLIST,
+		mutableScopeAllowlist,
 		passLimit,
 		readOnlyScope: READ_ONLY_SCOPE,
-		route: `/internal/scroll-performance?scenario=${scenario}`,
-		scenario,
+		readySelector,
 		schemaVersion: 1,
 		source: {
 			branch: branchAtSetup,
@@ -212,6 +276,7 @@ async function main() {
 			repoRoot,
 		},
 		tag,
+		targetPath,
 		worktreePath,
 	});
 

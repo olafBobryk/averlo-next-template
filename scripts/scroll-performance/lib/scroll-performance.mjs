@@ -2,12 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-export const DEFAULT_SCROLL_PERFORMANCE_SCENARIO = "default";
-export const SCROLL_PERFORMANCE_SCENARIOS = new Set([
-	"control",
-	"default",
-	"stress",
-]);
+export const DEFAULT_TARGET_PATH = "/";
 export const DEFAULT_AUTORESEARCH_PASS_LIMIT = 12;
 export const DEFAULT_SCROLL_PERFORMANCE_RECORD_PATH = path.join(
 	"tmp",
@@ -17,27 +12,15 @@ export const AUTORESEARCH_RUNTIME_ROOT = path.join(
 	"tmp",
 	"scroll-performance-autoresearch",
 );
-export const SCROLL_PERFORMANCE_ROUTE = `/internal/scroll-performance?scenario=${DEFAULT_SCROLL_PERFORMANCE_SCENARIO}`;
 export const PRIMARY_METRIC_TOLERANCES = {
 	frames_over_33ms: 1.0,
 	p95_frame_ms: 0.5,
 };
-export const MUTABLE_SCOPE_ALLOWLIST = [
-	"src/app/(site)/(marketing)/internal/scroll-performance",
-	"src/components/ui/foundations",
-	"src/components/ui/motion",
-	"src/components/ui/primitives",
-];
 export const READ_ONLY_SCOPE = [
-	"scripts/measure-scroll-performance.mjs",
-	"scripts/record-scroll-performance-benchmark.mjs",
+	"scripts/scroll-performance",
 	"scripts/_lib/local-production-preview.mjs",
-	"src/app/(site)/(marketing)/internal/layout.tsx",
-	"src/app/(site)/(marketing)/(home)",
-	"src/app/(site)/(marketing)/_components/layout",
-	"src/lib/marketing-content",
-	"src/app/api",
-	"src/payload",
+	"docs/worklogs/scroll-performance-benchmark.md",
+	"docs/worklogs/scroll-performance-runs.example.jsonl",
 	"docs/orchestration",
 ];
 
@@ -46,6 +29,29 @@ function normalizePath(value) {
 		.replaceAll("\\", "/")
 		.replace(/^\.\/+/, "")
 		.replace(/\/$/, "");
+}
+
+export function normalizeTargetPath(value) {
+	const raw =
+		String(value ?? DEFAULT_TARGET_PATH).trim() || DEFAULT_TARGET_PATH;
+
+	if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) {
+		throw new Error("--path must be a local route path, not an absolute URL.");
+	}
+
+	if (!raw.startsWith("/")) {
+		throw new Error("--path must start with '/'.");
+	}
+
+	return raw;
+}
+
+export function normalizeScopePath(value) {
+	const normalized = normalizePath(String(value ?? "").trim());
+	if (!normalized || normalized.startsWith("../") || normalized === "..") {
+		throw new Error(`Invalid mutable scope: ${value}`);
+	}
+	return normalized;
 }
 
 export function roundMetric(value, digits = 3) {
@@ -71,7 +77,7 @@ export function isValidScrollPerformanceRun(value) {
 		isNonNegativeNumber(value.script_ms) &&
 		isNonNegativeNumber(value.layout_ms) &&
 		isNonNegativeNumber(value.paint_ms) &&
-		typeof value.scenario === "string" &&
+		typeof value.target_path === "string" &&
 		typeof value.viewport === "string" &&
 		typeof value.status === "string" &&
 		typeof value.notes === "string"
@@ -154,11 +160,11 @@ export async function writeJsonFile(filePath, value) {
 	await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-export function isPathWithinMutableScope(filePath) {
+export function isPathWithinMutableScope(filePath, mutableScopeAllowlist) {
 	const normalizedFile = normalizePath(filePath);
 
-	return MUTABLE_SCOPE_ALLOWLIST.some((scopePath) => {
-		const normalizedScope = normalizePath(scopePath);
+	return mutableScopeAllowlist.some((scopePath) => {
+		const normalizedScope = normalizeScopePath(scopePath);
 		return (
 			normalizedFile === normalizedScope ||
 			normalizedFile.startsWith(`${normalizedScope}/`)
@@ -166,8 +172,10 @@ export function isPathWithinMutableScope(filePath) {
 	});
 }
 
-export function getUnauthorizedPaths(filePaths) {
-	return filePaths.filter((filePath) => !isPathWithinMutableScope(filePath));
+export function getUnauthorizedPaths(filePaths, mutableScopeAllowlist) {
+	return filePaths.filter(
+		(filePath) => !isPathWithinMutableScope(filePath, mutableScopeAllowlist),
+	);
 }
 
 export function decideScrollPerformanceKeep({ accepted, candidate }) {

@@ -8,10 +8,14 @@ import { chromium } from "playwright";
 import {
 	startLocalProductionServer,
 	stopServer,
-} from "./_lib/local-production-preview.mjs";
+} from "../_lib/local-production-preview.mjs";
+import {
+	DEFAULT_TARGET_PATH,
+	normalizeTargetPath,
+	roundMetric,
+} from "./lib/scroll-performance.mjs";
 
 const PROJECT = "averlo-next-template";
-const DEFAULT_SCENARIO = "default";
 const DEFAULT_RUNS = 1;
 const DEFAULT_VIEWPORT = { width: 1440, height: 900 };
 const WARMUP_MS = 500;
@@ -20,7 +24,6 @@ const FINAL_SETTLE_MS = 900;
 const SCROLL_PLAN = [
 	900, 900, 900, 900, 900, 900, 900, 900, 900, 900, -540, -540, -540, 720,
 ];
-const SUPPORTED_SCENARIOS = ["control", "default", "stress"];
 
 const TRACE_CATEGORIES = [
 	"devtools.timeline",
@@ -118,12 +121,13 @@ function printUsage() {
 	console.log(`Usage: npm run measure:scroll-performance -- [options]
 
 Options:
-  --base-url http://127.0.0.1:3100      Attach to an existing production-like preview
-  --scenario control|default|stress     Scenario to measure (default: ${DEFAULT_SCENARIO})
-  --runs 1|3                            Number of repeated runs (default: ${DEFAULT_RUNS})
-  --output path/to/result.json          Write the full result payload to disk
-  --headed                              Run Chromium headed for inspection
-  --notes "Short note"                  Attach a note to the aggregate result
+  --path /internal/demo/ui/primitives     Page path to measure (default: ${DEFAULT_TARGET_PATH})
+  --ready-selector "[data-ready]"         Optional selector to wait for before scrolling
+  --base-url http://127.0.0.1:3100        Attach to an existing production-like preview
+  --runs 1|3                              Number of repeated runs (default: ${DEFAULT_RUNS})
+  --output path/to/result.json            Write the full result payload to disk
+  --headed                                Run Chromium headed for inspection
+  --notes "Short note"                    Attach a note to the aggregate result
 `);
 }
 
@@ -172,12 +176,6 @@ function quantile(values, ratio) {
 		Math.max(0, Math.ceil(sorted.length * ratio) - 1),
 	);
 	return sorted[position];
-}
-
-function roundMetric(value, digits = 3) {
-	if (!Number.isFinite(value)) return 0;
-	const precision = 10 ** digits;
-	return Math.round(value * precision) / precision;
 }
 
 function getCommit() {
@@ -259,8 +257,8 @@ function buildRunResult({
 	longTasks,
 	notes,
 	paintMs,
-	scenario,
 	scriptMs,
+	targetPath,
 	viewport,
 }) {
 	return {
@@ -273,9 +271,9 @@ function buildRunResult({
 		p95_frame_ms: roundMetric(quantile(frameDurations, 0.95)),
 		p99_frame_ms: roundMetric(quantile(frameDurations, 0.99)),
 		paint_ms: roundMetric(paintMs),
-		scenario,
 		script_ms: roundMetric(scriptMs),
 		status: "measured",
+		target_path: targetPath,
 		viewport: `${viewport.width}x${viewport.height}`,
 	};
 }
@@ -286,7 +284,7 @@ function averageMetric(runs, key) {
 	);
 }
 
-function buildAggregate({ commit, notes, runs, scenario, viewport }) {
+function buildAggregate({ commit, notes, runs, targetPath, viewport }) {
 	return {
 		commit,
 		frames_over_16_7ms: averageMetric(runs, "frames_over_16_7ms"),
@@ -302,9 +300,9 @@ function buildAggregate({ commit, notes, runs, scenario, viewport }) {
 		p99_frame_ms: averageMetric(runs, "p99_frame_ms"),
 		paint_ms: averageMetric(runs, "paint_ms"),
 		run_count: runs.length,
-		scenario,
 		script_ms: averageMetric(runs, "script_ms"),
 		status: runs.length > 1 ? "confirm" : "fast",
+		target_path: targetPath,
 		viewport: `${viewport.width}x${viewport.height}`,
 	};
 }
@@ -327,7 +325,8 @@ async function runMeasurement({
 	baseUrl,
 	browser,
 	commit,
-	scenario,
+	readySelector,
+	targetPath,
 	viewport,
 }) {
 	const context = await browser.newContext({ viewport });
@@ -336,10 +335,11 @@ async function runMeasurement({
 	const session = await context.newCDPSession(page);
 
 	try {
-		const url = new URL("/internal/scroll-performance", baseUrl);
-		url.searchParams.set("scenario", scenario);
+		const url = new URL(targetPath, baseUrl);
 		await page.goto(url.toString(), { waitUntil: "networkidle" });
-		await page.waitForSelector("[data-scroll-performance-root]");
+		if (readySelector) {
+			await page.waitForSelector(readySelector);
+		}
 		await page.waitForFunction(
 			() => !document.querySelector("[data-loading-screen-mount='true']"),
 		);
@@ -379,13 +379,13 @@ async function runMeasurement({
 			longTasks: snapshot.longTasks,
 			notes: `scrollY=${Math.round(snapshot.scrollY)} of ${Math.round(snapshot.scrollHeight)}`,
 			paintMs: sumTraceDuration(traceEvents, PAINT_EVENT_NAMES, startTs, endTs),
-			scenario,
 			scriptMs: sumTraceDuration(
 				traceEvents,
 				SCRIPT_EVENT_NAMES,
 				startTs,
 				endTs,
 			),
+			targetPath,
 			viewport,
 		});
 	} finally {
@@ -411,13 +411,8 @@ async function main() {
 		return;
 	}
 
-	const scenario = readString(args.values, "scenario") ?? DEFAULT_SCENARIO;
-	if (!SUPPORTED_SCENARIOS.includes(scenario)) {
-		throw new Error(
-			`Unsupported scenario "${scenario}". Use ${SUPPORTED_SCENARIOS.join(", ")}.`,
-		);
-	}
-
+	const targetPath = normalizeTargetPath(readString(args.values, "path"));
+	const readySelector = readString(args.values, "ready-selector");
 	const runCount = readPositiveInteger(args.values, "runs", DEFAULT_RUNS);
 	const baseUrl = readString(args.values, "base-url");
 	const outputPath = readString(args.values, "output");
@@ -446,7 +441,8 @@ async function main() {
 					baseUrl: resolvedBaseUrl,
 					browser,
 					commit,
-					scenario,
+					readySelector,
+					targetPath,
 					viewport: DEFAULT_VIEWPORT,
 				}),
 			);
@@ -457,12 +453,12 @@ async function main() {
 				commit,
 				notes,
 				runs,
-				scenario,
+				targetPath,
 				viewport: DEFAULT_VIEWPORT,
 			}),
 			capturedAt: new Date().toISOString(),
 			project: PROJECT,
-			route: `/internal/scroll-performance?scenario=${scenario}`,
+			route: targetPath,
 			runs,
 			schemaVersion: 1,
 		};
@@ -473,7 +469,7 @@ async function main() {
 		}
 
 		console.log(
-			`Measured ${scenario} on ${payload.aggregate.viewport}: p95 ${payload.aggregate.p95_frame_ms}ms, p99 ${payload.aggregate.p99_frame_ms}ms, >33ms frames ${payload.aggregate.frames_over_33ms}.`,
+			`Measured ${targetPath} on ${payload.aggregate.viewport}: p95 ${payload.aggregate.p95_frame_ms}ms, p99 ${payload.aggregate.p99_frame_ms}ms, >33ms frames ${payload.aggregate.frames_over_33ms}.`,
 		);
 		console.log(JSON.stringify(payload, null, 2));
 	} finally {

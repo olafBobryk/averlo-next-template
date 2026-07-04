@@ -7,14 +7,19 @@ import {
 	appendJsonLine,
 	DEFAULT_SCROLL_PERFORMANCE_RECORD_PATH,
 	parseScrollPerformanceCandidate,
-} from "./_lib/scroll-performance-autoresearch.mjs";
+} from "./lib/scroll-performance.mjs";
 
 function parseArgs(argv) {
+	const flags = new Set();
 	const values = new Map();
 
 	for (let index = 0; index < argv.length; index += 1) {
 		const arg = argv[index];
 		if (!arg.startsWith("--")) continue;
+		if (!arg.includes("=") && (argv[index + 1]?.startsWith("--") ?? true)) {
+			flags.add(arg.slice(2));
+			continue;
+		}
 
 		const [key, inlineValue] = arg.slice(2).split("=");
 		const nextValue = inlineValue ?? argv[index + 1];
@@ -23,7 +28,7 @@ function parseArgs(argv) {
 		values.set(key, nextValue);
 	}
 
-	return values;
+	return { flags, values };
 }
 
 function readString(values, key) {
@@ -41,7 +46,13 @@ Optional:
 `);
 }
 
-const values = parseArgs(process.argv.slice(2));
+const args = parseArgs(process.argv.slice(2));
+if (args.flags.has("help")) {
+	printUsage();
+	process.exit(0);
+}
+
+const values = args.values;
 const inputPath = readString(values, "input");
 if (!inputPath) {
 	printUsage();
@@ -70,5 +81,5 @@ const run = {
 await appendJsonLine(absoluteOutput, run);
 
 console.log(
-	`Recorded ${run.status} ${run.scenario} scroll result in ${path.relative(process.cwd(), absoluteOutput)}.`,
+	`Recorded ${run.status} ${run.target_path} scroll result in ${path.relative(process.cwd(), absoluteOutput)}.`,
 );

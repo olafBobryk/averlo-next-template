@@ -64,8 +64,8 @@ adapters so the frontend continues to render a small page/section contract.
 - **Content modes:** static fallback content, Payload-ready scaffold, or
   Payload-powered Vercel setup.
 - **Agent workflows:** Template Intelligence, isolated agent dev server,
-  template pruning, smoke checks, scroll-performance measurement, and optional
-  thin-start activation.
+  template pruning, smoke checks, page-target scroll-performance measurement,
+  and optional thin-start activation.
 
 ## Included Workflows
 
@@ -96,18 +96,18 @@ local artifacts. See `docs/template-intelligence.md` for the full workflow.
 
 ### Scroll Performance
 
-Use the internal deterministic fixture when a candidate changes motion,
-scrolling, or shared shell behavior:
+Measure an existing page when a candidate changes motion, scrolling, shared
+shell behavior, or a page section with expensive scroll effects:
 
 ```sh
-npm run measure:scroll-performance -- --scenario default --output tmp/scroll-performance.json
+npm run measure:scroll-performance -- --path /internal/demo/ui/primitives --output tmp/scroll-performance.json
 npm run record:scroll-performance -- --input tmp/scroll-performance.json
 ```
 
-The measured route is `/internal/scroll-performance?scenario=default`; generic
-scenarios are `control`, `default`, and `stress`. Runtime results stay under
-ignored `tmp/` paths. See `docs/worklogs/scroll-performance-benchmark.md` for
-the autoresearch worktree loop.
+The measurement harness injects timing instrumentation into the real page path.
+Runtime results stay under ignored `tmp/` paths. See
+`docs/worklogs/scroll-performance-benchmark.md` for the autoresearch worktree
+loop.
 
 ### Content Modes
 
@@ -212,7 +212,7 @@ Read `docs/thin-start-creation-boundary.md` before using this path.
 | `npm run verify:static` | Biome plus TypeScript checks. |
 | `npm run build` | Production Next.js build. |
 | `npm run verify:smoke` | Route smoke verification. |
-| `npm run measure:scroll-performance` | Measure the internal deterministic scroll fixture. |
+| `npm run measure:scroll-performance` | Measure scroll performance on a real page path. |
 | `npm run prune:template` | Remove optional template surfaces in a clone. |
 | `npm run create:thin-start` | Activate the optional thin-start instance path. |
 

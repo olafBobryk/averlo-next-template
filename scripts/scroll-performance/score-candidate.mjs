@@ -14,7 +14,7 @@ import {
 	sanitizeTag,
 	summarizeScrollPerformanceResult,
 	writeJsonFile,
-} from "./_lib/scroll-performance-autoresearch.mjs";
+} from "./lib/scroll-performance.mjs";
 
 function printUsage() {
 	console.log(`Usage: npm run score:scroll-performance -- --tag <tag> [options]
@@ -109,9 +109,10 @@ async function scoreMeasurement({
 	cwd,
 	label,
 	logLines,
+	readySelector,
 	runCount,
 	runtimePaths,
-	scenario,
+	targetPath,
 }) {
 	await runAndCapture("npm", ["run", "build"], {
 		cwd,
@@ -119,25 +120,27 @@ async function scoreMeasurement({
 		logLines,
 	});
 
-	await runAndCapture(
-		process.execPath,
-		[
-			"scripts/measure-scroll-performance.mjs",
-			"--scenario",
-			scenario,
-			"--runs",
-			String(runCount),
-			"--output",
-			runtimePaths.latestMeasurementPath,
-			"--notes",
-			label,
-		],
-		{
-			cwd,
-			label: `node scripts/measure-scroll-performance.mjs --scenario ${scenario} --runs ${runCount} --output ${runtimePaths.latestMeasurementPath} --notes "${label}"`,
-			logLines,
-		},
-	);
+	const measureArgs = [
+		"scripts/scroll-performance/measure.mjs",
+		"--path",
+		targetPath,
+		"--runs",
+		String(runCount),
+		"--output",
+		runtimePaths.latestMeasurementPath,
+		"--notes",
+		label,
+	];
+
+	if (readySelector) {
+		measureArgs.push("--ready-selector", readySelector);
+	}
+
+	await runAndCapture(process.execPath, measureArgs, {
+		cwd,
+		label: `node ${measureArgs.join(" ")}`,
+		logLines,
+	});
 
 	return parseScrollPerformanceCandidate(
 		await readJsonFile(runtimePaths.latestMeasurementPath),
@@ -192,6 +195,7 @@ async function main() {
 		`tag: ${tag}`,
 		`branch: ${currentBranch}`,
 		`head: ${currentHead}`,
+		`target_path: ${state.targetPath}`,
 	];
 
 	if (state.accepted.metrics === null) {
@@ -205,9 +209,10 @@ async function main() {
 			cwd: repoRoot,
 			label: commitLabel,
 			logLines,
+			readySelector: state.readySelector,
 			runCount,
 			runtimePaths,
-			scenario: state.scenario,
+			targetPath: state.targetPath,
 		});
 		const recordedAt = new Date().toISOString();
 		await appendJsonLine(runtimePaths.resultsPath, {
@@ -222,6 +227,7 @@ async function main() {
 			runs: runCount,
 			schemaVersion: 1,
 			tag,
+			target_path: state.targetPath,
 		});
 
 		state.accepted = {
@@ -275,7 +281,10 @@ async function main() {
 		.stdout.split("\n")
 		.map((line) => line.trim())
 		.filter(Boolean);
-	const unauthorizedPaths = getUnauthorizedPaths(changedFiles);
+	const unauthorizedPaths = getUnauthorizedPaths(
+		changedFiles,
+		state.mutableScopeAllowlist ?? [],
+	);
 	if (unauthorizedPaths.length > 0) {
 		throw new Error(
 			`Candidate touched files outside the mutable allowlist:\n${unauthorizedPaths.join("\n")}`,
@@ -286,9 +295,10 @@ async function main() {
 		cwd: repoRoot,
 		label: commitLabel,
 		logLines,
+		readySelector: state.readySelector,
 		runCount,
 		runtimePaths,
-		scenario: state.scenario,
+		targetPath: state.targetPath,
 	});
 	const decision = decideScrollPerformanceKeep({
 		accepted: state.accepted.metrics,
@@ -317,6 +327,7 @@ async function main() {
 		runs: runCount,
 		schemaVersion: 1,
 		tag,
+		target_path: state.targetPath,
 	});
 
 	state.completedPasses = nextPass;

@@ -116,15 +116,10 @@ const SURFACES = {
 		id: "scrollPerformance",
 		flag: "--no-scroll-performance",
 		description:
-			"Remove the internal scroll-performance route, measurement/autoresearch scripts, benchmark docs, and Playwright dependency.",
+			"Remove page-target scroll-performance measurement/autoresearch scripts, benchmark docs, and Playwright dependency.",
 		dependentSurfaces: [],
 		ownedPaths: [
-			"src/app/(site)/(marketing)/internal/scroll-performance",
-			"scripts/_lib/scroll-performance-autoresearch.mjs",
-			"scripts/measure-scroll-performance.mjs",
-			"scripts/record-scroll-performance-benchmark.mjs",
-			"scripts/setup-scroll-performance-autoresearch.mjs",
-			"scripts/score-scroll-performance-candidate.mjs",
+			"scripts/scroll-performance",
 			"docs/worklogs/scroll-performance-benchmark.md",
 			"docs/worklogs/scroll-performance-runs.example.jsonl",
 		],
@@ -134,8 +129,8 @@ const SURFACES = {
 		searchSources: [],
 		postRemovalAssertions: [
 			{
-				label: "scroll-performance route links",
-				pattern: /\/internal\/scroll-performance|scroll-performance/,
+				label: "scroll-performance source references",
+				pattern: /scroll-performance/,
 			},
 		],
 	},
@@ -273,7 +268,7 @@ Flags:
   --no-demo        Remove the internal demo surface
   --no-intelligence Remove the internal template intelligence surface
   --no-scroll-performance
-                  Remove the internal scroll-performance tooling surface
+                  Remove page-target scroll-performance tooling
   --no-playground  Remove the internal playground surface
   --no-dictionary  Remove the internal dictionary surface
   --no-reference   Remove the internal reference surface
@@ -428,7 +423,6 @@ function buildState(surfaceIds) {
 		hasDashboard: !removed.has("dashboard"),
 		hasDemo: !removed.has("demo"),
 		hasIntelligence: !removed.has("intelligence"),
-		hasScrollPerformance: !removed.has("scrollPerformance"),
 		hasPlayground: !removed.has("playground"),
 		hasDictionary: !removed.has("dictionary"),
 		hasReference: !removed.has("reference"),
@@ -461,7 +455,6 @@ async function collectPlan(surfaceIds) {
 	const removeInternalDir =
 		surfaceIds.includes("demo") &&
 		surfaceIds.includes("intelligence") &&
-		surfaceIds.includes("scrollPerformance") &&
 		surfaceIds.includes("playground") &&
 		surfaceIds.includes("dictionary") &&
 		surfaceIds.includes("reference");
