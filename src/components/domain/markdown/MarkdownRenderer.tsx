@@ -5,6 +5,7 @@ import { Children, isValidElement, type ReactElement } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { ChoiceIndicatorMulti } from "@/components/ui/input/choice/ChoiceIndicators";
 import { Button, type ButtonProps } from "@/components/ui/primitives/Button";
 import { Text, textVariants } from "@/components/ui/primitives/Text";
 
@@ -288,14 +289,21 @@ function createMarkdownComponents(): Components {
 			if (type !== "checkbox") return null;
 
 			return (
-				<input
-					aria-label={checked ? "Completed task" : "Incomplete task"}
-					checked={Boolean(checked)}
-					className="mt-[0.18em] inline-flex size-4 shrink-0 appearance-none items-center justify-center rounded border border-border bg-background checked:border-primary checked:bg-primary checked:before:text-[11px] checked:before:leading-none checked:before:text-primary-foreground checked:before:content-['✓']"
-					disabled
-					readOnly
-					type="checkbox"
-				/>
+				<span className="group mt-[0.08em] inline-flex shrink-0">
+					<input
+						aria-label={checked ? "Completed task" : "Incomplete task"}
+						checked={Boolean(checked)}
+						className="peer sr-only"
+						disabled
+						readOnly
+						type="checkbox"
+					/>
+					<ChoiceIndicatorMulti
+						checked={Boolean(checked)}
+						className="pointer-events-none"
+						disabled
+					/>
+				</span>
 			);
 		},
 		li: ({ children, className }) => (
