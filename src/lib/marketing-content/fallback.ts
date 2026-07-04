@@ -1,4 +1,8 @@
-import type { MarketingPageDocument, SiteLayoutDocument } from "./types";
+import type {
+	MarketingPageDocument,
+	MarketingPageSlug,
+	SiteLayoutDocument,
+} from "./types";
 
 export const fallbackHomePage: MarketingPageDocument = {
 	slug: "home",
@@ -20,6 +24,10 @@ export const fallbackHomePage: MarketingPageDocument = {
 		},
 	],
 };
+
+export const fallbackMarketingPages = {
+	home: fallbackHomePage,
+} satisfies Record<MarketingPageSlug, MarketingPageDocument>;
 
 export const fallbackSiteLayout: SiteLayoutDocument = {
 	header: {

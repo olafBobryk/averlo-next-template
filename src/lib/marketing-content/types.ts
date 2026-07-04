@@ -1,7 +1,9 @@
 import type { IconName } from "@/components/ui/icons/Icon";
 import type { AppRouteId } from "@/config/routes";
 
-export type MarketingPageSlug = "home";
+export const marketingPageSlugs = ["home"] as const;
+
+export type MarketingPageSlug = (typeof marketingPageSlugs)[number];
 
 export type MarketingLink =
 	| {

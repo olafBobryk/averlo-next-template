@@ -1,4 +1,4 @@
-import { fallbackHomePage, fallbackSiteLayout } from "./fallback";
+import { fallbackMarketingPages, fallbackSiteLayout } from "./fallback";
 import type {
 	MarketingPageDocument,
 	MarketingPageSlug,
@@ -29,11 +29,7 @@ const limitSiteLayoutMenuGroups = (
 export async function getMarketingPage(
 	slug: MarketingPageSlug,
 ): Promise<MarketingPageDocument> {
-	if (slug === "home") {
-		return fallbackHomePage;
-	}
-
-	return fallbackHomePage;
+	return fallbackMarketingPages[slug] ?? fallbackMarketingPages.home;
 }
 
 export async function getSiteLayout(): Promise<SiteLayoutDocument> {
