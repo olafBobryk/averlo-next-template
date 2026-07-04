@@ -63,9 +63,10 @@ adapters so the frontend continues to render a small page/section contract.
   helpers, focus/motion foundations, branding, and mount components.
 - **Content modes:** static fallback content, Payload-ready scaffold, or
   Payload-powered Vercel setup.
-- **Agent workflows:** Template Intelligence, isolated agent dev server,
-  template pruning, smoke checks, page-target scroll-performance measurement,
-  and optional thin-start activation.
+- **Agent workflows:** Template Intelligence with warm-optional Serena,
+  isolated agent dev server, template pruning, smoke checks, page-target
+  scroll-performance measurement, disposable autoresearch worktrees, and
+  optional thin-start activation.
 
 ## Included Workflows
 
@@ -91,12 +92,15 @@ npm run intelligence:query -- ui-primitives
 npm run intelligence:query -- content-modes
 ```
 
-Serena semantic lookup is optional and warm-local. Use
-`npm run intelligence:serena:ensure` only when a task or benchmark needs it;
-normal implementation work should continue with Template Intelligence, `rg`,
-and file reads when Serena is cold. The generated `.template-intelligence/`,
-`.serena/`, `.codex/serena.json`, and `.codex/tmp/` paths are ignored local
-artifacts. See `docs/template-intelligence.md` for the full workflow.
+Serena semantic lookup is optional and warm-local, not required ceremony. Use
+`npm run intelligence:serena:status` to inspect it, use
+`npm run intelligence:serena:ensure` when semantic navigation or a Hybrid
+benchmark needs a warm service, and use `npm run intelligence:serena:stop` to
+clean up the local server. Normal implementation work should continue with
+Template Intelligence, `rg`, and file reads when Serena is cold. The generated
+`.template-intelligence/`, `.serena/`, `.codex/serena.json`, and `.codex/tmp/`
+paths are ignored local artifacts. See `docs/template-intelligence.md` for the
+full workflow.
 
 ### Scroll Performance
 
@@ -113,8 +117,10 @@ records normalized per-1000px work/jank metrics, and gates auto-keeps when page
 height or measured scroll distance changes enough to suggest a visual/layout
 change.
 
-For bounded agent exploration, create a disposable autoresearch worktree around
-one real page target and one or more mutable scopes:
+For bounded agent exploration, use the scroll-performance autoresearch harness.
+It creates a disposable worktree around one real page target and one or more
+mutable scopes, then lets a worker test exactly one committed candidate against
+the accepted baseline:
 
 ```sh
 npm run setup:scroll-performance-autoresearch -- --tag home-hero --path / --mutable src/lib/marketing-content/sections/homeHero
@@ -129,10 +135,12 @@ it:
 npm run score:scroll-performance -- --tag home-hero --runs 1 --label "candidate"
 ```
 
-The worker writes `state.json`, `results.jsonl`, `latest-measurement.json`, and
-`run.log` under ignored `tmp/scroll-performance-autoresearch/<tag>/`. It keeps
-eligible candidates, gates layout/geometry changes, and resets discarded or
-gated candidates back to the accepted baseline inside the disposable worktree.
+The harness owns the measurement, scoring, run log, state, and worktree loop;
+project instances own the target page and mutable file allowlist. The worker
+writes `state.json`, `results.jsonl`, `latest-measurement.json`, and `run.log`
+under ignored `tmp/scroll-performance-autoresearch/<tag>/`. It keeps eligible
+candidates, gates layout/geometry changes, and resets discarded or gated
+candidates back to the accepted baseline inside the disposable worktree.
 Preview setup first with `--dry-run`. See
 `docs/worklogs/scroll-performance-benchmark.md` for the full scoring contract.
 
@@ -212,6 +220,8 @@ Read `docs/thin-start-creation-boundary.md` before using this path.
 |   |-- dev-server.mjs
 |   |-- generate-template-intelligence.mjs
 |   |-- prune-template.mjs
+|   |-- scroll-performance/
+|   |-- template-intelligence-serena-service.mjs
 |   |-- create-thin-start.mjs
 |   `-- verify-smoke.mjs
 |-- src/
