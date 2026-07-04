@@ -112,6 +112,33 @@ const SURFACES = {
 			},
 		],
 	},
+	scrollPerformance: {
+		id: "scrollPerformance",
+		flag: "--no-scroll-performance",
+		description:
+			"Remove the internal scroll-performance route, measurement/autoresearch scripts, benchmark docs, and Playwright dependency.",
+		dependentSurfaces: [],
+		ownedPaths: [
+			"src/app/(site)/(marketing)/internal/scroll-performance",
+			"scripts/_lib/scroll-performance-autoresearch.mjs",
+			"scripts/measure-scroll-performance.mjs",
+			"scripts/record-scroll-performance-benchmark.mjs",
+			"scripts/setup-scroll-performance-autoresearch.mjs",
+			"scripts/score-scroll-performance-candidate.mjs",
+			"docs/worklogs/scroll-performance-benchmark.md",
+			"docs/worklogs/scroll-performance-runs.example.jsonl",
+		],
+		routeIds: [],
+		routeBuilders: [],
+		navRouteIds: [],
+		searchSources: [],
+		postRemovalAssertions: [
+			{
+				label: "scroll-performance route links",
+				pattern: /\/internal\/scroll-performance|scroll-performance/,
+			},
+		],
+	},
 	playground: {
 		id: "playground",
 		flag: "--no-playground",
@@ -219,6 +246,15 @@ const INTELLIGENCE_PACKAGE_SCRIPTS = [
 
 const INTELLIGENCE_PACKAGE_DEPENDENCIES = [];
 
+const SCROLL_PERFORMANCE_PACKAGE_SCRIPTS = [
+	"measure:scroll-performance",
+	"record:scroll-performance",
+	"setup:scroll-performance-autoresearch",
+	"score:scroll-performance",
+];
+
+const SCROLL_PERFORMANCE_PACKAGE_DEPENDENCIES = ["playwright"];
+
 const GRAPH_PACKAGE_DEPENDENCIES = [
 	"react-force-graph-2d",
 	"react-force-graph-3d",
@@ -236,6 +272,8 @@ Flags:
   --no-dashboard   Remove dashboard routes, auth/login shell, and dashboard auth helpers
   --no-demo        Remove the internal demo surface
   --no-intelligence Remove the internal template intelligence surface
+  --no-scroll-performance
+                  Remove the internal scroll-performance tooling surface
   --no-playground  Remove the internal playground surface
   --no-dictionary  Remove the internal dictionary surface
   --no-reference   Remove the internal reference surface
@@ -369,7 +407,7 @@ function assertTemplateRootMutationAllowed(pkg, parsed) {
 function warnCanonicalTemplateMainPrune(pkg, parsed) {
 	if (!isCanonicalTemplateMainCheckout(pkg)) return;
 
-	const runMode = parsed.dryRun ? "dry-run" : "mutating";
+	const runMode = parsed.dryRun ? "dry-run" : "mutating run";
 	console.warn("");
 	console.warn("WARNING: canonical template main prune target detected.");
 	console.warn(
@@ -390,6 +428,7 @@ function buildState(surfaceIds) {
 		hasDashboard: !removed.has("dashboard"),
 		hasDemo: !removed.has("demo"),
 		hasIntelligence: !removed.has("intelligence"),
+		hasScrollPerformance: !removed.has("scrollPerformance"),
 		hasPlayground: !removed.has("playground"),
 		hasDictionary: !removed.has("dictionary"),
 		hasReference: !removed.has("reference"),
@@ -422,6 +461,7 @@ async function collectPlan(surfaceIds) {
 	const removeInternalDir =
 		surfaceIds.includes("demo") &&
 		surfaceIds.includes("intelligence") &&
+		surfaceIds.includes("scrollPerformance") &&
 		surfaceIds.includes("playground") &&
 		surfaceIds.includes("dictionary") &&
 		surfaceIds.includes("reference");
@@ -437,17 +477,26 @@ async function collectPlan(surfaceIds) {
 				? ["next.config.ts", "tsconfig.json", "package.json"]
 				: []),
 			...(surfaceIds.includes("intelligence") ? ["package.json"] : []),
+			...(surfaceIds.includes("scrollPerformance") ? ["package.json"] : []),
 		],
 		packageDependencies: [
 			...(surfaceIds.includes("payload") ? PAYLOAD_PACKAGE_DEPENDENCIES : []),
 			...(surfaceIds.includes("intelligence")
 				? INTELLIGENCE_PACKAGE_DEPENDENCIES
 				: []),
+			...(surfaceIds.includes("scrollPerformance")
+				? SCROLL_PERFORMANCE_PACKAGE_DEPENDENCIES
+				: []),
 			...(removesAllGraphConsumers ? GRAPH_PACKAGE_DEPENDENCIES : []),
 		],
-		packageScripts: surfaceIds.includes("intelligence")
-			? [...INTELLIGENCE_PACKAGE_SCRIPTS]
-			: [],
+		packageScripts: [
+			...(surfaceIds.includes("intelligence")
+				? INTELLIGENCE_PACKAGE_SCRIPTS
+				: []),
+			...(surfaceIds.includes("scrollPerformance")
+				? SCROLL_PERFORMANCE_PACKAGE_SCRIPTS
+				: []),
+		],
 		removeInternalDir,
 	};
 }
@@ -1457,7 +1506,7 @@ function refreshPackageLock() {
 	);
 
 	if (result.status !== 0) {
-		throw new Error("Package lock refresh failed after pruning Payload.");
+		throw new Error("Package lock refresh failed after pruning dependencies.");
 	}
 }
 

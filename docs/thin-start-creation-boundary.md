@@ -90,6 +90,11 @@ Internal intelligence UI must not define the shared design system. In
 thin-start, it should use custom, minimal, route-owned components under the
 internal intelligence route rather than expanding `src/components/ui`.
 
+Scroll-performance tooling is excluded from thin-start activation by default.
+If a thin-start instance needs the benchmark/autoresearch loop, add it
+intentionally after activation rather than carrying it through the minimal
+component surface.
+
 The scaffold remains valuable and should stay:
 
 - dev workflow

@@ -64,7 +64,8 @@ adapters so the frontend continues to render a small page/section contract.
 - **Content modes:** static fallback content, Payload-ready scaffold, or
   Payload-powered Vercel setup.
 - **Agent workflows:** Template Intelligence, isolated agent dev server,
-  template pruning, smoke checks, and optional thin-start activation.
+  template pruning, smoke checks, scroll-performance measurement, and optional
+  thin-start activation.
 
 ## Included Workflows
 
@@ -93,6 +94,21 @@ npm run intelligence:query -- content-modes
 The generated `.template-intelligence/` and `.serena/` folders are ignored
 local artifacts. See `docs/template-intelligence.md` for the full workflow.
 
+### Scroll Performance
+
+Use the internal deterministic fixture when a candidate changes motion,
+scrolling, or shared shell behavior:
+
+```sh
+npm run measure:scroll-performance -- --scenario default --output tmp/scroll-performance.json
+npm run record:scroll-performance -- --input tmp/scroll-performance.json
+```
+
+The measured route is `/internal/scroll-performance?scenario=default`; generic
+scenarios are `control`, `default`, and `stress`. Runtime results stay under
+ignored `tmp/` paths. See `docs/worklogs/scroll-performance-benchmark.md` for
+the autoresearch worktree loop.
+
 ### Content Modes
 
 Choose the lightest content mode that fits the project:
@@ -113,19 +129,19 @@ Read `docs/template-content-modes.md` for mode boundaries and
 Dry-run before removing optional surfaces:
 
 ```sh
-npm run prune:template -- --dry-run --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
+npm run prune:template -- --dry-run --no-dashboard --no-demo --no-scroll-performance --no-dictionary --no-reference --no-playground
 ```
 
 Apply the lightweight route-surface prune after reviewing the plan:
 
 ```sh
-npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground
+npm run prune:template -- --yes --no-dashboard --no-demo --no-scroll-performance --no-dictionary --no-reference --no-playground
 ```
 
 For a static site, remove Payload explicitly:
 
 ```sh
-npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground --no-payload
+npm run prune:template -- --yes --no-dashboard --no-demo --no-scroll-performance --no-dictionary --no-reference --no-playground --no-payload
 ```
 
 When `prune:template` detects the canonical `averlo-next-template` `main`
@@ -196,6 +212,7 @@ Read `docs/thin-start-creation-boundary.md` before using this path.
 | `npm run verify:static` | Biome plus TypeScript checks. |
 | `npm run build` | Production Next.js build. |
 | `npm run verify:smoke` | Route smoke verification. |
+| `npm run measure:scroll-performance` | Measure the internal deterministic scroll fixture. |
 | `npm run prune:template` | Remove optional template surfaces in a clone. |
 | `npm run create:thin-start` | Activate the optional thin-start instance path. |
 

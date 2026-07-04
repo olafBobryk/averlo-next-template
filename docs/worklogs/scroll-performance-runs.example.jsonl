@@ -1,0 +1,1 @@
+{"schemaVersion":1,"recordedAt":"2026-06-26T00:00:00.000Z","commit":"example1","p95_frame_ms":18.214,"p99_frame_ms":29.104,"frames_over_16_7ms":42,"frames_over_33ms":3,"long_task_ms":61.227,"script_ms":84.103,"layout_ms":19.804,"paint_ms":11.621,"scenario":"default","viewport":"1440x900","status":"confirm","notes":"example only"}

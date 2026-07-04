@@ -26,6 +26,10 @@
 		"verify:static": "npm run lint && npm run typecheck",
 		"verify:build": "npm run build",
 		"verify:smoke": "node scripts/verify-smoke.mjs",
+		"measure:scroll-performance": "node scripts/measure-scroll-performance.mjs",
+		"record:scroll-performance": "node scripts/record-scroll-performance-benchmark.mjs",
+		"setup:scroll-performance-autoresearch": "node scripts/setup-scroll-performance-autoresearch.mjs",
+		"score:scroll-performance": "node scripts/score-scroll-performance-candidate.mjs",
 		"verify": "npm run verify:static && npm run verify:build && npm run verify:smoke",
 		"format": "biome format --write",
 		"create:thin-start": "node scripts/create-thin-start.mjs",
@@ -71,6 +75,7 @@
 		"@types/react-dom": "^19.1.7",
 		"@types/three": "^0.184.1",
 		"code-inspector-plugin": "^1.5.1",
+		"playwright": "^1.61.1",
 		"tailwindcss": "^4.1.12",
 		"typescript": "^6.0.3"
 	},
