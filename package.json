@@ -54,8 +54,10 @@
 		"react-dom": "^19.1.0",
 		"react-force-graph-2d": "^1.29.1",
 		"react-force-graph-3d": "^1.29.1",
+		"react-markdown": "^10.1.0",
 		"react-phone-number-input": "^3.4.14",
 		"react-responsive": "^10.0.1",
+		"remark-gfm": "^4.0.1",
 		"sharp": "^0.34.5",
 		"three": "^0.184.0",
 		"three-spritetext": "^1.10.0"

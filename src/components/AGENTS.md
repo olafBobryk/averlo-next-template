@@ -78,7 +78,7 @@ Use these defaults unless product requirements explicitly say otherwise.
 
 ## Directory Map
 - `branding/`: brand identity primitives such as `Logo`.
-- `domain/`: reusable domain-level widgets such as shared search surfaces.
+- `domain/`: reusable domain-level widgets such as shared search and markdown rendering surfaces.
 - `mount/`: client-only mounts for modal and toast hosts.
 - `ui/foundations/`: focus, motion, settings, and shared CSS tokens.
 - `ui/helpers/`: small helpers such as `IconSwap`.

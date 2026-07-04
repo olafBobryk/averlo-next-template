@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { type JSX, type Ref, useRef, useState } from "react";
 import Logo from "@/components/branding/Logo";
+import { MarkdownRenderer } from "@/components/domain/markdown";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { useIconRegistry } from "@/components/ui/icons/iconRegistry";
@@ -201,6 +202,55 @@ const imageSwitcherDemoImages = [
 	},
 ] satisfies ImageSwitcherImage[];
 
+const MARKDOWN_RENDERER_DEMO_MARKDOWN = [
+	"# Markdown Renderer",
+	"",
+	"This renderer maps plain markdown onto the template design system and supports [internal links](/internal/demo), [external links](https://example.com), **strong copy**, _emphasis_, ~~deleted text~~, and `inlineCode`.",
+	"",
+	"::button[Open Reference]{href=/internal/reference variant=primary size=md}",
+	"",
+	"::button[Small Ghost Action]{href=/internal/demo variant=ghost size=sm}",
+	"",
+	"## Lists",
+	"",
+	"- Unordered item",
+	"- Another item with **bold copy**",
+	"- [x] Completed task",
+	"- [ ] Incomplete task",
+	"",
+	"1. Ordered item",
+	"2. Another ordered item",
+	"",
+	"## Quote",
+	"",
+	"> Markdown should stay compact while still rendering through the design system.",
+	"",
+	"## Code",
+	"",
+	"```tsx",
+	"type MarkdownButton = {",
+	"  label: string;",
+	"  href: string;",
+	'  variant?: "primary" | "outline";',
+	'  size?: "sm" | "md" | "lg" | "xl";',
+	"};",
+	"```",
+	"",
+	"## Image",
+	"",
+	"![Soft abstract blob](/test/blob.png)",
+	"",
+	"## Table",
+	"",
+	"| Element | Covered |",
+	"| --- | ---: |",
+	"| Headings | yes |",
+	"| Tables | yes |",
+	"| Button directive | yes |",
+	"",
+	'Raw HTML remains escaped text: <script>alert("blocked")</script>',
+].join("\n");
+
 const activeStageDemoItems = [
 	{
 		title: "Brief",
@@ -284,6 +334,10 @@ const relatedMap: Record<string, RelatedInfo> = {
 		uses: ["ComboboxTextInput"],
 		usedIn: ["MarketingContentSearch"],
 	},
+	MarkdownRenderer: {
+		uses: ["Button", "Text", "focus"],
+		usedIn: [],
+	},
 	Footer: { uses: ["Button", "Logo", "Text"], usedIn: [] },
 	FormValidationClientMount: { uses: [], usedIn: [] },
 	ModalClientMount: { uses: ["ModalHost"], usedIn: [] },
@@ -348,6 +402,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			// "FilePreview",
 			"Footer",
 			"Listbox",
+			"MarkdownRenderer",
 			"PhoneInput",
 			"ProfilePicture",
 			"SegmentedControl",
@@ -374,6 +429,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ImageInspectModal",
 			"InspectableImage",
 			"Listbox",
+			"MarkdownRenderer",
 			"MoreMenuDropdown",
 			"PasswordInput",
 			"PhoneInput",
@@ -471,6 +527,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ChoiceIndicatorToggle",
 			"DateRangeInput",
 			"InputFrame",
+			"MarkdownRenderer",
 		],
 	},
 	spring: { uses: [], usedIn: ["Accordion", "SegmentedControl", "ToastHost"] },
@@ -979,6 +1036,81 @@ export const demoPages: DemoPage[] = [
 						label: "Mounts toast host",
 						snippet: "<ToastClientMount />",
 						related: relatedMap.ToastClientMount,
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "domain",
+		slug: ["domain"],
+		title: "Domain",
+		description: "Reusable domain-level components",
+		groups: [
+			{
+				id: "domain-links",
+				title: "Domain Components",
+				description: "Shared components above primitives and below routes",
+				items: [
+					{
+						id: "domain-links-card",
+						kind: "component",
+						name: "Domain Links",
+						label: "Jump to component",
+						Render() {
+							return (
+								<OverviewLinks
+									links={[
+										{
+											href: "/internal/demo/domain/markdown",
+											label: "Markdown",
+										},
+									]}
+								/>
+							);
+						},
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "domain-markdown",
+		slug: ["domain", "markdown"],
+		title: "Domain: Markdown",
+		description: "Design-system markdown rendering with a button directive",
+		groups: [
+			{
+				id: "markdown-renderer",
+				title: "Markdown Renderer",
+				description:
+					"Plain markdown rendered through Text, Button, focus, table, code, image, and list styles.",
+				columns: "grid-cols-1",
+				items: [
+					{
+						id: "markdown-renderer-live",
+						kind: "component",
+						name: "MarkdownRenderer",
+						label: "Broad markdown coverage",
+						related: relatedMap.MarkdownRenderer,
+						Render() {
+							return (
+								<div className="max-w-3xl">
+									<MarkdownRenderer
+										markdown={MARKDOWN_RENDERER_DEMO_MARKDOWN}
+									/>
+								</div>
+							);
+						},
+					},
+					{
+						id: "markdown-renderer-usage",
+						kind: "usage",
+						name: "MarkdownRenderer",
+						label: "Button directive",
+						related: relatedMap.MarkdownRenderer,
+						snippet:
+							'<MarkdownRenderer markdown={"# Title\\n\\n::button[Open Reference]{href=/internal/reference variant=primary size=md}"} />',
 					},
 				],
 			},
