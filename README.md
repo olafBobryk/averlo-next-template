@@ -64,8 +64,8 @@ adapters so the frontend continues to render a small page/section contract.
 - **Content modes:** static fallback content, Payload-ready scaffold, or
   Payload-powered Vercel setup.
 - **Agent workflows:** Template Intelligence with warm-optional Serena,
-  isolated agent dev server, template pruning, smoke checks, page-target
-  scroll-performance measurement, disposable autoresearch worktrees, and
+  isolated agent dev server, template pruning, smoke checks,
+  page-target scroll-performance autoresearch harnesses, and
   optional thin-start activation.
 
 ## Included Workflows
@@ -117,8 +117,10 @@ records normalized per-1000px work/jank metrics, and gates auto-keeps when page
 height or measured scroll distance changes enough to suggest a visual/layout
 change.
 
-For bounded agent exploration, use the scroll-performance autoresearch harness.
-It creates a disposable worktree around one real page target and one or more
+For bounded agent exploration, use the page-target scroll-performance
+autoresearch harness, inspired by the metric loop in
+[autoresearch-skill](https://github.com/wjgoarxiv/autoresearch-skill). It
+creates a disposable worktree around one real page target and one or more
 mutable scopes, then lets a worker test exactly one committed candidate against
 the accepted baseline:
 
