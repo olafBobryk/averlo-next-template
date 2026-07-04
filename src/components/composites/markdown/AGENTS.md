@@ -1,7 +1,7 @@
-# Folder: `src/components/domain/markdown`
+# Folder: `src/components/composites/markdown`
 
 ## Role
-Reusable markdown rendering surfaces that map content-authored markdown onto the template design system.
+Reusable markdown rendering surfaces that compose design-system primitives into content-authored pages or sections.
 
 ## Use This Folder When
 - A page or internal fixture needs markdown rendered through `Text`, `Button`, and shared focus conventions.
@@ -19,3 +19,4 @@ Reusable markdown rendering surfaces that map content-authored markdown onto the
 - Keep custom directives self-contained and generic.
 - Validate directive props before passing them into design-system components.
 - Do not expose arbitrary `className`, JSX, HTML passthrough, data registries, or product-specific card directives through markdown.
+- Keep this composite thin-start compatible; if it imports a design-system helper, make sure the thin-start API review explicitly allows that helper.

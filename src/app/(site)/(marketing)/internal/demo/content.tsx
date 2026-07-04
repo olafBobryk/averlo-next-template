@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { type JSX, type Ref, useRef, useState } from "react";
 import Logo from "@/components/branding/Logo";
-import { MarkdownRenderer } from "@/components/domain/markdown";
+import { MarkdownRenderer } from "@/components/composites/markdown";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { useIconRegistry } from "@/components/ui/icons/iconRegistry";
@@ -335,7 +335,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: ["MarketingContentSearch"],
 	},
 	MarkdownRenderer: {
-		uses: ["Button", "Text", "focus"],
+		uses: ["Button", "ChoiceIndicatorMulti", "Text", "focus"],
 		usedIn: [],
 	},
 	Footer: { uses: ["Button", "Logo", "Text"], usedIn: [] },
@@ -1042,27 +1042,27 @@ export const demoPages: DemoPage[] = [
 		],
 	},
 	{
-		id: "domain",
-		slug: ["domain"],
-		title: "Domain",
-		description: "Reusable domain-level components",
+		id: "composites",
+		slug: ["composites"],
+		title: "Composites",
+		description: "Reusable components composed from design-system primitives",
 		groups: [
 			{
-				id: "domain-links",
-				title: "Domain Components",
-				description: "Shared components above primitives and below routes",
+				id: "composite-links",
+				title: "Composite Components",
+				description: "Shared above-primitive components below route shells",
 				items: [
 					{
-						id: "domain-links-card",
+						id: "composite-links-card",
 						kind: "component",
-						name: "Domain Links",
+						name: "Composite Links",
 						label: "Jump to component",
 						Render() {
 							return (
 								<OverviewLinks
 									links={[
 										{
-											href: "/internal/demo/domain/markdown",
+											href: "/internal/demo/composites/markdown",
 											label: "Markdown",
 										},
 									]}
@@ -1075,9 +1075,9 @@ export const demoPages: DemoPage[] = [
 		],
 	},
 	{
-		id: "domain-markdown",
-		slug: ["domain", "markdown"],
-		title: "Domain: Markdown",
+		id: "composites-markdown",
+		slug: ["composites", "markdown"],
+		title: "Composites: Markdown",
 		description: "Design-system markdown rendering with a button directive",
 		groups: [
 			{

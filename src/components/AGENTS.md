@@ -9,7 +9,7 @@ Agents should assume that a matching component probably already exists and shoul
 
 ## Default Workflow
 1. Identify the UX pattern first, not the page-specific styling.
-2. Find the closest existing component in `primitives/`, `input/`, `misc/`, `overlays/`, or `domain/`.
+2. Find the closest existing component in `primitives/`, `input/`, `misc/`, `overlays/`, `composites/`, or `domain/`.
 3. Compose upward from library pieces instead of creating one-off page components.
 4. Only introduce new components when the behavior cannot be expressed by extending the library without harming reuse.
 5. When a page needs a familiar UX convention, prefer the built-in implementation even if a custom version seems faster.
@@ -78,7 +78,8 @@ Use these defaults unless product requirements explicitly say otherwise.
 
 ## Directory Map
 - `branding/`: brand identity primitives such as `Logo`.
-- `domain/`: reusable domain-level widgets such as shared search and markdown rendering surfaces.
+- `composites/`: reusable above-primitive compositions such as markdown rendering surfaces.
+- `domain/`: reusable domain-level widgets such as shared search.
 - `mount/`: client-only mounts for modal and toast hosts.
 - `ui/foundations/`: focus, motion, settings, and shared CSS tokens.
 - `ui/helpers/`: small helpers such as `IconSwap`.
@@ -111,6 +112,8 @@ Reusable features are not complete until implementation, demo coverage, and docu
 
 ## Folder Index
 - `src/components/branding/AGENTS.md`
+- `src/components/composites/AGENTS.md`
+- `src/components/composites/markdown/AGENTS.md`
 - `src/components/domain/AGENTS.md`
 - `src/components/domain/search/AGENTS.md`
 - `src/components/mount/AGENTS.md`

@@ -60,6 +60,15 @@ const LIVE_REWRITE_TARGETS = [
 		purpose: "Keep existing dropdown interaction behavior.",
 	},
 	{
+		path: "src/components/ui/input/choice/ChoiceIndicators.tsx",
+		purpose: "Keep minimal multiselect indicator for markdown task lists.",
+	},
+	{
+		path: "src/components/composites/markdown",
+		purpose:
+			"Keep generic markdown renderer as an allowed thin-start composite.",
+	},
+	{
 		path: "src/components/ui/overlays/toast",
 		purpose:
 			"Replace current Averlo toast with shadcn/Sonner-style thin-start default.",

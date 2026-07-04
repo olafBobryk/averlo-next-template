@@ -10,9 +10,11 @@ import { focusRing } from "@/components/ui/foundations/focus";
 
 export type ButtonVariant =
 	| "default"
+	| "danger"
 	| "solid"
 	| "ghost"
 	| "primary"
+	| "primaryDark"
 	| "outline";
 
 type ButtonBaseProps = {
@@ -23,12 +25,12 @@ type ButtonBaseProps = {
 	href?: string;
 	leadingIcon?: React.ReactNode;
 	loading?: boolean;
-	size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+	size?: "sm" | "md" | "lg" | "xl" | "icon" | "icon-sm";
 	trailingIcon?: React.ReactNode;
 	variant?: ButtonVariant;
 };
 
-type ButtonProps = ButtonBaseProps &
+export type ButtonProps = ButtonBaseProps &
 	Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonBaseProps> &
 	Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonBaseProps>;
 
@@ -43,8 +45,12 @@ function getButtonClassName({
 		focusRing.visibleDefault,
 		"disabled:pointer-events-none disabled:opacity-50",
 		loading && "pointer-events-none opacity-70",
-		(variant === "default" || variant === "primary") &&
+		(variant === "default" ||
+			variant === "primary" ||
+			variant === "primaryDark") &&
 			"bg-primary text-primary-foreground hover:bg-primary-hover",
+		variant === "danger" &&
+			"bg-danger text-white hover:bg-danger/90",
 		(variant === "solid" || variant === "outline") &&
 			"border border-border bg-foreground text-background hover:bg-foreground-hover",
 		variant === "ghost" &&
@@ -129,6 +135,7 @@ export const textVariants = cva("", {
 			support: "text-sm leading-6",
 			headingHero: "text-4xl font-semibold leading-tight md:text-6xl",
 			heading2xxl: "text-4xl font-semibold leading-tight md:text-6xl",
+			headingXxl: "text-3xl font-semibold leading-tight md:text-5xl",
 			headingXl: "text-3xl font-semibold leading-tight md:text-5xl",
 			headingLg: "text-2xl font-semibold leading-tight md:text-4xl",
 			headingMd: "text-xl font-semibold leading-tight",
@@ -142,10 +149,15 @@ export const textVariants = cva("", {
 			muted: "text-muted",
 			inherit: "text-inherit",
 		},
+		interactive: {
+			true: "transition-colors motion-interactive",
+			false: "",
+		},
 	},
 	defaultVariants: {
 		variant: "body",
 		tone: "default",
+		interactive: true,
 	},
 });
 
@@ -155,6 +167,7 @@ export type TextVariant =
 	| "support"
 	| "headingHero"
 	| "heading2xxl"
+	| "headingXxl"
 	| "headingXl"
 	| "headingLg"
 	| "headingMd"
@@ -169,6 +182,7 @@ type TextOwnProps = {
 	as?: React.ElementType;
 	children?: React.ReactNode;
 	className?: string;
+	interactive?: boolean;
 	tone?: TextTone;
 	variant?: TextVariant;
 };
@@ -180,6 +194,7 @@ export function Text({
 	as,
 	children,
 	className,
+	interactive: _interactive,
 	tone = "default",
 	variant = "body",
 	...rest
@@ -187,9 +202,78 @@ export function Text({
 	const Tag = as ?? (variant === "heading" ? "h2" : "p");
 
 	return (
-		<Tag className={textVariants({ variant, tone, className })} {...rest}>
+		<Tag
+			className={textVariants({
+				variant,
+				tone,
+				interactive: _interactive,
+				className,
+			})}
+			{...rest}
+		>
 			{children}
 		</Tag>
+	);
+}
+`,
+	},
+	{
+		path: "src/components/ui/input/choice/ChoiceIndicators.tsx",
+		content: `"use client";
+
+import clsx from "clsx";
+import { focusRing } from "@/components/ui/foundations/focus";
+
+type ChoiceIndicatorBaseProps = {
+	checked: boolean;
+	disabled?: boolean;
+	className?: string;
+};
+
+export function ChoiceIndicatorMulti({
+	checked,
+	disabled,
+	className,
+}: ChoiceIndicatorBaseProps) {
+	return (
+		<div
+			className={clsx(
+				"choice-field-indicator flex h-[22px] w-[22px] items-center justify-center rounded-[8px] group-hover:bg-background-hover group-hover:scale-[1.05] group-active:bg-background-active group-active:scale-[0.95] motion-micro",
+				focusRing.peerDefault,
+				focusRing.peerError,
+				disabled ? "opacity-60" : "opacity-100",
+				className,
+			)}
+		>
+			<div
+				className={clsx(
+					"flex h-[22px] w-[22px] overflow-hidden rounded-[8px] border transition-all motion-interactive",
+					checked
+						? "border-white/15 bg-primary"
+						: "border-foreground/20 group-data-[tone=error]/field:border-danger",
+					disabled ? "opacity-60" : "opacity-100",
+				)}
+			>
+				<div
+					className={clsx(
+						"flex h-full w-full items-center justify-center motion-micro transition-colors",
+						checked
+							? "group-hover:bg-primary-hover group-active:bg-primary-active"
+							: "",
+					)}
+				>
+					<span
+						aria-hidden="true"
+						className={clsx(
+							"text-[13px] font-semibold leading-none text-primary-foreground transition-transform motion-interactive",
+							checked ? "scale-100" : "scale-0",
+						)}
+					>
+						{"\\u2713"}
+					</span>
+				</div>
+			</div>
+		</div>
 	);
 }
 `,
@@ -579,6 +663,7 @@ import Portal from "@/components/ui/overlays/Portal";
 type ModalShellProps = {
 	backdropClassName?: string;
 	children: ReactNode;
+	isTopMost?: boolean;
 	onClose: () => void;
 	panelClassName?: string;
 	panelStyle?: React.CSSProperties;
@@ -589,6 +674,7 @@ type ModalShellProps = {
 export function ModalShell({
 	backdropClassName,
 	children,
+	isTopMost: _isTopMost,
 	onClose,
 	panelClassName,
 	panelStyle,

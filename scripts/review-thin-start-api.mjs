@@ -14,9 +14,11 @@ const ALLOWED_UI_IMPORTS = new Set([
 	"@/components/ui/primitives/InputFrame",
 	"@/components/ui/primitives/Dropdown",
 	"@/components/ui/primitives/dropdownStyles",
+	"@/components/ui/input/choice/ChoiceIndicators",
 	"@/components/ui/input/TextInput",
 	"@/components/ui/input/SelectInput",
 ]);
+const ALLOWED_COMPOSITE_IMPORT_PREFIXES = ["@/components/composites/markdown"];
 const ALLOWED_UI_PREFIXES = [
 	"@/components/ui/foundations/",
 	"@/components/ui/motion",
@@ -105,6 +107,18 @@ function classifyUiImport(source) {
 	return "outside-allowlist";
 }
 
+function classifyCompositeImport(source) {
+	if (!source.startsWith("@/components/composites/")) return null;
+	if (
+		ALLOWED_COMPOSITE_IMPORT_PREFIXES.some(
+			(prefix) => source === prefix || source.startsWith(`${prefix}/`),
+		)
+	) {
+		return "allowed-composite";
+	}
+	return "outside-composite-allowlist";
+}
+
 async function collectFindings() {
 	const files = (await walkFiles(SRC_DIR)).filter((filePath) =>
 		/\.(ts|tsx|js|jsx|mjs|cjs)$/.test(filePath),
@@ -112,8 +126,10 @@ async function collectFindings() {
 	const findings = {
 		allowed: [],
 		allowedSupport: [],
+		allowedComposite: [],
 		broad: [],
 		outsideAllowlist: [],
+		outsideCompositeAllowlist: [],
 		parkedImports: [],
 		compatibilityProps: [],
 	};
@@ -135,7 +151,8 @@ async function collectFindings() {
 
 		for (const match of content.matchAll(IMPORT_PATTERN)) {
 			const source = match[1] ?? match[2];
-			const classification = classifyUiImport(source);
+			const classification =
+				classifyUiImport(source) ?? classifyCompositeImport(source);
 			if (!classification) continue;
 
 			const record = `${relative} -> ${source}`;
@@ -143,9 +160,15 @@ async function collectFindings() {
 			if (classification === "allowed-support") {
 				findings.allowedSupport.push(record);
 			}
+			if (classification === "allowed-composite") {
+				findings.allowedComposite.push(record);
+			}
 			if (classification === "broad") findings.broad.push(record);
 			if (classification === "outside-allowlist") {
 				findings.outsideAllowlist.push(record);
+			}
+			if (classification === "outside-composite-allowlist") {
+				findings.outsideCompositeAllowlist.push(record);
 			}
 		}
 	}
@@ -168,6 +191,7 @@ function hasFailures(findings) {
 	return (
 		findings.broad.length > 0 ||
 		findings.outsideAllowlist.length > 0 ||
+		findings.outsideCompositeAllowlist.length > 0 ||
 		findings.parkedImports.length > 0 ||
 		findings.compatibilityProps.length > 0
 	);
@@ -186,8 +210,12 @@ async function main() {
 	console.log("==============================");
 	console.log(`Allowed imports: ${findings.allowed.length}`);
 	console.log(`Allowed support imports: ${findings.allowedSupport.length}`);
+	console.log(`Allowed composite imports: ${findings.allowedComposite.length}`);
 	console.log(`Broad UI imports: ${findings.broad.length}`);
 	console.log(`Outside allowlist imports: ${findings.outsideAllowlist.length}`);
+	console.log(
+		`Outside composite allowlist imports: ${findings.outsideCompositeAllowlist.length}`,
+	);
 	console.log(
 		`Parked reference import files: ${findings.parkedImports.length}`,
 	);
@@ -197,6 +225,10 @@ async function main() {
 
 	printList("Broad UI imports", findings.broad);
 	printList("Outside allowlist imports", findings.outsideAllowlist);
+	printList(
+		"Outside composite allowlist imports",
+		findings.outsideCompositeAllowlist,
+	);
 	printList("Parked reference imports", findings.parkedImports);
 	printList("Compatibility markers", findings.compatibilityProps);
 

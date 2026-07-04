@@ -68,7 +68,7 @@ const CONCEPTS = [
 		id: "design-system-discovery",
 		title: "Design System Discovery",
 		summary:
-			"Shared primitives, domain components, demos, and dictionary entries that should be reused before local UI is invented.",
+			"Shared primitives, composites, domain components, demos, and dictionary entries that should be reused before local UI is invented.",
 		matches: [
 			"src/components",
 			"src/app/(site)/(marketing)/internal/demo",

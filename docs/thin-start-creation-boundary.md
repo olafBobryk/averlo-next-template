@@ -35,9 +35,10 @@ npm run create:thin-start -- --yes --in-place --confirm-instance
 
 In-place mode parks the current Averlo reference first, updates that
 instance for the selected activation dependencies, then applies the selected
-thin-start live rewrite: shared primitive templates, Sonner-backed toast,
-route-owned internal intelligence components, and removal of broad
-misc/helper/icon/demo/dashboard surfaces from the live source graph.
+thin-start live rewrite: shared primitive templates, the generic markdown
+composite, Sonner-backed toast, route-owned internal intelligence components,
+and removal of broad misc/helper/icon/demo/dashboard surfaces from the live
+source graph.
 
 After activation, refresh the instance dependency lock/install state before
 building or shipping that instance:
@@ -67,6 +68,11 @@ interaction behavior, and limited input/select integration patterns stay intact.
 `Panel`/`Card` and broad misc/helper surfaces are not part of the simple
 thin-start primitive surface.
 
+The thin-start composite surface starts intentionally smaller than the full
+template. `MarkdownRenderer` is allowed because it accepts a plain markdown
+string, renders through the design system, and avoids metadata, route chrome,
+CMS records, or product-specific directives.
+
 Thin-start toast behavior should use a shadcn/Sonner-style default instead of
 carrying forward the current custom Averlo toast system. Other overlays may
 remain only when scaffold-critical, and they must stay small without dragging
@@ -91,8 +97,9 @@ The scaffold remains valuable and should stay:
 The review gate is exported API review, not just compile/build/smoke success.
 A thin-start output is only acceptable when the live exported surface is
 inspected and remains minimal for the current website. Compatibility props,
-broad misc/helper folders, internal/demo/dashboard-driven abstractions, and
-parked code re-entering the live import graph are review failures.
+broad misc/helper folders, unapproved composites, internal/demo/dashboard-driven
+abstractions, and parked code re-entering the live import graph are review
+failures.
 
 Use the report-only review command during setup:
 
