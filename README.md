@@ -91,8 +91,12 @@ npm run intelligence:query -- ui-primitives
 npm run intelligence:query -- content-modes
 ```
 
-The generated `.template-intelligence/` and `.serena/` folders are ignored
-local artifacts. See `docs/template-intelligence.md` for the full workflow.
+Serena semantic lookup is optional and warm-local. Use
+`npm run intelligence:serena:ensure` only when a task or benchmark needs it;
+normal implementation work should continue with Template Intelligence, `rg`,
+and file reads when Serena is cold. The generated `.template-intelligence/`,
+`.serena/`, `.codex/serena.json`, and `.codex/tmp/` paths are ignored local
+artifacts. See `docs/template-intelligence.md` for the full workflow.
 
 ### Scroll Performance
 

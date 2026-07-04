@@ -132,18 +132,46 @@ The active benchmark run log intentionally starts empty:
 docs/worklogs/template-intelligence-benchmark-runs.jsonl
 ```
 
-Record intentional runs with:
+Benchmarking is explicit maintainer work, not a default implementation
+requirement. Use Template Intelligence directly for normal agent orientation:
 
 ```bash
-PATH="$HOME/.local/bin:$PATH" npm run intelligence:hybrid -- \
+npm run intelligence:generate
+npm run intelligence:query -- route-architecture
+```
+
+Record intentional Hybrid runs only when a warm Serena service is available or
+when the command explicitly warms it:
+
+```bash
+npm run intelligence:serena:ensure
+npm run intelligence:hybrid -- \
   --task-id T1 \
   --task-name "Route architecture" \
   --topics route-architecture,dev-server \
   --serena-file src/config/routes.ts \
-  --serena-symbol appRoutes
+  --serena-symbol appRoutes \
+  --require-serena
 ```
 
-If the preset fails before Serena starts with a local port-discovery error, run:
+For one-command benchmark setup, use `--ensure-serena`:
+
+```bash
+npm run intelligence:hybrid -- \
+  --task-id T1 \
+  --task-name "Route architecture" \
+  --topics route-architecture,dev-server \
+  --serena-file src/config/routes.ts \
+  --serena-symbol appRoutes \
+  --ensure-serena \
+  --require-serena
+```
+
+Without a warm Serena service, `npm run intelligence:hybrid` still generates and
+queries Template Intelligence, prints `Template Intelligence only; no Hybrid row
+recorded`, and exits cleanly unless `--require-serena` is passed.
+
+If local port discovery needs inspection, run:
 
 ```bash
 npm run intelligence:serena:debug
@@ -201,18 +229,52 @@ so clones stay clean and dependency-free.
 ## Serena Boundary
 
 Serena is useful as a local semantic-code companion after the task map narrows
-the starting file set. Keep it user-local:
+the starting file set. It is warm-optional: ordinary agent work must not fail
+just because Serena is cold or unavailable.
 
 ```bash
+npm run intelligence:serena:status
 npm run intelligence:serena:setup -- --dry-run
-npm run intelligence:serena:debug
+npm run intelligence:serena:ensure
+npm run intelligence:serena:stop
 ```
 
-The enforced preset starts the Serena project server and calls its current
-tool endpoint with `project_name`, `tool_name`, and `tool_params_json`. Direct
-project-server calls should use that shape:
+The wrapper prepends `$HOME/.local/bin` for the command, installs
+`serena-agent` through `uv tool install serena-agent` only from
+`intelligence:serena:ensure`, indexes the current checkout, health-checks it,
+starts or reuses a local project server, and writes ignored state to:
+
+```text
+.codex/serena.json
+```
+
+The state schema is:
+
+```json
+{
+  "schemaVersion": 1,
+  "root": "/absolute/checkout/path",
+  "projectName": "averlo-next-template-<rootHash>",
+  "port": 9121,
+  "pid": 12345,
+  "startedAt": "2026-07-04T00:00:00.000Z",
+  "logPath": "/absolute/checkout/path/.codex/tmp/serena-..."
+}
+```
+
+Project names include a hash of the real checkout path, so the canonical
+checkout, worktrees, and sibling repos do not collide in Serena's project
+registry. Server logs live under `.codex/tmp/`.
+
+`npm run intelligence:serena:status` reports `missing-tools`, `not-started`,
+`running`, `stale-root`, or `dead-pid` without failing normal agent work.
+`npm run intelligence:serena:stop` stops the stored process for this checkout
+and removes `.codex/serena.json`.
+
+When a warm server is running, direct project-server calls should use the
+stored `projectName` with Serena's current endpoint shape:
 
 ```http
 POST /query_project
-{"project_name":"averlo-next-template","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
+{"project_name":"averlo-next-template-<rootHash>","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
 ```

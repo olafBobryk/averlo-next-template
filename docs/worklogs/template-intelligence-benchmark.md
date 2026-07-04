@@ -2,22 +2,31 @@
 
 ## Purpose
 
-Track whether the enforced hybrid preset reduces agent lookup cost without
-lowering correctness. `Hybrid` means Template Intelligence plus at least one
-successful Serena semantic call. Task-map-only runs must be recorded as
-`TemplateIntelligence`, not `Hybrid`.
+Track whether Template Intelligence and optional Serena semantic lookup reduce
+agent lookup cost without lowering correctness. `Hybrid` means Template
+Intelligence plus at least one successful Serena semantic call. Task-map-only
+runs must be recorded as `TemplateIntelligence`, not `Hybrid`.
 
 ## Commands
 
-Use the preset for normal task benchmarking:
+Use Template Intelligence directly for normal work:
 
 ```bash
-PATH="$HOME/.local/bin:$PATH" npm run intelligence:hybrid -- \
+npm run intelligence:generate
+npm run intelligence:query -- route-architecture
+```
+
+Use the warm Serena service only for intentional Hybrid benchmarking:
+
+```bash
+npm run intelligence:serena:ensure
+npm run intelligence:hybrid -- \
   --task-id T1 \
   --task-name "Route architecture" \
   --topics route-architecture,dev-server \
   --serena-file src/config/routes.ts \
-  --serena-symbol appRoutes
+  --serena-symbol appRoutes \
+  --require-serena
 ```
 
 The lower-level recorder is validation-strict: `--strategy Hybrid` is rejected
@@ -43,17 +52,24 @@ Placeholder chart data is available only for visual QA:
 
 ## Current Recommendation
 
-Default to the enforced hybrid preset:
+Default to lightweight Template Intelligence:
 
-1. Query the task map through `npm run intelligence:hybrid -- --topics ...`.
-2. Let the preset index and health-check user-local Serena.
-3. Provide a focused `--serena-file` and optional `--serena-symbol` for the
-   semantic lookup.
+1. Generate the task map with `npm run intelligence:generate`.
+2. Query relevant topics with `npm run intelligence:query -- <topic>`.
+3. Use `rg` and direct file reads for ordinary implementation work.
 
-Serena remains user-local. If it is missing from PATH, the preset warns and
-does not append a benchmark row.
+Use Hybrid only when the semantic layer is already warm or the benchmark
+explicitly opts into setup with `npm run intelligence:serena:ensure` or
+`--ensure-serena`. Without a warm Serena service, `npm run intelligence:hybrid`
+prints `Template Intelligence only; no Hybrid row recorded` and exits cleanly
+unless `--require-serena` is passed.
+
+Serena remains user-local. The service wrapper writes ignored state to
+`.codex/serena.json`, logs to `.codex/tmp/`, and uses path-hashed project names
+such as `averlo-next-template-<rootHash>` so worktrees and sibling repos do not
+collide.
 
 ```http
 POST /query_project
-{"project_name":"averlo-next-template","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
+{"project_name":"averlo-next-template-<rootHash>","tool_name":"get_symbols_overview","tool_params_json":"{\"relative_path\":\"src/config/routes.ts\"}"}
 ```
