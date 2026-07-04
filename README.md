@@ -104,10 +104,33 @@ npm run measure:scroll-performance -- --path /internal/demo/ui/primitives --outp
 npm run record:scroll-performance -- --input tmp/scroll-performance.json
 ```
 
-The measurement harness injects timing instrumentation into the real page path.
-Runtime results stay under ignored `tmp/` paths. See
-`docs/worklogs/scroll-performance-benchmark.md` for the autoresearch worktree
-loop.
+The measurement harness injects timing instrumentation into the real page path,
+records normalized per-1000px work/jank metrics, and gates auto-keeps when page
+height or measured scroll distance changes enough to suggest a visual/layout
+change.
+
+For bounded agent exploration, create a disposable autoresearch worktree around
+one real page target and one or more mutable scopes:
+
+```sh
+npm run setup:scroll-performance-autoresearch -- --tag home-hero --path / --mutable src/lib/marketing-content/sections/homeHero
+cd .worktrees/scroll-performance-autoresearch-home-hero
+npm run score:scroll-performance -- --tag home-hero --runs 1 --label "baseline"
+```
+
+Then make exactly one committed candidate inside the mutable allowlist and score
+it:
+
+```sh
+npm run score:scroll-performance -- --tag home-hero --runs 1 --label "candidate"
+```
+
+The worker writes `state.json`, `results.jsonl`, `latest-measurement.json`, and
+`run.log` under ignored `tmp/scroll-performance-autoresearch/<tag>/`. It keeps
+eligible candidates, gates layout/geometry changes, and resets discarded or
+gated candidates back to the accepted baseline inside the disposable worktree.
+Preview setup first with `--dry-run`. See
+`docs/worklogs/scroll-performance-benchmark.md` for the full scoring contract.
 
 ### Content Modes
 
@@ -213,6 +236,8 @@ Read `docs/thin-start-creation-boundary.md` before using this path.
 | `npm run build` | Production Next.js build. |
 | `npm run verify:smoke` | Route smoke verification. |
 | `npm run measure:scroll-performance` | Measure scroll performance on a real page path. |
+| `npm run setup:scroll-performance-autoresearch` | Create a disposable page-target scroll-performance worker worktree. |
+| `npm run score:scroll-performance` | Score the accepted baseline or one committed candidate in a scroll worker. |
 | `npm run prune:template` | Remove optional template surfaces in a clone. |
 | `npm run create:thin-start` | Activate the optional thin-start instance path. |
 
