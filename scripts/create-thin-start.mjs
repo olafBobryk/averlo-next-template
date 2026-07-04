@@ -56,12 +56,16 @@ const LIVE_REWRITE_TARGETS = [
 		purpose: "Keep simplified select field pattern.",
 	},
 	{
+		path: "src/components/ui/input/{RadioInput,MultiselectInput,ToggleInput}.tsx",
+		purpose: "Keep native choice-group inputs for thin-start preferences.",
+	},
+	{
 		path: "src/components/ui/primitives/Dropdown.tsx",
 		purpose: "Keep existing dropdown interaction behavior.",
 	},
 	{
-		path: "src/components/ui/input/choice/ChoiceIndicators.tsx",
-		purpose: "Keep minimal multiselect indicator for markdown task lists.",
+		path: "src/components/ui/input/choice/{ChoiceField,ChoiceIndicators}.tsx",
+		purpose: "Keep minimal choice foundation for markdown and choice inputs.",
 	},
 	{
 		path: "src/components/composites/markdown",

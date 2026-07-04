@@ -276,6 +276,205 @@ export function ChoiceIndicatorMulti({
 		</div>
 	);
 }
+
+export function ChoiceIndicatorRadio({
+	checked,
+	disabled,
+	className,
+}: ChoiceIndicatorBaseProps) {
+	return (
+		<div
+			className={clsx(
+				"choice-field-indicator flex h-[22px] w-[22px] items-center justify-center rounded-full bg-background group-hover:bg-background-hover group-active:bg-background-active motion-micro",
+				focusRing.peerDefault,
+				focusRing.peerError,
+				disabled ? "opacity-60" : "opacity-100",
+				!checked ? "group-hover:scale-[1.05] group-active:scale-[0.95]" : "",
+				className,
+			)}
+		>
+			<div
+				className={clsx(
+					"flex h-[22px] w-[22px] items-center justify-center rounded-full border transition-colors motion-interactive",
+					checked
+						? "border-white/15 bg-primary"
+						: "border-foreground/20 group-data-[tone=error]/field:border-danger",
+				)}
+			>
+				<div
+					className={clsx(
+						"h-[12px] w-[12px] rounded-full transition-[transform,opacity] motion-interactive",
+						checked
+							? "scale-100 bg-primary-foreground"
+							: "scale-0 bg-transparent",
+					)}
+				/>
+			</div>
+		</div>
+	);
+}
+
+export function ChoiceIndicatorToggle({
+	checked,
+	disabled,
+	className,
+}: ChoiceIndicatorBaseProps) {
+	return (
+		<div
+			className={clsx(
+				"choice-field-indicator flex h-[26px] min-w-[42px] items-center justify-center overflow-hidden rounded-full bg-background group-hover:bg-background-hover group-hover:scale-[1.05] group-active:bg-background-active group-active:scale-[0.95] motion-micro",
+				focusRing.peerDefault,
+				focusRing.peerError,
+				disabled ? "opacity-60" : "opacity-100",
+				className,
+			)}
+		>
+			<div
+				className={clsx(
+					"relative flex h-[26px] min-w-[42px] items-center overflow-hidden rounded-full border transition-colors motion-interactive",
+					checked
+						? "border-white/15 bg-primary"
+						: "border-foreground/20 group-data-[tone=error]/field:border-danger",
+					disabled ? "opacity-60" : "opacity-100",
+				)}
+			>
+				<div
+					className={clsx(
+						"flex h-full w-full items-center justify-center motion-micro transition-colors",
+						checked
+							? "group-hover:bg-primary-hover group-active:bg-primary-active"
+							: "",
+					)}
+				>
+					<div
+						className={clsx(
+							"absolute left-[3px] top-[3px] h-[18px] w-[22px] rounded-full border border-foreground/20 bg-background shadow-sm transition-transform motion-interactive",
+							checked ? "translate-x-[12px] border-none" : "translate-x-0",
+						)}
+					/>
+				</div>
+			</div>
+		</div>
+	);
+}
+`,
+	},
+	{
+		path: "src/components/ui/input/choice/ChoiceField.tsx",
+		content: `"use client";
+
+import clsx from "clsx";
+import * as React from "react";
+import { Text } from "@/components/ui/primitives/Text";
+
+type ChoiceFieldProps = {
+	checked: boolean;
+	className?: string;
+	describedBy?: string;
+	description?: React.ReactNode;
+	disabled?: boolean;
+	id: string;
+	indicator: React.ReactNode;
+	inputAriaHidden?: boolean;
+	inputTabIndex?: number;
+	inputType?: "radio" | "checkbox";
+	invalid?: boolean;
+	label?: React.ReactNode;
+	labelClassName?: string;
+	name?: string;
+	onChange?: (value: string, checked: boolean) => void;
+	required?: boolean;
+	value: string;
+};
+
+export function ChoiceField({
+	checked,
+	className,
+	describedBy,
+	description,
+	disabled,
+	id,
+	indicator,
+	inputAriaHidden,
+	inputTabIndex,
+	inputType = "radio",
+	invalid,
+	label,
+	labelClassName,
+	name,
+	onChange,
+	required,
+	value,
+}: ChoiceFieldProps) {
+	const inputRef = React.useRef<HTMLInputElement | null>(null);
+	const labelTabIndex =
+		inputType === "radio" ? (disabled || checked ? -1 : 0) : undefined;
+
+	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (disabled) return;
+		if (inputType === "radio") {
+			if (event.target.checked) onChange?.(value, true);
+			return;
+		}
+		onChange?.(value, event.target.checked);
+	};
+
+	return (
+		<label
+			htmlFor={id}
+			data-checked={checked ? "true" : "false"}
+			tabIndex={labelTabIndex}
+			onFocus={() => {
+				inputRef.current?.focus({ preventScroll: true });
+			}}
+			className={clsx(
+				"group choice-field flex w-full items-center gap-3 text-left transition-colors motion-interactive",
+				disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+				className,
+			)}
+		>
+			<input
+				id={id}
+				name={name}
+				type={inputType}
+				value={value}
+				checked={checked}
+				disabled={disabled}
+				required={required}
+				onChange={handleChange}
+				ref={inputRef}
+				onKeyDown={(event) => {
+					if (event.key === "Enter") {
+						event.preventDefault();
+						event.currentTarget.click();
+					}
+				}}
+				aria-invalid={invalid ? true : undefined}
+				aria-hidden={inputAriaHidden ? true : undefined}
+				tabIndex={inputTabIndex ?? (inputType === "radio" ? -1 : undefined)}
+				aria-describedby={describedBy}
+				className="peer choice-field-input sr-only"
+			/>
+			{indicator}
+			<span className="flex min-w-0 flex-col items-start">
+				{label ? (
+					<Text
+						as="span"
+						variant="body"
+						className={clsx("text-sm", labelClassName)}
+					>
+						{label}
+					</Text>
+				) : null}
+				{description ? (
+					<Text as="span" variant="caption" tone="muted">
+						{description}
+					</Text>
+				) : null}
+			</span>
+		</label>
+	);
+}
 `,
 	},
 	{
@@ -500,6 +699,381 @@ export function SelectInput<T extends string = string>({
 					))}
 				</select>
 			</InputFrame>
+		</Field>
+	);
+}
+`,
+	},
+	{
+		path: "src/components/ui/input/RadioInput.tsx",
+		content: `"use client";
+
+import clsx from "clsx";
+import * as React from "react";
+import { ChoiceField } from "@/components/ui/input/choice/ChoiceField";
+import { ChoiceIndicatorRadio } from "@/components/ui/input/choice/ChoiceIndicators";
+import { Field } from "@/components/ui/primitives/Field";
+
+export type RadioOption = {
+	value: string;
+	label: React.ReactNode;
+	description?: React.ReactNode;
+	disabled?: boolean;
+};
+
+type RadioInputProps = {
+	className?: string;
+	defaultValue?: string;
+	description?: React.ReactNode;
+	disabled?: boolean;
+	error?: React.ReactNode;
+	fieldClassName?: string;
+	id?: string;
+	label?: React.ReactNode;
+	labelClassName?: string;
+	name?: string;
+	onChange?: (value: string) => void;
+	optionClassName?: string;
+	options: RadioOption[];
+	required?: boolean;
+	value?: string;
+};
+
+export function RadioInput({
+	className,
+	defaultValue,
+	description,
+	disabled,
+	error,
+	fieldClassName,
+	id,
+	label,
+	labelClassName,
+	name,
+	onChange,
+	optionClassName,
+	options,
+	required,
+	value,
+}: RadioInputProps) {
+	const isControlled = value !== undefined;
+	const [internalValue, setInternalValue] = React.useState<string | undefined>(
+		defaultValue ?? options[0]?.value,
+	);
+	const generatedId = React.useId();
+	const baseId = id ?? name ?? generatedId;
+	const groupName = name ?? baseId;
+	const firstOptionId = options[0]?.value
+		? \`\${baseId}-\${options[0].value}\`
+		: baseId;
+	const describedBy =
+		[
+			description ? \`\${firstOptionId}-description\` : undefined,
+			error ? \`\${firstOptionId}-error\` : undefined,
+		]
+			.filter(Boolean)
+			.join(" ") || undefined;
+	const selectedValue = isControlled ? value : internalValue;
+
+	const handleSelect = (nextValue: string) => {
+		if (nextValue === selectedValue) return;
+		if (!isControlled) setInternalValue(nextValue);
+		onChange?.(nextValue);
+	};
+
+	return (
+		<Field
+			id={firstOptionId}
+			label={label}
+			description={description}
+			error={error}
+			className={fieldClassName}
+		>
+			<div className={clsx("flex flex-col gap-3", className)}>
+				{options.map((option) => {
+					const optionId = \`\${baseId}-\${option.value}\`;
+					const isSelected = option.value === selectedValue;
+					const isDisabled = Boolean(disabled || option.disabled);
+
+					return (
+						<ChoiceField
+							key={option.value}
+							id={optionId}
+							name={groupName}
+							value={option.value}
+							label={option.label}
+							description={option.description}
+							checked={isSelected}
+							disabled={isDisabled}
+							required={required}
+							inputType="radio"
+							describedBy={describedBy}
+							invalid={Boolean(error)}
+							onChange={(nextValue) => handleSelect(nextValue)}
+							className={optionClassName}
+							labelClassName={labelClassName}
+							indicator={
+								<ChoiceIndicatorRadio
+									checked={isSelected}
+									disabled={isDisabled}
+								/>
+							}
+						/>
+					);
+				})}
+			</div>
+		</Field>
+	);
+}
+`,
+	},
+	{
+		path: "src/components/ui/input/MultiselectInput.tsx",
+		content: `"use client";
+
+import clsx from "clsx";
+import * as React from "react";
+import { ChoiceField } from "@/components/ui/input/choice/ChoiceField";
+import { ChoiceIndicatorMulti } from "@/components/ui/input/choice/ChoiceIndicators";
+import { Field } from "@/components/ui/primitives/Field";
+
+export type MultiselectOption = {
+	value: string;
+	label: React.ReactNode;
+	description?: React.ReactNode;
+	disabled?: boolean;
+};
+
+type MultiselectInputProps = {
+	className?: string;
+	defaultValue?: string[];
+	description?: React.ReactNode;
+	disabled?: boolean;
+	error?: React.ReactNode;
+	fieldClassName?: string;
+	id?: string;
+	label?: React.ReactNode;
+	labelClassName?: string;
+	name?: string;
+	onChange?: (value: string[]) => void;
+	optionClassName?: string;
+	options: MultiselectOption[];
+	required?: boolean;
+	value?: string[];
+};
+
+export function MultiselectInput({
+	className,
+	defaultValue,
+	description,
+	disabled,
+	error,
+	fieldClassName,
+	id,
+	label,
+	labelClassName,
+	name,
+	onChange,
+	optionClassName,
+	options,
+	required,
+	value,
+}: MultiselectInputProps) {
+	const isControlled = value !== undefined;
+	const [internalValue, setInternalValue] = React.useState<string[]>(
+		defaultValue ?? [],
+	);
+	const generatedId = React.useId();
+	const baseId = id ?? name ?? generatedId;
+	const groupName = name ?? baseId;
+	const firstOptionId = options[0]?.value
+		? \`\${baseId}-\${options[0].value}\`
+		: baseId;
+	const describedBy =
+		[
+			description ? \`\${firstOptionId}-description\` : undefined,
+			error ? \`\${firstOptionId}-error\` : undefined,
+		]
+			.filter(Boolean)
+			.join(" ") || undefined;
+	const selectedValues = isControlled ? (value ?? []) : internalValue;
+
+	const handleToggle = (nextValue: string, nextChecked: boolean) => {
+		const nextValues = nextChecked
+			? Array.from(new Set([...selectedValues, nextValue]))
+			: selectedValues.filter((currentValue) => currentValue !== nextValue);
+
+		if (!isControlled) setInternalValue(nextValues);
+		onChange?.(nextValues);
+	};
+
+	return (
+		<Field
+			id={firstOptionId}
+			label={label}
+			description={description}
+			error={error}
+			className={fieldClassName}
+		>
+			<div className={clsx("flex flex-col gap-3", className)}>
+				{options.map((option) => {
+					const optionId = \`\${baseId}-\${option.value}\`;
+					const isSelected = selectedValues.includes(option.value);
+					const isDisabled = Boolean(disabled || option.disabled);
+
+					return (
+						<ChoiceField
+							key={option.value}
+							id={optionId}
+							name={groupName}
+							value={option.value}
+							label={option.label}
+							description={option.description}
+							checked={isSelected}
+							disabled={isDisabled}
+							required={required && selectedValues.length === 0}
+							inputType="checkbox"
+							describedBy={describedBy}
+							invalid={Boolean(error)}
+							onChange={handleToggle}
+							className={optionClassName}
+							labelClassName={labelClassName}
+							indicator={
+								<ChoiceIndicatorMulti
+									checked={isSelected}
+									disabled={isDisabled}
+								/>
+							}
+						/>
+					);
+				})}
+			</div>
+		</Field>
+	);
+}
+`,
+	},
+	{
+		path: "src/components/ui/input/ToggleInput.tsx",
+		content: `"use client";
+
+import clsx from "clsx";
+import * as React from "react";
+import { ChoiceField } from "@/components/ui/input/choice/ChoiceField";
+import { ChoiceIndicatorToggle } from "@/components/ui/input/choice/ChoiceIndicators";
+import { Field } from "@/components/ui/primitives/Field";
+
+export type ToggleOption = {
+	value: string;
+	label: React.ReactNode;
+	description?: React.ReactNode;
+	disabled?: boolean;
+};
+
+type ToggleInputProps = {
+	className?: string;
+	defaultValue?: string[];
+	description?: React.ReactNode;
+	disabled?: boolean;
+	error?: React.ReactNode;
+	fieldClassName?: string;
+	id?: string;
+	label?: React.ReactNode;
+	labelClassName?: string;
+	name?: string;
+	onChange?: (value: string[]) => void;
+	optionClassName?: string;
+	options: ToggleOption[];
+	required?: boolean;
+	value?: string[];
+};
+
+export function ToggleInput({
+	className,
+	defaultValue,
+	description,
+	disabled,
+	error,
+	fieldClassName,
+	id,
+	label,
+	labelClassName,
+	name,
+	onChange,
+	optionClassName,
+	options,
+	required,
+	value,
+}: ToggleInputProps) {
+	const isControlled = value !== undefined;
+	const [internalValue, setInternalValue] = React.useState<string[]>(
+		defaultValue ?? [],
+	);
+	const generatedId = React.useId();
+	const baseId = id ?? name ?? generatedId;
+	const groupName = name ?? baseId;
+	const firstOptionId = options[0]?.value
+		? \`\${baseId}-\${options[0].value}\`
+		: baseId;
+	const describedBy =
+		[
+			description ? \`\${firstOptionId}-description\` : undefined,
+			error ? \`\${firstOptionId}-error\` : undefined,
+		]
+			.filter(Boolean)
+			.join(" ") || undefined;
+	const selectedValues = isControlled ? (value ?? []) : internalValue;
+
+	const handleToggle = (nextValue: string, nextChecked: boolean) => {
+		const nextValues = nextChecked
+			? Array.from(new Set([...selectedValues, nextValue]))
+			: selectedValues.filter((currentValue) => currentValue !== nextValue);
+
+		if (!isControlled) setInternalValue(nextValues);
+		onChange?.(nextValues);
+	};
+
+	return (
+		<Field
+			id={firstOptionId}
+			label={label}
+			description={description}
+			error={error}
+			className={fieldClassName}
+		>
+			<div className={clsx("flex flex-col gap-3", className)}>
+				{options.map((option) => {
+					const optionId = \`\${baseId}-\${option.value}\`;
+					const isSelected = selectedValues.includes(option.value);
+					const isDisabled = Boolean(disabled || option.disabled);
+
+					return (
+						<ChoiceField
+							key={option.value}
+							id={optionId}
+							name={groupName}
+							value={option.value}
+							label={option.label}
+							description={option.description}
+							checked={isSelected}
+							disabled={isDisabled}
+							required={required && selectedValues.length === 0}
+							inputType="checkbox"
+							describedBy={describedBy}
+							invalid={Boolean(error)}
+							onChange={handleToggle}
+							className={optionClassName}
+							labelClassName={labelClassName}
+							indicator={
+								<ChoiceIndicatorToggle
+									checked={isSelected}
+									disabled={isDisabled}
+								/>
+							}
+						/>
+					);
+				})}
+			</div>
 		</Field>
 	);
 }
@@ -2516,24 +3090,20 @@ export const THIN_START_REMOVE_PATHS = [
 	"src/components/ui/icons",
 	"src/components/ui/misc",
 	"src/components/ui/time",
-	"src/components/ui/input/choice",
 	"src/components/ui/input/files",
 	"src/components/ui/input/ComboboxMultiSelectInput.tsx",
 	"src/components/ui/input/ComboboxTextInput.tsx",
 	"src/components/ui/input/DateRangeInput.tsx",
 	"src/components/ui/input/EditableTextInput.tsx",
 	"src/components/ui/input/EmailInput.tsx",
-	"src/components/ui/input/MultiselectInput.tsx",
 	"src/components/ui/input/NumberInput.tsx",
 	"src/components/ui/input/PasswordInput.tsx",
 	"src/components/ui/input/PhoneInput.tsx",
 	"src/components/ui/input/ProfilePictureInput.tsx",
-	"src/components/ui/input/RadioInput.tsx",
 	"src/components/ui/input/SignaturePad.tsx",
 	"src/components/ui/input/SliderInput.tsx",
 	"src/components/ui/input/SpamProtectionFields.tsx",
 	"src/components/ui/input/TextAreaInput.tsx",
-	"src/components/ui/input/ToggleInput.tsx",
 	"src/components/ui/input/UnitNumberInput.tsx",
 	"src/components/ui/primitives/Divider.tsx",
 	"src/components/ui/primitives/Panel.tsx",

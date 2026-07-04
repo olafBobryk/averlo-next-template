@@ -14,9 +14,13 @@ const ALLOWED_UI_IMPORTS = new Set([
 	"@/components/ui/primitives/InputFrame",
 	"@/components/ui/primitives/Dropdown",
 	"@/components/ui/primitives/dropdownStyles",
+	"@/components/ui/input/choice/ChoiceField",
 	"@/components/ui/input/choice/ChoiceIndicators",
+	"@/components/ui/input/RadioInput",
+	"@/components/ui/input/MultiselectInput",
 	"@/components/ui/input/TextInput",
 	"@/components/ui/input/SelectInput",
+	"@/components/ui/input/ToggleInput",
 ]);
 const ALLOWED_COMPOSITE_IMPORT_PREFIXES = ["@/components/composites/markdown"];
 const ALLOWED_UI_PREFIXES = [

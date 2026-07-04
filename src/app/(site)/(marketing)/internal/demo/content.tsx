@@ -2311,12 +2311,12 @@ export const demoPages: DemoPage[] = [
 		id: "ui-input-choice",
 		slug: ["ui", "input", "choice"],
 		title: "UI Input: Choice",
-		description: "Choice indicators + fields",
+		description: "Radio, checkbox, and toggle inputs included in thin-start",
 		groups: [
 			{
 				id: "choice-inputs",
 				title: "Choice Inputs",
-				description: "Choice indicators + fields",
+				description: "Native choice groups built from Field and indicators",
 				items: [
 					{
 						id: "radio-input",
@@ -2386,6 +2386,15 @@ export const demoPages: DemoPage[] = [
 								/>
 							);
 						},
+					},
+					{
+						id: "thin-start-choice-usage",
+						kind: "usage",
+						name: "Choice inputs",
+						label: "Thin-start usage",
+						related: relatedMap.RadioInput,
+						snippet:
+							'const options = [{ value: "fast", label: "Fast" }, { value: "steady", label: "Steady" }];\\n\\n<RadioInput label="Mode" options={options} value={mode} onChange={setMode} />\\n<MultiselectInput label="Channels" options={options} value={channels} onChange={setChannels} />\\n<ToggleInput label="Preferences" options={options} value={preferences} onChange={setPreferences} />',
 					},
 					{
 						id: "choice-field",

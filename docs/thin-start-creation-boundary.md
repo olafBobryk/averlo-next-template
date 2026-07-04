@@ -61,12 +61,20 @@ The thin-start live primitive surface starts intentionally small:
 - `InputFrame`
 - `TextInput`
 - `Select`
+- `RadioInput`
+- `MultiselectInput`
+- `ToggleInput`
 - `Dropdown`
 
 Motion foundations, reduced-motion handling, section motion behavior, dropdown
 interaction behavior, and limited input/select integration patterns stay intact.
 `Panel`/`Card` and broad misc/helper surfaces are not part of the simple
 thin-start primitive surface.
+
+Choice inputs are included because preference selection is common in thin-start
+projects. They use the same small `Field` contract as `TextInput` and
+`SelectInput`, keep real native radio/checkbox inputs in the DOM, and render
+through the minimal `ChoiceField` plus `ChoiceIndicators` foundation.
 
 The thin-start composite surface starts intentionally smaller than the full
 template. `MarkdownRenderer` is allowed because it accepts a plain markdown
