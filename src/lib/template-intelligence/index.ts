@@ -128,16 +128,34 @@ export type TemplateIntelligenceGraphView = {
 };
 
 export type TemplateIntelligenceBenchmarkRun = {
-	schemaVersion: 1;
+	schemaVersion: 1 | 2;
 	date: string;
 	project: string;
 	taskId: string;
 	taskName: string;
 	strategy: string;
+	benchmarkMode?: string;
 	shellCommands: number;
 	semanticCalls: number;
 	lookupActions: number;
 	correctness: number;
+	resolution?: string;
+	runGroupId?: string;
+	taskClass?: string;
+	beforeCommit?: string;
+	afterCommit?: string;
+	setupSeconds?: number;
+	buildSeconds?: number;
+	querySeconds?: number;
+	outputBytes?: number;
+	graphNodes?: number;
+	graphEdges?: number;
+	graphQueries?: number;
+	suggestedFiles?: string[];
+	actualFiles?: string[];
+	missedFiles?: string[];
+	unnecessaryFiles?: string[];
+	fallbacksUsed?: string[];
 	elapsedSeconds?: number;
 	wrongTurns?: number;
 	generatedArtifactMistakes?: number;
@@ -233,7 +251,7 @@ function isTemplateIntelligenceBenchmarkRun(
 	const correctness = candidate.correctness;
 
 	return (
-		candidate.schemaVersion === 1 &&
+		(candidate.schemaVersion === 1 || candidate.schemaVersion === 2) &&
 		typeof candidate.date === "string" &&
 		typeof candidate.project === "string" &&
 		typeof candidate.taskId === "string" &&

@@ -235,8 +235,8 @@ function ReadyState({
 							Benchmark lookup cost
 						</Text>
 						<Text variant="body" tone="muted">
-							Compare control, Template Intelligence, Serena, and hybrid lookup
-							workflows when benchmark runs are intentionally recorded.
+							Compare Control, TemplateSerena, and Graphify workflows when
+							benchmark runs are intentionally recorded.
 						</Text>
 						<Button
 							href="/internal/intelligence?view=benchmarks"
@@ -282,8 +282,8 @@ function BenchmarkState({
 								Intelligence Benchmarks
 							</Text>
 							<Text variant="body" tone="muted">
-								Recorded lookup-cost comparisons for Control, Template
-								Intelligence, Serena, and Hybrid agent workflows.
+								Recorded lookup-cost comparisons for Control, TemplateSerena,
+								and Graphify agent workflows.
 							</Text>
 						</div>
 						<Button

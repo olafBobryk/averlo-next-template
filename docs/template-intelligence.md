@@ -140,8 +140,8 @@ npm run intelligence:generate
 npm run intelligence:query -- route-architecture
 ```
 
-Record intentional Hybrid runs only when a warm Serena service is available or
-when the command explicitly warms it:
+Record intentional `TemplateSerena` runs only when a warm Serena service is
+available or when the command explicitly warms it:
 
 ```bash
 npm run intelligence:serena:ensure
@@ -168,8 +168,8 @@ npm run intelligence:hybrid -- \
 ```
 
 Without a warm Serena service, `npm run intelligence:hybrid` still generates and
-queries Template Intelligence, prints `Template Intelligence only; no Hybrid row
-recorded`, and exits cleanly unless `--require-serena` is passed.
+queries Template Intelligence, prints a no-row-recorded message, and exits
+cleanly unless `--require-serena` is passed.
 
 If local port discovery needs inspection, run:
 
@@ -187,10 +187,10 @@ npm run intelligence:serena:debug -- --serena-port 9121
 npm run intelligence:serena:debug -- --port-range-start 9200 --port-range-count 20
 ```
 
-`Hybrid` benchmark rows require Template Intelligence plus at least one
+`TemplateSerena` benchmark rows require Template Intelligence plus at least one
 successful Serena semantic call. The lower-level `npm run intelligence:record`
-command rejects `--strategy Hybrid` when `--semantic-calls` is `0`; use
-`TemplateIntelligence` for task-map-only diagnostic rows.
+command rejects `--strategy TemplateSerena` when `--semantic-calls` is `0`; use
+`Control` for no-intelligence baselines.
 
 The benchmark view is available at:
 

@@ -47,6 +47,7 @@ yarn-error.log*
 /.template-intelligence/
 /.serena/
 /.understand-anything/
+/graphify-out/
 /docs/orchestration/
 
 # vercel

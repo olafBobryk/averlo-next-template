@@ -6,7 +6,7 @@
 - Treat `.template-intelligence/agent-map.json` as the first-pass map for where to read next. Use it to narrow file inspection before broad `rg` sweeps.
 - Serena is an optional warm local service, not a normal-work prerequisite. Use it when it is already running, when semantic code navigation would materially help, or when the user explicitly asks for it.
 - Warm Serena with `npm run intelligence:serena:ensure`; inspect it with `npm run intelligence:serena:status`; stop it with `npm run intelligence:serena:stop`. The wrapper uses a path-hashed project name for each checkout/worktree and stores ignored state in `.codex/serena.json`.
-- `npm run intelligence:hybrid` is now benchmark-oriented. It records a `Hybrid` row only after a successful Serena semantic call. Without a warm Serena service, it exits cleanly after Template Intelligence work and records no `Hybrid` row unless `--require-serena` is passed. Use `--ensure-serena` only for intentional benchmark/setup runs.
+- `npm run intelligence:hybrid` is now benchmark-oriented. It records a `TemplateSerena` row only after a successful Serena semantic call. Without a warm Serena service, it exits cleanly after Template Intelligence work and records no `TemplateSerena` row unless `--require-serena` is passed. Use `--ensure-serena` only for intentional benchmark/setup runs.
 - Do not block ordinary implementation work on Serena setup. If Serena is cold or unavailable, continue with Template Intelligence, `rg`, and direct file inspection.
 - Do not commit `.template-intelligence/**`, `.serena/**`, `.understand-anything/**`, `.codex/serena.json`, or `.codex/tmp/**`; these are local/generated context artifacts.
 

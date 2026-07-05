@@ -124,7 +124,7 @@ async function querySerena(state, toolName, toolParams) {
 }
 
 function templateOnly(message, requireSerena) {
-	const formatted = `Template Intelligence only; no Hybrid row recorded: ${message}`;
+	const formatted = `Template Intelligence only; no TemplateSerena row recorded: ${message}`;
 	if (requireSerena) {
 		throw new Error(formatted);
 	}
@@ -186,7 +186,7 @@ async function main() {
 
 		if (!state) {
 			templateOnly(
-				"no warm Serena service is available. Run `npm run intelligence:serena:ensure` or retry with `--ensure-serena` for an intentional Hybrid benchmark.",
+				"no warm Serena service is available. Run `npm run intelligence:serena:ensure` or retry with `--ensure-serena` for an intentional TemplateSerena benchmark.",
 				requireSerena,
 			);
 			return;
@@ -226,7 +226,7 @@ async function main() {
 
 		const shellCommands = 1 + topics.length + (ensureSerena ? 3 : 0);
 		const notes = [
-			`Warm optional Hybrid benchmark: generated Template Intelligence, queried topics ${topics.join(", ")}, used Serena service ${state.projectName} on port ${state.port}, and queried ${serenaFile}${serenaSymbol ? ` / ${serenaSymbol}` : ""}.`,
+			`Warm optional TemplateSerena benchmark: generated Template Intelligence, queried topics ${topics.join(", ")}, used Serena service ${state.projectName} on port ${state.port}, and queried ${serenaFile}${serenaSymbol ? ` / ${serenaSymbol}` : ""}.`,
 			extraNotes,
 		]
 			.filter(Boolean)
@@ -241,7 +241,7 @@ async function main() {
 			"--task-name",
 			taskName,
 			"--strategy",
-			"Hybrid",
+			"TemplateSerena",
 			"--shell-commands",
 			String(shellCommands),
 			"--semantic-calls",
@@ -259,7 +259,7 @@ async function main() {
 		]);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
-		console.warn(`Hybrid benchmark not recorded: ${message}`);
+		console.warn(`TemplateSerena benchmark not recorded: ${message}`);
 		process.exitCode = 2;
 	}
 }
