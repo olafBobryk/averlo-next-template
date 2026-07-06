@@ -2,26 +2,23 @@
 
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import Logo from "@/components/branding/Logo";
 import {
 	hasIntroDisabledSearchParam,
 	useIntroDisableOverride,
 	useMotionDisableOverride,
 } from "@/components/ui/foundations/motionDisableOverride";
+import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { markAppReady } from "@/lib/appReadySignal";
-import {
-	LayerFloodLoading,
-	layerFloodExitDurationMs,
-} from "./LayerFloodLoading";
+import { Text } from "../ui/primitives/Text";
 
-type Phase = "loading" | "transitioning" | "done";
+type Phase = "loading" | "revealing" | "transitioning" | "done";
 
-const EXIT_FADE_DURATION_MS = 420;
-const EXIT_FADE_TRANSITION = {
-	duration: EXIT_FADE_DURATION_MS / 1000,
-	ease: "linear",
-} as const;
-const EXIT_UNMOUNT_FALLBACK_MS = EXIT_FADE_DURATION_MS + 120;
+const REVEAL_DURATION_MS = Math.round(
+	Number(getMotionTiming("grand").duration ?? 0) * 1000,
+);
+const EXIT_REVEAL_HANDOFF_MS = 180;
 
 export default function LoadingScreenMount() {
 	const immediateIntroDisabled = hasIntroDisabledSearchParam();
@@ -67,11 +64,17 @@ export default function LoadingScreenMount() {
 		if (introDisabled) return;
 		let t1: ReturnType<typeof setTimeout> | undefined;
 		let cancelled = false;
-		t1 = setTimeout(() => {
+		Promise.all([
+			document.fonts.ready,
+			new Promise<void>((resolve) => setTimeout(resolve, 500)),
+		]).then(() => {
 			if (cancelled) return;
-			markAppReady();
-			setPhase("transitioning");
-		}, layerFloodExitDurationMs);
+			setPhase("revealing");
+			t1 = setTimeout(() => {
+				if (cancelled) return;
+				setPhase("transitioning");
+			}, REVEAL_DURATION_MS);
+		});
 
 		return () => {
 			cancelled = true;
@@ -81,12 +84,11 @@ export default function LoadingScreenMount() {
 
 	useEffect(() => {
 		if (introDisabled || phase !== "transitioning") return;
-		const doneId = setTimeout(() => {
+		const readyId = setTimeout(() => {
 			markAppReady();
-			setPhase("done");
-		}, EXIT_UNMOUNT_FALLBACK_MS);
+		}, EXIT_REVEAL_HANDOFF_MS);
 
-		return () => clearTimeout(doneId);
+		return () => clearTimeout(readyId);
 	}, [introDisabled, phase]);
 
 	if (immediateIntroDisabled || introDisabled || phase === "done") return null;
@@ -99,22 +101,29 @@ export default function LoadingScreenMount() {
 			}`}
 			data-loading-screen-mount="true"
 			animate={{ opacity: phase === "transitioning" ? 0 : 1 }}
-			transition={EXIT_FADE_TRANSITION}
+			transition={getMotionTiming("grand")}
 			onAnimationComplete={() => {
 				if (phase !== "transitioning") return;
 				markAppReady();
 				setPhase("done");
 			}}
 		>
-			<motion.div className="relative flex size-full items-center justify-center">
-				<LayerFloodLoading />
+			<motion.div
+				className="flex items-stretch"
+				transition={getMotionTiming("grand")}
+			>
+				<Logo as="span" variant="mark" size="lg" />
 				<motion.div
-					aria-hidden="true"
-					className="absolute inset-0 z-20 bg-white"
-					initial={{ opacity: 0 }}
-					animate={{ opacity: phase === "loading" ? 0 : 1 }}
-					transition={EXIT_FADE_TRANSITION}
-				/>
+					initial={{ maxWidth: 0 }}
+					animate={{ maxWidth: phase === "loading" ? 0 : 420 }}
+					className="overflow-hidden flex items-center"
+					transition={getMotionTiming("grand")}
+				>
+					<div className="min-w-0.5 rounded-full bg-primary h-full mx-3" />
+					<Text variant="heading2xxl" className="font-black!">
+						AVERLO
+					</Text>
+				</motion.div>
 			</motion.div>
 		</motion.div>
 	);
