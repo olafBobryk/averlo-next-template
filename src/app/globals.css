@@ -1,3 +1,25 @@
 /** biome-ignore-all lint/suspicious/noUnknownAtRules: Tailwind at-rules are expected here. */
 @import "tailwindcss";
 @import "../components/ui/foundations/library.css";
+
+@layer components {
+	.marketing-section-review-frame {
+		position: relative;
+		outline: 1px solid transparent;
+		outline-offset: -1px;
+		transition:
+			background-color 160ms ease,
+			outline-color 160ms ease;
+	}
+
+	html[data-section-review="active"] .marketing-section-review-frame {
+		background-color: rgb(var(--color-primary-rgb) / 0.04);
+		outline-color: rgb(var(--color-primary-rgb) / 0.36);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.marketing-section-review-frame {
+			transition: none;
+		}
+	}
+}

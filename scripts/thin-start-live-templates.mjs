@@ -1723,7 +1723,7 @@ export const fallbackHomePage: MarketingPageDocument = {
 			],
 			cta: {
 				label: "Start",
-				href: "/#hero",
+				href: "/#home-hero",
 			},
 		},
 	],
@@ -1733,7 +1733,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 	header: {
 		cta: {
 			label: "Start",
-			href: "/#hero",
+			href: "/#home-hero",
 		},
 		menuGroups: [
 			{
@@ -1741,7 +1741,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				icon: "dot",
 				link: { label: "Home", routeId: "home" },
 				links: [
-					{ label: "Hero", href: "/#hero" },
+					{ label: "Hero", href: "/#home-hero" },
 					{ label: "Intelligence", routeId: "intelligence" },
 				],
 			},
@@ -1766,7 +1766,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				sections: [
 					{
 						label: "Hero",
-						href: "/#hero",
+						href: "/#home-hero",
 						description: "Primary home page introduction.",
 					},
 				],
@@ -1793,7 +1793,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				label: "Home",
 				icon: "dot",
 				link: { label: "Home", routeId: "home" },
-				links: [{ label: "Hero", href: "/#hero" }],
+				links: [{ label: "Hero", href: "/#home-hero" }],
 			},
 			{
 				label: "Internal",
@@ -1874,7 +1874,13 @@ export function HomeHeroSection({ section }: HomeHeroSectionProps) {
 	const description = section.descriptions[0]?.text ?? "";
 
 	return (
-		<Section id="hero" padding="hero">
+		<Section
+			id={section.id ?? "home-hero"}
+			padding="hero"
+			data-section-id={section.id ?? "home-hero"}
+			data-section-label="Home Hero"
+			data-section-type={section.blockType}
+		>
 			<Reveal.List className="mx-auto flex min-h-[70vh] max-w-section-max flex-col justify-center gap-8">
 				<Reveal.Item>
 					<Text as="h1" variant="heading" className="max-w-3xl">

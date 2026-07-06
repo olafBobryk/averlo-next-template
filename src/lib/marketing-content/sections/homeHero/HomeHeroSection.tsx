@@ -16,7 +16,12 @@ export function HomeHeroSection({ section }: HomeHeroSectionProps) {
 
 	return (
 		<MotionScene>
-			<Section id="hero" height="hero" background="background" padding="hero">
+			<Section
+				id={section.id ?? "home-hero"}
+				height="hero"
+				background="background"
+				padding="hero"
+			>
 				<Section.Background
 					interactive
 					className="flex justify-center rtl:-scale-x-100"

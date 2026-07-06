@@ -40,7 +40,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				label: "Start",
 				link: { label: "Home", routeId: "home" },
 				links: [
-					{ label: "Hero", href: "/#hero" },
+					{ label: "Hero", href: "/#home-hero" },
 					{ label: "Settings", routeId: "settings" },
 				],
 			},
@@ -75,7 +75,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 				sections: [
 					{
 						label: "Hero",
-						href: "/#hero",
+						href: "/#home-hero",
 						description: "Primary home page introduction.",
 					},
 				],
@@ -131,7 +131,7 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 			{
 				label: "Home",
 				link: { label: "Home", routeId: "home" },
-				links: [{ label: "Hero", href: "/#hero" }],
+				links: [{ label: "Hero", href: "/#home-hero" }],
 			},
 			{
 				label: "Template",

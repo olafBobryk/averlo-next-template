@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import { spawn } from "node:child_process";
-import { writeFile } from "node:fs/promises";
+import { execFileSync, spawn } from "node:child_process";
+import { mkdir, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import net from "node:net";
+import path from "node:path";
 
 const USER_PORT = 3000;
 const USER_PORT_END = 3010;
@@ -15,6 +16,8 @@ const args = process.argv.slice(2);
 const mode = args.find((arg) => !arg.startsWith("-")) ?? "user";
 const isDryRun = args.includes("--dry-run");
 const useRandomPort = args.includes("--random");
+const checkoutRoot = process.cwd();
+const previewMetadataPath = path.join(checkoutRoot, ".codex", "preview.json");
 
 const printUsageAndExit = () => {
 	console.error(
@@ -91,6 +94,51 @@ const getPayloadAdminUrl = (url) => {
 	return loginUrl.toString();
 };
 
+const getAutomationUrl = (url) => `${url}?motion=off&reveal=off`;
+
+const shellQuote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
+
+const getGitBranch = () => {
+	try {
+		const branch = execFileSync("git", ["branch", "--show-current"], {
+			cwd: checkoutRoot,
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+
+		if (branch) {
+			return branch;
+		}
+
+		return execFileSync("git", ["rev-parse", "--short", "HEAD"], {
+			cwd: checkoutRoot,
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+	} catch {
+		return null;
+	}
+};
+
+const writePreviewMetadata = async ({ child, target, url }) => {
+	const metadata = {
+		schemaVersion: 1,
+		root: checkoutRoot,
+		branch: getGitBranch(),
+		mode: target.label,
+		pid: child.pid ?? null,
+		localUrl: url,
+		automationUrl: getAutomationUrl(url),
+		startedAt: new Date().toISOString(),
+	};
+
+	await mkdir(path.dirname(previewMetadataPath), { recursive: true });
+	await writeFile(
+		previewMetadataPath,
+		`${JSON.stringify(metadata, null, 2)}\n`,
+	);
+};
+
 const getServerTarget = async () => {
 	if (mode === "user") {
 		const port = await findAvailablePort(USER_PORT, USER_PORT_END);
@@ -147,11 +195,14 @@ const start = async () => {
 	console.log(`Mode: ${target.label}`);
 	console.log(`URL: ${url}`);
 	if (target.label === "agent") {
-		console.log(`Automation URL: ${url}?motion=off&reveal=off`);
+		console.log(`Automation URL: ${getAutomationUrl(url)}`);
 	}
 	if (process.env.PAYLOAD_DEV_MAGIC_LOGIN === "1") {
 		console.log(`Payload Admin URL: ${getPayloadAdminUrl(url)}`);
 	}
+	console.log(`Checkout: ${checkoutRoot}`);
+	console.log(`VS Code: code --new-window ${shellQuote(checkoutRoot)}`);
+	console.log(`Preview metadata: ${previewMetadataPath}`);
 	console.log(`Next distDir: ${target.distDir}`);
 	console.log(`TypeScript config: ${target.tsconfigPath}`);
 
@@ -186,12 +237,16 @@ const start = async () => {
 			env: {
 				...process.env,
 				NEXT_DEV_DIST_DIR: target.distDir,
+				NEXT_DEV_SERVER_MODE: target.label,
 				NEXT_DEV_TSCONFIG_PATH: target.tsconfigPath,
+				NEXT_WORKTREE_ROOT: checkoutRoot,
 				PORT: String(target.port),
 			},
 			stdio: "inherit",
 		},
 	);
+
+	await writePreviewMetadata({ child, target, url });
 
 	child.on("exit", (code, signal) => {
 		if (signal) {

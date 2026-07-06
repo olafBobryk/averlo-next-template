@@ -5,6 +5,20 @@ type RenderableMarketingSection =
 	| MarketingSection
 	| MarketingSectionBase<string>;
 
+const formatSectionLabel = (
+	section: RenderableMarketingSection,
+	index: number,
+) => {
+	const source = section.id ?? section.blockType ?? `section-${index + 1}`;
+
+	return source
+		.replace(/([a-z])([A-Z])/g, "$1 $2")
+		.replace(/[-_]+/g, " ")
+		.replace(/\s+/g, " ")
+		.trim()
+		.replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
 const isKnownSection = (
 	section: RenderableMarketingSection,
 ): section is MarketingSection => section.blockType in marketingSectionRegistry;
@@ -27,6 +41,19 @@ export function renderMarketingSections(
 		}
 
 		const Renderer = marketingSectionRegistry[section.blockType];
-		return <Renderer key={key} section={section} />;
+		const sectionId = section.id ?? `${section.blockType}-${index + 1}`;
+
+		return (
+			<div
+				key={key}
+				className="marketing-section-review-frame"
+				data-marketing-section=""
+				data-section-id={sectionId}
+				data-section-label={formatSectionLabel(section, index)}
+				data-section-type={section.blockType}
+			>
+				<Renderer section={section} />
+			</div>
+		);
 	});
 }

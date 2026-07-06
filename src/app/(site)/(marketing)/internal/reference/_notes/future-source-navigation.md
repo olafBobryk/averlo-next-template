@@ -8,9 +8,17 @@ This note belongs under the internal reference surface so it is removed by:
 npm run prune:template -- --no-reference
 ```
 
-## Current experiment
+## Current implementation
 
-Use `code-inspector-plugin` as the lightweight option-3 implementation. It runs through `turbopack.rules` in `next.config.ts`, only activates in `next dev`, and opens VS Code through the local editor bridge.
+Use `code-inspector-plugin` as the lightweight source-navigation implementation. It runs through `turbopack.rules` in `next.config.ts`, only activates in `next dev`, and opens VS Code through the local editor bridge.
+
+The inspector launch is worktree-aware. The agent dev wrapper sets `NEXT_WORKTREE_ROOT`, and the inspector uses VS Code CLI arguments equivalent to:
+
+```bash
+code --reuse-window <worktree-root> --goto <file>:<line>:<column>
+```
+
+The Codex app's top-right VS Code button is not the source of truth for parallel worktrees. Use the checkout path printed by the preview command, `.codex/preview.json`, or the `$open-vscode` skill when making human tweaks alongside an agent thread.
 
 Default local workflow:
 
@@ -19,6 +27,12 @@ Default local workflow:
 - hold `Option + Shift` on macOS
 - hover an element to see the inspector overlay
 - click to open the source location in VS Code
+
+For marketing page review, `Option + Shift` also activates a subtle section
+review state. The page can force that same state with `?review=sections`.
+Sections expose `data-section-id`, `data-section-type`, and
+`data-section-label` so the visible section, URL anchor, and source file names
+are easier to reference in chat.
 
 ## Option 4: custom build
 
