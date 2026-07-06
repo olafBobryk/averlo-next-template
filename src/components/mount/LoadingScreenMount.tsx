@@ -2,22 +2,26 @@
 
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import Logo from "@/components/branding/Logo";
 import {
 	hasIntroDisabledSearchParam,
 	useIntroDisableOverride,
+	useMotionDisableOverride,
 } from "@/components/ui/foundations/motionDisableOverride";
-import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { markAppReady } from "@/lib/appReadySignal";
-import { Text } from "../ui/primitives/Text";
+import {
+	LayerFloodLoading,
+	layerFloodExitDurationMs,
+} from "./LayerFloodLoading";
 
-type Phase = "loading" | "revealing" | "transitioning" | "done";
+type Phase = "loading" | "transitioning" | "done";
 
-const REVEAL_DURATION_MS = Math.round(
-	Number(getMotionTiming("grand").duration ?? 0) * 1000,
-);
-const EXIT_REVEAL_HANDOFF_MS = 180;
+const EXIT_FADE_DURATION_MS = 420;
+const EXIT_FADE_TRANSITION = {
+	duration: EXIT_FADE_DURATION_MS / 1000,
+	ease: "linear",
+} as const;
+const EXIT_UNMOUNT_FALLBACK_MS = EXIT_FADE_DURATION_MS + 120;
 
 export default function LoadingScreenMount() {
 	const immediateIntroDisabled = hasIntroDisabledSearchParam();
@@ -25,15 +29,29 @@ export default function LoadingScreenMount() {
 		hasIntroDisabledSearchParam() ? "done" : "loading",
 	);
 	const motionAllowed = useMotionAllowed(true);
+	const motionDisabled = useMotionDisableOverride();
 	const introOverrideDisabled = useIntroDisableOverride();
 	const introDisabled =
-		immediateIntroDisabled || introOverrideDisabled || !motionAllowed;
+		immediateIntroDisabled ||
+		introOverrideDisabled ||
+		motionDisabled ||
+		!motionAllowed;
 
 	useEffect(() => {
 		if (!introDisabled) return;
 		markAppReady();
 		setPhase("done");
 	}, [introDisabled]);
+
+	useEffect(() => {
+		if (!immediateIntroDisabled) return;
+
+		document
+			.querySelectorAll('[data-loading-screen-mount="true"]')
+			.forEach((node) => {
+				node.remove();
+			});
+	}, [immediateIntroDisabled]);
 
 	// Prevent scroll until the loading screen is fully gone
 	useEffect(() => {
@@ -49,17 +67,12 @@ export default function LoadingScreenMount() {
 		if (introDisabled) return;
 		let t1: ReturnType<typeof setTimeout> | undefined;
 		let cancelled = false;
-		Promise.all([
-			document.fonts.ready,
-			new Promise<void>((resolve) => setTimeout(resolve, 500)),
-		]).then(() => {
+		t1 = setTimeout(() => {
 			if (cancelled) return;
-			setPhase("revealing");
-			t1 = setTimeout(() => {
-				if (cancelled) return;
-				setPhase("transitioning");
-			}, REVEAL_DURATION_MS);
-		});
+			markAppReady();
+			setPhase("transitioning");
+		}, layerFloodExitDurationMs);
+
 		return () => {
 			cancelled = true;
 			clearTimeout(t1);
@@ -68,14 +81,15 @@ export default function LoadingScreenMount() {
 
 	useEffect(() => {
 		if (introDisabled || phase !== "transitioning") return;
-		const readyId = setTimeout(() => {
+		const doneId = setTimeout(() => {
 			markAppReady();
-		}, EXIT_REVEAL_HANDOFF_MS);
+			setPhase("done");
+		}, EXIT_UNMOUNT_FALLBACK_MS);
 
-		return () => clearTimeout(readyId);
+		return () => clearTimeout(doneId);
 	}, [introDisabled, phase]);
 
-	if (introDisabled || phase === "done") return null;
+	if (immediateIntroDisabled || introDisabled || phase === "done") return null;
 
 	return (
 		<motion.div
@@ -85,29 +99,22 @@ export default function LoadingScreenMount() {
 			}`}
 			data-loading-screen-mount="true"
 			animate={{ opacity: phase === "transitioning" ? 0 : 1 }}
-			transition={getMotionTiming("grand")}
+			transition={EXIT_FADE_TRANSITION}
 			onAnimationComplete={() => {
 				if (phase !== "transitioning") return;
 				markAppReady();
 				setPhase("done");
 			}}
 		>
-			<motion.div
-				className="flex items-stretch"
-				transition={getMotionTiming("grand")}
-			>
-				<Logo as="span" variant="mark" size="lg" />
+			<motion.div className="relative flex size-full items-center justify-center">
+				<LayerFloodLoading />
 				<motion.div
-					initial={{ maxWidth: 0 }}
-					animate={{ maxWidth: phase === "loading" ? 0 : 420 }}
-					className="overflow-hidden flex items-center"
-					transition={getMotionTiming("grand")}
-				>
-					<div className="min-w-0.5 rounded-full bg-primary h-full mx-3" />
-					<Text variant="heading2xxl" className="font-black!">
-						AVERLO
-					</Text>
-				</motion.div>
+					aria-hidden="true"
+					className="absolute inset-0 z-20 bg-white"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: phase === "loading" ? 0 : 1 }}
+					transition={EXIT_FADE_TRANSITION}
+				/>
 			</motion.div>
 		</motion.div>
 	);
