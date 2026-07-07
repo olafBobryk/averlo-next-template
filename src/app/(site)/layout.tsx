@@ -14,9 +14,25 @@ const motionOverrideScript = `
 		const isOff = (value) => value === "off" || value === "false";
 		const motion = params.get("motion")?.toLowerCase();
 		const reveal = params.get("reveal")?.toLowerCase();
+		const intro = params.get("intro")?.toLowerCase();
+		const loading = params.get("loading")?.toLowerCase();
+		const motionDisabled = isOff(motion) || isOff(reveal);
+		const loadingDisabled = motionDisabled || isOff(intro) || isOff(loading);
 
-		if (isOff(motion) || isOff(reveal)) {
+		if (motionDisabled) {
 			document.documentElement.dataset.motionOverride = "off";
+		} else {
+			delete document.documentElement.dataset.motionOverride;
+		}
+
+		if (loadingDisabled) {
+			document.documentElement.dataset.loadingOverride = "off";
+			if (!document.getElementById("loading-screen-override-style")) {
+				const style = document.createElement("style");
+				style.id = "loading-screen-override-style";
+				style.textContent = '[data-loading-screen-mount="true"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}';
+				document.head.appendChild(style);
+			}
 			const removeLoadingMount = () => {
 				document
 					.querySelectorAll('[data-loading-screen-mount="true"]')
@@ -37,7 +53,7 @@ const motionOverrideScript = `
 				{ once: true },
 			);
 		} else {
-			delete document.documentElement.dataset.motionOverride;
+			delete document.documentElement.dataset.loadingOverride;
 		}
 	} catch {}
 })();

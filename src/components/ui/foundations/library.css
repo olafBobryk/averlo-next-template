@@ -318,8 +318,11 @@
 		scrollbar-color: rgba(229, 241, 255, 0.22) #101011;
 	}
 
-	html[data-motion-override="off"] [data-loading-screen-mount="true"] {
+	html[data-motion-override="off"] [data-loading-screen-mount="true"],
+	html[data-loading-override="off"] [data-loading-screen-mount="true"] {
+		display: none;
 		visibility: hidden;
+		pointer-events: none;
 	}
 
 	body {
