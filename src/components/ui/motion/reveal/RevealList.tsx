@@ -3,7 +3,7 @@
 import {
 	RevealGroup,
 	type RevealGroupProps,
-} from "@/components/ui/motion/reveal/legacyCore";
+} from "@/components/ui/motion/reveal/scheduler/RevealGroupScheduler";
 import { type RevealStageAliasProps, resolveRevealStageAliases } from "./types";
 
 export type RevealListProps = Omit<

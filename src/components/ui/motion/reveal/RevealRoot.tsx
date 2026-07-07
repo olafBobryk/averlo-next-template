@@ -4,4 +4,4 @@ export {
 	RevealRoot as Root,
 	RevealRoot,
 	type RevealRootProps,
-} from "./legacyCore";
+} from "./scheduler/RevealRootScheduler";

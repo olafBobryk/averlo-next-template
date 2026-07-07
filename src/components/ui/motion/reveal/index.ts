@@ -8,16 +8,6 @@ import { RevealScene } from "./RevealScene";
 import { ScrambleReveal } from "./RevealScramble";
 import { RevealText } from "./RevealText";
 
-export type {
-	RevealGroupItemProps,
-	RevealGroupProps,
-} from "./legacyCore";
-export {
-	RevealGroup,
-	RevealGroupItem,
-	RevealItem as RootScheduledRevealItem,
-	useRevealAnimationsDisabled,
-} from "./legacyCore";
 export { RevealHighlightText } from "./RevealHighlightText";
 export {
 	getCornerClipRevealVariants,
@@ -37,6 +27,12 @@ export { RevealRoot, type RevealRootProps } from "./RevealRoot";
 export { RevealScene } from "./RevealScene";
 export { ScrambleReveal } from "./RevealScramble";
 export { RevealText } from "./RevealText";
+export type { RevealGroupItemProps } from "./scheduler/RevealGroupItemScheduler";
+export { RevealGroupItem } from "./scheduler/RevealGroupItemScheduler";
+export type { RevealGroupProps } from "./scheduler/RevealGroupScheduler";
+export { RevealGroup } from "./scheduler/RevealGroupScheduler";
+export { RevealItem as RootScheduledRevealItem } from "./scheduler/RevealItemScheduler";
+export { useRevealAnimationsDisabled } from "./scheduler/RevealRootScheduler";
 export type { RevealStageAliasProps } from "./types";
 
 export const Reveal = {

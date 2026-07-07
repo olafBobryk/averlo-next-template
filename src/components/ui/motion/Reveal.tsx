@@ -1,15 +1,19 @@
 "use client";
 
-export type {
-	RevealGroupItemProps,
-	RevealGroupProps,
-	RevealItemProps,
-	RevealRootProps,
-} from "@/components/ui/motion/reveal/legacyCore";
+export {
+	RevealGroupItem,
+	type RevealGroupItemProps,
+} from "@/components/ui/motion/reveal/scheduler/RevealGroupItemScheduler";
 export {
 	RevealGroup,
-	RevealGroupItem,
+	type RevealGroupProps,
+} from "@/components/ui/motion/reveal/scheduler/RevealGroupScheduler";
+export {
 	RevealItem,
+	type RevealItemProps,
+} from "@/components/ui/motion/reveal/scheduler/RevealItemScheduler";
+export {
 	RevealRoot,
+	type RevealRootProps,
 	useRevealAnimationsDisabled,
-} from "@/components/ui/motion/reveal/legacyCore";
+} from "@/components/ui/motion/reveal/scheduler/RevealRootScheduler";

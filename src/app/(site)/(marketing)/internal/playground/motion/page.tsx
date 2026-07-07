@@ -318,9 +318,9 @@ function RevealGroupCompatibilityQa() {
 
 	return (
 		<QaPanel
-			title="RevealGroup Compatibility"
+			title="RevealGroup Alias"
 			code="<RevealGroup>"
-			expected="The old boundary export still schedules once through the root while its wrapper stays visually stable."
+			expected="The compatibility boundary export schedules once through the root while its wrapper stays visually stable."
 		>
 			<Button
 				size="sm"
@@ -351,9 +351,9 @@ function RevealGroupItemCompatibilityQa() {
 
 	return (
 		<QaPanel
-			title="RevealGroupItem Compatibility"
+			title="RevealGroupItem Alias"
 			code="<RevealGroupItem>"
-			expected="The old child export still joins its nearest RevealGroup queue and falls back to root scheduling outside a group."
+			expected="The compatibility child export joins its nearest RevealGroup queue and falls back to root scheduling outside a group."
 		>
 			<Button
 				size="sm"

@@ -1,10 +1,10 @@
 "use client";
 
 import {
-	type RevealItemProps as CoreRevealItemProps,
 	RevealGroupItem,
 	type RevealGroupItemProps,
-} from "@/components/ui/motion/reveal/legacyCore";
+} from "@/components/ui/motion/reveal/scheduler/RevealGroupItemScheduler";
+import type { RevealItemProps as CoreRevealItemProps } from "@/components/ui/motion/reveal/scheduler/RevealItemScheduler";
 import { type RevealStageAliasProps, resolveRevealStageAliases } from "./types";
 
 export type RevealItemProps = CoreRevealItemProps & RevealStageAliasProps;
