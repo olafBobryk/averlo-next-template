@@ -10,6 +10,7 @@ import {
 } from "motion/react";
 import {
 	type ComponentProps,
+	type CSSProperties,
 	createContext,
 	createElement,
 	type ElementType,
@@ -34,6 +35,7 @@ import {
 import {
 	type MotionSceneStageInput,
 	useMotionSceneGate,
+	useOptionalMotionScene,
 } from "@/components/ui/motion/MotionScene";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -77,6 +79,11 @@ type RevealGroupContextValue = {
 
 const RevealRootContext = createContext<RevealRootContextValue | null>(null);
 const RevealGroupContext = createContext<RevealGroupContextValue | null>(null);
+const disabledRevealStyle: CSSProperties = {
+	opacity: 1,
+	transform: "none",
+	clipPath: "none",
+};
 
 function getStaticRevealTag(as?: ElementType) {
 	return typeof as === "string" ? as : "div";
@@ -255,6 +262,7 @@ export type RevealGroupProps = {
 	children: ReactNode;
 	as?: ElementType;
 	className?: string;
+	disabled?: boolean;
 	stagger?: number;
 	/** @deprecated RevealGroup is now a boundary-only local scheduler. */
 	delay?: number;
@@ -264,6 +272,7 @@ export type RevealGroupProps = {
 	once?: boolean;
 	active?: boolean;
 	waitFor?: MotionSceneStageInput;
+	unlockOnStartStage?: MotionSceneStageInput;
 	unlockStage?: MotionSceneStageInput;
 	disableWhenReducedMotion?: boolean;
 	viewportAmount?: number;
@@ -287,9 +296,11 @@ function RevealGroupInner({
 	children,
 	as = "div",
 	className,
+	disabled: disabledOverride = false,
 	stagger = 0.18,
 	active,
 	waitFor,
+	unlockOnStartStage,
 	unlockStage,
 	disableWhenReducedMotion = true,
 	viewportAmount = 0.2,
@@ -298,7 +309,7 @@ function RevealGroupInner({
 	const root = useContext(RevealRootContext);
 	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
-	const disabled = root?.disabled || !motionAllowed;
+	const disabled = disabledOverride || root?.disabled || !motionAllowed;
 	const [hasPlayed, setHasPlayed] = useState(false);
 	const [started, setStarted] = useState(false);
 	const viewportRef = useRef<HTMLElement | null>(null);
@@ -325,6 +336,7 @@ function RevealGroupInner({
 		waitFor,
 		unlockStage,
 	});
+	const scene = useOptionalMotionScene();
 	const isReady =
 		disabled || (appReady && isInViewport && active !== false && sceneReady);
 
@@ -449,12 +461,13 @@ function RevealGroupInner({
 
 	const startGroup = useCallback(() => {
 		startedRef.current = true;
+		scene?.markStages(unlockOnStartStage);
 		if (mountedRef.current) {
 			setStarted(true);
 		}
 		scheduleFlush();
 		scheduleCompletionCheck();
-	}, [scheduleCompletionCheck, scheduleFlush]);
+	}, [scheduleCompletionCheck, scheduleFlush, scene, unlockOnStartStage]);
 
 	const play = useCallback(
 		async (delay: number) => {
@@ -759,9 +772,14 @@ function RevealItemInner({
 
 	const showImmediately = useCallback(() => {
 		if (!mountedRef.current) return;
+		if (variants) {
+			controls.set("show");
+			setHasPlayed(true);
+			return;
+		}
 		controls.set(disableTransform ? { opacity: 1 } : { opacity: 1, y: 0 });
 		setHasPlayed(true);
-	}, [controls, disableTransform]);
+	}, [controls, disableTransform, variants]);
 
 	const onComplete = useCallback(() => {
 		markReady();
@@ -828,6 +846,8 @@ function RevealItemInner({
 				<SlotWithRef
 					ref={childRef}
 					className={revealClassName}
+					data-reveal-item=""
+					style={disabledRevealStyle}
 					{...interactionLockProps}
 				>
 					{children}
@@ -838,7 +858,13 @@ function RevealItemInner({
 		const Tag = getStaticRevealTag(staticAs ?? as);
 		return createElement(
 			Tag,
-			{ ref: viewportRef, className: revealClassName, ...interactionLockProps },
+			{
+				ref: viewportRef,
+				className: revealClassName,
+				"data-reveal-item": "",
+				style: disabledRevealStyle,
+				...interactionLockProps,
+			},
 			children,
 		);
 	}
@@ -865,6 +891,7 @@ function RevealItemInner({
 			animate={controls}
 			variants={baseVariants}
 			className={revealClassName}
+			data-reveal-item=""
 			{...interactionLockProps}
 		>
 			{children}
@@ -1007,9 +1034,14 @@ function RevealGroupItemInner({
 
 	const showImmediately = useCallback(() => {
 		if (!mountedRef.current) return;
+		if (variants) {
+			controls.set("show");
+			setHasPlayed(true);
+			return;
+		}
 		controls.set(disableTransform ? { opacity: 1 } : { opacity: 1, y: 0 });
 		setHasPlayed(true);
-	}, [controls, disableTransform]);
+	}, [controls, disableTransform, variants]);
 
 	const onComplete = useCallback(() => {
 		group?.completeItem(id);
@@ -1076,6 +1108,8 @@ function RevealGroupItemInner({
 				<SlotWithRef
 					ref={childRef}
 					className={revealClassName}
+					data-reveal-item=""
+					style={disabledRevealStyle}
 					{...interactionLockProps}
 				>
 					{children}
@@ -1086,7 +1120,13 @@ function RevealGroupItemInner({
 		const Tag = getStaticRevealTag(staticAs ?? as);
 		return createElement(
 			Tag,
-			{ ref: viewportRef, className: revealClassName, ...interactionLockProps },
+			{
+				ref: viewportRef,
+				className: revealClassName,
+				"data-reveal-item": "",
+				style: disabledRevealStyle,
+				...interactionLockProps,
+			},
 			children,
 		);
 	}
@@ -1113,6 +1153,7 @@ function RevealGroupItemInner({
 			animate={controls}
 			variants={baseVariants}
 			className={revealClassName}
+			data-reveal-item=""
 			{...interactionLockProps}
 		>
 			{children}

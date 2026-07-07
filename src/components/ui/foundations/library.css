@@ -325,6 +325,19 @@
 		pointer-events: none;
 	}
 
+	html[data-motion-override="off"] [data-reveal-item] {
+		/* biome-ignore lint/complexity/noImportantStyles: Automation overrides must beat server-rendered inline motion styles. */
+		opacity: 1 !important;
+		/* biome-ignore lint/complexity/noImportantStyles: Automation overrides must beat server-rendered inline motion styles. */
+		transform: none !important;
+		/* biome-ignore lint/complexity/noImportantStyles: Automation overrides must beat server-rendered inline motion styles. */
+		clip-path: none !important;
+		/* biome-ignore lint/complexity/noImportantStyles: Automation overrides must beat server-rendered inline motion styles. */
+		animation: none !important;
+		/* biome-ignore lint/complexity/noImportantStyles: Automation overrides must beat server-rendered inline motion styles. */
+		transition: none !important;
+	}
+
 	body {
 		--font-body: var(--font-roboto), var(--font-sans-fallback);
 		--font-heading: var(--font-roboto), var(--font-sans-fallback);
