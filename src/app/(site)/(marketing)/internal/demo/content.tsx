@@ -5,8 +5,13 @@ import { type JSX, type Ref, useRef, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { MarkdownRenderer } from "@/components/composites/markdown";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
+import {
+	CopyStatusIcon,
+	useCopyAction,
+} from "@/components/ui/helpers/useCopyAction";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { useIconRegistry } from "@/components/ui/icons/iconRegistry";
+import { ButtonMultiSelectInput } from "@/components/ui/input/ButtonMultiSelectInput";
 import { ComboboxMultiSelectInput } from "@/components/ui/input/ComboboxMultiSelectInput";
 import { ComboboxTextInput } from "@/components/ui/input/ComboboxTextInput";
 import { ChoiceField } from "@/components/ui/input/choice/ChoiceField";
@@ -57,6 +62,7 @@ import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
 import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
+import { SocialLinks } from "@/components/ui/misc/SocialLinks";
 import { SuspenseBoundary } from "@/components/ui/misc/SuspenseBoundary";
 import { ErrorState } from "@/components/ui/misc/state/ErrorState";
 import { IdleState } from "@/components/ui/misc/state/IdleState";
@@ -92,6 +98,7 @@ import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import { DateAgo } from "@/components/ui/time/DateAgo";
 import { DateIndicator } from "@/components/ui/time/DateIndicator";
+import { useTouchScreen } from "@/hooks/useTouchScreen";
 import {
 	type ApiError,
 	checkHealth,
@@ -266,6 +273,29 @@ const activeStageDemoItems = [
 	},
 ];
 
+const revealNumericStartStage = "demo-stats-numeric-start";
+const scrollHighlightBaseColor = "rgb(var(--color-foreground-rgb) / 0.45)";
+const scrollHighlightTargetColor = "rgb(var(--color-primary-rgb) / 1)";
+
+const revealNumericStats = [
+	{
+		value: "128+",
+		label: "Signals grouped",
+	},
+	{
+		value: "5x",
+		label: "Iteration speed",
+	},
+	{
+		value: "300%",
+		label: "Coverage range",
+	},
+	{
+		value: "24/7",
+		label: "Review window",
+	},
+];
+
 function ActiveStageHostDemo() {
 	return (
 		<ActiveStageHost
@@ -275,6 +305,58 @@ function ActiveStageHostDemo() {
 		>
 			<ActiveStageHostDemoContent />
 		</ActiveStageHost>
+	);
+}
+
+function RevealNumericStatsDemo() {
+	return (
+		<Reveal.Root>
+			<Reveal.Scene>
+				<Reveal.List
+					className="grid gap-3 sm:grid-cols-2"
+					stagger={0.12}
+					unlockOnStartStage={revealNumericStartStage}
+					viewportAmount={0.08}
+				>
+					{revealNumericStats.map((stat) => (
+						<Reveal.Item
+							key={stat.label}
+							className="flex min-h-32 flex-col justify-between rounded-lg border border-border/10 bg-surface/50 p-4"
+						>
+							<Reveal.Numeric
+								animation="countUp"
+								as="p"
+								className="m-0 text-4xl font-semibold leading-none tracking-normal tabular-nums text-foreground sm:text-5xl"
+								data-demo-numeric-value={stat.value}
+								text={stat.value}
+								useViewport={false}
+								waitFor={revealNumericStartStage}
+							/>
+							<Text variant="caption" tone="muted" className="mt-3 block">
+								{stat.label}
+							</Text>
+						</Reveal.Item>
+					))}
+				</Reveal.List>
+			</Reveal.Scene>
+		</Reveal.Root>
+	);
+}
+
+function TouchScreenStatusDemo() {
+	const isTouchScreen = useTouchScreen();
+
+	return (
+		<div className="rounded-lg border border-border/10 bg-surface/50 p-4">
+			<Text variant="bodyStrong">
+				{isTouchScreen ? "Touch / coarse pointer" : "Hover / fine pointer"}
+			</Text>
+			<Text variant="caption" tone="muted" className="mt-2 block">
+				{isTouchScreen
+					? "Use this branch for touch-safe controls and hover fallbacks."
+					: "Use this branch for hover previews and pointer-rich controls."}
+			</Text>
+		</div>
 	);
 }
 
@@ -347,6 +429,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: [
 			"Accordion",
 			"CopyField",
+			"CopyStatusIcon",
 			"PasswordInput",
 			"PhoneInput",
 			"ToastHost",
@@ -361,6 +444,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ChoiceIndicatorRadio",
 			"ChoiceIndicatorToggle",
 			"ComboboxMultiSelectInput",
+			"CopyStatusIcon",
 			"CopyField",
 			"DateRangeInput",
 			"Dropdown",
@@ -373,6 +457,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ProfilePictureInput",
 			"SegmentedControl",
 			"SelectInput",
+			"SocialLinks",
 			"StateIndicator",
 			"ToastHost",
 			"Warning",
@@ -417,6 +502,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 		uses: ["Icon", "Loader", "Skeleton", "Text", "focus", "customRegistry"],
 		usedIn: [
 			"Accordion",
+			"ButtonMultiSelectInput",
 			"ComboboxMultiSelectInput",
 			"ComboboxTextInput",
 			"ConfirmationModal",
@@ -436,6 +522,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ProfilePictureInput",
 			"SegmentedControl",
 			"SelectInput",
+			"SocialLinks",
 			"StateIndicator",
 			"ToastHost",
 			"FileGallery",
@@ -480,6 +567,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ComboboxTextInput",
 			"EditableTextInput",
 			"EmailInput",
+			"ButtonMultiSelectInput",
 			"MultiselectInput",
 			"NumberInput",
 			"PasswordInput",
@@ -549,12 +637,14 @@ const relatedMap: Record<string, RelatedInfo> = {
 	},
 	"Reveal.Text": { uses: ["Reveal.Item"], usedIn: [] },
 	"Reveal.HighlightText": { uses: ["Reveal.Item", "motionTiming"], usedIn: [] },
+	"Reveal.Numeric": { uses: ["MotionScene", "spring"], usedIn: [] },
 	LetterWave: { uses: ["Text"], usedIn: [] },
 	"Reveal.Scramble": { uses: ["motionTiming"], usedIn: [] },
-	ScrollHighlightText: { uses: [], usedIn: [] },
+	ScrollHighlightText: { uses: ["spring"], usedIn: [] },
 	ScrollLag: { uses: [], usedIn: [] },
 	ScrollParallax: { uses: [], usedIn: [] },
 	ScrollWidth: { uses: ["spring"], usedIn: [] },
+	useTouchScreen: { uses: [], usedIn: [] },
 	MultiselectInput: {
 		uses: [
 			"ChoiceField",
@@ -563,6 +653,10 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ChoiceIndicatorToggle",
 			"Field",
 		],
+		usedIn: [],
+	},
+	ButtonMultiSelectInput: {
+		uses: ["Button", "ChoiceIndicatorMulti", "Field"],
 		usedIn: [],
 	},
 	ToggleInput: {
@@ -704,7 +798,28 @@ const relatedMap: Record<string, RelatedInfo> = {
 		uses: ["Button", "Icon", "Text", "spring"],
 		usedIn: [],
 	},
-	CopyField: { uses: ["Button", "Icon", "IconSwap", "Text"], usedIn: [] },
+	SocialLinks: {
+		uses: ["Button", "Icon", "iconRegistry"],
+		usedIn: ["Footer"],
+	},
+	CopyStatusIcon: {
+		uses: ["Icon", "IconSwap"],
+		usedIn: [
+			"CopyField",
+			"EmailInput",
+			"PasswordInput",
+			"TextInput",
+			"useCopyAction",
+		],
+	},
+	useCopyAction: {
+		uses: ["CopyStatusIcon", "showToast"],
+		usedIn: ["CopyField", "EmailInput", "PasswordInput", "TextInput"],
+	},
+	CopyField: {
+		uses: ["Button", "CopyStatusIcon", "Text", "useCopyAction"],
+		usedIn: [],
+	},
 	IdleState: { uses: ["StateIndicator"], usedIn: [] },
 	StateIndicator: {
 		uses: ["Button", "Icon", "Text"],
@@ -2365,6 +2480,34 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
+						id: "button-multiselect-input",
+						kind: "component",
+						name: "ButtonMultiSelectInput",
+						label: "Button multi-select",
+						related: relatedMap.ButtonMultiSelectInput,
+						Render() {
+							const [buttonChoices, setButtonChoices] = useState([
+								"design",
+								"copy",
+							]);
+
+							return (
+								<ButtonMultiSelectInput
+									label="Review focus"
+									description="Compact button choices for filters, tags, and preference pickers."
+									options={[
+										{ value: "design", label: "Design" },
+										{ value: "copy", label: "Copy" },
+										{ value: "motion", label: "Motion" },
+										{ value: "blocked", label: "Blocked", disabled: true },
+									]}
+									value={buttonChoices}
+									onChange={setButtonChoices}
+								/>
+							);
+						},
+					},
+					{
 						id: "toggle-input",
 						kind: "component",
 						name: "ToggleInput",
@@ -2394,7 +2537,7 @@ export const demoPages: DemoPage[] = [
 						label: "Thin-start usage",
 						related: relatedMap.RadioInput,
 						snippet:
-							'const options = [{ value: "fast", label: "Fast" }, { value: "steady", label: "Steady" }];\\n\\n<RadioInput label="Mode" options={options} value={mode} onChange={setMode} />\\n<MultiselectInput label="Channels" options={options} value={channels} onChange={setChannels} />\\n<ToggleInput label="Preferences" options={options} value={preferences} onChange={setPreferences} />',
+							'const options = [{ value: "fast", label: "Fast" }, { value: "steady", label: "Steady" }];\\n\\n<RadioInput label="Mode" options={options} value={mode} onChange={setMode} />\\n<MultiselectInput label="Channels" options={options} value={channels} onChange={setChannels} />\\n<ButtonMultiSelectInput label="Tags" options={options} value={tags} onChange={setTags} />\\n<ToggleInput label="Preferences" options={options} value={preferences} onChange={setPreferences} />',
 					},
 					{
 						id: "choice-field",
@@ -2686,6 +2829,87 @@ export const demoPages: DemoPage[] = [
 								);
 							},
 						},
+					},
+					{
+						id: "copy-action",
+						kind: "component",
+						name: "useCopyAction",
+						label: "Copy action hook",
+						related: relatedMap.useCopyAction,
+						Render() {
+							const { copied, handleCopy } = useCopyAction({
+								value: "template-copy-value",
+								toastMessage: "Copied template value",
+							});
+
+							return (
+								<div className="flex flex-col gap-2">
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() => {
+											void handleCopy();
+										}}
+										trailingIcon={<CopyStatusIcon copied={copied} />}
+									>
+										{copied ? "Copied" : "Copy value"}
+									</Button>
+									<Text variant="caption" tone="muted">
+										Shared hook plus status icon for copy affordances outside
+										CopyField.
+									</Text>
+								</div>
+							);
+						},
+					},
+					{
+						id: "copy-action-usage",
+						kind: "usage",
+						name: "useCopyAction",
+						label: "Status icon usage",
+						related: relatedMap.useCopyAction,
+						snippet:
+							'const { copied, handleCopy } = useCopyAction({ value, toastMessage: "Copied" });\\n\\n<Button onClick={() => void handleCopy()} trailingIcon={<CopyStatusIcon copied={copied} />}>\\n  {copied ? "Copied" : "Copy"}\\n</Button>',
+					},
+					{
+						id: "social-links",
+						kind: "component",
+						name: "SocialLinks",
+						label: "Social links",
+						related: relatedMap.SocialLinks,
+						Render() {
+							const links = [
+								{
+									href: "https://instagram.com/example",
+									label: "Instagram",
+								},
+								{ href: "https://x.com/example", label: "X" },
+								{
+									href: "https://linkedin.com/company/example",
+									label: "LinkedIn",
+								},
+								{
+									href: "https://youtube.com/@example",
+									label: "YouTube",
+								},
+							];
+
+							return (
+								<div className="flex flex-col gap-3">
+									<SocialLinks links={links} />
+									<SocialLinks links={links.slice(0, 3)} showLabels size="sm" />
+								</div>
+							);
+						},
+					},
+					{
+						id: "social-links-usage",
+						kind: "usage",
+						name: "SocialLinks",
+						label: "Generic social links",
+						related: relatedMap.SocialLinks,
+						snippet:
+							'<SocialLinks\\n  links={[\\n    { href: "https://instagram.com/example", label: "Instagram" },\\n    { href: "https://x.com/example", label: "X" },\\n    { href: "https://linkedin.com/company/example", label: "LinkedIn" },\\n  ]}\\n/>',
 					},
 					{
 						id: "more-menu-dropdown",
@@ -3260,7 +3484,7 @@ export const demoPages: DemoPage[] = [
 						related: relatedMap["Reveal.Image"],
 						Render() {
 							return (
-								<div className="grid gap-3 md:grid-cols-2">
+								<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
 									<div className="flex flex-col gap-2">
 										<Text variant="caption" tone="muted">
 											Default: ignores image load
@@ -3269,6 +3493,7 @@ export const demoPages: DemoPage[] = [
 											src="/test/blob.png"
 											alt="Abstract blob"
 											fill
+											sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
 											useViewport={false}
 											className="w-full"
 											contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
@@ -3283,6 +3508,7 @@ export const demoPages: DemoPage[] = [
 											src="/test/mercury.png"
 											alt="Mercury-like abstract surface"
 											fill
+											sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
 											useViewport={false}
 											loadStrategy="wait-for-load"
 											placeholder="blur"
@@ -3293,9 +3519,58 @@ export const demoPages: DemoPage[] = [
 											fallback={<Skeleton className="h-full w-full" />}
 										/>
 									</div>
+									<div className="flex flex-col gap-2">
+										<Text variant="caption" tone="muted">
+											Corner clip with overlay
+										</Text>
+										<Reveal.Image
+											src="/test/blob.png"
+											alt="Abstract blob with overlay"
+											fill
+											sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+											useViewport={false}
+											revealVariant="corner-clip"
+											revealOrigin="top-left"
+											revealFinalRadius={16}
+											className="w-full"
+											contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
+											imageClassName="object-cover"
+											overlay={
+												<div className="absolute inset-x-3 bottom-3 rounded-lg border border-background/20 bg-background/85 p-3 text-foreground shadow-sm backdrop-blur-sm">
+													<Text variant="bodyStrong">Overlay content</Text>
+													<Text
+														variant="caption"
+														tone="muted"
+														className="mt-1 block"
+													>
+														Content stays inside the reveal mask.
+													</Text>
+												</div>
+											}
+										/>
+									</div>
 								</div>
 							);
 						},
+					},
+					{
+						id: "reveal-image-corner-clip-usage",
+						kind: "usage",
+						name: "Reveal.Image",
+						label: "Corner clip usage",
+						related: relatedMap["Reveal.Image"],
+						snippet: `<Reveal.Image
+	src="/test/blob.png"
+	alt="Preview"
+	fill
+	sizes="(min-width: 768px) 50vw, 100vw"
+	revealVariant="corner-clip"
+	revealOrigin="top-left"
+	revealFinalRadius={16}
+	overlay={<div className="absolute inset-x-3 bottom-3">...</div>}
+	contentClassName="aspect-[4/3] overflow-hidden rounded-2xl"
+	imageClassName="object-cover"
+/>`,
 					},
 					{
 						id: "reveal-text",
@@ -3350,6 +3625,39 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
+						id: "reveal-numeric",
+						kind: "component",
+						name: "Reveal.Numeric",
+						label: "Stats count-up",
+						related: relatedMap["Reveal.Numeric"],
+						Render() {
+							return <RevealNumericStatsDemo />;
+						},
+					},
+					{
+						id: "reveal-numeric-usage",
+						kind: "usage",
+						name: "Reveal.Numeric",
+						label: "Count-up usage",
+						related: relatedMap["Reveal.Numeric"],
+						snippet: `const numericStartStage = "stats-numeric-start";
+
+<Reveal.Root>
+	<Reveal.Scene>
+		<Reveal.List unlockOnStartStage={numericStartStage}>
+			<Reveal.Item>
+				<Reveal.Numeric
+					animation="countUp"
+					text="128+"
+					useViewport={false}
+					waitFor={numericStartStage}
+				/>
+			</Reveal.Item>
+		</Reveal.List>
+	</Reveal.Scene>
+</Reveal.Root>`,
+					},
+					{
 						id: "letter-wave",
 						kind: "component",
 						name: "LetterWave",
@@ -3391,6 +3699,26 @@ export const demoPages: DemoPage[] = [
 </ActiveStageHost>`,
 					},
 					{
+						id: "use-touch-screen",
+						kind: "component",
+						name: "useTouchScreen",
+						label: "Pointer capability hook",
+						related: relatedMap.useTouchScreen,
+						Render() {
+							return <TouchScreenStatusDemo />;
+						},
+					},
+					{
+						id: "use-touch-screen-usage",
+						kind: "usage",
+						name: "useTouchScreen",
+						label: "Touch-aware branch",
+						related: relatedMap.useTouchScreen,
+						snippet: `const isTouchScreen = useTouchScreen();
+
+return isTouchScreen ? <TouchSafeControls /> : <HoverPreviewControls />;`,
+					},
+					{
 						id: "reveal-image-group",
 						kind: "component",
 						name: "Reveal.Image + Reveal.List",
@@ -3423,6 +3751,7 @@ export const demoPages: DemoPage[] = [
 										src={imageSrc}
 										alt="Image-driven reveal"
 										fill
+										sizes="(min-width: 768px) 50vw, 100vw"
 										useViewport={false}
 										className="w-full"
 										contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
@@ -3483,6 +3812,7 @@ export const demoPages: DemoPage[] = [
 												src={imageSrc}
 												alt="Motion scene image"
 												fill
+												sizes="(min-width: 768px) 50vw, 100vw"
 												useViewport={false}
 												loadStrategy="wait-for-load"
 												after="app"
@@ -3588,18 +3918,56 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 						related: relatedMap.ScrollHighlightText,
 						Render() {
 							return (
-								<div className="space-y-3">
-									<Text variant="body" tone="muted">
-										Scroll until the headline enters the viewport.
-									</Text>
-									<Text variant="headingSm" as="h3">
-										<ScrollHighlightText className="text-foreground">
-											Clarity arrives as the section lands.
-										</ScrollHighlightText>
-									</Text>
+								<div className="grid gap-4">
+									<div className="space-y-2">
+										<Text variant="caption" tone="muted">
+											Scroll character emphasis
+										</Text>
+										<Text variant="headingSm" as="h3">
+											<ScrollHighlightText
+												className="text-foreground"
+												highlightRange={[0.12, 0.9]}
+											>
+												Clarity arrives as the section lands.
+											</ScrollHighlightText>
+										</Text>
+									</div>
+									<div className="space-y-2">
+										<Text variant="caption" tone="muted">
+											Viewport color emphasis
+										</Text>
+										<Text variant="headingSm" as="h3">
+											<ScrollHighlightText
+												baseColor={scrollHighlightBaseColor}
+												targetColor={scrollHighlightTargetColor}
+												variant="viewport"
+												viewportAmount={0.62}
+											>
+												Viewport state can drive one clean color transition.
+											</ScrollHighlightText>
+										</Text>
+									</div>
 								</div>
 							);
 						},
+					},
+					{
+						id: "scroll-highlight-text-usage",
+						kind: "usage",
+						name: "ScrollHighlightText",
+						label: "Scroll + viewport usage",
+						related: relatedMap.ScrollHighlightText,
+						snippet: `<ScrollHighlightText highlightRange={[0.12, 0.9]}>
+	Clarity arrives as the section lands.
+</ScrollHighlightText>
+
+<ScrollHighlightText
+	variant="viewport"
+	baseColor="rgb(var(--color-foreground-rgb) / 0.45)"
+	targetColor="rgb(var(--color-primary-rgb) / 1)"
+>
+	Viewport state can drive one clean color transition.
+</ScrollHighlightText>`,
 					},
 					{
 						id: "scroll-lag",

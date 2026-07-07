@@ -23,6 +23,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - `src/components/ui/misc/ProfilePicture.tsx`: avatar display for profile images, initials, unknown users, and loading state.
 - `src/components/ui/misc/ScrollBorders.tsx`: scroll container with top/bottom edge affordances and an optional return-to-top action.
 - `src/components/ui/misc/SegmentedControl.tsx`: segmented option selector.
+- `src/components/ui/misc/SocialLinks.tsx`: generic social/profile link cluster backed by the shared icon registry.
 - `src/components/ui/misc/SuspenseBoundary.tsx`: loading and error boundary wrapper.
 - `src/components/ui/misc/Tooltip.tsx`: hover or focus helper text built on the shared dropdown primitive.
 - `src/components/ui/misc/Warning.tsx`: inline or panel warning block.
@@ -61,6 +62,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - Use `Warning` for cautionary messaging; use `variant="panel"` when the warning should be visually separated from surrounding content.
 - Use `Pill` for compact labels and statuses when the element is not itself an action.
 - Use `ProfilePicture` for avatar display before assembling image, initial, or fallback badges by hand.
+- Use `SocialLinks` for reusable social/profile link clusters instead of product-local icon-button lists.
 - For initial-load loading states, prefer `Skeleton`, `Text.Skeleton`, and component-specific skeletons before toasts.
   - For `SuspenseBoundary ghost`, build the fallback from component skeletons inside the same wrapper and spacing structure as the resolved content.
 

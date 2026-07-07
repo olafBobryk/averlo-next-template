@@ -3,13 +3,33 @@
 import { useState } from "react";
 import type { MotionMoment } from "@/components/ui/foundations/motionTiming";
 import { MotionScope, Reveal } from "@/components/ui/motion";
-import { RevealGroup, RevealGroupItem } from "@/components/ui/motion/Reveal";
+import { RevealGroup, RevealGroupItem } from "@/components/ui/motion/reveal";
 import { Button } from "@/components/ui/primitives/Button";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 
 const colorBlocks = ["bg-red-500", "bg-sky-500", "bg-emerald-500"];
+const numericStartStage = "motion-playground-numeric-start";
+
+const numericStats = [
+	{
+		value: "128+",
+		label: "Signals grouped",
+	},
+	{
+		value: "5x",
+		label: "Iteration speed",
+	},
+	{
+		value: "300%",
+		label: "Coverage range",
+	},
+	{
+		value: "24/7",
+		label: "Review window",
+	},
+];
 
 const characterCases = [
 	{
@@ -313,6 +333,56 @@ function RevealApiQa() {
 	);
 }
 
+function RevealNumericStatsQa() {
+	const [runId, setRunId] = useState(0);
+
+	return (
+		<QaPanel
+			title="Reveal Numeric Stats"
+			code='<Reveal.Numeric animation="countUp" />'
+			expected="Stats enter through a Reveal.List, then each value counts after the list start stage."
+		>
+			<Button
+				size="sm"
+				variant="outline"
+				onClick={() => setRunId((current) => current + 1)}
+			>
+				Reset stats
+			</Button>
+			<Reveal.Root key={runId}>
+				<Reveal.Scene>
+					<Reveal.List
+						className="grid gap-3 sm:grid-cols-2"
+						stagger={0.12}
+						unlockOnStartStage={numericStartStage}
+						viewportAmount={0.08}
+					>
+						{numericStats.map((stat) => (
+							<Reveal.Item
+								key={stat.label}
+								className="flex min-h-32 flex-col justify-between rounded-lg border border-border/10 bg-surface/50 p-4"
+							>
+								<Reveal.Numeric
+									animation="countUp"
+									as="p"
+									className="m-0 text-4xl font-semibold leading-none tracking-normal tabular-nums text-foreground sm:text-5xl"
+									data-motion-numeric-value={stat.value}
+									text={stat.value}
+									useViewport={false}
+									waitFor={numericStartStage}
+								/>
+								<Text variant="caption" tone="muted" className="mt-3 block">
+									{stat.label}
+								</Text>
+							</Reveal.Item>
+						))}
+					</Reveal.List>
+				</Reveal.Scene>
+			</Reveal.Root>
+		</QaPanel>
+	);
+}
+
 function RevealGroupCompatibilityQa() {
 	const [runId, setRunId] = useState(0);
 
@@ -493,6 +563,7 @@ export default function MotionPlaygroundPage() {
 						<MotionCharacterQa />
 						<TimingMomentsQa />
 						<RevealApiQa />
+						<RevealNumericStatsQa />
 						<RevealGroupCompatibilityQa />
 						<RevealGroupItemCompatibilityQa />
 						<SceneGateQa />

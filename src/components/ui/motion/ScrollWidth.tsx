@@ -4,10 +4,12 @@ import clsx from "clsx";
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import {
 	type ComponentProps,
+	createElement,
 	type ElementType,
 	type ReactNode,
 	useRef,
 } from "react";
+import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
 import { getSpring } from "@/components/ui/foundations/spring";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -54,6 +56,97 @@ function resolveRadius(radius?: ScrollWidthRadius) {
 }
 
 export function ScrollWidth({
+	disableWhenReducedMotion = true,
+	...props
+}: ScrollWidthProps) {
+	const appReady = useAppReady();
+	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const motionDisabled = useMotionDisableOverride();
+	const motionReady = motionAllowed && appReady && !motionDisabled;
+
+	if (!motionReady) {
+		return <ScrollWidthStatic {...props} />;
+	}
+
+	return <ScrollWidthMotion {...props} />;
+}
+
+function ScrollWidthStatic({
+	children,
+	as = "div",
+	className,
+	frameClassName,
+	contentClassName,
+	coverClassName,
+	style,
+	offset: _offset = DEFAULT_OFFSET,
+	startInset = 0,
+	endInset: _endInset = 48,
+	startRadius,
+	endRadius: _endRadius,
+	progressRange: _progressRange = [0, 1],
+	smooth: _smooth = true,
+	stiffness: _stiffness,
+	damping: _damping,
+	mass: _mass,
+	...rest
+}: Omit<ScrollWidthProps, "disableWhenReducedMotion">) {
+	const Tag = (as ?? "div") as ElementType;
+	const start = resolveRadius(startRadius);
+	const coverWidth = Math.max(startInset, 1);
+	const startCoverScale = startInset / coverWidth;
+
+	return createElement(
+		Tag,
+		{
+			className: clsx("relative min-w-0", className),
+			style,
+			...rest,
+		},
+		<div
+			className={clsx(
+				"absolute inset-0 min-w-0 overflow-hidden box-border",
+				frameClassName,
+			)}
+			style={{
+				borderTopLeftRadius: start.tl,
+				borderTopRightRadius: start.tr,
+				borderBottomRightRadius: start.br,
+				borderBottomLeftRadius: start.bl,
+			}}
+		>
+			<div className={clsx("relative h-full w-full", contentClassName)}>
+				{children}
+			</div>
+			<div
+				aria-hidden={true}
+				className={clsx(
+					"pointer-events-none absolute inset-y-0 left-0",
+					coverClassName,
+				)}
+				style={{
+					width: coverWidth,
+					scale: `${startCoverScale} 1`,
+					transformOrigin: "left center",
+				}}
+			/>
+			<div
+				aria-hidden={true}
+				className={clsx(
+					"pointer-events-none absolute inset-y-0 right-0",
+					coverClassName,
+				)}
+				style={{
+					width: coverWidth,
+					scale: `${startCoverScale} 1`,
+					transformOrigin: "right center",
+				}}
+			/>
+		</div>,
+	);
+}
+
+function ScrollWidthMotion({
 	children,
 	as = "div",
 	className,
@@ -67,16 +160,12 @@ export function ScrollWidth({
 	startRadius,
 	endRadius,
 	progressRange = [0, 1],
-	disableWhenReducedMotion = true,
 	smooth = true,
 	stiffness,
 	damping,
 	mass,
 	...rest
-}: ScrollWidthProps) {
-	const appReady = useAppReady();
-	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
-	const motionReady = motionAllowed && appReady;
+}: Omit<ScrollWidthProps, "disableWhenReducedMotion">) {
 	const ref = useRef<HTMLElement | null>(null);
 	const Tag = as ?? "div";
 	const start = resolveRadius(startRadius);
@@ -128,40 +217,23 @@ export function ScrollWidth({
 		[startCoverScale, endCoverScale],
 	);
 
-	const frameStyle = motionReady
-		? {
-				borderTopLeftRadius,
-				borderTopRightRadius,
-				borderBottomRightRadius,
-				borderBottomLeftRadius,
-				willChange: "border-radius",
-			}
-		: {
-				borderTopLeftRadius: start.tl,
-				borderTopRightRadius: start.tr,
-				borderBottomRightRadius: start.br,
-				borderBottomLeftRadius: start.bl,
-			};
-	const leftCoverStyle = motionReady
-		? {
-				scaleX: coverScale,
-				originX: 0,
-				willChange: "transform",
-			}
-		: {
-				scaleX: startCoverScale,
-				originX: 0,
-			};
-	const rightCoverStyle = motionReady
-		? {
-				scaleX: coverScale,
-				originX: 1,
-				willChange: "transform",
-			}
-		: {
-				scaleX: startCoverScale,
-				originX: 1,
-			};
+	const frameStyle = {
+		borderTopLeftRadius,
+		borderTopRightRadius,
+		borderBottomRightRadius,
+		borderBottomLeftRadius,
+		willChange: "border-radius",
+	};
+	const leftCoverStyle = {
+		scaleX: coverScale,
+		originX: 0,
+		willChange: "transform",
+	};
+	const rightCoverStyle = {
+		scaleX: coverScale,
+		originX: 1,
+		willChange: "transform",
+	};
 
 	return (
 		<Tag

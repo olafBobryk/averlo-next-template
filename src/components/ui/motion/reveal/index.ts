@@ -16,23 +16,33 @@ export {
 	type RevealImageClipRevealTransition,
 	type RevealImageProps,
 } from "./RevealImage";
-export { RevealItem, type RevealItemProps } from "./RevealItem";
-export { RevealList, type RevealListProps } from "./RevealList";
+export {
+	RevealGroupItem,
+	type RevealGroupItemProps,
+	RevealItem,
+	type RevealItemProps,
+	RootScheduledRevealItem,
+	type RootScheduledRevealItemProps,
+} from "./RevealItem";
+export {
+	RevealGroup,
+	type RevealGroupProps,
+	RevealList,
+	type RevealListProps,
+} from "./RevealList";
 export {
 	NumericReveal,
 	type NumericRevealAnimation,
 	type NumericRevealProps,
 } from "./RevealNumeric";
-export { RevealRoot, type RevealRootProps } from "./RevealRoot";
+export {
+	RevealRoot,
+	type RevealRootProps,
+	useRevealAnimationsDisabled,
+} from "./RevealRoot";
 export { RevealScene } from "./RevealScene";
 export { ScrambleReveal } from "./RevealScramble";
 export { RevealText } from "./RevealText";
-export type { RevealGroupItemProps } from "./scheduler/RevealGroupItemScheduler";
-export { RevealGroupItem } from "./scheduler/RevealGroupItemScheduler";
-export type { RevealGroupProps } from "./scheduler/RevealGroupScheduler";
-export { RevealGroup } from "./scheduler/RevealGroupScheduler";
-export { RevealItem as RootScheduledRevealItem } from "./scheduler/RevealItemScheduler";
-export { useRevealAnimationsDisabled } from "./scheduler/RevealRootScheduler";
 export type { RevealStageAliasProps } from "./types";
 
 export const Reveal = {

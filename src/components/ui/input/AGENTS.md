@@ -22,6 +22,7 @@ Ready-made form controls composed from the primitives. This folder should be the
 - `src/components/ui/input/SelectInput.tsx`: searchable single-select dropdown.
 - `src/components/ui/input/ComboboxTextInput.tsx`: text-driven combobox.
 - `src/components/ui/input/ComboboxMultiSelectInput.tsx`: multi-select combobox.
+- `src/components/ui/input/ButtonMultiSelectInput.tsx`: compact button-based multi-select for tags, filters, and preference pickers.
 - `src/components/ui/input/DateRangeInput.tsx`: date-range presets plus custom range entry; exported as `DateRangeInput`.
 - `src/components/ui/input/SignaturePad.tsx`: signature capture.
 - `src/components/ui/input/SpamProtectionFields.tsx`: hidden honeypot field for form submissions.
@@ -56,7 +57,7 @@ Ready-made form controls composed from the primitives. This folder should be the
 - **Sign-up form:** usually `EmailInput` plus `PasswordInput showStrength`.
 - **Profile or settings form:** start with `ProfilePictureInput`, `TextInput`, `EmailInput`, `PhoneInput`, `SelectInput`, and `ToggleInput` before creating bespoke controls.
 - **Filter bars and dashboards:** use `SelectInput`, `ComboboxTextInput`, `ComboboxMultiSelectInput`, and `DateRangeInput` before ad hoc filter UIs.
-- **Preference selection:** use `RadioInput`, `MultiselectInput`, or `ToggleInput` so focus, semantics, and indicators stay consistent.
+- **Preference selection:** use `RadioInput`, `MultiselectInput`, `ButtonMultiSelectInput`, or `ToggleInput` so focus, semantics, and indicators stay consistent.
 
 ## Submission And Feedback Pattern
 - Use `showToast.promise` for user-initiated async submissions such as save, apply, submit, retry, or manual refresh.

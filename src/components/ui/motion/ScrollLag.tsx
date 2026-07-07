@@ -10,11 +10,13 @@ import {
 } from "motion/react";
 import {
 	type ComponentProps,
+	createElement,
 	type ElementType,
 	type ReactNode,
 	useEffect,
 	useState,
 } from "react";
+import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
 import { getSpring } from "@/components/ui/foundations/spring";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -45,7 +47,41 @@ export function ScrollLag({
 }: ScrollLagProps) {
 	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
-	const motionReady = motionAllowed && appReady;
+	const motionDisabled = useMotionDisableOverride();
+	const motionReady = motionAllowed && appReady && !motionDisabled;
+
+	if (!motionReady) {
+		const StaticTag = (typeof as === "string" ? as : "div") as ElementType;
+		return createElement(StaticTag, { className, style, ...rest }, children);
+	}
+
+	return (
+		<ScrollLagMotion
+			as={as}
+			className={className}
+			damping={damping}
+			magnitude={magnitude}
+			stiffness={stiffness}
+			style={style}
+			velocityClamp={velocityClamp}
+			{...rest}
+		>
+			{children}
+		</ScrollLagMotion>
+	);
+}
+
+function ScrollLagMotion({
+	children,
+	as = motion.div,
+	className,
+	style,
+	magnitude = 0.15,
+	stiffness,
+	damping,
+	velocityClamp = 2000,
+	...rest
+}: Omit<ScrollLagProps, "disableWhenReducedMotion">) {
 	const { scrollY } = useScroll();
 	const velocity = useVelocity(scrollY);
 	const [hasScrolled, setHasScrolled] = useState(false);
@@ -75,13 +111,9 @@ export function ScrollLag({
 		hasScrolled ? -value * magnitude : 0,
 	);
 
-	const Tag = motionReady ? (as ?? motion.div) : (as ?? "div");
+	const Tag = as ?? motion.div;
 	return (
-		<Tag
-			style={motionReady ? { ...style, y } : style}
-			className={className}
-			{...rest}
-		>
+		<Tag style={{ ...style, y }} className={className} {...rest}>
 			{children}
 		</Tag>
 	);

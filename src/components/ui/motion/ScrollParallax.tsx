@@ -3,10 +3,12 @@
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import {
 	type ComponentProps,
+	createElement,
 	type ElementType,
 	type ReactNode,
 	useRef,
 } from "react";
+import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
 import { getSpring } from "@/components/ui/foundations/spring";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -39,7 +41,43 @@ export function ScrollParallax({
 }: ScrollParallaxProps) {
 	const appReady = useAppReady();
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
-	const motionReady = motionAllowed && appReady;
+	const motionDisabled = useMotionDisableOverride();
+	const motionReady = motionAllowed && appReady && !motionDisabled;
+
+	if (!motionReady) {
+		const StaticTag = (typeof as === "string" ? as : "div") as ElementType;
+		return createElement(StaticTag, { className, style, ...rest }, children);
+	}
+
+	return (
+		<ScrollParallaxMotion
+			as={as}
+			className={className}
+			damping={damping}
+			direction={direction}
+			magnitude={magnitude}
+			smooth={smooth}
+			stiffness={stiffness}
+			style={style}
+			{...rest}
+		>
+			{children}
+		</ScrollParallaxMotion>
+	);
+}
+
+function ScrollParallaxMotion({
+	children,
+	as = motion.div,
+	className,
+	style,
+	magnitude = 80,
+	direction = "down",
+	stiffness,
+	damping,
+	smooth = true,
+	...rest
+}: Omit<ScrollParallaxProps, "disableWhenReducedMotion">) {
 	const ref = useRef<HTMLElement | null>(null);
 	const { scrollYProgress } = useScroll({
 		target: ref,
@@ -61,13 +99,16 @@ export function ScrollParallax({
 	});
 	const y = smooth ? springY : rawY;
 
-	const Tag = motionReady ? (as ?? motion.div) : (as ?? "div");
-	const passthroughStyle = motionReady
-		? { willChange: "transform", ...style, y }
-		: style;
+	const Tag = as ?? motion.div;
+	const passthroughStyle = { willChange: "transform", ...style, y };
 
 	return (
-		<Tag ref={ref} className={className} style={passthroughStyle} {...rest}>
+		<Tag
+			ref={ref}
+			className={["relative", className].filter(Boolean).join(" ")}
+			style={passthroughStyle}
+			{...rest}
+		>
 			{children}
 		</Tag>
 	);

@@ -15,7 +15,7 @@ import {
 	useMotionSceneGate,
 	useOptionalMotionScene,
 } from "@/components/ui/motion/MotionScene";
-import { useRevealAnimationsDisabled } from "@/components/ui/motion/reveal/scheduler/RevealRootScheduler";
+import { useRevealAnimationsDisabled } from "@/components/ui/motion/reveal/RevealRoot";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { RevealItem, type RevealItemProps } from "./RevealItem";
