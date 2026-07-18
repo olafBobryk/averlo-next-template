@@ -6,7 +6,20 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 
 - Full start remains the canonical broad template system.
 - Inference Console is a design reference, not a general component donor or runtime/source dependency.
-- Initial primitive convergence is limited to the `Panel` foundation and semantic `Card` system.
+- Structural primitive convergence begins with the `Panel` foundation and semantic `Card` system, while styling convergence covers the complete shared consumer layer.
+
+## Inference Console visual-system baseline
+
+- The complete template is reskinned to the visual system represented by the current Inference Console styling work.
+- The current dirty Inference Console working tree is not itself the durable reference. That work must first be committed, and the resulting revision becomes the pinned source baseline before consolidation or implementation continues.
+- The port covers the complete light and dark visual foundation: semantic colors, surfaces, borders, primary and status colors, sidebar tokens, chart and spectrum colors, radius scale, focus behavior, motion behavior, and scrollbar treatment.
+- Template-specific automation and motion-disable behavior remains intact while adopting the source visual foundation.
+- The reusable template uses Inter through the shared application-font contract. Local SF Pro binaries are not distributed with the template.
+- The complete shared consumer layer adopts the source visual grammar, including typography, buttons, panels, cards, fields, inputs, dropdowns, listboxes, chips, skeletons, modals, toasts, and shared state surfaces.
+- The reskin applies across marketing, authentication, dashboard, internal demonstrations, loading, error, empty, and overlay surfaces.
+- Spectrum accents remain reusable visual tokens, while Inference Console logos, product copy, and domain-specific branded artwork remain outside the template.
+- Dashboard visual parity is intentionally close to the Inference Console reference across shell, navigation, spacing, density, cards, tables, forms, overlays, interaction states, and responsive behavior.
+- The custom Inference Console profile-picture gradient background is explicitly excluded from the dashboard parity target.
 
 ## Panel and Card contract
 
@@ -177,5 +190,5 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 
 ## Final architecture disposition
 
-- The accepted architecture will be consolidated into `docs/architecture.md` after the remaining visual-system architecture is resolved.
+- The accepted architecture will be consolidated into `docs/architecture.md` after the Inference Console styling baseline is committed and pinned to a revision.
 - `docs/architecture-staging.md` remains as the historical acceptance ledger after consolidation, marked as consolidated and linked to the final architecture document.
