@@ -33,15 +33,28 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 ## Filesystem-backed template profiles
 
 - Full start and thin start use layered, filesystem-backed profile sources.
-- Shared components remain canonical rather than being duplicated into complete full-start and thin-start source trees.
-- Thin start is defined through a declarative profile manifest.
-- Only genuine thin-specific replacements are stored as separate, real source files.
+- Full start's live source is the canonical shared source rather than being materialized from a separate package.
+- Thin start references canonical shared files through its profile manifest.
+- Only genuine thin-specific replacements are stored as separate, real source files outside the full-start import graph.
+- One authoritative profile manifest declares shared inclusions, file-backed overrides, removals, dependencies, retained routes and scripts, public API allowances, and required validations.
+- Generator reporting and API review derive from the authoritative profile manifest rather than maintaining parallel configuration lists.
 
 ## Thin-start materialization
 
 - The thin-start generator is a materializer: it selects shared files, applies explicit file-backed overrides, removes excluded surfaces, and adjusts profile dependencies.
 - Component source code must not live inside generator strings.
 - Review allowlists validate the materialized output; they do not serve as component source definitions.
+- Routine thin-start development materializes into an ignored, isolated profile workspace that can run beside the canonical full-start preview.
+- Previewing thin start must not rewrite the canonical checkout.
+- In-place materialization is reserved for creating a new template instance.
+- Materialized thin-start workspaces are disposable and must not be edited directly.
+- Changes are made in canonical shared source or explicit thin override files, then the materialized workspace is refreshed.
+
+## Profile parity gate
+
+- Architecture-significant shared-system changes can be reviewed against full-start and thin-start previews produced from the same commit.
+- Both profiles receive type, build, and smoke verification.
+- Both profiles receive public API-surface review and a small visual route matrix.
 
 ## Full-start dashboard role
 
