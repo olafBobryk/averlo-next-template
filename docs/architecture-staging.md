@@ -99,7 +99,8 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - The default demo pattern uses an organization-scoped demo context and the same data boundaries as a converted product.
 - Dashboard authentication uses a provider-neutral contract with a local mock or demo session as the default implementation.
 - Dashboard routes remain guarded; Payload or another authentication provider may replace the default adapter.
-- Active-organization selection and persistence remain unresolved.
+- Provider-neutral fixture, authentication, and selection adapters are template scaffolding rather than recommended final product implementations.
+- When implementation begins in a template instance, the instance must explicitly choose its real data, authentication, organization-selection, and persistence implementations instead of preserving the scaffold by default.
 
 ## Organization context and lifecycle
 
@@ -112,11 +113,17 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - An organization switcher can be enabled through a small, explicit configuration change without rewriting routes, adapters, or entity ownership.
 - Canonical dashboard URLs do not include an organization slug; the validated active organization comes from the organization context.
 - The organization adapter owns a server-readable active-organization selection and validates membership whenever it resolves that selection.
+- The template mock adapter may persist active organization selection in a protected server-readable cookie; a product adapter may use an account preference or another product-appropriate mechanism.
 - Singleton mode automatically selects the only valid membership.
 - When multiple memberships exist without a valid active selection, the user must choose through a dedicated organization-selection screen.
+- `/select-organization` is the organization-selection route. It sits after authentication but outside the organization-dependent dashboard shell.
 - The resolver must never silently select an arbitrary organization.
+- Sign-out clears the active selection, and revoked membership invalidates it immediately.
 - The normal organization switcher is controlled by an explicit feature or configuration setting.
 - The guarded debug menu can switch fixture organizations, enter the demo organization, inspect current membership and capabilities, force interface states, and reset demo fixtures.
+- Demo access is explicit through demo login or organization selection.
+- Demo users receive real demo-organization membership through the same organization context model.
+- Development debug controls may enter the demo organization directly, but normal users are never silently moved into demo data.
 
 ## Organization routes
 
@@ -124,6 +131,12 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - `/dashboard/organization/members` presents members, invitations, and access management.
 - `/dashboard/organization/settings` presents organization-owned preferences.
 - `/dashboard/settings` remains personal account and interface settings.
+
+## Settings ownership
+
+- `/dashboard/settings` owns personal profile, interface preferences, authentication, and notification preferences.
+- `/dashboard/organization/settings` owns organization identity, defaults, feature configuration, and organization-level destructive actions.
+- `/dashboard/organization/members` owns members, invitations, and roles.
 
 ## Organization membership and permissions
 
@@ -150,3 +163,5 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - A guarded internal dashboard review route renders deterministic live, loading, empty, error, and unavailable variants.
 - The full-start dashboard includes a default debug surface that can force loading for diagnosis while preserving the real route shell.
 - Debug controls are separate from normal user navigation and product behavior.
+- The debug menu ships in full start but is available only in development or guarded internal-review mode by default.
+- Production debug-menu exposure requires explicit environment opt-in.
