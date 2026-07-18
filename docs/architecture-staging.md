@@ -192,3 +192,5 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 
 - The accepted architecture will be consolidated into `docs/architecture.md` after the Inference Console styling baseline is committed and pinned to a revision.
 - `docs/architecture-staging.md` remains as the historical acceptance ledger after consolidation, marked as consolidated and linked to the final architecture document.
+- Consolidation may deduplicate and improve sequencing, but it must not add implementation planning or change accepted meaning.
+- The final review traces every staging decision into the consolidated architecture, checks for wording drift, and marks consolidation complete only after parity passes.
