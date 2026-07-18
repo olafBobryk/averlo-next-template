@@ -174,3 +174,8 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - Debug controls are separate from normal user navigation and product behavior.
 - The debug menu ships in full start but is available only in development or guarded internal-review mode by default.
 - Production debug-menu exposure requires explicit environment opt-in.
+
+## Final architecture disposition
+
+- The accepted architecture will be consolidated into `docs/architecture.md` after the remaining visual-system architecture is resolved.
+- `docs/architecture-staging.md` remains as the historical acceptance ledger after consolidation, marked as consolidated and linked to the final architecture document.
