@@ -7,7 +7,23 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - Full start remains the canonical broad template system.
 - Inference Console is a design reference, not a general component donor or runtime/source dependency.
 - Initial primitive convergence is limited to the `Panel` foundation and semantic `Card` system.
-- The exact `Panel` and `Card` responsibilities, APIs, variants, and profile exposure remain unresolved and require a dedicated architecture decision.
+
+## Panel and Card contract
+
+- `Panel` is the non-semantic surface primitive.
+- `Card` is a structured content pattern built on `Panel`, with header, title, description, action, content, and footer slots.
+- `Panel` owns background, border, radius, shadow, overflow, width, padding, basic display and gap, polymorphic element selection, and ref forwarding.
+- `Panel` does not own responsive columns or card-specific structure. Responsive composition belongs to layout components or caller-supplied classes.
+- `Card` fixes sensible surface defaults and owns density through a small size contract.
+- Card slots own their internal spacing and typography.
+- `Card` may expose bounded escape hatches such as overflow, shadow, semantic accent, and caller-supplied classes, but it does not pass through every `Panel` layout property.
+- The shared semantic accent vocabulary is `neutral`, `info`, `success`, `warning`, and `danger`.
+- Surface and card-slot accents use the same semantic accent system.
+- Arbitrary hexadecimal accents and separate translucent-versus-solid public modes stay outside the shared primitive contract unless a later dashboard requirement demonstrates that they are necessary.
+- Full start and thin start both expose `Panel` and `Card` through the same implementation.
+- Thin start remains smaller by excluding higher-level surfaces rather than hiding a foundational primitive used by `Card`.
+- Card slots must be used under a real `Card` root. Consumers must not place card slots under a raw `Panel` by imitating Card data attributes.
+- Overlays that need Card structure should use `Card` as their root; overlays with materially different structure should define overlay-owned slots.
 
 ## Shared profile invariant
 
