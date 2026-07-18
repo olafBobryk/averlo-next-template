@@ -60,8 +60,17 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 
 - The full-start dashboard is a first-class, product-neutral reference application rather than an empty shell.
 - It uses capability-led example surfaces rather than inventing a fake business product.
-- It demonstrates overview, collection, record-detail, activity, and settings patterns with clearly replaceable fixture content.
+- It demonstrates overview, collection, record-detail, settings, and organization-level patterns with clearly replaceable fixture content.
 - It demonstrates responsive behavior and loading, empty, and error states.
+
+## Dashboard routes and surface registry
+
+- The baseline dashboard routes are `/dashboard`, `/dashboard/records`, `/dashboard/records/[recordId]`, and `/dashboard/settings`.
+- Organization-level dashboard pages are also part of the baseline; their exact route set remains unresolved.
+- A typed dashboard surface registry is the source of truth for route identity, paths, labels, navigation placement, breadcrumbs, visibility, and standard-versus-wide layout mode.
+- The Command-K menu consumes the same surface registry and context model as dashboard navigation and breadcrumbs, following the structural pattern proven in Inference Console.
+- The dashboard overview is a lightweight capability and navigation directory.
+- Charts and summary metrics are not required baseline dashboard content because many products do not need them.
 
 ## Dashboard shell
 
@@ -76,12 +85,24 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - The default dashboard runs from deterministic typed fixture data behind lightweight adapters.
 - Shared dashboard surfaces must not require Payload, Supabase, or another hosted backend.
 - Dashboard adapters expose clear seams for replacing fixtures with a project data source.
+- Dashboard data is organization-scoped behind the adapter boundary from the start.
+- Applications without multi-organization UX still operate through a singleton organization rather than bypassing organization scope.
+- The default demo pattern uses an organization-scoped demo context and the same data boundaries as a converted product.
 - Dashboard authentication uses a provider-neutral contract with a local mock or demo session as the default implementation.
 - Dashboard routes remain guarded; Payload or another authentication provider may replace the default adapter.
+- The exact organization route set, active-organization lifecycle, and singleton-versus-demo organization behavior remain unresolved.
 
 ## Dashboard component ownership
 
 - Recurring dashboard patterns live in a full-start-only application component layer.
-- This layer owns the shell, navigation, page header, breadcrumbs, summary cards, table panels, detail fields, chart panels, and their loading counterparts.
+- This layer owns the shell, navigation, page header, breadcrumbs, table panels, detail fields, and their loading counterparts.
+- Summary-card and chart-panel systems are opt-in extensions rather than required baseline components.
 - Route-specific fixture content remains with its route.
 - Thin start excludes the dashboard application component layer.
+
+## Dashboard state review and debugging
+
+- Real dashboard routes own their normal loading, error, and relevant not-found boundaries.
+- A guarded internal dashboard review route renders deterministic live, loading, empty, error, and unavailable variants.
+- The full-start dashboard includes a default debug surface that can force loading for diagnosis while preserving the real route shell.
+- Debug controls are separate from normal user navigation and product behavior.
