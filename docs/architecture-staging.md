@@ -90,7 +90,35 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - The default demo pattern uses an organization-scoped demo context and the same data boundaries as a converted product.
 - Dashboard authentication uses a provider-neutral contract with a local mock or demo session as the default implementation.
 - Dashboard routes remain guarded; Payload or another authentication provider may replace the default adapter.
-- The exact organization route set, active-organization lifecycle, and singleton-versus-demo organization behavior remain unresolved.
+- Active-organization selection and persistence remain unresolved.
+
+## Organization context and lifecycle
+
+- Every authenticated dashboard request resolves an organization context containing the organization, current membership, and effective capabilities.
+- Routes and adapters consume the resolved organization context rather than importing a fixed organization identifier.
+- Singleton mode provisions one normal organization and hides organization switching by default.
+- Demo mode uses a separate seeded, resettable demo organization with isolated users and fixture data.
+- Singleton and demo modes use the same organization-scoped adapters and entity shapes.
+- The organization context and membership model support multiple organizations even when the default interface is singleton-only.
+- An organization switcher can be enabled through a small, explicit configuration change without rewriting routes, adapters, or entity ownership.
+
+## Organization routes
+
+- `/dashboard/organization` presents organization profile and overview information.
+- `/dashboard/organization/members` presents members, invitations, and access management.
+- `/dashboard/organization/settings` presents organization-owned preferences.
+- `/dashboard/settings` remains personal account and interface settings.
+
+## Organization membership and permissions
+
+- Baseline organization membership roles are `owner`, `admin`, and `member`.
+- Product capabilities are resolved separately through the organization adapter or policy layer rather than adding product-specific role columns to the base membership.
+
+## Organization-owned records
+
+- Every product or domain record is organization-owned from its first representation, including fixture types.
+- Relationships and adapter operations preserve the organization boundary.
+- Members and invitations are organization-scoped.
 
 ## Dashboard component ownership
 
