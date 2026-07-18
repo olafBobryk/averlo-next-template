@@ -66,7 +66,6 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 ## Dashboard routes and surface registry
 
 - The baseline dashboard routes are `/dashboard`, `/dashboard/records`, `/dashboard/records/[recordId]`, and `/dashboard/settings`.
-- Organization-level dashboard pages are also part of the baseline; their exact route set remains unresolved.
 - A typed dashboard surface registry is the source of truth for route identity, paths, labels, navigation placement, breadcrumbs, visibility, and standard-versus-wide layout mode.
 - The Command-K menu consumes the same surface registry and context model as dashboard navigation and breadcrumbs, following the structural pattern proven in Inference Console.
 - The dashboard overview is a lightweight capability and navigation directory.
@@ -101,6 +100,16 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - Dashboard routes remain guarded; Payload or another authentication provider may replace the default adapter.
 - Provider-neutral fixture, authentication, and selection adapters are template scaffolding rather than recommended final product implementations.
 - When implementation begins in a template instance, the instance must explicitly choose its real data, authentication, organization-selection, and persistence implementations instead of preserving the scaffold by default.
+
+## Template-instance activation boundary
+
+- Beginning implementation in a template instance requires an explicit activation pass rather than silently inheriting scaffold choices.
+- The activation pass selects the real authentication provider, persistence layer, organization-selection mechanism, content mode, and disposition of demo and debug infrastructure.
+- Fixture data and provider-neutral adapters are clearly named and documented as scaffold or demo infrastructure rather than presented as production architecture.
+- Organization ownership, membership, context, and capability contracts may be removed by an instance, but only as a deliberate exceptional decision.
+- The expected path for single-tenant and white-labelled products is to retain the organization contract through singleton organization mode while hiding organization-management and switching UX that the product does not need.
+- Demo-organization support, fixture mutations, the debug menu, and forced-state routes remain installed in an activated instance as dormant, guarded infrastructure.
+- Production access to retained demo and debug infrastructure remains disabled unless the instance explicitly enables the appropriate guard and environment opt-in.
 
 ## Organization context and lifecycle
 
