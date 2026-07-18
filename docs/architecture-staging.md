@@ -72,6 +72,15 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - The dashboard overview is a lightweight capability and navigation directory.
 - Charts and summary metrics are not required baseline dashboard content because many products do not need them.
 
+## Record reference interaction
+
+- The reference collection demonstrates search, filtering, sorting, pagination, row navigation, and action menus.
+- The reference detail surface demonstrates page actions, structured properties, related data, and a focused edit modal.
+- These are reference capabilities rather than requirements that every converted product must retain.
+- The fixture adapter supports organization-scoped, resettable create, edit, archive, and delete commands.
+- Demo mutations exercise confirmation, validation, toast, optimistic, and failure feedback patterns.
+- Demo persistence may be explicitly non-durable; production adapters own durable storage.
+
 ## Dashboard shell
 
 - The dashboard uses a fixed responsive sidebar with desktop collapse and a mobile overlay mode.
@@ -101,6 +110,13 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - Singleton and demo modes use the same organization-scoped adapters and entity shapes.
 - The organization context and membership model support multiple organizations even when the default interface is singleton-only.
 - An organization switcher can be enabled through a small, explicit configuration change without rewriting routes, adapters, or entity ownership.
+- Canonical dashboard URLs do not include an organization slug; the validated active organization comes from the organization context.
+- The organization adapter owns a server-readable active-organization selection and validates membership whenever it resolves that selection.
+- Singleton mode automatically selects the only valid membership.
+- When multiple memberships exist without a valid active selection, the user must choose through a dedicated organization-selection screen.
+- The resolver must never silently select an arbitrary organization.
+- The normal organization switcher is controlled by an explicit feature or configuration setting.
+- The guarded debug menu can switch fixture organizations, enter the demo organization, inspect current membership and capabilities, force interface states, and reset demo fixtures.
 
 ## Organization routes
 
