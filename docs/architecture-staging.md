@@ -59,6 +59,29 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 ## Full-start dashboard role
 
 - The full-start dashboard is a first-class, product-neutral reference application rather than an empty shell.
-- It demonstrates a coherent dashboard system across navigation, overview, list, detail, and settings surfaces.
+- It uses capability-led example surfaces rather than inventing a fake business product.
+- It demonstrates overview, collection, record-detail, activity, and settings patterns with clearly replaceable fixture content.
 - It demonstrates responsive behavior and loading, empty, and error states.
-- Detailed route, content, data, and component boundaries remain to be decided.
+
+## Dashboard shell
+
+- The dashboard uses a fixed responsive sidebar with desktop collapse and a mobile overlay mode.
+- It uses a persistent top bar with a command surface and account menu.
+- Dashboard pages use shared breadcrumbs, page headers, and action zones.
+- The shell provides a standard constrained content width and an explicit wide-surface escape hatch.
+- Inference Console may inform structural maturity, but product-specific branding and domain behavior are not copied into the template shell.
+
+## Dashboard data and authentication boundaries
+
+- The default dashboard runs from deterministic typed fixture data behind lightweight adapters.
+- Shared dashboard surfaces must not require Payload, Supabase, or another hosted backend.
+- Dashboard adapters expose clear seams for replacing fixtures with a project data source.
+- Dashboard authentication uses a provider-neutral contract with a local mock or demo session as the default implementation.
+- Dashboard routes remain guarded; Payload or another authentication provider may replace the default adapter.
+
+## Dashboard component ownership
+
+- Recurring dashboard patterns live in a full-start-only application component layer.
+- This layer owns the shell, navigation, page header, breadcrumbs, summary cards, table panels, detail fields, chart panels, and their loading counterparts.
+- Route-specific fixture content remains with its route.
+- Thin start excludes the dashboard application component layer.
