@@ -41,6 +41,33 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - Card slots must be used under a real `Card` root. Consumers must not place card slots under a raw `Panel` by imitating Card data attributes.
 - Overlays that need Card structure should use `Card` as their root; overlays with materially different structure should define overlay-owned slots.
 
+## Additional shared-component convergence
+
+- Source convergence is additive: matching the pinned Inference Console visual and behavioral contracts must not flatten or remove mature template APIs that remain useful.
+- `MarkdownRenderer` remains a shared full-start and thin-start composite over plain Markdown strings.
+- Its contract includes default and compact density, design-system-backed GFM rendering, task lists, tables, images, code, quotes, links, validated generic button directives, and optional durable `@[user:<id>]` mention resolution.
+- Markdown rendering does not allow arbitrary HTML, JSX, class injection, data registries, or product-specific directives.
+- `MarkdownEditor` is a full-start-only, client-only composite; thin start retains the renderer without the MDXEditor dependency.
+- The editor persists only plain Markdown strings and supports responsive rich editing, lossless source mode, automatic source fallback, headings, inline formatting, lists and tasks, links, tables, images, code, dividers, undo and redo, optional mention insertion, generic button-directive editing, and default or compact density.
+- The editor toolbar composes the template's existing `MoreMenuDropdown`, `Button`, `Dropdown`, and `Listbox` contracts rather than introducing a duplicate package-owned menu system.
+- The existing `MoreMenuDropdown` remains canonical, including its keyboard navigation, fixed or absolute positioning, portal support, hover and pinned interaction modes, custom triggers, and active or disabled options.
+- Button convergence incorporates the pinned `default`, `primary`, `primaryDark`, `primarySoft`, `secondary`, `solid`, `danger`, `ghost`, `quiet`, and `card` visual variants and the `sm`, `md`, `lg`, `xl`, `icon`, `icon-sm`, and `chip` sizes while preserving useful template contracts such as `outline`.
+- Loading states and variant-aware skeleton treatments follow the converged visual vocabulary without replacing the template's richer existing API surface.
+- Existing Button capabilities such as icon-registry inputs, content and text configuration, radius and hit-area controls, focusability, typed link and button behavior, class and style extension, and layout alignment remain available unless an explicit later decision supersedes them.
+- Button loading preserves the template's position-absolute overlay strategy: normal content remains in layout and fades while the centered loader appears, preventing loading-state resizing.
+- `Button.Skeleton` mirrors live size, alignment, radius, icons, label width, and variant treatment without changing the final component dimensions.
+- Chip convergence adopts the pinned compact rounded-medium visual design, semantic, spectrum, and custom colors, interactive link or button behavior, static behavior, `Chip.Text`, and `Chip.Skeleton` while retaining useful existing tone, helper-palette, icon, and canvas-measurement capabilities.
+- `ColorInput` and `ColorSwatchInput` join the full-start input library only; thin start does not include them.
+- `ColorInput` supports controlled and uncontrolled hexadecimal selection, pointer and keyboard operation, normal form submission, field validation, and portal-aware dropdown positioning.
+- `ColorSwatchInput` supports generic typed presets and an optional custom color. Its shared semantic defaults are neutral, info, success, warning, and danger; product-specific palettes stay outside the shared input.
+
+## Full-start detail and property system
+
+- The full-start application layer includes `DashboardDetailField` with static, link, action, copy, truncation, icon, disabled, and skeleton states.
+- It includes `DashboardPropertyList` with responsive identity, value, and action columns, add-property selection, and row actions.
+- It includes `DashboardMarkdownEditorModalButton` as the focused dashboard editing surface. Callers own asynchronous persistence while the composite owns modal composition, validation display, loading feedback, errors, and success toast feedback.
+- Detail and property components remain product-neutral and stay outside thin start.
+
 ## Shared profile invariant
 
 - Components present in both full start and thin start should normally share one implementation and visual contract.
