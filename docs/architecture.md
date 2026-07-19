@@ -2,7 +2,7 @@
 
 Final accepted architecture for the Averlo full-start and thin-start profiles.
 This document defines durable system boundaries and does not authorize or prescribe an implementation sequence.
-Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2026-07-19 with no unresolved or drifted decisions.
+Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2026-07-19, including the pinned-source surface rescan, with no unresolved or drifted decisions.
 
 ## Source relationship
 
@@ -70,6 +70,13 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Chip uses the compact rounded-medium reference design with semantic, spectrum, and custom colors and supports static, link, and button behavior.
 - `Chip.Text` and `Chip.Skeleton` are part of the contract. Useful existing tone, helper-palette, icon, and canvas-measurement capabilities remain available.
 
+### Loading and client boundaries
+
+- Shared components with recurring loading representations expose component-owned namespaced skeletons such as `Field.Skeleton`, `InputFrame.Skeleton`, and `Accordion.Skeleton`.
+- Component-owned skeletons extend the template's richer live APIs. Routes compose them rather than duplicating component geometry.
+- Components remain single-file by default. A component may separate shared contracts, a server-safe public entry and skeleton, and a narrow client implementation when server consumers need its types or skeleton without importing meaningful client-only behavior.
+- This split is a selective dependency-boundary technique, not a mandatory naming convention or universal component structure.
+
 ### Markdown
 
 - `MarkdownRenderer` is shared by full and thin profiles and operates on plain Markdown strings.
@@ -79,15 +86,24 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - The editor persists only plain Markdown strings and provides responsive rich editing, lossless source mode, automatic source fallback, headings, inline formatting, lists and tasks, links, tables, images, code, dividers, undo and redo, optional mention insertion, generic button-directive editing, and default or compact density.
 - Its toolbar composes the template's existing `MoreMenuDropdown`, `Button`, `Dropdown`, and `Listbox` rather than a duplicate package-owned menu system.
 - Existing `MoreMenuDropdown` behavior remains canonical, including keyboard navigation, fixed or absolute positioning, portal support, hover and pinned modes, custom triggers, and active or disabled options.
+- `MoreMenuDropdown` provides typed factories for recurring open, edit, delete, and mark-read actions with consistent icon, separator, disabled, and danger semantics while retaining caller-defined options.
 - Baseline image insertion accepts image URLs only. File upload is a caller or product integration.
 - Markdown stores mentions as durable `@[user:<id>]` references. Callers provide options and rendering resolution; shared Markdown components never fetch organizations or users directly.
 
-### Full-start-only inputs and supporting primitives
+### Inputs and supporting primitives
 
 - `ColorInput` and `ColorSwatchInput` belong to full start only.
 - `ColorInput` supports controlled and uncontrolled hexadecimal selection, pointer and keyboard operation, normal form submission, field validation, and portal-aware dropdown positioning.
 - `ColorSwatchInput` supports generic typed presets and an optional custom color. Shared semantic defaults are neutral, info, success, warning, and danger; product palettes remain outside the shared input.
+- A single-date `DateInput` matches the pinned Inference Console visual and interaction design while exposing template-safe controlled and uncontrolled values and native form serialization.
+- `DateInput` and `DateRangeInput` share configurable locale, timezone, and preset contracts. Neither hardcodes a universal timezone or fixed all-time boundary.
+- The existing searchable `SelectInput` remains canonical. Its option-selection hook runs before value mutation so a claimed action row can close the menu without changing the selected or hidden form value.
+- Existing file and profile-picture inputs retain their caller-controlled APIs while supporting configurable validation, native file-form behavior, optional integrated previews, per-file removal, object-URL cleanup, and form reset.
+- `ProfilePictureInput` supports configurable accepted types and maximum size without Inference-specific storage behavior or profile gradients.
 - Accepted ports include their generic dependency closure: semantic accent helpers, `StatusMessage`, `ModalForm`, shared overlay chrome, and the markdown-mention parser.
+- `ModalForm` includes a generic `ModalStepForm` and `StepIndicator` matching the pinned source's visual and interaction design while retaining stronger compatible template modal APIs.
+- Completed step panels remain mounted and hidden so field state survives navigation. Back and Next never submit; only the final action validates and submits.
+- The shared confirmation system supports structured impact details, warnings, semantic confirm variants, and asynchronous confirmation that may return `false` to keep the modal open after a failed mutation.
 - Existing template helpers remain canonical where they provide an equivalent or stronger contract.
 
 ## Full-start dashboard
@@ -105,6 +121,8 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Organization routes are `/dashboard/organization`, `/dashboard/organization/members`, and `/dashboard/organization/settings`.
 - A typed dashboard surface registry is the source of truth for route identity, paths, labels, navigation placement, breadcrumbs, visibility, and standard-versus-wide layout mode.
 - Navigation, breadcrumbs, and Command-K consume the same registry and organization context model.
+- Mounted pages and surfaces may register currently available contextual actions with the dashboard shell. Dashboard-local registration is removed when its owner unmounts.
+- Command-K combines live actions with the static surface hierarchy, navigation, active organization context, and capability checks rather than maintaining a separate command model.
 - The overview is a lightweight capability and navigation directory rather than a required metrics dashboard.
 
 ### Shell and application components
@@ -137,6 +155,7 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Where an entity participates in tables, forms, filters, detail views, selectors, Command-K, Markdown mentions, empty states, or loading surfaces, those consumers reuse the owning presentation definitions.
 - A generic `entity-frontend-system` Codex skill is an optional discovery and audit workflow linked from the policy. It searches for the repository's actual entity, presentation, renderer, surface, loading, command, and import contracts; classifies entity surfaces; identifies gaps; and recommends relevant vertical skills or work without inventing product models, encoding template-specific paths, or invoking recommended workflows without task authorization.
 - The skill contract is derived only after the presentation foundation, example member, and repository policy establish real APIs; the skill never supersedes repository policy.
+- Frontend policies may reference only verifiable paths, exports, demonstrations, and public contracts. A policy-integrity check reports stale references rather than allowing copied instructions to drift away from the repository.
 
 ### Records, detail, and mutations
 
@@ -148,6 +167,7 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Detail and property components own presentation and interaction composition only. Routes own property schemas, authorization, persistence, and product-specific editors.
 - Fixture adapters provide organization-scoped, resettable create, edit, archive, and delete commands and demonstrate confirmation, validation, toast, optimistic, and failure feedback.
 - An entity-neutral deletion lifecycle definition and dashboard composition centralize impact descriptions, confirmation structure, danger-menu placement, mutation feedback, refresh behavior, and disabled explanations. Owning adapters retain the mutation and entity-specific consequences.
+- The framed and dashed no-data treatment proven by Inference Console is a dashboard-oriented variant or wrapper around the canonical `StateIndicator`, not a competing global null-state system.
 - Demo persistence may be explicitly non-durable; production adapters own durable storage.
 
 ### State and debug surfaces
@@ -155,6 +175,8 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Real routes own their normal loading, error, not-found, and other relevant boundaries.
 - Status and not-found surfaces use a shared frame derived from the dashboard surface registry rather than hardcoded product route prefixes.
 - A guarded internal dashboard review route renders deterministic live, loading, empty, error, and unavailable variants.
+- The guarded review surface presents live and skeleton examples side by side for fields, accordions, tables, detail views, cards, and installed optional chart surfaces.
+- Skeleton parity review covers geometry, responsive behavior, and light and dark modes.
 - A default debug surface can force loading while preserving the real route shell.
 - Debug controls are separate from normal navigation and product behavior.
 - The debug menu is available in development or guarded internal-review mode by default; production exposure requires explicit environment opt-in.
@@ -167,6 +189,17 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - The default dashboard runs from deterministic typed fixtures behind lightweight adapters and does not require Payload, Supabase, or another hosted backend.
 - Authentication uses a provider-neutral contract with a local mock or demo session. Dashboard routes remain guarded, and a real provider may replace the adapter.
 - Fixture, authentication, active-organization selection, and persistence adapters are clearly labeled template scaffolding, not recommended final product implementations.
+- A provider-neutral private-file and avatar-storage adapter defines authorization, validation, opaque object keys, metadata ownership, signed-access lifetimes, replacement cleanup, and deletion responsibilities without installing a concrete storage provider.
+
+### Authentication entry and identity lifecycle
+
+- Full start defines a provider-neutral registry of password, OAuth, magic-link, demo, and local-review entry methods.
+- Server-side resolution intersects template configuration, provider capability, and current user state. Missing or uncertain capability fails closed, and unavailable methods are not presented as usable actions.
+- The baseline lifecycle includes login, sign-in options, forgot password, reset password, set password, callback, invitation, and corresponding loading and error states. Routes consume provider-neutral contracts rather than provider document shapes.
+- Every authentication flow uses one continuation-path helper that accepts only local application paths, rejects protocol-relative and external destinations, and falls back to the dashboard.
+- Failures and outcomes use stable public status codes mapped to user-facing copy; raw provider errors are not exposed through route URLs or rendered directly.
+- Password state and connected-provider identities are modeled separately.
+- Before removing a credential or disconnecting a provider, the server recomputes enabled identities and rejects any mutation that would remove the account's final viable sign-in method.
 
 ### Organization context
 
@@ -186,6 +219,15 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - When multiple memberships exist without a valid active selection, `/select-organization` is required after authentication and outside the organization-dependent dashboard shell.
 - The resolver never silently chooses an arbitrary organization.
 - Sign-out clears active selection, and revoked membership invalidates it immediately.
+
+### Organization invitations
+
+- Invitations are explicit organization-scoped records with recipient identity, normalized email, expiry, revocation, reuse, and acceptance state.
+- Invitation links open an inert review screen. Only an explicit POST accepts an invitation, preventing link scanners or speculative navigation from consuming a one-time token.
+- Acceptance verifies the authenticated recipient, normalized email, organization, expiry, revocation, and prior use before atomically creating membership.
+- Reinviting the same pending or expired recipient refreshes the pending invitation and invalidates the earlier link.
+- Expired, revoked, mismatched, reused, cross-organization, and already-member attempts fail closed.
+- Authentication-user creation does not grant organization access; only verified invitation acceptance creates the corresponding membership.
 
 ### Demo organization and permissions
 
@@ -222,4 +264,5 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Detail-system verification covers responsive property layout across its container breakpoint.
 - Entity-presentation verification covers the example member across identity, table, detail, selector, Command-K, Markdown mention, empty, and loading surfaces and checks that owning definitions are reused rather than copied into routes.
 - Profile verification proves that thin start excludes dashboard presentation and reference-entity capabilities, that dashboard pruning removes both, and that pruning `dashboard.reference-entities` leaves no reference-entity imports, dependencies, demonstrations, policy hooks, or generated output behind.
+- Focused behavioral or structural verification covers authentication entry, invitation acceptance, viable-identity protection, entity deletion, component skeleton parity, and profile pruning. Product-specific Inference Console verifier scripts are not copied.
 - Dashboard visual review covers the baseline route matrix in light and dark modes, desktop and mobile shell behavior, Command-K, and deterministic live, loading, empty, error, unavailable, and not-found states.
