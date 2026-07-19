@@ -31,7 +31,7 @@ export type DashboardSurface = {
 	id: DashboardSurfaceId;
 	label: string;
 	layoutWidth: DashboardLayoutWidth;
-	match: "exact" | "record-detail";
+	match: "exact" | "member-detail" | "record-detail";
 	parentId?: DashboardSurfaceId;
 	sidebar: boolean;
 	sidebarTier: DashboardSidebarTier;
@@ -39,12 +39,21 @@ export type DashboardSurface = {
 
 export type DashboardSurfaceId =
 	| "dashboard.overview"
+	// prune:dashboard.reference-entities:start
 	| "dashboard.records"
 	| "dashboard.record"
+	// prune:dashboard.reference-entities:end
 	| "dashboard.settings"
 	| "dashboard.organization"
+	// prune:dashboard.reference-entities:start
 	| "dashboard.organization.members"
-	| "dashboard.organization.settings";
+	| "dashboard.organization.member"
+	// prune:dashboard.reference-entities:end
+	| "dashboard.organization.settings"
+	// prune:dashboard.reference-entities:start
+	| "dashboard.reference.entities"
+	// prune:dashboard.reference-entities:end
+	| never;
 
 export type DashboardBreadcrumb = {
 	href?: string;
@@ -65,6 +74,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		sidebar: true,
 		sidebarTier: "primary",
 	},
+	// prune:dashboard.reference-entities:start
 	{
 		breadcrumb: true,
 		capability: "records.read",
@@ -103,6 +113,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		sidebar: false,
 		sidebarTier: "primary",
 	},
+	// prune:dashboard.reference-entities:end
 	{
 		breadcrumb: true,
 		commands: [],
@@ -130,6 +141,22 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		sidebar: true,
 		sidebarTier: "secondary",
 	},
+	// prune:dashboard.reference-entities:start
+	{
+		breadcrumb: true,
+		capability: "organization.read",
+		commands: [],
+		description: "Review one organization-scoped member presentation.",
+		href: "/dashboard/organization/members/[memberId]",
+		icon: "user",
+		id: "dashboard.organization.member",
+		label: "Member",
+		layoutWidth: "standard",
+		match: "member-detail",
+		parentId: "dashboard.organization.members",
+		sidebar: false,
+		sidebarTier: "secondary",
+	},
 	{
 		breadcrumb: true,
 		capability: "organization.read",
@@ -145,6 +172,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		sidebar: true,
 		sidebarTier: "secondary",
 	},
+	// prune:dashboard.reference-entities:end
 	{
 		breadcrumb: true,
 		capability: "organization.manage",
@@ -160,6 +188,23 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		sidebar: true,
 		sidebarTier: "secondary",
 	},
+	// prune:dashboard.reference-entities:start
+	{
+		breadcrumb: true,
+		capability: "debug.use",
+		commands: [],
+		description: "Review live and skeleton entity presentation contracts.",
+		href: "/dashboard/reference/entities",
+		icon: "cards",
+		id: "dashboard.reference.entities",
+		label: "Entity reference",
+		layoutWidth: "wide",
+		match: "exact",
+		parentId: "dashboard.overview",
+		sidebar: false,
+		sidebarTier: "utility",
+	},
+	// prune:dashboard.reference-entities:end
 ] as const;
 
 export const dashboardFeatureConfig = {
@@ -190,9 +235,14 @@ export function hasDashboardCapability(
 
 function matchesSurface(pathname: string, surface: DashboardSurface) {
 	if (surface.match === "exact") return pathname === surface.href;
+	// prune:dashboard.reference-entities:start
 	if (surface.match === "record-detail") {
 		return /^\/dashboard\/records\/[^/]+$/.test(pathname);
 	}
+	if (surface.match === "member-detail") {
+		return /^\/dashboard\/organization\/members\/[^/]+$/.test(pathname);
+	}
+	// prune:dashboard.reference-entities:end
 	return false;
 }
 
@@ -261,16 +311,23 @@ export function getDashboardBreadcrumbs(
 export function getDashboardNavigationCommands(
 	capabilities: ReadonlySet<DashboardCapability>,
 ) {
-	return getVisibleDashboardSurfaces(capabilities).flatMap((surface) => [
-		{
-			description: surface.description,
-			href: surface.href.includes("[") ? "/dashboard/records" : surface.href,
-			id: `navigate.${surface.id}`,
-			keywords: [surface.label, "navigate", "open"],
-			label: surface.label,
-		},
-		...surface.commands.filter((command) =>
-			hasDashboardCapability(capabilities, command.capability),
-		),
-	]);
+	return getVisibleDashboardSurfaces(capabilities).flatMap((surface) => {
+		const parentHref = surface.parentId
+			? getDashboardSurfaceById(surface.parentId)?.href
+			: null;
+		return [
+			{
+				description: surface.description,
+				href: surface.href.includes("[")
+					? (parentHref ?? "/dashboard")
+					: surface.href,
+				id: `navigate.${surface.id}`,
+				keywords: [surface.label, "navigate", "open"],
+				label: surface.label,
+			},
+			...surface.commands.filter((command) =>
+				hasDashboardCapability(capabilities, command.capability),
+			),
+		];
+	});
 }

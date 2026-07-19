@@ -35,7 +35,7 @@ full-start dashboard.
 5. P1-C5 — reference entities, policy, pruning, skill, and visual gate 2.
 
 One verified commit closes each chunk. P1-C1 through P1-C4 are closed; P1-C5 is
-current.
+complete and its closing commit follows this handoff update.
 
 ## P1-C1 state
 
@@ -130,6 +130,44 @@ current.
 - The verified full preview is
   `http://localhost:3037/dashboard?motion=off&reveal=off`; use the fixture demo
   action on `/login` when the in-memory session has restarted.
+
+## P1-C5 state
+
+- Status: complete; the closing commit immediately follows this handoff update.
+- Dashboard-owned contracts are split into domain facts, React-free/fetch-free
+  presentation factories, route/adapter fixtures, lifecycle definitions, and
+  entity-owned renderers. There is no global presentation registry.
+- Reference users remain global identities while reference members add
+  organization, role, and joined-at facts. Member profile, compact, actor,
+  avatar/list, selector, mention, table, detail, Command-K, empty, and skeleton
+  surfaces consume one presentation model.
+- Organization-scoped reference records cover sortable tables, detail fields,
+  property lists, shared Markdown rendering, full-only modal MDX editing,
+  mentions, More-menu actions, create/edit/archive/delete, optimistic rollback,
+  deterministic failure mode, and resettable non-durable fixture CRUD.
+- `docs/frontend-entity-policy.md` declares machine-verifiable canonical paths,
+  ownership layers, mutation rules, skeleton parity, and agent workflow. Nearest
+  dashboard policies reinforce those boundaries.
+- `dashboard.reference-entities` is a child prune surface.
+  `--no-dashboard-reference-entities` removes the examples while retaining
+  dashboard core; `--no-dashboard` implicitly removes both. Child-only,
+  dashboard-only, and dashboard-plus-no-Payload disposable builds pass.
+- Thin materialization removes dashboard/entity ownership and the focused
+  scripts through its authoritative manifest. Strict API review, absence
+  assertions, typecheck, 10-route build, and smoke pass.
+- `/Users/olafbobryk/.codex/skills/entity-frontend-system` is installed and
+  validated. It discovers repository policy and can recommend relevant vertical
+  skills, but never overrides repository rules or invokes those skills itself.
+- Browser verification passed contextual entity command registration/cleanup,
+  record create/edit/delete, Markdown modal presentation, deletion failure with
+  confirmation held open, optimistic rollback, and the responsive sidebar.
+  Visual gate 2 covers auth and dashboard at mobile/tablet/desktop sizes in
+  light and dark modes.
+- Verified full preview:
+  `http://localhost:3074/dashboard/reference/entities?motion=off&reveal=off`.
+  Use the fixture demo action at
+  `http://localhost:3074/login?motion=off&reveal=off` if the in-memory session
+  has restarted.
 
 ## Required gates
 

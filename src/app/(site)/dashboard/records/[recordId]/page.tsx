@@ -1,75 +1,63 @@
-import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
-import { Text } from "@/components/ui/primitives/Text";
-import { DashboardSurfaceCommands } from "../../_components/commands/DashboardSurfaceCommands";
+import { notFound } from "next/navigation";
+import { DashboardEntityCommands } from "../../_components/commands/DashboardEntityCommands";
+import { RecordDetailActions } from "../../_components/entities/record/RecordDetailActions";
+import { RecordDetailContent } from "../../_components/entities/record/RecordDetailContent";
 import { DashboardSection } from "../../_components/layout/DashboardSection";
+import {
+	getMemberCommand,
+	getMemberPresentation,
+} from "../../_lib/entities/member/presentation";
+import {
+	getRecordCommand,
+	getRecordPresentation,
+} from "../../_lib/entities/record/presentation";
+import { listReferenceMembers } from "../../_lib/fixtures/reference-members.server";
+import { getReferenceRecord } from "../../_lib/fixtures/reference-records.server";
 import { requireDashboardCapability } from "../../_registry/access.server";
 
 export default async function DashboardRecordPage({
 	params,
+	searchParams,
 }: {
 	params: Promise<{ recordId: string }>;
+	searchParams: Promise<{ "debug-mutation"?: string }>;
 }) {
 	const { recordId } = await params;
+	const query = await searchParams;
 	const { capabilities, context } =
 		await requireDashboardCapability("records.read");
-	const title = decodeURIComponent(recordId)
-		.split("-")
-		.map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-		.join(" ");
+	const record = getReferenceRecord(context.organization.id, recordId);
+	if (!record) notFound();
+	const members = listReferenceMembers(context.organization.id).map(
+		getMemberPresentation,
+	);
+	const presentation = getRecordPresentation(record);
 	return (
 		<DashboardSection
 			actions={
-				capabilities.has("records.write") ? (
-					<Button href={`?action=edit`} size="sm" variant="secondary">
-						Edit record
-					</Button>
-				) : null
+				<RecordDetailActions
+					canWrite={capabilities.has("records.write")}
+					members={members}
+					record={record}
+				/>
 			}
-			breadcrumbLabel={title}
+			breadcrumbLabel={presentation.title}
 			description={`Reference detail in ${context.organization.name}.`}
-			title={title}
+			title={presentation.title}
 		>
-			<DashboardSurfaceCommands
+			<DashboardEntityCommands
 				commands={[
-					{
-						capability: "records.write",
-						description: `Edit ${title}.`,
-						href: `/dashboard/records/${recordId}?action=edit`,
-						id: `record.${recordId}.edit`,
-						keywords: ["change", "update"],
-						label: "Edit record",
-					},
+					getRecordCommand(presentation),
+					...members.map(getMemberCommand),
 				]}
-				ownerId={`dashboard.record.${recordId}`}
+				ownerId={`dashboard.record.entities.${record.id}`}
 			/>
-			<Card>
-				<Card.Header>
-					<Card.Title>Record details</Card.Title>
-					<Card.Description>
-						C5 replaces this reference boundary with the documented entity
-						presentation, Markdown, mutation, and deletion system.
-					</Card.Description>
-				</Card.Header>
-				<Card.Content className="grid gap-4 sm:grid-cols-2">
-					<div>
-						<Text as="div" tone="muted" variant="caption">
-							Record ID
-						</Text>
-						<Text as="div" variant="bodyStrong">
-							{recordId}
-						</Text>
-					</div>
-					<div>
-						<Text as="div" tone="muted" variant="caption">
-							Organization
-						</Text>
-						<Text as="div" variant="bodyStrong">
-							{context.organization.name}
-						</Text>
-					</div>
-				</Card.Content>
-			</Card>
+			<RecordDetailContent
+				canWrite={capabilities.has("records.write")}
+				members={members}
+				record={record}
+				simulateFailure={query["debug-mutation"] === "fail"}
+			/>
 		</DashboardSection>
 	);
 }

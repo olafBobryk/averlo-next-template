@@ -1,3 +1,4 @@
+import { AuthAppearance } from "./_components/AuthAppearance";
 import { AuthShell } from "./_components/AuthShell";
 
 export default function SiteAuthLayout({
@@ -5,5 +6,10 @@ export default function SiteAuthLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	return <AuthShell>{children}</AuthShell>;
+	return (
+		<>
+			<AuthAppearance />
+			<AuthShell>{children}</AuthShell>
+		</>
+	);
 }

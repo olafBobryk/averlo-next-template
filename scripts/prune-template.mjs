@@ -25,6 +25,61 @@ const TEMPLATE_SHAPE_FILES = [
 const TEMPLATE_SHAPE_SCRIPTS = ["build", "prune:template", "verify:smoke"];
 
 const SURFACES = {
+	dashboardReferenceEntities: {
+		id: "dashboard.reference-entities",
+		flag: "--no-dashboard-reference-entities",
+		description:
+			"Remove the dashboard reference member/record verticals, examples, policy, and focused verifiers while retaining dashboard core.",
+		dependentSurfaces: ["dashboard"],
+		ownedPaths: [
+			"docs/frontend-entity-policy.md",
+			"scripts/verify-reference-entities.ts",
+			"scripts/verify-entity-deletion.ts",
+			"scripts/verify-entity-skeletons.ts",
+			"scripts/verify-frontend-entity-policy.ts",
+			"scripts/verify-profile-pruning.mjs",
+			"src/app/(site)/dashboard/records",
+			"src/app/(site)/dashboard/organization/members",
+			"src/app/(site)/dashboard/reference",
+			"src/app/(site)/dashboard/_components/commands/DashboardEntityCommands.tsx",
+			"src/app/(site)/dashboard/_components/data",
+			"src/app/(site)/dashboard/_components/detail",
+			"src/app/(site)/dashboard/_components/entities/AGENTS.md",
+			"src/app/(site)/dashboard/_components/entities/DashboardEntityState.tsx",
+			"src/app/(site)/dashboard/_components/entities/EntityDeletion.tsx",
+			"src/app/(site)/dashboard/_components/entities/member",
+			"src/app/(site)/dashboard/_components/entities/record",
+			"src/app/(site)/dashboard/_lib/AGENTS.md",
+			"src/app/(site)/dashboard/_lib/entities",
+			"src/app/(site)/dashboard/_lib/entity-lifecycle.ts",
+			"src/app/(site)/dashboard/_lib/fixtures",
+			"src/app/(site)/dashboard/_lib/presentation",
+		],
+		markerFiles: [
+			"scripts/verify-dashboard-surfaces.ts",
+			"src/app/(site)/dashboard/page.tsx",
+			"src/app/(site)/dashboard/organization/page.tsx",
+			"src/app/(site)/dashboard/_components/debug/DashboardDebugMenu.tsx",
+			"src/app/(site)/dashboard/_components/layout/DashboardSidebarNav.tsx",
+			"src/app/(site)/dashboard/_registry/surfaceRegistry.ts",
+			"src/app/api/debug/fixture/reset/route.ts",
+		],
+		packageScripts: [
+			"verify:reference-entities",
+			"verify:entity-deletion",
+			"verify:entity-skeletons",
+			"verify:frontend-entity-policy",
+			"verify:frontend-entities",
+			"verify:profile-pruning",
+		],
+		postRemovalAssertions: [
+			{
+				label: "reference entity routes and imports",
+				pattern:
+					/(dashboard\.reference\.entities|dashboard\.records|dashboard\.record|dashboard\.organization\.members|dashboard\.organization\.member|\/dashboard\/records|\/dashboard\/reference\/entities|_lib\/entities|reference-records|reference-members)/,
+			},
+		],
+	},
 	dashboard: {
 		id: "dashboard",
 		flag: "--no-dashboard",
@@ -32,11 +87,25 @@ const SURFACES = {
 			"Remove the dashboard shell, login/auth routes, and dashboard-only auth helpers.",
 		dependentSurfaces: ["auth"],
 		ownedPaths: [
+			"scripts/verify-auth-organization.ts",
+			"scripts/verify-dashboard-surfaces.ts",
 			"src/app/(site)/dashboard",
 			"src/app/(site)/(auth)",
+			"src/app/api/auth",
+			"src/app/api/debug",
 			"src/lib/api/auth.ts",
+			"src/lib/auth",
+			"src/proxy.ts",
 		],
-		routeIds: ["login", "dashboard", "dashboardPages", "dashboardSettings"],
+		routeIds: [
+			"login",
+			"signInOptions",
+			"forgotPassword",
+			"resetPassword",
+			"setPassword",
+			"invitation",
+			"selectOrganization",
+		],
 		routeBuilders: ["dashboardSubpage"],
 		navRouteIds: [],
 		searchSources: [],
@@ -44,13 +113,15 @@ const SURFACES = {
 			{
 				label: "dashboard route ids",
 				pattern:
-					/(hrefFor\("dashboard"\)|hrefFor\("dashboardPages"\)|hrefFor\("dashboardSettings"\)|hrefFor\("login"\)|routeId:\s*"dashboard"|routeId:\s*"dashboardPages"|routeId:\s*"dashboardSettings"|routeId:\s*"login")/,
+					/(hrefFor\("login"\)|hrefFor\("signInOptions"\)|hrefFor\("forgotPassword"\)|hrefFor\("resetPassword"\)|hrefFor\("setPassword"\)|hrefFor\("invitation"\)|hrefFor\("selectOrganization"\)|routeId:\s*"login"|routeId:\s*"signInOptions"|routeId:\s*"forgotPassword"|routeId:\s*"resetPassword"|routeId:\s*"setPassword"|routeId:\s*"invitation"|routeId:\s*"selectOrganization")/,
 			},
 			{
 				label: "dashboard auth import",
 				pattern: /from\s+["']@\/lib\/api\/auth["']/,
 			},
 		],
+		markerFiles: [],
+		packageScripts: ["verify:auth", "verify:dashboard"],
 	},
 	demo: {
 		id: "demo",
@@ -194,7 +265,12 @@ const SURFACES = {
 		description:
 			"Remove the guarded Payload CMS scaffold, config references, and Payload packages.",
 		dependentSurfaces: [],
-		ownedPaths: ["payload.config.ts", "src/payload", "src/app/(payload)"],
+		ownedPaths: [
+			"payload.config.ts",
+			"src/payload",
+			"src/app/(payload)",
+			"src/app/api/dev/payload-login",
+		],
 		routeIds: [],
 		routeBuilders: [],
 		navRouteIds: [],
@@ -202,7 +278,8 @@ const SURFACES = {
 		postRemovalAssertions: [
 			{
 				label: "Payload imports",
-				pattern: /(@payloadcms|@payload-config|@\/payload)/,
+				pattern:
+					/(?:from\s+["'](?:@payloadcms|@payload-config|@\/payload)|import\s+["'](?:@payloadcms|@payload-config|@\/payload)|require\(["'](?:@payloadcms|@payload-config|@\/payload))/,
 			},
 		],
 	},
@@ -265,6 +342,8 @@ function printUsage() {
 
 Flags:
   --no-dashboard   Remove dashboard routes, auth/login shell, and dashboard auth helpers
+  --no-dashboard-reference-entities
+                  Remove dashboard reference entities while retaining dashboard core
   --no-demo        Remove the internal demo surface
   --no-intelligence Remove the internal template intelligence surface
   --no-scroll-performance
@@ -288,6 +367,12 @@ function parseArgs(argv) {
 		if (flags.has(surface.flag)) {
 			surfaceIds.push(surfaceId);
 		}
+	}
+	if (
+		surfaceIds.includes("dashboard") &&
+		!surfaceIds.includes("dashboardReferenceEntities")
+	) {
+		surfaceIds.unshift("dashboardReferenceEntities");
 	}
 
 	const recognized = new Set([
@@ -421,6 +506,8 @@ function buildState(surfaceIds) {
 
 	return {
 		hasDashboard: !removed.has("dashboard"),
+		hasDashboardReferenceEntities:
+			!removed.has("dashboard") && !removed.has("dashboardReferenceEntities"),
 		hasDemo: !removed.has("demo"),
 		hasIntelligence: !removed.has("intelligence"),
 		hasPlayground: !removed.has("playground"),
@@ -432,6 +519,9 @@ function buildState(surfaceIds) {
 
 async function collectPlan(surfaceIds) {
 	const deletedPaths = [];
+	const rewriteCentral = surfaceIds.some(
+		(surfaceId) => surfaceId !== "dashboardReferenceEntities",
+	);
 	const removesAllGraphConsumers =
 		surfaceIds.includes("intelligence") && surfaceIds.includes("reference");
 
@@ -463,15 +553,20 @@ async function collectPlan(surfaceIds) {
 		surfaces: surfaceIds.map((surfaceId) => SURFACES[surfaceId]),
 		deletedPaths: uniqueDeletedPaths,
 		rewriteFiles: [
-			...CENTRAL_FILES,
-			"src/lib/marketing-content/fallback.ts",
-			"scripts/verify-smoke.mjs",
+			...(rewriteCentral
+				? [
+						...CENTRAL_FILES,
+						"src/lib/marketing-content/fallback.ts",
+						"scripts/verify-smoke.mjs",
+					]
+				: []),
 			...(surfaceIds.includes("payload")
 				? ["next.config.ts", "tsconfig.json", "package.json"]
 				: []),
 			...(surfaceIds.includes("intelligence") ? ["package.json"] : []),
 			...(surfaceIds.includes("scrollPerformance") ? ["package.json"] : []),
 		],
+		rewriteCentral,
 		packageDependencies: [
 			...(surfaceIds.includes("payload") ? PAYLOAD_PACKAGE_DEPENDENCIES : []),
 			...(surfaceIds.includes("intelligence")
@@ -483,6 +578,9 @@ async function collectPlan(surfaceIds) {
 			...(removesAllGraphConsumers ? GRAPH_PACKAGE_DEPENDENCIES : []),
 		],
 		packageScripts: [
+			...surfaceIds.flatMap(
+				(surfaceId) => SURFACES[surfaceId].packageScripts ?? [],
+			),
 			...(surfaceIds.includes("intelligence")
 				? INTELLIGENCE_PACKAGE_SCRIPTS
 				: []),
@@ -490,8 +588,41 @@ async function collectPlan(surfaceIds) {
 				? SCROLL_PERFORMANCE_PACKAGE_SCRIPTS
 				: []),
 		],
+		markerFiles: [
+			...new Set(
+				surfaceIds.flatMap(
+					(surfaceId) => SURFACES[surfaceId].markerFiles ?? [],
+				),
+			),
+		],
 		removeInternalDir,
 	};
+}
+
+function stripSurfaceMarkerBlocks(content, surfaceIds) {
+	let nextContent = content;
+	for (const surfaceId of surfaceIds) {
+		const markerId = SURFACES[surfaceId].id;
+		const escapedMarkerId = markerId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const block = new RegExp(
+			`^[\\t ]*(?:// prune:${escapedMarkerId}:start|\\{/\\* prune:${escapedMarkerId}:start \\*/\\})\\r?\\n[\\s\\S]*?^[\\t ]*(?:// prune:${escapedMarkerId}:end|\\{/\\* prune:${escapedMarkerId}:end \\*/\\})\\r?\\n?`,
+			"gm",
+		);
+		nextContent = nextContent.replace(block, "");
+	}
+	return nextContent;
+}
+
+async function stripSurfaceMarkers(filePaths, surfaceIds) {
+	for (const filePath of filePaths) {
+		const absolutePath = path.join(ROOT, filePath);
+		if (!(await pathExists(absolutePath))) continue;
+		const content = await fs.readFile(absolutePath, "utf8");
+		const nextContent = stripSurfaceMarkerBlocks(content, surfaceIds);
+		if (nextContent !== content) {
+			await fs.writeFile(absolutePath, nextContent, "utf8");
+		}
+	}
 }
 
 function renderRoutesFile(state) {
@@ -517,9 +648,12 @@ function renderRoutesFile(state) {
 
 	if (state.hasDashboard) {
 		lines.push(`\tlogin: "/login",`);
-		lines.push(`\tdashboard: "/dashboard",`);
-		lines.push(`\tdashboardPages: "/dashboard/pages",`);
-		lines.push(`\tdashboardSettings: "/dashboard/settings",`);
+		lines.push(`\tsignInOptions: "/sign-in-options",`);
+		lines.push(`\tforgotPassword: "/forgot-password",`);
+		lines.push(`\tresetPassword: "/reset-password",`);
+		lines.push(`\tsetPassword: "/set-password",`);
+		lines.push(`\tinvitation: "/invitation",`);
+		lines.push(`\tselectOrganization: "/select-organization",`);
 	}
 
 	if (state.hasDictionary) {
@@ -920,19 +1054,6 @@ function renderMarketingContentFallbackFile(state) {
 		);
 	}
 
-	if (state.hasDashboard) {
-		menuGroups.push(
-			"\t\t\t{",
-			'\t\t\t\tlabel: "Build",',
-			"\t\t\t\tlinks: [",
-			'\t\t\t\t\t{ label: "Dashboard", routeId: "dashboard" },',
-			'\t\t\t\t\t{ label: "Pages", routeId: "dashboardPages" },',
-			'\t\t\t\t\t{ label: "Dashboard settings", routeId: "dashboardSettings" },',
-			"\t\t\t\t],",
-			"\t\t\t},",
-		);
-	}
-
 	const topNavEntries = ['\t\t\t{ label: "Home", routeId: "home" },'];
 	if (state.hasDemo) {
 		topNavEntries.push('\t\t\t{ label: "Demo", routeId: "demo" },');
@@ -945,7 +1066,11 @@ function renderMarketingContentFallbackFile(state) {
 	topNavEntries.push('\t\t\t{ label: "Settings", routeId: "settings" },');
 
 	return [
-		'import type { MarketingPageDocument, SiteLayoutDocument } from "./types";',
+		"import type {",
+		"\tMarketingPageDocument,",
+		"\tMarketingPageSlug,",
+		"\tSiteLayoutDocument,",
+		'} from "./types";',
 		"",
 		"export const fallbackHomePage: MarketingPageDocument = {",
 		'\tslug: "home",',
@@ -967,6 +1092,10 @@ function renderMarketingContentFallbackFile(state) {
 		"\t\t},",
 		"\t],",
 		"};",
+		"",
+		"export const fallbackMarketingPages = {",
+		"\thome: fallbackHomePage,",
+		"} satisfies Record<MarketingPageSlug, MarketingPageDocument>;",
 		"",
 		"export const fallbackSiteLayout: SiteLayoutDocument = {",
 		"\theader: {",
@@ -1243,7 +1372,7 @@ function renderTsconfigFile(state) {
 		'\t\t".next/types/**/*.ts",',
 		'\t\t".next/dev/types/**/*.ts"',
 		"\t],",
-		'\t"exclude": ["node_modules"]',
+		'\t"exclude": ["node_modules", "template-profiles/**/overrides/**"]',
 		"}",
 		"",
 	].join("\n");
@@ -1259,6 +1388,7 @@ function renderApiIndexFile(state) {
 			"  login,",
 			"  logout,",
 			"  type SessionUser,",
+			"  updateSessionUser,",
 			"  updateStoredSessionUser,",
 			'} from "./auth";',
 		);
@@ -1673,7 +1803,7 @@ function printPlan(plan) {
 	}
 
 	console.log("\nCentral files to rewrite");
-	for (const filePath of plan.rewriteFiles) {
+	for (const filePath of [...plan.rewriteFiles, ...plan.markerFiles]) {
 		console.log(`- ${filePath}`);
 	}
 
@@ -1759,11 +1889,14 @@ async function main() {
 	}
 
 	await deleteOwnedPaths(plan.deletedPaths);
+	await stripSurfaceMarkers(plan.markerFiles, parsed.surfaceIds);
 
-	for (const target of getRewriteTargets(state)) {
-		await writeFileIfChanged(target.path, target.content, {
-			optional: target.optional,
-		});
+	if (plan.rewriteCentral) {
+		for (const target of getRewriteTargets(state)) {
+			await writeFileIfChanged(target.path, target.content, {
+				optional: target.optional,
+			});
+		}
 	}
 
 	await removeEmptyInternalDirIfNeeded(plan.removeInternalDir);
@@ -1776,7 +1909,7 @@ async function main() {
 		refreshPackageLock();
 	}
 
-	await runFormatter(plan.rewriteFiles);
+	await runFormatter([...plan.rewriteFiles, ...plan.markerFiles]);
 	await validateRemovedSurfaceReferences(parsed.surfaceIds);
 	runBuild();
 

@@ -9,7 +9,7 @@ export default async function DashboardPage() {
 	const { context } = await requireDashboardCapability("dashboard.view");
 	return (
 		<DashboardSection
-			description="A product-ready organization boundary with reference records, members, settings, commands, and deterministic review states."
+			description="A product-ready organization boundary with settings, commands, and deterministic review states."
 			title={context.organization.name}
 		>
 			<DashboardSurfaceCommands
@@ -22,10 +22,21 @@ export default async function DashboardPage() {
 						keywords: ["team", "company", "workspace"],
 						label: "Open organization",
 					},
+					// prune:dashboard.reference-entities:start
+					{
+						description:
+							"Review the copyable live and skeleton entity presentation contracts.",
+						href: "/dashboard/reference/entities",
+						id: "overview.entity-reference",
+						keywords: ["entity", "presentation", "skeleton", "reference"],
+						label: "Open entity reference",
+					},
+					// prune:dashboard.reference-entities:end
 				]}
 				ownerId="dashboard.overview"
 			/>
 			<div className="grid gap-4 md:grid-cols-2">
+				{/* prune:dashboard.reference-entities:start */}
 				<Card>
 					<Card.Header>
 						<Card.Title>Reference records</Card.Title>
@@ -40,6 +51,7 @@ export default async function DashboardPage() {
 						</Button>
 					</Card.Content>
 				</Card>
+				{/* prune:dashboard.reference-entities:end */}
 				<Card>
 					<Card.Header>
 						<Card.Title>Organization</Card.Title>
@@ -59,6 +71,26 @@ export default async function DashboardPage() {
 						</Button>
 					</Card.Content>
 				</Card>
+				{/* prune:dashboard.reference-entities:start */}
+				<Card>
+					<Card.Header>
+						<Card.Title>Entity presentation reference</Card.Title>
+						<Card.Description>
+							Compare live member and record surfaces with their component-owned
+							skeletons, then copy the direct-import ownership pattern.
+						</Card.Description>
+					</Card.Header>
+					<Card.Content className="mt-auto">
+						<Button
+							href="/dashboard/reference/entities"
+							size="sm"
+							variant="secondary"
+						>
+							Open reference
+						</Button>
+					</Card.Content>
+				</Card>
+				{/* prune:dashboard.reference-entities:end */}
 			</div>
 			<Card className="mt-4" padding="md">
 				<Text as="h2" variant="headingSm">

@@ -131,6 +131,27 @@ const CONCEPTS = [
 		keywords: ["prune", "optional", "surface", "template", "clone"],
 	},
 	{
+		id: "dashboard-reference-entities",
+		title: "Dashboard Reference Entities",
+		summary:
+			"Dashboard-owned member and record presentation examples with fetch-free factories, live/skeleton parity, fixture CRUD, and child pruning.",
+		matches: [
+			"docs/frontend-entity-policy.md",
+			"src/app/(site)/dashboard/_lib/entities",
+			"src/app/(site)/dashboard/_components/entities",
+			"src/app/(site)/dashboard/reference/entities",
+			"scripts/verify-reference-entities.ts",
+		],
+		keywords: [
+			"entity",
+			"presentation",
+			"member",
+			"record",
+			"skeleton",
+			"dashboard.reference-entities",
+		],
+	},
+	{
 		id: "dev-workflow",
 		title: "Dev Workflow",
 		summary:
@@ -196,6 +217,8 @@ const AGENT_MAP = {
 			aliases: ["prune", "optional-surfaces", "template-pruning"],
 			paths: [
 				"scripts/prune-template.mjs",
+				"scripts/verify-profile-pruning.mjs",
+				"template-profiles/thin-start/manifest.mjs",
 				"scripts/create-thin-start.mjs",
 				"scripts/review-thin-start-api.mjs",
 				"README.md",
@@ -209,7 +232,27 @@ const AGENT_MAP = {
 				"src/lib/marketing-content/fallback.ts",
 			],
 			notes:
-				"SURFACES owns normal prune flags, paths, routes, nav/search references, smoke-route rewrites, package changes, and post-removal assertions. Lightweight instances should dry-run then apply: npm run prune:template -- --dry-run --no-dashboard --no-demo --no-dictionary --no-reference --no-playground, then npm run prune:template -- --yes --no-dashboard --no-demo --no-dictionary --no-reference --no-playground. Add --no-payload only for static instances. Thin-start is a separate explicit instance activation path; dry-run first, then activate with --in-place --confirm-instance and require strict API review.",
+				"SURFACES owns normal prune flags, paths, routes, nav/search references, smoke-route rewrites, package changes, and post-removal assertions. dashboard.reference-entities is a dashboard child surface: --no-dashboard-reference-entities removes the reference verticals while retaining dashboard core, and --no-dashboard removes both. Lightweight instances should dry-run then apply their selected flags. Add --no-payload only for static instances. Thin-start is a separate explicit instance activation path; dry-run first, then activate with --in-place --confirm-instance and require strict API review.",
+		},
+		{
+			id: "frontend-entity-system",
+			title: "Dashboard-owned frontend entity system",
+			aliases: [
+				"entity-presentation",
+				"reference-entities",
+				"frontend-entity-policy",
+			],
+			paths: [
+				"docs/frontend-entity-policy.md",
+				"src/app/(site)/dashboard/_lib/AGENTS.md",
+				"src/app/(site)/dashboard/_components/entities/AGENTS.md",
+				"src/app/(site)/dashboard/_lib/presentation/contracts.ts",
+				"src/app/(site)/dashboard/_lib/entities/member/presentation.ts",
+				"src/app/(site)/dashboard/_lib/entities/record/presentation.ts",
+				"src/app/(site)/dashboard/reference/entities/page.tsx",
+			],
+			notes:
+				"Routes and adapters own data, authorization, persistence, and mutation. Presentation factories stay React-free and fetch-free; renderers import their owning factory directly and keep live/skeleton parity. Repository policy supersedes user-level skills.",
 		},
 		{
 			id: "content-modes",

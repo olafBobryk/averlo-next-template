@@ -43,6 +43,18 @@ export function DashboardDebugMenu({
 		router.replace(`${pathname}${params.size > 0 ? `?${params}` : ""}`);
 	}
 
+	// prune:dashboard.reference-entities:start
+	function toggleMutationFailure() {
+		const params = new URLSearchParams(searchParams.toString());
+		if (params.get("debug-mutation") === "fail") {
+			params.delete("debug-mutation");
+		} else {
+			params.set("debug-mutation", "fail");
+		}
+		router.replace(`${pathname}${params.size > 0 ? `?${params}` : ""}`);
+	}
+	// prune:dashboard.reference-entities:end
+
 	async function enterFixture(email: string, destination: string) {
 		await showToast.promise(signInFixture(email), {
 			loading: "Changing fixture session…",
@@ -79,6 +91,23 @@ export function DashboardDebugMenu({
 				positionStrategy="fixed"
 				side="top"
 				options={[
+					// prune:dashboard.reference-entities:start
+					{
+						href: "/dashboard/reference/entities?motion=off&reveal=off",
+						id: "entity-reference",
+						label: "Open entity reference",
+						leadingIcon: "cards",
+					},
+					{
+						id: "mutation-failure",
+						label:
+							searchParams.get("debug-mutation") === "fail"
+								? "Disable mutation failures"
+								: "Force mutation failures",
+						leadingIcon: "warning",
+						onSelect: toggleMutationFailure,
+					},
+					// prune:dashboard.reference-entities:end
 					{
 						disabled: true,
 						id: "debug-context",

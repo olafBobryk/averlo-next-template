@@ -59,9 +59,15 @@ export const thinStartProfile = {
 		target,
 	})),
 	removals: [
+		"docs/frontend-entity-policy.md",
 		"scripts/scroll-performance",
 		"scripts/verify-auth-organization.ts",
 		"scripts/verify-dashboard-surfaces.ts",
+		"scripts/verify-reference-entities.ts",
+		"scripts/verify-entity-deletion.ts",
+		"scripts/verify-entity-skeletons.ts",
+		"scripts/verify-frontend-entity-policy.ts",
+		"scripts/verify-profile-pruning.mjs",
 		"src/app/(site)/(auth)",
 		"src/app/api/auth",
 		"src/app/api/debug",
@@ -120,6 +126,12 @@ export const thinStartProfile = {
 			remove: [
 				"verify:auth",
 				"verify:dashboard",
+				"verify:reference-entities",
+				"verify:entity-deletion",
+				"verify:entity-skeletons",
+				"verify:frontend-entity-policy",
+				"verify:frontend-entities",
+				"verify:profile-pruning",
 				"measure:scroll-performance",
 				"record:scroll-performance",
 				"setup:scroll-performance-autoresearch",
@@ -150,6 +162,10 @@ export const thinStartProfile = {
 				"postbuild",
 			],
 		},
+	},
+	surfaces: {
+		remove: ["dashboard", "dashboard.reference-entities"],
+		retain: ["marketing", "template-intelligence"],
 	},
 	routes: {
 		retain: [

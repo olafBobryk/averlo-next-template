@@ -1,8 +1,9 @@
 import clsx from "clsx";
 import type * as React from "react";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { Text } from "@/components/ui/primitives/Text";
 
-export function DashboardPageHeader({
+function DashboardPageHeaderRoot({
 	action,
 	actionClassName,
 	description,
@@ -35,3 +36,16 @@ export function DashboardPageHeader({
 		</div>
 	);
 }
+
+function DashboardPageHeaderSkeleton() {
+	return (
+		<div className="grid gap-2">
+			<Skeleton className="h-8 w-48" />
+			<Skeleton className="h-4 w-full max-w-lg" />
+		</div>
+	);
+}
+
+export const DashboardPageHeader = Object.assign(DashboardPageHeaderRoot, {
+	Skeleton: DashboardPageHeaderSkeleton,
+});

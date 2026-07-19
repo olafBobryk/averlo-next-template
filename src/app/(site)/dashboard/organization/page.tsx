@@ -39,6 +39,7 @@ export default async function DashboardOrganizationPage() {
 						</div>
 					</Card.Content>
 				</Card>
+				{/* prune:dashboard.reference-entities:start */}
 				<Card>
 					<Card.Header>
 						<Card.Title>Members</Card.Title>
@@ -56,6 +57,7 @@ export default async function DashboardOrganizationPage() {
 						</Button>
 					</Card.Content>
 				</Card>
+				{/* prune:dashboard.reference-entities:end */}
 			</div>
 		</DashboardSection>
 	);

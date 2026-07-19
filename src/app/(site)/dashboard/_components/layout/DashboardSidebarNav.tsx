@@ -41,8 +41,7 @@ export function DashboardSidebarNav({
 					{group.surfaces.map((surface) => {
 						const active =
 							activeSurface?.id === surface.id ||
-							(surface.id === "dashboard.records" &&
-								pathname.startsWith("/dashboard/records/"));
+							activeSurface?.parentId === surface.id;
 						return (
 							<Link
 								aria-current={active ? "page" : undefined}

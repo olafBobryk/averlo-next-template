@@ -11,3 +11,6 @@
   unregister when their owning surface unmounts.
 - Keep product-specific entities and their presentation below the dashboard
   route boundary. Do not create a global entity renderer or presentation map.
+- Entity paths, dependency layers, examples, and pruning contracts are defined in
+  `docs/frontend-entity-policy.md`; registry entries expose routes but do not own
+  entity presentation.
