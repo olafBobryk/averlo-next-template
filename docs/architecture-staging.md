@@ -189,6 +189,16 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - Provider-neutral fixture, authentication, and selection adapters are template scaffolding rather than recommended final product implementations.
 - When implementation begins in a template instance, the instance must explicitly choose its real data, authentication, organization-selection, and persistence implementations instead of preserving the scaffold by default.
 
+## Authentication entry and identity lifecycle
+
+- Full start defines a provider-neutral registry of available authentication entry methods, including password, OAuth, magic link, demo, and local-review methods.
+- Server-side resolution intersects template configuration, provider capability, and current user state. Missing or uncertain capability fails closed, and unavailable methods are not presented as usable actions.
+- The baseline route lifecycle includes login, sign-in options, forgot password, reset password, set password, callback, invitation, and corresponding loading and error states. These routes consume provider-neutral contracts rather than provider-specific document shapes.
+- Every authentication flow uses one safe continuation-path helper. It accepts only local application paths, rejects protocol-relative and external destinations, and falls back to the dashboard.
+- Authentication failures and outcomes use stable public status codes mapped to user-facing copy. Raw provider errors are never passed through route URLs or rendered directly.
+- Password state and connected-provider identities are modeled separately.
+- Before disconnecting a provider or removing a credential, the server recomputes the currently enabled identities and rejects any mutation that would remove the account's final viable sign-in method.
+
 ## Template-instance activation boundary
 
 - Beginning implementation in a template instance requires an explicit activation pass rather than silently inheriting scaffold choices.
@@ -221,6 +231,15 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - Demo access is explicit through demo login or organization selection.
 - Demo users receive real demo-organization membership through the same organization context model.
 - Development debug controls may enter the demo organization directly, but normal users are never silently moved into demo data.
+
+## Organization invitation lifecycle
+
+- Organization invitations are explicit organization-scoped records with recipient identity, normalized email, expiry, revocation, reuse, and acceptance state.
+- An invitation link opens an inert review screen. Only an explicit POST accepts the invitation, so link scanners and speculative navigation cannot consume a one-time token.
+- Acceptance verifies the authenticated recipient, normalized email, organization, expiry, revocation, and prior use before atomically creating membership.
+- Reinviting the same pending or expired recipient refreshes the pending invitation and invalidates the earlier link.
+- Expired, revoked, mismatched, reused, cross-organization, and already-member attempts fail closed.
+- Authentication-user creation never grants organization access by itself; only the verified invitation-acceptance lifecycle creates the corresponding membership.
 
 ## Organization routes
 
