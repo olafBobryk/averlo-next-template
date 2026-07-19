@@ -115,6 +115,25 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Recurring dashboard patterns live in a full-start-only application component layer; thin start excludes that layer.
 - The layer owns shell, navigation, page header, breadcrumbs, table panels, detail fields, property lists, and loading counterparts. Route-specific fixture content remains route-owned.
 
+### Entity presentation
+
+- Entity presentation is a full-start dashboard capability rather than a shared primitive, thin-start dependency, or application-wide global registry.
+- The authoritative profile manifest exposes it as a named pruneable surface beneath the dashboard feature. Dashboard removal removes it automatically, and a dashboard-based instance may deliberately prune the reference entity system when adopting another frontend entity architecture.
+- A small dashboard presentation foundation owns only reusable contracts such as entity nouns, action labels, empty-state copy, field and column metadata, semantic variants, and renderer inputs.
+- Source is split by dependency layer and entity ownership. Each entity folder separates domain inputs, presentation definitions, derived view-model factories, render components, and surface adapters; product-specific roles, routes, labels, icons, permissions, formatting, and variants remain with that entity.
+- Renderers receive ready data and never fetch. Routes and adapters own authorization, organization context, persistence, and mutations.
+- The reference identity entity separates a global user from an organization-scoped member. Its resolved presentation provides deterministic display, email, initials, avatar, role, joined-date, profile-target, and Markdown-mention fallbacks.
+- The example member demonstrates profile, compact, actor, avatar-only, avatar-list, table, detail, selector, Command-K, Markdown mention, empty, and skeleton presentations without the Inference-specific profile gradient.
+- Entities implement only the presentation surfaces they need. An internal dashboard reference surface demonstrates the contracts and provides copyable usage.
+
+### Frontend entity policy and workflow
+
+- A repository-owned frontend entity policy is authoritative for entity ownership, presentation reuse, data-source boundaries, surface integration, skeleton parity, demonstrations, and documentation.
+- Relevant dashboard, component, domain, and library `AGENTS.md` files link to the focused policy rather than duplicating or centralizing every rule at the root.
+- Where an entity participates in tables, forms, filters, detail views, selectors, Command-K, Markdown mentions, empty states, or loading surfaces, those consumers reuse the owning presentation definitions.
+- A generic `entity-frontend-system` Codex skill is an optional discovery and audit workflow linked from the policy. It inspects the repository's actual contracts, classifies entity surfaces, identifies gaps, and recommends relevant vertical skills or work without inventing product models, encoding template-specific paths, or automatically executing every recommendation.
+- The skill contract is derived only after the presentation foundation, example member, and repository policy establish real APIs; the skill never supersedes repository policy.
+
 ### Records, detail, and mutations
 
 - The collection reference demonstrates search, filtering, sorting, pagination, row navigation, and action menus.
@@ -124,15 +143,18 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - `DashboardMarkdownEditorModalButton` provides focused Markdown editing. Callers own asynchronous persistence; the composite owns modal composition, validation display, loading feedback, errors, and success toasts.
 - Detail and property components own presentation and interaction composition only. Routes own property schemas, authorization, persistence, and product-specific editors.
 - Fixture adapters provide organization-scoped, resettable create, edit, archive, and delete commands and demonstrate confirmation, validation, toast, optimistic, and failure feedback.
+- An entity-neutral deletion lifecycle definition and dashboard composition centralize impact descriptions, confirmation structure, danger-menu placement, mutation feedback, refresh behavior, and disabled explanations. Owning adapters retain the mutation and entity-specific consequences.
 - Demo persistence may be explicitly non-durable; production adapters own durable storage.
 
 ### State and debug surfaces
 
 - Real routes own their normal loading, error, not-found, and other relevant boundaries.
+- Status and not-found surfaces use a shared frame derived from the dashboard surface registry rather than hardcoded product route prefixes.
 - A guarded internal dashboard review route renders deterministic live, loading, empty, error, and unavailable variants.
 - A default debug surface can force loading while preserving the real route shell.
 - Debug controls are separate from normal navigation and product behavior.
 - The debug menu is available in development or guarded internal-review mode by default; production exposure requires explicit environment opt-in.
+- A generic activity or event row remains an optional dashboard extension. Inference-specific notifications, product permission presentations, charts, and provider-branded authentication buttons are demand-led rather than baseline ports.
 
 ## Data, authentication, and organizations
 
@@ -194,4 +216,6 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Chip verification covers semantic, spectrum, custom, static, link, button, and skeleton states.
 - Color-input verification covers pointer and keyboard operation, validation, form behavior, and portal positioning.
 - Detail-system verification covers responsive property layout across its container breakpoint.
+- Entity-presentation verification covers the example member across identity, table, detail, selector, Command-K, Markdown mention, empty, and loading surfaces and checks that owning definitions are reused rather than copied into routes.
+- Profile verification proves that thin start excludes the dashboard presentation capability and that pruning the dashboard or its entity-presentation child surface leaves no imports, dependencies, demos, policies, or generated output behind.
 - Dashboard visual review covers the baseline route matrix in light and dark modes, desktop and mobile shell behavior, Command-K, and deterministic live, loading, empty, error, unavailable, and not-found states.

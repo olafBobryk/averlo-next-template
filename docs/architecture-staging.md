@@ -73,6 +73,35 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - Detail and property components remain product-neutral and stay outside thin start.
 - Detail fields and property lists own presentation and interaction composition only. Routes own property schemas, authorization, persistence, and product-specific editors.
 
+## Dashboard entity presentation system
+
+- Entity presentation is a full-start dashboard capability rather than a shared primitive, thin-start dependency, or application-wide global registry.
+- The authoritative profile manifest exposes entity presentation as a named pruneable surface beneath the dashboard feature. Removing the dashboard removes the surface automatically, while a dashboard-based template instance may also prune the reference entity system when it deliberately adopts another frontend entity architecture.
+- The source is split by ownership and dependency direction instead of reproducing Inference Console's monolithic presentation registry and renderer namespace.
+- A small dashboard presentation foundation owns only reusable contracts such as entity nouns, action labels, empty-state copy, field and column metadata, semantic variants, and renderer inputs.
+- Every entity lives in its own folder and separates its domain input types, presentation definitions, derived view-model factory, render components, and surface adapters. Product-specific roles, routes, labels, icons, permissions, formatting, and variant registries remain with the owning entity.
+- Presentation renderers receive ready data and never fetch. Routes and adapters own authorization, organization context, persistence, and mutations.
+- The reference identity implementation models a global user separately from an organization-scoped member. The resolved member presentation owns deterministic fallbacks for display label, email, initials, avatar, role, joined date, profile target, and Markdown mention identity.
+- The example member is wired through profile, compact, actor, avatar-only, avatar-list, table, detail, selector, Command-K, Markdown mention, empty, and skeleton presentations. It uses the template's plain avatar fallback and does not port Inference Console's custom profile-picture gradient.
+- Entities implement only the presentation surfaces they actually need; the foundation does not require every entity to support every renderer or dashboard surface.
+- An internal dashboard reference surface provides live examples and copyable usage for the generic contracts and the example member.
+
+## Entity frontend policy and skill
+
+- A repository-owned frontend entity policy is the durable source of truth for entity-layer ownership, presentation reuse, data-source boundaries, surface integration, skeleton parity, demonstration, and documentation requirements.
+- The policy is linked from the relevant dashboard, component, domain, and library `AGENTS.md` files instead of accumulating every rule in a single root instruction file.
+- The policy requires tables, forms, filters, detail views, selectors, Command-K, Markdown mentions, empty states, and loading surfaces to reuse owning entity presentation definitions when those surfaces exist.
+- A generic `entity-frontend-system` Codex skill complements the repository policy. Like the existing focused loading and import-surface skills, it discovers the current repository's contracts, classifies the entity's frontend surfaces, identifies gaps, and recommends the relevant vertical skills or work without inventing product models or assuming template-specific paths.
+- The entity skill does not become the source of truth, execute every recommended vertical workflow automatically, or embed one repository's entity schema. The repository policy links to it as an optional creation and audit workflow.
+- The skill contract is derived after the dashboard presentation foundation, example member, and frontend entity policy establish real APIs.
+
+## Additional reusable dashboard patterns
+
+- The full-start dashboard includes an entity-neutral deletion lifecycle definition and composition that centralizes impact descriptions, confirmation-modal structure, danger-menu placement, mutation feedback, refresh behavior, and disabled explanations while leaving the mutation and entity-specific consequences with the owning adapter.
+- Dashboard status and not-found surfaces use a shared status-page frame derived from the typed dashboard surface registry. The reusable frame does not hardcode product route prefixes.
+- A generic activity or event row is an optional dashboard extension rather than baseline template content.
+- Inference-specific notification systems, product permission presentations, charts, and provider-branded authentication buttons are not baseline ports; they remain demand-led additions.
+
 ## Shared profile invariant
 
 - Components present in both full start and thin start should normally share one implementation and visual contract.
@@ -108,6 +137,8 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - Chip verification covers semantic, spectrum, custom, static, link, button, and skeleton states.
 - Color-input verification covers pointer and keyboard operation, validation, form behavior, and portal positioning.
 - Detail-system verification covers responsive property layout across its container breakpoint.
+- Entity-presentation verification covers the example member across identity, table, detail, selector, Command-K, Markdown mention, empty, and loading surfaces and checks that owning definitions are reused rather than copied into routes.
+- Profile verification proves that thin start excludes the dashboard presentation capability and that pruning the dashboard or its entity-presentation child surface leaves no imports, dependencies, demos, policies, or generated output behind.
 
 ## Full-start dashboard role
 
