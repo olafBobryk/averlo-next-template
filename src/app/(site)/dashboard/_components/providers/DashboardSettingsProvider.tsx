@@ -7,26 +7,17 @@ import {
 } from "@/app/(site)/_components/settings/sharedSettingsSections";
 import { useSettingsContext } from "@/components/ui/foundations/settingsContext";
 import { ToggleInput } from "@/components/ui/input/ToggleInput";
-import type { AppRouteId } from "@/config/routes";
 import { ProfileSettingsSection } from "../../settings/_components/ProfileSettingsSection";
-import {
-	defaultDashboardSidebarRouteIds,
-	sanitizeDashboardSidebarRouteIds,
-} from "../entities/pages/presentation";
 
 type DashboardAppearance = "light" | "dark";
 
 type StoredDashboardSettings = {
 	dashboardAppearance?: DashboardAppearance;
-	dashboardSidebarRouteIds?: AppRouteId[];
 };
 
 type DashboardSettingsContextValue = {
 	dashboardAppearance: DashboardAppearance;
 	setDashboardAppearance: (value: DashboardAppearance) => void;
-	dashboardSidebarRouteIds: AppRouteId[];
-	setDashboardSidebarRouteIds: (routeIds: AppRouteId[]) => void;
-	toggleDashboardSidebarRoute: (routeId: AppRouteId) => void;
 	sharedSections: SettingsSection[];
 	dashboardSections: SettingsSection[];
 };
@@ -101,10 +92,6 @@ export function DashboardSettingsProvider({
 	const settings = useSettingsContext();
 	const [dashboardAppearance, setDashboardAppearance] =
 		React.useState<DashboardAppearance>(DEFAULT_DASHBOARD_APPEARANCE);
-	const [dashboardSidebarRouteIds, setDashboardSidebarRouteIdsState] =
-		React.useState<AppRouteId[]>(() =>
-			sanitizeDashboardSidebarRouteIds(defaultDashboardSidebarRouteIds),
-		);
 	const hasHydrated = React.useRef(false);
 
 	if (!settings) {
@@ -118,19 +105,13 @@ export function DashboardSettingsProvider({
 
 		writeStoredDashboardSettings(DASHBOARD_SETTINGS_STORAGE_KEY, {
 			dashboardAppearance,
-			dashboardSidebarRouteIds,
 		});
-	}, [dashboardAppearance, dashboardSidebarRouteIds]);
+	}, [dashboardAppearance]);
 
 	React.useEffect(() => {
 		const stored = readStoredDashboardSettings(DASHBOARD_SETTINGS_STORAGE_KEY);
 		if (isDashboardAppearance(stored?.dashboardAppearance)) {
 			setDashboardAppearance(stored.dashboardAppearance);
-		}
-		if (Array.isArray(stored?.dashboardSidebarRouteIds)) {
-			setDashboardSidebarRouteIdsState(
-				sanitizeDashboardSidebarRouteIds(stored.dashboardSidebarRouteIds),
-			);
 		}
 		hasHydrated.current = true;
 	}, []);
@@ -147,35 +128,11 @@ export function DashboardSettingsProvider({
 			} else {
 				setDashboardAppearance(DEFAULT_DASHBOARD_APPEARANCE);
 			}
-
-			if (Array.isArray(stored?.dashboardSidebarRouteIds)) {
-				setDashboardSidebarRouteIdsState(
-					sanitizeDashboardSidebarRouteIds(stored.dashboardSidebarRouteIds),
-				);
-			} else {
-				setDashboardSidebarRouteIdsState(
-					sanitizeDashboardSidebarRouteIds(defaultDashboardSidebarRouteIds),
-				);
-			}
 		};
 
 		window.addEventListener("storage", handleStorage);
 		return () => window.removeEventListener("storage", handleStorage);
 	}, []);
-
-	function setDashboardSidebarRouteIds(routeIds: AppRouteId[]) {
-		setDashboardSidebarRouteIdsState(
-			sanitizeDashboardSidebarRouteIds(routeIds),
-		);
-	}
-
-	function toggleDashboardSidebarRoute(routeId: AppRouteId) {
-		setDashboardSidebarRouteIdsState((current) =>
-			current.includes(routeId)
-				? current.filter((currentRouteId) => currentRouteId !== routeId)
-				: sanitizeDashboardSidebarRouteIds([...current, routeId]),
-		);
-	}
 
 	const sharedSections = buildSharedSettingsSections(settings);
 	const dashboardSections: SettingsSection[] = [
@@ -199,9 +156,6 @@ export function DashboardSettingsProvider({
 			value={{
 				dashboardAppearance,
 				setDashboardAppearance,
-				dashboardSidebarRouteIds,
-				setDashboardSidebarRouteIds,
-				toggleDashboardSidebarRoute,
 				sharedSections,
 				dashboardSections,
 			}}

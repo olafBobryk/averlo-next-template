@@ -21,14 +21,14 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html className={inter.variable} lang="en">
 			<head>
 				<script
 					// biome-ignore lint/security/noDangerouslySetInnerHtml: Static bootstrap reads URL flags before hydration so automation screenshots do not capture hidden motion states.
 					dangerouslySetInnerHTML={{ __html: motionOverrideBootstrap }}
 				/>
 			</head>
-			<body className={`${inter.variable} antialiased`}>{children}</body>
+			<body className="antialiased">{children}</body>
 		</html>
 	);
 }

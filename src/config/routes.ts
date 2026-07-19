@@ -12,9 +12,6 @@ export const appRoutes = {
 	setPassword: "/set-password",
 	invitation: "/invitation",
 	selectOrganization: "/select-organization",
-	dashboard: "/dashboard",
-	dashboardPages: "/dashboard/pages",
-	dashboardSettings: "/dashboard/settings",
 	dictionary: "/internal/dictionary",
 	reference: "/internal/reference",
 	dictionaryRiveLogoReveal:

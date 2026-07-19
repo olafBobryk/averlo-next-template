@@ -54,14 +54,6 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 					{ label: "Reference", routeId: "reference" },
 				],
 			},
-			{
-				label: "Build",
-				links: [
-					{ label: "Dashboard", routeId: "dashboard" },
-					{ label: "Pages", routeId: "dashboardPages" },
-					{ label: "Dashboard settings", routeId: "dashboardSettings" },
-				],
-			},
 		],
 		mobile: {
 			closeAriaLabel: "Close navigation",
@@ -141,14 +133,6 @@ export const fallbackSiteLayout: SiteLayoutDocument = {
 					{ label: "Playground", routeId: "playground" },
 					{ label: "Dictionary", routeId: "dictionary" },
 					{ label: "Reference", routeId: "reference" },
-				],
-			},
-			{
-				label: "Dashboard",
-				link: { label: "Dashboard", routeId: "dashboard" },
-				links: [
-					{ label: "Pages", routeId: "dashboardPages" },
-					{ label: "Settings", routeId: "dashboardSettings" },
 				],
 			},
 		],

@@ -61,8 +61,10 @@ export const thinStartProfile = {
 	removals: [
 		"scripts/scroll-performance",
 		"scripts/verify-auth-organization.ts",
+		"scripts/verify-dashboard-surfaces.ts",
 		"src/app/(site)/(auth)",
 		"src/app/api/auth",
+		"src/app/api/debug",
 		"src/app/(site)/_components/settings",
 		"src/app/(site)/dashboard",
 		"src/app/(site)/(marketing)/settings",
@@ -117,6 +119,7 @@ export const thinStartProfile = {
 		scripts: {
 			remove: [
 				"verify:auth",
+				"verify:dashboard",
 				"measure:scroll-performance",
 				"record:scroll-performance",
 				"setup:scroll-performance-autoresearch",
@@ -226,6 +229,7 @@ export const thinStartProfile = {
 		forbiddenPaths: [
 			"src/app/(site)/(auth)",
 			"src/app/api/auth",
+			"src/app/api/debug",
 			"src/app/(site)/dashboard",
 			"src/app/(site)/(marketing)/internal/demo",
 			"src/components/ui/misc",

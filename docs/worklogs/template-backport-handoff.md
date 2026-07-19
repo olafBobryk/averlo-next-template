@@ -34,8 +34,8 @@ full-start dashboard.
 4. P1-C4 — dashboard shell, registry, commands, and debug state.
 5. P1-C5 — reference entities, policy, pruning, skill, and visual gate 2.
 
-One verified commit closes each chunk. P1-C1 through P1-C3 are closed; P1-C4 is
-current and P1-C5 follows.
+One verified commit closes each chunk. P1-C1 through P1-C4 are closed; P1-C5 is
+current.
 
 ## P1-C1 state
 
@@ -103,6 +103,33 @@ current and P1-C5 follows.
 - Current full review URLs:
   `http://localhost:3037/login?motion=off&reveal=off` and
   `http://localhost:3037/invitation?invitation=00000000-0000-4000-8000-000000000001&token=fixture-invitation-token&motion=off&reveal=off`.
+
+## P1-C4 state
+
+- Status: complete; the closing commit immediately follows this handoff update.
+- The dashboard owns one typed surface registry for route identity, hierarchy,
+  sidebar groups, breadcrumbs, layout width, capabilities, and static commands.
+- The fixed responsive shell closely follows the pinned source visual system
+  without its notification stack or custom profile-gradient treatment. The
+  mobile rail/drawer, desktop collapsed state, page headers, breadcrumbs,
+  account menu, route skeletons, and wide-layout escape hatch share this shell.
+- `/dashboard`, records list/detail, settings, organization overview, members,
+  and organization settings are implemented. Legacy `/dashboard/pages` source
+  ownership and duplicate marketing-registry dashboard routes are removed.
+- Command-K merges static registry actions with mounted contextual actions and
+  removes registrations on unmount. Capability-hidden commands are filtered by
+  the same registry access rules as navigation.
+- Guarded debug controls expose deterministic loading, empty, error,
+  unavailable, and not-found states, fixture reset, capability inspection, demo
+  entry, and multi-organization selection. Forced loading overlays the real
+  content frame without resizing it.
+- `verify:dashboard`, contextual registration cleanup, no-resize geometry,
+  responsive light/dark review, full 38-route build/smoke, and thin 10-route
+  build/smoke all pass. Thin materialization excludes dashboard and debug
+  ownership through the shared manifest.
+- The verified full preview is
+  `http://localhost:3037/dashboard?motion=off&reveal=off`; use the fixture demo
+  action on `/login` when the in-memory session has restarted.
 
 ## Required gates
 

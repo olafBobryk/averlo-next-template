@@ -23,6 +23,7 @@ export type DashboardAuthContextValue = {
 	user: SessionUser | null;
 	organization: Organization;
 	membership: OrganizationMembership;
+	memberships: readonly OrganizationMembership[];
 	initializing: boolean;
 	loading: boolean;
 	error: Error | null;
@@ -43,11 +44,13 @@ function getError(error: unknown) {
 export function DashboardAuthProvider({
 	children,
 	initialMembership,
+	initialMemberships,
 	initialOrganization,
 	initialUser,
 }: {
 	children: React.ReactNode;
 	initialMembership: OrganizationMembership;
+	initialMemberships: readonly OrganizationMembership[];
 	initialOrganization: Organization;
 	initialUser: SessionUser;
 }) {
@@ -101,6 +104,7 @@ export function DashboardAuthProvider({
 				user,
 				organization: initialOrganization,
 				membership: initialMembership,
+				memberships: initialMemberships,
 				initializing,
 				loading,
 				error,

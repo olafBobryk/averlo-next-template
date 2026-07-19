@@ -9,11 +9,13 @@ import { DashboardSettingsProvider } from "./DashboardSettingsProvider";
 export function DashboardProviders({
 	children,
 	initialMembership,
+	initialMemberships,
 	initialOrganization,
 	initialUser,
 }: {
 	children: React.ReactNode;
 	initialMembership: OrganizationMembership;
+	initialMemberships: readonly OrganizationMembership[];
 	initialOrganization: Organization;
 	initialUser: SessionUser;
 }) {
@@ -21,6 +23,7 @@ export function DashboardProviders({
 		<DashboardSettingsProvider>
 			<DashboardAuthProvider
 				initialMembership={initialMembership}
+				initialMemberships={initialMemberships}
 				initialOrganization={initialOrganization}
 				initialUser={initialUser}
 			>

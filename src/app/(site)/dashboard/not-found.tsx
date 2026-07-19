@@ -1,20 +1,12 @@
-import { StatusContent } from "@/app/(site)/_components/status/StatusContent";
 import { Button } from "@/components/ui/primitives/Button";
-import { hrefFor } from "@/lib/routes";
+import { DashboardStatusFrame } from "./_components/layout/DashboardStatusFrame";
 
 export default function DashboardNotFoundPage() {
 	return (
-		<div className="flex min-h-full flex-1 items-center justify-center py-10">
-			<StatusContent
-				heading="Dashboard page not found"
-				body="This dashboard route doesn’t exist."
-				enableRevealMotion={false}
-				actions={
-					<Button variant="primary" href={hrefFor("dashboard")}>
-						Go to dashboard
-					</Button>
-				}
-			/>
-		</div>
+		<DashboardStatusFrame
+			action={<Button href="/dashboard">Go to overview</Button>}
+			description="This dashboard surface does not exist or is unavailable for the current capability set."
+			title="Dashboard page not found"
+		/>
 	);
 }

@@ -13,7 +13,7 @@ import { selectOrganizationAction } from "../actions";
 export default async function SelectOrganizationPage({
 	searchParams,
 }: {
-	searchParams: Promise<{ message?: string; next?: string }>;
+	searchParams: Promise<{ message?: string; next?: string; switch?: string }>;
 }) {
 	const query = await searchParams;
 	const next = getSafeContinuationPath(query.next);
@@ -26,7 +26,7 @@ export default async function SelectOrganizationPage({
 			`/login?message=membership-required&next=${encodeURIComponent(next)}`,
 		);
 	}
-	if (resolution.status === "resolved") redirect(next);
+	if (resolution.status === "resolved" && query.switch !== "1") redirect(next);
 
 	const choices = await Promise.all(
 		resolution.memberships.map(async (membership) => ({

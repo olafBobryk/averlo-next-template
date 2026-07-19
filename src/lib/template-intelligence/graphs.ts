@@ -32,7 +32,7 @@ const PRUNE_SURFACES: PruneSurface[] = [
 			"removed auth route tree",
 			"dashboard auth helper",
 		],
-		routeIds: ["login", "dashboard", "dashboardPages", "dashboardSettings"],
+		routeIds: ["login"],
 		centralRewrites: ["routes", "api-index", "fallback-content"],
 		assertions: ["dashboard route ids", "dashboard auth import"],
 	},

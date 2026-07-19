@@ -10,8 +10,8 @@ export default function DashboardSettingsPage() {
 
 	return (
 		<DashboardSection
-			title="Dashboard"
-			description="A minimal dashboard shell with route-scoped auth, sidebar navigation, and responsive layout scaffolding."
+			title="Account settings"
+			description="Manage the current profile, appearance, and accessibility preferences."
 			contentClassName="flex flex-col gap-6"
 		>
 			{sections.map((section) => (

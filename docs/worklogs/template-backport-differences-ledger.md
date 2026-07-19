@@ -24,7 +24,7 @@
 - Framework: Use `template-backport-workflow` classifications:
   `Port`, `Adapt`, `Skip`, and `Defer`.
 - Delivery branch: `codex/inference-port`; one verified commit per chunk.
-- Last updated: 2026-07-19
+- Last updated: 2026-07-20
 
 ## Active Inference Console Port
 
@@ -35,8 +35,8 @@ organization-powered full-start dashboard.
 | --- | --- | --- | --- | --- | --- |
 | P1-C1 | Clean baseline, filesystem-backed thin profile, shared Panel/Card | Adapt | complete | Commit `6cb2c99`; shared Panel/Card and manifest-driven materialization pass strict API review, typecheck, build, and smoke in both profiles | Closed |
 | P1-C2 | Pinned visual tokens and shared component convergence | Adapt | complete | Commit `5d79e06`; tokens, Inter, shared primitives, inputs, modal flows, skeleton namespaces, full-only editor/color controls, and thin exclusions implemented; both profiles typecheck/build/smoke; responsive light/dark gate passed | Closed |
-| P1-C3 | Provider-neutral authentication and organization lifecycle | Adapt | complete | Top-level auth routes, HttpOnly server-memory sessions, organization resolution, inert invitation review plus explicit acceptance, identity protection, private-file contracts, focused verifier, and thin exclusions implemented | P1-C4 dashboard shell and surface registry |
-| P1-C4 | Dashboard shell, typed surface registry, commands, debug state | Adapt | pending | Route and command ownership accepted | Registry/capability and responsive verification |
+| P1-C3 | Provider-neutral authentication and organization lifecycle | Adapt | complete | Commit `66a08e1`; top-level auth routes, HttpOnly server-memory sessions, organization resolution, inert invitation review plus explicit acceptance, identity protection, private-file contracts, focused verifier, and thin exclusions implemented | Closed |
+| P1-C4 | Dashboard shell, typed surface registry, commands, debug state | Adapt | complete | Dashboard-owned registry drives routes, hierarchy, sidebar, breadcrumbs, layout width, capabilities, and static commands; contextual command cleanup, deterministic debug states, no-resize forced loading, responsive shell, full/thin builds, and focused verifier passed | Closed; P1-C5 reference entities next |
 | P1-C5 | Reference entities, mutations, policy, pruning, skill, closure | Adapt | pending | Dashboard-owned dependency layers and reference-entity scope accepted | Visual gate 2 and closure audit |
 
 ### Current classifications
@@ -249,3 +249,8 @@ organization-powered full-start dashboard.
 | 2026-07-19 | Live auth route and cookie checks | passed | `/dashboard/settings?tab=profile` preserved its safe continuation, unsafe callback continuation fell back to `/dashboard`, opaque HttpOnly fixture login reached the dashboard, logout cleared the session, and multi-org login required selection before dashboard access. |
 | 2026-07-19 | Full and materialized thin typecheck/build/smoke plus strict thin API review | passed | Full built 34 routes including all accepted auth routes and handler; thin built 9 routes with auth, dashboard, verifier, proxy, adapters, and direct `tsx` dependency absent. Shared Card remained byte-identical. |
 | 2026-07-19 | Auth visual review at mobile, tablet, and desktop widths | passed | Reviewed login, invitation, and organization-selection screens with automation flags; corrected structured invitation fields and propagated motion/reveal flags across safe auth redirects. |
+| 2026-07-20 | `npm run verify:dashboard`, `npm run verify:auth`, `npm run lint`, `npm run typecheck`, `git diff --check` | passed | Registry ownership, route hierarchy, capability filtering, feature configuration, debug modes, and auth lifecycle passed. Biome retained the intentional thin image-inspection `<img>` warning only. |
+| 2026-07-20 | Full `npm run build` and `npm run verify:smoke` | passed | Full built 38 routes including the accepted dashboard and debug route matrix; smoke passed. Legacy `/dashboard/pages` source ownership is absent. |
+| 2026-07-20 | Contextual Command-K cleanup and forced-loading geometry checks | passed | The records command registered once and unregistered after navigating to settings. Forced loading preserved the real shell and retained the same 872px content-frame height. |
+| 2026-07-20 | Dashboard responsive light/dark review | passed | Reviewed desktop records/detail plus collapsed and expanded mobile shell; corrected the mobile logo visibility conflict and verified rendered typography resolves to Inter rather than the browser serif fallback. |
+| 2026-07-20 | Materialized thin strict API review, full-only absence assertions, typecheck, build, and smoke | passed | Thin built 10 routes with dashboard, debug API, dashboard verifier, and full-only MDX editor source absent; strict API review reported no findings. |

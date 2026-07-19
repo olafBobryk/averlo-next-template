@@ -42,6 +42,7 @@ export default async function DashboardLayout({
 	return (
 		<DashboardProviders
 			initialMembership={resolution.membership}
+			initialMemberships={resolution.memberships}
 			initialOrganization={resolution.organization}
 			initialUser={initialUser}
 		>

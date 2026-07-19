@@ -1,24 +1,23 @@
 "use client";
 
-import { StatusErrorState } from "@/app/(site)/_components/status/StatusErrorState";
-import { hrefFor } from "@/lib/routes";
+import { Button } from "@/components/ui/primitives/Button";
+import { DashboardStatusFrame } from "./_components/layout/DashboardStatusFrame";
 
-export default function DashboardErrorPage({
-	error,
-	reset,
-}: {
-	error: globalThis.Error & { digest?: string };
-	reset: () => void;
-}) {
+export default function DashboardErrorPage({ reset }: { reset: () => void }) {
 	return (
-		<div className="flex min-h-full flex-1 items-center justify-center py-10">
-			<StatusErrorState
-				error={error}
-				reset={reset}
-				href={hrefFor("dashboard")}
-				hrefLabel="Go to dashboard"
-				enableRevealMotion={false}
-			/>
-		</div>
+		<DashboardStatusFrame
+			action={
+				<div className="flex gap-2">
+					<Button onClick={reset} variant="primary">
+						Try again
+					</Button>
+					<Button href="/dashboard" variant="secondary">
+						Go to overview
+					</Button>
+				</div>
+			}
+			description="The dashboard could not complete this request."
+			title="Something went wrong"
+		/>
 	);
 }

@@ -32,6 +32,7 @@
 		"verify:build": "npm run build",
 		"verify:smoke": "node scripts/verify-smoke.mjs",
 		"verify:auth": "tsx scripts/verify-auth-organization.ts",
+		"verify:dashboard": "tsx scripts/verify-dashboard-surfaces.ts",
 		"measure:scroll-performance": "node scripts/scroll-performance/measure.mjs",
 		"record:scroll-performance": "node scripts/scroll-performance/record.mjs",
 		"setup:scroll-performance-autoresearch": "node scripts/scroll-performance/setup-autoresearch.mjs",
