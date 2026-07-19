@@ -58,6 +58,8 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - `Button.Skeleton` mirrors live size, alignment, radius, icons, label width, and variant treatment without changing the final component dimensions.
 - Shared components with recurring loading representations expose component-owned, namespaced skeleton APIs such as `Field.Skeleton`, `InputFrame.Skeleton`, and `Accordion.Skeleton`.
 - Component-owned skeletons extend the template's richer live APIs rather than replacing or narrowing them. Routes compose these canonical skeletons instead of reimplementing their geometry.
+- Components remain single-file by default. A component may separate shared contracts, a server-safe public entry and skeleton, and a narrow client implementation when server consumers need its public types or skeleton without importing meaningful client-only behavior.
+- This selective server/client split is a dependency-boundary technique, not a mandatory naming convention or universal three-file component structure.
 - Chip convergence adopts the pinned compact rounded-medium visual design, semantic, spectrum, and custom colors, interactive link or button behavior, static behavior, `Chip.Text`, and `Chip.Skeleton` while retaining useful existing tone, helper-palette, icon, and canvas-measurement capabilities.
 - `ColorInput` and `ColorSwatchInput` join the full-start input library only; thin start does not include them.
 - `ColorInput` supports controlled and uncontrolled hexadecimal selection, pointer and keyboard operation, normal form submission, field validation, and portal-aware dropdown positioning.
