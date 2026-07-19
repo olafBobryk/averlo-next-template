@@ -228,7 +228,7 @@
 	 *
 	 * Ideal for:
 	 * - Dropdown menus appearing/disappearing (opacity, translateY) if not using Framer.
-	 * - Panels expanding/collapsing in an accordion.
+	 * - Cards expanding/collapsing in an accordion.
 	 * - Cards changing layout slightly (eg. showing extra text or controls).
 	 * - Form sections sliding in when a toggle reveals more fields.
 	 * - Width/height changes where the component grows/shrinks a bit.

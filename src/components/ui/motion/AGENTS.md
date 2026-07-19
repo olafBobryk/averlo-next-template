@@ -53,7 +53,7 @@ Shared reveal, intro, and scroll-motion helpers for cases where motion meaningfu
 - Use `Reveal.HighlightText` when one substring should shift to the primary color as part of entrance choreography. It defaults to `dir="auto"` so mixed LTR/RTL copy keeps sensible bidi behavior.
 - Use `ScrollHighlightText` when a short string should brighten progressively as it enters the viewport.
 - Use `ScrollParallax` and `ScrollLag` sparingly for decorative depth effects.
-- Use `ScrollWidth` when a panel or media block should reveal from a narrow inset to a full-width frame while preserving rounded corners.
+- Use `ScrollWidth` when a card or media block should reveal from a narrow inset to a full-width frame while preserving rounded corners.
 - Use `Reveal.Numeric` for metric values that should count up or reveal digit by digit. Use `Reveal.Scramble` for decoding text; prefer `maintainSpace` when scramble layout must remain stable.
 - Use `LetterWave` for hover-only accent text. Give it a parent with the `group` class.
 - If a component already animates itself sufficiently, do not wrap it in extra motion without a clear UX payoff.

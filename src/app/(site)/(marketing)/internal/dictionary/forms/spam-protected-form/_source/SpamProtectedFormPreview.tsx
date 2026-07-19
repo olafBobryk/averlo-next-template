@@ -6,12 +6,12 @@ import { SpamProtectionFields } from "@/components/ui/input/SpamProtectionFields
 import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
 import { TextInput } from "@/components/ui/input/TextInput";
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 import { submitSpamProtectedExample } from "@/lib/api";
 import { showToast } from "@/lib/feedback";
@@ -132,7 +132,7 @@ export function SpamProtectedFormPreview() {
 	}
 
 	return (
-		<Panel display="flex" padding="md" gap="md">
+		<Card display="flex" padding="md" gap="md">
 			<div className="flex flex-col gap-2">
 				<Text as="h2" variant="headingSm">
 					Working preview
@@ -208,6 +208,6 @@ export function SpamProtectedFormPreview() {
 					</Button>
 				</div>
 			</form>
-		</Panel>
+		</Card>
 	);
 }

@@ -26,7 +26,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - `src/components/ui/misc/SocialLinks.tsx`: generic social/profile link cluster backed by the shared icon registry.
 - `src/components/ui/misc/SuspenseBoundary.tsx`: loading and error boundary wrapper.
 - `src/components/ui/misc/Tooltip.tsx`: hover or focus helper text built on the shared dropdown primitive.
-- `src/components/ui/misc/Warning.tsx`: inline or panel warning block.
+- `src/components/ui/misc/Warning.tsx`: inline or card warning block.
 - `src/components/ui/misc/Skeleton.tsx`: loading placeholder.
 - `src/components/ui/misc/InspectableImage.tsx`: image trigger for inspect modal.
 
@@ -59,7 +59,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - Use `InspectableImage` for click-to-zoom image behavior.
 - Use `HealthCheckIndicator` for compact live service status instead of page-local polling badges.
 - Use `ImageSwitcher` for small image carousels or before/after-style media switchers before building page-local slideshow state.
-- Use `Warning` for cautionary messaging; use `variant="panel"` when the warning should be visually separated from surrounding content.
+- Use `Warning` for cautionary messaging; use `variant="card"` when the warning should be visually separated from surrounding content.
 - Use `Pill` for compact labels and statuses when the element is not itself an action.
 - Use `ProfilePicture` for avatar display before assembling image, initial, or fallback badges by hand.
 - Use `SocialLinks` for reusable social/profile link clusters instead of product-local icon-button lists.

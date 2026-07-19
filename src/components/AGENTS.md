@@ -26,7 +26,7 @@ For any new reusable UI-library feature:
 
 ## Invariants
 - **Library-first invariant:** Never start from raw HTML if a library component already covers the pattern. Search here first.
-- **Composition invariant:** Prefer `Text`, `Button`, `Panel`, `Field`, `InputFrame`, `Dropdown`, `Listbox`, `PasswordInput`, `SelectInput`, `ModalShell`, `ToastHost`, and other existing building blocks before introducing bespoke UI.
+- **Composition invariant:** Prefer `Text`, `Button`, `Card`, `Field`, `InputFrame`, `Dropdown`, `Listbox`, `PasswordInput`, `SelectInput`, `ModalShell`, `ToastHost`, and other existing building blocks before introducing bespoke UI.
 - **Focus invariant:** Every interactive control must preserve visible keyboard focus using the shared focus tokens from `ui/foundations/focus.ts`. Do not invent ad hoc focus rings, remove outlines without replacement, or move focus styling away from the real interactive element.
 - **Form invariant:** Labels, descriptions, errors, required state, IDs, and `aria-describedby` should flow through `Field` plus the relevant input component instead of page-local markup.
 - **Input shell invariant:** Text-like controls should use `InputFrame` for the shell and `inputVariants` or `inputSizeClasses` for the actual input element. Padding belongs on the input, not the wrapper.
@@ -69,8 +69,8 @@ Use these defaults unless product requirements explicitly say otherwise.
 - **Transparent gradient-border wrappers:** When reusing a transparent gradient-border treatment, keep wrapper and inner surface responsibilities separate.
   - Apply the border effect to a wrapper element.
   - Keep the wrapper background transparent so the border treatment can render independently.
-  - Keep the inner panel itself transparent and apply interior fills separately, for example `bg-linear-to-b from-surface to-transparent`.
-- **Radius plus transparency:** When using transparent panels, keep wrapper and panel radii aligned, such as `rounded-t-3xl` on both layers when that is the chosen radius token.
+  - Keep the inner card itself transparent and apply interior fills separately, for example `bg-linear-to-b from-surface to-transparent`.
+- **Radius plus transparency:** When using transparent cards, keep wrapper and card radii aligned, such as `rounded-t-3xl` on both layers when that is the chosen radius token.
 - **Form submission:** Prefer real `<form>` elements with `onSubmit` so Enter-to-submit and accessibility work naturally.
 - **Toast usage:** Do not show toast notifications for initial page loads. Use skeletons or inline loading states first, then use toast-wrapped requests for explicit user actions like submit, apply, refresh, or retry.
 - **SVG casing:** Inline SVG in JSX or TSX must use camelCase attribute names such as `clipPath`, `strokeWidth`, `colorInterpolationFilters`, `stopColor`, `stopOpacity`, and `maskType`.

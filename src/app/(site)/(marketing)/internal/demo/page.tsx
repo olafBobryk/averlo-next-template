@@ -2,8 +2,8 @@
 
 import { getVisibleDemoPages } from "@/app/(site)/(marketing)/internal/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
 import Divider from "@/components/ui/primitives/Divider";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 
 function groupPages() {
@@ -41,20 +41,20 @@ export default function DemoIndexPage() {
 				</Text>
 			</header>
 
-			<Panel display="flex" padding="sm" gap="sm" shadow="none">
+			<Card display="flex" padding="sm" gap="sm" shadow="none">
 				<Text variant="body">
 					Need to add a demo? Update the content map and it appears everywhere.
 				</Text>
 				<Button href="/internal/demo/ui/primitives" variant="primary" size="sm">
 					Jump to UI Primitives
 				</Button>
-			</Panel>
+			</Card>
 
 			<Divider />
 
 			<div className="grid gap-4">
 				{grouped.map((group) => (
-					<Panel
+					<Card
 						key={group.key}
 						display="flex"
 						padding="sm"
@@ -78,7 +78,7 @@ export default function DemoIndexPage() {
 								))}
 							</div>
 						</div>
-					</Panel>
+					</Card>
 				))}
 			</div>
 		</div>

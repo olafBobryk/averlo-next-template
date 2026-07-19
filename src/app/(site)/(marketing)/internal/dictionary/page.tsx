@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
 import Divider from "@/components/ui/primitives/Divider";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import type { AppRouteId } from "@/config/routes";
@@ -65,7 +65,7 @@ export default function DictionaryIndexPage() {
 
 			<div className="grid gap-4">
 				{families.map((family) => (
-					<Panel key={family.id} display="flex" padding="md" gap="md">
+					<Card key={family.id} display="flex" padding="md" gap="md">
 						<div className="flex flex-col gap-2">
 							<Text as="h2" variant="headingSm">
 								{family.title}
@@ -108,7 +108,7 @@ export default function DictionaryIndexPage() {
 								</div>
 							))}
 						</div>
-					</Panel>
+					</Card>
 				))}
 			</div>
 		</Section>

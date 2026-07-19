@@ -36,12 +36,6 @@ export type RevealGroupProps = {
 	className?: string;
 	disabled?: boolean;
 	stagger?: number;
-	/** @deprecated RevealGroup is now a boundary-only local scheduler. */
-	delay?: number;
-	/** @deprecated RevealGroup item duration is controlled by RevealGroupItem. */
-	duration?: number;
-	/** @deprecated Reveal groups play once through the root scheduler. */
-	once?: boolean;
 	active?: boolean;
 	waitFor?: MotionSceneStageInput;
 	unlockOnStartStage?: MotionSceneStageInput;

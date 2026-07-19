@@ -4,7 +4,7 @@ import * as React from "react";
 import { EmailInput } from "@/components/ui/input/EmailInput";
 import { TextInput } from "@/components/ui/input/TextInput";
 import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 import { showToast } from "@/lib/feedback";
 import { ProfilePictureInput } from "../../_components/entities/users/ProfilePictureInput";
@@ -105,7 +105,7 @@ export function ProfileSettingsSection() {
 	}
 
 	return (
-		<Panel display="flex" padding="md" gap="md">
+		<Card display="flex" padding="md" gap="md">
 			<div className="flex flex-col gap-2">
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
 					<div className="min-w-0">
@@ -181,6 +181,6 @@ export function ProfileSettingsSection() {
 					/>
 				</div>
 			</form>
-		</Panel>
+		</Card>
 	);
 }

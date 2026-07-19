@@ -55,6 +55,7 @@ minimal API needed for the current website.
 The thin-start live primitive surface starts intentionally small:
 
 - `Button`
+- `Card`
 - `Text`
 - `Section`
 - `Field`
@@ -68,8 +69,8 @@ The thin-start live primitive surface starts intentionally small:
 
 Motion foundations, reduced-motion handling, section motion behavior, dropdown
 interaction behavior, and limited input/select integration patterns stay intact.
-`Panel`/`Card` and broad misc/helper surfaces are not part of the simple
-thin-start primitive surface.
+Broad misc/helper surfaces are not part of the simple thin-start primitive
+surface.
 
 Choice inputs are included because preference selection is common in thin-start
 projects. They use the same small `Field` contract as `TextInput` and
@@ -84,7 +85,7 @@ CMS records, or product-specific directives.
 Thin-start toast behavior should use a shadcn/Sonner-style default instead of
 carrying forward the current custom Averlo toast system. Other overlays may
 remain only when scaffold-critical, and they must stay small without dragging
-broad misc, panel, or visual-state dependencies into shared primitives.
+broad misc or visual-state dependencies into shared primitives.
 
 Internal intelligence UI must not define the shared design system. In
 thin-start, it should use custom, minimal, route-owned components under the

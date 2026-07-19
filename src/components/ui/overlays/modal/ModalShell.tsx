@@ -11,7 +11,7 @@ import {
 } from "react";
 import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
 import Portal from "@/components/ui/overlays/Portal";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type ModalShellProps = {
@@ -282,7 +282,7 @@ export function ModalShell({
 					tabIndex={-1}
 					onClick={onClose}
 				>
-					<Panel
+					<Card
 						as={motion.div}
 						display="flex"
 						columns={1}
@@ -304,7 +304,7 @@ export function ModalShell({
 						}
 					>
 						{children}
-					</Panel>
+					</Card>
 				</motion.div>
 			</div>
 		</Portal>

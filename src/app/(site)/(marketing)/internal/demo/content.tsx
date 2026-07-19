@@ -85,6 +85,13 @@ import { useImageInspectModal } from "@/components/ui/overlays/modal/useImageIns
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import Portal from "@/components/ui/overlays/Portal";
 import { Button } from "@/components/ui/primitives/Button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/primitives/Card";
 import Divider from "@/components/ui/primitives/Divider";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { Field } from "@/components/ui/primitives/Field";
@@ -93,7 +100,6 @@ import {
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
 import { Listbox } from "@/components/ui/primitives/Listbox";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import { DateAgo } from "@/components/ui/time/DateAgo";
@@ -557,7 +563,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"SelectInput",
 		],
 	},
-	Panel: { uses: [], usedIn: ["ModalShell", "ToastHost"] },
+	Card: { uses: [], usedIn: ["ModalShell", "ToastHost"] },
 	Divider: { uses: [], usedIn: [] },
 	Section: { uses: [], usedIn: [] },
 	Field: {
@@ -909,7 +915,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: ["FilePreview"],
 	},
 	ModalShell: {
-		uses: ["Panel", "Portal"],
+		uses: ["Card", "Portal"],
 		usedIn: ["ModalHost"],
 	},
 	useImageInspectModal: {
@@ -926,7 +932,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: ["useImageInspectModal"],
 	},
 	ToastHost: {
-		uses: ["Button", "Icon", "IconSwap", "Panel", "Portal", "Text", "spring"],
+		uses: ["Button", "Icon", "IconSwap", "Card", "Portal", "Text", "spring"],
 		usedIn: ["ToastClientMount"],
 	},
 	showToast: {
@@ -1464,40 +1470,46 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "panel",
+						id: "card",
 						kind: "component",
-						name: "Panel",
-						label: "Card container",
-						related: relatedMap.Panel,
+						name: "Card",
+						label: "Slot container",
+						related: relatedMap.Card,
 						Render() {
 							return (
 								<div className="flex flex-col gap-2">
-									<Panel
+									<Card
 										display="flex"
-										padding="sm"
-										gap="sm"
+										padding="none"
+										gap="none"
 										shadow="none"
 										background="white"
 										className="border border-border/10"
 									>
-										<Text variant="bodyStrong">White panel</Text>
-										<Text variant="caption" tone="muted">
-											Default surface.
-										</Text>
-									</Panel>
-									<Panel
+										<CardHeader>
+											<CardTitle>White card</CardTitle>
+											<CardDescription>Default surface.</CardDescription>
+										</CardHeader>
+										<CardContent>
+											<Text variant="caption" tone="muted">
+												Root variants preserve Averlo spacing while slot parts
+												match the Shadcn card shape.
+											</Text>
+										</CardContent>
+									</Card>
+									<Card
 										display="flex"
-										padding="md"
-										gap="sm"
+										padding="none"
+										gap="none"
 										shadow="sm"
 										background="surface"
 										className="border border-border/10"
 									>
-										<Text variant="bodyStrong">Surface panel</Text>
-										<Text variant="caption" tone="muted">
-											Softer background.
-										</Text>
-									</Panel>
+										<CardHeader>
+											<CardTitle>Surface card</CardTitle>
+											<CardDescription>Softer background.</CardDescription>
+										</CardHeader>
+									</Card>
 								</div>
 							);
 						},
@@ -4010,7 +4022,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 											<div className="flex h-full flex-col justify-end gap-2 p-6">
 												<Text variant="headingSm">ScrollWidth</Text>
 												<Text variant="body" tone="muted">
-													Use it for panels or media where the frame should open
+													Use it for cards or media where the frame should open
 													progressively instead of snapping full width.
 												</Text>
 											</div>
@@ -4554,7 +4566,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 											layout.
 										</Text>
 									</div>
-									<Panel
+									<Card
 										display="flex"
 										padding="sm"
 										gap="sm"
@@ -4568,7 +4580,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 										<Text variant="caption" className="text-background/80">
 											The section API still controls spacing and width.
 										</Text>
-									</Panel>
+									</Card>
 								</Section>
 							);
 						},
@@ -4610,7 +4622,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 											background needs real controls.
 										</Text>
 									</div>
-									<Panel
+									<Card
 										display="flex"
 										padding="sm"
 										gap="sm"
@@ -4624,7 +4636,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 											{taps} tap{taps === 1 ? "" : "s"} registered from the
 											background action.
 										</Text>
-									</Panel>
+									</Card>
 								</Section>
 							);
 						},
@@ -4706,7 +4718,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 										</Button>
 									</div>
 
-									<Panel
+									<Card
 										padding="sm"
 										shadow="none"
 										className="border border-border/15"
@@ -4737,7 +4749,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 												.
 											</Text>
 										</div>
-									</Panel>
+									</Card>
 								</div>
 							);
 						},

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
 import Divider from "@/components/ui/primitives/Divider";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import { hrefFor } from "@/lib/routes";
@@ -21,7 +21,7 @@ export default function SpamProtectedFormDictionaryPage() {
 
 			<SpamProtectedFormPreview />
 
-			<Panel display="flex" padding="md" gap="md">
+			<Card display="flex" padding="md" gap="md">
 				<Text as="h2" variant="headingSm">
 					Adaptation points
 				</Text>
@@ -53,7 +53,7 @@ export default function SpamProtectedFormDictionaryPage() {
 						Back to dictionary
 					</Button>
 				</div>
-			</Panel>
+			</Card>
 		</Section>
 	);
 }

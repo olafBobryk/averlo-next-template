@@ -42,7 +42,7 @@ import {
 import { InteractionGate } from "@/components/ui/misc/InteractionGate";
 import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
 import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -1146,7 +1146,7 @@ function NodeDetailsPanel({
 	if (!open || !node) return null;
 
 	return (
-		<Panel
+		<Card
 			display="flex"
 			padding="md"
 			gap="md"
@@ -1196,13 +1196,13 @@ function NodeDetailsPanel({
 					))}
 				</div>
 			) : null}
-		</Panel>
+		</Card>
 	);
 }
 
 function LinkLegendPanel() {
 	return (
-		<Panel
+		<Card
 			display="flex"
 			padding="sm"
 			gap="sm"
@@ -1224,7 +1224,7 @@ function LinkLegendPanel() {
 					</Chip>
 				))}
 			</div>
-		</Panel>
+		</Card>
 	);
 }
 
@@ -1726,7 +1726,7 @@ export function GraphMap<TViewId extends GraphMapViewId = GraphMapViewId>({
 					ref={graphControlsRef}
 					className="pointer-events-none flex w-full flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"
 				>
-					<Panel
+					<Card
 						display="flex"
 						padding="sm"
 						gap="sm"
@@ -1739,7 +1739,7 @@ export function GraphMap<TViewId extends GraphMapViewId = GraphMapViewId>({
 						<Text variant="body" tone="muted">
 							{activeView.description}
 						</Text>
-					</Panel>
+					</Card>
 
 					<LinkLegendPanel />
 

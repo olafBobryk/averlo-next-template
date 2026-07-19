@@ -3,11 +3,11 @@
 import clsx from "clsx";
 import type * as React from "react";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
-import { Panel, type PanelProps } from "@/components/ui/primitives/Panel";
+import { Card, type CardProps } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 
 type WarningTone = "warning" | "danger";
-type WarningVariant = "inline" | "panel";
+type WarningVariant = "inline" | "card";
 
 type WarningProps = {
 	title?: React.ReactNode;
@@ -20,8 +20,8 @@ type WarningProps = {
 	tone?: WarningTone;
 	variant?: WarningVariant;
 	className?: string;
-	panelClassName?: string;
-	panelProps?: Omit<PanelProps<"div">, "children">;
+	cardClassName?: string;
+	cardProps?: Omit<CardProps<"div">, "children">;
 	textClassName?: string;
 	titleClassName?: string;
 	descriptionClassName?: string;
@@ -55,8 +55,8 @@ export function Warning({
 	tone = "warning",
 	variant = "inline",
 	className,
-	panelClassName,
-	panelProps,
+	cardClassName,
+	cardProps,
 	textClassName,
 	titleClassName,
 	descriptionClassName,
@@ -66,7 +66,7 @@ export function Warning({
 	const isPrimitive =
 		typeof content === "string" || typeof content === "number";
 	const styles = toneStyles[tone];
-	const isPanel = variant === "panel";
+	const isCard = variant === "card";
 
 	const inner = (
 		<>
@@ -115,26 +115,25 @@ export function Warning({
 		</>
 	);
 
-	if (isPanel) {
-		const { className: panelPropsClassName, ...restPanelProps } =
-			panelProps ?? {};
+	if (isCard) {
+		const { className: cardPropsClassName, ...restCardProps } = cardProps ?? {};
 
 		return (
-			<Panel
+			<Card
 				padding="none"
 				gap="none"
 				shadow="none"
 				tone={tone}
-				{...restPanelProps}
+				{...restCardProps}
 				className={clsx(
 					"flex items-start gap-2.5 rounded-[12px] px-4 py-3",
-					panelClassName,
-					panelPropsClassName,
+					cardClassName,
+					cardPropsClassName,
 					className,
 				)}
 			>
 				{inner}
-			</Panel>
+			</Card>
 		);
 	}
 

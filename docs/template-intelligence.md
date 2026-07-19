@@ -49,7 +49,7 @@ shows the maintainer overview: title, summary, index stats, graph launcher, and
 benchmark launcher. The interactive graph lives at `/internal/intelligence/graph`
 so the map can run as a first-viewport inspection surface while still using the
 shared marketing shell, visible header, `Section.Background`, `Button`, `Text`,
-`Panel`, and rounded `SegmentedControl` primitives.
+`Card`, and rounded `SegmentedControl` primitives.
 
 The graph route shows:
 

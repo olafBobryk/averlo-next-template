@@ -17,8 +17,8 @@ import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
 import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
 import Divider from "@/components/ui/primitives/Divider";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { showToast } from "@/lib/feedback";
@@ -159,7 +159,7 @@ export function DashboardSidebar({
 		];
 
 		return (
-			<Panel
+			<Card
 				display="flex"
 				padding="none"
 				gap="none"
@@ -381,7 +381,7 @@ export function DashboardSidebar({
 						/>
 					</div>
 				</div>
-			</Panel>
+			</Card>
 		);
 	}
 

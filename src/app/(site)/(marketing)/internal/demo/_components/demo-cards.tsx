@@ -1,7 +1,7 @@
 "use client";
 
 import { CopyField } from "@/components/ui/misc/CopyField";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 
 export type RelatedInfo = { uses: string[]; usedIn: string[] };
@@ -45,7 +45,7 @@ export function ComponentCard({
 	related,
 }: ComponentCardProps) {
 	return (
-		<Panel
+		<Card
 			display="flex"
 			gap="sm"
 			padding="sm"
@@ -67,7 +67,7 @@ export function ComponentCard({
 			</div>
 			<div className="min-h-[44px] flex-1">{children}</div>
 			{related ? <RelatedItems {...related} /> : null}
-		</Panel>
+		</Card>
 	);
 }
 

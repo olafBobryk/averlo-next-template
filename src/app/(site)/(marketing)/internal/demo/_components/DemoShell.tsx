@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import { getVisibleDemoPages } from "../content";
@@ -26,7 +26,7 @@ export function DemoShell({ children }: DemoShellProps) {
 		<Section innerClassName="flex flex-row w-full gap-8">
 			<aside className="w-64 shrink-0">
 				<div className="sticky top-24 flex flex-col gap-4">
-					<Panel display="flex" padding="sm" gap="sm" shadow="none">
+					<Card display="flex" padding="sm" gap="sm" shadow="none">
 						<div className="flex flex-col gap-2">
 							<Text as="h2" variant="headingXs">
 								Demo Index
@@ -38,8 +38,8 @@ export function DemoShell({ children }: DemoShellProps) {
 								Overview
 							</Button>
 						</div>
-					</Panel>
-					<Panel display="flex" padding="sm" gap="sm" shadow="none">
+					</Card>
+					<Card display="flex" padding="sm" gap="sm" shadow="none">
 						<nav className="flex flex-col gap-1">
 							{visiblePages.map((page) => {
 								const href = buildPath(page.slug);
@@ -63,7 +63,7 @@ export function DemoShell({ children }: DemoShellProps) {
 								);
 							})}
 						</nav>
-					</Panel>
+					</Card>
 				</div>
 			</aside>
 			<main className="min-w-0 flex-1">{children}</main>

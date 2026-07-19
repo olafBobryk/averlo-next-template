@@ -5,7 +5,7 @@ import type { MotionMoment } from "@/components/ui/foundations/motionTiming";
 import { MotionScope, Reveal } from "@/components/ui/motion";
 import { RevealGroup, RevealGroupItem } from "@/components/ui/motion/reveal";
 import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -84,7 +84,7 @@ function MotionTravelTrack({
 	);
 }
 
-function QaPanel({
+function QaCard({
 	title,
 	code,
 	expected,
@@ -96,7 +96,7 @@ function QaPanel({
 	children: React.ReactNode;
 }) {
 	return (
-		<Panel display="flex" padding="md" gap="md" shadow="none">
+		<Card display="flex" padding="md" gap="md" shadow="none">
 			<div className="flex flex-col gap-2">
 				<div className="flex flex-wrap items-center justify-between gap-3">
 					<Text as="h2" variant="headingSm">
@@ -111,7 +111,7 @@ function QaPanel({
 				</Text>
 			</div>
 			{children}
-		</Panel>
+		</Card>
 	);
 }
 
@@ -140,7 +140,7 @@ function MotionCharacterQa() {
 	const [expanded, setExpanded] = useState(false);
 
 	return (
-		<QaPanel
+		<QaCard
 			title="Motion Character"
 			code="<MotionScope expressive={...}>"
 			expected="Run the comparison: productive resolves fastest, neutral sits in the middle, expressive lingers longest."
@@ -179,7 +179,7 @@ function MotionCharacterQa() {
 					</MotionScope>
 				))}
 			</div>
-		</QaPanel>
+		</QaCard>
 	);
 }
 
@@ -187,7 +187,7 @@ function TimingMomentsQa() {
 	const [active, setActive] = useState(false);
 
 	return (
-		<QaPanel
+		<QaCard
 			title="Timing Moments"
 			code="motion-{moment}"
 			expected="Every moment travels the same distance; only timing and easing should differ."
@@ -220,7 +220,7 @@ function TimingMomentsQa() {
 					</div>
 				))}
 			</div>
-		</QaPanel>
+		</QaCard>
 	);
 }
 
@@ -229,7 +229,7 @@ function RevealApiQa() {
 	const [active, setActive] = useState(true);
 
 	return (
-		<QaPanel
+		<QaCard
 			title="Reveal API"
 			code="<Reveal.Root><Reveal.List><Reveal.Item />"
 			expected="The public namespace demos Root, Scene, Item, List, Image, Text, and Scramble from one import."
@@ -329,7 +329,7 @@ function RevealApiQa() {
 					</Reveal.List>
 				</div>
 			</Reveal.Root>
-		</QaPanel>
+		</QaCard>
 	);
 }
 
@@ -337,7 +337,7 @@ function RevealNumericStatsQa() {
 	const [runId, setRunId] = useState(0);
 
 	return (
-		<QaPanel
+		<QaCard
 			title="Reveal Numeric Stats"
 			code='<Reveal.Numeric animation="countUp" />'
 			expected="Stats enter through a Reveal.List, then each value counts after the list start stage."
@@ -379,7 +379,7 @@ function RevealNumericStatsQa() {
 					</Reveal.List>
 				</Reveal.Scene>
 			</Reveal.Root>
-		</QaPanel>
+		</QaCard>
 	);
 }
 
@@ -387,7 +387,7 @@ function RevealGroupCompatibilityQa() {
 	const [runId, setRunId] = useState(0);
 
 	return (
-		<QaPanel
+		<QaCard
 			title="RevealGroup Alias"
 			code="<RevealGroup>"
 			expected="The compatibility boundary export schedules once through the root while its wrapper stays visually stable."
@@ -412,7 +412,7 @@ function RevealGroupCompatibilityQa() {
 					</RevealGroupItem>
 				</RevealGroup>
 			</Reveal.Root>
-		</QaPanel>
+		</QaCard>
 	);
 }
 
@@ -420,7 +420,7 @@ function RevealGroupItemCompatibilityQa() {
 	const [runId, setRunId] = useState(0);
 
 	return (
-		<QaPanel
+		<QaCard
 			title="RevealGroupItem Alias"
 			code="<RevealGroupItem>"
 			expected="The compatibility child export joins its nearest RevealGroup queue and falls back to root scheduling outside a group."
@@ -447,7 +447,7 @@ function RevealGroupItemCompatibilityQa() {
 					</RevealGroupItem>
 				</div>
 			</Reveal.Root>
-		</QaPanel>
+		</QaCard>
 	);
 }
 
@@ -455,7 +455,7 @@ function SceneGateQa() {
 	const [runId, setRunId] = useState(0);
 
 	return (
-		<QaPanel
+		<QaCard
 			title="Scene Gates"
 			code="<Reveal.Scene after unlock>"
 			expected="Media unlocks content, content unlocks the accent. The sequence should read image, blocks, then scramble."
@@ -507,13 +507,13 @@ function SceneGateQa() {
 					</div>
 				</Reveal.Scene>
 			</Reveal.Root>
-		</QaPanel>
+		</QaCard>
 	);
 }
 
 function DisabledModeQa() {
 	return (
-		<QaPanel
+		<QaCard
 			title="Disabled Mode"
 			code="?motion=off&reveal=off"
 			expected="With the automation query, these blocks should render immediately with no hidden transform state."
@@ -530,7 +530,7 @@ function DisabledModeQa() {
 					))}
 				</Reveal.List>
 			</Reveal.Root>
-		</QaPanel>
+		</QaCard>
 	);
 }
 

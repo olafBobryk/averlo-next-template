@@ -8,6 +8,7 @@ const ROOT = process.cwd();
 const SRC_DIR = path.join(ROOT, "src");
 const ALLOWED_UI_IMPORTS = new Set([
 	"@/components/ui/primitives/Button",
+	"@/components/ui/primitives/Card",
 	"@/components/ui/primitives/Text",
 	"@/components/ui/primitives/Section",
 	"@/components/ui/primitives/Field",

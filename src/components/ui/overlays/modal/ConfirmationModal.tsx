@@ -48,7 +48,7 @@ export function ConfirmationModal({
 			</div>
 			{warning ? (
 				<Warning
-					variant="panel"
+					variant="card"
 					tone="warning"
 					message={warning}
 					className="w-full"

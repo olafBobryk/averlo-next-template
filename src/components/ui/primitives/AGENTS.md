@@ -4,7 +4,7 @@
 Lowest-level reusable building blocks. Agents should check this folder before writing raw UI markup.
 
 ## Use This Folder When
-- You need a reusable button, text style, field wrapper, input shell, dropdown surface, listbox, panel, divider, or section container.
+- You need a reusable button, text style, field wrapper, input shell, dropdown surface, listbox, card, divider, or section container.
 - A new higher-level component should be composed from existing building blocks.
 - A page wants custom arrangement but standard library behavior.
 
@@ -15,7 +15,7 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - `src/components/ui/primitives/Field.tsx`: canonical label, description, and message wrapper.
 - `src/components/ui/primitives/Dropdown.tsx`: canonical trigger-plus-menu overlay primitive.
 - `src/components/ui/primitives/Listbox.tsx`: canonical accessible option list for menus and selectors.
-- `src/components/ui/primitives/Panel.tsx`: surface container for grouped content, cards, and transparent-border inner panels.
+- `src/components/ui/primitives/Card.tsx`: Shadcn-style card surface and slot parts for grouped content, cards, and transparent-border inner cards.
 - `src/components/ui/primitives/Section.tsx`: page section wrapper.
 - `src/components/ui/primitives/Divider.tsx`: horizontal or vertical separator with optional horizontal label.
 - `src/components/ui/primitives/dropdownStyles.ts`: shared dropdown classnames.
@@ -34,7 +34,7 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
   - `InputFrame` focus should come from `focus-within` tokens on the shell plus the real focusable input inside.
   - Listbox-like controls must preserve active, selected, and keyboard navigation states.
 - Class overrides should be additive. Extend through props and `className` rather than forking primitives.
-- For transparent gradient-border panels, keep wrapper and inner surface responsibilities separate: the wrapper owns the border effect, the panel owns the fill.
+- For transparent gradient-border cards, keep wrapper and inner surface responsibilities separate: the wrapper owns the border effect, the card owns the fill.
 
 ## How To Use The Core Primitives
 - Use `Text` for headings, labels, supporting copy, and muted text instead of raw typographic utility strings.
@@ -43,13 +43,14 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - Use `inputVariants(...)` on the actual input element so padding and disabled state stay aligned with the shell.
 - Use `Dropdown` when you need a trigger and floating menu; use `Listbox` when the menu is fundamentally a list of options.
   - Prefer the default fixed strategy for filter menus and controls inside scrolling layouts.
-- Use `Panel`, `Section`, and `Divider` to preserve shared container spacing and surface rhythm.
-  - Use `Panel` instead of raw bordered boxes when a reusable surface needs padding, columns, gap, background, border, or shadow variants.
+- Use `Card`, `Section`, and `Divider` to preserve shared container spacing and surface rhythm.
+  - Use `Card` instead of raw bordered boxes when a reusable surface needs padding, columns, gap, background, border, or shadow variants.
+  - Use `CardHeader`, `CardContent`, and `CardFooter` when a card needs Shadcn-style internal structure.
   - Use `Divider` instead of ad hoc border divs when separating content groups or labeling a horizontal break.
 - Use `Section.Background` when a section needs image, gradient, or node-based background media behind its normal content flow.
   - The background spans the full section, not the inner max-width container.
   - It is decorative by default; set `interactive` only when the background truly needs live controls.
-- When building transparent bordered panels, keep the wrapper transparent, keep the panel background explicit, and align wrapper and panel radii.
+- When building transparent bordered cards, keep the wrapper transparent, keep the card background explicit, and align wrapper and card radii.
 
 ## UX Conventions To Preserve
 - Do not build raw password visibility buttons, select menus, or pseudo-fields from primitives if `ui/input/` already provides a finished control.
@@ -60,4 +61,4 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - Raw `<button>`, `<label>`, or styled `<input>` markup in reusable UI when the primitive already exists.
 - Duplicating dropdown layout classes instead of routing them through the shared styles.
 - Hiding focus rings without the shared replacement tokens.
-- Combining border, fill, and transparency responsibilities on one element when the wrapper-plus-panel pattern is already established.
+- Combining border, fill, and transparency responsibilities on one element when the wrapper-plus-card pattern is already established.

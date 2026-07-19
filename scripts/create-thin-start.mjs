@@ -32,6 +32,10 @@ const LIVE_REWRITE_TARGETS = [
 		purpose: "Reduce to thin-start Button API.",
 	},
 	{
+		path: "src/components/ui/primitives/Card.tsx",
+		purpose: "Keep Shadcn-style card root and slot parts.",
+	},
+	{
 		path: "src/components/ui/primitives/Text.tsx",
 		purpose: "Reduce to visually complete heading/body/support typography.",
 	},

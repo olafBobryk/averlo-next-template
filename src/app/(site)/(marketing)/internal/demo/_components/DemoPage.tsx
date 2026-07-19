@@ -12,8 +12,8 @@ import type {
 	DemoPage as DemoPageType,
 } from "@/app/(site)/(marketing)/internal/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
 import Divider from "@/components/ui/primitives/Divider";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 
 export type DemoPageProps = {
@@ -58,12 +58,12 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 						This demo route does not exist yet.
 					</Text>
 				</header>
-				<Panel display="flex" padding="sm" gap="sm" shadow="none">
+				<Card display="flex" padding="sm" gap="sm" shadow="none">
 					<Text variant="body">Go back to the demo index.</Text>
 					<Button href="/internal/demo" variant="outline" size="sm">
 						Open demo index
 					</Button>
-				</Panel>
+				</Card>
 			</div>
 		);
 	}
