@@ -60,6 +60,10 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - `ColorInput` and `ColorSwatchInput` join the full-start input library only; thin start does not include them.
 - `ColorInput` supports controlled and uncontrolled hexadecimal selection, pointer and keyboard operation, normal form submission, field validation, and portal-aware dropdown positioning.
 - `ColorSwatchInput` supports generic typed presets and an optional custom color. Its shared semantic defaults are neutral, info, success, warning, and danger; product-specific palettes stay outside the shared input.
+- The accepted component ports include their generic dependency closure: semantic accent helpers, `StatusMessage`, `ModalForm`, shared overlay chrome, and the markdown-mention parser.
+- Existing template helpers remain canonical wherever they provide an equivalent or stronger contract.
+- Baseline Markdown image insertion accepts image URLs only. File upload remains a caller or product integration rather than a dependency of the shared editor.
+- Markdown stores durable mentions as `@[user:<id>]`; callers provide mention options and rendering resolution, and shared Markdown components never fetch organizations or users directly.
 
 ## Full-start detail and property system
 
@@ -67,6 +71,7 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - It includes `DashboardPropertyList` with responsive identity, value, and action columns, add-property selection, and row actions.
 - It includes `DashboardMarkdownEditorModalButton` as the focused dashboard editing surface. Callers own asynchronous persistence while the composite owns modal composition, validation display, loading feedback, errors, and success toast feedback.
 - Detail and property components remain product-neutral and stay outside thin start.
+- Detail fields and property lists own presentation and interaction composition only. Routes own property schemas, authorization, persistence, and product-specific editors.
 
 ## Shared profile invariant
 
@@ -98,6 +103,11 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - Architecture-significant shared-system changes can be reviewed against full-start and thin-start previews produced from the same commit.
 - Both profiles receive type, build, and smoke verification.
 - Both profiles receive public API-surface review and a small visual route matrix.
+- Markdown verification covers renderer-editor round trips, lossless source fallback, responsive and keyboard-accessible toolbar behavior, and the exclusion of mention parsing from code and links.
+- Button verification covers zero layout shift during position-absolute loading and dimensional parity between every live variant and its skeleton.
+- Chip verification covers semantic, spectrum, custom, static, link, button, and skeleton states.
+- Color-input verification covers pointer and keyboard operation, validation, form behavior, and portal positioning.
+- Detail-system verification covers responsive property layout across its container breakpoint.
 
 ## Full-start dashboard role
 
