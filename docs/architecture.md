@@ -2,6 +2,7 @@
 
 Final accepted architecture for the Averlo full-start and thin-start profiles.
 This document defines durable system boundaries and does not authorize or prescribe an implementation sequence.
+Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2026-07-19 with no unresolved or drifted decisions.
 
 ## Source relationship
 
