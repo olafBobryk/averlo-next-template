@@ -18,9 +18,11 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 - The reusable template uses Inter through the shared application-font contract. Local SF Pro binaries are not distributed with the template.
 - The complete shared consumer layer adopts the source visual grammar, including typography, buttons, panels, cards, fields, inputs, dropdowns, listboxes, chips, skeletons, modals, toasts, and shared state surfaces.
 - The reskin applies across marketing, authentication, dashboard, internal demonstrations, loading, error, empty, and overlay surfaces.
+- Marketing and authentication retain the template's existing page composition and content architecture while adopting the pinned source's tokens, primitives, and visual grammar.
 - Spectrum accents remain reusable visual tokens, while Inference Console logos, product copy, and domain-specific branded artwork remain outside the template.
-- Dashboard visual parity is intentionally close to the Inference Console reference across shell, navigation, spacing, density, cards, tables, forms, overlays, interaction states, and responsive behavior.
+- Dashboard visual parity is intentionally close to the Inference Console reference across shell geometry, navigation, spacing, density, cards, tables, forms, overlays, interaction states, and responsive behavior.
 - The custom Inference Console profile-picture gradient background is explicitly excluded from the dashboard parity target.
+- The pinned commit provides visual provenance and rendered references only; Inference Console product models, domain components, routes, and backend architecture are not template architecture.
 
 ## Panel and Card contract
 
@@ -192,6 +194,7 @@ Accepted but not yet consolidated architecture decisions for the Averlo full-sta
 ## Final architecture disposition
 
 - The accepted architecture will be consolidated into `docs/architecture.md` from the pinned Inference Console styling baseline.
+- Final architecture is organized around template profiles, the visual system and primitives, the full-start dashboard, organization/authentication/data contracts, template-instance activation, and verification invariants.
 - `docs/architecture-staging.md` remains as the historical acceptance ledger after consolidation, marked as consolidated and linked to the final architecture document.
 - Consolidation may deduplicate and improve sequencing, but it must not add implementation planning or change accepted meaning.
 - The final review traces every staging decision into the consolidated architecture, checks for wording drift, and marks consolidation complete only after parity passes.
