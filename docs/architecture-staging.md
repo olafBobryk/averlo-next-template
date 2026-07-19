@@ -76,10 +76,14 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 ## Dashboard entity presentation system
 
 - Entity presentation is a full-start dashboard capability rather than a shared primitive, thin-start dependency, or application-wide global registry.
-- The authoritative profile manifest exposes entity presentation as a named pruneable surface beneath the dashboard feature. Removing the dashboard removes the surface automatically, while a dashboard-based template instance may also prune the reference entity system when it deliberately adopts another frontend entity architecture.
+- Entity-presentation source lives beneath `src/app/(site)/dashboard` so dashboard ownership and prune behavior remain physically visible.
+- Non-React contracts and factories live beneath dashboard `_lib`, with generic presentation contracts separated from entity-owned domain inputs and presentation definitions. React renderers live beneath dashboard `_components`, with generic presentation components separated from entity-owned components.
+- Surface adapters remain with their route or surface until repeated consumers justify promoting a reusable entity-owned adapter.
+- The authoritative profile manifest exposes `dashboard.reference-entities` as the independently pruneable child surface. The small presentation foundation remains dashboard core; removing the dashboard removes both, while pruning the reference entities removes their examples, integrations, demonstrations, and policy hooks without pretending that dashboard core is optional.
 - The source is split by ownership and dependency direction instead of reproducing Inference Console's monolithic presentation registry and renderer namespace.
 - A small dashboard presentation foundation owns only reusable contracts such as entity nouns, action labels, empty-state copy, field and column metadata, semantic variants, and renderer inputs.
 - Every entity lives in its own folder and separates its domain input types, presentation definitions, derived view-model factory, render components, and surface adapters. Product-specific roles, routes, labels, icons, permissions, formatting, and variant registries remain with the owning entity.
+- Dashboard consumers import from the file that owns the symbol. There is no global entity barrel, central `presentationRegistry`, or `presentationRender` object; a narrow entity entrypoint is allowed only when it deliberately hides private structure from multiple consumers.
 - Presentation renderers receive ready data and never fetch. Routes and adapters own authorization, organization context, persistence, and mutations.
 - The reference identity implementation models a global user separately from an organization-scoped member. The resolved member presentation owns deterministic fallbacks for display label, email, initials, avatar, role, joined date, profile target, and Markdown mention identity.
 - The example member is wired through profile, compact, actor, avatar-only, avatar-list, table, detail, selector, Command-K, Markdown mention, empty, and skeleton presentations. It uses the template's plain avatar fallback and does not port Inference Console's custom profile-picture gradient.
@@ -91,8 +95,8 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - A repository-owned frontend entity policy is the durable source of truth for entity-layer ownership, presentation reuse, data-source boundaries, surface integration, skeleton parity, demonstration, and documentation requirements.
 - The policy is linked from the relevant dashboard, component, domain, and library `AGENTS.md` files instead of accumulating every rule in a single root instruction file.
 - The policy requires tables, forms, filters, detail views, selectors, Command-K, Markdown mentions, empty states, and loading surfaces to reuse owning entity presentation definitions when those surfaces exist.
-- A generic `entity-frontend-system` Codex skill complements the repository policy. Like the existing focused loading and import-surface skills, it discovers the current repository's contracts, classifies the entity's frontend surfaces, identifies gaps, and recommends the relevant vertical skills or work without inventing product models or assuming template-specific paths.
-- The entity skill does not become the source of truth, execute every recommended vertical workflow automatically, or embed one repository's entity schema. The repository policy links to it as an optional creation and audit workflow.
+- A generic `entity-frontend-system` Codex skill complements the repository policy. Like the existing focused loading and import-surface skills, it searches for the repository's actual entity, presentation, renderer, surface, loading, command, and import contracts; classifies the entity's frontend surfaces; identifies gaps; and recommends the relevant vertical skills or work without inventing product models or assuming template-specific paths.
+- The entity skill does not become the source of truth, embed a preferred folder layout or one repository's entity schema, or invoke recommended vertical workflows without authorization from the active task. The repository policy links to it as an optional creation and audit workflow.
 - The skill contract is derived after the dashboard presentation foundation, example member, and frontend entity policy establish real APIs.
 
 ## Additional reusable dashboard patterns
@@ -138,7 +142,7 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - Color-input verification covers pointer and keyboard operation, validation, form behavior, and portal positioning.
 - Detail-system verification covers responsive property layout across its container breakpoint.
 - Entity-presentation verification covers the example member across identity, table, detail, selector, Command-K, Markdown mention, empty, and loading surfaces and checks that owning definitions are reused rather than copied into routes.
-- Profile verification proves that thin start excludes the dashboard presentation capability and that pruning the dashboard or its entity-presentation child surface leaves no imports, dependencies, demos, policies, or generated output behind.
+- Profile verification proves that thin start excludes dashboard presentation and reference-entity capabilities, that dashboard pruning removes both, and that pruning `dashboard.reference-entities` leaves no reference-entity imports, dependencies, demonstrations, policy hooks, or generated output behind.
 
 ## Full-start dashboard role
 
