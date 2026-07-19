@@ -51,6 +51,7 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - The editor persists only plain Markdown strings and supports responsive rich editing, lossless source mode, automatic source fallback, headings, inline formatting, lists and tasks, links, tables, images, code, dividers, undo and redo, optional mention insertion, generic button-directive editing, and default or compact density.
 - The editor toolbar composes the template's existing `MoreMenuDropdown`, `Button`, `Dropdown`, and `Listbox` contracts rather than introducing a duplicate package-owned menu system.
 - The existing `MoreMenuDropdown` remains canonical, including its keyboard navigation, fixed or absolute positioning, portal support, hover and pinned interaction modes, custom triggers, and active or disabled options.
+- `MoreMenuDropdown` exposes typed factories for recurring open, edit, delete, and mark-read actions with consistent icon, separator, disabled, and danger semantics while preserving caller-defined options.
 - Button convergence incorporates the pinned `default`, `primary`, `primaryDark`, `primarySoft`, `secondary`, `solid`, `danger`, `ghost`, `quiet`, and `card` visual variants and the `sm`, `md`, `lg`, `xl`, `icon`, `icon-sm`, and `chip` sizes while preserving useful template contracts such as `outline`.
 - Loading states and variant-aware skeleton treatments follow the converged visual vocabulary without replacing the template's richer existing API surface.
 - Existing Button capabilities such as icon-registry inputs, content and text configuration, radius and hit-area controls, focusability, typed link and button behavior, class and style extension, and layout alignment remain available unless an explicit later decision supersedes them.
@@ -110,10 +111,12 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - A generic `entity-frontend-system` Codex skill complements the repository policy. Like the existing focused loading and import-surface skills, it searches for the repository's actual entity, presentation, renderer, surface, loading, command, and import contracts; classifies the entity's frontend surfaces; identifies gaps; and recommends the relevant vertical skills or work without inventing product models or assuming template-specific paths.
 - The entity skill does not become the source of truth, embed a preferred folder layout or one repository's entity schema, or invoke recommended vertical workflows without authorization from the active task. The repository policy links to it as an optional creation and audit workflow.
 - The skill contract is derived after the dashboard presentation foundation, example member, and frontend entity policy establish real APIs.
+- Repository frontend policies may reference only verifiable paths, exports, demonstrations, and public contracts. A policy-integrity check reports stale references rather than allowing copied instructions to drift away from the repository.
 
 ## Additional reusable dashboard patterns
 
 - The full-start dashboard includes an entity-neutral deletion lifecycle definition and composition that centralizes impact descriptions, confirmation-modal structure, danger-menu placement, mutation feedback, refresh behavior, and disabled explanations while leaving the mutation and entity-specific consequences with the owning adapter.
+- The framed and dashed no-data treatment proven by Inference Console is adapted as a dashboard-oriented variant or wrapper around the template's canonical `StateIndicator`; it does not introduce a competing global null-state system.
 - Dashboard status and not-found surfaces use a shared status-page frame derived from the typed dashboard surface registry. The reusable frame does not hardcode product route prefixes.
 - A generic activity or event row is an optional dashboard extension rather than baseline template content.
 - Inference-specific notification systems, product permission presentations, charts, and provider-branded authentication buttons are not baseline ports; they remain demand-led additions.
@@ -155,6 +158,7 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - Detail-system verification covers responsive property layout across its container breakpoint.
 - Entity-presentation verification covers the example member across identity, table, detail, selector, Command-K, Markdown mention, empty, and loading surfaces and checks that owning definitions are reused rather than copied into routes.
 - Profile verification proves that thin start excludes dashboard presentation and reference-entity capabilities, that dashboard pruning removes both, and that pruning `dashboard.reference-entities` leaves no reference-entity imports, dependencies, demonstrations, policy hooks, or generated output behind.
+- Focused behavioral or structural verification covers authentication entry, invitation acceptance, viable-identity protection, entity deletion, component skeleton parity, and profile pruning. Product-specific Inference Console verifier scripts are not copied.
 
 ## Full-start dashboard role
 
@@ -195,6 +199,7 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - The default dashboard runs from deterministic typed fixture data behind lightweight adapters.
 - Shared dashboard surfaces must not require Payload, Supabase, or another hosted backend.
 - Dashboard adapters expose clear seams for replacing fixtures with a project data source.
+- A provider-neutral private-file and avatar-storage adapter defines authorization, validation, opaque object keys, metadata ownership, signed-access lifetimes, replacement cleanup, and deletion responsibilities without installing a concrete storage provider.
 - Dashboard data is organization-scoped behind the adapter boundary from the start.
 - Applications without multi-organization UX still operate through a singleton organization rather than bypassing organization scope.
 - The default demo pattern uses an organization-scoped demo context and the same data boundaries as a converted product.
