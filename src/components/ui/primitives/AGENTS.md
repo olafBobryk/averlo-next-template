@@ -15,7 +15,8 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - `src/components/ui/primitives/Field.tsx`: canonical label, description, and message wrapper.
 - `src/components/ui/primitives/Dropdown.tsx`: canonical trigger-plus-menu overlay primitive.
 - `src/components/ui/primitives/Listbox.tsx`: canonical accessible option list for menus and selectors.
-- `src/components/ui/primitives/Card.tsx`: Shadcn-style card surface and slot parts for grouped content, cards, and transparent-border inner cards.
+- `src/components/ui/primitives/Panel.tsx`: generic surface, layout, and overlay-root primitive.
+- `src/components/ui/primitives/Card.tsx`: structured card built on `Panel`, with owned header, action, content, and footer slots.
 - `src/components/ui/primitives/Section.tsx`: page section wrapper.
 - `src/components/ui/primitives/Divider.tsx`: horizontal or vertical separator with optional horizontal label.
 - `src/components/ui/primitives/dropdownStyles.ts`: shared dropdown classnames.
@@ -43,9 +44,10 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - Use `inputVariants(...)` on the actual input element so padding and disabled state stay aligned with the shell.
 - Use `Dropdown` when you need a trigger and floating menu; use `Listbox` when the menu is fundamentally a list of options.
   - Prefer the default fixed strategy for filter menus and controls inside scrolling layouts.
-- Use `Card`, `Section`, and `Divider` to preserve shared container spacing and surface rhythm.
-  - Use `Card` instead of raw bordered boxes when a reusable surface needs padding, columns, gap, background, border, or shadow variants.
-  - Use `CardHeader`, `CardContent`, and `CardFooter` when a card needs Shadcn-style internal structure.
+- Use `Panel`, `Card`, `Section`, and `Divider` to preserve shared container spacing and surface rhythm.
+  - Use `Panel` for non-semantic surfaces, generic grouped layout, and overlay roots.
+  - Use `Card` only when its structured slots describe the content.
+  - Use `CardHeader`, `CardContent`, and `CardFooter` under a real `Card` root; do not imitate Card data attributes on `Panel`.
   - Use `Divider` instead of ad hoc border divs when separating content groups or labeling a horizontal break.
 - Use `Section.Background` when a section needs image, gradient, or node-based background media behind its normal content flow.
   - The background spans the full section, not the inner max-width container.

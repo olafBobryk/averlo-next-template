@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
 import Divider from "@/components/ui/primitives/Divider";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import { hrefFor } from "@/lib/routes";
@@ -19,7 +19,7 @@ export default function RiveLogoRevealDictionaryPage() {
 				</Text>
 			</header>
 
-			<Card display="flex" padding="md" gap="md">
+			<Panel display="flex" padding="md" gap="md">
 				<Text as="h2" variant="headingSm">
 					Preview
 				</Text>
@@ -28,9 +28,9 @@ export default function RiveLogoRevealDictionaryPage() {
 					actual `.riv` runtime swap as a later integration step.
 				</Text>
 				<LoadingScreenPreview />
-			</Card>
+			</Panel>
 
-			<Card display="flex" padding="md" gap="md">
+			<Panel display="flex" padding="md" gap="md">
 				<Text as="h2" variant="headingSm">
 					Adaptation points
 				</Text>
@@ -62,7 +62,7 @@ export default function RiveLogoRevealDictionaryPage() {
 						Back to dictionary
 					</Button>
 				</div>
-			</Card>
+			</Panel>
 		</Section>
 	);
 }

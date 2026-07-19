@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -42,7 +42,7 @@ export default function PlaygroundIndexPage() {
 
 					<div className="grid gap-4">
 						{playgroundGroups.map((group) => (
-							<Card key={group.id} display="flex" padding="md" gap="md">
+							<Panel key={group.id} display="flex" padding="md" gap="md">
 								<div className="flex flex-col gap-2">
 									<Text as="h2" variant="headingSm">
 										{group.title}
@@ -74,7 +74,7 @@ export default function PlaygroundIndexPage() {
 										</div>
 									))}
 								</div>
-							</Card>
+							</Panel>
 						))}
 					</div>
 				</div>

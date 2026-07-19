@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import {
@@ -144,12 +144,12 @@ function MissingIndexState({ path }: { path: string }) {
 						</Text>
 					</header>
 
-					<Card display="flex" padding="md" gap="md" shadow="none">
+					<Panel display="flex" padding="md" gap="md" shadow="none">
 						<Text variant="body">
 							Run <code>npm run intelligence:generate</code> to create{" "}
 							<code>{path}</code>.
 						</Text>
-					</Card>
+					</Panel>
 				</div>
 			</Section>
 		</main>
@@ -178,31 +178,31 @@ function ReadyState({
 					</header>
 
 					<div className="grid gap-4 md:grid-cols-4">
-						<Card display="flex" padding="md" gap="sm" shadow="none">
+						<Panel display="flex" padding="md" gap="sm" shadow="none">
 							<Text variant="caption" tone="muted">
 								Files indexed
 							</Text>
 							<Text as="p" variant="headingMd">
 								{index.fileCount}
 							</Text>
-						</Card>
-						<Card display="flex" padding="md" gap="sm" shadow="none">
+						</Panel>
+						<Panel display="flex" padding="md" gap="sm" shadow="none">
 							<Text variant="caption" tone="muted">
 								Concept groups
 							</Text>
 							<Text as="p" variant="headingMd">
 								{index.conceptCount}
 							</Text>
-						</Card>
-						<Card display="flex" padding="md" gap="sm" shadow="none">
+						</Panel>
+						<Panel display="flex" padding="md" gap="sm" shadow="none">
 							<Text variant="caption" tone="muted">
 								Relationships
 							</Text>
 							<Text as="p" variant="headingMd">
 								{index.relationships.length}
 							</Text>
-						</Card>
-						<Card display="flex" padding="md" gap="sm" shadow="none">
+						</Panel>
+						<Panel display="flex" padding="md" gap="sm" shadow="none">
 							<Text variant="caption" tone="muted">
 								Task topics
 							</Text>
@@ -211,7 +211,7 @@ function ReadyState({
 									? agentMapResult.agentMap.topics.length
 									: 0}
 							</Text>
-						</Card>
+						</Panel>
 					</div>
 
 					<div className="flex justify-center">
@@ -224,7 +224,7 @@ function ReadyState({
 						</Button>
 					</div>
 
-					<Card
+					<Panel
 						display="flex"
 						padding="lg"
 						gap="md"
@@ -246,7 +246,7 @@ function ReadyState({
 						>
 							View benchmarks
 						</Button>
-					</Card>
+					</Panel>
 				</div>
 			</Section>
 		</main>
@@ -299,27 +299,27 @@ function BenchmarkState({
 					<BenchmarkRunToggle isExample={isExample} />
 
 					{isExample ? (
-						<Card display="flex" padding="md" gap="sm" shadow="none">
+						<Panel display="flex" padding="md" gap="sm" shadow="none">
 							<Text variant="bodyStrong">Placeholder data</Text>
 							<Text variant="body" tone="muted">
 								This view is populated from the example JSONL file for visual
 								QA. It is not benchmark history.
 							</Text>
-						</Card>
+						</Panel>
 					) : null}
 
 					{invalidLineCount > 0 ? (
-						<Card display="flex" padding="md" gap="sm" shadow="none">
+						<Panel display="flex" padding="md" gap="sm" shadow="none">
 							<Text variant="bodyStrong">Skipped invalid JSONL lines</Text>
 							<Text variant="body" tone="muted">
 								{invalidLineCount} malformed benchmark{" "}
 								{invalidLineCount === 1 ? "line was" : "lines were"} ignored.
 							</Text>
-						</Card>
+						</Panel>
 					) : null}
 
 					{runs.length === 0 ? (
-						<Card display="flex" padding="md" gap="md" shadow="none">
+						<Panel display="flex" padding="md" gap="md" shadow="none">
 							<Text as="h2" variant="headingSm">
 								No real benchmark runs recorded
 							</Text>
@@ -328,38 +328,38 @@ function BenchmarkState({
 								<code>npm run intelligence:record</code> after an intentional
 								benchmark pass, or switch to placeholder data for chart QA.
 							</Text>
-						</Card>
+						</Panel>
 					) : (
 						<>
 							<div className="grid gap-4 md:grid-cols-3">
-								<Card display="flex" padding="md" gap="sm" shadow="none">
+								<Panel display="flex" padding="md" gap="sm" shadow="none">
 									<Text variant="caption" tone="muted">
 										Runs
 									</Text>
 									<Text as="p" variant="headingMd">
 										{runs.length}
 									</Text>
-								</Card>
-								<Card display="flex" padding="md" gap="sm" shadow="none">
+								</Panel>
+								<Panel display="flex" padding="md" gap="sm" shadow="none">
 									<Text variant="caption" tone="muted">
 										Strategies
 									</Text>
 									<Text as="p" variant="headingMd">
 										{summaries.length}
 									</Text>
-								</Card>
-								<Card display="flex" padding="md" gap="sm" shadow="none">
+								</Panel>
+								<Panel display="flex" padding="md" gap="sm" shadow="none">
 									<Text variant="caption" tone="muted">
 										Latest
 									</Text>
 									<Text as="p" variant="headingMd">
 										{latestDate ?? "n/a"}
 									</Text>
-								</Card>
+								</Panel>
 							</div>
 
 							<div className="grid gap-4 lg:grid-cols-2">
-								<Card display="flex" padding="md" gap="md" shadow="none">
+								<Panel display="flex" padding="md" gap="md" shadow="none">
 									<div className="flex flex-col gap-2">
 										<Text as="h2" variant="headingSm">
 											Strategy Totals
@@ -379,9 +379,9 @@ function BenchmarkState({
 											/>
 										))}
 									</div>
-								</Card>
+								</Panel>
 
-								<Card display="flex" padding="md" gap="md" shadow="none">
+								<Panel display="flex" padding="md" gap="md" shadow="none">
 									<Text as="h2" variant="headingSm">
 										Strategy Details
 									</Text>
@@ -402,7 +402,7 @@ function BenchmarkState({
 											</div>
 										))}
 									</div>
-								</Card>
+								</Panel>
 							</div>
 						</>
 					)}

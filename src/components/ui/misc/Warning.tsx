@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import type * as React from "react";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
-import { Card, type CardProps } from "@/components/ui/primitives/Card";
+import { Panel, type PanelProps } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 
 type WarningTone = "warning" | "danger";
@@ -21,7 +21,7 @@ type WarningProps = {
 	variant?: WarningVariant;
 	className?: string;
 	cardClassName?: string;
-	cardProps?: Omit<CardProps<"div">, "children">;
+	cardProps?: Omit<PanelProps<"div">, "children">;
 	textClassName?: string;
 	titleClassName?: string;
 	descriptionClassName?: string;
@@ -116,15 +116,16 @@ export function Warning({
 	);
 
 	if (isCard) {
-		const { className: cardPropsClassName, ...restCardProps } = cardProps ?? {};
+		const { className: cardPropsClassName, ...restPanelProps } =
+			cardProps ?? {};
 
 		return (
-			<Card
+			<Panel
 				padding="none"
 				gap="none"
 				shadow="none"
 				tone={tone}
-				{...restCardProps}
+				{...restPanelProps}
 				className={clsx(
 					"flex items-start gap-2.5 rounded-[12px] px-4 py-3",
 					cardClassName,
@@ -133,7 +134,7 @@ export function Warning({
 				)}
 			>
 				{inner}
-			</Card>
+			</Panel>
 		);
 	}
 

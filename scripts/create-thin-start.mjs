@@ -1,155 +1,90 @@
 #!/usr/bin/env node
 
+import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import process, { stdin as input, stdout as output } from "node:process";
 import { createInterface } from "node:readline/promises";
-import {
-	THIN_START_REMOVE_PATHS,
-	THIN_START_WRITE_FILES,
-} from "./thin-start-live-templates.mjs";
+import thinStartProfile from "../template-profiles/thin-start/manifest.mjs";
 
-const ROOT = process.cwd();
-const SRC_DIR = path.join(ROOT, "src");
-const PARKED_ROOT = path.join(ROOT, ".thin-start");
+const TEMPLATE_ROOT = process.cwd();
+const PROFILE_MARKER = ".template-profile.json";
+const PARKED_ROOT = path.join(TEMPLATE_ROOT, ".thin-start");
 const PARKED_REFERENCE_DIR = path.join(
 	PARKED_ROOT,
 	"reference/averlo-components",
 );
-const PARKED_COMPONENTS_DIR = path.join(PARKED_REFERENCE_DIR, "src/components");
-const COMPONENT_SOURCE_DIR = path.join(ROOT, "src/components");
-const LIVE_REWRITE_PLAN_PATH = path.join(
-	PARKED_ROOT,
-	"reference/live-rewrite-plan.json",
-);
-const PACKAGE_JSON_PATH = path.join(ROOT, "package.json");
-const ACTIVATION_DEPENDENCIES = {
-	sonner: "^2.0.7",
-};
-const LIVE_REWRITE_TARGETS = [
-	{
-		path: "src/components/ui/primitives/Button.tsx",
-		purpose: "Reduce to thin-start Button API.",
-	},
-	{
-		path: "src/components/ui/primitives/Card.tsx",
-		purpose: "Keep Shadcn-style card root and slot parts.",
-	},
-	{
-		path: "src/components/ui/primitives/Text.tsx",
-		purpose: "Reduce to visually complete heading/body/support typography.",
-	},
-	{
-		path: "src/components/ui/primitives/Section.tsx",
-		purpose: "Keep shared section scaffold behavior intact.",
-	},
-	{
-		path: "src/components/ui/primitives/Field.tsx",
-		purpose: "Keep minimal field label/message wrapper for text/select inputs.",
-	},
-	{
-		path: "src/components/ui/primitives/InputFrame.tsx",
-		purpose: "Keep minimal text-like input shell.",
-	},
-	{
-		path: "src/components/ui/input/TextInput.tsx",
-		purpose: "Keep TextInput built from Field and InputFrame.",
-	},
-	{
-		path: "src/components/ui/input/SelectInput.tsx",
-		purpose: "Keep simplified select field pattern.",
-	},
-	{
-		path: "src/components/ui/input/{RadioInput,MultiselectInput,ToggleInput}.tsx",
-		purpose: "Keep native choice-group inputs for thin-start preferences.",
-	},
-	{
-		path: "src/components/ui/primitives/Dropdown.tsx",
-		purpose: "Keep existing dropdown interaction behavior.",
-	},
-	{
-		path: "src/components/ui/input/choice/{ChoiceField,ChoiceIndicators}.tsx",
-		purpose: "Keep minimal choice foundation for markdown and choice inputs.",
-	},
-	{
-		path: "src/components/composites/markdown",
-		purpose:
-			"Keep generic markdown renderer as an allowed thin-start composite.",
-	},
-	{
-		path: "src/components/ui/overlays/toast",
-		purpose:
-			"Replace current Averlo toast with shadcn/Sonner-style thin-start default.",
-	},
-	{
-		path: "src/app/(site)/(marketing)/internal/intelligence",
-		purpose: "Move internal intelligence UI to route-owned minimal components.",
-	},
-	{
-		path: "src/app/(site)/(marketing)/_components/layout",
-		purpose:
-			"Replace broad header/search/menu chrome with a thin-start marketing shell.",
-	},
-	{
-		path: "src/config/routes.ts",
-		purpose: "Reduce route registry to selected thin-start routes.",
-	},
-	{
-		path: "src/lib/marketing-content",
-		purpose:
-			"Reduce fallback content and link types to thin-start route shape.",
-	},
-	{
-		path: "src/components/ui/{misc,helpers,icons,time}",
-		purpose: "Remove broad Averlo helper surfaces from live source.",
-	},
-];
 const LIVE_IMPORT_PATTERN =
 	/((from|import)\s*["'][^"']*(\.thin-start|thin-start\/reference|reference\/averlo-components)[^"']*["']|import\([^)]*["'][^"']*(\.thin-start|thin-start\/reference|reference\/averlo-components)[^"']*["'][^)]*\))/;
 
 function parseArgs(argv) {
-	const flags = new Set(argv);
-	const recognized = new Set([
-		"--dry-run",
-		"--yes",
-		"--force",
-		"--in-place",
-		"--confirm-instance",
-		"--help",
-	]);
-	const unknown = argv.filter((arg) => !recognized.has(arg));
+	const options = {
+		confirmInstance: false,
+		dryRun: false,
+		force: false,
+		help: false,
+		inPlace: false,
+		output: undefined,
+		yes: false,
+	};
 
-	if (unknown.length > 0) {
-		throw new Error(`Unknown flag(s): ${unknown.join(", ")}`);
+	for (let index = 0; index < argv.length; index += 1) {
+		const arg = argv[index];
+		if (arg === "--output") {
+			const value = argv[index + 1];
+			if (!value || value.startsWith("--")) {
+				throw new Error("--output requires a directory path.");
+			}
+			options.output = value;
+			index += 1;
+			continue;
+		}
+		if (arg === "--confirm-instance") options.confirmInstance = true;
+		else if (arg === "--dry-run") options.dryRun = true;
+		else if (arg === "--force") options.force = true;
+		else if (arg === "--help") options.help = true;
+		else if (arg === "--in-place") options.inPlace = true;
+		else if (arg === "--yes") options.yes = true;
+		else throw new Error(`Unknown flag: ${arg}`);
 	}
 
-	return {
-		dryRun: flags.has("--dry-run"),
-		force: flags.has("--force"),
-		help: flags.has("--help"),
-		inPlace: flags.has("--in-place"),
-		confirmInstance: flags.has("--confirm-instance"),
-		yes: flags.has("--yes"),
-	};
+	if (options.inPlace && options.output) {
+		throw new Error("--output cannot be combined with --in-place.");
+	}
+
+	return options;
 }
 
 function printUsage() {
 	console.log(`Usage: npm run create:thin-start -- [flags]
 
+Default behavior materializes a complete thin-start workspace at
+${thinStartProfile.defaultOutput}.
+
 Flags:
-  --dry-run  Print the thin-start creation plan without changing files
-  --yes      Skip the confirmation prompt
-  --force    Replace an existing parked reference directory
-  --in-place Record an in-place live rewrite plan after parking reference code
-  --confirm-instance
-            Required with mutating --in-place runs. Confirms this checkout is
-            a new/disposable template instance, not the canonical default.
-  --help     Show this help text
+  --output <path>     Materialize at a custom directory
+  --dry-run           Print the profile plan without changing files
+  --force             Replace an existing verified thin-start output/reference
+  --in-place          Apply the profile to the current project instance
+  --confirm-instance  Required for mutating --in-place activation
+  --yes               Skip the in-place confirmation prompt
+  --help              Show this help text
 `);
 }
 
-function relativePath(targetPath) {
-	return path.relative(ROOT, targetPath) || ".";
+function resolveOutputRoot(options) {
+	return options.inPlace
+		? TEMPLATE_ROOT
+		: path.resolve(
+				TEMPLATE_ROOT,
+				options.output ?? thinStartProfile.defaultOutput,
+			);
+}
+
+function displayPath(targetPath) {
+	const relative = path.relative(TEMPLATE_ROOT, targetPath);
+	return relative && !relative.startsWith("..") ? relative : targetPath;
 }
 
 async function pathExists(targetPath) {
@@ -161,284 +96,350 @@ async function pathExists(targetPath) {
 	}
 }
 
-async function readPackageJson() {
-	const raw = await fs.readFile(PACKAGE_JSON_PATH, "utf8");
-	return JSON.parse(raw);
+function assertSafeOutputRoot(outputRoot) {
+	const normalized = path.resolve(outputRoot);
+	const filesystemRoot = path.parse(normalized).root;
+	const home = path.resolve(os.homedir());
+	if (
+		normalized === filesystemRoot ||
+		normalized === home ||
+		normalized === TEMPLATE_ROOT ||
+		TEMPLATE_ROOT.startsWith(`${normalized}${path.sep}`)
+	) {
+		throw new Error(`Refusing unsafe thin-start output path: ${normalized}`);
+	}
 }
 
-async function writePackageJson(pkg) {
-	await fs.writeFile(
-		PACKAGE_JSON_PATH,
-		`${JSON.stringify(pkg, null, "\t")}\n`,
-		"utf8",
-	);
+async function readJson(filePath) {
+	return JSON.parse(await fs.readFile(filePath, "utf8"));
 }
 
-async function assertTemplateShape() {
-	const pkg = await readPackageJson();
-	const requiredScripts = [
-		"build",
-		"dev:agent",
-		"intelligence:generate",
-		"prune:template",
-	];
-	const missingScripts = requiredScripts.filter((scriptName) => {
-		return typeof pkg.scripts?.[scriptName] !== "string";
-	});
-
-	if (missingScripts.length > 0) {
+async function assertReplaceableOutput(outputRoot) {
+	const markerPath = path.join(outputRoot, PROFILE_MARKER);
+	if (!(await pathExists(markerPath))) {
 		throw new Error(
-			`Expected an Averlo template-shaped checkout. Missing package script(s): ${missingScripts.join(", ")}.`,
+			`Refusing to replace ${displayPath(outputRoot)} because it is not a verified thin-start output.`,
+		);
+	}
+	const marker = await readJson(markerPath);
+	if (marker.profile !== thinStartProfile.id) {
+		throw new Error(
+			`Refusing to replace ${displayPath(outputRoot)} because its profile marker does not match ${thinStartProfile.id}.`,
 		);
 	}
 }
 
 function assertInPlaceActivationAllowed(options) {
 	if (!options.inPlace || options.dryRun) return;
-
 	if (!options.confirmInstance) {
 		throw new Error(
-			"Mutating thin-start activation requires --confirm-instance. Use it only in a new/disposable template instance after accepting that the live source will be rewritten.",
+			"Mutating thin-start activation requires --confirm-instance. Use it only in a new/disposable template instance.",
 		);
 	}
 }
 
-async function confirmMutation(options) {
+async function confirmInPlaceMutation(options) {
+	if (!options.inPlace || options.yes) return true;
 	const rl = createInterface({ input, output });
-
 	try {
-		const prompt = options.inPlace
-			? "This parks the current reference and rewrites live source for selected thin-start in-place activation. Continue? [y/N] "
-			: "This creates a local parked thin-start reference outside src/. Continue? [y/N] ";
-		const answer = await rl.question(prompt);
+		const answer = await rl.question(
+			"This parks the full component reference and rewrites this project instance from the thin-start manifest. Continue? [y/N] ",
+		);
 		return /^(y|yes)$/i.test(answer.trim());
 	} finally {
 		rl.close();
 	}
 }
 
-async function walkFiles(targetDir) {
-	if (!(await pathExists(targetDir))) return [];
-
-	const entries = await fs.readdir(targetDir, { withFileTypes: true });
-	const files = [];
-
-	for (const entry of entries) {
-		const absolutePath = path.join(targetDir, entry.name);
-		if (entry.isDirectory()) {
-			files.push(...(await walkFiles(absolutePath)));
-			continue;
-		}
-		files.push(absolutePath);
-	}
-
-	return files;
-}
-
-async function assertParkedReferenceOutsideLiveImportGraph() {
-	const files = (await walkFiles(SRC_DIR)).filter((filePath) =>
-		/\.(ts|tsx|js|jsx|mjs|cjs)$/.test(filePath),
+function trackedFiles() {
+	const result = execFileSync(
+		"git",
+		["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+		{
+			cwd: TEMPLATE_ROOT,
+			encoding: "utf8",
+		},
 	);
-	const failures = [];
+	return result.split("\0").filter(Boolean);
+}
 
-	for (const filePath of files) {
-		const content = await fs.readFile(filePath, "utf8");
-		if (LIVE_IMPORT_PATTERN.test(content)) {
-			failures.push(relativePath(filePath));
+async function copyTrackedWorkspace(outputRoot) {
+	for (const relativePath of trackedFiles()) {
+		const source = path.join(TEMPLATE_ROOT, relativePath);
+		const destination = path.join(outputRoot, relativePath);
+		let stat;
+		try {
+			stat = await fs.lstat(source);
+		} catch (error) {
+			if (error?.code === "ENOENT") continue;
+			throw error;
+		}
+		await fs.mkdir(path.dirname(destination), { recursive: true });
+		if (stat.isSymbolicLink()) {
+			await fs.symlink(await fs.readlink(source), destination);
+		} else {
+			await fs.copyFile(source, destination);
 		}
 	}
-
-	if (failures.length === 0) return;
-
-	console.error("\nParked thin-start reference imports found in live src/:");
-	for (const failure of failures) {
-		console.error(`- ${failure}`);
-	}
-
-	throw new Error("Thin-start parked reference is in the live import graph.");
 }
 
-function buildManifest(options) {
-	return {
-		schemaVersion: 1,
-		generatedAt: new Date().toISOString(),
-		mode: options.inPlace ? "thin-start-in-place" : "thin-start-reference",
-		source: "src/components",
-		target: relativePath(PARKED_COMPONENTS_DIR),
-		liveImportGraph: "forbidden",
-		notes: [
-			"Reference-only parked copy of the current Averlo component system.",
-			"Do not import from this directory into src/.",
-			"Promote only the minimal API needed for the current website.",
-		],
-	};
-}
-
-function buildLiveRewritePlan() {
-	return {
-		schemaVersion: 1,
-		mode: "thin-start-in-place",
-		status: "planned",
-		defaultSetupBehavior: "unchanged until this command is explicitly selected",
-		parkedReferenceImportGraph: "forbidden",
-		targets: LIVE_REWRITE_TARGETS,
-		writes: THIN_START_WRITE_FILES.map((file) => file.path),
-		removals: THIN_START_REMOVE_PATHS,
-		nextGate:
-			"Run exported API review in strict mode after selected in-place activation.",
-	};
-}
-
-function renderReferenceReadme() {
-	return [
-		"# Thin-Start Parked Averlo Reference",
-		"",
-		"This directory is generated by `npm run create:thin-start`.",
-		"",
-		"It is reference-only and must stay outside the live import graph.",
-		"Agents may inspect the parked Averlo component API here, but live",
-		"promotion should bring forward only the minimal API needed for the",
-		"current website.",
-		"",
-		"Do not import from `.thin-start/` into `src/`.",
-		"",
-	].join("\n");
-}
-
-function printPlan(options) {
-	console.log("\nThin-start creation plan");
-	console.log("========================");
-	console.log(`- mode: ${options.inPlace ? "in-place" : "reference-only"}`);
-	console.log(`- copy: ${relativePath(COMPONENT_SOURCE_DIR)}`);
-	console.log(`- parked reference: ${relativePath(PARKED_COMPONENTS_DIR)}`);
-	console.log("- write: .thin-start/reference/README.md");
-	console.log("- write: .thin-start/reference/manifest.json");
-	if (options.inPlace) {
-		console.log("- write: .thin-start/reference/live-rewrite-plan.json");
-		console.log(
-			`- live source rewrite files: ${THIN_START_WRITE_FILES.length} planned`,
-		);
-		console.log(
-			`- live source removals: ${THIN_START_REMOVE_PATHS.length} planned`,
-		);
-		console.log(
-			"- live source rewrite: applied only on non-dry explicit --in-place run",
-		);
-		console.log(
-			`- package dependency update: ${Object.keys(ACTIVATION_DEPENDENCIES).join(", ")}`,
-		);
-	}
-	console.log("- assert: live src/ does not import parked reference paths");
-	console.log("- default Averlo setup remains unchanged");
-	if (options.force) {
-		console.log("- force: existing parked reference will be replaced");
-	}
-}
-
-async function applyInPlaceRewrite() {
-	for (const targetPath of THIN_START_REMOVE_PATHS) {
-		await fs.rm(path.join(ROOT, targetPath), { recursive: true, force: true });
-	}
-
-	for (const file of THIN_START_WRITE_FILES) {
-		const absolutePath = path.join(ROOT, file.path);
-		await fs.mkdir(path.dirname(absolutePath), { recursive: true });
-		await fs.writeFile(absolutePath, file.content, "utf8");
-	}
-}
-
-async function applyActivationDependencies() {
-	const pkg = await readPackageJson();
-	pkg.dependencies = pkg.dependencies ?? {};
-
-	let changed = false;
-	for (const [name, version] of Object.entries(ACTIVATION_DEPENDENCIES)) {
-		if (pkg.dependencies[name] === version) continue;
-		pkg.dependencies[name] = version;
-		changed = true;
-	}
-
-	if (!changed) return;
-
-	pkg.dependencies = Object.fromEntries(
-		Object.entries(pkg.dependencies).sort(([left], [right]) =>
-			left.localeCompare(right),
-		),
-	);
-	await writePackageJson(pkg);
-}
-
-async function createThinStartReference(options) {
+async function parkComponentReference(options) {
 	if (await pathExists(PARKED_REFERENCE_DIR)) {
 		if (!options.force) {
 			throw new Error(
-				`${relativePath(PARKED_REFERENCE_DIR)} already exists. Re-run with --force to replace it.`,
+				`${displayPath(PARKED_REFERENCE_DIR)} already exists. Re-run with --force to replace the verified parked reference.`,
+			);
+		}
+		const marker = path.join(PARKED_REFERENCE_DIR, PROFILE_MARKER);
+		if (!(await pathExists(marker))) {
+			throw new Error(
+				`Refusing to replace ${displayPath(PARKED_REFERENCE_DIR)} without its profile marker.`,
 			);
 		}
 		await fs.rm(PARKED_REFERENCE_DIR, { recursive: true, force: true });
 	}
 
-	await fs.mkdir(path.dirname(PARKED_COMPONENTS_DIR), { recursive: true });
-	await fs.cp(COMPONENT_SOURCE_DIR, PARKED_COMPONENTS_DIR, {
-		recursive: true,
-		errorOnExist: true,
-	});
+	await fs.mkdir(PARKED_REFERENCE_DIR, { recursive: true });
+	await fs.cp(
+		path.join(TEMPLATE_ROOT, "src/components"),
+		path.join(PARKED_REFERENCE_DIR, "src/components"),
+		{ recursive: true },
+	);
 	await fs.writeFile(
-		path.join(PARKED_ROOT, "reference/README.md"),
-		renderReferenceReadme(),
+		path.join(PARKED_REFERENCE_DIR, PROFILE_MARKER),
+		`${JSON.stringify({ profile: thinStartProfile.id, referenceOnly: true }, null, 2)}\n`,
 		"utf8",
 	);
 	await fs.writeFile(
-		path.join(PARKED_ROOT, "reference/manifest.json"),
-		`${JSON.stringify(buildManifest(options), null, "\t")}\n`,
+		path.join(PARKED_REFERENCE_DIR, "README.md"),
+		[
+			"# Thin-Start Parked Component Reference",
+			"",
+			"This is a reference-only snapshot created before in-place activation.",
+			"Do not import from `.thin-start/` into live source.",
+			"",
+		].join("\n"),
 		"utf8",
 	);
+}
 
-	if (options.inPlace) {
-		await fs.writeFile(
-			LIVE_REWRITE_PLAN_PATH,
-			`${JSON.stringify(buildLiveRewritePlan(), null, "\t")}\n`,
-			"utf8",
+async function applyFileRules(destinationRoot) {
+	for (const target of thinStartProfile.removals) {
+		await fs.rm(path.join(destinationRoot, target), {
+			recursive: true,
+			force: true,
+		});
+	}
+
+	const fileRules = [
+		...thinStartProfile.sharedFiles.map((target) => ({
+			source: target,
+			target,
+		})),
+		...thinStartProfile.overrides,
+	];
+
+	for (const file of fileRules) {
+		const source = path.join(TEMPLATE_ROOT, file.source);
+		const destination = path.join(destinationRoot, file.target);
+		if (source === destination) continue;
+		await fs.mkdir(path.dirname(destination), { recursive: true });
+		await fs.copyFile(source, destination);
+	}
+}
+
+function applyRecordChanges(record, changes) {
+	const next = { ...(record ?? {}) };
+	for (const name of changes.remove) delete next[name];
+	for (const [name, value] of Object.entries(changes.add)) next[name] = value;
+	return Object.fromEntries(
+		Object.entries(next).sort(([left], [right]) => left.localeCompare(right)),
+	);
+}
+
+async function applyPackageChanges(destinationRoot) {
+	const packagePath = path.join(destinationRoot, "package.json");
+	const pkg = await readJson(packagePath);
+	const changes = thinStartProfile.packageChanges;
+	pkg.dependencies = applyRecordChanges(pkg.dependencies, changes.dependencies);
+	pkg.devDependencies = applyRecordChanges(
+		pkg.devDependencies,
+		changes.devDependencies,
+	);
+	for (const scriptName of changes.scripts.remove)
+		delete pkg.scripts?.[scriptName];
+	await fs.writeFile(
+		packagePath,
+		`${JSON.stringify(pkg, null, "\t")}\n`,
+		"utf8",
+	);
+}
+
+async function walkFiles(targetDir) {
+	if (!(await pathExists(targetDir))) return [];
+	const entries = await fs.readdir(targetDir, { withFileTypes: true });
+	const files = [];
+	for (const entry of entries) {
+		const absolutePath = path.join(targetDir, entry.name);
+		if (entry.isDirectory()) files.push(...(await walkFiles(absolutePath)));
+		else files.push(absolutePath);
+	}
+	return files;
+}
+
+async function assertNoParkedImports(destinationRoot) {
+	const files = (await walkFiles(path.join(destinationRoot, "src"))).filter(
+		(filePath) => /\.(ts|tsx|js|jsx|mjs|cjs)$/.test(filePath),
+	);
+	const failures = [];
+	for (const filePath of files) {
+		if (LIVE_IMPORT_PATTERN.test(await fs.readFile(filePath, "utf8"))) {
+			failures.push(path.relative(destinationRoot, filePath));
+		}
+	}
+	if (failures.length > 0) {
+		throw new Error(
+			`Parked thin-start reference imports found in live source:\n${failures.map((file) => `- ${file}`).join("\n")}`,
 		);
 	}
 }
 
+async function validateProfile(destinationRoot) {
+	for (const requiredFile of thinStartProfile.verification.requiredFiles) {
+		if (!(await pathExists(path.join(destinationRoot, requiredFile)))) {
+			throw new Error(`Thin-start required file is missing: ${requiredFile}`);
+		}
+	}
+	for (const forbiddenPath of thinStartProfile.verification.forbiddenPaths) {
+		if (await pathExists(path.join(destinationRoot, forbiddenPath))) {
+			throw new Error(`Thin-start forbidden path remains: ${forbiddenPath}`);
+		}
+	}
+	for (const route of thinStartProfile.routes.retain) {
+		if (!(await pathExists(path.join(destinationRoot, route.file)))) {
+			throw new Error(`Thin-start retained route is missing: ${route.path}`);
+		}
+	}
+
+	const pkg = await readJson(path.join(destinationRoot, "package.json"));
+	for (const name of thinStartProfile.verification.forbiddenPackages) {
+		if (pkg.dependencies?.[name] || pkg.devDependencies?.[name]) {
+			throw new Error(`Thin-start forbidden package remains: ${name}`);
+		}
+	}
+	for (const name of thinStartProfile.packageChanges.scripts.retain) {
+		if (typeof pkg.scripts?.[name] !== "string") {
+			throw new Error(`Thin-start retained script is missing: ${name}`);
+		}
+	}
+	await assertNoParkedImports(destinationRoot);
+}
+
+function currentCommit() {
+	return execFileSync("git", ["rev-parse", "HEAD"], {
+		cwd: TEMPLATE_ROOT,
+		encoding: "utf8",
+	}).trim();
+}
+
+async function writeReceipt(destinationRoot, mode) {
+	const receipt = {
+		schemaVersion: thinStartProfile.schemaVersion,
+		profile: thinStartProfile.id,
+		mode,
+		sourceCommit: currentCommit(),
+		verification: thinStartProfile.verification.commands,
+	};
+	const receiptPath =
+		mode === "in-place"
+			? path.join(PARKED_ROOT, "profile.json")
+			: path.join(destinationRoot, PROFILE_MARKER);
+	await fs.mkdir(path.dirname(receiptPath), { recursive: true });
+	await fs.writeFile(
+		receiptPath,
+		`${JSON.stringify(receipt, null, 2)}\n`,
+		"utf8",
+	);
+}
+
+function printPlan(options, destinationRoot) {
+	console.log("\nThin-start profile plan");
+	console.log("=======================");
+	console.log(
+		`- profile: ${thinStartProfile.id} (schema ${thinStartProfile.schemaVersion})`,
+	);
+	console.log(
+		`- mode: ${options.inPlace ? "in-place" : "materialized workspace"}`,
+	);
+	console.log(`- destination: ${displayPath(destinationRoot)}`);
+	console.log(`- shared files: ${thinStartProfile.sharedFiles.length}`);
+	console.log(`- file-backed overrides: ${thinStartProfile.overrides.length}`);
+	console.log(`- removals: ${thinStartProfile.removals.length}`);
+	console.log(
+		`- added dependencies: ${Object.keys(thinStartProfile.packageChanges.dependencies.add).join(", ") || "none"}`,
+	);
+	console.log(
+		`- removed scripts: ${thinStartProfile.packageChanges.scripts.remove.join(", ") || "none"}`,
+	);
+	if (options.inPlace) {
+		console.log("- park: current src/components reference before mutation");
+	}
+	if (options.force)
+		console.log("- force: replace verified prior output/reference");
+}
+
+async function materializeWorkspace(options, destinationRoot) {
+	assertSafeOutputRoot(destinationRoot);
+	if (await pathExists(destinationRoot)) {
+		if (!options.force) {
+			throw new Error(
+				`${displayPath(destinationRoot)} already exists. Re-run with --force to replace a verified thin-start output.`,
+			);
+		}
+		await assertReplaceableOutput(destinationRoot);
+		await fs.rm(destinationRoot, { recursive: true, force: true });
+	}
+	await fs.mkdir(destinationRoot, { recursive: true });
+	await copyTrackedWorkspace(destinationRoot);
+	await applyFileRules(destinationRoot);
+	await applyPackageChanges(destinationRoot);
+	await validateProfile(destinationRoot);
+	await writeReceipt(destinationRoot, "materialized");
+}
+
+async function activateInPlace(options) {
+	await parkComponentReference(options);
+	await applyFileRules(TEMPLATE_ROOT);
+	await applyPackageChanges(TEMPLATE_ROOT);
+	await validateProfile(TEMPLATE_ROOT);
+	await writeReceipt(TEMPLATE_ROOT, "in-place");
+}
+
 async function main() {
 	const options = parseArgs(process.argv.slice(2));
-
 	if (options.help) {
 		printUsage();
 		return;
 	}
 
-	await assertTemplateShape();
+	const destinationRoot = resolveOutputRoot(options);
 	assertInPlaceActivationAllowed(options);
-	printPlan(options);
-
+	printPlan(options, destinationRoot);
 	if (options.dryRun) {
-		await assertParkedReferenceOutsideLiveImportGraph();
 		console.log("\nDry run complete. No files were changed.");
 		return;
 	}
 
-	if (!options.yes) {
-		const confirmed = await confirmMutation(options);
-		if (!confirmed) {
-			throw new Error("Aborted by user.");
-		}
+	if (!(await confirmInPlaceMutation(options))) {
+		throw new Error("Aborted by user.");
 	}
-
-	await createThinStartReference(options);
-	if (options.inPlace) {
-		await applyActivationDependencies();
-		await applyInPlaceRewrite();
-	}
-	await assertParkedReferenceOutsideLiveImportGraph();
+	if (options.inPlace) await activateInPlace(options);
+	else await materializeWorkspace(options, destinationRoot);
 
 	console.log(
 		options.inPlace
-			? "\nThin-start parked reference created and in-place activation applied."
-			: "\nThin-start parked reference created successfully.",
+			? "\nThin-start in-place activation complete."
+			: `\nThin-start workspace materialized at ${displayPath(destinationRoot)}.`,
 	);
 }
 

@@ -2,13 +2,19 @@
 
 ## Purpose
 
-- Goal: Compare reusable ideas from newer Averlo Next Template descendants back
-  against the canonical template and prepare implementation packets without
-  importing product-specific scope.
+- Active goal: Port the accepted reusable architecture from the pinned Inference
+  Console source into full and thin template profiles, while keeping the full
+  profile product-ready and the thin profile intentionally smaller.
 - Template root:
-  `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template`
-- Source A:
-  `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-web-clean`
+  `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template-inference-port`
+- Template baseline: `50616826610a9acded69625133e476694cdf3358`.
+- Active source:
+  `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console` at pinned commit
+  `8a13d12ea11461fe204625bd1247a6db16c4a207`.
+- Source access: read only through `git show` or `git archive`; ignore its dirty
+  working tree.
+- Historical Source B:
+  `/Users/olafbobryk/Documents/Code/Averlo/2026/averlo-rebrand`.
 - Source B:
   `/Users/olafbobryk/Documents/Code/Averlo/2026/averlo-rebrand`
 - Historical template recovery source:
@@ -17,9 +23,34 @@
   `c7397aa` reduced the shared UI surface.
 - Framework: Use `template-backport-workflow` classifications:
   `Port`, `Adapt`, `Skip`, and `Defer`.
-- Ledger owner: Orchestrator chat. Explorer agents return rows, but do not edit
-  this file directly.
-- Last updated: 2026-07-04
+- Delivery branch: `codex/inference-port`; one verified commit per chunk.
+- Last updated: 2026-07-19
+
+## Active Inference Console Port
+
+Product spine: reusable full/thin template parity plus a product-ready,
+organization-powered full-start dashboard.
+
+| Chunk | Scope | Classification | Status | Current evidence | Next gate |
+| --- | --- | --- | --- | --- | --- |
+| P1-C1 | Clean baseline, filesystem-backed thin profile, shared Panel/Card | Adapt | complete | Baseline `5061682`; shared Panel/Card restored; profile manifest and file overrides pass strict API review, typecheck, build, and smoke in both profiles | Commit the verified chunk |
+| P1-C2 | Pinned visual tokens and shared component convergence | Adapt | pending | Source pin accepted; exact component inventory recorded in architecture | Visual gate 1 across both profiles |
+| P1-C3 | Provider-neutral authentication and organization lifecycle | Adapt | pending | Routes, adapters, session, invitation, and identity decisions accepted | Focused auth/org verification |
+| P1-C4 | Dashboard shell, typed surface registry, commands, debug state | Adapt | pending | Route and command ownership accepted | Registry/capability and responsive verification |
+| P1-C5 | Reference entities, mutations, policy, pruning, skill, closure | Adapt | pending | Dashboard-owned dependency layers and reference-entity scope accepted | Visual gate 2 and closure audit |
+
+### Current classifications
+
+| ID | Candidate | Classification | Decision |
+| --- | --- | --- | --- |
+| INF-PROFILE-001 | Filesystem-backed thin profile with complete isolated materialization | Adapt | Manifest owns shared files, overrides, removals, package changes, routes/scripts, API review, and verification. |
+| INF-UI-020 | Generic `Panel` plus structured `Card` built on it | Adapt | Shared identically by full and thin; Panel owns non-semantic surfaces and overlay roots. |
+| INF-UI-021 | File-backed Sonner thin toast | Adapt | Thin-specific implementation uses shared tokens; full template feedback API remains intact. |
+| INF-VISUAL-001 | Pinned light/dark surface, sidebar, status, spectrum, radius, focus, motion, scrollbar grammar | Adapt | Port in P1-C2 with Inter; exclude SF Pro and product gradients. |
+| INF-AUTH-001 | Provider-neutral auth/org/membership/invitation/private-file contracts | Adapt | Implement in P1-C3 with non-durable fixture adapter and server-resolved org context. |
+| INF-DASH-001 | Dashboard shell, surface registry, contextual Command-K, deterministic debug state | Adapt | Implement in P1-C4 without Inference notifications or profile gradient. |
+| INF-ENTITY-001 | Dashboard-owned entity presentation foundation and reference members/records | Adapt | Implement file-based dependency layers in P1-C5; no global presentation registry. |
+| INF-SKIP-020 | Supabase, Resend, DnD, charts, PDF, branded providers, notifications, roles, domains | Skip | Keep source/product/provider obligations out of the reusable baseline. |
 
 ## Operating Rules
 
@@ -41,8 +72,8 @@
 
 | Source | Root | Role | Current use |
 | --- | --- | --- | --- |
-| Template | `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template` | Canonical target | Receives only reusable, template-safe backports. |
-| Inference | `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-web-clean` | Product descendant | Source for UI primitive, helper, command-search, loading, and app-shell patterns. |
+| Template | `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template-inference-port` | Isolated target worktree | Receives the accepted five-chunk port before any merge decision. |
+| Inference Console | `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console` at `8a13d12` | Pinned product source | Read-only source for visual primitives, dashboard patterns, auth/org contracts, and presentation patterns. |
 | Averlo Rebrand | `/Users/olafbobryk/Documents/Code/Averlo/2026/averlo-rebrand` | Product descendant | Source for dev/test workflow, orchestration, scroll-performance, content, metadata, shell, and motion patterns. |
 | Historical Template UI | Git ref `7235466` in this repo | Pre-thin-start template state | Primary source for recovered helpers, richer Button behavior, and future form/misc UI packets that already belonged to the template. |
 
@@ -203,3 +234,8 @@
 | 2026-07-04 | Disposable thin-start activation, `npm run review:thin-start-api -- --strict`, `npm run typecheck` | passed | Verified thin-start keeps `src/components/composites/markdown/MarkdownRenderer.tsx` plus a minimal `ChoiceIndicatorMulti` dependency without restoring the broad icon/helper/misc surfaces. |
 | 2026-07-04 | Disposable thin-start activation, `npm run review:thin-start-api -- --strict`, `npm run typecheck`; `curl -fsS http://localhost:3069/internal/demo/ui/input/choice?motion=off&reveal=off` | passed | Verified thin-start now keeps `RadioInput`, `MultiselectInput`, `ToggleInput`, `ChoiceField`, and `ChoiceIndicators`; full demo route includes the thin-start choice-input usage snippet. |
 | 2026-07-04 | `npm run intelligence:hybrid -- --task-id scroll-performance-page-target-rebuild ...`; `npm run lint`; `npm run typecheck`; `npm run build`; `npm run measure:scroll-performance -- --path /internal/demo/ui/primitives --output tmp/scroll-performance-page-smoke.json --notes "page smoke"`; `npm run record:scroll-performance -- --input tmp/scroll-performance-page-smoke.json --output tmp/scroll-performance-runs-smoke.jsonl`; `npm run setup:scroll-performance-autoresearch -- --tag page-smoke --path /internal/demo/ui/primitives --mutable src/components/ui/primitives --dry-run`; scroll-performance prune dry-runs; canonical `main` mutating prune failure | passed / expected failure | Verified the replacement page-target scroll-performance system, grouped scripts, ignored runtime output, narrower `--no-scroll-performance` surface, and removal of the synthetic internal fixture route. The mutating prune command failed as expected on canonical `main` without `--confirm-template-root`. |
+| 2026-07-19 | Full and materialized thin `npm run typecheck`, `npm run build`, and `npm run verify:smoke` | passed | Full produced 23 routes; thin produced 9 routes. Both smoke checks passed `/`, `/internal/intelligence`, and `/api/health`. |
+| 2026-07-19 | `npm run review:thin-start-api -- --root .thin-start/workspace --strict` | passed | No broad, outside-allowlist, parked-reference, or compatibility-marker findings. |
+| 2026-07-19 | Default and custom `create:thin-start`; guarded in-place checks; `dev:thin -- --random --dry-run` | passed / expected failure | Default and custom workspaces materialized from one manifest. Missing `--confirm-instance` failed closed; in-place dry-run did not mutate. |
+| 2026-07-19 | `cmp` shared Panel/Card; thin MDX/editor exclusion | passed | Full and thin Panel/Card files are byte-identical; thin has no MDXEditor package or editor source. |
+| 2026-07-19 | Isolated preview route matrix | passed | Full `/internal/demo` and thin `/`, `/contact`, and `/internal/intelligence` returned 200 with automation overrides. |

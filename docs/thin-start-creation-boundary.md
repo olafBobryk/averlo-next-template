@@ -1,134 +1,78 @@
-# Optional Thin-Start Creation Boundary
+# Thin-Start Profile Boundary
 
-This document records the accepted boundary for the optional thin-start creation
-path and the local command that prepares it. The command is optional-only: the
-default Averlo template remains unchanged unless thin-start activation is
-explicitly selected in a target instance.
+Thin start is an optional filesystem-backed template profile. Full start remains
+the canonical source. Shared files come directly from that source; genuine
+thin-only replacements live as normal files under
+`template-profiles/thin-start/overrides/`.
 
-## Decision
+`template-profiles/thin-start/manifest.mjs` is authoritative for shared files,
+overrides, removals, dependency changes, retained routes and scripts, API review,
+and verification. Component source must never be embedded in generator strings.
 
-Thin-start is an optional creation-time mode. It does not replace the normal
-Averlo template path, and it is not a forced parking, reset, or cleanup path
-for standard setup.
+## Isolated materialization
 
-The explicit tooling entrypoint is:
+The default command creates a complete disposable project in the ignored
+`.thin-start/workspace` directory:
 
 ```bash
-npm run create:thin-start -- --dry-run
+npm run create:thin-start
+npm run review:thin-start-api -- --root .thin-start/workspace --strict
 ```
 
-For the selected in-place activation route, preview the mutation boundary with:
+Use a custom output without changing the source checkout:
+
+```bash
+npm run create:thin-start -- --output ../my-thin-project
+```
+
+Existing outputs are not replaced by default. `--force` works only when the
+destination contains the matching thin-profile marker, preventing an unrelated
+directory from being removed.
+
+For routine development, refresh, install, and run the isolated profile through
+one command:
+
+```bash
+npm run dev:thin -- --random
+```
+
+Materialized workspaces are disposable. Edit canonical shared files or the
+explicit override files, then rematerialize.
+
+## In-place activation
+
+In-place activation exists only for a new template instance. Preview its exact
+manifest plan first:
 
 ```bash
 npm run create:thin-start -- --dry-run --in-place
 ```
 
-Mutation requires an intentional run without `--dry-run`; use `--yes` only when
-the plan is accepted. Mutating in-place activation also requires
-`--confirm-instance`, which is the operator acknowledgement that the current
-checkout is a new/disposable template instance rather than the canonical default
-template:
+Mutation requires both the explicit mode and instance acknowledgement:
 
 ```bash
 npm run create:thin-start -- --yes --in-place --confirm-instance
-```
-
-In-place mode parks the current Averlo reference first, updates that
-instance for the selected activation dependencies, then applies the selected
-thin-start live rewrite: shared primitive templates, the generic markdown
-composite, Sonner-backed toast, route-owned internal intelligence components,
-and removal of broad misc/helper/icon/demo/dashboard surfaces from the live
-source graph.
-
-After activation, refresh the instance dependency lock/install state before
-building or shipping that instance:
-
-```bash
 npm install
+npm run review:thin-start-api -- --strict
+npm run build
 ```
 
-When thin-start is selected, the existing Averlo component system is copied
-to a parked, reference-only location outside the live import graph. Agents may
-inspect that parked API, but live promotion should bring forward only the
-minimal API needed for the current website.
+This path parks the current component tree under `.thin-start/reference/` before
+applying the manifest. Parked code is reference-only and must never re-enter the
+live import graph.
 
-The thin-start live primitive surface starts intentionally small:
+## Shared and thin-only surfaces
 
-- `Button`
-- `Card`
-- `Text`
-- `Section`
-- `Field`
-- `InputFrame`
-- `TextInput`
-- `Select`
-- `RadioInput`
-- `MultiselectInput`
-- `ToggleInput`
-- `Dropdown`
+Both profiles use the same `Panel` and structured `Card` implementation.
+`Panel` owns generic surfaces and overlay roots. `Card` builds on `Panel` and its
+slots own structured card composition.
 
-Motion foundations, reduced-motion handling, section motion behavior, dropdown
-interaction behavior, and limited input/select integration patterns stay intact.
-Broad misc/helper surfaces are not part of the simple thin-start primitive
-surface.
+Thin start keeps the small Button, Panel/Card, Text, Section, Field, InputFrame,
+Dropdown, native choice-input, Markdown renderer, modal, motion, and content
+scaffolds declared by the manifest. Its Sonner toast is an explicit file-backed
+override styled with shared tokens. Broad helper, icon, misc, dashboard, demo,
+and scroll-performance surfaces are excluded.
 
-Choice inputs are included because preference selection is common in thin-start
-projects. They use the same small `Field` contract as `TextInput` and
-`SelectInput`, keep real native radio/checkbox inputs in the DOM, and render
-through the minimal `ChoiceField` plus `ChoiceIndicators` foundation.
-
-The thin-start composite surface starts intentionally smaller than the full
-template. `MarkdownRenderer` is allowed because it accepts a plain markdown
-string, renders through the design system, and avoids metadata, route chrome,
-CMS records, or product-specific directives.
-
-Thin-start toast behavior should use a shadcn/Sonner-style default instead of
-carrying forward the current custom Averlo toast system. Other overlays may
-remain only when scaffold-critical, and they must stay small without dragging
-broad misc or visual-state dependencies into shared primitives.
-
-Internal intelligence UI must not define the shared design system. In
-thin-start, it should use custom, minimal, route-owned components under the
-internal intelligence route rather than expanding `src/components/ui`.
-
-Scroll-performance tooling is excluded from thin-start activation by default.
-If a thin-start instance needs the page-target benchmark/autoresearch loop, add
-it intentionally after activation rather than carrying it through the minimal
-component surface.
-
-The scaffold remains valuable and should stay:
-
-- dev workflow
-- route structure
-- content-mode scaffolding
-- Payload-ready inactive shape
-- Template Intelligence
-- docs/process scaffolding
-- motion/reduced-motion foundations
-- dropdown behavior
-- limited input/select patterns
-
-The review gate is exported API review, not just compile/build/smoke success.
-A thin-start output is only acceptable when the live exported surface is
-inspected and remains minimal for the current website. Compatibility props,
-broad misc/helper folders, unapproved composites, internal/demo/dashboard-driven
-abstractions, and parked code re-entering the live import graph are review
-failures.
-
-Use the report-only review command during setup:
-
-```bash
-npm run review:thin-start-api
-```
-
-Use `-- --strict` only when the current checkout is expected to satisfy the
-thin-start allowlist. The full Averlo default path is broader by design.
-
-## Source Status
-
-The current repository documents the full Averlo default component system,
-optional internal surfaces, prune behavior, content modes, Template
-Intelligence, and dev workflow. The thin-start-specific boundary above was
-accepted in the thin-start consolidation discussion. The shipped default path is
-the full Averlo template; thin-start is created only by the explicit command
-above.
+The exported API review is a required gate. It reads the same manifest as the
+materializer and rejects broad imports, unapproved composites, compatibility
+markers, and parked-reference imports.

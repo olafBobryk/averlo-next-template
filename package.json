@@ -23,6 +23,7 @@
 		"dev": "node scripts/dev-server.mjs user",
 		"dev:user": "node scripts/dev-server.mjs user",
 		"dev:agent": "node scripts/dev-server.mjs agent",
+		"dev:thin": "node scripts/dev-thin.mjs",
 		"build": "next build --turbopack",
 		"start": "next start",
 		"lint": "biome check",

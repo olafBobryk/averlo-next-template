@@ -1,6 +1,6 @@
 import { GraphMap, type GraphMapView } from "@/components/ui/misc/GraphMap";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -238,7 +238,7 @@ export default function ReferencePage() {
 
 					<div className="grid gap-4">
 						{REFERENCE_LINKS.map((link) => (
-							<Card key={link.href} display="flex" padding="md" gap="sm">
+							<Panel key={link.href} display="flex" padding="md" gap="sm">
 								<Text as="h2" variant="headingSm">
 									{link.title}
 								</Text>
@@ -256,7 +256,7 @@ export default function ReferencePage() {
 										Open link
 									</Button>
 								</div>
-							</Card>
+							</Panel>
 						))}
 					</div>
 				</div>

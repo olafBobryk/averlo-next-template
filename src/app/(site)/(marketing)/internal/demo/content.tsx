@@ -100,6 +100,7 @@ import {
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
 import { Listbox } from "@/components/ui/primitives/Listbox";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import { DateAgo } from "@/components/ui/time/DateAgo";
@@ -563,7 +564,8 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"SelectInput",
 		],
 	},
-	Card: { uses: [], usedIn: ["ModalShell", "ToastHost"] },
+	Card: { uses: ["Panel"], usedIn: [] },
+	Panel: { uses: [], usedIn: ["Card", "ModalShell", "ToastHost"] },
 	Divider: { uses: [], usedIn: [] },
 	Section: { uses: [], usedIn: [] },
 	Field: {
@@ -4566,7 +4568,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 											layout.
 										</Text>
 									</div>
-									<Card
+									<Panel
 										display="flex"
 										padding="sm"
 										gap="sm"
@@ -4580,7 +4582,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 										<Text variant="caption" className="text-background/80">
 											The section API still controls spacing and width.
 										</Text>
-									</Card>
+									</Panel>
 								</Section>
 							);
 						},
@@ -4622,7 +4624,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 											background needs real controls.
 										</Text>
 									</div>
-									<Card
+									<Panel
 										display="flex"
 										padding="sm"
 										gap="sm"
@@ -4636,7 +4638,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 											{taps} tap{taps === 1 ? "" : "s"} registered from the
 											background action.
 										</Text>
-									</Card>
+									</Panel>
 								</Section>
 							);
 						},
@@ -4718,7 +4720,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 										</Button>
 									</div>
 
-									<Card
+									<Panel
 										padding="sm"
 										shadow="none"
 										className="border border-border/15"
@@ -4749,7 +4751,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 												.
 											</Text>
 										</div>
-									</Card>
+									</Panel>
 								</div>
 							);
 						},

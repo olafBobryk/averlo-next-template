@@ -1,110 +1,56 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import clsx from "clsx";
+import type { ComponentPropsWithoutRef, ElementType } from "react";
+import { Panel, type PanelProps } from "@/components/ui/primitives/Panel";
 
-function cx(...classes: Array<string | false | null | undefined>) {
-	return classes.filter(Boolean).join(" ");
-}
-
-const cardStyles = cva(
-	"w-full rounded-2xl border border-border text-foreground shadow-sm",
-	{
-		variants: {
-			display: {
-				grid: "grid",
-				flex: "flex flex-col",
-			},
-			padding: {
-				none: "p-0",
-				sm: "p-4",
-				md: "p-6",
-				lg: "p-8",
-			},
-			gap: {
-				none: "gap-0",
-				sm: "gap-4",
-				md: "gap-6",
-				lg: "gap-8",
-			},
-			columns: {
-				1: "grid-cols-1",
-				2: "grid-cols-1 md:grid-cols-2",
-				3: "grid-cols-1 md:grid-cols-3",
-			},
-			shadow: {
-				none: "shadow-none",
-				sm: "shadow-sm",
-			},
-			bordered: {
-				true: "border border-border",
-				false: "border-0",
-			},
-			background: {
-				white: "bg-background",
-				surface: "bg-surface",
-				transparent: "bg-transparent",
-			},
-			tone: {
-				default: "",
-				warning: "border border-warning/20 bg-warning/10",
-				danger: "border border-danger/20 bg-danger/10",
-			},
-		},
-		defaultVariants: {
-			display: "grid",
-			padding: "md",
-			gap: "md",
-			columns: 1,
-			shadow: "sm",
-			bordered: true,
-			background: "white",
-			tone: "default",
+const cardStyles = cva("group/card text-sm", {
+	variants: {
+		size: {
+			default: "py-4 has-data-[slot=card-footer]:pb-0",
+			sm: "py-3 has-data-[slot=card-footer]:pb-0",
 		},
 	},
-);
+	defaultVariants: {
+		size: "default",
+	},
+});
 
-export type CardProps<T extends ElementType = "div"> = {
-	as?: T;
-	children?: ReactNode;
-	className?: string;
-} & VariantProps<typeof cardStyles> &
-	Omit<ComponentPropsWithoutRef<T>, "as" | "children" | "className">;
+export type CardProps<T extends ElementType = "div"> = PanelProps<T> &
+	VariantProps<typeof cardStyles>;
 
 export function Card<T extends ElementType = "div">({
-	as,
-	children,
-	className,
-	display,
-	padding,
-	gap,
-	columns,
-	shadow,
+	background = "card",
+	border,
 	bordered,
-	background,
-	tone,
-	...rest
+	className,
+	display = "flex",
+	gap,
+	overflow = "hidden",
+	padding,
+	size,
+	...props
 }: CardProps<T>) {
-	const Tag = (as ?? "div") as ElementType;
+	const resolvedSize = size ?? "default";
+	const usesStructuredSpacing = padding == null;
+	const PanelRoot = Panel as ElementType;
 
 	return (
-		<Tag
-			data-slot="card"
-			className={cx(
-				cardStyles({
-					display,
-					padding,
-					gap,
-					columns,
-					shadow,
-					bordered,
-					background,
-					tone,
-				}),
+		<PanelRoot
+			background={background}
+			border={border}
+			bordered={bordered}
+			className={clsx(
+				usesStructuredSpacing && cardStyles({ size: resolvedSize }),
 				className,
 			)}
-			{...(rest as ComponentPropsWithoutRef<ElementType>)}
-		>
-			{children}
-		</Tag>
+			data-size={resolvedSize}
+			data-slot="card"
+			display={display}
+			gap={gap ?? (resolvedSize === "sm" ? "sm" : "md")}
+			overflow={overflow}
+			padding={padding ?? "none"}
+			{...props}
+		/>
 	);
 }
 
@@ -113,21 +59,29 @@ type CardPartProps = ComponentPropsWithoutRef<"div">;
 export function CardHeader({ className, ...props }: CardPartProps) {
 	return (
 		<div
-			data-slot="card-header"
-			className={cx(
-				"@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+			className={clsx(
+				"grid auto-rows-min items-start gap-1 px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3",
 				className,
 			)}
+			data-slot="card-header"
 			{...props}
 		/>
 	);
 }
 
-export function CardTitle({ className, ...props }: CardPartProps) {
+type CardTitleProps = CardPartProps & {
+	as?: "div" | "h2" | "h3" | "h4";
+};
+
+export function CardTitle({ as = "h2", className, ...props }: CardTitleProps) {
+	const Tag = as;
 	return (
-		<div
+		<Tag
+			className={clsx(
+				"font-medium leading-none group-data-[size=sm]/card:text-sm",
+				className,
+			)}
 			data-slot="card-title"
-			className={cx("leading-none font-semibold", className)}
 			{...props}
 		/>
 	);
@@ -136,8 +90,8 @@ export function CardTitle({ className, ...props }: CardPartProps) {
 export function CardDescription({ className, ...props }: CardPartProps) {
 	return (
 		<div
+			className={clsx("text-sm text-muted/60", className)}
 			data-slot="card-description"
-			className={cx("text-sm text-muted", className)}
 			{...props}
 		/>
 	);
@@ -146,11 +100,11 @@ export function CardDescription({ className, ...props }: CardPartProps) {
 export function CardAction({ className, ...props }: CardPartProps) {
 	return (
 		<div
-			data-slot="card-action"
-			className={cx(
+			className={clsx(
 				"col-start-2 row-span-2 row-start-1 self-start justify-self-end",
 				className,
 			)}
+			data-slot="card-action"
 			{...props}
 		/>
 	);
@@ -159,8 +113,8 @@ export function CardAction({ className, ...props }: CardPartProps) {
 export function CardContent({ className, ...props }: CardPartProps) {
 	return (
 		<div
+			className={clsx("px-4 group-data-[size=sm]/card:px-3", className)}
 			data-slot="card-content"
-			className={cx("px-6", className)}
 			{...props}
 		/>
 	);
@@ -169,8 +123,11 @@ export function CardContent({ className, ...props }: CardPartProps) {
 export function CardFooter({ className, ...props }: CardPartProps) {
 	return (
 		<div
+			className={clsx(
+				"flex items-center border-t p-4 group-data-[size=sm]/card:p-3",
+				className,
+			)}
 			data-slot="card-footer"
-			className={cx("flex items-center px-6 [.border-t]:pt-6", className)}
 			{...props}
 		/>
 	);

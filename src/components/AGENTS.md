@@ -26,7 +26,7 @@ For any new reusable UI-library feature:
 
 ## Invariants
 - **Library-first invariant:** Never start from raw HTML if a library component already covers the pattern. Search here first.
-- **Composition invariant:** Prefer `Text`, `Button`, `Card`, `Field`, `InputFrame`, `Dropdown`, `Listbox`, `PasswordInput`, `SelectInput`, `ModalShell`, `ToastHost`, and other existing building blocks before introducing bespoke UI.
+- **Composition invariant:** Prefer `Text`, `Button`, `Panel`, structured `Card`, `Field`, `InputFrame`, `Dropdown`, `Listbox`, `PasswordInput`, `SelectInput`, `ModalShell`, `ToastHost`, and other existing building blocks before introducing bespoke UI.
 - **Focus invariant:** Every interactive control must preserve visible keyboard focus using the shared focus tokens from `ui/foundations/focus.ts`. Do not invent ad hoc focus rings, remove outlines without replacement, or move focus styling away from the real interactive element.
 - **Form invariant:** Labels, descriptions, errors, required state, IDs, and `aria-describedby` should flow through `Field` plus the relevant input component instead of page-local markup.
 - **Input shell invariant:** Text-like controls should use `InputFrame` for the shell and `inputVariants` or `inputSizeClasses` for the actual input element. Padding belongs on the input, not the wrapper.

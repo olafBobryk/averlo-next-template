@@ -189,20 +189,19 @@ clone, branch, or worktree for project-specific pruning.
 
 ### Thin-Start Mode
 
-Thin-start is an explicit instance activation path, not the default template
-state. Use it only when a project should begin with the smallest accepted live
-primitive surface while keeping the original Averlo system parked as
-reference-only code.
+Thin-start is a filesystem-backed template profile. Its default command creates
+a complete disposable workspace under the ignored `.thin-start/` directory, so
+the thin and full profiles can run side by side without rewriting this checkout.
 
 ```sh
-npm run create:thin-start -- --dry-run --in-place
-npm run create:thin-start -- --yes --in-place --confirm-instance
-npm install
-npm run review:thin-start-api -- --strict
-npm run build
+npm run create:thin-start
+npm run review:thin-start-api -- --root .thin-start/workspace --strict
+npm run dev:thin -- --random
 ```
 
-Read `docs/thin-start-creation-boundary.md` before using this path.
+Use `--output <path>` for another isolated workspace. Only new project
+instances should use the guarded `--in-place --confirm-instance` path. Read
+`docs/thin-start-creation-boundary.md` before in-place activation.
 
 ## Repository Layout
 
@@ -248,6 +247,7 @@ Read `docs/thin-start-creation-boundary.md` before using this path.
 | --- | --- |
 | `npm run dev` | Human local development server. |
 | `npm run dev:agent` | Isolated server for agent browser testing. |
+| `npm run dev:thin` | Refresh and run the materialized thin profile. |
 | `npm run verify:static` | Biome plus TypeScript checks. |
 | `npm run build` | Production Next.js build. |
 | `npm run verify:smoke` | Route smoke verification. |
@@ -255,7 +255,7 @@ Read `docs/thin-start-creation-boundary.md` before using this path.
 | `npm run setup:scroll-performance-autoresearch` | Create a disposable page-target scroll-performance worker worktree. |
 | `npm run score:scroll-performance` | Score the accepted baseline or one committed candidate in a scroll worker. |
 | `npm run prune:template` | Remove optional template surfaces in a clone. |
-| `npm run create:thin-start` | Activate the optional thin-start instance path. |
+| `npm run create:thin-start` | Materialize the optional thin-start profile. |
 
 ## Deployment
 

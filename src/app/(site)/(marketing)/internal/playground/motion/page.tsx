@@ -5,7 +5,7 @@ import type { MotionMoment } from "@/components/ui/foundations/motionTiming";
 import { MotionScope, Reveal } from "@/components/ui/motion";
 import { RevealGroup, RevealGroupItem } from "@/components/ui/motion/reveal";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -96,7 +96,7 @@ function QaCard({
 	children: React.ReactNode;
 }) {
 	return (
-		<Card display="flex" padding="md" gap="md" shadow="none">
+		<Panel display="flex" padding="md" gap="md" shadow="none">
 			<div className="flex flex-col gap-2">
 				<div className="flex flex-wrap items-center justify-between gap-3">
 					<Text as="h2" variant="headingSm">
@@ -111,7 +111,7 @@ function QaCard({
 				</Text>
 			</div>
 			{children}
-		</Card>
+		</Panel>
 	);
 }
 

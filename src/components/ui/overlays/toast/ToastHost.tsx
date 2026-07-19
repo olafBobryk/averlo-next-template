@@ -9,7 +9,7 @@ import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon } from "@/components/ui/icons/Icon";
 import Portal from "@/components/ui/overlays/Portal";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import type { ToastType } from "@/lib/feedback";
@@ -229,7 +229,7 @@ function ToastItemCard({
 						};
 
 	return (
-		<Card
+		<Panel
 			as={motion.div}
 			layout={motionAllowed}
 			initial={motionAllowed ? { opacity: 0, y: -8, scale: 0.98 } : false}
@@ -282,7 +282,7 @@ function ToastItemCard({
 					<Icon name="close" size="sm" />
 				</Button>
 			</div>
-		</Card>
+		</Panel>
 	);
 }
 

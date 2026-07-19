@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 import { fetchSession, login } from "@/lib/api/auth";
 import { showToast } from "@/lib/feedback";
@@ -50,7 +50,7 @@ export default function LoginPage() {
 	}
 
 	return (
-		<Card
+		<Panel
 			as="form"
 			display="flex"
 			padding="lg"
@@ -85,6 +85,6 @@ export default function LoginPage() {
 					Back to site
 				</Button>
 			</div>
-		</Card>
+		</Panel>
 	);
 }

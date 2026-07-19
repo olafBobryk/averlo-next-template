@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/primitives/Card";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 import { DashboardSection } from "./_components/layout/DashboardSection";
 
@@ -9,7 +9,7 @@ export default function DashboardPage() {
 			description="A minimal dashboard shell with route-scoped auth, sidebar navigation, and responsive layout scaffolding."
 		>
 			<div className="grid gap-4 lg:grid-cols-2">
-				<Card
+				<Panel
 					display="flex"
 					padding="md"
 					gap="sm"
@@ -23,8 +23,8 @@ export default function DashboardPage() {
 						The template now has a dedicated dashboard frame, route-scoped auth
 						guard, and responsive sidebar structure.
 					</Text>
-				</Card>
-				<Card
+				</Panel>
+				<Panel
 					display="flex"
 					padding="md"
 					gap="sm"
@@ -38,7 +38,7 @@ export default function DashboardPage() {
 						Add dashboard pages here and wrap each page in dashboard-specific
 						content blocks rather than marketing sections.
 					</Text>
-				</Card>
+				</Panel>
 			</div>
 		</DashboardSection>
 	);

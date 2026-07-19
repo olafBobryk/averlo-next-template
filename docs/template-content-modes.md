@@ -99,30 +99,31 @@ that shape.
 
 ## Thin-Start Instances
 
-Thin-start is an optional instance creation path, not a fourth content source
-and not the default template state. Use it when a new project should begin with
-the smallest accepted live primitive surface while keeping the original
-Averlo component system parked as reference-only code.
+Thin-start is an optional filesystem-backed profile, not a fourth content
+source. By default it materializes a complete ignored workspace beside the full
+template so both profiles can be developed independently.
 
-Run the dry-run first in the target instance:
+Materialize and verify the isolated profile:
+
+```bash
+npm run create:thin-start
+npm run review:thin-start-api -- --root .thin-start/workspace --strict
+npm run dev:thin -- --random
+```
+
+Only a new project instance should use the guarded in-place path:
 
 ```bash
 npm run create:thin-start -- --dry-run --in-place
-```
-
-If the plan is accepted, activate thin-start explicitly:
-
-```bash
 npm run create:thin-start -- --yes --in-place --confirm-instance
 npm install
 npm run review:thin-start-api -- --strict
 npm run build
 ```
 
-The `--confirm-instance` flag is intentional friction: it means the operator is
-running the command in a new/disposable project instance, not on the canonical
-default template. After activation, `.thin-start/` is an ignored parked
-reference and must not enter the live import graph.
+The `--confirm-instance` flag is intentional friction. In-place activation parks
+the original components under ignored `.thin-start/reference/`; that reference
+must not enter the live import graph.
 
 Use normal `npm run prune:template -- [flags]` for broad route/content-mode
 surface removal. Use thin-start activation only when the desired instance shape
