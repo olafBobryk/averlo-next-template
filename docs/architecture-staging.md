@@ -56,11 +56,16 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - Existing Button capabilities such as icon-registry inputs, content and text configuration, radius and hit-area controls, focusability, typed link and button behavior, class and style extension, and layout alignment remain available unless an explicit later decision supersedes them.
 - Button loading preserves the template's position-absolute overlay strategy: normal content remains in layout and fades while the centered loader appears, preventing loading-state resizing.
 - `Button.Skeleton` mirrors live size, alignment, radius, icons, label width, and variant treatment without changing the final component dimensions.
+- Shared components with recurring loading representations expose component-owned, namespaced skeleton APIs such as `Field.Skeleton`, `InputFrame.Skeleton`, and `Accordion.Skeleton`.
+- Component-owned skeletons extend the template's richer live APIs rather than replacing or narrowing them. Routes compose these canonical skeletons instead of reimplementing their geometry.
 - Chip convergence adopts the pinned compact rounded-medium visual design, semantic, spectrum, and custom colors, interactive link or button behavior, static behavior, `Chip.Text`, and `Chip.Skeleton` while retaining useful existing tone, helper-palette, icon, and canvas-measurement capabilities.
 - `ColorInput` and `ColorSwatchInput` join the full-start input library only; thin start does not include them.
 - `ColorInput` supports controlled and uncontrolled hexadecimal selection, pointer and keyboard operation, normal form submission, field validation, and portal-aware dropdown positioning.
 - `ColorSwatchInput` supports generic typed presets and an optional custom color. Its shared semantic defaults are neutral, info, success, warning, and danger; product-specific palettes stay outside the shared input.
 - The accepted component ports include their generic dependency closure: semantic accent helpers, `StatusMessage`, `ModalForm`, shared overlay chrome, and the markdown-mention parser.
+- `ModalForm` includes a generic `ModalStepForm` and `StepIndicator` modeled visually and behaviorally on the pinned Inference Console source while preserving stronger compatible template modal APIs.
+- Completed step panels remain mounted and hidden so field state survives navigation. Back and Next actions never submit; only the final action validates and submits.
+- The shared confirmation system supports structured impact details, warnings, semantic confirm variants, and asynchronous confirmation that may return `false` to keep the modal open after a failed mutation.
 - Existing template helpers remain canonical wherever they provide an equivalent or stronger contract.
 - Baseline Markdown image insertion accepts image URLs only. File upload remains a caller or product integration rather than a dependency of the shared editor.
 - Markdown stores durable mentions as `@[user:<id>]`; callers provide mention options and rendering resolution, and shared Markdown components never fetch organizations or users directly.
@@ -277,6 +282,8 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 
 - Real dashboard routes own their normal loading, error, and relevant not-found boundaries.
 - A guarded internal dashboard review route renders deterministic live, loading, empty, error, and unavailable variants.
+- The guarded review surface includes side-by-side live and skeleton examples for fields, accordions, tables, detail views, cards, and installed optional chart surfaces.
+- Skeleton parity review covers geometry, responsive behavior, and light and dark modes.
 - The full-start dashboard includes a default debug surface that can force loading for diagnosis while preserving the real route shell.
 - Debug controls are separate from normal user navigation and product behavior.
 - The debug menu ships in full start but is available only in development or guarded internal-review mode by default.
