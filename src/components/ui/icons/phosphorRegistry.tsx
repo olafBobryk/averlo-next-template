@@ -3,6 +3,7 @@
 
 import {
 	ArrowRight,
+	ArrowSquareOut,
 	ArrowUpIcon,
 	Bell,
 	Calendar,
@@ -31,6 +32,7 @@ import {
 	Spinner,
 	Star,
 	TiktokLogo,
+	Trash,
 	X,
 	XLogo,
 	YoutubeLogo,
@@ -42,6 +44,7 @@ import {
 
 const phosphorOverrides: Partial<IconRegistry> = {
 	"arrow-right": ArrowRight,
+	"external-link": ArrowSquareOut,
 	"caret-left": CaretLeftIcon,
 	"caret-right": CaretRightIcon,
 	bell: Bell,
@@ -72,6 +75,7 @@ const phosphorOverrides: Partial<IconRegistry> = {
 	home: HouseIcon,
 	"log-out": SignOut,
 	pencil: PencilSimpleIcon,
+	trash: Trash,
 	star: Star,
 	x: XLogo,
 	youtube: YoutubeLogo,

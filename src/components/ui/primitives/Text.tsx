@@ -7,6 +7,11 @@ import { Skeleton } from "@/components/ui/misc/Skeleton";
 export const textVariants = cva("", {
 	variants: {
 		variant: {
+			chip: "min-w-0 truncate text-xs leading-4",
+			heading:
+				"[font-family:var(--font-heading)] text-3xl font-semibold leading-tight tracking-normal md:text-5xl",
+			headingPage:
+				"[font-family:var(--font-heading)] text-2xl font-semibold leading-tight md:text-3xl",
 			headingHero:
 				"[font-family:var(--font-heading)] text-[calc(70px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
 			heading2xxl:
@@ -24,6 +29,7 @@ export const textVariants = cva("", {
 			headingXs:
 				"[font-family:var(--font-heading)] text-[calc(1rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
 			body: "text-[calc(0.875rem*var(--text-scale,1))] font-normal",
+			support: "text-sm leading-6",
 			bodyStrong:
 				"text-[calc(0.875rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
 			caption: "text-[calc(0.75rem*var(--text-scale,1))] font-normal",
@@ -57,7 +63,7 @@ export const textVariants = cva("", {
 		{
 			theme: "dark",
 			tone: "muted",
-			class: "text-muted/60",
+			class: "text-muted-foreground",
 		},
 		{
 			theme: "light",
@@ -77,6 +83,10 @@ export const textVariants = cva("", {
 		interactive: true,
 	},
 });
+
+export type TextVariant = NonNullable<
+	VariantProps<typeof textVariants>["variant"]
+>;
 
 type BaseProps = {
 	as?: "span" | "p" | "div" | "label" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
@@ -111,7 +121,7 @@ export type TextProps =
 
 type TextSkeletonProps = Omit<
 	React.ComponentPropsWithoutRef<typeof Skeleton>,
-	"children"
+	"as" | "children"
 > &
 	VariantProps<typeof textVariants> & {
 		as?:
@@ -162,7 +172,7 @@ function TextSkeleton({
 	return (
 		<Skeleton
 			className={clsx(
-				"w-fit",
+				"w-fit max-w-full",
 				textVariants({ variant, tone, theme, interactive, className }),
 			)}
 			{...rest}

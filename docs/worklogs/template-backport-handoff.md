@@ -16,8 +16,8 @@ shares its visual foundation through filesystem-backed materialization.
 - Source: `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console`
 - Source policy: use `git show` or `git archive` at the pinned commit; never read
   implementation input from its dirty working tree.
-- Full preview: `http://localhost:3064?motion=off&reveal=off`
-- Thin preview: `http://localhost:3081?motion=off&reveal=off`
+- Full preview: restart/verify with `npm run dev:agent -- --random` before review.
+- Thin preview: restart/verify with `npm run dev:thin -- --random` before review.
 - Worktree policy: retain through both visual gates. Do not merge, push, or
   remove it without explicit direction.
 
@@ -34,12 +34,12 @@ full-start dashboard.
 4. P1-C4 — dashboard shell, registry, commands, and debug state.
 5. P1-C5 — reference entities, policy, pruning, skill, and visual gate 2.
 
-One verified commit closes each chunk. The rolling window is P1-C1 current,
-P1-C2 through P1-C4 queued; P1-C5 enters when P1-C1 closes.
+One verified commit closes each chunk. P1-C1 and P1-C2 are closed; P1-C3 is
+current and P1-C4 through P1-C5 follow sequentially.
 
 ## P1-C1 state
 
-- Status: implementation and verification complete; ready for the P1-C1 commit.
+- Status: complete in commit `6cb2c99`.
 - Main baseline was committed cleanly as `5061682` before worktree creation.
 - `template-profiles/thin-start/manifest.mjs` is authoritative for profile
   files, removals, package changes, route/script retention, API review, and
@@ -54,6 +54,28 @@ P1-C2 through P1-C4 queued; P1-C5 enters when P1-C1 closes.
 - Full and thin share canonical `Panel` and `Card`. `Card` is implemented on
   `Panel`; unstructured surfaces and overlay roots use `Panel`.
 - Thin Sonner toast remains an explicit file-backed override.
+
+## P1-C2 state
+
+- Status: complete; the closing commit immediately follows this handoff update.
+- The pinned light/dark token, focus, motion, radius, status, spectrum, sidebar,
+  and scrollbar grammar is installed with Inter through `next/font/google`.
+- Shared primitives retain stronger template APIs while matching the source
+  surface system. Button loading remains position-absolute and skeletons live
+  on their owning component namespaces.
+- `ModalForm`, `ModalStepForm`, `StepIndicator`, structured confirmation,
+  DateInput, generic DateRange contracts, selection interception, file/profile
+  lifecycle cleanup, More-menu factories, and NullState are implemented.
+- The existing Markdown renderer remains shared. MDXEditor, source mode,
+  mentions, modal editing, and color inputs are full-start only.
+- Thin materialization removes editor/color source, CSS, dependency, and lockfile
+  records while retaining shared Panel/Card and the common visual foundation.
+- Both profiles pass typecheck, production build, smoke verification, and the
+  strict thin API review. Responsive light/dark review passed for the full demo
+  and the thin home/contact/internal-intelligence route matrix.
+- Verified previews at chunk closure:
+  `http://localhost:3037/internal/demo?motion=off&reveal=off` (full) and
+  `http://localhost:3034?motion=off&reveal=off` (thin).
 
 ## Required gates
 

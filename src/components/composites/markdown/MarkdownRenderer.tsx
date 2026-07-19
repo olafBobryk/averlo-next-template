@@ -1,18 +1,91 @@
 "use client";
 
 import clsx from "clsx";
-import { Children, isValidElement, type ReactElement } from "react";
+import {
+	Children,
+	isValidElement,
+	type ReactElement,
+	type ReactNode,
+} from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { ChoiceIndicatorMulti } from "@/components/ui/input/choice/ChoiceIndicators";
 import { Button, type ButtonProps } from "@/components/ui/primitives/Button";
 import { Text, textVariants } from "@/components/ui/primitives/Text";
+import { splitMarkdownUserMentions } from "@/lib/markdown-mentions";
 
 export type MarkdownRendererProps = {
 	className?: string;
 	markdown: string;
+	resolveUserMention?: (memberId: string) => ReactNode;
 };
+
+type MarkdownAstNode = {
+	children?: MarkdownAstNode[];
+	data?: {
+		hName?: string;
+		hProperties?: Record<string, unknown>;
+	};
+	type: string;
+	value?: string;
+};
+
+const mentionExcludedNodeTypes = new Set([
+	"code",
+	"html",
+	"inlineCode",
+	"link",
+]);
+
+function transformMarkdownMentions(node: MarkdownAstNode) {
+	if (!node.children || mentionExcludedNodeTypes.has(node.type)) return;
+	const nextChildren: MarkdownAstNode[] = [];
+	for (const child of node.children) {
+		if (child.type !== "text" || typeof child.value !== "string") {
+			transformMarkdownMentions(child);
+			nextChildren.push(child);
+			continue;
+		}
+		const segments = splitMarkdownUserMentions(child.value);
+		if (!segments.some((segment) => segment.type === "mention")) {
+			nextChildren.push(child);
+			continue;
+		}
+		for (const segment of segments) {
+			nextChildren.push(
+				segment.type === "text"
+					? { type: "text", value: segment.value }
+					: {
+							data: {
+								hName: "span",
+								hProperties: { "data-user-mention-id": segment.memberId },
+							},
+							type: "text",
+							value: "@Unknown member",
+						},
+			);
+		}
+	}
+	node.children = nextChildren;
+}
+
+function remarkUserMentions() {
+	return (tree: MarkdownAstNode) => transformMarkdownMentions(tree);
+}
+
+function getUserMentionId(node: unknown) {
+	if (!node || typeof node !== "object" || !("properties" in node)) return null;
+	const properties = node.properties;
+	if (!properties || typeof properties !== "object") return null;
+	const memberId =
+		"dataUserMentionId" in properties
+			? properties.dataUserMentionId
+			: "data-user-mention-id" in properties
+				? properties["data-user-mention-id"]
+				: null;
+	return typeof memberId === "string" ? memberId : null;
+}
 
 type MarkdownSegment =
 	| {
@@ -172,7 +245,9 @@ function MarkdownImage({ alt, src }: { alt?: string; src?: string }) {
 	);
 }
 
-function createMarkdownComponents(): Components {
+function createMarkdownComponents(
+	resolveUserMention?: (memberId: string) => ReactNode,
+): Components {
 	return {
 		a: ({ children, href }) => {
 			const external = isExternalHref(href);
@@ -375,6 +450,17 @@ function createMarkdownComponents(): Components {
 		strong: ({ children }) => (
 			<strong className="font-semibold text-foreground/90">{children}</strong>
 		),
+		span: ({ children, node }) => {
+			const memberId = getUserMentionId(node);
+			if (!memberId) return <span>{children}</span>;
+			return (
+				resolveUserMention?.(memberId) ?? (
+					<span className="font-medium text-muted-foreground">
+						@Unknown member
+					</span>
+				)
+			);
+		},
 		table: ({ children }) => (
 			<div className="max-w-full overflow-x-auto">
 				<table className="w-full min-w-[36rem] border-collapse text-left">
@@ -428,13 +514,13 @@ function createMarkdownComponents(): Components {
 	};
 }
 
-const markdownComponents = createMarkdownComponents();
-
 export function MarkdownRenderer({
 	className,
 	markdown,
+	resolveUserMention,
 }: MarkdownRendererProps) {
 	const segments = splitMarkdownByButtonDirectives(markdown);
+	const markdownComponents = createMarkdownComponents(resolveUserMention);
 
 	return (
 		<div className={clsx("grid w-full min-w-0 gap-5", className)}>
@@ -455,7 +541,7 @@ export function MarkdownRenderer({
 					<ReactMarkdown
 						// biome-ignore lint/suspicious/noArrayIndexKey: Segment order is derived from static markdown source.
 						key={`markdown-${index}`}
-						remarkPlugins={[remarkGfm]}
+						remarkPlugins={[remarkGfm, remarkUserMentions]}
 						components={markdownComponents}
 					>
 						{segment.markdown}

@@ -21,6 +21,7 @@ export type ListboxOption<T> = {
 	content: React.ReactNode;
 	href?: string;
 	disabled?: boolean;
+	tone?: "default" | "danger";
 	selected?: boolean;
 	className?: string;
 	activeClassName?: string;
@@ -122,6 +123,7 @@ export function Listbox<T>({
 						active: isActive,
 						selected: isSelected,
 						disabled: isDisabled,
+						tone: option.tone,
 						className: resolvedOptionClassName,
 						activeClassName: resolvedActiveClassName,
 						selectedClassName: resolvedSelectedClassName,

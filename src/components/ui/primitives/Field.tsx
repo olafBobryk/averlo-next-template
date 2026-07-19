@@ -2,6 +2,7 @@
 "use client";
 
 import type * as React from "react";
+import { InputFrameSkeleton } from "./InputFrame";
 import { Text } from "./Text";
 
 type FieldTone = "default" | "error" | "success";
@@ -18,9 +19,16 @@ type FieldProps = {
 	disableMessage?: boolean;
 	className?: string;
 	children: React.ReactNode;
+	labelAction?: React.ReactNode;
 };
 
-export function Field({
+type FieldSkeletonProps = Omit<FieldProps, "children" | "message" | "tone"> & {
+	children?: React.ReactNode;
+	inputClassName?: string;
+	skeletonClassName?: string;
+};
+
+function FieldRoot({
 	label,
 	description,
 	message,
@@ -32,6 +40,7 @@ export function Field({
 	disableMessage = false,
 	className,
 	children,
+	labelAction,
 }: FieldProps) {
 	const hasMessage = Boolean(message);
 	const announceMessage = tone === "error" && hasMessage;
@@ -43,24 +52,29 @@ export function Field({
 				.filter(Boolean)
 				.join(" ")}
 		>
-			{label || description ? (
+			{label || description || labelAction ? (
 				<div className="flex flex-col gap-1">
-					{label ? (
-						<Text
-							as="label"
-							variant="body"
-							htmlFor={inputId}
-							className="pointer-events-none"
-						>
-							<span className="inline-flex items-center gap-1">
-								{label}
-								{required ? (
-									<span aria-hidden="true" className="text-danger">
-										*
+					{label || labelAction ? (
+						<div className="flex items-end justify-between gap-3">
+							{label ? (
+								<Text
+									as="label"
+									variant="body"
+									htmlFor={inputId}
+									className="pointer-events-none"
+								>
+									<span className="inline-flex items-center gap-1">
+										{label}
+										{required ? (
+											<span aria-hidden="true" className="text-danger">
+												*
+											</span>
+										) : null}
 									</span>
-								) : null}
-							</span>
-						</Text>
+								</Text>
+							) : null}
+							{labelAction}
+						</div>
 					) : null}
 
 					{description ? (
@@ -111,3 +125,23 @@ export function Field({
 		</div>
 	);
 }
+
+export function FieldSkeleton({
+	children,
+	inputClassName,
+	skeletonClassName,
+	...props
+}: FieldSkeletonProps) {
+	return (
+		<FieldRoot {...props}>
+			<InputFrameSkeleton
+				className={inputClassName}
+				skeletonClassName={skeletonClassName}
+			>
+				{children}
+			</InputFrameSkeleton>
+		</FieldRoot>
+	);
+}
+
+export const Field = Object.assign(FieldRoot, { Skeleton: FieldSkeleton });

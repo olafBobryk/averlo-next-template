@@ -4,7 +4,7 @@
 Ready-made form controls composed from the primitives. This folder should be the default destination for form UX before building anything custom.
 
 ## Use This Folder When
-- A page needs a text, email, password, phone, numeric, selectable, combobox, date range, signature, radio, checkbox, or toggle input.
+- A page needs a text, email, password, phone, numeric, selectable, combobox, date, date range, color, signature, radio, multi-select, or toggle input.
 - You want consistent validation, focus, shell styling, and accessibility wiring.
 - The goal is to get close to standard product UX by using proven controls instead of custom page code.
 
@@ -24,6 +24,8 @@ Ready-made form controls composed from the primitives. This folder should be the
 - `src/components/ui/input/ComboboxMultiSelectInput.tsx`: multi-select combobox.
 - `src/components/ui/input/ButtonMultiSelectInput.tsx`: compact button-based multi-select for tags, filters, and preference pickers.
 - `src/components/ui/input/DateRangeInput.tsx`: date-range presets plus custom range entry; exported as `DateRangeInput`.
+- `src/components/ui/input/DateInput.tsx`: source-matched single-date calendar input.
+- `src/components/ui/input/ColorInput.tsx` and `ColorSwatchInput.tsx`: full-start color entry and swatch selection controls.
 - `src/components/ui/input/SignaturePad.tsx`: signature capture.
 - `src/components/ui/input/SpamProtectionFields.tsx`: hidden honeypot field for form submissions.
 - `src/components/ui/input/RadioInput.tsx`: radio group built on the shared choice system.
@@ -51,6 +53,10 @@ Ready-made form controls composed from the primitives. This folder should be the
   - Guard against double submit by returning early when `loading` is already true.
   - Set `loading` on the submit button and disable other conflicting actions while the request is in flight.
   - Do not auto-clear the form after submit unless the product explicitly wants that behavior.
+- `SelectInput.onOptionSelect` may return `true` to intercept a selection before the normal value change. Keep ordinary `onChange` behavior as the default.
+- File and profile inputs must clear native file state on form reset and clean up object URLs when files are replaced or the component unmounts.
+- Do not introduce a separate `CheckboxInput`; `MultiselectInput` and the `choice/` subsystem are the canonical checkbox-style controls.
+- Color inputs and the MDX editor are full-start-only profile features. Thin-start must not retain their source files or dependencies.
 
 ## Page-Level Usage Guidance
 - **Login form:** usually `EmailInput` plus `PasswordInput` without strength meter.

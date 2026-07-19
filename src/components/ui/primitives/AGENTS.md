@@ -19,12 +19,15 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - `src/components/ui/primitives/Card.tsx`: structured card built on `Panel`, with owned header, action, content, and footer slots.
 - `src/components/ui/primitives/Section.tsx`: page section wrapper.
 - `src/components/ui/primitives/Divider.tsx`: horizontal or vertical separator with optional horizontal label.
+- `src/components/ui/primitives/StatusMessage.tsx`: semantic inline status surface for information, success, warning, and danger copy.
+- `src/components/ui/primitives/accent.ts`: the closed semantic accent contract shared by Panel, Card, and compact status surfaces.
 - `src/components/ui/primitives/dropdownStyles.ts`: shared dropdown classnames.
 
 ## Invariants
 - Start here before building custom equivalents from raw HTML.
 - `Text` should own most component-level typography decisions.
 - `Button` should own most interactive button or button-like link behavior, including loading, icon layout, and visible focus.
+  - Loading must preserve the live button's dimensions: keep the content in flow and place the loader over it with absolute positioning.
 - `InputFrame` should own the visual shell for text-like controls.
 - `Field` should own labels, descriptions, required markers, and inline status messages.
 - `Dropdown` and `Listbox` should own menu positioning and accessible option-list behavior rather than page-local popover logic.
@@ -48,6 +51,7 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
   - Use `Panel` for non-semantic surfaces, generic grouped layout, and overlay roots.
   - Use `Card` only when its structured slots describe the content.
   - Use `CardHeader`, `CardContent`, and `CardFooter` under a real `Card` root; do not imitate Card data attributes on `Panel`.
+  - Use semantic `accent` values from `accent.ts`; do not pass product-specific color strings into shared surfaces.
   - Use `Divider` instead of ad hoc border divs when separating content groups or labeling a horizontal break.
 - Use `Section.Background` when a section needs image, gradient, or node-based background media behind its normal content flow.
   - The background spans the full section, not the inner max-width container.
@@ -56,7 +60,8 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 
 ## UX Conventions To Preserve
 - Do not build raw password visibility buttons, select menus, or pseudo-fields from primitives if `ui/input/` already provides a finished control.
-- Use `Button.Skeleton` and `Text.Skeleton` when a primitive-backed loading state is needed.
+- Use component-owned `Button.Skeleton`, `Text.Skeleton`, `Field.Skeleton`, and `InputFrame.Skeleton` when their live counterpart is loading.
+- Keep primitive skeleton imports server-safe. Split client behavior from shared types/skeleton exports when a primitive otherwise forces server consumers across a client boundary.
 - If a component needs icon transitions, pair `Button` with `IconSwap` instead of custom animation wrappers.
 
 ## Avoid

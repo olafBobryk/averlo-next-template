@@ -17,6 +17,7 @@ File selection and upload-oriented controls for forms and document workflows.
 - Prefer `FileUploadInput` for new work and pair it with `FileGallery` when selected files should be visible before submit.
 - File actions should continue to use shared `Button`, `Text`, and preview conventions rather than custom upload cards.
 - Removal or replacement actions must keep visible focus and keyboard accessibility.
+- Keep the native file list synchronized with visual state. Form reset, reset signals, replacement, removal, and unmount cleanup must not leave stale files or object URLs behind.
 - If a richer preview flow is needed, prefer composing with `FilePreview` and confirmation or image-inspection helpers instead of starting from scratch.
 
 ## How To Use It

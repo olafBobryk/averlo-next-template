@@ -2,6 +2,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import type { ComponentPropsWithoutRef, ElementType } from "react";
 import { Panel, type PanelProps } from "@/components/ui/primitives/Panel";
+import { Text } from "@/components/ui/primitives/Text";
+import { type AccentTone, getAccentClassName } from "./accent";
+
+export type { AccentTone } from "./accent";
 
 const cardStyles = cva("group/card text-sm", {
 	variants: {
@@ -54,16 +58,29 @@ export function Card<T extends ElementType = "div">({
 	);
 }
 
-type CardPartProps = ComponentPropsWithoutRef<"div">;
+type CardPartProps = ComponentPropsWithoutRef<"div"> & {
+	accent?: AccentTone | null;
+	solidAccentBackground?: boolean;
+};
 
-export function CardHeader({ className, ...props }: CardPartProps) {
+export function CardHeader({
+	accent,
+	className,
+	solidAccentBackground = false,
+	...props
+}: CardPartProps) {
 	return (
 		<div
 			className={clsx(
 				"grid auto-rows-min items-start gap-1 px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3",
+				getAccentClassName(accent, "slot", {
+					solidBackground: solidAccentBackground,
+				}),
 				className,
 			)}
 			data-slot="card-header"
+			data-accent={accent ?? undefined}
+			data-solid-accent-background={solidAccentBackground || undefined}
 			{...props}
 		/>
 	);
@@ -78,7 +95,7 @@ export function CardTitle({ as = "h2", className, ...props }: CardTitleProps) {
 	return (
 		<Tag
 			className={clsx(
-				"font-medium leading-none group-data-[size=sm]/card:text-sm",
+				"text-base font-semibold leading-snug group-data-[size=sm]/card:text-sm",
 				className,
 			)}
 			data-slot="card-title"
@@ -87,11 +104,19 @@ export function CardTitle({ as = "h2", className, ...props }: CardTitleProps) {
 	);
 }
 
-export function CardDescription({ className, ...props }: CardPartProps) {
+export function CardDescription({
+	accent: _accent,
+	className,
+	solidAccentBackground: _solidAccentBackground,
+	...props
+}: CardPartProps) {
 	return (
-		<div
-			className={clsx("text-sm text-muted/60", className)}
+		<Text
+			as="div"
+			className={className}
 			data-slot="card-description"
+			tone="muted"
+			variant="support"
 			{...props}
 		/>
 	);
@@ -110,24 +135,47 @@ export function CardAction({ className, ...props }: CardPartProps) {
 	);
 }
 
-export function CardContent({ className, ...props }: CardPartProps) {
+export function CardContent({
+	accent,
+	className,
+	solidAccentBackground = false,
+	...props
+}: CardPartProps) {
 	return (
 		<div
-			className={clsx("px-4 group-data-[size=sm]/card:px-3", className)}
+			className={clsx(
+				"px-4 group-data-[size=sm]/card:px-3",
+				getAccentClassName(accent, "slot", {
+					solidBackground: solidAccentBackground,
+				}),
+				className,
+			)}
+			data-accent={accent ?? undefined}
+			data-solid-accent-background={solidAccentBackground || undefined}
 			data-slot="card-content"
 			{...props}
 		/>
 	);
 }
 
-export function CardFooter({ className, ...props }: CardPartProps) {
+export function CardFooter({
+	accent,
+	className,
+	solidAccentBackground = false,
+	...props
+}: CardPartProps) {
 	return (
 		<div
 			className={clsx(
 				"flex items-center border-t p-4 group-data-[size=sm]/card:p-3",
+				getAccentClassName(accent, "slot", {
+					solidBackground: solidAccentBackground,
+				}),
 				className,
 			)}
 			data-slot="card-footer"
+			data-accent={accent ?? undefined}
+			data-solid-accent-background={solidAccentBackground || undefined}
 			{...props}
 		/>
 	);

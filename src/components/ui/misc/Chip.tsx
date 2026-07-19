@@ -6,6 +6,7 @@ import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
+import { Text } from "@/components/ui/primitives/Text";
 
 type IconProp = React.ReactNode | IconName;
 
@@ -24,19 +25,22 @@ export type ChipProps = {
 	disabled?: boolean;
 	tone?: ChipTone;
 	helperIndex?: number;
+	color?: string | null;
 	leadingIcon?: IconProp;
 	trailingIcon?: IconProp;
 	className?: string;
 	contentClassName?: string;
 	style?: React.CSSProperties;
 	onClick?: React.MouseEventHandler<HTMLElement>;
+	title?: string;
 } & Omit<
 	React.HTMLAttributes<HTMLElement>,
-	"children" | "className" | "onClick" | "style"
+	"children" | "className" | "color" | "onClick" | "style" | "title"
 >;
 
 type ChipStyle = React.CSSProperties & {
 	"--chip-accent"?: string;
+	"--chip-color"?: string;
 };
 
 export type ChipSkeletonProps = {
@@ -81,6 +85,20 @@ export function getChipCanvasMetrics(textHeight: number) {
 
 const HELPER_PALETTE_SIZE = 8;
 
+const chipColorTokenValues: Record<string, string> = {
+	berry: "var(--app-berry)",
+	danger: "var(--danger)",
+	info: "var(--primary)",
+	lime: "var(--app-lime)",
+	orange: "var(--app-orange)",
+	primary: "var(--primary)",
+	purple: "var(--app-purple)",
+	rose: "var(--app-rose)",
+	success: "var(--success)",
+	violet: "var(--app-violet)",
+	warning: "var(--warning)",
+};
+
 const toneClasses: Record<ChipTone, string> = {
 	plain: "border-border bg-background text-foreground",
 	neutral: "border-border bg-background/80 text-foreground/80",
@@ -101,6 +119,15 @@ function normalizeHelperIndex(index: number) {
 	return Math.abs(Math.trunc(index)) % HELPER_PALETTE_SIZE;
 }
 
+function resolveChipColor(color?: string | null) {
+	const normalized = color?.trim().toLowerCase();
+	if (!normalized) return null;
+	if (normalized === "neutral" || normalized === "muted") return "muted";
+	const tokenValue = chipColorTokenValues[normalized];
+	if (tokenValue) return tokenValue;
+	return /^#[0-9a-f]{6}$/i.test(normalized) ? normalized : null;
+}
+
 function renderIcon(icon?: IconProp) {
 	if (!icon) return null;
 	if (typeof icon === "string") {
@@ -113,10 +140,15 @@ function chipClassName(
 	disabled?: boolean,
 	tone: ChipTone = "neutral",
 	className?: string,
+	customColor?: string | null,
 ) {
 	return clsx(
-		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 rounded-full border px-2.5 py-1 transition-colors motion-interactive",
-		toneClasses[tone],
+		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 rounded-md border px-2 py-1 transition-colors motion-interactive",
+		customColor === "muted"
+			? "border-border bg-muted text-muted-foreground"
+			: customColor
+				? "[border-color:color-mix(in_oklch,var(--chip-color)_25%,transparent)] [background-color:color-mix(in_oklch,var(--chip-color)_10%,transparent)] text-[var(--chip-color)]"
+				: toneClasses[tone],
 		disabled
 			? "cursor-not-allowed opacity-50"
 			: "hover:border-foreground/20 hover:bg-background-hover hover:text-foreground",
@@ -127,9 +159,27 @@ function chipClassName(
 
 function chipSkeletonClassName(className?: string) {
 	return clsx(
-		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 rounded-full border px-2.5 py-1",
-		"pointer-events-none border-transparent bg-foreground/5",
+		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 rounded-md border px-2 py-1",
+		"pointer-events-none border-transparent !bg-muted/80",
 		className,
+	);
+}
+
+export type ChipTextProps = Omit<
+	React.ComponentPropsWithoutRef<typeof Text>,
+	"as" | "interactive" | "tone" | "variant"
+>;
+
+export function ChipText({ className, ...props }: ChipTextProps) {
+	return (
+		<Text
+			as="span"
+			className={className}
+			interactive={false}
+			tone="inherit"
+			variant="chip"
+			{...props}
+		/>
 	);
 }
 
@@ -180,6 +230,7 @@ function ChipSkeleton({
 const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 	{
 		children,
+		color,
 		href,
 		disabled,
 		tone = "neutral",
@@ -190,6 +241,7 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 		contentClassName,
 		style,
 		onClick,
+		title,
 		...rest
 	},
 	ref,
@@ -201,6 +253,12 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 				}
 			: undefined;
 	const resolvedStyle = helperStyle ? { ...helperStyle, ...style } : style;
+	const resolvedColor = resolveChipColor(color);
+	const colorStyle: ChipStyle =
+		resolvedColor && resolvedColor !== "muted"
+			? { "--chip-accent": resolvedColor, "--chip-color": resolvedColor }
+			: {};
+	const mergedStyle = { ...colorStyle, ...resolvedStyle };
 	const content = (
 		<>
 			{renderIcon(leadingIcon)}
@@ -221,8 +279,9 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 			<Link
 				ref={ref as React.Ref<HTMLAnchorElement>}
 				href={href}
-				className={chipClassName(disabled, tone, className)}
-				style={resolvedStyle}
+				className={chipClassName(disabled, tone, className, resolvedColor)}
+				style={mergedStyle}
+				title={title}
 				{...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
 			>
 				{content}
@@ -237,8 +296,9 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 				type="button"
 				disabled={disabled}
 				onClick={onClick as React.MouseEventHandler<HTMLButtonElement>}
-				className={chipClassName(disabled, tone, className)}
-				style={resolvedStyle}
+				className={chipClassName(disabled, tone, className, resolvedColor)}
+				style={mergedStyle}
+				title={title}
 				{...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
 			>
 				{content}
@@ -249,8 +309,9 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 	return (
 		<span
 			ref={ref as React.Ref<HTMLSpanElement>}
-			className={chipClassName(disabled, tone, className)}
-			style={resolvedStyle}
+			className={chipClassName(disabled, tone, className, resolvedColor)}
+			style={mergedStyle}
+			title={title}
 			{...(rest as React.HTMLAttributes<HTMLSpanElement>)}
 		>
 			{content}
@@ -260,4 +321,5 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 
 export const Chip = Object.assign(ChipRoot, {
 	Skeleton: ChipSkeleton,
+	Text: ChipText,
 });

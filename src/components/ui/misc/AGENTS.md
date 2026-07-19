@@ -18,6 +18,8 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - `src/components/ui/misc/ImageSwitcher.tsx`: reusable image switcher with stable transitions, eager preloading, swipe support, and shared pagination controls.
 - `src/components/ui/misc/Loader.tsx`: spinner loader.
 - `src/components/ui/misc/MoreMenuDropdown.tsx`: overflow action menu.
+- `src/components/ui/misc/NullState.tsx`: compact null or unavailable-value treatment for dashboard fields.
+- `src/components/ui/misc/StepIndicator.tsx`: progress indicator used by modal step flows.
 - `src/components/ui/misc/PaginationControls.tsx`: compact previous or next pagination controls.
 - `src/components/ui/misc/Pill.tsx`: compact non-interactive badge with semantic and helper tones.
 - `src/components/ui/misc/ProfilePicture.tsx`: avatar display for profile images, initials, unknown users, and loading state.
@@ -52,6 +54,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
   - Use `Chip.Skeleton` with children and explicit `leadingIcon` or `trailingIcon` flags when skeleton-loading a final chip so label width, icon space, height, border, and rounded-full geometry match the loaded state.
 - Use `Loader` inside asynchronous regions, but avoid duplicating loader behavior already built into `Button` or other components.
 - Use `MoreMenuDropdown` for action-overflow menus instead of assembling a new icon-trigger dropdown.
+  - Prefer the exported `moreMenuOptions` factories for standard open, edit, and delete actions so tone, icons, and labels remain consistent.
 - Use `PaginationControls` for compact previous or next paging actions before building page-local pager rows.
 - Use `FileGallery` for pending/uploaded file preview strips instead of assembling one-off preview rows.
 - Use `ScrollBorders` when a vertically scrollable region should expose overflow with shared border treatment instead of page-local scroll shadows or one-off borders.

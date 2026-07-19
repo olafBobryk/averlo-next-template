@@ -12,25 +12,36 @@ import { Text } from "../primitives/Text";
 
 const APP_TIMEZONE = process.env.NEXT_PUBLIC_APP_TIMEZONE || "Europe/Amsterdam";
 
-export type DateRange = {
-	start: Date;
-	end: Date;
+export type DateRange<TValue = Date> = {
+	start: TValue;
+	end: TValue;
 };
 
-type PresetKey =
+export type DateRangePresetKey =
 	| "all_time"
 	| "last_7_days"
 	| "last_30_days"
 	| "this_month"
 	| "last_month";
 
-type DateRangeInputProps = {
+export type DateRangeSelection<
+	TValue = Date,
+	TPreset extends string = DateRangePresetKey | "custom",
+> = {
+	preset: TPreset;
+	range: DateRange<TValue> | null;
+};
+
+export type DateRangeInputProps = {
 	value?: DateRange;
 	// range can be null for "All time"
-	onChange?: (range: DateRange | null, preset: PresetKey | "custom") => void;
+	onChange?: (
+		range: DateRange | null,
+		preset: DateRangePresetKey | "custom",
+	) => void;
 	className?: string;
 	resetSignal?: number; // ⬅ bump this from parent to reset
-	resetTo?: PresetKey; // ⬅ optional, default "last_30_days"
+	resetTo?: DateRangePresetKey; // ⬅ optional, default "last_30_days"
 };
 
 const DATE_FMT = new Intl.DateTimeFormat("en-US", {
@@ -63,7 +74,7 @@ function addDays(date: Date, days: number) {
 	return d;
 }
 
-function getPresetRange(key: PresetKey): DateRange {
+function getPresetRange(key: DateRangePresetKey): DateRange {
 	const today = getToday();
 
 	switch (key) {
@@ -99,7 +110,7 @@ function getPresetRange(key: PresetKey): DateRange {
 	}
 }
 
-const PRESETS: { key: PresetKey; label: string }[] = [
+const PRESETS: { key: DateRangePresetKey; label: string }[] = [
 	{ key: "all_time", label: "All time" },
 	{ key: "last_7_days", label: "Last 7 days" },
 	{ key: "last_30_days", label: "Last 30 days" },
@@ -146,7 +157,7 @@ function isSameRange(a: DateRange, b: DateRange) {
 	return isSameDay(a.start, b.start) && isSameDay(a.end, b.end);
 }
 
-function getPresetKeyForRange(range: DateRange): PresetKey | "custom" {
+function getPresetKeyForRange(range: DateRange): DateRangePresetKey | "custom" {
 	for (const preset of PRESETS) {
 		const presetRange = getPresetRange(preset.key);
 		if (isSameRange(range, presetRange)) {
@@ -164,7 +175,7 @@ export function DateRangeInput({
 	resetTo = "last_30_days",
 }: DateRangeInputProps) {
 	// This is just the dropdown's internal "selection"; parent can override via `value`.
-	const [preset, setPreset] = React.useState<PresetKey | "custom">(
+	const [preset, setPreset] = React.useState<DateRangePresetKey | "custom">(
 		"last_30_days",
 	);
 	const [range, setRange] = React.useState<DateRange>(
@@ -241,7 +252,7 @@ export function DateRangeInput({
 			? "Custom range"
 			: (PRESETS.find((p) => p.key === preset)?.label ?? "Custom range");
 
-	const handlePresetClick = (p: PresetKey, close: () => void) => {
+	const handlePresetClick = (p: DateRangePresetKey, close: () => void) => {
 		const newRange = getPresetRange(p);
 		setPreset(p);
 		setRange(newRange);
@@ -441,7 +452,7 @@ export function DateRangeInput({
 							focusCustomStart();
 							return;
 						}
-						handlePresetClick(option.value as PresetKey, close);
+						handlePresetClick(option.value as DateRangePresetKey, close);
 					}}
 					listRef={listRef}
 					listId={listId}
@@ -480,7 +491,7 @@ export function DateRangeInput({
 								focusCustomStart();
 								return;
 							}
-							handlePresetClick(option.value as PresetKey, close);
+							handlePresetClick(option.value as DateRangePresetKey, close);
 						}
 					}}
 					className={["outline-none", focusRing.visibleDefault]

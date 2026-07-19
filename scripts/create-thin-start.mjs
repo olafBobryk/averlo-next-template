@@ -273,6 +273,21 @@ async function applyPackageChanges(destinationRoot) {
 		`${JSON.stringify(pkg, null, "\t")}\n`,
 		"utf8",
 	);
+
+	const lockPath = path.join(destinationRoot, "package-lock.json");
+	if (await pathExists(lockPath)) {
+		execFileSync(
+			"npm",
+			[
+				"install",
+				"--package-lock-only",
+				"--ignore-scripts",
+				"--no-audit",
+				"--no-fund",
+			],
+			{ cwd: destinationRoot, stdio: "inherit" },
+		);
+	}
 }
 
 async function walkFiles(targetDir) {

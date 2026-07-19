@@ -23,9 +23,9 @@ export function DemoShell({ children }: DemoShellProps) {
 	const visiblePages = getVisibleDemoPages();
 
 	return (
-		<Section innerClassName="flex flex-row w-full gap-8">
-			<aside className="w-64 shrink-0">
-				<div className="sticky top-24 flex flex-col gap-4">
+		<Section innerClassName="flex w-full flex-col gap-8 lg:flex-row">
+			<aside className="w-full shrink-0 lg:w-64">
+				<div className="flex flex-col gap-4 lg:sticky lg:top-24">
 					<Panel display="flex" padding="sm" gap="sm" shadow="none">
 						<div className="flex flex-col gap-2">
 							<Text as="h2" variant="headingXs">
@@ -40,7 +40,7 @@ export function DemoShell({ children }: DemoShellProps) {
 						</div>
 					</Panel>
 					<Panel display="flex" padding="sm" gap="sm" shadow="none">
-						<nav className="flex flex-col gap-1">
+						<nav className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:flex lg:flex-col">
 							{visiblePages.map((page) => {
 								const href = buildPath(page.slug);
 								const active = pathname === href;

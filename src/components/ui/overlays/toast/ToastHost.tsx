@@ -227,9 +227,18 @@ function ToastItemCard({
 							iconColor: "text-primary-foreground",
 							iconIndex: 1,
 						};
+	const accent =
+		toast.type === "success"
+			? "success"
+			: toast.type === "error"
+				? "danger"
+				: toast.type === "info"
+					? "info"
+					: "neutral";
 
 	return (
 		<Panel
+			accent={accent}
 			as={motion.div}
 			layout={motionAllowed}
 			initial={motionAllowed ? { opacity: 0, y: -8, scale: 0.98 } : false}
@@ -243,7 +252,8 @@ function ToastItemCard({
 			display="flex"
 			gap="none"
 			padding="sm"
-			background="white"
+			background="card"
+			solidAccentBackground
 			className={clsx(
 				"pointer-events-auto w-full max-w-[22rem]",
 				"transition-colors motion-interactive",

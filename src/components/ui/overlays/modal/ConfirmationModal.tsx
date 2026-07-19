@@ -1,16 +1,30 @@
 "use client";
 
 import * as React from "react";
-import { Warning } from "@/components/ui/misc/Warning";
-import { Button } from "@/components/ui/primitives/Button";
-import Divider from "@/components/ui/primitives/Divider";
+import { Icon } from "@/components/ui/icons/Icon";
+import {
+	ModalContent,
+	ModalDescription,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/overlays/modal/ModalShell";
+import { Button, type ButtonVariant } from "@/components/ui/primitives/Button";
+import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import { Text } from "@/components/ui/primitives/Text";
 
-type ConfirmationModalProps = {
+export type ConfirmationModalDetail = {
+	description: string;
+	label: string;
+};
+
+export type ConfirmationModalProps = {
 	title: string;
 	description: string;
 	confirmLabel: string;
-	onConfirm: () => void | Promise<void>;
+	confirmVariant?: ButtonVariant;
+	details?: readonly ConfirmationModalDetail[];
+	onConfirm: () => unknown;
 	onClose: () => void;
 	warning?: string;
 };
@@ -19,56 +33,87 @@ export function ConfirmationModal({
 	title,
 	description,
 	confirmLabel,
+	confirmVariant = "danger",
+	details,
 	onConfirm,
 	onClose,
 	warning,
 }: ConfirmationModalProps) {
+	const impactTitleId = React.useId();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-	const handleConfirm = async () => {
+	async function handleConfirm() {
 		if (isSubmitting) return;
 		setIsSubmitting(true);
 		try {
-			await onConfirm();
+			const shouldClose = await onConfirm();
+			if (shouldClose !== false) onClose();
 		} finally {
 			setIsSubmitting(false);
-			onClose();
 		}
-	};
+	}
 
 	return (
-		<div className="flex flex-col gap-[20px]">
-			<div className="flex flex-col gap-[5px] text-center">
-				<Text as="h2" variant="headingMd">
-					{title}
-				</Text>
-				<Text variant="body" tone="muted">
-					{description}
-				</Text>
-			</div>
-			{warning ? (
-				<Warning
-					variant="card"
-					tone="warning"
-					message={warning}
-					className="w-full"
-				/>
+		<>
+			<ModalHeader
+				closeDisabled={isSubmitting}
+				leadingIcon={<Icon name="warning" size="sm" className="text-danger" />}
+			>
+				<ModalTitle>{title}</ModalTitle>
+				<ModalDescription>{description}</ModalDescription>
+			</ModalHeader>
+			{details?.length || warning ? (
+				<ModalContent className="grid gap-4">
+					{details?.length ? (
+						<section className="grid gap-3" aria-labelledby={impactTitleId}>
+							<Text
+								as="h3"
+								className="font-medium"
+								id={impactTitleId}
+								variant="support"
+							>
+								What will change
+							</Text>
+							<dl className="grid">
+								{details.map((detail) => (
+									<div
+										className="grid gap-1 border-t border-border/70 py-3 first:border-t-0 first:pt-0 last:pb-0"
+										key={detail.label}
+									>
+										<dt className="text-sm font-medium leading-6">
+											{detail.label}
+										</dt>
+										<dd className="text-sm leading-6 text-muted-foreground">
+											{detail.description}
+										</dd>
+									</div>
+								))}
+							</dl>
+						</section>
+					) : null}
+					{warning ? (
+						<StatusMessage tone="danger">{warning}</StatusMessage>
+					) : null}
+				</ModalContent>
 			) : null}
-			<Divider />
-			<div className="flex justify-between gap-3">
-				<Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+			<ModalFooter>
+				<Button
+					disabled={isSubmitting}
+					onClick={onClose}
+					type="button"
+					variant="ghost"
+				>
 					Cancel
 				</Button>
 				<Button
-					variant="primary"
-					onClick={handleConfirm}
+					type="button"
 					loading={isSubmitting}
-					disabled={isSubmitting}
-					trailingIcon="check"
+					onClick={handleConfirm}
+					variant={confirmVariant}
 				>
 					{confirmLabel}
 				</Button>
-			</div>
-		</div>
+			</ModalFooter>
+		</>
 	);
 }

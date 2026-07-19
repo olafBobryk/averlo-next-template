@@ -1,18 +1,17 @@
 export const focusRing = {
 	fieldDefault:
-		"focus-within:!border-primary/60 focus-within:ring-4 focus-within:ring-primary/10",
+		"focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/30",
 	fieldError:
-		"focus-within:!border-danger focus-within:ring-4 focus-within:ring-danger/10",
-	fieldSuccess:
-		"focus-within:!border-success/70 focus-within:ring-4 focus-within:ring-success/10",
+		"border-danger ring-3 ring-danger/20 dark:border-danger/50 dark:ring-danger/40",
+	fieldSuccess: "border-success/70 ring-3 ring-success/20",
 	visibleDefault:
-		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+		"focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30",
 	visibleInner:
-		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-inset",
+		"focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:ring-inset",
 	visibleError:
-		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+		"focus-visible:border-danger/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-danger/20",
 	peerDefault:
-		"peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary/35",
+		"peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring/50",
 	peerError:
 		"group-data-[tone=error]/field:peer-focus-visible:outline-danger/35",
 } as const;

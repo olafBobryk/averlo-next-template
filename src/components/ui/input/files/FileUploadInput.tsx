@@ -6,7 +6,7 @@ import { Field } from "@/components/ui/primitives/Field";
 import { InputFrame } from "@/components/ui/primitives/InputFrame";
 import { Text } from "@/components/ui/primitives/Text";
 
-type FileUploadInputProps = {
+export type FileUploadInputProps = {
 	files: File[];
 	onFilesChange: (files: File[]) => void;
 	id?: string;
@@ -27,6 +27,8 @@ type FileUploadInputProps = {
 	pendingFilesLabel?: (count: number) => React.ReactNode;
 	showClear?: boolean;
 	className?: string;
+	/** Bump to clear native inputs and controlled pending files. */
+	resetSignal?: number;
 };
 
 export function FileUploadInput({
@@ -51,6 +53,7 @@ export function FileUploadInput({
 		`${count} pending ${count === 1 ? "file" : "files"}`,
 	showClear = true,
 	className,
+	resetSignal,
 }: FileUploadInputProps) {
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
 	const cameraInputRef = React.useRef<HTMLInputElement>(null);
@@ -63,6 +66,28 @@ export function FileUploadInput({
 	const describedBy =
 		[descriptionId, messageId].filter(Boolean).join(" ") || undefined;
 	const tone = error ? "error" : "default";
+	const previousResetSignalRef = React.useRef(resetSignal);
+
+	const resetSelection = React.useCallback(() => {
+		if (fileInputRef.current) fileInputRef.current.value = "";
+		if (cameraInputRef.current) cameraInputRef.current.value = "";
+		setIsDragging(false);
+		onFilesChange([]);
+	}, [onFilesChange]);
+
+	React.useEffect(() => {
+		if (resetSignal === undefined) return;
+		if (previousResetSignalRef.current === resetSignal) return;
+		previousResetSignalRef.current = resetSignal;
+		resetSelection();
+	}, [resetSignal, resetSelection]);
+
+	React.useEffect(() => {
+		const form = fileInputRef.current?.form;
+		if (!form) return;
+		form.addEventListener("reset", resetSelection);
+		return () => form.removeEventListener("reset", resetSelection);
+	}, [resetSelection]);
 
 	function addFiles(nextFiles: FileList | File[]) {
 		if (disabled) return;
@@ -189,7 +214,7 @@ export function FileUploadInput({
 					{showClear && files.length > 0 ? (
 						<Button
 							variant="ghost"
-							onClick={() => onFilesChange([])}
+							onClick={resetSelection}
 							disabled={disabled}
 						>
 							Clear pending

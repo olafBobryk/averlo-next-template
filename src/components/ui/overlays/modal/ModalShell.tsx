@@ -1,7 +1,9 @@
 // ModalShell.tsx
 "use client";
 
+import clsx from "clsx";
 import { motion } from "motion/react";
+import * as React from "react";
 import {
 	type CSSProperties,
 	type MouseEvent,
@@ -10,11 +12,22 @@ import {
 	useRef,
 } from "react";
 import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
+import { Icon } from "@/components/ui/icons/Icon";
 import Portal from "@/components/ui/overlays/Portal";
+import { Button } from "@/components/ui/primitives/Button";
+import {
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/primitives/Card";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type ModalShellProps = {
+	ariaLabel?: string;
 	onClose: () => void;
 	children: ReactNode;
 	portalTargetId?: string;
@@ -33,6 +46,122 @@ type ModalShellProps = {
 	panelStyle?: CSSProperties;
 	isTopMost?: boolean;
 };
+
+type ModalShellContextValue = { onClose: () => void };
+type ModalHeaderContextValue = { leadingIcon?: ReactNode };
+
+const ModalShellContext = React.createContext<ModalShellContextValue | null>(
+	null,
+);
+const ModalHeaderContext = React.createContext<ModalHeaderContextValue | null>(
+	null,
+);
+
+type ModalHeaderProps = React.ComponentPropsWithoutRef<"div"> & {
+	actions?: ReactNode;
+	closeDisabled?: boolean;
+	closeLabel?: string;
+	leadingIcon?: ReactNode;
+	onClose?: () => void;
+	showCloseButton?: boolean;
+};
+
+export function ModalHeader({
+	actions,
+	children,
+	className,
+	closeDisabled = false,
+	closeLabel = "Close modal",
+	leadingIcon,
+	onClose,
+	showCloseButton = true,
+	...props
+}: ModalHeaderProps) {
+	const modalContext = React.useContext(ModalShellContext);
+	const closeHandler = onClose ?? modalContext?.onClose;
+
+	return (
+		<CardHeader className={clsx("border-b px-5 py-4", className)} {...props}>
+			<ModalHeaderContext.Provider value={{ leadingIcon }}>
+				{children}
+			</ModalHeaderContext.Provider>
+			{actions || (showCloseButton && closeHandler) ? (
+				<CardAction className="inline-flex items-center gap-1">
+					{actions}
+					{showCloseButton && closeHandler ? (
+						<Button
+							aria-label={closeLabel}
+							className="!h-8 !w-8 !px-0"
+							disabled={closeDisabled}
+							onClick={closeHandler}
+							size="icon-sm"
+							type="button"
+							variant="quiet"
+						>
+							<Icon name="close" size="sm" />
+						</Button>
+					) : null}
+				</CardAction>
+			) : null}
+		</CardHeader>
+	);
+}
+
+export function ModalContent({
+	className,
+	...props
+}: React.ComponentPropsWithoutRef<"div">) {
+	return (
+		<CardContent
+			className={clsx(
+				"min-h-0 overflow-y-auto overscroll-contain px-5 py-4",
+				className,
+			)}
+			{...props}
+		/>
+	);
+}
+
+export function ModalFooter({
+	className,
+	...props
+}: React.ComponentPropsWithoutRef<"div">) {
+	return (
+		<CardFooter
+			className={clsx("justify-end gap-2 px-5 py-4", className)}
+			{...props}
+		/>
+	);
+}
+
+export function ModalTitle({
+	children,
+	className,
+	leadingIcon,
+	...props
+}: React.ComponentProps<typeof CardTitle> & { leadingIcon?: ReactNode }) {
+	const headerContext = React.useContext(ModalHeaderContext);
+	const resolvedLeadingIcon = leadingIcon ?? headerContext?.leadingIcon;
+	return (
+		<CardTitle
+			className={clsx("inline-flex items-center gap-2 text-base", className)}
+			{...props}
+		>
+			{resolvedLeadingIcon ? (
+				<span className="inline-flex shrink-0 text-muted-foreground [&_svg]:size-4">
+					{resolvedLeadingIcon}
+				</span>
+			) : null}
+			{children}
+		</CardTitle>
+	);
+}
+
+export function ModalDescription(
+	props: React.ComponentProps<typeof CardDescription>,
+) {
+	return <CardDescription {...props} />;
+}
 
 const overlayTransition = resolveMotionTransition("overlay");
 const panelTransition = resolveMotionTransition("disclosure");
@@ -61,6 +190,7 @@ function getFocusableElements(root: HTMLElement) {
 }
 
 export function ModalShell({
+	ariaLabel,
 	onClose,
 	children,
 	portalTargetId = "modal-root",
@@ -279,6 +409,7 @@ export function ModalShell({
 					transition={motionAllowed ? overlayTransition : undefined}
 					aria-modal="true"
 					role="dialog"
+					aria-label={ariaLabel}
 					tabIndex={-1}
 					onClick={onClose}
 				>
@@ -303,7 +434,9 @@ export function ModalShell({
 							event.stopPropagation()
 						}
 					>
-						{children}
+						<ModalShellContext.Provider value={{ onClose }}>
+							{children}
+						</ModalShellContext.Provider>
 					</Panel>
 				</motion.div>
 			</div>

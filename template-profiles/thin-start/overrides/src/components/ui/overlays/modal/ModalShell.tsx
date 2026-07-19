@@ -28,7 +28,7 @@ export function ModalShell({
 		<Portal target={portalTargetId}>
 			<div
 				className={[
-					"fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4",
+					"fixed inset-0 z-50 flex items-center justify-center bg-foreground/35 p-4 backdrop-blur-[2px]",
 					backdropClassName,
 				]
 					.filter(Boolean)
@@ -47,7 +47,7 @@ export function ModalShell({
 				>
 					<div
 						className={[
-							"relative rounded-md border border-border bg-background p-6 shadow-xl",
+							"relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-2xl",
 							panelClassName,
 						]
 							.filter(Boolean)

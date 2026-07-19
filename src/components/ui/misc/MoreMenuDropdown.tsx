@@ -21,10 +21,70 @@ export type MoreMenuOption = {
 	onClick?: (
 		event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>,
 	) => void;
+	onSelect?: (
+		event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>,
+	) => void;
 	disabled?: boolean;
 	active?: boolean;
 	className?: string;
+	separatorBefore?: boolean;
 	textClassName?: string;
+	tone?: "danger" | "default";
+};
+
+type MoreMenuActionHandler = (
+	event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>,
+) => void;
+
+export const moreMenuOptions = {
+	delete({
+		disabled,
+		label = "Delete",
+		onSelect,
+	}: {
+		disabled?: boolean;
+		label?: React.ReactNode;
+		onSelect?: MoreMenuActionHandler;
+	}): MoreMenuOption {
+		return {
+			disabled,
+			id: "delete",
+			label,
+			leadingIcon: "trash",
+			onSelect,
+			separatorBefore: true,
+			tone: "danger",
+		};
+	},
+	edit({
+		disabled,
+		onSelect,
+	}: {
+		disabled?: boolean;
+		onSelect: MoreMenuActionHandler;
+	}): MoreMenuOption {
+		return {
+			disabled,
+			id: "edit",
+			label: "Edit",
+			leadingIcon: "pencil",
+			onSelect,
+		};
+	},
+	open({
+		href,
+		leadingIcon,
+	}: {
+		href: string;
+		leadingIcon?: IconProp;
+	}): MoreMenuOption {
+		return {
+			href,
+			id: "open",
+			label: "Open",
+			leadingIcon: leadingIcon ?? "external-link",
+		};
+	},
 };
 
 type MoreMenuDropdownProps = {
@@ -188,6 +248,7 @@ export function MoreMenuDropdown({
 								option.onClick?.(
 									event as unknown as React.MouseEvent<HTMLElement>,
 								);
+								option.onSelect?.(event);
 								if (option.href && typeof window !== "undefined") {
 									window.location.href = option.href;
 								}
@@ -217,7 +278,11 @@ export function MoreMenuDropdown({
 							value: option,
 							href: option.href,
 							disabled: option.disabled,
+							tone: option.tone,
 							selected: isActive,
+							className: option.separatorBefore
+								? clsx("mt-1 border-t border-border pt-1", option.className)
+								: option.className,
 							content: (
 								<>
 									{option.leadingIcon ? (
@@ -229,6 +294,7 @@ export function MoreMenuDropdown({
 										className={clsx(
 											"min-w-0 flex-1 truncate text-sm",
 											isActive ? "text-foreground" : "text-foreground/80",
+											option.tone === "danger" && "text-danger",
 											option.textClassName,
 										)}
 									>
@@ -254,6 +320,7 @@ export function MoreMenuDropdown({
 							return;
 						}
 						option.value.onClick?.(event);
+						option.value.onSelect?.(event);
 						close();
 					}}
 				/>

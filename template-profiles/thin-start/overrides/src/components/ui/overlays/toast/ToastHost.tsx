@@ -12,10 +12,10 @@ export default function ToastHost({
 	return (
 		<Toaster
 			closeButton
-			richColors
 			position={position}
 			toastOptions={{
-				className: "border border-border bg-background text-foreground",
+				className:
+					"rounded-xl border border-border bg-surface text-foreground shadow-lg",
 			}}
 		/>
 	);

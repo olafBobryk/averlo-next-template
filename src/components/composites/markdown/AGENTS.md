@@ -9,7 +9,8 @@ Reusable markdown rendering surfaces that compose design-system primitives into 
 - A small custom directive is needed without introducing route-specific registries.
 
 ## Current Contract
-- `MarkdownRenderer` accepts only `{ markdown, className? }`.
+- `MarkdownRenderer` accepts markdown, optional class styling, and an optional generic mention resolver.
+- `MarkdownEditor` is a controlled full-start editor with rich/source modes and optional mentions; `MarkdownEditorModalForm` is the dashboard-ready modal composition.
 - Metadata, route titles, and page chrome do not belong in this renderer.
 - Supported custom directive:
   - `::button[Label]{href=/path variant=primary size=md}`
@@ -19,4 +20,6 @@ Reusable markdown rendering surfaces that compose design-system primitives into 
 - Keep custom directives self-contained and generic.
 - Validate directive props before passing them into design-system components.
 - Do not expose arbitrary `className`, JSX, HTML passthrough, data registries, or product-specific card directives through markdown.
-- Keep this composite thin-start compatible; if it imports a design-system helper, make sure the thin-start API review explicitly allows that helper.
+- Keep `MarkdownRenderer` thin-start compatible; if it imports a design-system helper, make sure the thin-start API review explicitly allows that helper.
+- Keep `MarkdownEditor`, its MDXEditor dependency, editor CSS, and modal editing composition full-start-only. The thin profile must export only the renderer.
+- Mention rendering remains presentation-only: route/adapters resolve entity data, and the renderer/editor must not fetch.

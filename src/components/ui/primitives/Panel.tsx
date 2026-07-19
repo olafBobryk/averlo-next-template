@@ -1,12 +1,21 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import type {
+	ComponentPropsWithoutRef,
+	ComponentPropsWithRef,
+	ElementType,
+	ReactNode,
+} from "react";
+import { type AccentTone, getAccentClassName } from "./accent";
+
+export type { AccentTone } from "./accent";
 
 const panelStyles = cva("text-foreground", {
 	variants: {
 		background: {
 			background: "bg-background",
-			card: "bg-background",
+			card: "bg-card text-card-foreground",
+			muted: "bg-muted",
 			surface: "bg-surface",
 			transparent: "bg-transparent",
 			white: "bg-background",
@@ -85,16 +94,20 @@ const panelStyles = cva("text-foreground", {
 
 type PanelOwnProps<T extends ElementType> = {
 	/** Boolean shorthand for selecting the default or no-border treatment. */
+	accent?: AccentTone | null;
 	bordered?: boolean;
 	as?: T;
 	children?: ReactNode;
 	className?: string;
+	ref?: ComponentPropsWithRef<T>["ref"];
+	solidAccentBackground?: boolean;
 } & VariantProps<typeof panelStyles>;
 
 export type PanelProps<T extends ElementType = "div"> = PanelOwnProps<T> &
 	Omit<ComponentPropsWithoutRef<T>, keyof PanelOwnProps<T>>;
 
 export function Panel<T extends ElementType = "div">({
+	accent,
 	as,
 	background,
 	border,
@@ -107,7 +120,9 @@ export function Panel<T extends ElementType = "div">({
 	overflow,
 	padding,
 	radius,
+	ref,
 	shadow,
+	solidAccentBackground = false,
 	tone,
 	width,
 	...rest
@@ -117,6 +132,7 @@ export function Panel<T extends ElementType = "div">({
 
 	return (
 		<Tag
+			ref={ref}
 			className={clsx(
 				panelStyles({
 					background,
@@ -131,8 +147,13 @@ export function Panel<T extends ElementType = "div">({
 					tone,
 					width,
 				}),
+				getAccentClassName(accent, "surface", {
+					solidBackground: solidAccentBackground,
+				}),
 				className,
 			)}
+			data-accent={accent ?? undefined}
+			data-solid-accent-background={solidAccentBackground || undefined}
 			data-slot="panel"
 			{...(rest as ComponentPropsWithoutRef<ElementType>)}
 		>

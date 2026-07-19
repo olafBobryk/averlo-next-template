@@ -41,6 +41,9 @@ const buttonStyles = cva(
 	{
 		variants: {
 			variant: {
+				card: "h-auto rounded-md border border-dashed border-foreground/20 bg-card px-4 py-3 text-card-foreground hover:bg-muted/30 focus-visible:ring-3 focus-visible:ring-ring/30",
+				default:
+					"border border-transparent bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active",
 				outline:
 					"border border-border bg-background text-background text-foreground hover:bg-background-hover active:bg-background-active disabled:hover:bg-background disabled:active:bg-background",
 				primary:
@@ -49,6 +52,12 @@ const buttonStyles = cva(
 					"bg-danger text-white hover:bg-danger/90 active:bg-danger/80 border border-transparent disabled:hover:bg-danger disabled:active:bg-danger",
 				primaryDark:
 					"bg-foreground text-background hover:bg-foreground-hover active:bg-foreground-active border border-transparent",
+				primarySoft:
+					"border border-transparent bg-primary/10 text-primary hover:bg-primary/15 focus-visible:border-primary/40 focus-visible:ring-primary/20",
+				quiet:
+					"border border-transparent bg-transparent text-foreground opacity-60 hover:opacity-100 active:opacity-80",
+				secondary:
+					"border border-transparent bg-input/50 text-foreground hover:bg-input/70",
 				solid:
 					"border! border-border! bg-white/70 shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:bg-white active:bg-[#F3F3F3]",
 				ghost:
@@ -59,6 +68,7 @@ const buttonStyles = cva(
 				xl: "px-7 py-3.5 text-base font-semibold",
 				md: "px-5 py-2.5 text-sm font-medium",
 				sm: "px-2.5 py-[5px] text-xs font-medium",
+				chip: "h-auto px-2 py-1 text-xs font-medium gap-1 [&_svg]:size-3",
 				icon: "min-w-[2.4375rem] min-h-[2.4375rem] h-[2.4375rem] w-[2.4375rem] px-0 py-0 text-sm font-medium justify-center items-center",
 				"icon-sm":
 					"min-w-[1.5625rem] min-h-[1.5625rem] h-[1.5625rem] w-[1.5625rem] px-0 py-0 text-sm font-medium justify-center item-center",
@@ -87,6 +97,11 @@ const buttonStyles = cva(
 		},
 	},
 );
+
+export type ButtonVariant = NonNullable<
+	VariantProps<typeof buttonStyles>["variant"]
+>;
+export type ButtonSize = NonNullable<VariantProps<typeof buttonStyles>["size"]>;
 
 const DEFAULT_ICON_SIZE = 15; // 0.9375rem – kept in px to match provided assets
 
@@ -231,6 +246,7 @@ const buttonSkeletonStyles = cva(
 				xl: "px-7 py-3.5 text-base font-semibold",
 				md: "px-5 py-2.5 text-sm font-medium",
 				sm: "px-2.5 py-[5px] text-xs font-medium",
+				chip: "h-auto gap-1 px-2 py-1 text-xs font-medium",
 				icon: "min-w-[2.4375rem] min-h-[2.4375rem] h-[2.4375rem] w-[2.4375rem] px-0 py-0",
 				"icon-sm":
 					"min-w-[1.5625rem] min-h-[1.5625rem] h-[1.5625rem] w-[1.5625rem] px-0 py-0",
@@ -265,8 +281,8 @@ function ButtonSkeleton({
 	fullWidth,
 	leadingIcon = false,
 	trailingIcon = false,
-	iconSize = DEFAULT_ICON_SIZE,
-	textVariant = "body",
+	iconSize,
+	textVariant,
 	textClassName,
 	variant,
 }: ButtonSkeletonProps) {
@@ -284,9 +300,20 @@ function ButtonSkeleton({
 
 	const hasLabel = React.Children.count(children) > 0;
 	const isIconSize = size === "icon" || size === "icon-sm";
+	const isChipSize = size === "chip";
+	const resolvedIconSize = iconSize ?? (isChipSize ? 12 : DEFAULT_ICON_SIZE);
+	const resolvedTextVariant = textVariant ?? (isChipSize ? "chip" : "support");
 	const minWidthClass =
 		isIconSize || fullWidth || hasLabel ? undefined : "min-w-[140px]";
-	const iconStyle = { width: `${iconSize}px`, height: `${iconSize}px` };
+	const iconStyle = {
+		width: `${resolvedIconSize}px`,
+		height: `${resolvedIconSize}px`,
+	};
+	const isPrimaryVariant =
+		variant === "default" ||
+		variant === "primary" ||
+		variant === "primaryDark" ||
+		variant === "primarySoft";
 	const isTextChild = typeof label === "string" || typeof label === "number";
 
 	return (
@@ -299,7 +326,8 @@ function ButtonSkeleton({
 					fullWidth: fullWidth ? true : undefined,
 				}),
 				minWidthClass,
-				"pointer-events-none",
+				"pointer-events-none border border-transparent",
+				isPrimaryVariant ? "!bg-primary/20" : "!bg-muted/80",
 				className,
 			)}
 		>
@@ -313,7 +341,7 @@ function ButtonSkeleton({
 				{isIconSize ? null : isTextChild ? (
 					<Text
 						as="span"
-						variant={textVariant}
+						variant={resolvedTextVariant}
 						style={{ color: "inherit" }}
 						className={clsx("opacity-0 select-none", textClassName)}
 					>
@@ -342,7 +370,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			href,
 			className,
 			contentClassName,
-			textVariant = "body",
+			textVariant,
 			textTone,
 			textClassName,
 			style,
@@ -386,6 +414,8 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 		const isTextChild =
 			typeof children === "string" || typeof children === "number";
 		const textToneClassName = getTextToneClassName(textTone);
+		const resolvedTextVariant =
+			textVariant ?? (size === "chip" ? "chip" : "body");
 		const content = (
 			<>
 				<span
@@ -407,7 +437,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 						isTextChild ? (
 							<Text
 								as="span"
-								variant={textVariant}
+								variant={resolvedTextVariant}
 								tone={textTone}
 								style={textTone ? undefined : { color: "inherit" }}
 								className={textClassName}

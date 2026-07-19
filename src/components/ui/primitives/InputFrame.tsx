@@ -5,6 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 
 const inputFrameVariants = cva(
 	"flex items-stretch gap-2.5 rounded-[10px] bg-surface border transition-all motion-micro shadow-[2px_4px_15px_rgba(2,2,2,0.03)]",
@@ -91,7 +92,7 @@ export type InputFrameSize = NonNullable<
 	VariantProps<typeof inputFrameVariants>["size"]
 >;
 
-type InputFrameProps = {
+export type InputFrameProps = {
 	start?: React.ReactNode;
 	end?: React.ReactNode;
 	fullWidth?: boolean;
@@ -101,7 +102,7 @@ type InputFrameProps = {
 } & VariantProps<typeof inputFrameVariants> &
 	React.HTMLAttributes<HTMLDivElement>;
 
-export const InputFrame = React.forwardRef<HTMLDivElement, InputFrameProps>(
+const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 	function InputFrame(
 		{
 			start,
@@ -147,3 +148,50 @@ export const InputFrame = React.forwardRef<HTMLDivElement, InputFrameProps>(
 		);
 	},
 );
+
+export type InputFrameSkeletonProps = Omit<
+	InputFrameProps,
+	"children" | "disabled" | "tone"
+> & {
+	children?: React.ReactNode;
+	skeletonClassName?: string;
+};
+
+export function InputFrameSkeleton({
+	children,
+	className,
+	contentClassName: _contentClassName,
+	end: _end,
+	fullWidth,
+	size = "md",
+	skeletonClassName,
+	start: _start,
+	...rest
+}: InputFrameSkeletonProps) {
+	return (
+		<Skeleton
+			className={clsx(
+				inputFrameVariants({ size, fullWidth: fullWidth ? true : undefined }),
+				"pointer-events-none border-transparent !bg-muted/80 shadow-none",
+				className,
+			)}
+			data-slot="input-frame-skeleton"
+			{...rest}
+		>
+			{children ? (
+				<span
+					className={clsx(
+						"mx-[15px] min-w-0 truncate text-sm",
+						skeletonClassName,
+					)}
+				>
+					{children}
+				</span>
+			) : null}
+		</Skeleton>
+	);
+}
+
+export const InputFrame = Object.assign(InputFrameRoot, {
+	Skeleton: InputFrameSkeleton,
+});

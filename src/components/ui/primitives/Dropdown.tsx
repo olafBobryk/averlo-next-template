@@ -3,12 +3,14 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: trigger wrapper behavior is delegated through render props and nested controls */
 "use client";
 
+import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
 import Portal from "@/components/ui/overlays/Portal";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { Icon } from "../icons/Icon";
+import { Panel, type PanelProps } from "./Panel";
 
 export type DropdownTriggerRenderProps = {
 	ref: React.Ref<HTMLElement>;
@@ -61,6 +63,20 @@ type DropdownProps = {
 };
 
 type DropdownSide = NonNullable<DropdownProps["side"]>;
+export type DropdownPositionStrategy = "absolute" | "fixed";
+type DropdownAnchorRef = { current: Element | null };
+
+export type DropdownPanelProps = PanelProps<"div"> & {
+	align?: "start" | "end";
+	anchorRef?: DropdownAnchorRef;
+	collisionPadding?: number;
+	matchAnchorWidth?: boolean;
+	offset?: number;
+	portalTargetId?: string;
+	positionStrategy?: DropdownPositionStrategy;
+	ref?: React.Ref<HTMLDivElement>;
+	side?: DropdownSide;
+};
 
 const DEFAULT_CHEVRON_ICON = ({ isOpen }: { isOpen: boolean }) => {
 	return (
@@ -95,6 +111,163 @@ function resolveDropdownSide({
 	if (measuredHeight <= preferredAvailable) return preferredSide;
 	if (oppositeAvailable > preferredAvailable) return oppositeSide;
 	return preferredSide;
+}
+
+function assignRef<T>(ref: React.Ref<T> | undefined, value: T) {
+	if (!ref) return;
+	if (typeof ref === "function") {
+		ref(value);
+		return;
+	}
+	ref.current = value;
+}
+
+export function DropdownPanel({
+	align = "start",
+	anchorRef,
+	className,
+	collisionPadding = COLLISION_PADDING,
+	matchAnchorWidth = false,
+	offset = 8,
+	padding = "none",
+	portalTargetId,
+	positionStrategy = "absolute",
+	ref,
+	shadow = "lg",
+	side = "bottom",
+	style,
+	width = "auto",
+	...props
+}: DropdownPanelProps) {
+	const panelRef = React.useRef<HTMLDivElement | null>(null);
+	const [mountedPanelNode, setMountedPanelNode] =
+		React.useState<HTMLDivElement | null>(null);
+	const [positionStyle, setPositionStyle] =
+		React.useState<React.CSSProperties>();
+
+	const setPanelNode = React.useCallback(
+		(node: HTMLDivElement | null) => {
+			panelRef.current = node;
+			setMountedPanelNode(node);
+			assignRef(ref, node);
+		},
+		[ref],
+	);
+
+	const calculateFixedPosition = React.useCallback(() => {
+		const anchor = anchorRef?.current;
+		const panel = panelRef.current;
+		if (!(anchor instanceof HTMLElement) || !panel) return;
+
+		const anchorRect = anchor.getBoundingClientRect();
+		const panelRect = panel.getBoundingClientRect();
+		const explicitWidth = matchAnchorWidth ? anchorRect.width : undefined;
+		const measuredWidth = explicitWidth ?? panelRect.width;
+		const measuredHeight = panel.scrollHeight || panelRect.height;
+		const availableAbove = Math.max(
+			0,
+			anchorRect.top - offset - collisionPadding,
+		);
+		const availableBelow = Math.max(
+			0,
+			window.innerHeight - anchorRect.bottom - offset - collisionPadding,
+		);
+		const resolvedSide = resolveDropdownSide({
+			availableAbove,
+			availableBelow,
+			measuredHeight,
+			preferredSide: side,
+		});
+		const availableHeight =
+			resolvedSide === "top" ? availableAbove : availableBelow;
+		const maxHeight =
+			measuredHeight > availableHeight ? availableHeight : undefined;
+		const renderedHeight = maxHeight ?? measuredHeight;
+		const viewportWidth = window.innerWidth;
+		let left =
+			align === "end" ? anchorRect.right - measuredWidth : anchorRect.left;
+		const maxLeft = Math.max(
+			collisionPadding,
+			viewportWidth - measuredWidth - collisionPadding,
+		);
+		left = Math.min(Math.max(left, collisionPadding), maxLeft);
+		const top =
+			resolvedSide === "top"
+				? Math.max(collisionPadding, anchorRect.top - renderedHeight - offset)
+				: Math.max(
+						collisionPadding,
+						Math.min(
+							anchorRect.bottom + offset,
+							window.innerHeight - collisionPadding - renderedHeight,
+						),
+					);
+
+		setPositionStyle({
+			left,
+			maxHeight,
+			minWidth: explicitWidth,
+			overflowY: maxHeight === undefined ? undefined : "auto",
+			position: "fixed",
+			top,
+			width: explicitWidth,
+			zIndex: 110,
+		});
+	}, [align, anchorRef, collisionPadding, matchAnchorWidth, offset, side]);
+
+	React.useLayoutEffect(() => {
+		if (positionStrategy !== "fixed") {
+			setPositionStyle(undefined);
+			return;
+		}
+		if (mountedPanelNode) calculateFixedPosition();
+	}, [calculateFixedPosition, mountedPanelNode, positionStrategy]);
+
+	React.useEffect(() => {
+		if (positionStrategy !== "fixed") return;
+		const handleViewportChange = () => calculateFixedPosition();
+		window.addEventListener("resize", handleViewportChange);
+		window.addEventListener("scroll", handleViewportChange, true);
+		return () => {
+			window.removeEventListener("resize", handleViewportChange);
+			window.removeEventListener("scroll", handleViewportChange, true);
+		};
+	}, [calculateFixedPosition, positionStrategy]);
+
+	const resolvedStyle =
+		positionStrategy === "fixed"
+			? ({
+					...style,
+					left: 0,
+					position: "fixed",
+					top: 0,
+					visibility: positionStyle
+						? (style?.visibility ?? "visible")
+						: "hidden",
+					zIndex: 110,
+					...positionStyle,
+				} satisfies React.CSSProperties)
+			: style;
+	const panel = (
+		<Panel
+			className={clsx(
+				"dropdown-panel-enter z-50 min-w-48",
+				positionStrategy === "fixed" ? "fixed" : "absolute mt-2",
+				className,
+			)}
+			padding={padding}
+			ref={setPanelNode}
+			shadow={shadow}
+			style={resolvedStyle}
+			width={width}
+			{...props}
+		/>
+	);
+
+	return positionStrategy === "fixed" ? (
+		<Portal target={portalTargetId}>{panel}</Portal>
+	) : (
+		panel
+	);
 }
 
 export function Dropdown({

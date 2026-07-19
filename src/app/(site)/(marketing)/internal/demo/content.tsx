@@ -3,7 +3,10 @@
 import Image from "next/image";
 import { type JSX, type Ref, useRef, useState } from "react";
 import Logo from "@/components/branding/Logo";
-import { MarkdownRenderer } from "@/components/composites/markdown";
+import {
+	MarkdownEditor,
+	MarkdownRenderer,
+} from "@/components/composites/markdown";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import {
 	CopyStatusIcon,
@@ -12,6 +15,11 @@ import {
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { useIconRegistry } from "@/components/ui/icons/iconRegistry";
 import { ButtonMultiSelectInput } from "@/components/ui/input/ButtonMultiSelectInput";
+import { ColorInput } from "@/components/ui/input/ColorInput";
+import {
+	ColorSwatchInput,
+	SEMANTIC_COLOR_SWATCH_PRESETS,
+} from "@/components/ui/input/ColorSwatchInput";
 import { ComboboxMultiSelectInput } from "@/components/ui/input/ComboboxMultiSelectInput";
 import { ComboboxTextInput } from "@/components/ui/input/ComboboxTextInput";
 import { ChoiceField } from "@/components/ui/input/choice/ChoiceField";
@@ -20,6 +28,7 @@ import {
 	ChoiceIndicatorRadio,
 	ChoiceIndicatorToggle,
 } from "@/components/ui/input/choice/ChoiceIndicators";
+import { DateInput } from "@/components/ui/input/DateInput";
 import { DateRangeInput } from "@/components/ui/input/DateRangeInput";
 import { EditableTextInput } from "@/components/ui/input/EditableTextInput";
 import { EmailInput } from "@/components/ui/input/EmailInput";
@@ -56,6 +65,7 @@ import {
 import { InspectableImage } from "@/components/ui/misc/InspectableImage";
 import { Loader } from "@/components/ui/misc/Loader";
 import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
+import { NullState } from "@/components/ui/misc/NullState";
 import { PaginationControls } from "@/components/ui/misc/PaginationControls";
 import { Pill } from "@/components/ui/misc/Pill";
 import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
@@ -63,6 +73,7 @@ import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { SocialLinks } from "@/components/ui/misc/SocialLinks";
+import { StepIndicator } from "@/components/ui/misc/StepIndicator";
 import { SuspenseBoundary } from "@/components/ui/misc/SuspenseBoundary";
 import { ErrorState } from "@/components/ui/misc/state/ErrorState";
 import { IdleState } from "@/components/ui/misc/state/IdleState";
@@ -1235,6 +1246,40 @@ export const demoPages: DemoPage[] = [
 						snippet:
 							'<MarkdownRenderer markdown={"# Title\\n\\n::button[Open Reference]{href=/internal/reference variant=primary size=md}"} />',
 					},
+					{
+						id: "markdown-editor-live",
+						kind: "component",
+						name: "MarkdownEditor",
+						label: "Rich text, source, and mentions",
+						Render() {
+							const [markdown, setMarkdown] = useState(
+								"## Project note\n\nWrite a polished update and mention a teammate.",
+							);
+							return (
+								<div className="grid max-w-3xl gap-4">
+									<MarkdownEditor
+										ariaLabel="Project note"
+										defaultMarkdown={markdown}
+										mentions={[
+											{
+												id: "4b533f14-6dd0-4dbf-9f73-212be08f5211",
+												label: "Ada Lovelace",
+											},
+										]}
+										onChange={setMarkdown}
+									/>
+									<Panel background="muted" border="subtle" padding="sm">
+										<MarkdownRenderer
+											markdown={markdown}
+											resolveUserMention={() => (
+												<Chip color="info">@Ada Lovelace</Chip>
+											)}
+										/>
+									</Panel>
+								</div>
+							);
+						},
+					},
 				],
 			},
 		],
@@ -1386,6 +1431,9 @@ export const demoPages: DemoPage[] = [
 									<Chip href="/internal/demo" trailingIcon="arrow-right">
 										Linked chip
 									</Chip>
+									<Chip color="success">Ready</Chip>
+									<Chip color="warning">Needs review</Chip>
+									<Chip color="#9C46BF">Custom</Chip>
 								</div>
 							);
 						},
@@ -1416,6 +1464,9 @@ export const demoPages: DemoPage[] = [
 										<Button variant="solid">Solid</Button>
 										<Button variant="danger">Danger</Button>
 										<Button variant="primaryDark">Dark</Button>
+										<Button variant="primarySoft">Primary soft</Button>
+										<Button variant="secondary">Secondary</Button>
+										<Button variant="quiet">Quiet</Button>
 										<Button variant="ghost">Ghost</Button>
 									</div>
 									<div className="flex flex-wrap items-center gap-2">
@@ -1998,6 +2049,49 @@ export const demoPages: DemoPage[] = [
 											? `Selected: ${selectedFileName}`
 											: "No file selected"}
 									</Text>
+								</div>
+							);
+						},
+					},
+					{
+						id: "date-input",
+						kind: "component",
+						name: "DateInput",
+						label: "Calendar date input",
+						Render() {
+							const [date, setDate] = useState("2026-07-19");
+							return (
+								<DateInput
+									label="Review date"
+									value={date}
+									onChange={setDate}
+								/>
+							);
+						},
+					},
+					{
+						id: "color-inputs",
+						kind: "component",
+						name: "ColorInput",
+						label: "Color and semantic swatches",
+						Render() {
+							const [color, setColor] = useState("#3567EA");
+							const [tone, setTone] = useState<
+								"neutral" | "info" | "success" | "warning" | "danger"
+							>("info");
+							return (
+								<div className="grid gap-4">
+									<ColorInput
+										label="Brand color"
+										value={color}
+										onChange={setColor}
+									/>
+									<ColorSwatchInput
+										label="Status color"
+										presets={SEMANTIC_COLOR_SWATCH_PRESETS}
+										value={tone}
+										onChange={(selection) => setTone(selection.value)}
+									/>
 								</div>
 							);
 						},
@@ -2777,7 +2871,28 @@ export const demoPages: DemoPage[] = [
 									<Accordion title="Disabled" disabled>
 										Disabled content.
 									</Accordion>
+									<Accordion.Skeleton />
 								</div>
+							);
+						},
+					},
+					{
+						id: "step-indicator",
+						kind: "component",
+						name: "StepIndicator",
+						label: "Modal workflow steps",
+						Render() {
+							const [step, setStep] = useState("details");
+							return (
+								<StepIndicator
+									currentStep={step}
+									onStepChange={setStep}
+									steps={[
+										{ id: "details", label: "Details" },
+										{ id: "review", label: "Review" },
+										{ id: "finish", label: "Finish" },
+									]}
+								/>
 							);
 						},
 					},
@@ -3409,11 +3524,17 @@ export const demoPages: DemoPage[] = [
 						related: relatedMap.StateIndicator,
 						Render() {
 							return (
-								<StateIndicator
-									title="Offline"
-									description="Check your connection"
-									iconName="warning"
-								/>
+								<div className="grid gap-4">
+									<StateIndicator
+										title="Offline"
+										description="Check your connection"
+										iconName="warning"
+									/>
+									<NullState
+										title="No records yet"
+										copy="Create the first record to populate this surface."
+									/>
+								</div>
 							);
 						},
 					},

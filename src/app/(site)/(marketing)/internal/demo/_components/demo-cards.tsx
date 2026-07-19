@@ -50,10 +50,7 @@ export function ComponentCard({
 			gap="sm"
 			padding="sm"
 			shadow="none"
-			className={[
-				"h-full border border-border/10 bg-white self-stretch",
-				className,
-			]
+			className={["h-full self-stretch border border-border bg-card", className]
 				.filter(Boolean)
 				.join(" ")}
 		>
@@ -115,7 +112,7 @@ export function ComponentGroup({
 			</div>
 			<div
 				className={[
-					"grid gap-3 auto-rows-fr items-stretch",
+					"grid items-stretch gap-3",
 					columns ?? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3",
 				]
 					.filter(Boolean)

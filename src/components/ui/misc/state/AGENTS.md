@@ -12,6 +12,7 @@ Reusable state indicators for empty, idle, and error presentations.
 - `src/components/ui/misc/state/State.tsx`: exports the base `StateIndicator`.
 - `src/components/ui/misc/state/ErrorState.tsx`: error-focused preset.
 - `src/components/ui/misc/state/IdleState.tsx`: idle or empty-state preset.
+- `src/components/ui/misc/NullState.tsx`: use the sibling compact null-value treatment inside details, rows, and property lists where a full state frame would be excessive.
 
 ## Invariants
 - Use `StateIndicator` or its presets instead of ad hoc icon-plus-copy-plus-button stacks.

@@ -1,50 +1,105 @@
 import clsx from "clsx";
 import type * as React from "react";
+import { InputFrame } from "@/components/ui/primitives/InputFrame";
 import { Text } from "@/components/ui/primitives/Text";
 
 type FieldProps = {
 	children: React.ReactNode;
 	className?: string;
 	description?: React.ReactNode;
+	descriptionId?: string;
+	disableMessage?: boolean;
 	error?: React.ReactNode;
 	id?: string;
+	inputId?: string;
 	label?: React.ReactNode;
+	labelAction?: React.ReactNode;
+	message?: React.ReactNode;
+	messageId?: string;
+	required?: boolean;
+	tone?: "default" | "error" | "success";
 };
 
-export function Field({
+function FieldRoot({
 	children,
 	className,
 	description,
+	descriptionId: providedDescriptionId,
+	disableMessage = false,
 	error,
 	id,
+	inputId: providedInputId,
 	label,
+	labelAction,
+	message,
+	messageId: providedMessageId,
+	required,
+	tone,
 }: FieldProps) {
-	const descriptionId = description && id ? `${id}-description` : undefined;
-	const errorId = error && id ? `${id}-error` : undefined;
+	const inputId = providedInputId ?? id;
+	const resolvedMessage = message ?? error;
+	const resolvedTone = tone ?? (error ? "error" : "default");
+	const descriptionId =
+		providedDescriptionId ??
+		(description && inputId ? `${inputId}-description` : undefined);
+	const messageId =
+		providedMessageId ??
+		(resolvedMessage && inputId ? `${inputId}-message` : undefined);
 
 	return (
-		<div className={clsx("grid gap-2", className)}>
-			{label ? (
-				<label htmlFor={id} className="text-sm font-medium text-foreground">
-					{label}
-				</label>
-			) : null}
-			{description ? (
-				<Text id={descriptionId} variant="support" tone="muted">
-					{description}
-				</Text>
+		<div className={clsx("group/field flex flex-col gap-3", className)}>
+			{label || description || labelAction ? (
+				<div className="flex flex-col gap-1">
+					{label || labelAction ? (
+						<div className="flex items-end justify-between gap-3">
+							{label ? (
+								<label className="text-sm text-foreground" htmlFor={inputId}>
+									{label}
+									{required ? <span className="text-danger"> *</span> : null}
+								</label>
+							) : null}
+							{labelAction}
+						</div>
+					) : null}
+					{description ? (
+						<Text id={descriptionId} variant="support" tone="muted">
+							{description}
+						</Text>
+					) : null}
+				</div>
 			) : null}
 			{children}
-			{error ? (
+			{!disableMessage && resolvedMessage ? (
 				<Text
-					id={errorId}
+					id={messageId}
 					variant="support"
-					className="text-danger"
-					role="alert"
+					className={clsx(
+						resolvedTone === "error" && "text-danger",
+						resolvedTone === "success" && "text-success",
+					)}
+					role={resolvedTone === "error" ? "alert" : undefined}
 				>
-					{error}
+					{resolvedMessage}
 				</Text>
 			) : null}
 		</div>
 	);
 }
+
+function FieldSkeleton({
+	className,
+	description,
+	label,
+}: Pick<FieldProps, "className" | "description" | "label">) {
+	return (
+		<div aria-hidden className={clsx("flex flex-col gap-3", className)}>
+			{label ? <Text.Skeleton>{label}</Text.Skeleton> : null}
+			{description ? (
+				<Text.Skeleton variant="support">{description}</Text.Skeleton>
+			) : null}
+			<InputFrame.Skeleton fullWidth>Input</InputFrame.Skeleton>
+		</div>
+	);
+}
+
+export const Field = Object.assign(FieldRoot, { Skeleton: FieldSkeleton });

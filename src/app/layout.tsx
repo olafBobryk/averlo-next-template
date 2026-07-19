@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { roboto } from "@/font";
+import { inter } from "@/font";
 import { createRootMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createRootMetadata();
 
 export const viewport: Viewport = {
-	themeColor: "#0f172a",
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
+		{ media: "(prefers-color-scheme: dark)", color: "#18181b" },
+	],
 };
 
 const motionOverrideBootstrap =
@@ -25,7 +28,7 @@ export default function RootLayout({
 					dangerouslySetInnerHTML={{ __html: motionOverrideBootstrap }}
 				/>
 			</head>
-			<body className={`${roboto.variable} antialiased`}>{children}</body>
+			<body className={`${inter.variable} antialiased`}>{children}</body>
 		</html>
 	);
 }

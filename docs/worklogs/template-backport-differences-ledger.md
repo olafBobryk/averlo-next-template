@@ -33,8 +33,8 @@ organization-powered full-start dashboard.
 
 | Chunk | Scope | Classification | Status | Current evidence | Next gate |
 | --- | --- | --- | --- | --- | --- |
-| P1-C1 | Clean baseline, filesystem-backed thin profile, shared Panel/Card | Adapt | complete | Baseline `5061682`; shared Panel/Card restored; profile manifest and file overrides pass strict API review, typecheck, build, and smoke in both profiles | Commit the verified chunk |
-| P1-C2 | Pinned visual tokens and shared component convergence | Adapt | pending | Source pin accepted; exact component inventory recorded in architecture | Visual gate 1 across both profiles |
+| P1-C1 | Clean baseline, filesystem-backed thin profile, shared Panel/Card | Adapt | complete | Commit `6cb2c99`; shared Panel/Card and manifest-driven materialization pass strict API review, typecheck, build, and smoke in both profiles | Closed |
+| P1-C2 | Pinned visual tokens and shared component convergence | Adapt | complete | Tokens, Inter, shared primitives, inputs, modal flows, skeleton namespaces, full-only editor/color controls, and thin exclusions implemented; both profiles typecheck/build/smoke; responsive light/dark gate passed | P1-C3 auth and organization lifecycle |
 | P1-C3 | Provider-neutral authentication and organization lifecycle | Adapt | pending | Routes, adapters, session, invitation, and identity decisions accepted | Focused auth/org verification |
 | P1-C4 | Dashboard shell, typed surface registry, commands, debug state | Adapt | pending | Route and command ownership accepted | Registry/capability and responsive verification |
 | P1-C5 | Reference entities, mutations, policy, pruning, skill, closure | Adapt | pending | Dashboard-owned dependency layers and reference-entity scope accepted | Visual gate 2 and closure audit |
@@ -47,6 +47,10 @@ organization-powered full-start dashboard.
 | INF-UI-020 | Generic `Panel` plus structured `Card` built on it | Adapt | Shared identically by full and thin; Panel owns non-semantic surfaces and overlay roots. |
 | INF-UI-021 | File-backed Sonner thin toast | Adapt | Thin-specific implementation uses shared tokens; full template feedback API remains intact. |
 | INF-VISUAL-001 | Pinned light/dark surface, sidebar, status, spectrum, radius, focus, motion, scrollbar grammar | Adapt | Port in P1-C2 with Inter; exclude SF Pro and product gradients. |
+| INF-UI-022 | Source-matched Button, Text, Field, InputFrame, Dropdown/Listbox, Chip, Accordion, modal, toast, and status convergence | Adapt | Preserve mature template APIs, absolute loading overlay, focus behavior, and component-owned skeleton namespaces while adopting the pinned visual grammar. |
+| INF-UI-023 | Full-only MDX editor, source mode, mentions, and modal editing | Adapt | Keep the existing renderer shared; strip editor source, CSS, and `@mdxeditor/editor` from thin output and lockfile. |
+| INF-UI-024 | Date, color, selection interception, file/profile lifecycle, More-menu factories, and null-state improvements | Adapt | Date contracts are reusable; color controls are full-only; existing Multiselect/ChoiceField remains canonical instead of adding CheckboxInput. |
+| INF-UI-025 | Source modal forms, step indicator, and richer confirmation contract | Adapt | Confirmation supports details, warnings, variants, and `false`-keeps-open without replacing the existing modal host/focus APIs. |
 | INF-AUTH-001 | Provider-neutral auth/org/membership/invitation/private-file contracts | Adapt | Implement in P1-C3 with non-durable fixture adapter and server-resolved org context. |
 | INF-DASH-001 | Dashboard shell, surface registry, contextual Command-K, deterministic debug state | Adapt | Implement in P1-C4 without Inference notifications or profile gradient. |
 | INF-ENTITY-001 | Dashboard-owned entity presentation foundation and reference members/records | Adapt | Implement file-based dependency layers in P1-C5; no global presentation registry. |
@@ -239,3 +243,5 @@ organization-powered full-start dashboard.
 | 2026-07-19 | Default and custom `create:thin-start`; guarded in-place checks; `dev:thin -- --random --dry-run` | passed / expected failure | Default and custom workspaces materialized from one manifest. Missing `--confirm-instance` failed closed; in-place dry-run did not mutate. |
 | 2026-07-19 | `cmp` shared Panel/Card; thin MDX/editor exclusion | passed | Full and thin Panel/Card files are byte-identical; thin has no MDXEditor package or editor source. |
 | 2026-07-19 | Isolated preview route matrix | passed | Full `/internal/demo` and thin `/`, `/contact`, and `/internal/intelligence` returned 200 with automation overrides. |
+| 2026-07-19 | Responsive visual gate 1 at base, small, medium, large, and extra-large widths in light and dark modes | passed | Reviewed the full internal component demo and the thin home/contact/internal-intelligence matrix. The full MDX editor rendered initial content, inserted a mention, and entered source mode. |
+| 2026-07-19 | Focused Biome checks and `git diff --check` | passed | No errors. Biome retained the existing intentional `<img>` warning in the file-inspection preview surface. |

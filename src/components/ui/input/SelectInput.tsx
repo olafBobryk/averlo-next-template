@@ -27,7 +27,7 @@ export type SelectOption<T> = {
 	disabled?: boolean;
 };
 
-type SelectInputProps<T> = {
+export type SelectInputProps<T> = {
 	label: React.ReactNode;
 	description?: React.ReactNode;
 	placeholder?: string;
@@ -35,7 +35,9 @@ type SelectInputProps<T> = {
 	name?: string;
 	value: T | null;
 	onChange: (value: T) => void;
-	onOptionSelect?: (value: T, option: SelectOption<T>) => void;
+	/** Return true to intercept the selection and skip the normal value change. */
+	// biome-ignore lint/suspicious/noConfusingVoidType: void preserves existing callbacks while true adds interception.
+	onOptionSelect?: (value: T, option: SelectOption<T>) => boolean | void;
 	options: SelectOption<T>[];
 	required?: boolean;
 	disabled?: boolean;
@@ -213,8 +215,11 @@ export function SelectInput<T>({
 	);
 
 	const selectOption = (option: SelectOption<T>) => {
+		if (onOptionSelect?.(option.value, option) === true) {
+			setSearchQuery("");
+			return;
+		}
 		onChange(option.value);
-		onOptionSelect?.(option.value, option);
 		setSearchQuery("");
 	};
 

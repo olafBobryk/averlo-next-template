@@ -14,6 +14,8 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
 - `src/components/ui/overlays/modal/useModal.tsx`: low-level modal hook.
 - `src/components/ui/overlays/modal/ConfirmationModal.tsx`: shared confirmation dialog content.
 - `src/components/ui/overlays/modal/useConfirmationModal.tsx`: easiest path for destructive or confirm actions.
+- `src/components/ui/overlays/modal/ModalForm.tsx`: standard form body/footer and multi-step modal composition.
+- `src/components/ui/misc/StepIndicator.tsx`: canonical progress UI for `ModalStepForm`.
 - `src/components/ui/overlays/modal/ImageInspectModal.tsx`: shared image-viewing modal.
 - `src/components/ui/overlays/modal/useImageInspectModal.tsx`: easiest path for image-inspection UX.
 
@@ -27,6 +29,8 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
   - Closing a modal should restore focus predictably to the invoking control when possible.
 - Backdrop, shell, and panel behavior should stay centralized in `ModalShell`.
 - Destructive confirmation patterns should reuse the shared confirmation modal before introducing custom dialog copy and controls.
+- Confirmation handlers may return `false` to keep the modal open. Use structured `details`, semantic warnings, and `confirmVariant` instead of replacing the shared confirmation layout.
+- Form flows should begin with `ModalForm`; use `ModalStepForm` only when the interaction has real ordered steps rather than cosmetic progress.
 - Do not add a second confirmation system. If a standard confirm-before-action flow needs different copy, pass different options to `useConfirmationModal`.
 
 ## How To Use It

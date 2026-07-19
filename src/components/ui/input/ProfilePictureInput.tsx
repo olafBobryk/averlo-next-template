@@ -14,53 +14,70 @@ const ACCEPT_ATTR = ".jpg,.jpeg,.png,.webp";
 export type ProfilePictureInputProps = {
 	label?: string;
 	description?: string;
-	currentUrl?: string;
+	currentUrl?: string | null;
+	id?: string;
 	name?: string;
 	disabled?: boolean;
 	onChange: (file: File | null) => void;
+	acceptedMimeTypes?: readonly string[];
+	maxSizeBytes?: number;
+	onValidationError?: (message: string | null) => void;
 };
 
 export function ProfilePictureInput({
 	label = "Profile picture",
 	description,
 	currentUrl,
+	id,
 	name,
 	disabled = false,
 	onChange,
+	acceptedMimeTypes = ACCEPTED_TYPES,
+	maxSizeBytes = MAX_FILE_SIZE_BYTES,
+	onValidationError,
 }: ProfilePictureInputProps) {
-	const inputId = React.useId();
+	const generatedId = React.useId();
+	const inputId = id ?? generatedId;
 	const inputRef = React.useRef<HTMLInputElement>(null);
+	const previewUrlRef = React.useRef<string | null>(null);
 	const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 	const [removed, setRemoved] = React.useState(false);
 	const [error, setError] = React.useState<string | null>(null);
 	const displayUrl = removed ? undefined : (previewUrl ?? currentUrl);
 
-	function revokePreview() {
-		if (previewUrl) {
-			URL.revokeObjectURL(previewUrl);
-		}
-	}
+	const revokePreview = React.useCallback(() => {
+		if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+		previewUrlRef.current = null;
+	}, []);
 
 	function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-		const file = event.target.files?.[0];
-		event.target.value = "";
+		const file = event.currentTarget.files?.[0];
 
 		if (!file) return;
 
-		if (!ACCEPTED_TYPES.includes(file.type)) {
-			setError("Only JPG, PNG, and WebP images are accepted.");
+		if (!acceptedMimeTypes.includes(file.type)) {
+			const message = "Only JPG, PNG, and WebP images are accepted.";
+			setError(message);
+			onValidationError?.(message);
+			event.currentTarget.value = "";
 			return;
 		}
 
-		if (file.size > MAX_FILE_SIZE_BYTES) {
-			setError("Image must be smaller than 25 MB.");
+		if (file.size > maxSizeBytes) {
+			const message = `Image must be smaller than ${Math.round(maxSizeBytes / 1024 / 1024)} MB.`;
+			setError(message);
+			onValidationError?.(message);
+			event.currentTarget.value = "";
 			return;
 		}
 
 		revokePreview();
 		setError(null);
+		onValidationError?.(null);
 		setRemoved(false);
-		setPreviewUrl(URL.createObjectURL(file));
+		const nextPreviewUrl = URL.createObjectURL(file);
+		previewUrlRef.current = nextPreviewUrl;
+		setPreviewUrl(nextPreviewUrl);
 		onChange(file);
 	}
 
@@ -69,14 +86,28 @@ export function ProfilePictureInput({
 		setPreviewUrl(null);
 		setRemoved(true);
 		setError(null);
+		onValidationError?.(null);
+		if (inputRef.current) inputRef.current.value = "";
 		onChange(null);
 	}
 
 	React.useEffect(() => {
-		return () => {
-			if (previewUrl) URL.revokeObjectURL(previewUrl);
+		return revokePreview;
+	}, [revokePreview]);
+
+	React.useEffect(() => {
+		const form = inputRef.current?.form;
+		if (!form) return;
+		const handleReset = () => {
+			revokePreview();
+			setPreviewUrl(null);
+			setRemoved(false);
+			setError(null);
+			onValidationError?.(null);
 		};
-	}, [previewUrl]);
+		form.addEventListener("reset", handleReset);
+		return () => form.removeEventListener("reset", handleReset);
+	}, [onValidationError, revokePreview]);
 
 	return (
 		<Field
@@ -100,7 +131,7 @@ export function ProfilePictureInput({
 					disabled={disabled}
 				>
 					<ProfilePicture
-						src={displayUrl}
+						src={displayUrl ?? undefined}
 						name={name}
 						size="lg"
 						className="h-full w-full rounded-full border-0"
@@ -117,6 +148,7 @@ export function ProfilePictureInput({
 				<input
 					ref={inputRef}
 					id={inputId}
+					name={name}
 					type="file"
 					accept={ACCEPT_ATTR}
 					hidden
