@@ -1,6 +1,6 @@
 # Architecture Staging
 
-Accepted but not yet consolidated architecture decisions for the Averlo full-start and thin-start profiles.
+Consolidated into [the final architecture](./architecture.md) on 2026-07-19. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles.
 
 ## Template relationship and convergence scope
 
