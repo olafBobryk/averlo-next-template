@@ -60,7 +60,9 @@ export const thinStartProfile = {
 	})),
 	removals: [
 		"scripts/scroll-performance",
+		"scripts/verify-auth-organization.ts",
 		"src/app/(site)/(auth)",
+		"src/app/api/auth",
 		"src/app/(site)/_components/settings",
 		"src/app/(site)/dashboard",
 		"src/app/(site)/(marketing)/settings",
@@ -98,6 +100,8 @@ export const thinStartProfile = {
 		"src/components/ui/input/TextAreaInput.tsx",
 		"src/components/ui/input/UnitNumberInput.tsx",
 		"src/components/ui/primitives/Divider.tsx",
+		"src/lib/auth",
+		"src/proxy.ts",
 	],
 	packageChanges: {
 		dependencies: {
@@ -108,10 +112,11 @@ export const thinStartProfile = {
 		},
 		devDependencies: {
 			add: {},
-			remove: [],
+			remove: ["tsx"],
 		},
 		scripts: {
 			remove: [
+				"verify:auth",
 				"measure:scroll-performance",
 				"record:scroll-performance",
 				"setup:scroll-performance-autoresearch",
@@ -162,7 +167,19 @@ export const thinStartProfile = {
 				file: "src/app/(site)/(marketing)/internal/intelligence/graph/page.tsx",
 			},
 		],
-		remove: ["/login", "/dashboard", "/settings", "/internal/demo"],
+		remove: [
+			"/login",
+			"/sign-in-options",
+			"/forgot-password",
+			"/reset-password",
+			"/set-password",
+			"/invitation",
+			"/select-organization",
+			"/auth/callback",
+			"/dashboard",
+			"/settings",
+			"/internal/demo",
+		],
 	},
 	apiReview: {
 		allowedUiImports: [
@@ -207,10 +224,14 @@ export const thinStartProfile = {
 			"src/app/(site)/(marketing)/internal/intelligence/page.tsx",
 		],
 		forbiddenPaths: [
+			"src/app/(site)/(auth)",
+			"src/app/api/auth",
 			"src/app/(site)/dashboard",
 			"src/app/(site)/(marketing)/internal/demo",
 			"src/components/ui/misc",
 			"scripts/scroll-performance",
+			"src/lib/auth",
+			"src/proxy.ts",
 		],
 		forbiddenPackages: ["@mdxeditor/editor"],
 		commands: [

@@ -2,13 +2,18 @@ export type SessionUser = {
 	id: string;
 	name: string;
 	email: string;
-	role: "member" | "admin";
+	role: "owner" | "member" | "admin";
 	isBanned: boolean;
 	profilePictureUrl?: string;
 };
 
 type SessionResponse = {
 	user: SessionUser | null;
+	status?:
+		| "anonymous"
+		| "membership-required"
+		| "organization-selection-required"
+		| "resolved";
 };
 
 type LoginOptions = {
@@ -19,84 +24,81 @@ type LogoutResponse = {
 	message: string;
 };
 
-const STORAGE_KEY = "averlo-dashboard-session";
-const DEFAULT_DELAY_MS = 200;
+let cachedUser: SessionUser | null = null;
 
-const DEFAULT_USER: SessionUser = {
-	id: "demo-user",
-	name: "Template Operator",
-	email: "operator@averlo.local",
-	role: "admin",
-	isBanned: false,
-};
-
-function wait(ms = DEFAULT_DELAY_MS) {
-	return new Promise<void>((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
-
-function readStoredUser(): SessionUser | null {
-	if (typeof window === "undefined") return null;
-
-	try {
-		const raw = window.localStorage.getItem(STORAGE_KEY);
-		if (!raw) return null;
-		return JSON.parse(raw) as SessionUser;
-	} catch {
-		return null;
+async function readJson<T>(response: Response): Promise<T> {
+	const body = (await response.json()) as T & { message?: string };
+	if (!response.ok) {
+		throw new Error(body.message ?? "The authentication request failed.");
 	}
-}
-
-function writeStoredUser(user: SessionUser | null) {
-	if (typeof window === "undefined") return;
-
-	try {
-		if (!user) {
-			window.localStorage.removeItem(STORAGE_KEY);
-			return;
-		}
-
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-	} catch {
-		// Ignore storage failures in mock auth mode.
-	}
+	return body;
 }
 
 export async function fetchSession(): Promise<SessionResponse> {
-	await wait();
-	return { user: readStoredUser() };
+	const response = await fetch("/api/auth/session", {
+		cache: "no-store",
+		credentials: "same-origin",
+	});
+	const body = await readJson<SessionResponse>(response);
+	cachedUser = body.user;
+	return body;
 }
 
 export async function login(
 	options?: LoginOptions,
 ): Promise<SessionResponse & { message: string }> {
-	await wait(250);
-	const user = {
-		...DEFAULT_USER,
-		isBanned: options?.banned ?? false,
-		name: options?.banned ? "Restricted Operator" : DEFAULT_USER.name,
-	};
-	writeStoredUser(user);
-	return {
-		user,
-		message: "Signed in to the dashboard template.",
-	};
+	const response = await fetch("/api/auth/login", {
+		method: "POST",
+		credentials: "same-origin",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({
+			email: options?.banned
+				? "restricted@averlo.local"
+				: "operator@averlo.local",
+			password: "demo-password",
+		}),
+	});
+	const body = await readJson<SessionResponse>(response);
+	cachedUser = body.user;
+	return { ...body, message: "Signed in to the dashboard template." };
 }
 
 export async function logout(): Promise<LogoutResponse> {
-	await wait();
-	writeStoredUser(null);
-	return { message: "Signed out of the dashboard template." };
+	const response = await fetch("/api/auth/logout", {
+		method: "POST",
+		credentials: "same-origin",
+	});
+	cachedUser = null;
+	return readJson<LogoutResponse>(response);
 }
 
 export function updateStoredSessionUser(
 	patch: Partial<SessionUser>,
 ): SessionUser | null {
-	const current = readStoredUser();
+	const current = cachedUser;
 	if (!current) return null;
 
 	const nextUser = { ...current, ...patch };
-	writeStoredUser(nextUser);
+	cachedUser = nextUser;
+	void updateSessionUser(patch).catch(() => undefined);
 	return nextUser;
+}
+
+export async function updateSessionUser(patch: Partial<SessionUser>) {
+	const payload: Record<string, unknown> = { ...patch };
+	if (
+		Object.hasOwn(patch, "profilePictureUrl") &&
+		patch.profilePictureUrl === undefined
+	) {
+		payload.profilePictureUrl = null;
+	}
+	const response = await fetch("/api/auth/session", {
+		method: "PATCH",
+		credentials: "same-origin",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify(payload),
+	});
+	const result = await readJson<{ user: SessionUser }>(response);
+	cachedUser = result.user;
+	return result.user;
 }

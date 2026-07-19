@@ -3,6 +3,7 @@ export {
 	login,
 	logout,
 	type SessionUser,
+	updateSessionUser,
 	updateStoredSessionUser,
 } from "./auth";
 export {

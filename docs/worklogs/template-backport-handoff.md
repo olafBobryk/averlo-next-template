@@ -34,8 +34,8 @@ full-start dashboard.
 4. P1-C4 — dashboard shell, registry, commands, and debug state.
 5. P1-C5 — reference entities, policy, pruning, skill, and visual gate 2.
 
-One verified commit closes each chunk. P1-C1 and P1-C2 are closed; P1-C3 is
-current and P1-C4 through P1-C5 follow sequentially.
+One verified commit closes each chunk. P1-C1 through P1-C3 are closed; P1-C4 is
+current and P1-C5 follows.
 
 ## P1-C1 state
 
@@ -76,6 +76,33 @@ current and P1-C4 through P1-C5 follow sequentially.
 - Verified previews at chunk closure:
   `http://localhost:3037/internal/demo?motion=off&reveal=off` (full) and
   `http://localhost:3034?motion=off&reveal=off` (thin).
+
+## P1-C3 state
+
+- Status: complete; the closing commit immediately follows this handoff update.
+- User-facing auth routes remain top-level inside the shared auth layout, while
+  the technical callback is `/auth/callback`.
+- Provider-neutral auth, organization, membership, invitation, identity, and
+  private-file contracts are documented in `docs/auth-organization-adapters.md`.
+- The default fixture uses opaque HttpOnly server-memory sessions and clearly
+  labels its non-durable behavior. Deterministic singleton, multi-org, and
+  invitation accounts cover the product lifecycle without recommending fixture
+  storage for a real instance.
+- Dashboard requests resolve session and organization context server-side. One
+  membership auto-selects, multiple memberships require
+  `/select-organization`, revoked selections are invalidated, and logout deletes
+  the selected session.
+- Invitation GET is inert; explicit acceptance validates token, recipient,
+  organization, expiry, revocation, and reuse before the atomic fixture
+  membership transition. Reinvite invalidation and final viable identity
+  protection are verified.
+- The full profile passes focused auth verification, typecheck, 34-route build,
+  smoke, and live cookie/redirect checks. Thin materialization excludes the
+  complete auth/dashboard runtime and passes strict API review, typecheck,
+  9-route build, and smoke.
+- Current full review URLs:
+  `http://localhost:3037/login?motion=off&reveal=off` and
+  `http://localhost:3037/invitation?invitation=00000000-0000-4000-8000-000000000001&token=fixture-invitation-token&motion=off&reveal=off`.
 
 ## Required gates
 

@@ -180,3 +180,10 @@ export function CardFooter({
 		/>
 	);
 }
+
+Card.Header = CardHeader;
+Card.Title = CardTitle;
+Card.Description = CardDescription;
+Card.Action = CardAction;
+Card.Content = CardContent;
+Card.Footer = CardFooter;

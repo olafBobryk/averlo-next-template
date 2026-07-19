@@ -8,6 +8,10 @@ import {
 	type SessionUser,
 	updateStoredSessionUser,
 } from "@/lib/api/auth";
+import type {
+	Organization,
+	OrganizationMembership,
+} from "@/lib/auth/contracts";
 import { hrefFor } from "@/lib/routes";
 import {
 	DashboardBannedFallback,
@@ -17,6 +21,8 @@ import {
 
 export type DashboardAuthContextValue = {
 	user: SessionUser | null;
+	organization: Organization;
+	membership: OrganizationMembership;
 	initializing: boolean;
 	loading: boolean;
 	error: Error | null;
@@ -36,11 +42,17 @@ function getError(error: unknown) {
 
 export function DashboardAuthProvider({
 	children,
+	initialMembership,
+	initialOrganization,
+	initialUser,
 }: {
 	children: React.ReactNode;
+	initialMembership: OrganizationMembership;
+	initialOrganization: Organization;
+	initialUser: SessionUser;
 }) {
-	const [user, setUser] = React.useState<SessionUser | null>(null);
-	const [initializing, setInitializing] = React.useState(true);
+	const [user, setUser] = React.useState<SessionUser | null>(initialUser);
+	const [initializing] = React.useState(false);
 	const [loading, setLoading] = React.useState(false);
 	const [error, setError] = React.useState<Error | null>(null);
 
@@ -83,23 +95,12 @@ export function DashboardAuthProvider({
 		});
 	}, []);
 
-	React.useEffect(() => {
-		let active = true;
-
-		void refresh({ silent: true }).finally(() => {
-			if (!active) return;
-			setInitializing(false);
-		});
-
-		return () => {
-			active = false;
-		};
-	}, [refresh]);
-
 	return (
 		<DashboardAuthContext.Provider
 			value={{
 				user,
+				organization: initialOrganization,
+				membership: initialMembership,
 				initializing,
 				loading,
 				error,
