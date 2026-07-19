@@ -64,6 +64,11 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - `ColorInput` and `ColorSwatchInput` join the full-start input library only; thin start does not include them.
 - `ColorInput` supports controlled and uncontrolled hexadecimal selection, pointer and keyboard operation, normal form submission, field validation, and portal-aware dropdown positioning.
 - `ColorSwatchInput` supports generic typed presets and an optional custom color. Its shared semantic defaults are neutral, info, success, warning, and danger; product-specific palettes stay outside the shared input.
+- A single-date `DateInput` adopts the pinned Inference Console visual and interaction design while exposing template-safe controlled and uncontrolled values and native form serialization.
+- `DateInput` and `DateRangeInput` share configurable locale, timezone, and preset contracts. Neither component hardcodes a universal timezone or fixed all-time boundary.
+- The template's existing searchable `SelectInput` remains canonical. Its option-selection contract invokes an interception hook before changing value so a claimed action row can close the menu without modifying the selected or hidden form value.
+- Existing file and profile-picture inputs retain their caller-controlled APIs while gaining configurable validation, native file-form behavior, optional integrated previews, per-file removal, object-URL cleanup, and form-reset handling.
+- `ProfilePictureInput` supports configurable accepted file types and maximum size without inheriting Inference-specific storage behavior or profile gradients.
 - The accepted component ports include their generic dependency closure: semantic accent helpers, `StatusMessage`, `ModalForm`, shared overlay chrome, and the markdown-mention parser.
 - `ModalForm` includes a generic `ModalStepForm` and `StepIndicator` modeled visually and behaviorally on the pinned Inference Console source while preserving stronger compatible template modal APIs.
 - Completed step panels remain mounted and hidden so field state survives navigation. Back and Next actions never submit; only the final action validates and submits.
@@ -163,6 +168,8 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 and 
 - The baseline dashboard routes are `/dashboard`, `/dashboard/records`, `/dashboard/records/[recordId]`, and `/dashboard/settings`.
 - A typed dashboard surface registry is the source of truth for route identity, paths, labels, navigation placement, breadcrumbs, visibility, and standard-versus-wide layout mode.
 - The Command-K menu consumes the same surface registry and context model as dashboard navigation and breadcrumbs, following the structural pattern proven in Inference Console.
+- Mounted dashboard pages and surfaces may register currently available contextual actions with the dashboard shell. Registration is dashboard-local and is removed when its owner unmounts.
+- Command-K combines these live actions with the static surface hierarchy, navigation, active organization context, and capability checks rather than maintaining a separate command model.
 - The dashboard overview is a lightweight capability and navigation directory.
 - Charts and summary metrics are not required baseline dashboard content because many products do not need them.
 
