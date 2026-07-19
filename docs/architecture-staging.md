@@ -67,7 +67,7 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 afte
 - `ColorSwatchInput` supports generic typed presets and an optional custom color. Its shared semantic defaults are neutral, info, success, warning, and danger; product-specific palettes stay outside the shared input.
 - A single-date `DateInput` adopts the pinned Inference Console visual and interaction design while exposing template-safe controlled and uncontrolled values and native form serialization.
 - `DateInput` and `DateRangeInput` share configurable locale, timezone, and preset contracts. Neither component hardcodes a universal timezone or fixed all-time boundary.
-- The template's existing searchable `SelectInput` remains canonical. Its option-selection contract invokes an interception hook before changing value so a claimed action row can close the menu without modifying the selected or hidden form value.
+- The template's existing searchable `SelectInput` remains canonical. Its `onOptionSelect` hook runs before changing value; returning `true` claims an action row so it can close the menu without modifying the selected or hidden form value.
 - Existing file and profile-picture inputs retain their caller-controlled APIs while gaining configurable validation, native file-form behavior, optional integrated previews, per-file removal, object-URL cleanup, and form-reset handling.
 - `ProfilePictureInput` supports configurable accepted file types and maximum size without inheriting Inference-specific storage behavior or profile gradients.
 - The accepted component ports include their generic dependency closure: semantic accent helpers, `StatusMessage`, `ModalForm`, shared overlay chrome, and the markdown-mention parser.

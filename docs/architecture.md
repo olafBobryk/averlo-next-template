@@ -97,7 +97,7 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - `ColorSwatchInput` supports generic typed presets and an optional custom color. Shared semantic defaults are neutral, info, success, warning, and danger; product palettes remain outside the shared input.
 - A single-date `DateInput` matches the pinned Inference Console visual and interaction design while exposing template-safe controlled and uncontrolled values and native form serialization.
 - `DateInput` and `DateRangeInput` share configurable locale, timezone, and preset contracts. Neither hardcodes a universal timezone or fixed all-time boundary.
-- The existing searchable `SelectInput` remains canonical. Its option-selection hook runs before value mutation so a claimed action row can close the menu without changing the selected or hidden form value.
+- The existing searchable `SelectInput` remains canonical. Its `onOptionSelect` hook runs before value mutation; returning `true` claims an action row so it can close the menu without changing the selected or hidden form value.
 - Existing file and profile-picture inputs retain their caller-controlled APIs while supporting configurable validation, native file-form behavior, optional integrated previews, per-file removal, object-URL cleanup, and form reset.
 - `ProfilePictureInput` supports configurable accepted types and maximum size without Inference-specific storage behavior or profile gradients.
 - Accepted ports include their generic dependency closure: semantic accent helpers, `StatusMessage`, `ModalForm`, shared overlay chrome, and the markdown-mention parser.
