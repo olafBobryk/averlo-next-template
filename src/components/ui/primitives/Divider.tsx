@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { Text, type TextSpanProps } from "./Text";
 
 type DividerProps = {
@@ -12,12 +13,17 @@ export default function Divider({ children, textProps }: DividerProps) {
 		);
 	}
 
+	const { className, ...resolvedTextProps } = textProps ?? {};
+
 	return (
-		<div className="relative w-full flex flex-col items-center">
-			<Text as="span" className="z-10 bg-background px-3" {...textProps}>
+		<div className="flex w-full items-center before:h-px before:min-w-0 before:flex-1 before:-translate-y-1/2 before:rounded-l-[5px] before:bg-border before:content-[''] after:h-px after:min-w-0 after:flex-1 after:-translate-y-1/2 after:rounded-r-[5px] after:bg-border after:content-['']">
+			<Text
+				as="span"
+				className={clsx("shrink-0 px-3", className)}
+				{...resolvedTextProps}
+			>
 				{children}
 			</Text>
-			<div className="flex-grow-0 absolute top-1/2 -translate-y-1/2 flex-shrink-0 w-full h-px overflow-hidden rounded-[5px] bg-border" />
 		</div>
 	);
 }

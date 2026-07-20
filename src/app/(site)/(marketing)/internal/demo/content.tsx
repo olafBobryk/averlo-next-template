@@ -1580,7 +1580,14 @@ export const demoPages: DemoPage[] = [
 						label: "Content separator",
 						related: relatedMap.Divider,
 						Render() {
-							return <Divider />;
+							return (
+								<div className="grid gap-4">
+									<Divider />
+									<Panel background="surface" padding="sm" radius="xs">
+										<Divider>Surface-neutral label</Divider>
+									</Panel>
+								</div>
+							);
 						},
 					},
 					{

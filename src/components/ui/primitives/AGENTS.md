@@ -53,6 +53,7 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
   - Use `CardHeader`, `CardContent`, and `CardFooter` under a real `Card` root; do not imitate Card data attributes on `Panel`.
   - Use semantic `accent` values from `accent.ts`; do not pass product-specific color strings into shared surfaces.
   - Use `Divider` instead of ad hoc border divs when separating content groups or labeling a horizontal break.
+  - Labeled `Divider` rules must terminate at the label's padded box. Do not paint `bg-background` behind the label; the divider must remain neutral on Card, Panel, modal, and page surfaces.
 - Use `Section.Background` when a section needs image, gradient, or node-based background media behind its normal content flow.
   - The background spans the full section, not the inner max-width container.
   - It is decorative by default; set `interactive` only when the background truly needs live controls.

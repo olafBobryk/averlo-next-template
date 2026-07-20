@@ -193,6 +193,21 @@ complete and its closing commit follows this handoff update.
   `.codex/tmp/source-parity-card-pilot/after-small/`, and
   `.codex/tmp/card-parity-live/`.
 
+## Post-closure Divider context correction
+
+- Status: complete; the correction commit follows this handoff update.
+- Labeled Divider no longer paints `bg-background` over the rule. The line is
+  split into two flexible segments that terminate at the label's padded box,
+  preserving the square interruption without depending on the parent surface.
+- The existing `children` and `textProps` API is unchanged. Unlabeled Divider
+  output is unchanged, and label `className` remains additive.
+- The internal primitive demo now exercises the labeled Divider inside a
+  `surface` Panel. Browser review covers the login Card plus light and dark
+  elevated surfaces at `http://localhost:3090`; no console or request failures
+  were observed.
+- Platform and theme-switch visual drift remain explicitly outside this thread
+  and should be reviewed as a separate, narrowly scoped follow-up.
+
 ## Required gates
 
 Every chunk runs `git diff --check`, focused Biome checks, `npm run typecheck`,
