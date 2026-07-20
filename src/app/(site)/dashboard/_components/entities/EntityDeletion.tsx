@@ -37,7 +37,7 @@ export function useEntityDeletionOption({
 			event.preventDefault();
 			openConfirmation({
 				confirmLabel: "Delete",
-				confirmVariant: "danger",
+				confirmTone: "danger",
 				description:
 					definition.summary ??
 					`This will delete the ${definition.entityTypeLabel.toLowerCase()} “${definition.entityLabel}”.`,

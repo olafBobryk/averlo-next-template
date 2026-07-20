@@ -51,7 +51,7 @@ function CopyFieldRoot({
 	onClick,
 	loading,
 	disabled,
-	buttonVariant = "solid",
+	buttonVariant = "secondary",
 	buttonSize = "md",
 	textVariant = "body",
 	textTone,
@@ -113,7 +113,7 @@ function CopyFieldRoot({
 			onClick={handleCopyClick}
 			trailingIcon={showIcon ? iconNode : undefined}
 			className={clsx(
-				buttonVariant === "solid" && buttonSize === "md"
+				buttonVariant === "secondary" && buttonSize === "md"
 					? "w-full min-w-0 !rounded-full !px-[15px] !py-[12px]"
 					: "min-w-0",
 				className,
@@ -126,7 +126,7 @@ function CopyFieldRoot({
 
 function CopyFieldSkeleton({
 	placeholder = "example.com/referral=123456",
-	buttonVariant = "solid",
+	buttonVariant = "secondary",
 	buttonSize = "md",
 	textVariant = "body",
 	textTone,
@@ -138,9 +138,9 @@ function CopyFieldSkeleton({
 			variant={buttonVariant}
 			size={buttonSize === "fit" ? "sm" : buttonSize}
 			align="between"
-			fullWidth={buttonVariant === "solid" && buttonSize === "md"}
+			fullWidth={buttonVariant === "secondary" && buttonSize === "md"}
 			className={clsx(
-				buttonVariant === "solid" && buttonSize === "md"
+				buttonVariant === "secondary" && buttonSize === "md"
 					? "w-full min-w-0 !rounded-full !px-[15px] !py-[12px]"
 					: "min-w-0",
 				className,

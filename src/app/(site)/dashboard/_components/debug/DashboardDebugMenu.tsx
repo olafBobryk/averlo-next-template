@@ -177,7 +177,7 @@ export function DashboardDebugMenu({
 						onMouseLeave={trigger.onRootMouseLeave}
 						ref={trigger.ref}
 						size="sm"
-						variant="primaryDark"
+						variant="inverse"
 					>
 						Debug
 					</Button>

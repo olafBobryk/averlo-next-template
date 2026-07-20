@@ -5,20 +5,12 @@ import Link from "next/link";
 import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
 
-export type ButtonVariant =
-	| "card"
-	| "danger"
-	| "default"
-	| "ghost"
-	| "outline"
-	| "primary"
-	| "primaryDark"
-	| "primarySoft"
-	| "quiet"
-	| "secondary"
-	| "solid";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "inverse";
+
+export type ButtonTone = "default" | "danger";
 
 export type ButtonSize =
+	| "none"
 	| "sm"
 	| "md"
 	| "lg"
@@ -39,6 +31,7 @@ type ButtonBaseProps = {
 	loading?: boolean;
 	radius?: "pill" | "sm";
 	size?: ButtonSize;
+	tone?: ButtonTone;
 	trailingIcon?: React.ReactNode;
 	variant?: ButtonVariant;
 };
@@ -48,38 +41,44 @@ export type ButtonProps = ButtonBaseProps &
 	Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonBaseProps>;
 
 const sizeClasses: Record<ButtonSize, string> = {
-	lg: "px-6 py-3 text-sm font-semibold",
-	xl: "px-7 py-3.5 text-base font-semibold",
-	md: "px-5 py-2.5 text-sm font-medium",
-	sm: "px-2.5 py-[5px] text-xs font-medium",
-	chip: "h-auto gap-1 px-2 py-1 text-xs font-medium",
-	icon: "size-[2.4375rem] p-0",
-	"icon-sm": "size-[1.5625rem] p-0",
+	none: "",
+	lg: "h-11 px-6 text-sm font-semibold",
+	xl: "h-12 px-7 text-base font-semibold",
+	md: "h-9 px-3 text-sm font-medium",
+	sm: "h-8 px-2.5 text-xs font-medium",
+	chip: "h-auto px-2 py-1 text-xs font-medium",
+	icon: "size-9 p-0 text-sm font-medium",
+	"icon-sm": "size-8 p-0 text-sm font-medium",
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-	card: "h-auto rounded-md border border-dashed border-foreground/20 bg-card text-card-foreground hover:bg-muted/30",
-	danger:
-		"border border-transparent bg-danger text-white hover:bg-danger/90 active:bg-danger/80",
-	default:
-		"border border-transparent bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active",
-	ghost:
-		"border-0 bg-transparent !p-0 text-foreground hover:text-foreground/80 hover:translate-y-0 active:scale-100",
-	outline:
-		"border border-border bg-background text-foreground hover:bg-background-hover active:bg-background-active",
 	primary:
-		"border border-transparent bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active",
-	primaryDark:
-		"border border-transparent bg-foreground text-background hover:bg-foreground-hover active:bg-foreground-active",
-	primarySoft:
-		"border border-transparent bg-primary/10 text-primary hover:bg-primary/15",
-	quiet:
-		"border border-transparent bg-transparent text-foreground opacity-60 hover:opacity-100",
+		"border border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
 	secondary:
 		"border border-transparent bg-input/50 text-foreground hover:bg-input/70",
-	solid:
-		"border border-border bg-surface text-foreground shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:bg-background-hover",
+	ghost:
+		"border border-transparent bg-transparent text-foreground hover:bg-muted",
+	inverse:
+		"border border-transparent bg-foreground text-background hover:bg-foreground/90",
 };
+
+function getContentSizeClassName(size: ButtonSize) {
+	switch (size) {
+		case "none":
+		case "icon":
+		case "icon-sm":
+			return undefined;
+		case "chip":
+			return "gap-1";
+		case "sm":
+		case "md":
+			return "gap-1.5";
+		case "lg":
+			return "gap-2";
+		case "xl":
+			return "gap-2.5";
+	}
+}
 
 function getButtonClassName({
 	align = "center",
@@ -87,18 +86,27 @@ function getButtonClassName({
 	disabled,
 	radius = "pill",
 	size = "md",
-	variant = "outline",
+	tone = "default",
+	variant = "secondary",
 }: Pick<
 	ButtonBaseProps,
-	"align" | "className" | "disabled" | "radius" | "size" | "variant"
+	"align" | "className" | "disabled" | "radius" | "size" | "tone" | "variant"
 >) {
 	return clsx(
-		"group relative inline-flex items-center gap-2.5 whitespace-nowrap transition-all motion-interactive",
+		"group relative inline-flex shrink-0 items-center whitespace-nowrap border bg-clip-padding transition-all motion-interactive select-none",
 		focusRing.visibleDefault,
-		"cursor-pointer hover:-translate-y-px active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:active:scale-100",
+		"cursor-pointer active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
 		sizeClasses[size ?? "md"],
-		variantClasses[variant ?? "outline"],
-		radius === "sm" ? "rounded-md" : "rounded-full",
+		variantClasses[variant ?? "secondary"],
+		tone === "danger" &&
+			"!text-danger focus-visible:!border-danger/40 focus-visible:!ring-danger/20",
+		tone === "danger" &&
+			(variant === "secondary"
+				? "!bg-danger/10 hover:!bg-danger/20"
+				: variant === "ghost"
+					? "!bg-transparent hover:!bg-danger/10"
+					: "!bg-danger/20 hover:!bg-danger/30"),
+		radius === "sm" ? "rounded-md" : "rounded-4xl",
 		align === "left" && "justify-start text-left",
 		align === "center" && "justify-center text-center",
 		align === "between" && "justify-between text-left",
@@ -109,7 +117,7 @@ function getButtonClassName({
 
 type ButtonSkeletonProps = Pick<
 	ButtonBaseProps,
-	"align" | "children" | "className" | "radius" | "size" | "variant"
+	"align" | "children" | "className" | "radius" | "size" | "tone" | "variant"
 > & { fullWidth?: boolean };
 
 function ButtonSkeleton({
@@ -121,17 +129,38 @@ function ButtonSkeleton({
 	size,
 	variant,
 }: ButtonSkeletonProps) {
+	const resolvedSize = size ?? "md";
+	const resolvedRadius = radius === "sm" ? "!rounded-[6px]" : "!rounded-full";
+	const resolvedSurface =
+		variant === "primary" ? "!bg-primary/20" : "!bg-muted/80";
+
 	return (
 		<span
 			aria-hidden
 			className={clsx(
-				getButtonClassName({ align, radius, size, variant }),
-				"pointer-events-none border-transparent !bg-muted/80 !text-transparent shadow-none",
+				"relative inline-flex shrink-0 items-center overflow-hidden whitespace-nowrap border border-transparent",
+				sizeClasses[resolvedSize],
+				align === "left" && "justify-start text-left",
+				(align === undefined || align === "center") &&
+					"justify-center text-center",
+				align === "between" && "justify-between text-left",
+				"pointer-events-none !border-transparent !ring-0",
 				fullWidth && "w-full",
 				className,
+				resolvedRadius,
+				resolvedSurface,
 			)}
 		>
-			<span className="select-none opacity-0">{children}</span>
+			<span className="contents pointer-events-none select-none opacity-0 [&_*]:pointer-events-none [&_*]:select-none [&_*]:opacity-0">
+				<span
+					className={clsx(
+						"inline-flex min-w-0 items-center justify-center",
+						getContentSizeClassName(resolvedSize),
+					)}
+				>
+					{children}
+				</span>
+			</span>
 		</span>
 	);
 }
@@ -149,9 +178,10 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 		loading = false,
 		radius,
 		size = "md",
+		tone = "default",
 		trailingIcon,
 		type,
-		variant = "outline",
+		variant = "secondary",
 		...rest
 	},
 	ref,
@@ -163,13 +193,15 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 		disabled: isDisabled,
 		radius,
 		size,
+		tone,
 		variant,
 	});
 	const content = (
 		<>
 			<span
 				className={clsx(
-					"inline-flex max-w-full items-center gap-2.5 transition-opacity motion-micro",
+					"inline-flex max-w-full items-center transition-opacity motion-micro",
+					getContentSizeClassName(size),
 					loading && "opacity-0",
 					contentClassName,
 				)}

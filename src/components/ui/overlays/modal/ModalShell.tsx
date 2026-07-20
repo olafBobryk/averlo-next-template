@@ -91,12 +91,12 @@ export function ModalHeader({
 					{showCloseButton && closeHandler ? (
 						<Button
 							aria-label={closeLabel}
-							className="!h-8 !w-8 !px-0"
+							className="text-foreground/60 hover:text-foreground"
 							disabled={closeDisabled}
 							onClick={closeHandler}
 							size="icon-sm"
 							type="button"
-							variant="quiet"
+							variant="ghost"
 						>
 							<Icon name="close" size="sm" />
 						</Button>

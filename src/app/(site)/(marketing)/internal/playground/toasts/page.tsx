@@ -209,7 +209,7 @@ export default function ToastPlaygroundPage() {
 					<Button
 						href="/internal/playground"
 						size="sm"
-						variant="outline"
+						variant="secondary"
 						className="self-start"
 					>
 						Back to playground

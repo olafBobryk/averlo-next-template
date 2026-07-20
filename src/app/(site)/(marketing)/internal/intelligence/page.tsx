@@ -240,7 +240,7 @@ function ReadyState({
 						</Text>
 						<Button
 							href="/internal/intelligence?view=benchmarks"
-							variant="outline"
+							variant="secondary"
 							size="md"
 							className="mx-auto w-fit"
 						>
@@ -288,7 +288,7 @@ function BenchmarkState({
 						</div>
 						<Button
 							href="/internal/intelligence"
-							variant="outline"
+							variant="secondary"
 							size="sm"
 							className="w-fit"
 						>

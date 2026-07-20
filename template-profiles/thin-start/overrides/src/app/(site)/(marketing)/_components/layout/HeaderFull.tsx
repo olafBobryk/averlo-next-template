@@ -42,8 +42,9 @@ function HeaderTopNavLink({
 		<Button
 			href={getMarketingLinkHref(link)}
 			variant="ghost"
+			size="none"
 			className={clsx(
-				"text-foreground/60 hover:bg-transparent hover:text-foreground",
+				"text-sm font-medium text-foreground/60 hover:bg-transparent hover:text-foreground",
 				className,
 			)}
 		>

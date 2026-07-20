@@ -28,7 +28,7 @@ export function PaginationControls({
 	nextLabel = "Next",
 	disablePrev,
 	disableNext,
-	variant = "solid",
+	variant = "secondary",
 	buttonSize = "icon-sm",
 	preserveIconDirection = false,
 	textVariant = "body",

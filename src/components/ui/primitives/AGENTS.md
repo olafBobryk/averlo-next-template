@@ -28,6 +28,9 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - `Text` should own most component-level typography decisions.
 - `Button` should own most interactive button or button-like link behavior, including loading, icon layout, and visible focus.
   - Loading must preserve the live button's dimensions: keep the content in flow and place the loader over it with absolute positioning.
+  - Use `primary`, `secondary`, and `ghost` for action hierarchy; reserve `inverse` for controls on contextual high-contrast surfaces.
+  - Use `tone="danger"` for destructive meaning instead of introducing a danger appearance variant. Danger remains a soft treatment at every hierarchy level.
+  - Ghost buttons use the normal size shell by default. Use `size="none"` only when the caller deliberately owns all dimensions, spacing, and typography.
 - `InputFrame` should own the visual shell for text-like controls.
 - `Field` should own labels, descriptions, required markers, and inline status messages.
 - `Dropdown` and `Listbox` should own menu positioning and accessible option-list behavior rather than page-local popover logic.

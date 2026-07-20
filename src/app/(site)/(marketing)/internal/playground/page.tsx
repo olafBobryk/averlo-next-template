@@ -67,7 +67,7 @@ export default function PlaygroundIndexPage() {
 												</Text>
 											</div>
 											<div>
-												<Button href={link.href} size="sm" variant="outline">
+												<Button href={link.href} size="sm" variant="secondary">
 													Open playground
 												</Button>
 											</div>

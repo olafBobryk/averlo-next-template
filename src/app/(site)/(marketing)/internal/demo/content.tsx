@@ -256,7 +256,8 @@ const MARKDOWN_RENDERER_DEMO_MARKDOWN = [
 	"type MarkdownButton = {",
 	"  label: string;",
 	"  href: string;",
-	'  variant?: "primary" | "outline";',
+	'  variant?: "primary" | "secondary" | "ghost" | "inverse";',
+	'  tone?: "default" | "danger";',
 	'  size?: "sm" | "md" | "lg" | "xl";',
 	"};",
 	"```",
@@ -963,7 +964,7 @@ function OverviewLinks({ links }: { links: OverviewLink[] }) {
 	return (
 		<div className="flex flex-wrap gap-2">
 			{links.map((link) => (
-				<Button key={link.href} href={link.href} size="sm" variant="outline">
+				<Button key={link.href} href={link.href} size="sm" variant="secondary">
 					{link.label}
 				</Button>
 			))}
@@ -1460,23 +1461,33 @@ export const demoPages: DemoPage[] = [
 								<div className="flex flex-col gap-2">
 									<div className="flex flex-wrap gap-2">
 										<Button variant="primary">Primary</Button>
-										<Button variant="outline">Outline</Button>
-										<Button variant="solid">Solid</Button>
-										<Button variant="danger">Danger</Button>
-										<Button variant="primaryDark">Dark</Button>
-										<Button variant="primarySoft">Primary soft</Button>
-										<Button variant="secondary">Secondary</Button>
-										<Button variant="quiet">Quiet</Button>
+										<Button>Secondary default</Button>
 										<Button variant="ghost">Ghost</Button>
+										<Button variant="inverse">Inverse</Button>
+										<Button tone="danger">Danger</Button>
+										<Button variant="primary" tone="danger">
+											Danger primary
+										</Button>
+										<Button variant="ghost" tone="danger">
+											Danger ghost
+										</Button>
 									</div>
 									<div className="flex flex-wrap items-center gap-2">
 										<Button size="sm">Small</Button>
 										<Button size="md">Medium</Button>
 										<Button size="lg">Large</Button>
+										<Button size="xl">Extra large</Button>
+										<Button
+											variant="ghost"
+											size="none"
+											className="text-sm font-medium"
+										>
+											Ghost none
+										</Button>
 										<Button size="icon" leadingIcon="plus" aria-label="Add" />
 										<Button
 											dir="rtl"
-											variant="outline"
+											variant="secondary"
 											trailingIcon={{
 												name: "arrow-right",
 												mirrorInRtl: true,
@@ -1484,10 +1495,10 @@ export const demoPages: DemoPage[] = [
 										>
 											RTL action
 										</Button>
-										<Button variant="outline" loading>
+										<Button variant="secondary" loading>
 											Loading
 										</Button>
-										<Button variant="outline" disabled>
+										<Button variant="secondary" disabled>
 											Disabled
 										</Button>
 									</div>
@@ -1500,12 +1511,17 @@ export const demoPages: DemoPage[] = [
 								return (
 									<div className="flex flex-col gap-2">
 										<div className="flex flex-wrap items-center gap-2">
-											<Button.Skeleton size="md">Primary</Button.Skeleton>
-											<Button.Skeleton size="md">Outline</Button.Skeleton>
-											<Button.Skeleton size="md">Solid</Button.Skeleton>
-											<Button.Skeleton size="md">Danger</Button.Skeleton>
-											<Button.Skeleton size="md">Dark</Button.Skeleton>
-											<Button.Skeleton size="md" variant={"ghost"}>
+											<Button.Skeleton size="md" variant="primary">
+												Primary
+											</Button.Skeleton>
+											<Button.Skeleton size="md">Secondary</Button.Skeleton>
+											<Button.Skeleton size="md" variant="inverse">
+												Inverse
+											</Button.Skeleton>
+											<Button.Skeleton size="md" tone="danger">
+												Danger
+											</Button.Skeleton>
+											<Button.Skeleton size="md" variant="ghost">
 												Ghost
 											</Button.Skeleton>
 										</div>
@@ -1521,6 +1537,21 @@ export const demoPages: DemoPage[] = [
 								);
 							},
 						},
+					},
+					{
+						id: "button-usage",
+						kind: "usage",
+						name: "Button",
+						label: "Hierarchy, danger tone, and unboxed sizing",
+						snippet: `<div className="flex items-center gap-2">
+  <Button variant="primary">Continue</Button>
+  <Button>Save for later</Button>
+  <Button variant="ghost">Cancel</Button>
+  <Button tone="danger">Delete</Button>
+  <Button variant="ghost" size="none" className="text-sm font-medium">
+    Inline action
+  </Button>
+</div>`,
 					},
 					{
 						id: "card",
@@ -1724,7 +1755,7 @@ export const demoPages: DemoPage[] = [
 											renderTrigger={({ ref, onRightClick, chevronIcon }) => (
 												<Button
 													ref={ref as Ref<HTMLElement>}
-													variant="outline"
+													variant="secondary"
 													className="w-full"
 													onClick={onRightClick}
 												>
@@ -1754,7 +1785,7 @@ export const demoPages: DemoPage[] = [
 											renderTrigger={({ ref, onRightClick, chevronIcon }) => (
 												<Button
 													ref={ref as Ref<HTMLElement>}
-													variant="outline"
+													variant="secondary"
 													className="w-full"
 													onClick={onRightClick}
 												>
@@ -1842,7 +1873,7 @@ export const demoPages: DemoPage[] = [
 									</div>
 									<Button
 										size="sm"
-										variant="outline"
+										variant="secondary"
 										onClick={() => setIconSwapIndex((i) => (i === 0 ? 1 : 0))}
 									>
 										Toggle
@@ -2446,7 +2477,7 @@ export const demoPages: DemoPage[] = [
 										/>
 										<Button
 											size="sm"
-											variant="outline"
+											variant="secondary"
 											onClick={() => setResetSignal((value) => value + 1)}
 										>
 											Reset to last 7 days
@@ -2472,7 +2503,7 @@ export const demoPages: DemoPage[] = [
 										className="h-24 w-full rounded-lg border border-border/15"
 									/>
 									<Button
-										variant="outline"
+										variant="secondary"
 										size="sm"
 										onClick={() => signatureRef.current?.clear()}
 									>
@@ -2975,7 +3006,7 @@ export const demoPages: DemoPage[] = [
 								<div className="flex flex-col gap-2">
 									<Button
 										size="sm"
-										variant="outline"
+										variant="secondary"
 										onClick={() => {
 											void handleCopy();
 										}}
@@ -3203,7 +3234,7 @@ export const demoPages: DemoPage[] = [
 						Render() {
 							return (
 								<Tooltip content="Search the shared component library.">
-									<Button size="sm" variant="outline">
+									<Button size="sm" variant="secondary">
 										Library tip
 									</Button>
 								</Tooltip>
@@ -3216,7 +3247,7 @@ export const demoPages: DemoPage[] = [
 						name: "Tooltip",
 						label: "Usage",
 						snippet: `<Tooltip content="Search the shared component library.">
-  <Button size="sm" variant="outline">Library tip</Button>
+  <Button size="sm" variant="secondary">Library tip</Button>
 </Tooltip>`,
 					},
 					{
@@ -3392,7 +3423,7 @@ export const demoPages: DemoPage[] = [
 										</Button>
 										<Button
 											size="sm"
-											variant="outline"
+											variant="secondary"
 											onClick={() => setContentState("error")}
 										>
 											Error
@@ -3875,7 +3906,7 @@ return isTouchScreen ? <TouchSafeControls /> : <HoverPreviewControls />;`,
 										</Button>
 										<Button
 											size="sm"
-											variant="outline"
+											variant="secondary"
 											onClick={() => setImageSrc("/test/mercury.png")}
 										>
 											Mercury
@@ -3935,7 +3966,7 @@ return isTouchScreen ? <TouchSafeControls /> : <HoverPreviewControls />;`,
 										</Button>
 										<Button
 											size="sm"
-											variant="outline"
+											variant="secondary"
 											onClick={() => setImageSrc("/test/mercury.png")}
 										>
 											Mercury
@@ -4297,7 +4328,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 							return (
 								<Button
 									size="sm"
-									variant="outline"
+									variant="secondary"
 									onClick={() =>
 										openConfirmation({
 											title: "Delete item?",
@@ -4331,7 +4362,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 							return (
 								<Button
 									size="sm"
-									variant="outline"
+									variant="secondary"
 									onClick={() =>
 										openImageInspect({
 											src: "/test/blob.png",
@@ -4403,7 +4434,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 								<div className="flex flex-wrap gap-2">
 									<Button
 										size="sm"
-										variant="outline"
+										variant="secondary"
 										onClick={() =>
 											showToast.success("Settings saved.", {
 												title: "Success",
@@ -4480,7 +4511,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 									</Button>
 									<Button
 										size="sm"
-										variant="outline"
+										variant="secondary"
 										onClick={runStackedToasts}
 									>
 										Stacked toasts
@@ -4646,7 +4677,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 										<Button variant="primary" size="sm">
 											Primary action
 										</Button>
-										<Button variant="outline" size="sm">
+										<Button variant="secondary" size="sm">
 											Secondary
 										</Button>
 									</div>
@@ -4728,7 +4759,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 										<div className="h-full w-full bg-linear-to-br from-primary/10 via-transparent to-foreground/5" />
 										<Button
 											size="sm"
-											variant="outline"
+											variant="secondary"
 											className="absolute bottom-4 right-4"
 											onClick={() => setTaps((value) => value + 1)}
 										>
@@ -4834,7 +4865,7 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 										</Button>
 										<Button
 											size="sm"
-											variant="outline"
+											variant="secondary"
 											onClick={() => runCheck(mockHealthErrorClient.request)}
 										>
 											Mock error

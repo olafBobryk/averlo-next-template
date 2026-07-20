@@ -100,7 +100,7 @@ export default function DictionaryIndexPage() {
 										<Button
 											href={hrefFor(entry.routeId)}
 											size="sm"
-											variant="outline"
+											variant="secondary"
 										>
 											Open entry
 										</Button>

@@ -26,7 +26,7 @@ export function DashboardBannedFallback() {
 						<Button variant="primary" href={hrefFor("login")}>
 							Go to login
 						</Button>
-						<Button variant="outline" href={hrefFor("home")}>
+						<Button variant="secondary" href={hrefFor("home")}>
 							Back to site
 						</Button>
 					</>

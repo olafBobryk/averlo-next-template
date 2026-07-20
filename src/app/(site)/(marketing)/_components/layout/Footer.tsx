@@ -26,7 +26,9 @@ export default function Footer({
 						<Button
 							href={getMarketingLinkHref(item)}
 							key={`${item.label}-${getMarketingLinkHref(item)}`}
+							size="none"
 							variant="ghost"
+							className="text-sm font-medium"
 						>
 							{item.label}
 						</Button>
@@ -37,7 +39,7 @@ export default function Footer({
 						{socialLinks.map((item) => (
 							<Button
 								key={item.label}
-								variant="outline"
+								variant="secondary"
 								className="w-[50px] h-[50px] !p-0 rounded-full"
 								iconSize={15}
 								leadingIcon={item.icon}

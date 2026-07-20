@@ -195,7 +195,7 @@ export function FileUploadInput({
 
 				<div className="flex flex-wrap items-center gap-3">
 					<Button
-						variant="outline"
+						variant="secondary"
 						onClick={() => fileInputRef.current?.click()}
 						disabled={disabled}
 					>
@@ -203,7 +203,7 @@ export function FileUploadInput({
 					</Button>
 					{showCamera ? (
 						<Button
-							variant="primaryDark"
+							variant="primary"
 							trailingIcon="camera"
 							onClick={() => cameraInputRef.current?.click()}
 							disabled={disabled}

@@ -101,9 +101,11 @@ export type MarkdownButtonDirective = {
 	href: string;
 	label: string;
 	size?: MarkdownButtonSize;
+	tone?: MarkdownButtonTone;
 	variant?: MarkdownButtonVariant;
 };
 
+type MarkdownButtonTone = NonNullable<ButtonProps["tone"]>;
 type MarkdownButtonVariant = NonNullable<ButtonProps["variant"]>;
 type MarkdownButtonSize = Extract<
 	NonNullable<ButtonProps["size"]>,
@@ -114,13 +116,12 @@ const buttonDirectivePattern = /^::button\[([^\]]+)\](?:\{([^}]*)\})?\s*$/;
 const directiveOptionPattern =
 	/([A-Za-z][A-Za-z0-9_-]*)=(?:"([^"]*)"|'([^']*)'|([^\s}]+))/g;
 const buttonVariants = new Set<MarkdownButtonVariant>([
-	"danger",
 	"ghost",
-	"outline",
+	"inverse",
 	"primary",
-	"primaryDark",
-	"solid",
+	"secondary",
 ]);
+const buttonTones = new Set<MarkdownButtonTone>(["danger", "default"]);
 const buttonSizes = new Set<MarkdownButtonSize>(["lg", "md", "sm", "xl"]);
 
 function isExternalHref(href?: string) {
@@ -156,6 +157,13 @@ function parseButtonSize(value?: string) {
 		: undefined;
 }
 
+function parseButtonTone(value?: string) {
+	if (!value) return undefined;
+	return buttonTones.has(value as MarkdownButtonTone)
+		? (value as MarkdownButtonTone)
+		: undefined;
+}
+
 function parseButtonDirective(line: string): MarkdownButtonDirective | null {
 	const match = line.match(buttonDirectivePattern);
 	if (!match) return null;
@@ -169,8 +177,9 @@ function parseButtonDirective(line: string): MarkdownButtonDirective | null {
 	return {
 		label,
 		href,
-		variant: parseButtonVariant(options.get("variant")),
 		size: parseButtonSize(options.get("size")),
+		tone: parseButtonTone(options.get("tone")),
+		variant: parseButtonVariant(options.get("variant")),
 	};
 }
 
@@ -219,6 +228,7 @@ function MarkdownButton({ button }: { button: MarkdownButtonDirective }) {
 			<Button
 				href={button.href}
 				size={button.size}
+				tone={button.tone}
 				variant={button.variant}
 				target={external ? "_blank" : undefined}
 				rel={external ? "noreferrer" : undefined}

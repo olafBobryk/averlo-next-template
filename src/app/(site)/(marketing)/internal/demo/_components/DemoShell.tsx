@@ -34,7 +34,7 @@ export function DemoShell({ children }: DemoShellProps) {
 							<Text variant="caption" tone="muted" className="text-xs">
 								UI system showcase derived from a single content map.
 							</Text>
-							<Button href="/internal/demo" size="sm" variant="outline">
+							<Button href="/internal/demo" size="sm" variant="secondary">
 								Overview
 							</Button>
 						</div>

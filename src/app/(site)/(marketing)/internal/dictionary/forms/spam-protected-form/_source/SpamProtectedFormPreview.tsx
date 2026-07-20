@@ -192,7 +192,7 @@ export function SpamProtectedFormPreview() {
 					</Button>
 					<Button
 						type="button"
-						variant="outline"
+						variant="secondary"
 						onClick={() => {
 							formRef.current?.reset();
 							setName("");

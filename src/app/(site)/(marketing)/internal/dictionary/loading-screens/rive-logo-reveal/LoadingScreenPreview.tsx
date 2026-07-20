@@ -38,7 +38,7 @@ export function LoadingScreenPreview() {
 					<Button
 						key={value}
 						size="sm"
-						variant={phase === value ? "primary" : "outline"}
+						variant={phase === value ? "primary" : "secondary"}
 						onClick={() => setPhase(value)}
 					>
 						{value}

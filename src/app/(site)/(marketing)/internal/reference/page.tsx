@@ -249,7 +249,7 @@ export default function ReferencePage() {
 									<Button
 										href={link.href}
 										size="sm"
-										variant="outline"
+										variant="secondary"
 										target="_blank"
 										rel="noreferrer"
 									>

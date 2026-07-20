@@ -13,7 +13,7 @@ Reusable markdown rendering surfaces that compose design-system primitives into 
 - `MarkdownEditor` is a controlled full-start editor with rich/source modes and optional mentions; `MarkdownEditorModalForm` is the dashboard-ready modal composition.
 - Metadata, route titles, and page chrome do not belong in this renderer.
 - Supported custom directive:
-  - `::button[Label]{href=/path variant=primary size=md}`
+  - `::button[Label]{href=/path variant=primary tone=default size=md}`
 
 ## Invariants
 - Keep markdown output grounded in design-system primitives.

@@ -121,7 +121,7 @@ export function ProfileSettingsSection() {
 							<>
 								<Button
 									type="button"
-									variant="outline"
+									variant="secondary"
 									size="sm"
 									onClick={handleCancel}
 									disabled={submitting}
@@ -142,7 +142,7 @@ export function ProfileSettingsSection() {
 						) : (
 							<Button
 								type="button"
-								variant="outline"
+								variant="secondary"
 								size="sm"
 								onClick={() => setEditing(true)}
 							>

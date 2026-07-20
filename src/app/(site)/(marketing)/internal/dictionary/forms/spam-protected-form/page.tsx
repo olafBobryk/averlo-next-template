@@ -49,7 +49,7 @@ export default function SpamProtectedFormDictionaryPage() {
 				</div>
 				<Divider />
 				<div className="flex flex-wrap gap-2">
-					<Button href={hrefFor("dictionary")} size="sm" variant="outline">
+					<Button href={hrefFor("dictionary")} size="sm" variant="secondary">
 						Back to dictionary
 					</Button>
 				</div>

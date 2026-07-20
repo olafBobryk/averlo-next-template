@@ -147,7 +147,7 @@ function MotionCharacterQa() {
 		>
 			<Button
 				size="sm"
-				variant={expanded ? "primary" : "outline"}
+				variant={expanded ? "primary" : "secondary"}
 				onClick={() => setExpanded((current) => !current)}
 			>
 				Run comparison
@@ -194,7 +194,7 @@ function TimingMomentsQa() {
 		>
 			<Button
 				size="sm"
-				variant={active ? "primary" : "outline"}
+				variant={active ? "primary" : "secondary"}
 				onClick={() => setActive((current) => !current)}
 			>
 				Replay moments
@@ -237,14 +237,14 @@ function RevealApiQa() {
 			<div className="flex flex-wrap gap-2">
 				<Button
 					size="sm"
-					variant="outline"
+					variant="secondary"
 					onClick={() => setRunId((current) => current + 1)}
 				>
 					Reset root
 				</Button>
 				<Button
 					size="sm"
-					variant={active ? "primary" : "outline"}
+					variant={active ? "primary" : "secondary"}
 					onClick={() => setActive((current) => !current)}
 				>
 					{active ? "Close active gate" : "Open active gate"}
@@ -344,7 +344,7 @@ function RevealNumericStatsQa() {
 		>
 			<Button
 				size="sm"
-				variant="outline"
+				variant="secondary"
 				onClick={() => setRunId((current) => current + 1)}
 			>
 				Reset stats
@@ -394,7 +394,7 @@ function RevealGroupCompatibilityQa() {
 		>
 			<Button
 				size="sm"
-				variant="outline"
+				variant="secondary"
 				onClick={() => setRunId((current) => current + 1)}
 			>
 				Reset group
@@ -427,7 +427,7 @@ function RevealGroupItemCompatibilityQa() {
 		>
 			<Button
 				size="sm"
-				variant="outline"
+				variant="secondary"
 				onClick={() => setRunId((current) => current + 1)}
 			>
 				Reset items
@@ -462,7 +462,7 @@ function SceneGateQa() {
 		>
 			<Button
 				size="sm"
-				variant="outline"
+				variant="secondary"
 				onClick={() => setRunId((current) => current + 1)}
 			>
 				Reset gates

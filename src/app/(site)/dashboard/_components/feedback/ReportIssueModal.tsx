@@ -140,7 +140,7 @@ export function ReportIssueModal({
 			<div className="flex flex-wrap justify-between gap-3">
 				<Button
 					type="button"
-					variant="outline"
+					variant="secondary"
 					onClick={onClose}
 					disabled={isSubmitting}
 				>

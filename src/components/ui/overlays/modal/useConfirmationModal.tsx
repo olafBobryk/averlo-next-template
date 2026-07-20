@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
-import type { ButtonVariant } from "@/components/ui/primitives/Button";
+import type {
+	ButtonTone,
+	ButtonVariant,
+} from "@/components/ui/primitives/Button";
 import {
 	ConfirmationModal,
 	type ConfirmationModalDetail,
@@ -12,6 +15,7 @@ type OpenConfirmationOptions = {
 	title: string;
 	description: string;
 	confirmLabel: string;
+	confirmTone?: ButtonTone;
 	confirmVariant?: ButtonVariant;
 	details?: readonly ConfirmationModalDetail[];
 	onConfirm: () => unknown;
@@ -27,6 +31,7 @@ export function useConfirmationModal(defaultPortalTargetId?: string) {
 			title,
 			description,
 			confirmLabel,
+			confirmTone,
 			confirmVariant,
 			details,
 			onConfirm,
@@ -41,6 +46,7 @@ export function useConfirmationModal(defaultPortalTargetId?: string) {
 						title={title}
 						description={description}
 						confirmLabel={confirmLabel}
+						confirmTone={confirmTone}
 						confirmVariant={confirmVariant}
 						details={details}
 						onConfirm={onConfirm}

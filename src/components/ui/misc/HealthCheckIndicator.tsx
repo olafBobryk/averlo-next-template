@@ -200,8 +200,8 @@ export function HealthCheckIndicator({
 				type="button"
 				variant="ghost"
 				textVariant={"caption"}
-				size="sm"
-				className="min-h-0 px-0 py-0 text-[11px] text-muted hover:text-foreground"
+				size="none"
+				className="text-[11px] font-medium text-muted hover:text-foreground"
 				disabled={isChecking}
 				onClick={() => setRequestIndex((current) => current + 1)}
 			>

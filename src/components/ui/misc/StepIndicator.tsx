@@ -41,7 +41,11 @@ export function StepIndicator<TStep extends string = string>({
 						>
 							<Button
 								aria-current={index === currentIndex ? "step" : undefined}
-								className="h-8 px-2.5"
+								className={clsx(
+									"h-8 px-2.5",
+									index < currentIndex &&
+										"bg-primary/10 text-primary hover:bg-primary/15",
+								)}
 								disabled={step.disabled}
 								onClick={() => onStepChange(step.id)}
 								size="sm"
@@ -80,7 +84,7 @@ function getStepVariant(
 	stepIndex: number,
 	currentIndex: number,
 ): ButtonVariant {
-	if (stepIndex < currentIndex) return "primarySoft";
+	if (stepIndex < currentIndex) return "secondary";
 	if (stepIndex === currentIndex) return "primary";
 	return "ghost";
 }

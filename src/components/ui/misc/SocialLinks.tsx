@@ -94,7 +94,7 @@ export function SocialLinks({
 	links,
 	showLabels = false,
 	size,
-	variant = "outline",
+	variant = "secondary",
 }: SocialLinksProps) {
 	const excludedIcons = new Set(
 		excludeIcons.map((icon) => socialIconAliases[normalizeSocialToken(icon)]),

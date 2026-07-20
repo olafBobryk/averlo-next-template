@@ -29,7 +29,7 @@ function MissingGraphIndexState({ path }: { path: string }) {
 						</Text>
 						<Button
 							href="/internal/intelligence"
-							variant="outline"
+							variant="secondary"
 							size="sm"
 							className="w-fit"
 						>

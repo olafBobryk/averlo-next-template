@@ -18,60 +18,38 @@ type IconProp = React.ReactNode | IconName | IconConfig;
 
 const buttonStyles = cva(
 	[
-		// layout
-		"relative inline-flex items-center justify-center gap-2.5",
-		"whitespace-nowrap",
-
-		// motion
-		"transition-all motion-interactive",
-
-		// focus / disabled
+		"group relative inline-flex shrink-0 items-center justify-center whitespace-nowrap border border-transparent bg-clip-padding",
+		"cursor-pointer transition-all motion-interactive select-none",
 		focusRing.visibleDefault,
-		"disabled:opacity-50",
-
-		// subtle interaction
-		"hover:-translate-y-[0.0625rem] active:translate-y-[0rem] active:scale-[0.98] disabled:hover:-translate-y-0 disabled:active:scale-100",
-
-		// tailwind helpers
-		"group",
-
-		// cursor
-		"cursor-pointer disabled:cursor-not-allowed",
+		"active:not-aria-[haspopup]:translate-y-px",
+		"disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+		"data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
 	].join(" "),
 	{
 		variants: {
 			variant: {
-				card: "h-auto rounded-md border border-dashed border-foreground/20 bg-card px-4 py-3 text-card-foreground hover:bg-muted/30 focus-visible:ring-3 focus-visible:ring-ring/30",
-				default:
-					"border border-transparent bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active",
-				outline:
-					"border border-border bg-background text-background text-foreground hover:bg-background-hover active:bg-background-active disabled:hover:bg-background disabled:active:bg-background",
-				primary:
-					"bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active border border-transparent disabled:hover:bg-primary disabled:active:bg-primary",
-				danger:
-					"bg-danger text-white hover:bg-danger/90 active:bg-danger/80 border border-transparent disabled:hover:bg-danger disabled:active:bg-danger",
-				primaryDark:
-					"bg-foreground text-background hover:bg-foreground-hover active:bg-foreground-active border border-transparent",
-				primarySoft:
-					"border border-transparent bg-primary/10 text-primary hover:bg-primary/15 focus-visible:border-primary/40 focus-visible:ring-primary/20",
-				quiet:
-					"border border-transparent bg-transparent text-foreground opacity-60 hover:opacity-100 active:opacity-80",
+				primary: "bg-primary text-primary-foreground hover:bg-primary/80",
 				secondary:
 					"border border-transparent bg-input/50 text-foreground hover:bg-input/70",
-				solid:
-					"border! border-border! bg-white/70 shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:bg-white active:bg-[#F3F3F3]",
 				ghost:
-					"border-0 bg-transparent !p-0 text-foreground hover:text-foreground/85 active:text-foreground/70 hover:bg-transparent hover:translate-y-0 hover:scale-100 active:translate-y-0 active:!scale-100",
+					"bg-transparent text-foreground hover:bg-muted hover:text-foreground",
+				inverse:
+					"border-border bg-foreground text-background hover:bg-foreground/90",
+			},
+			tone: {
+				default: "",
+				danger:
+					"!text-danger focus-visible:!border-danger/40 focus-visible:!ring-danger/20",
 			},
 			size: {
-				lg: "px-6 py-3 text-sm font-semibold",
-				xl: "px-7 py-3.5 text-base font-semibold",
-				md: "px-5 py-2.5 text-sm font-medium",
-				sm: "px-2.5 py-[5px] text-xs font-medium",
-				chip: "h-auto px-2 py-1 text-xs font-medium gap-1 [&_svg]:size-3",
-				icon: "min-w-[2.4375rem] min-h-[2.4375rem] h-[2.4375rem] w-[2.4375rem] px-0 py-0 text-sm font-medium justify-center items-center",
-				"icon-sm":
-					"min-w-[1.5625rem] min-h-[1.5625rem] h-[1.5625rem] w-[1.5625rem] px-0 py-0 text-sm font-medium justify-center item-center",
+				none: "",
+				lg: "h-11 px-6 text-sm font-semibold",
+				xl: "h-12 px-7 text-base font-semibold",
+				md: "h-9 px-3 text-sm font-medium",
+				sm: "h-8 px-2.5 text-xs font-medium",
+				chip: "h-auto px-2 py-1 text-xs font-medium [&_svg]:size-3",
+				icon: "size-9 p-0 text-sm font-medium",
+				"icon-sm": "size-8 p-0 text-sm font-medium",
 			},
 			align: {
 				left: "justify-start",
@@ -79,7 +57,7 @@ const buttonStyles = cva(
 				between: "justify-between",
 			},
 			radius: {
-				pill: "rounded-[6.25rem]",
+				pill: "rounded-4xl",
 				sm: "rounded-[6px]",
 			},
 			hitArea: {
@@ -89,7 +67,8 @@ const buttonStyles = cva(
 			},
 		},
 		defaultVariants: {
-			variant: "outline",
+			variant: "secondary",
+			tone: "default",
 			size: "md",
 			align: "left",
 			radius: "pill",
@@ -98,10 +77,22 @@ const buttonStyles = cva(
 	},
 );
 
+const buttonDangerStyles = cva("", {
+	variants: {
+		variant: {
+			primary: "!bg-danger/20 hover:!bg-danger/30",
+			secondary: "!bg-danger/10 hover:!bg-danger/20",
+			ghost: "!bg-transparent hover:!bg-danger/10",
+			inverse: "!bg-danger/20 hover:!bg-danger/30",
+		},
+	},
+});
+
 export type ButtonVariant = NonNullable<
 	VariantProps<typeof buttonStyles>["variant"]
 >;
 export type ButtonSize = NonNullable<VariantProps<typeof buttonStyles>["size"]>;
+export type ButtonTone = NonNullable<VariantProps<typeof buttonStyles>["tone"]>;
 
 const DEFAULT_ICON_SIZE = 15; // 0.9375rem – kept in px to match provided assets
 
@@ -155,26 +146,21 @@ function getTextToneClassName(tone?: TextProps["tone"]) {
 	}
 }
 
-function getDisabledClassName(variant: ButtonBaseProps["variant"]) {
-	const disabledBase =
-		"!cursor-not-allowed opacity-50 hover:!translate-y-0 active:!translate-y-0 active:!scale-100";
-
-	switch (variant) {
-		case "primary":
-			return clsx(disabledBase, "hover:!bg-primary active:!bg-primary");
-		case "danger":
-			return clsx(disabledBase, "hover:!bg-danger active:!bg-danger");
-		case "primaryDark":
-			return clsx(disabledBase, "hover:!bg-foreground active:!bg-foreground");
-		case "solid":
-			return clsx(disabledBase, "hover:!bg-background active:!bg-background");
-		case "ghost":
-			return clsx(
-				disabledBase,
-				"hover:!bg-transparent hover:!text-foreground active:!text-foreground",
-			);
-		default:
-			return clsx(disabledBase, "hover:!bg-background active:!bg-background");
+function getContentSizeClassName(size: ButtonSize) {
+	switch (size) {
+		case "none":
+		case "icon":
+		case "icon-sm":
+			return undefined;
+		case "chip":
+			return "gap-1";
+		case "sm":
+		case "md":
+			return "gap-1.5";
+		case "lg":
+			return "gap-2";
+		case "xl":
+			return "gap-2.5";
 	}
 }
 
@@ -233,6 +219,7 @@ type ButtonSkeletonProps = {
 	textVariant?: TextProps["variant"];
 	textClassName?: string;
 	variant?: VariantProps<typeof buttonStyles>["variant"];
+	tone?: ButtonTone;
 } & VariantProps<typeof buttonSkeletonStyles>;
 
 const buttonSkeletonStyles = cva(
@@ -242,14 +229,14 @@ const buttonSkeletonStyles = cva(
 	{
 		variants: {
 			size: {
-				lg: "px-6 py-3 text-sm font-semibold",
-				xl: "px-7 py-3.5 text-base font-semibold",
-				md: "px-5 py-2.5 text-sm font-medium",
-				sm: "px-2.5 py-[5px] text-xs font-medium",
+				none: "",
+				lg: "h-11 px-6 text-sm font-semibold",
+				xl: "h-12 px-7 text-base font-semibold",
+				md: "h-9 px-3 text-sm font-medium",
+				sm: "h-8 px-2.5 text-xs font-medium",
 				chip: "h-auto gap-1 px-2 py-1 text-xs font-medium",
-				icon: "min-w-[2.4375rem] min-h-[2.4375rem] h-[2.4375rem] w-[2.4375rem] px-0 py-0",
-				"icon-sm":
-					"min-w-[1.5625rem] min-h-[1.5625rem] h-[1.5625rem] w-[1.5625rem] px-0 py-0",
+				icon: "size-9 p-0",
+				"icon-sm": "size-8 p-0",
 			},
 			align: {
 				left: "justify-start",
@@ -257,7 +244,7 @@ const buttonSkeletonStyles = cva(
 				between: "justify-between",
 			},
 			radius: {
-				pill: "rounded-[6.25rem]",
+				pill: "rounded-4xl",
 				sm: "rounded-[6px]",
 			},
 			fullWidth: {
@@ -287,17 +274,6 @@ function ButtonSkeleton({
 	variant,
 }: ButtonSkeletonProps) {
 	const label = children ?? "Button";
-	if (variant === "ghost") {
-		return (
-			<Text.Skeleton
-				variant={textVariant}
-				className={clsx(className, textClassName)}
-			>
-				{label}
-			</Text.Skeleton>
-		);
-	}
-
 	const hasLabel = React.Children.count(children) > 0;
 	const isIconSize = size === "icon" || size === "icon-sm";
 	const isChipSize = size === "chip";
@@ -309,11 +285,7 @@ function ButtonSkeleton({
 		width: `${resolvedIconSize}px`,
 		height: `${resolvedIconSize}px`,
 	};
-	const isPrimaryVariant =
-		variant === "default" ||
-		variant === "primary" ||
-		variant === "primaryDark" ||
-		variant === "primarySoft";
+	const isPrimaryVariant = variant === "primary";
 	const isTextChild = typeof label === "string" || typeof label === "number";
 
 	return (
@@ -327,11 +299,17 @@ function ButtonSkeleton({
 				}),
 				minWidthClass,
 				"pointer-events-none border border-transparent",
+				radius === "sm" ? "!rounded-[6px]" : "!rounded-full",
 				isPrimaryVariant ? "!bg-primary/20" : "!bg-muted/80",
 				className,
 			)}
 		>
-			<span className="inline-flex items-center justify-center gap-2.5">
+			<span
+				className={clsx(
+					"inline-flex items-center justify-center",
+					getContentSizeClassName(size ?? "md"),
+				)}
+			>
 				{leadingIcon ? (
 					<span
 						className="inline-flex items-center justify-center"
@@ -374,7 +352,8 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			textTone,
 			textClassName,
 			style,
-			variant = "outline",
+			variant = "secondary",
+			tone = "default",
 			size = "md",
 			align = "center",
 			radius,
@@ -393,13 +372,8 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			loading === undefined ? undefined : loading ? "true" : "false";
 
 		const mergedClassName = clsx(
-			buttonStyles({ variant, size, align, radius, hitArea }),
-			variant === "outline"
-				? "drop-shadow-[2px_4px_15px_rgba(2,2,2,0.03)]"
-				: variant === "ghost"
-					? undefined
-					: "shadow-[2px_4px_15px_0_rgba(2,2,2,0.03)]",
-			isDisabled && getDisabledClassName(variant),
+			buttonStyles({ variant, tone, size, align, radius, hitArea }),
+			tone === "danger" && buttonDangerStyles({ variant }),
 			className,
 		);
 
@@ -413,6 +387,10 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			align === "between" || align === "center" ? "w-full" : "w-fit";
 		const isTextChild =
 			typeof children === "string" || typeof children === "number";
+		const usesCustomTextPresentation =
+			textVariant !== undefined ||
+			textTone !== undefined ||
+			textClassName !== undefined;
 		const textToneClassName = getTextToneClassName(textTone);
 		const resolvedTextVariant =
 			textVariant ?? (size === "chip" ? "chip" : "body");
@@ -420,7 +398,8 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			<>
 				<span
 					className={clsx(
-						"inline-flex max-w-full items-center gap-2.5 transition-opacity motion-micro group-data-[loading=true]:opacity-0",
+						"inline-flex max-w-full items-center transition-opacity motion-micro group-data-[loading=true]:opacity-0",
+						getContentSizeClassName(size ?? "md"),
 						contentAlignClass,
 						contentWidthClass,
 						contentClassName,
@@ -434,7 +413,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 
 					{/* children can be anything (text, icon, etc) */}
 					{children != null ? (
-						isTextChild ? (
+						isTextChild && usesCustomTextPresentation ? (
 							<Text
 								as="span"
 								variant={resolvedTextVariant}
@@ -444,6 +423,8 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 							>
 								{children}
 							</Text>
+						) : isTextChild ? (
+							<span className="truncate">{children}</span>
 						) : (
 							children
 						)

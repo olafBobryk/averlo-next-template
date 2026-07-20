@@ -419,8 +419,9 @@ export function ComboboxMultiSelectInput<T>({
 												</Text>
 												<Button
 													variant="ghost"
+													size="none"
 													className={clsx(
-														"!p-0 text-foreground/50 hover:text-foreground",
+														"text-foreground/50 hover:text-foreground",
 														chipRemoveClassName,
 													)}
 													onMouseDown={(event) => {
@@ -539,8 +540,9 @@ export function ComboboxMultiSelectInput<T>({
 												</Text>
 												<Button
 													variant="ghost"
+													size="none"
 													className={clsx(
-														"!p-0 text-foreground/50 hover:text-foreground",
+														"text-foreground/50 hover:text-foreground",
 														chipRemoveClassName,
 													)}
 													onMouseDown={(event) => {

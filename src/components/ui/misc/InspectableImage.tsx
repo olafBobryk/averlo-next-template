@@ -41,9 +41,9 @@ export function InspectableImage({
 	return (
 		<Button
 			variant="ghost"
-			size="md"
+			size="none"
 			align="center"
-			className={["!p-0 !rounded-none border-0 bg-transparent", className]
+			className={["!rounded-none border-0 bg-transparent", className]
 				.filter(Boolean)
 				.join(" ")}
 			contentClassName="h-full w-full"

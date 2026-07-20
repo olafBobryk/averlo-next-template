@@ -60,7 +60,7 @@ export function StatusErrorState({
 					<Button variant="primary" onClick={() => reset()}>
 						Try again
 					</Button>
-					<Button variant="outline" href={href}>
+					<Button variant="secondary" href={href}>
 						{hrefLabel}
 					</Button>
 					<Button
@@ -77,7 +77,7 @@ export function StatusErrorState({
 						<pre className="max-h-48 w-full overflow-auto rounded-lg border border-border/15 bg-surface p-4 text-left text-xs leading-relaxed text-foreground/80">
 							{errorDetails}
 						</pre>
-						<Button variant="outline" onClick={handleCopyDetails}>
+						<Button variant="secondary" onClick={handleCopyDetails}>
 							{copyStatus === "copied"
 								? "Copied"
 								: copyStatus === "failed"

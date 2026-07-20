@@ -29,7 +29,7 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
   - Closing a modal should restore focus predictably to the invoking control when possible.
 - Backdrop, shell, and panel behavior should stay centralized in `ModalShell`.
 - Destructive confirmation patterns should reuse the shared confirmation modal before introducing custom dialog copy and controls.
-- Confirmation handlers may return `false` to keep the modal open. Use structured `details`, semantic warnings, and `confirmVariant` instead of replacing the shared confirmation layout.
+- Confirmation handlers may return `false` to keep the modal open. Use structured `details`, semantic warnings, `confirmVariant`, and `confirmTone` instead of replacing the shared confirmation layout. Destructive confirmations default to the shared soft-danger tone.
 - Form flows should begin with `ModalForm`; use `ModalStepForm` only when the interaction has real ordered steps rather than cosmetic progress.
 - Do not add a second confirmation system. If a standard confirm-before-action flow needs different copy, pass different options to `useConfirmationModal`.
 

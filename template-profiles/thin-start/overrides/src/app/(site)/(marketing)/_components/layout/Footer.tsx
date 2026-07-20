@@ -17,7 +17,9 @@ export default function Footer({
 						<Button
 							key={item.label}
 							href={getMarketingLinkHref(item)}
+							size="none"
 							variant="ghost"
+							className="text-sm font-medium"
 						>
 							{item.label}
 						</Button>

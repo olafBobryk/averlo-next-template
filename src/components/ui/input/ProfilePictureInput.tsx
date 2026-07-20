@@ -121,8 +121,9 @@ export function ProfilePictureInput({
 				<Button
 					type="button"
 					variant="ghost"
+					size="none"
 					className={clsx(
-						"relative h-24 w-24 shrink-0 overflow-hidden rounded-full! border border-border bg-surface p-0! group",
+						"relative h-24 w-24 shrink-0 overflow-hidden rounded-full! border border-border bg-surface group",
 						disabled ? "cursor-not-allowed" : "cursor-pointer",
 					)}
 					contentClassName="h-full w-full"

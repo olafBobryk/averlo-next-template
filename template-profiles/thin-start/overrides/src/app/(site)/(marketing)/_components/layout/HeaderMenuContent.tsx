@@ -220,6 +220,7 @@ export function HeaderSearchInput({
 			<Button
 				type="button"
 				variant="ghost"
+				size="none"
 				className={clsx(
 					"min-h-8 px-2 text-xs text-muted opacity-0 transition-opacity group-hover/header-search:opacity-100 group-focus-within/header-search:opacity-100",
 					!hasValue && "pointer-events-none",
@@ -290,7 +291,8 @@ export function HeaderMenuGroup({
 				<Button
 					href={groupHref}
 					variant="ghost"
-					className="w-fit justify-start px-0 text-foreground hover:bg-transparent"
+					size="none"
+					className="w-fit justify-start text-sm font-medium text-foreground hover:bg-transparent"
 					leadingIcon={
 						group.icon ? (
 							<HeaderIcon name={group.icon} className="text-foreground" />
@@ -315,7 +317,8 @@ export function HeaderMenuGroup({
 							key={`${item.label}-${getMarketingLinkHref(item)}`}
 							href={getMarketingLinkHref(item)}
 							variant="ghost"
-							className="min-h-0 w-fit justify-start px-0 py-0 text-sm font-normal text-muted hover:bg-transparent hover:text-foreground"
+							size="none"
+							className="w-fit justify-start text-sm font-normal text-muted hover:bg-transparent hover:text-foreground"
 							onClick={onNavigate}
 						>
 							{item.label}

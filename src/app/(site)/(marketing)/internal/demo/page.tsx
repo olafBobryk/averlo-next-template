@@ -70,7 +70,7 @@ export default function DemoIndexPage() {
 									<Button
 										key={page.id}
 										href={`/internal/demo/${page.slug.join("/")}`}
-										variant="outline"
+										variant="secondary"
 										size="sm"
 									>
 										{page.title}

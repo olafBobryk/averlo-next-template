@@ -63,7 +63,7 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 
 ### Button and Chip
 
-- Button incorporates `default`, `primary`, `primaryDark`, `primarySoft`, `secondary`, `solid`, `danger`, `ghost`, `quiet`, and `card` visual variants and `sm`, `md`, `lg`, `xl`, `icon`, `icon-sm`, and `chip` sizes.
+- Button separates action hierarchy (`primary`, `secondary`, `ghost`, and contextual `inverse`) from semantic `default`/`danger` tone. Its sizes are `none`, `sm`, `md`, `lg`, `xl`, `icon`, `icon-sm`, and `chip`; omitted variant and size resolve to `secondary` and the 36px `md` shell.
 - Useful template contracts such as `outline`, icon-registry inputs, content and text configuration, radius and hit-area controls, focusability, typed link and button behavior, class and style extension, and layout alignment remain available unless explicitly superseded.
 - Loading keeps normal content in layout while a position-absolute centered loader fades over it, preventing loading-state resizing.
 - `Button.Skeleton` mirrors live size, alignment, radius, icons, label width, and variant treatment without changing final dimensions.

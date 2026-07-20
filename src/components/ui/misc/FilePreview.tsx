@@ -174,9 +174,9 @@ export function FilePreview({
 					</div>
 					<Button
 						variant="ghost"
-						size="md"
+						size="none"
 						align="center"
-						className="absolute! inset-0! z-10 h-full! w-full! !rounded-md !p-0"
+						className="absolute! inset-0! z-10 h-full! w-full! !rounded-md"
 						aria-label={`Open ${name}`}
 						onClick={handleOpenFile}
 					/>
@@ -184,9 +184,9 @@ export function FilePreview({
 			) : (
 				<Button
 					variant="ghost"
-					size="md"
+					size="none"
 					align="center"
-					className="h-full w-full !rounded-md !p-2"
+					className="h-full w-full !rounded-md p-2 text-sm font-medium"
 					contentClassName="min-w-0 flex-col gap-1 whitespace-normal"
 					onClick={handleOpenFile}
 				>

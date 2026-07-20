@@ -1163,7 +1163,7 @@ function NodeDetailsPanel({
 						{getConnectionCount(node)} links
 					</Text>
 				</div>
-				<Button type="button" size="sm" variant="outline" onClick={onClose}>
+				<Button type="button" size="sm" variant="secondary" onClick={onClose}>
 					Close
 				</Button>
 			</div>
@@ -1747,19 +1747,19 @@ export function GraphMap<TViewId extends GraphMapViewId = GraphMapViewId>({
 						{isGraphFocused ? (
 							<Button
 								type="button"
-								variant="solid"
+								variant="inverse"
 								size="sm"
 								onClick={releaseGraphStage}
 							>
 								Esc to exit
 							</Button>
 						) : null}
-						<Button href={backHref} variant="outline" size="sm">
+						<Button href={backHref} variant="secondary" size="sm">
 							{backLabel}
 						</Button>
 						<Button
 							type="button"
-							variant="outline"
+							variant="secondary"
 							size="sm"
 							onClick={resetLayout}
 						>

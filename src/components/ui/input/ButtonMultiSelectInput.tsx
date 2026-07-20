@@ -49,7 +49,7 @@ export function ButtonMultiSelectInput<T extends string = string>({
 	selectedVariant = "primary",
 	size = "sm",
 	tone = "default",
-	unselectedVariant = "outline",
+	unselectedVariant = "secondary",
 	value,
 	...props
 }: ButtonMultiSelectInputProps<T>) {

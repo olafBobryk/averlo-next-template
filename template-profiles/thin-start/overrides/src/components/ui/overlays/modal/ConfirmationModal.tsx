@@ -13,6 +13,7 @@ type ConfirmationModalProps = {
 	title: string;
 	description: string;
 	confirmLabel: string;
+	confirmTone?: React.ComponentProps<typeof Button>["tone"];
 	confirmVariant?: React.ComponentProps<typeof Button>["variant"];
 	details?: readonly ConfirmationModalDetail[];
 	onConfirm: () => unknown;
@@ -24,7 +25,8 @@ export function ConfirmationModal({
 	title,
 	description,
 	confirmLabel,
-	confirmVariant = "danger",
+	confirmTone = "danger",
+	confirmVariant = "secondary",
 	details,
 	onConfirm,
 	onClose,
@@ -72,6 +74,7 @@ export function ConfirmationModal({
 					type="button"
 					loading={isSubmitting}
 					onClick={handleConfirm}
+					tone={confirmTone}
 					variant={confirmVariant}
 				>
 					{confirmLabel}

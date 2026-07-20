@@ -111,7 +111,7 @@ export function StateIndicator({
 	const actionNode =
 		action ??
 		(onAction ? (
-			<Button variant="outline" size="sm" onClick={onAction}>
+			<Button variant="secondary" size="sm" onClick={onAction}>
 				{actionLabel}
 			</Button>
 		) : null);

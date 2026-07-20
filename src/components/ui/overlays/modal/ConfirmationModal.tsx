@@ -9,7 +9,11 @@ import {
 	ModalHeader,
 	ModalTitle,
 } from "@/components/ui/overlays/modal/ModalShell";
-import { Button, type ButtonVariant } from "@/components/ui/primitives/Button";
+import {
+	Button,
+	type ButtonTone,
+	type ButtonVariant,
+} from "@/components/ui/primitives/Button";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -22,6 +26,7 @@ export type ConfirmationModalProps = {
 	title: string;
 	description: string;
 	confirmLabel: string;
+	confirmTone?: ButtonTone;
 	confirmVariant?: ButtonVariant;
 	details?: readonly ConfirmationModalDetail[];
 	onConfirm: () => unknown;
@@ -33,7 +38,8 @@ export function ConfirmationModal({
 	title,
 	description,
 	confirmLabel,
-	confirmVariant = "danger",
+	confirmTone = "danger",
+	confirmVariant = "secondary",
 	details,
 	onConfirm,
 	onClose,
@@ -109,6 +115,7 @@ export function ConfirmationModal({
 					type="button"
 					loading={isSubmitting}
 					onClick={handleConfirm}
+					tone={confirmTone}
 					variant={confirmVariant}
 				>
 					{confirmLabel}

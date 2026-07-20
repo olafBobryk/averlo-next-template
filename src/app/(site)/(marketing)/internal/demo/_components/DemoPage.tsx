@@ -60,7 +60,7 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 				</header>
 				<Panel display="flex" padding="sm" gap="sm" shadow="none">
 					<Text variant="body">Go back to the demo index.</Text>
-					<Button href="/internal/demo" variant="outline" size="sm">
+					<Button href="/internal/demo" variant="secondary" size="sm">
 						Open demo index
 					</Button>
 				</Panel>
@@ -115,7 +115,7 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 					<div className="flex flex-wrap gap-2">
 						<Button
 							href={isSkeletonMode ? basePath : skeletonPath}
-							variant="outline"
+							variant="secondary"
 							size="sm"
 						>
 							{isSkeletonMode ? "View full demos" : "View skeletons"}
