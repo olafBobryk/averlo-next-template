@@ -1,6 +1,6 @@
 # Architecture Staging
 
-Consolidated into [the final architecture](./architecture.md) on 2026-07-19 after the pinned-source surface rescan and reviewed with no unresolved or drifted decisions. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles.
+Consolidated into [the final architecture](./architecture.md) on 2026-07-20 after the pinned-source surface rescan and accepted mutation-policy delta, then reviewed with no unresolved or drifted decisions. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles.
 
 ## Template relationship and convergence scope
 
