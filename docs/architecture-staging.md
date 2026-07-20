@@ -303,6 +303,59 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 afte
 - The debug menu ships in full start but is available only in development or guarded internal-review mode by default.
 - Production debug-menu exposure requires explicit environment opt-in.
 
+## Async mutation and modal completion policy
+
+- The committed Inference Console mutation-policy delta from
+  `8a13d12ea11461fe204625bd1247a6db16c4a207` through
+  `1c6208b37fabb4666c142490608f45662013b0f7` is an explicitly accepted
+  behavioral source for this port. It does not repin the earlier visual-system
+  baseline or authorize unrelated source changes.
+- Full start and thin start expose the same modal-level submission contract
+  through `useModalSubmission`. The contract rejects duplicate submission and
+  lets the owning `ModalShell` block Escape, backdrop, and header-close
+  dismissal while a mutation is pending.
+- The port preserves each profile's stronger existing behavior and public API.
+  Full start retains its focus trap, focus restoration, modal stacking, scroll
+  lock, motion, and Card/Panel composition. Thin start retains its smaller modal
+  surface. Shared modal options carry an accessible label through the host to
+  either shell.
+- Both confirmation implementations consume the shell submission contract.
+  Full-start `ModalStepForm` accepts submission state and disables Back,
+  Cancel, and Next while pending; its caller-owned final submit action continues
+  to use the Button loading contract.
+- Server-backed modal actions return local, discriminated results shaped as
+  `{ ok, message, fieldErrors? }`. Field-error keys remain owned by the form or
+  domain mutation; the template does not introduce a global catch-all modal
+  mutation result type. Shared deletion results remain a small base contract.
+- Modal field validation stays inline. Overall mutation success, partial
+  success, and recoverable failure use the shared toast system. Recoverable
+  failure clears submission state while leaving the modal and entered values
+  mounted.
+- Same-route completion closes the modal and performs exactly one local data
+  update or `router.refresh()`. Navigation completion performs exactly one
+  `router.push()` or `router.replace()`, closes the modal, does not refresh, and
+  keeps submission locked until the modal unmounts so the destination route's
+  loading boundary owns pending presentation.
+- Entity deletion gains an additive typed completion contract with `refresh`
+  and `navigate` branches. The existing refresh default remains for public API
+  compatibility, while reference consumers declare their completion explicitly.
+  Deleting the entity represented by the current detail route uses replacement
+  navigation so browser history does not reopen that deleted route.
+- The template's stronger optimistic deletion behavior is retained. A failed
+  result or thrown mutation rolls optimistic state back, reports failure, and
+  returns `false` so the confirmation remains open. The shared deletion layer
+  owns completion navigation; feature-level deletion callbacks do not duplicate
+  route changes.
+- The full-start reference adoption covers record create and edit, dashboard
+  Markdown editing, the reusable Markdown modal form, entity confirmation and
+  deletion, an internal asynchronous-mutation demonstration, nearest component
+  and entity policies, and focused structural verification.
+- The non-persistent report-issue stub and non-modal profile settings form are
+  outside this modal-mutation adoption. Product-specific Inference Console
+  mutation consumers, backend actions, roles, and domain workflows remain
+  excluded. The separately delegated strict visual-parity task retains exclusive
+  ownership of the full and thin `InputFrame` files during this work.
+
 ## Final architecture disposition
 
 - The accepted architecture will be consolidated into `docs/architecture.md` from the pinned Inference Console styling baseline.
