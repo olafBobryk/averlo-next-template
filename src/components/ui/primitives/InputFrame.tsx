@@ -8,28 +8,28 @@ import { focusRing } from "@/components/ui/foundations/focus";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 
 const inputFrameVariants = cva(
-	"flex items-stretch gap-2.5 rounded-[10px] bg-surface border transition-all motion-micro shadow-[2px_4px_15px_rgba(2,2,2,0.03)]",
+	"flex min-w-0 items-stretch gap-2.5 rounded-3xl border border-transparent bg-input/50 text-foreground transition-[color,box-shadow,background-color] outline-none",
 	{
 		variants: {
 			size: {
-				sm: "min-h-[36px]",
+				sm: "h-9",
 				md: "min-h-[40px]",
 				lg: "min-h-[48px]",
 			},
 			tone: {
-				default: `border-border hover:border-border/50 has-[input:-webkit-autofill]:bg-primary/10 has-[input:-webkit-autofill]:border-primary/40 has-[input:autofill]:bg-primary/10 has-[input:autofill]:border-primary/40 ${focusRing.fieldDefault}`,
-				error: `border-danger ${focusRing.fieldError}`,
-				success: `border-success/70 ${focusRing.fieldSuccess}`,
+				default: focusRing.fieldDefault,
+				error: focusRing.fieldError,
+				success: focusRing.fieldSuccess,
 			},
 			fullWidth: {
 				true: "w-full",
 			},
 			disabled: {
-				true: "opacity-60 cursor-not-allowed pointer-events-none",
+				true: "pointer-events-none cursor-not-allowed",
 			},
 		},
 		defaultVariants: {
-			size: "md",
+			size: "sm",
 			tone: "default",
 		},
 	},
@@ -42,7 +42,7 @@ export const inputPaddingXClasses = {
 } as const;
 
 export const inputPaddingYClasses = {
-	sm: "py-2",
+	sm: "py-1",
 	md: "py-2.5",
 	lg: "py-3",
 } as const;
@@ -60,13 +60,13 @@ const inputFrameEndPaddingClasses = {
 } as const;
 
 export const inputSizeClasses = {
-	sm: `${inputPaddingXClasses.sm} ${inputPaddingYClasses.sm} text-sm`,
+	sm: `${inputPaddingXClasses.sm} ${inputPaddingYClasses.sm} text-base md:text-sm`,
 	md: `${inputPaddingXClasses.md} ${inputPaddingYClasses.md} text-sm`,
 	lg: `${inputPaddingXClasses.lg} ${inputPaddingYClasses.lg} text-base`,
 } as const;
 
 export const inputVariants = cva(
-	"disabled:cursor-not-allowed px-0 w-full h-full min-w-0 bg-transparent outline-none text-left text-foreground placeholder:text-muted/70 autofill:!shadow-[inset_0_0_0_30px_rgb(var(--color-primary-rgb)_/_0.08)] autofill:![-webkit-text-fill-color:rgb(var(--color-foreground-rgb)_/_1)] autofill:caret-[rgb(var(--color-foreground-rgb)_/_1)] autofill:[transition:background-color_5000s_ease-in-out_0s]",
+	"h-full w-full min-w-0 bg-transparent px-0 text-left text-foreground outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
 	{
 		variants: {
 			size: inputSizeClasses,
@@ -81,7 +81,7 @@ export const inputVariants = cva(
 			},
 		},
 		defaultVariants: {
-			size: "md",
+			size: "sm",
 		},
 	},
 );
@@ -125,8 +125,8 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 				fullWidth: fullWidth ? true : undefined,
 				disabled,
 			}),
-			start ? inputFrameStartPaddingClasses[size ?? "md"] : undefined,
-			end ? inputFrameEndPaddingClasses[size ?? "md"] : undefined,
+			start ? inputFrameStartPaddingClasses[size ?? "sm"] : undefined,
+			end ? inputFrameEndPaddingClasses[size ?? "sm"] : undefined,
 			className,
 		);
 
@@ -134,7 +134,9 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 			<div
 				ref={ref}
 				className={wrapperClass}
+				aria-invalid={tone === "error" || undefined}
 				data-disabled={disabled ? true : undefined}
+				data-slot="input-frame"
 				{...rest}
 			>
 				{start ? (
@@ -163,7 +165,7 @@ export function InputFrameSkeleton({
 	contentClassName: _contentClassName,
 	end: _end,
 	fullWidth,
-	size = "md",
+	size = "sm",
 	skeletonClassName,
 	start: _start,
 	...rest
@@ -172,7 +174,7 @@ export function InputFrameSkeleton({
 		<Skeleton
 			className={clsx(
 				inputFrameVariants({ size, fullWidth: fullWidth ? true : undefined }),
-				"pointer-events-none border-transparent !bg-muted/80 shadow-none",
+				"pointer-events-none select-none !rounded-3xl border-transparent !bg-muted/80 shadow-none",
 				className,
 			)}
 			data-slot="input-frame-skeleton"
@@ -181,7 +183,10 @@ export function InputFrameSkeleton({
 			{children ? (
 				<span
 					className={clsx(
-						"mx-[15px] min-w-0 truncate text-sm",
+						size === "sm" && "mx-3 text-base md:text-sm",
+						size === "md" && "mx-[15px] text-sm",
+						size === "lg" && "mx-4 text-base",
+						"min-w-0 truncate",
 						skeletonClassName,
 					)}
 				>

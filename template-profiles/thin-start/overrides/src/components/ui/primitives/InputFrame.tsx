@@ -1,8 +1,9 @@
 import clsx from "clsx";
 import * as React from "react";
+import { focusRing } from "@/components/ui/foundations/focus";
 
 export const inputTextClasses =
-	"w-full bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted disabled:cursor-not-allowed disabled:opacity-50";
+	"h-9 w-full min-w-0 bg-transparent px-3 py-1 text-base text-foreground outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
 type InputFrameProps = React.HTMLAttributes<HTMLDivElement> & {
 	children: React.ReactNode;
@@ -29,17 +30,17 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 			<div
 				ref={ref}
 				className={clsx(
-					"flex min-h-10 items-center rounded-[10px] border bg-surface shadow-[2px_4px_15px_rgba(2,2,2,0.03)] transition-all motion-micro",
-					tone === "error" &&
-						"border-danger focus-within:ring-3 focus-within:ring-danger/20",
-					tone === "success" &&
-						"border-success/70 focus-within:ring-3 focus-within:ring-success/20",
-					tone === "default" &&
-						"border-border hover:border-border/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20",
+					"flex h-9 min-w-0 items-center rounded-3xl border border-transparent bg-input/50 text-foreground transition-[color,box-shadow,background-color] outline-none",
+					tone === "error" && focusRing.fieldError,
+					tone === "success" && focusRing.fieldSuccess,
+					tone === "default" && focusRing.fieldDefault,
 					fullWidth && "w-full",
-					disabled && "pointer-events-none cursor-not-allowed opacity-60",
+					disabled && "pointer-events-none cursor-not-allowed",
 					className,
 				)}
+				aria-invalid={tone === "error" || undefined}
+				data-disabled={disabled || undefined}
+				data-slot="input-frame"
 				{...rest}
 			>
 				{children}
@@ -57,12 +58,18 @@ function InputFrameSkeleton({
 		<span
 			aria-hidden
 			className={clsx(
-				"flex min-h-10 items-center rounded-[10px] border border-transparent bg-muted/80 px-3 text-sm text-transparent",
+				"relative flex h-9 min-w-0 items-center overflow-hidden rounded-3xl border border-transparent",
+				"pointer-events-none select-none bg-muted/80",
 				fullWidth && "w-full",
 				className,
 			)}
+			data-slot="input-frame-skeleton"
 		>
-			<span className="select-none opacity-0">{children ?? "Input"}</span>
+			{children ? (
+				<span className="mx-3 min-w-0 truncate text-base opacity-0 md:text-sm">
+					{children}
+				</span>
+			) : null}
 		</span>
 	);
 }
