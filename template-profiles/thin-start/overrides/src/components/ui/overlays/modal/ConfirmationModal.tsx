@@ -1,6 +1,7 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
+import { useModalSubmission } from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -30,16 +31,19 @@ export function ConfirmationModal({
 	onClose,
 	warning,
 }: ConfirmationModalProps) {
-	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
 
 	const handleConfirm = async () => {
-		if (isSubmitting) return;
-		setIsSubmitting(true);
+		if (!beginSubmission()) return;
+		let shouldEndSubmission = true;
 		try {
 			const shouldClose = await onConfirm();
-			if (shouldClose !== false) onClose();
+			if (shouldClose !== false) {
+				onClose();
+				shouldEndSubmission = false;
+			}
 		} finally {
-			setIsSubmitting(false);
+			if (shouldEndSubmission) endSubmission();
 		}
 	};
 
@@ -65,7 +69,12 @@ export function ConfirmationModal({
 				{warning ? <Text className="text-danger">{warning}</Text> : null}
 			</div>
 			<div className="flex justify-end gap-2">
-				<Button type="button" variant="ghost" onClick={onClose}>
+				<Button
+					disabled={isSubmitting}
+					type="button"
+					variant="ghost"
+					onClick={onClose}
+				>
 					Cancel
 				</Button>
 				<Button

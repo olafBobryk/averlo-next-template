@@ -8,6 +8,7 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalTitle,
+	useModalSubmission,
 } from "@/components/ui/overlays/modal/ModalShell";
 import { Button, type ButtonVariant } from "@/components/ui/primitives/Button";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
@@ -40,16 +41,19 @@ export function ConfirmationModal({
 	warning,
 }: ConfirmationModalProps) {
 	const impactTitleId = React.useId();
-	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
 
 	async function handleConfirm() {
-		if (isSubmitting) return;
-		setIsSubmitting(true);
+		if (!beginSubmission()) return;
+		let shouldEndSubmission = true;
 		try {
 			const shouldClose = await onConfirm();
-			if (shouldClose !== false) onClose();
+			if (shouldClose !== false) {
+				onClose();
+				shouldEndSubmission = false;
+			}
 		} finally {
-			setIsSubmitting(false);
+			if (shouldEndSubmission) endSubmission();
 		}
 	}
 

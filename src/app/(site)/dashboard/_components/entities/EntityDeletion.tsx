@@ -14,6 +14,7 @@ import type {
 } from "../../_lib/entity-lifecycle";
 
 type EntityDeletionOptionProps = {
+	completion?: EntityDeletionCompletion;
 	deleteEntity: () => Promise<DashboardEntityMutationResult>;
 	definition: DashboardEntityDeletionDefinition;
 	onDeleted?: () => void;
@@ -21,7 +22,12 @@ type EntityDeletionOptionProps = {
 	onRollback?: () => void;
 };
 
+export type EntityDeletionCompletion =
+	| { type: "refresh" }
+	| { href: string; replace?: boolean; type: "navigate" };
+
 export function useEntityDeletionOption({
+	completion = { type: "refresh" },
 	deleteEntity,
 	definition,
 	onDeleted,
@@ -44,16 +50,35 @@ export function useEntityDeletionOption({
 				details: definition.impacts,
 				onConfirm: async () => {
 					onOptimisticDelete?.();
-					const result = await deleteEntity();
-					if (!result.ok) {
+					try {
+						const result = await deleteEntity();
+						if (!result.ok) {
+							onRollback?.();
+							showToast.error(result.message, {
+								title: "Deletion failed",
+							});
+							return false;
+						}
+						showToast.success(result.message, { title: "Deleted" });
+						onDeleted?.();
+						if (completion.type === "navigate") {
+							if (completion.replace) {
+								router.replace(completion.href);
+							} else {
+								router.push(completion.href);
+							}
+						} else {
+							router.refresh();
+						}
+						return true;
+					} catch {
 						onRollback?.();
-						showToast.error(result.message, { title: "Deletion failed" });
+						showToast.error(
+							`${definition.entityTypeLabel} could not be deleted.`,
+							{ title: "Deletion failed" },
+						);
 						return false;
 					}
-					showToast.success(result.message, { title: "Deleted" });
-					onDeleted?.();
-					router.refresh();
-					return true;
 				},
 				title: `Delete ${definition.entityLabel}?`,
 				warning: definition.warning,
@@ -64,6 +89,7 @@ export function useEntityDeletionOption({
 
 export function EntityDeletionDetailMenu({
 	ariaLabel,
+	completion,
 	deleteEntity,
 	definition,
 	onDeleted,
@@ -71,6 +97,7 @@ export function EntityDeletionDetailMenu({
 	onRollback,
 }: EntityDeletionOptionProps & { ariaLabel?: string }) {
 	const option = useEntityDeletionOption({
+		completion,
 		deleteEntity,
 		definition,
 		onDeleted,

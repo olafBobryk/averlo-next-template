@@ -48,7 +48,7 @@ export function useConfirmationModal(defaultPortalTargetId?: string) {
 						warning={warning}
 					/>
 				),
-				targetId ? { portalTargetId: targetId } : undefined,
+				{ ariaLabel: title, portalTargetId: targetId },
 			);
 		},
 		[openModal, defaultPortalTargetId],

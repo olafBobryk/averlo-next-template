@@ -58,6 +58,7 @@ export function ModalHost() {
 		<AnimatePresence>
 			{modals.map(({ id, render, options }, index) => (
 				<ModalShell
+					ariaLabel={options?.ariaLabel}
 					key={id}
 					isTopMost={index === modals.length - 1}
 					onClose={() => {

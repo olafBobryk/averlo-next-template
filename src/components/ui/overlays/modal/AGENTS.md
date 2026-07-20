@@ -28,6 +28,7 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
   - `Escape` should affect only the top-most modal.
   - Closing a modal should restore focus predictably to the invoking control when possible.
 - Backdrop, shell, and panel behavior should stay centralized in `ModalShell`.
+- Async mutation modals use `useModalSubmission`. Its synchronous guard rejects duplicate submits, and the shell blocks Escape, backdrop, and header-close dismissal while pending. Disable Cancel and pass `isSubmitting` to the submit Button and `ModalStepForm` where applicable.
 - Destructive confirmation patterns should reuse the shared confirmation modal before introducing custom dialog copy and controls.
 - Confirmation handlers may return `false` to keep the modal open. Use structured `details`, semantic warnings, and `confirmVariant` instead of replacing the shared confirmation layout.
 - Form flows should begin with `ModalForm`; use `ModalStepForm` only when the interaction has real ordered steps rather than cosmetic progress.
@@ -37,9 +38,11 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
 - Use `useConfirmationModal` for delete, remove, disconnect, or other confirm-before-action flows.
 - Use `useImageInspectModal` or `InspectableImage` for click-to-enlarge imagery.
 - Use `useModal` only when a new modal type truly needs custom content beyond the existing specialized helpers.
+- For recoverable failure, show field errors inline, use `showToast.error` for the overall result, call `endSubmission()`, and keep the modal values mounted. Same-route success closes and updates locally or refreshes once. Navigation success performs one push or replace, closes while still locked, and leaves pending UI to the destination route boundary; never navigate and refresh together.
 - If styling needs adjustment, prefer modal options such as panel or backdrop class overrides instead of forking the shell.
 
 ## Avoid
 - Page-local dialog stacks with their own focus logic.
 - Custom confirm modals for standard destructive flows.
+- Page-local pending booleans in server-backed modal forms when `useModalSubmission` can coordinate the shell and footer.
 - Breaking focus trap or focus return behavior for styling reasons.

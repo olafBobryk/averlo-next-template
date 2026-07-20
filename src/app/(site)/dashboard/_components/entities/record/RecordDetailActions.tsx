@@ -11,6 +11,7 @@ import {
 	ModalDescription,
 	ModalHeader,
 	ModalTitle,
+	useModalSubmission,
 } from "@/components/ui/overlays/modal/ModalShell";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
@@ -66,7 +67,10 @@ export function RecordDetailActions({
 								simulateFailure={simulateFailure}
 							/>
 						),
-						{ id: `edit-record-${record.id}` },
+						{
+							ariaLabel: `Edit ${record.title}`,
+							id: `edit-record-${record.id}`,
+						},
 					)
 				}
 				size="sm"
@@ -75,6 +79,11 @@ export function RecordDetailActions({
 				Edit record
 			</Button>
 			<EntityDeletionDetailMenu
+				completion={{
+					href: "/dashboard/records",
+					replace: true,
+					type: "navigate",
+				}}
 				deleteEntity={() =>
 					deleteReferenceRecordAction(record.id, simulateFailure)
 				}
@@ -93,7 +102,6 @@ export function RecordDetailActions({
 					],
 					warning: "The fixture adapter does not retain a recycle bin.",
 				}}
-				onDeleted={() => router.push("/dashboard/records")}
 			/>
 		</div>
 	);
@@ -120,7 +128,36 @@ function RecordEditForm({
 		record.status,
 	);
 	const [error, setError] = React.useState<string>();
-	const [saving, setSaving] = React.useState(false);
+	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
+
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		if (!beginSubmission()) return;
+		setError(undefined);
+		let shouldEndSubmission = true;
+		try {
+			const result = await updateReferenceRecordAction(
+				record.id,
+				{ ownerMemberId, status, title },
+				simulateFailure,
+			);
+			if (!result.ok) {
+				setError(result.fieldErrors?.title);
+				showToast.error(result.message, { title: "Save failed" });
+				return;
+			}
+			showToast.success(result.message);
+			shouldEndSubmission = false;
+			onSaved();
+		} catch {
+			showToast.error("The record could not be saved. Try again.", {
+				title: "Save failed",
+			});
+		} finally {
+			if (shouldEndSubmission) endSubmission();
+		}
+	}
+
 	return (
 		<>
 			<ModalHeader leadingIcon={<Icon name="pencil" size="sm" />}>
@@ -134,38 +171,19 @@ function RecordEditForm({
 				footer={
 					<>
 						<Button
-							disabled={saving}
+							disabled={isSubmitting}
 							onClick={onCancel}
 							type="button"
 							variant="ghost"
 						>
 							Cancel
 						</Button>
-						<Button loading={saving} type="submit">
+						<Button loading={isSubmitting} type="submit">
 							Save changes
 						</Button>
 					</>
 				}
-				onSubmit={async (event) => {
-					event.preventDefault();
-					setSaving(true);
-					setError(undefined);
-					try {
-						const result = await updateReferenceRecordAction(
-							record.id,
-							{ ownerMemberId, status, title },
-							simulateFailure,
-						);
-						if (!result.ok) {
-							setError(result.message);
-							return;
-						}
-						showToast.success(result.message);
-						onSaved();
-					} finally {
-						setSaving(false);
-					}
-				}}
+				onSubmit={handleSubmit}
 			>
 				<TextInput
 					error={error}

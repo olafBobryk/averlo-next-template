@@ -158,9 +158,15 @@ export function RecordDetailContent({
 										{ descriptionMarkdown },
 										simulateFailure,
 									);
-									if (!result.ok) return { error: result.message, ok: false };
+									if (!result.ok) {
+										return {
+											error: result.message,
+											message: result.message,
+											ok: false,
+										};
+									}
 									setRecord(result.record);
-									return { ok: true };
+									return { message: result.message, ok: true };
 								}}
 								title={`Edit ${presentation.title} description`}
 							/>

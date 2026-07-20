@@ -8,13 +8,19 @@ import {
 	ModalDescription,
 	ModalHeader,
 	ModalTitle,
+	useModalSubmission,
 } from "@/components/ui/overlays/modal/ModalShell";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import { showToast } from "@/lib/feedback/toast";
 
-export type DashboardMarkdownSaveResult = { error?: string; ok: boolean };
+export type DashboardMarkdownSaveResult = {
+	error?: string;
+	fieldErrors?: { markdown?: string };
+	message?: string;
+	ok: boolean;
+};
 
 export function DashboardMarkdownEditorModalButton({
 	description,
@@ -49,14 +55,18 @@ export function DashboardMarkdownEditorModalButton({
 							mentions={mentions}
 							onCancel={close}
 							onSave={onSave}
-							onSaved={() => {
-								showToast.success(successMessage);
+							onSaved={(message) => {
+								showToast.success(message ?? successMessage);
 								close();
 							}}
 							title={title}
 						/>
 					),
-					{ id: modalId, panelWrapperClassName: "!max-w-4xl" },
+					{
+						ariaLabel: title,
+						id: modalId,
+						panelWrapperClassName: "!max-w-4xl",
+					},
 				);
 			}}
 			type="button"
@@ -81,12 +91,41 @@ function DashboardMarkdownEditorModalForm({
 	mentions?: readonly { id: string; label: string }[];
 	onCancel: () => void;
 	onSave: (markdown: string) => Promise<DashboardMarkdownSaveResult>;
-	onSaved: () => void;
+	onSaved: (message?: string) => void;
 	title: string;
 }) {
 	const [markdown, setMarkdown] = React.useState(initialMarkdown);
 	const [error, setError] = React.useState<string>();
-	const [saving, setSaving] = React.useState(false);
+	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
+
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		if (!beginSubmission()) return;
+		setError(undefined);
+		let shouldEndSubmission = true;
+		try {
+			const result = await onSave(markdown);
+			if (!result.ok) {
+				const message =
+					result.fieldErrors?.markdown ??
+					result.message ??
+					result.error ??
+					"Could not save changes.";
+				setError(message);
+				showToast.error(result.message ?? result.error ?? message);
+				return;
+			}
+			shouldEndSubmission = false;
+			onSaved(result.message);
+		} catch {
+			const message = "Could not save changes.";
+			setError(message);
+			showToast.error(message);
+		} finally {
+			if (shouldEndSubmission) endSubmission();
+		}
+	}
+
 	return (
 		<>
 			<ModalHeader leadingIcon={<Icon name="pencil" size="sm" />}>
@@ -100,40 +139,24 @@ function DashboardMarkdownEditorModalForm({
 				footer={
 					<>
 						<Button
-							disabled={saving}
+							disabled={isSubmitting}
 							onClick={onCancel}
 							type="button"
 							variant="ghost"
 						>
 							Cancel
 						</Button>
-						<Button loading={saving} type="submit">
+						<Button loading={isSubmitting} type="submit">
 							Save
 						</Button>
 					</>
 				}
-				onSubmit={async (event) => {
-					event.preventDefault();
-					setError(undefined);
-					setSaving(true);
-					try {
-						const result = await onSave(markdown);
-						if (!result.ok) {
-							setError(result.error ?? "Could not save changes.");
-							return;
-						}
-						onSaved();
-					} catch {
-						setError("Could not save changes.");
-					} finally {
-						setSaving(false);
-					}
-				}}
+				onSubmit={handleSubmit}
 			>
 				<MarkdownEditor
 					ariaLabel={title}
 					defaultMarkdown={initialMarkdown}
-					disabled={saving}
+					disabled={isSubmitting}
 					mentions={mentions ? [...mentions] : undefined}
 					onChange={setMarkdown}
 					placeholder="Write a description"

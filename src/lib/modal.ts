@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 export type ModalRenderFn = (helpers: { close: () => void }) => ReactNode;
 
 export type OpenModalOptions = {
+	ariaLabel?: string;
 	portalTargetId?: string;
 	id?: string;
 	panelClassName?: string;

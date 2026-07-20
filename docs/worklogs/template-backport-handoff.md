@@ -16,6 +16,9 @@ shares its visual foundation through filesystem-backed materialization.
 - Source: `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console`
 - Source policy: use `git show` or `git archive` at the pinned commit; never read
   implementation input from its dirty working tree.
+- Mutation behavior reference: committed delta through
+  `1c6208b37fabb4666c142490608f45662013b0f7`; this does not repin the visual
+  baseline or authorize product-specific consumers.
 - Full preview: restart/verify with `npm run dev:agent -- --random` before review.
 - Thin preview: restart/verify with `npm run dev:thin -- --random` before review.
 - Worktree policy: retain through both visual gates. Do not merge, push, or
@@ -207,6 +210,40 @@ complete and its closing commit follows this handoff update.
   were observed.
 - Platform and theme-switch visual drift remain explicitly outside this thread
   and should be reviewed as a separate, narrowly scoped follow-up.
+
+## Post-closure mutation policy port
+
+- Status: complete; the cohesive mutation-policy commit follows this handoff
+  update.
+- Full and thin modal shells expose `useModalSubmission`, reject duplicate
+  submits, and block Escape, backdrop, and header-close dismissal while pending.
+  The full shell retains its stronger focus, stacking, scroll-lock, motion, and
+  Card/Panel composition behavior.
+- Confirmation, multi-step forms, record create/edit, dashboard and reusable
+  Markdown editing, and entity deletion consume the shared pending contract.
+  Recoverable failure preserves mounted values and overall feedback uses the
+  shared toast system.
+- Same-route completion performs one local update or refresh. Detail deletion
+  declares replacement navigation through the shared deletion layer and never
+  combines that route change with refresh. Returned and thrown deletion failures
+  both roll optimistic state back.
+- Mutation results stay local and structured as `{ ok, message, fieldErrors? }`;
+  the dashboard Markdown result retains its prior `error` field as a compatibility
+  fallback. No global mutation-result registry or provider dependency was added.
+- `verify:mutation-policy`, the expanded entity-deletion verifier, the internal
+  async modal demo, nearest policies, child-prune ownership, and thin-profile
+  exclusions make the contract discoverable and machine-verifiable.
+- Full typecheck/build/smoke and focused mutation/entity/dashboard/prune checks
+  pass. A disposable thin workspace passes strict API review, install,
+  typecheck, build, and smoke while excluding dashboard and Markdown-editor
+  ownership.
+- Browser review on the retained `http://localhost:3090` preview passed pending
+  dismissal locking, duplicate-submit control, retained inline failure values,
+  confirmation-held-open rollback, same-route refresh, detail replacement
+  navigation, Markdown failure retention, fixture reset, and console health.
+- The strict visual-parity worker continues to own only the full and thin
+  `InputFrame` files. Its commit remains outside this branch until explicit
+  review acceptance.
 
 ## Required gates
 
