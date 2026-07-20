@@ -1531,22 +1531,15 @@ export const demoPages: DemoPage[] = [
 						Render() {
 							return (
 								<div className="flex flex-col gap-2">
-									<Card
-										display="flex"
-										padding="none"
-										gap="none"
-										shadow="none"
-										background="white"
-										className="border border-border/10"
-									>
+									<Card>
 										<CardHeader>
-											<CardTitle>White card</CardTitle>
-											<CardDescription>Default surface.</CardDescription>
+											<CardTitle>Default card</CardTitle>
+											<CardDescription>Pinned source defaults.</CardDescription>
 										</CardHeader>
 										<CardContent>
 											<Text variant="caption" tone="muted">
-												Root variants preserve Averlo spacing while slot parts
-												match the Shadcn card shape.
+												Default ring, 8px radius, no shadow, and structured
+												spacing.
 											</Text>
 										</CardContent>
 									</Card>

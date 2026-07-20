@@ -56,6 +56,7 @@ const panelStyles = cva("text-foreground", {
 		},
 		radius: {
 			none: "rounded-none",
+			xs: "rounded-md",
 			sm: "rounded-lg",
 			md: "rounded-xl",
 			lg: "rounded-2xl",

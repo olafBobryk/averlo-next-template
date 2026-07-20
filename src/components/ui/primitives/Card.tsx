@@ -31,28 +31,35 @@ export function Card<T extends ElementType = "div">({
 	gap,
 	overflow = "hidden",
 	padding,
+	radius,
+	shadow,
 	size,
 	...props
 }: CardProps<T>) {
 	const resolvedSize = size ?? "default";
+	const resolvedBorder =
+		border ?? (bordered == null ? "ring" : bordered ? "default" : "none");
+	const usesDefaultGap = gap == null;
 	const usesStructuredSpacing = padding == null;
 	const PanelRoot = Panel as ElementType;
 
 	return (
 		<PanelRoot
 			background={background}
-			border={border}
-			bordered={bordered}
+			border={resolvedBorder}
 			className={clsx(
 				usesStructuredSpacing && cardStyles({ size: resolvedSize }),
+				usesDefaultGap && (resolvedSize === "sm" ? "gap-3" : "gap-4"),
 				className,
 			)}
 			data-size={resolvedSize}
 			data-slot="card"
 			display={display}
-			gap={gap ?? (resolvedSize === "sm" ? "sm" : "md")}
+			gap={gap ?? "none"}
 			overflow={overflow}
 			padding={padding ?? "none"}
+			radius={radius ?? "xs"}
+			shadow={shadow ?? "none"}
 			{...props}
 		/>
 	);

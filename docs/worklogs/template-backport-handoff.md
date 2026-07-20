@@ -169,6 +169,30 @@ complete and its closing commit follows this handoff update.
   `http://localhost:3074/login?motion=off&reveal=off` if the in-memory session
   has restarted.
 
+## Post-closure Card parity correction
+
+- Status: complete; the correction commit follows this handoff update.
+- A controlled source-versus-target Card pilot exposed three coupled default
+  differences: the target inherited Panel's larger radius, real border plus
+  shadow, and wider gap scale. Card now selects the pinned source defaults
+  without changing generic Panel defaults.
+- Default Card chrome is an 8px radius through the additive Panel `xs` radius,
+  a non-layout foreground ring, no real border, no shadow, and 16px structured
+  spacing. `size="sm"` uses the source's 12px structured spacing.
+- The additive template API remains intact. Explicit `background`, `border` or
+  `bordered`, `radius`, `shadow`, `padding`, and `gap` values continue to win;
+  Card remains composed on Panel and every existing slot is unchanged.
+- The original fixed-size pilot measured 15.8099% exact changed pixels in light
+  and 15.8249% in dark. The corrected default and small fixtures both measure
+  0 changed pixels in light and dark for the exact and >=16-channel metrics.
+- Full and materialized thin Panel/Card implementations remain byte-identical,
+  and strict thin API review passes. The live full demo is
+  `http://localhost:3074/internal/demo/ui/primitives?motion=off&reveal=off`.
+- Ignored visual evidence lives under
+  `.codex/tmp/source-parity-card-pilot/after/`,
+  `.codex/tmp/source-parity-card-pilot/after-small/`, and
+  `.codex/tmp/card-parity-live/`.
+
 ## Required gates
 
 Every chunk runs `git diff --check`, focused Biome checks, `npm run typecheck`,
