@@ -8,34 +8,41 @@ Ready-made form controls composed from the primitives. This folder should be the
 - You want consistent validation, focus, shell styling, and accessibility wiring.
 - The goal is to get close to standard product UX by using proven controls instead of custom page code.
 
+## Public Import Surface
+- Application, route, composite, demo, and other external consumers import public inputs and public types from `@/components/ui/input`.
+- The explicit root `index.ts` is the stable public boundary. Do not deep-import implementation files from outside this family.
+- Input-family implementations import direct owners such as `InputSkeleton`, choice primitives, and sibling modules. They must not self-import through the public barrel.
+- Full-start and thin-start own separate barrel files because thin-start deliberately exposes a smaller input inventory.
+- See `docs/frontend-import-policy.md` for the repository-wide policy.
+
 ## Choose The Highest-Level Match First
-- `src/components/ui/input/TextInput.tsx`: plain single-line text entry.
+- `src/components/ui/input/text/TextInput.tsx`: plain single-line text entry.
 - `src/components/ui/input/editable/`: display-to-edit field composites for inline rename and stable field-shell editing.
-- `src/components/ui/input/EmailInput.tsx`: email entry with email-centric defaults.
-- `src/components/ui/input/PasswordInput.tsx`: password entry with built-in visibility toggle and optional strength meter.
-- `src/components/ui/input/ProfilePictureInput.tsx`: image picker for profile/avatar flows with preview, type validation, and remove action.
+- `src/components/ui/input/text/EmailInput.tsx`: email entry with email-centric defaults.
+- `src/components/ui/input/text/PasswordInput.tsx`: password entry with built-in visibility toggle and optional strength meter.
+- `src/components/ui/input/files/ProfilePictureInput.tsx`: image picker for profile/avatar flows with preview, type validation, and remove action.
 	- Use the default overlay layout for direct profile controls and `layout="file-row"` for source-style modal forms with a separate removal action.
 	- Use `renderPreview` when a domain presentation owns the avatar fallback, color seed, or icon-only policy; keep the edit preview on that same presentation recipe.
 - `src/components/ui/input/files/FileInput.tsx`: controlled generic-file field for selection, previews, inspection, and editable/read-only presentation. It does not own upload transport or persistence.
-- `src/components/ui/input/TextAreaInput.tsx`: multi-line text input.
-- `src/components/ui/input/NumberInput.tsx`: typed numeric entry.
-- `src/components/ui/input/UnitNumberInput.tsx`: numeric entry with a fixed unit.
-- `src/components/ui/input/SliderInput.tsx`: range-style numeric selection.
+- `src/components/ui/input/text/TextAreaInput.tsx`: multi-line text input.
+- `src/components/ui/input/numeric/NumberInput.tsx`: typed numeric entry.
+- `src/components/ui/input/numeric/UnitNumberInput.tsx`: numeric entry with a fixed unit.
+- `src/components/ui/input/numeric/SliderInput.tsx`: range-style numeric selection.
 	- Keep native range semantics beneath the shared custom track, progress, thumb, focus, and disabled treatment. The range, number field, and optional unit must remain vertically centered within one `InputFrame`.
-- `src/components/ui/input/PhoneInput.tsx`: phone input with country-aware UX.
-- `src/components/ui/input/SelectInput.tsx`: searchable single-select dropdown.
-- `src/components/ui/input/ComboboxTextInput.tsx`: text-driven combobox.
-- `src/components/ui/input/ComboboxMultiSelectInput.tsx`: multi-select combobox.
-- `src/components/ui/input/ButtonMultiSelectInput.tsx`: compact button-based multi-select for tags, filters, and preference pickers.
-- `src/components/ui/input/date/`: the canonical date subsystem. Import `DateInput` and `DateRangeInput` from `@/components/ui/input/date`.
+- `src/components/ui/input/text/PhoneInput.tsx`: phone input with country-aware UX.
+- `src/components/ui/input/selection/SelectInput.tsx`: searchable single-select dropdown.
+- `src/components/ui/input/selection/ComboboxTextInput.tsx`: text-driven combobox.
+- `src/components/ui/input/selection/ComboboxMultiSelectInput.tsx`: multi-select combobox.
+- `src/components/ui/input/selection/ButtonMultiSelectInput.tsx`: compact button-based multi-select for tags, filters, and preference pickers.
+- `src/components/ui/input/date/`: the canonical date subsystem. Import `DateInput` and `DateRangeInput` from `@/components/ui/input`.
 	- Both inputs share one source-native calendar popover, UTC date model, keyboard navigation, and utility treatment.
 	- `DateRangeInput` is full-start-only; thin-start retains `DateInput` and the shared calendar core.
-- `src/components/ui/input/ColorInput.tsx` and `ColorSwatchInput.tsx`: full-start color entry and swatch selection controls.
+- `src/components/ui/input/color/ColorInput.tsx` and `ColorSwatchInput.tsx`: full-start color entry and swatch selection controls.
 - `src/components/ui/input/SignatureInput.tsx`: canvas-based signature capture composed through `Field` and `InputFrame`.
-- `src/components/ui/input/SpamProtectionFields.tsx`: hidden honeypot field for form submissions.
-- `src/components/ui/input/RadioInput.tsx`: radio group built on the shared choice system.
-- `src/components/ui/input/MultiselectInput.tsx`: checkbox group built on the shared choice system.
-- `src/components/ui/input/ToggleInput.tsx`: toggle-style group built on the shared choice system.
+- `src/components/ui/input/text/SpamProtectionFields.tsx`: hidden honeypot field for form submissions.
+- `src/components/ui/input/choice/RadioInput.tsx`: radio group built on the shared choice system.
+- `src/components/ui/input/choice/MultiselectInput.tsx`: checkbox group built on the shared choice system.
+- `src/components/ui/input/choice/ToggleInput.tsx`: toggle-style group built on the shared choice system.
 
 ## Invariants
 - Prefer a complete input from this folder before composing a fresh control from primitives.
@@ -99,8 +106,13 @@ Ready-made form controls composed from the primitives. This folder should be the
 - Handling submissions from click handlers alone when a real form would solve the same job.
 
 ## See Also
+- `docs/frontend-import-policy.md`
+- `src/components/ui/input/color/AGENTS.md`
 - `src/components/ui/input/editable/AGENTS.md`
 - `src/components/ui/input/choice/AGENTS.md`
 - `src/components/ui/input/files/AGENTS.md`
+- `src/components/ui/input/numeric/AGENTS.md`
+- `src/components/ui/input/selection/AGENTS.md`
+- `src/components/ui/input/text/AGENTS.md`
 - `src/components/ui/primitives/AGENTS.md`
 - `src/components/ui/overlays/toast/AGENTS.md`

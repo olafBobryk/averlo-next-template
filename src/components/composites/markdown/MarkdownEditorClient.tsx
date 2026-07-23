@@ -61,8 +61,8 @@ import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import {
 	SelectInput,
 	type SelectOption,
-} from "@/components/ui/input/SelectInput";
-import { TextInput } from "@/components/ui/input/TextInput";
+	TextInput,
+} from "@/components/ui/input";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import {
 	ModalHeader,

@@ -3,9 +3,8 @@
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
-import { TextInput } from "@/components/ui/input/TextInput";
-import { ToggleInput } from "@/components/ui/input/ToggleInput";
-import { Chip } from "@/components/ui/misc/Chip";
+import { TextInput, ToggleInput } from "@/components/ui/input";
+import { Chip } from "@/components/ui/misc";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import {
 	ModalDescription,

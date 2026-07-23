@@ -7,7 +7,7 @@ export const manifest = {
 	summary:
 		"Reference form pattern that combines a honeypot field, a 60-second cooldown cookie, and strict server-side file validation.",
 	copyTargets: [
-		"src/components/ui/input/SpamProtectionFields.tsx",
+		"src/components/ui/input/text/SpamProtectionFields.tsx",
 		"src/lib/forms/guard.ts",
 		"src/app/api/internal/forms/spam-protected-example/route.ts",
 	],

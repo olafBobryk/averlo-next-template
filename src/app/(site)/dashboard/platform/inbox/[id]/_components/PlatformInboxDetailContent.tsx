@@ -23,8 +23,8 @@ import {
 import {
 	SelectInput,
 	type SelectOption,
-} from "@/components/ui/input/SelectInput";
-import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
+	TextAreaInput,
+} from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";

@@ -1,4 +1,4 @@
-import { Chip } from "@/components/ui/misc/Chip";
+import { Chip } from "@/components/ui/misc";
 import type { DashboardPresentationTone } from "../../../_lib/presentation/contracts";
 
 const chipTone = {

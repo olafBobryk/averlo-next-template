@@ -10,8 +10,8 @@ import {
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { focusRing } from "@/components/ui/foundations/focus";
-import { ChoiceIndicatorMulti } from "@/components/ui/input/choice/ChoiceIndicators";
-import { Skeleton } from "@/components/ui/misc/Skeleton";
+import { ChoiceIndicatorMulti } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/misc";
 import { Button, type ButtonProps } from "@/components/ui/primitives/Button";
 import { Text, textVariants } from "@/components/ui/primitives/Text";
 import { splitMarkdownUserMentions } from "@/lib/markdown-mentions";

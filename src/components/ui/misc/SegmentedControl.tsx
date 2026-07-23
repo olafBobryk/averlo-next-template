@@ -37,8 +37,6 @@ type SegmentedControlProps<T extends string> = {
 	ariaLabelledBy?: string;
 	ariaDescribedBy?: string;
 	className?: string;
-	/** Retained for compatibility; segmented selection no longer uses a layout animation. */
-	disableWhenReducedMotion?: boolean;
 };
 
 function renderIcon(icon?: IconProp) {

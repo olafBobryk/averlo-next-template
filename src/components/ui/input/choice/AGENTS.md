@@ -1,7 +1,7 @@
 # Folder: `src/components/ui/input/choice`
 
 ## Role
-Shared building blocks for radio, checkbox, and toggle-style inputs.
+Shared building blocks and complete radio, checkbox, and toggle-style inputs.
 
 ## Use This Folder When
 - The UI needs a labeled choice control with a visually hidden native input.
@@ -11,6 +11,11 @@ Shared building blocks for radio, checkbox, and toggle-style inputs.
 ## Prefer These Files
 - `src/components/ui/input/choice/ChoiceField.tsx`: shared label, input, and change-handling wrapper.
 - `src/components/ui/input/choice/ChoiceIndicators.tsx`: shared indicator visuals for radio, multi-select, and toggle styles.
+- `src/components/ui/input/choice/RadioInput.tsx`, `MultiselectInput.tsx`, and `ToggleInput.tsx`: complete grouped controls exported through `@/components/ui/input`.
+
+## Public Surface
+- External consumers import choice fields, indicators, and complete choice inputs from `@/components/ui/input`.
+- Files inside this family import `ChoiceField` and `ChoiceIndicators` directly.
 
 ## Invariants
 - Keep the native input in the DOM. Do not replace it with a div plus ARIA unless there is no viable native pattern.

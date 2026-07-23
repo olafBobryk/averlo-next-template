@@ -6,7 +6,7 @@ import { useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
-import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
+import { ScrollBorders } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { getMarketingLinkHref } from "@/lib/marketing-content/links";

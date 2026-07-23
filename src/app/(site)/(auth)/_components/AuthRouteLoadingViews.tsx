@@ -3,8 +3,7 @@
 import { OrganizationSelectionCard } from "@/app/(site)/_components/organization/OrganizationSelectionCard";
 import { DashboardDetailField } from "@/app/(site)/dashboard/_components/detail/DashboardDetailField";
 import { Icon } from "@/components/ui/icons/Icon";
-import { EmailInput } from "@/components/ui/input/EmailInput";
-import { PasswordInput } from "@/components/ui/input/PasswordInput";
+import { EmailInput, PasswordInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { AuthScreen } from "./AuthScreen";

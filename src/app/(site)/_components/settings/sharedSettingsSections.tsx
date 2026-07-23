@@ -4,8 +4,7 @@ import type * as React from "react";
 import type { AppearancePreference } from "@/components/ui/foundations/appearance";
 import type { useSettingsContext } from "@/components/ui/foundations/settingsContext";
 import { Icon } from "@/components/ui/icons/Icon";
-import { RadioInput } from "@/components/ui/input/RadioInput";
-import { ToggleInput } from "@/components/ui/input/ToggleInput";
+import { RadioInput, ToggleInput } from "@/components/ui/input";
 import { Card } from "@/components/ui/primitives/Card";
 
 export type SettingsSection = {

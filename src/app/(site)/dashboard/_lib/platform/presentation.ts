@@ -1,4 +1,4 @@
-import type { ChipTone } from "@/components/ui/misc/Chip";
+import type { ChipTone } from "@/components/ui/misc";
 import type {
 	FeedbackCategory,
 	FeedbackSeverity,

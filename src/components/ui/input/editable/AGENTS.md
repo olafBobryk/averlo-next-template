@@ -6,7 +6,7 @@ Reusable display-to-edit field composites. These components own the transition b
 
 ## Public Surface
 
-- Import `EditableTextField` from `@/components/ui/input/editable`.
+- Import `EditableTextField` from `@/components/ui/input`.
 - Use `presentation="field"` for a stable input shell and `presentation="inline"` only for deliberate title or rename interactions.
 - Use `EditableTextField.Skeleton` with the same presentation as the live component.
 

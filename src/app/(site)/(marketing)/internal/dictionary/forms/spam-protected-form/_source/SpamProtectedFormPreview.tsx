@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { EmailInput } from "@/components/ui/input/EmailInput";
-import { SpamProtectionFields } from "@/components/ui/input/SpamProtectionFields";
-import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
-import { TextInput } from "@/components/ui/input/TextInput";
+import {
+	EmailInput,
+	SpamProtectionFields,
+	TextAreaInput,
+	TextInput,
+} from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { Field } from "@/components/ui/primitives/Field";

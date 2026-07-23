@@ -5,8 +5,8 @@ import { Icon } from "@/components/ui/icons/Icon";
 import {
 	SelectInput,
 	type SelectOption,
-} from "@/components/ui/input/SelectInput";
-import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
+	TextAreaInput,
+} from "@/components/ui/input";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import {
 	ModalDescription,

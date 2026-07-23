@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectInput } from "@/components/ui/input/SelectInput";
+import { SelectInput } from "@/components/ui/input";
 import { Field } from "@/components/ui/primitives/Field";
 import type { MemberPresentation } from "../../../_lib/entities/member/presentation";
 import { MemberAvatar } from "./MemberAvatar";

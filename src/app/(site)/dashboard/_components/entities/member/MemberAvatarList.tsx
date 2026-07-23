@@ -1,4 +1,4 @@
-import { ProfilePictureStack } from "@/components/ui/misc/ProfilePicture";
+import { ProfilePictureStack } from "@/components/ui/misc";
 import type { MemberPresentation } from "../../../_lib/entities/member/presentation";
 
 function MemberAvatarListRoot({

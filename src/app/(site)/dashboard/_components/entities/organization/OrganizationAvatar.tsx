@@ -2,10 +2,7 @@
 
 import clsx from "clsx";
 import { Icon } from "@/components/ui/icons/Icon";
-import {
-	ProfilePicture,
-	type ProfilePictureSize,
-} from "@/components/ui/misc/ProfilePicture";
+import { ProfilePicture, type ProfilePictureSize } from "@/components/ui/misc";
 import {
 	type OrganizationIdentityVisual,
 	organizationPresentationConfig,

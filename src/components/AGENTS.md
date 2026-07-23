@@ -9,7 +9,7 @@ Agents should assume that a matching component probably already exists and shoul
 
 ## Default Workflow
 1. Identify the UX pattern first, not the page-specific styling.
-2. Find the closest existing component in `primitives/`, `input/`, `misc/`, `overlays/`, `composites/`, or `domain/`.
+2. Find the closest existing component in `primitives/`, `input/`, `misc/`, `overlays/`, or `composites/`.
 3. Compose upward from library pieces instead of creating one-off page components.
 4. Only introduce new components when the behavior cannot be expressed by extending the library without harming reuse.
 5. When a page needs a familiar UX convention, prefer the built-in implementation even if a custom version seems faster.
@@ -23,6 +23,13 @@ For any new reusable UI-library feature:
 5. Update the nearest folder `AGENTS.md` with what the feature is for, when to use it, and any new invariants.
 6. If the feature changes shared library conventions, also update this file so the workflow is visible at the top of the component tree.
 7. Run checks on the touched files before considering the feature complete.
+
+## Import Boundaries
+- Follow `docs/frontend-import-policy.md` for public component-family entrypoints and internal imports.
+- Cohesive families with many complete leaf or composite components may expose one curated `index.ts` boundary so consumers do not depend on physical file placement.
+- Application, route, domain, and composite consumers import from that boundary. Files inside the family and lower-level UI dependencies import direct owners when routing through the barrel would create a cycle or invert the dependency graph.
+- Keep barrels explicit and intentional: export public components and public types, not every helper in the folder.
+- When profiles expose different capabilities, maintain matching full and thin barrel contracts and verify both in the same change.
 
 ## Invariants
 - **Library-first invariant:** Never start from raw HTML if a library component already covers the pattern. Search here first.
@@ -117,8 +124,6 @@ Reusable features are not complete until implementation, demo coverage, and docu
 - `src/components/branding/AGENTS.md`
 - `src/components/composites/AGENTS.md`
 - `src/components/composites/markdown/AGENTS.md`
-- `src/components/domain/AGENTS.md`
-- `src/components/domain/search/AGENTS.md`
 - `src/components/mount/AGENTS.md`
 - `src/components/ui/AGENTS.md`
 - `src/components/ui/foundations/AGENTS.md`
@@ -126,10 +131,15 @@ Reusable features are not complete until implementation, demo coverage, and docu
 - `src/components/ui/icons/AGENTS.md`
 - `src/components/ui/primitives/AGENTS.md`
 - `src/components/ui/input/AGENTS.md`
+- `src/components/ui/input/color/AGENTS.md`
 - `src/components/ui/input/editable/AGENTS.md`
 - `src/components/ui/input/choice/AGENTS.md`
 - `src/components/ui/input/files/AGENTS.md`
+- `src/components/ui/input/numeric/AGENTS.md`
+- `src/components/ui/input/selection/AGENTS.md`
+- `src/components/ui/input/text/AGENTS.md`
 - `src/components/ui/misc/AGENTS.md`
+- `src/components/ui/misc/accordion/AGENTS.md`
 - `src/components/ui/misc/state/AGENTS.md`
 - `src/components/ui/motion/AGENTS.md`
 - `src/components/ui/overlays/AGENTS.md`

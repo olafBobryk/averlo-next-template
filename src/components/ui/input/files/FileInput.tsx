@@ -3,16 +3,16 @@
 import clsx from "clsx";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
+import { IdleState } from "@/components/ui/misc/state/IdleState";
+import { Button } from "@/components/ui/primitives/Button";
+import { Field } from "@/components/ui/primitives/Field";
 import {
 	FilePreview,
 	type FilePreviewItem,
 	type FilePreviewLabels,
 	type FilePreviewTag,
-} from "@/components/ui/misc/FilePreview";
-import { Skeleton } from "@/components/ui/misc/Skeleton";
-import { IdleState } from "@/components/ui/misc/state/IdleState";
-import { Button } from "@/components/ui/primitives/Button";
-import { Field } from "@/components/ui/primitives/Field";
+} from "./FilePreview";
 
 export type FileInputPendingItem = {
 	file: File;

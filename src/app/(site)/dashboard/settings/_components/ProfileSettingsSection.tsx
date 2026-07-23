@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
-import { ProfilePictureInput } from "@/components/ui/input/ProfilePictureInput";
-import { TextInput } from "@/components/ui/input/TextInput";
-import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
+import { ProfilePictureInput, TextInput } from "@/components/ui/input";
+import { ProfilePicture } from "@/components/ui/misc";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import {
 	ModalDescription,
