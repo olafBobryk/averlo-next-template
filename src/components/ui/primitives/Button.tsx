@@ -176,7 +176,6 @@ function renderIcon(
 			<Icon
 				name={icon as IconName}
 				animate
-				// className={animatedIconClassMap[icon as IconName]}
 				className={className}
 				style={{ width: `${size}px`, height: `${size}px` }}
 			/>

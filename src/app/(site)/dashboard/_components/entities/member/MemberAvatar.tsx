@@ -1,9 +1,6 @@
 "use client";
 
-import {
-	ProfilePicture,
-	type ProfilePictureSize,
-} from "@/components/ui/misc/ProfilePicture";
+import { ProfilePicture, type ProfilePictureSize } from "@/components/ui/misc";
 
 export type MemberAvatarSize = Exclude<ProfilePictureSize, "2xl">;
 

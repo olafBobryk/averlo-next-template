@@ -143,5 +143,3 @@ export function useRevealAnimationsDisabled(disableWhenReducedMotion = true) {
 	const urlDisabled = useMotionDisableOverride();
 	return context?.disabled ?? (urlDisabled || !motionAllowed);
 }
-
-export { RevealRoot as Root };

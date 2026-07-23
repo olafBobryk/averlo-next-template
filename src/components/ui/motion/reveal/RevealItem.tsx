@@ -637,5 +637,3 @@ export function RevealItem({
 
 	return <RevealGroupItem {...(props as RevealGroupItemProps)} {...stages} />;
 }
-
-export { RevealItem as Item };

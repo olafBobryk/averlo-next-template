@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
+import { ProfilePicture } from "@/components/ui/misc";
 import { Text } from "@/components/ui/primitives/Text";
 import type { AccountPresentation } from "../../../_lib/entities/account/presentation";
 

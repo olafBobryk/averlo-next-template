@@ -17,7 +17,7 @@ const PACKAGE_JSON_PATH = path.join(ROOT, "package.json");
 const TEMPLATE_SHAPE_FILES = [
 	"scripts/prune-template.mjs",
 	"scripts/_lib/local-production-preview.mjs",
-	"scripts/verify-smoke.mjs",
+	"scripts/verify/verify-smoke.mjs",
 	"src/config/routes.ts",
 	"src/lib/routes.ts",
 	"src/lib/marketing-content/fallback.ts",
@@ -33,12 +33,12 @@ const SURFACES = {
 		dependentSurfaces: ["dashboard"],
 		ownedPaths: [
 			"docs/frontend-entity-policy.md",
-			"scripts/verify-reference-entities.ts",
-			"scripts/verify-entity-deletion.ts",
-			"scripts/verify-mutation-policy.ts",
-			"scripts/verify-entity-skeletons.ts",
-			"scripts/verify-frontend-entity-policy.ts",
-			"scripts/verify-profile-pruning.mjs",
+			"scripts/verify/verify-reference-entities.ts",
+			"scripts/verify/verify-entity-deletion.ts",
+			"scripts/verify/verify-mutation-policy.ts",
+			"scripts/verify/verify-entity-skeletons.ts",
+			"scripts/verify/verify-frontend-entity-policy.ts",
+			"scripts/verify/verify-profile-pruning.mjs",
 			"src/app/(site)/dashboard/records",
 			"src/app/(site)/dashboard/organization/members/[memberId]",
 			"src/app/(site)/dashboard/reference",
@@ -50,7 +50,7 @@ const SURFACES = {
 			"src/app/(site)/dashboard/_lib/fixtures",
 		],
 		markerFiles: [
-			"scripts/verify-dashboard-surfaces.ts",
+			"scripts/verify/verify-dashboard-surfaces.ts",
 			"src/app/(site)/dashboard/page.tsx",
 			"src/app/(site)/dashboard/layout.tsx",
 			"src/app/(site)/dashboard/organization/page.tsx",
@@ -84,9 +84,9 @@ const SURFACES = {
 			"Remove the dashboard shell, login/auth routes, and dashboard-only auth helpers.",
 		dependentSurfaces: ["auth"],
 		ownedPaths: [
-			"scripts/verify-auth-organization.ts",
-			"scripts/verify-dashboard-surfaces.ts",
-			"scripts/verify-platform-operations.ts",
+			"scripts/verify/verify-auth-organization.ts",
+			"scripts/verify/verify-dashboard-surfaces.ts",
+			"scripts/verify/verify-platform-operations.ts",
 			"src/app/(site)/_components/organization",
 			"src/app/(site)/dashboard",
 			"src/app/(site)/(auth)",
@@ -172,8 +172,8 @@ const SURFACES = {
 			"scripts/run-template-intelligence-benchmark.mjs",
 			"scripts/run-template-intelligence-hybrid.mjs",
 			"scripts/setup-template-intelligence-serena.mjs",
-			"scripts/verify-template-intelligence-benchmark.mjs",
-			"scripts/verify-codex-turn-recording.ts",
+			"scripts/verify/verify-template-intelligence-benchmark.mjs",
+			"scripts/verify/verify-codex-turn-recording.ts",
 			"docs/template-intelligence.md",
 			"docs/worklogs/template-intelligence-ledger.md",
 			"docs/worklogs/template-intelligence-handoff.md",
@@ -304,8 +304,6 @@ const CENTRAL_FILES = [
 	"src/config/routes.ts",
 	"src/lib/routes.ts",
 	"src/lib/api/index.ts",
-	"src/app/(site)/(marketing)/_components/layout/marketingNav.ts",
-	"src/app/(site)/(marketing)/_components/layout/MarketingContentSearch.tsx",
 ];
 
 const PAYLOAD_PACKAGE_DEPENDENCIES = [
@@ -555,7 +553,7 @@ async function collectPlan(surfaceIds) {
 				? [
 						...CENTRAL_FILES,
 						"src/lib/marketing-content/fallback.ts",
-						"scripts/verify-smoke.mjs",
+						"scripts/verify/verify-smoke.mjs",
 					]
 				: []),
 			...(surfaceIds.includes("payload")
@@ -707,199 +705,6 @@ function renderLibRoutesFile(state) {
 	].join("\n");
 }
 
-function renderMarketingNavFile(state) {
-	const navEntries = ['\t{ name: "Home", routeId: "home" },'];
-
-	if (state.hasDemo) {
-		navEntries.push('\t{ name: "Demo", routeId: "demo" },');
-	}
-
-	if (state.hasIntelligence) {
-		navEntries.push('\t{ name: "Intelligence", routeId: "intelligence" },');
-	}
-
-	if (state.hasPlayground) {
-		navEntries.push('\t{ name: "Playground", routeId: "playground" },');
-	}
-
-	navEntries.push('\t{ name: "Settings", routeId: "settings" },');
-
-	if (state.hasDictionary) {
-		navEntries.push('\t{ name: "Dictionary", routeId: "dictionary" },');
-	}
-
-	if (state.hasReference) {
-		navEntries.push('\t{ name: "Reference", routeId: "reference" },');
-	}
-
-	return [
-		'import type { IconName } from "@/components/ui/icons/Icon";',
-		'import type { AppRouteId } from "@/config/routes";',
-		"",
-		"export type MarketingNavLink = {",
-		"\tname: string;",
-		"\trouteId: AppRouteId;",
-		"};",
-		"",
-		"export type MarketingSocialLink = {",
-		"\tname: string;",
-		"\ticon: IconName;",
-		"\thref: string;",
-		"};",
-		"",
-		"export const MARKETING_NAV_LINKS: MarketingNavLink[] = [",
-		...navEntries,
-		"];",
-		"",
-		"export const MARKETING_SOCIAL_LINKS: MarketingSocialLink[] = [",
-		"\t{",
-		'\t\tname: "X",',
-		'\t\ticon: "x",',
-		'\t\thref: "",',
-		"\t},",
-		"\t{",
-		'\t\tname: "Instagram",',
-		'\t\ticon: "instagram",',
-		'\t\thref: "",',
-		"\t},",
-		"\t{",
-		'\t\tname: "LinkedIn",',
-		'\t\ticon: "linked-in",',
-		'\t\thref: "",',
-		"\t},",
-		"\t{",
-		'\t\tname: "Meta",',
-		'\t\ticon: "meta",',
-		'\t\thref: "",',
-		"\t},",
-		"\t{",
-		'\t\tname: "You Tube",',
-		'\t\ticon: "youtube",',
-		'\t\thref: "",',
-		"\t},",
-		"];",
-		"",
-	].join("\n");
-}
-
-function renderMarketingContentSearchFile(state) {
-	const header = [
-		'"use client";',
-		"",
-		state.hasDemo
-			? 'import { getVisibleDemoPages } from "@/app/(site)/(marketing)/internal/demo/content";'
-			: null,
-		"import {",
-		"\tContentSearch,",
-		"\ttype ContentSearchEntry,",
-		"\ttype ContentSearchFieldProps,",
-		"\ttype ContentSearchInputProps,",
-		'} from "@/components/domain/search/ContentSearch";',
-		'import { getMarketingLinkHref } from "@/lib/marketing-content/links";',
-		'import type { MarketingNavLink } from "@/lib/marketing-content/types";',
-		"",
-		"type MarketingContentSearchProps = {",
-		"\tnavLinks: MarketingNavLink[];",
-		"\tonNavigate?: () => void;",
-		"\tportalTargetId?: string;",
-		"\tfield?: ContentSearchFieldProps;",
-		"\tinput?: ContentSearchInputProps;",
-		"};",
-		"",
-		"function getMarketingSearchEntries(navLinks: MarketingNavLink[]): ContentSearchEntry[] {",
-		"\tconst entries: ContentSearchEntry[] = [];",
-		"\tconst seen = new Set<string>();",
-		"",
-		"\tfunction addEntry(entry: ContentSearchEntry) {",
-		"\t\tif (seen.has(entry.href)) return;",
-		"\t\tseen.add(entry.href);",
-		"\t\tentries.push(entry);",
-		"\t}",
-		"",
-		"\tfor (const link of navLinks) {",
-		"\t\tconst href = getMarketingLinkHref(link);",
-		"",
-		"\t\taddEntry({",
-		"\t\t\tid: `nav-${href}`,",
-		"\t\t\tlabel: link.label,",
-		"\t\t\thref: href,",
-		"\t\t});",
-		"",
-		"\t\tfor (const section of link.sections ?? []) {",
-		"\t\t\tconst sectionHref = getMarketingLinkHref(section);",
-		"",
-		"\t\t\taddEntry({",
-		"\t\t\t\tid: `section-${sectionHref}`,",
-		"\t\t\t\tlabel: section.label,",
-		"\t\t\t\thref: sectionHref,",
-		"\t\t\t});",
-		"\t\t}",
-		"\t}",
-	];
-
-	if (state.hasDemo) {
-		header.push(
-			"",
-			"\tfor (const page of getVisibleDemoPages()) {",
-			"\t\taddEntry({",
-			"\t\t\tid: `demo-${page.id}`,",
-			"\t\t\tlabel: `Demo: ${page.title}`,",
-			'\t\t\thref: `/internal/demo/${page.slug.join("/")}`,',
-			"\t\t});",
-			"\t}",
-		);
-	}
-
-	if (state.hasIntelligence) {
-		header.push(
-			"",
-			"\taddEntry({",
-			'\t\tid: "intelligence",',
-			'\t\tlabel: "Intelligence: Concept Map",',
-			'\t\thref: "/internal/intelligence",',
-			"\t});",
-		);
-	}
-
-	if (state.hasPlayground) {
-		header.push(
-			"",
-			"\taddEntry({",
-			'\t\tid: "playground-motion-reveal-root",',
-			'\t\tlabel: "Playground: Reveal Root",',
-			'\t\thref: "/internal/playground/motion/reveal-root",',
-			"\t});",
-		);
-	}
-
-	header.push(
-		"",
-		"\treturn entries;",
-		"}",
-		"",
-		"export default function MarketingContentSearch({",
-		"\tnavLinks,",
-		"\tonNavigate,",
-		"\tportalTargetId,",
-		"\tfield,",
-		"\tinput,",
-		"}: MarketingContentSearchProps) {",
-		"\treturn (",
-		"\t\t<ContentSearch",
-		"\t\t\tentries={getMarketingSearchEntries(navLinks)}",
-		"\t\t\tonNavigate={onNavigate}",
-		"\t\t\tportalTargetId={portalTargetId}",
-		"\t\t\tfield={field}",
-		"\t\t\tinput={input}",
-		"\t\t/>",
-		"\t);",
-		"}",
-		"",
-	);
-
-	return header.filter(Boolean).join("\n");
-}
-
 function renderMarketingContentFallbackFile(state) {
 	const serviceEntries = [];
 	const addServiceEntry = (id, title, description, surfaceIds) => {
@@ -1016,9 +821,9 @@ function renderMarketingContentFallbackFile(state) {
 			'\t\t\t\trouteId: "playground",',
 			"\t\t\t\tsections: [",
 			"\t\t\t\t\t{",
-			'\t\t\t\t\t\tlabel: "Reveal root",',
-			'\t\t\t\t\t\thref: "/internal/playground/motion/reveal-root",',
-			'\t\t\t\t\t\tdescription: "Motion reveal scheduler playground.",',
+			'\t\t\t\t\t\tlabel: "Motion QA",',
+			'\t\t\t\t\t\thref: "/internal/playground/motion",',
+			'\t\t\t\t\t\tdescription: "Motion system QA playground.",',
 			"\t\t\t\t\t},",
 			"\t\t\t\t],",
 			"\t\t\t},",
@@ -1604,20 +1409,11 @@ function getRewriteTargets(state) {
 			content: renderApiIndexFile(state),
 		},
 		{
-			path: "src/app/(site)/(marketing)/_components/layout/marketingNav.ts",
-			content: renderMarketingNavFile(state),
-		},
-		{
-			path: "src/app/(site)/(marketing)/_components/layout/MarketingContentSearch.tsx",
-			content: renderMarketingContentSearchFile(state),
-			optional: true,
-		},
-		{
 			path: "src/lib/marketing-content/fallback.ts",
 			content: renderMarketingContentFallbackFile(state),
 		},
 		{
-			path: "scripts/verify-smoke.mjs",
+			path: "scripts/verify/verify-smoke.mjs",
 			content: renderVerifySmokeFile(state),
 		},
 	];

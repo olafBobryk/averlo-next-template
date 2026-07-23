@@ -1,4 +1,4 @@
-import { PasswordInput } from "@/components/ui/input/PasswordInput";
+import { PasswordInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import { getSafeContinuationPath } from "@/lib/auth/continuation";
 import { AuthScreen } from "../_components/AuthScreen";

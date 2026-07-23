@@ -13,7 +13,6 @@ import {
 	resolveCurrentSession,
 	selectCurrentOrganization,
 	signInWithFixturePassword,
-	signOutCurrentSession,
 } from "@/lib/auth/server";
 
 function readFormString(formData: FormData, name: string) {
@@ -86,11 +85,6 @@ export async function requestUnavailableAuthMethodAction(formData: FormData) {
 		const returnTo = readFormString(formData, "returnTo") || "/login";
 		redirect(authRedirect(returnTo, next, publicError.code));
 	}
-}
-
-export async function signOutAction() {
-	await signOutCurrentSession();
-	redirect("/login");
 }
 
 export async function selectOrganizationAction(formData: FormData) {

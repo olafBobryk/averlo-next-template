@@ -1,4 +1,4 @@
-import { Chip } from "@/components/ui/misc/Chip";
+import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { hrefFor } from "@/lib/routes";

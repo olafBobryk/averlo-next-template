@@ -3,9 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
-import { EmailInput } from "@/components/ui/input/EmailInput";
-import { SelectInput } from "@/components/ui/input/SelectInput";
-import { Chip } from "@/components/ui/misc/Chip";
+import { EmailInput, SelectInput } from "@/components/ui/input";
+import { Chip } from "@/components/ui/misc";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import {
 	ModalDescription,

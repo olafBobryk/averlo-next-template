@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { StateIndicator } from "@/components/ui/misc/state/State";
+import { StateIndicator } from "@/components/ui/misc";
 
 export function DashboardStatusFrame({
 	action,

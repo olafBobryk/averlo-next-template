@@ -22,69 +22,61 @@ import {
 } from "@/components/ui/helpers/useCopyAction";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { useIconRegistry } from "@/components/ui/icons/iconRegistry";
-import { ButtonMultiSelectInput } from "@/components/ui/input/ButtonMultiSelectInput";
-import { ColorInput } from "@/components/ui/input/ColorInput";
 import {
-	ColorSwatchInput,
-	SEMANTIC_COLOR_SWATCH_PRESETS,
-} from "@/components/ui/input/ColorSwatchInput";
-import { ComboboxMultiSelectInput } from "@/components/ui/input/ComboboxMultiSelectInput";
-import { ComboboxTextInput } from "@/components/ui/input/ComboboxTextInput";
-import { ChoiceField } from "@/components/ui/input/choice/ChoiceField";
-import {
+	ButtonMultiSelectInput,
+	ChoiceField,
 	ChoiceIndicatorMulti,
 	ChoiceIndicatorRadio,
 	ChoiceIndicatorToggle,
-} from "@/components/ui/input/choice/ChoiceIndicators";
-import {
+	ColorInput,
+	ColorSwatchInput,
+	ComboboxMultiSelectInput,
+	ComboboxTextInput,
 	DateInput,
 	DateRangeInput,
 	type DateRangeValue,
-} from "@/components/ui/input/date";
-import { EmailInput } from "@/components/ui/input/EmailInput";
-import { EditableTextField } from "@/components/ui/input/editable";
-import {
+	EditableTextField,
+	EmailInput,
 	FileInput,
 	type FileInputItem,
-} from "@/components/ui/input/files/FileInput";
-import { MultiselectInput } from "@/components/ui/input/MultiselectInput";
-import { NumberInput } from "@/components/ui/input/NumberInput";
-import { PasswordInput } from "@/components/ui/input/PasswordInput";
-import { PhoneInput } from "@/components/ui/input/PhoneInput";
-import { ProfilePictureInput } from "@/components/ui/input/ProfilePictureInput";
-import { RadioInput } from "@/components/ui/input/RadioInput";
-import { SelectInput } from "@/components/ui/input/SelectInput";
-import { SignatureInput } from "@/components/ui/input/SignatureInput";
-import { SliderInput } from "@/components/ui/input/SliderInput";
-import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
-import { TextInput } from "@/components/ui/input/TextInput";
-import { ToggleInput } from "@/components/ui/input/ToggleInput";
-import { UnitNumberInput } from "@/components/ui/input/UnitNumberInput";
-import { Accordion } from "@/components/ui/misc/Accordion";
-import { Chip } from "@/components/ui/misc/Chip";
-import { CopyField } from "@/components/ui/misc/CopyField";
-import { HealthCheckIndicator } from "@/components/ui/misc/HealthCheckIndicator";
+	MultiselectInput,
+	NumberInput,
+	PasswordInput,
+	PhoneInput,
+	ProfilePictureInput,
+	RadioInput,
+	SEMANTIC_COLOR_SWATCH_PRESETS,
+	SelectInput,
+	SignatureInput,
+	SliderInput,
+	TextAreaInput,
+	TextInput,
+	ToggleInput,
+	UnitNumberInput,
+} from "@/components/ui/input";
 import {
+	Accordion,
+	Chip,
+	CopyField,
+	ErrorState,
+	HealthCheckIndicator,
+	IdleState,
 	ImageSwitcher,
 	type ImageSwitcherImage,
-} from "@/components/ui/misc/ImageSwitcher";
-import { InspectableImage } from "@/components/ui/misc/InspectableImage";
-import { Loader } from "@/components/ui/misc/Loader";
-import { PaginationControls } from "@/components/ui/misc/PaginationControls";
-import {
+	InspectableImage,
+	Loader,
+	PaginationControls,
 	ProfilePicture,
 	ProfilePictureStack,
-} from "@/components/ui/misc/ProfilePicture";
-import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
-import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
-import { Skeleton } from "@/components/ui/misc/Skeleton";
-import { SocialLinks } from "@/components/ui/misc/SocialLinks";
-import { StepIndicator } from "@/components/ui/misc/StepIndicator";
-import { SuspenseBoundary } from "@/components/ui/misc/SuspenseBoundary";
-import { ErrorState } from "@/components/ui/misc/state/ErrorState";
-import { IdleState } from "@/components/ui/misc/state/IdleState";
-import { StateIndicator } from "@/components/ui/misc/state/State";
-import { Tooltip } from "@/components/ui/misc/Tooltip";
+	ScrollBorders,
+	SegmentedControl,
+	Skeleton,
+	SocialLinks,
+	StateIndicator,
+	StepIndicator,
+	SuspenseBoundary,
+	Tooltip,
+} from "@/components/ui/misc";
 import { Reveal } from "@/components/ui/motion";
 import {
 	ActiveStageHost,
@@ -618,14 +610,6 @@ const relatedMap: Record<string, RelatedInfo> = {
 	HeaderMenuContent: {
 		uses: ["Button", "Icon", "InputFrame", "Text"],
 		usedIn: ["HeaderCompact", "HeaderFull"],
-	},
-	MarketingContentSearch: {
-		uses: ["ContentSearch"],
-		usedIn: [],
-	},
-	ContentSearch: {
-		uses: ["ComboboxTextInput"],
-		usedIn: ["MarketingContentSearch"],
 	},
 	MarkdownRenderer: {
 		uses: ["Button", "ChoiceIndicatorMulti", "Text", "focus"],

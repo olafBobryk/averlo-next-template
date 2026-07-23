@@ -2,18 +2,21 @@
 
 import { LoginLoadingView } from "@/app/(site)/(auth)/_components/AuthRouteLoadingViews";
 import { Icon } from "@/components/ui/icons/Icon";
-import { DateInput, DateRangeInput } from "@/components/ui/input/date";
-import { EmailInput } from "@/components/ui/input/EmailInput";
-import { MultiselectInput } from "@/components/ui/input/MultiselectInput";
-import { NumberInput } from "@/components/ui/input/NumberInput";
-import { PasswordInput } from "@/components/ui/input/PasswordInput";
-import { ProfilePictureInput } from "@/components/ui/input/ProfilePictureInput";
-import { RadioInput } from "@/components/ui/input/RadioInput";
-import { SelectInput } from "@/components/ui/input/SelectInput";
-import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
-import { TextInput } from "@/components/ui/input/TextInput";
-import { ToggleInput } from "@/components/ui/input/ToggleInput";
-import { Chip } from "@/components/ui/misc/Chip";
+import {
+	DateInput,
+	DateRangeInput,
+	EmailInput,
+	MultiselectInput,
+	NumberInput,
+	PasswordInput,
+	ProfilePictureInput,
+	RadioInput,
+	SelectInput,
+	TextAreaInput,
+	TextInput,
+	ToggleInput,
+} from "@/components/ui/input";
+import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";

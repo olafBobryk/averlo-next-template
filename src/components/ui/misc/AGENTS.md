@@ -8,10 +8,9 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - The UX pattern is common across pages but not strictly a form input or overlay primitive.
 
 ## Prefer These Files
-- `src/components/ui/misc/Accordion.tsx`: disclosure UI.
+- `src/components/ui/misc/accordion/Accordion.tsx`: disclosure UI and the public owner for the private client/shared accordion split.
 - `src/components/ui/misc/Chip.tsx`: compact linked, button, or static chip for source references and lightweight token-like navigation.
 - `src/components/ui/misc/CopyField.tsx`: copy-to-clipboard interaction.
-- `src/components/ui/misc/FilePreview.tsx` and `FileInspectModal.tsx`: internal preview and inspection helpers owned by `FileInput`; feature code should start from the public field.
 - `src/components/ui/misc/HealthCheckIndicator.tsx`: compact service health display backed by a health endpoint.
 - `src/components/ui/misc/ImageSwitcher.tsx`: reusable image switcher with stable transitions, eager preloading, swipe support, and shared pagination controls.
 - `src/components/ui/misc/Loader.tsx`: spinner loader.
@@ -25,6 +24,12 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - `src/components/ui/misc/Tooltip.tsx`: hover or focus helper text built on the shared dropdown primitive.
 - `src/components/ui/misc/Skeleton.tsx`: loading placeholder.
 - `src/components/ui/misc/InspectableImage.tsx`: image trigger for inspect modal.
+
+## Public Surface
+- Application, route, composite, demo, and domain consumers import public misc components and types from `@/components/ui/misc`.
+- Misc-family internals and lower-level UI dependencies import their owning files directly. In particular, primitives that provide dependencies to misc components must not import the misc barrel and create a cycle.
+- The barrel is explicit. Accordion client/shared modules and input-owned file preview helpers are implementation details and are not exported.
+- Thin start owns a separate `@/components/ui/misc` barrel that exports only `Skeleton`.
 
 ## Invariants
 - Prefer these shared UX patterns before introducing page-local versions.
@@ -71,6 +76,7 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 - Skeleton layouts that shrink, jump, or change breakpoint structure compared to the live widget.
 
 ## See Also
+- `src/components/ui/misc/accordion/AGENTS.md`
 - `src/components/ui/misc/state/AGENTS.md`
 - `src/components/ui/overlays/modal/AGENTS.md`
 - `src/components/ui/overlays/toast/AGENTS.md`

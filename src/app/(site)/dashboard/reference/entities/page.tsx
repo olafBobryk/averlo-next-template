@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icons/Icon";
-import { Accordion } from "@/components/ui/misc/Accordion";
+import { Accordion } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";

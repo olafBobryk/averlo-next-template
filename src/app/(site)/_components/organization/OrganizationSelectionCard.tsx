@@ -2,7 +2,7 @@ import { OrganizationIdentity } from "@/app/(site)/dashboard/_components/entitie
 import { toOrganizationEntity } from "@/app/(site)/dashboard/_lib/entities/organization/domain";
 import { getOrganizationPresentation } from "@/app/(site)/dashboard/_lib/entities/organization/presentation";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
-import { Chip } from "@/components/ui/misc/Chip";
+import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";

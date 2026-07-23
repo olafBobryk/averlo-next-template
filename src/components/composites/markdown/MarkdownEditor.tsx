@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import dynamic from "next/dynamic";
 import * as React from "react";
-import { Skeleton } from "@/components/ui/misc/Skeleton";
+import { Skeleton } from "@/components/ui/misc";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import { useModalSubmission } from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";

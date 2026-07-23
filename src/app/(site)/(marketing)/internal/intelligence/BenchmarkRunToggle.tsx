@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
+import { SegmentedControl } from "@/components/ui/misc";
 
 type BenchmarkRunView = "real" | "placeholder";
 

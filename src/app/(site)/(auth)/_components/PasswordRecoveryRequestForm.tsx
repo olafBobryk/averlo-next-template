@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { EmailInput } from "@/components/ui/input/EmailInput";
+import { EmailInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import { requestPasswordRecovery } from "@/lib/api/auth";

@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icons/Icon";
-import { Chip } from "@/components/ui/misc/Chip";
+import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { DashboardDetailField } from "../_components/detail/DashboardDetailField";

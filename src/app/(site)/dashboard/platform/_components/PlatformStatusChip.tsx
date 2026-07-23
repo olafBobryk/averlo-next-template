@@ -8,7 +8,7 @@ import {
 	feedbackStatusPresentation,
 	supportStatusPresentation,
 } from "@/app/(site)/dashboard/_lib/platform/presentation";
-import { Chip } from "@/components/ui/misc/Chip";
+import { Chip } from "@/components/ui/misc";
 
 export function SupportStatusChip({
 	status,

@@ -2,16 +2,12 @@
 
 import { OrganizationSelectionCard } from "@/app/(site)/_components/organization/OrganizationSelectionCard";
 import { Icon } from "@/components/ui/icons/Icon";
-import { Chip } from "@/components/ui/misc/Chip";
+import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 // prune:dashboard.reference-entities:start
-import {
-	memberColumnDefinitions,
-	memberFieldDefinitions,
-	memberPresentationDefinition,
-} from "../../_lib/entities/member/presentation";
+import { memberFieldDefinitions } from "../../_lib/entities/member/presentation";
 // prune:dashboard.reference-entities:end
 import { toOrganizationEntity } from "../../_lib/entities/organization/domain";
 import { getOrganizationPresentation } from "../../_lib/entities/organization/presentation";
@@ -28,7 +24,6 @@ import DashboardProfileLoading from "../../profile/loading";
 import { DashboardEntityReferenceLoadingComposition } from "../../reference/entities/EntitySkeletonReference";
 // prune:dashboard.reference-entities:end
 import { DashboardSettingsLoadingView } from "../../settings/_components/DashboardSettingsLoadingView";
-import { DashboardTablePanel } from "../data/DashboardTablePanel";
 import { DashboardDetailField } from "../detail/DashboardDetailField";
 import { MemberIdentity } from "../entities/member/MemberIdentity";
 import { MemberRoleChip } from "../entities/member/MemberRoleChip";
@@ -40,25 +35,6 @@ import { RecordDetailContent } from "../entities/record/RecordDetailContent";
 // prune:dashboard.reference-entities:end
 import { DashboardSection } from "../layout/DashboardSection";
 import { useDashboardAuth } from "../providers/DashboardAuthProvider";
-
-// prune:dashboard.reference-entities:start
-const memberSkeletonRows = [
-	{
-		email: "multi@averlo.local",
-		joinedAt: "14 Feb 2026",
-		key: "multi-org-reviewer",
-		name: "Multi-org Reviewer",
-		role: "Admin",
-	},
-	{
-		email: "operator@averlo.local",
-		joinedAt: "12 Jan 2026",
-		key: "template-operator",
-		name: "Template Operator",
-		role: "Owner",
-	},
-] as const;
-// prune:dashboard.reference-entities:end
 
 function LoadingStatus({
 	children,
@@ -140,77 +116,6 @@ function DashboardOverviewCard({
 		</Card>
 	);
 }
-
-// prune:dashboard.reference-entities:start
-function MemberTableSkeleton({
-	description,
-	id,
-	title,
-}: {
-	description: React.ReactNode;
-	id: string;
-	title: React.ReactNode;
-}) {
-	return (
-		<DashboardTablePanel.Skeleton
-			columns={memberColumnDefinitions.map((column) => ({
-				header: column.label,
-				id: column.id,
-			}))}
-			header={
-				<Card.Header className="min-w-0 border-b">
-					<Card.Title className="inline-flex min-w-0 flex-wrap items-center gap-2">
-						<Icon name={memberPresentationDefinition.icon} size="sm" />
-						{title}
-					</Card.Title>
-					<Card.Description className="min-w-0 break-words">
-						{description}
-					</Card.Description>
-				</Card.Header>
-			}
-			id={id}
-		>
-			{memberSkeletonRows.map((row) => (
-				<tr key={row.key}>
-					<td
-						className="min-w-0 border-b border-border/70 px-4 py-3 text-muted-foreground"
-						data-dashboard-table-column-index="0"
-						data-dashboard-table-kind="data"
-						data-dashboard-table-required="true"
-					>
-						<MemberIdentity.Skeleton
-							displayLabel={row.name}
-							emailLabel={row.email}
-							variant="compact"
-						/>
-					</td>
-					<td
-						className="border-b border-border/70 px-4 py-3 whitespace-nowrap text-muted-foreground"
-						data-dashboard-table-column-index="1"
-						data-dashboard-table-kind="data"
-					>
-						<MemberRoleChip.Skeleton label={row.role} />
-					</td>
-					<td
-						className="border-b border-border/70 px-4 py-3 whitespace-nowrap text-muted-foreground"
-						data-dashboard-table-column-index="2"
-						data-dashboard-table-kind="data"
-					>
-						<Text.Skeleton
-							as="span"
-							className="max-w-28 text-sm text-muted-foreground"
-							tone={null}
-							variant={null}
-						>
-							{row.joinedAt}
-						</Text.Skeleton>
-					</td>
-				</tr>
-			))}
-		</DashboardTablePanel.Skeleton>
-	);
-}
-// prune:dashboard.reference-entities:end
 
 export function DashboardOrganizationLoadingView() {
 	const { membership, user } = useDashboardAuth();
@@ -303,24 +208,6 @@ export function DashboardOrganizationLoadingView() {
 }
 
 // prune:dashboard.reference-entities:start
-export function DashboardMembersLoadingView() {
-	const { organization } = useDashboardAuth();
-	return (
-		<LoadingStatus label="Loading organization members">
-			<DashboardSection
-				description={`Organization-scoped membership identities for ${organization.name}.`}
-				title="Members"
-			>
-				<MemberTableSkeleton
-					description="The global user and organization membership remain separate inputs."
-					id="organization-members"
-					title={memberPresentationDefinition.nouns.plural}
-				/>
-			</DashboardSection>
-		</LoadingStatus>
-	);
-}
-
 export function DashboardMemberDetailLoadingView() {
 	return (
 		<LoadingStatus label="Loading member details">

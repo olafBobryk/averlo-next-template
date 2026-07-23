@@ -376,5 +376,3 @@ export function RevealList({
 
 	return <RevealGroup {...props} {...stages} />;
 }
-
-export { RevealList as List };

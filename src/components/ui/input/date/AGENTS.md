@@ -6,7 +6,7 @@ Canonical single-date and date-range input system. Both public inputs must compo
 
 ## Public Surface
 
-- Import `DateInput`, `DateRangeInput`, and their public types from `@/components/ui/input/date`.
+- Import `DateInput`, `DateRangeInput`, and their public types from `@/components/ui/input`.
 - `DateInput` is shared by full-start and thin-start.
 - `DateRangeInput` remains full-start-only.
 - Both inputs expose closed loading geometry through `Component.Skeleton`.

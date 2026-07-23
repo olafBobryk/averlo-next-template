@@ -4,8 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { MemberSelector } from "@/app/(site)/dashboard/_components/entities/member/MemberSelector";
 import { Icon } from "@/components/ui/icons/Icon";
-import { SelectInput } from "@/components/ui/input/SelectInput";
-import { TextInput } from "@/components/ui/input/TextInput";
+import { SelectInput, TextInput } from "@/components/ui/input";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import {
 	ModalDescription,

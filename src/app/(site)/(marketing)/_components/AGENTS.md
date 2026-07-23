@@ -13,7 +13,6 @@ Route-scoped public-site shell components and adapters.
 - `layout/Header.tsx`: responsive public header wrapper.
 - `layout/HeaderMenuContent.tsx`: grouped menu, search input, search results, and no-results primitives used by both header breakpoints.
 - `layout/Footer.tsx`: public footer.
-- `layout/MarketingContentSearch.tsx`: adapter that feeds public/demo pages into the shared `ContentSearch` when a standalone combobox search is needed outside the header menu.
 
 ## Invariants
 - Public navigation data flows through `SiteLayoutDocument` fallback/resolver data, not shared app config.

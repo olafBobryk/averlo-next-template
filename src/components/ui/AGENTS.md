@@ -10,10 +10,10 @@ Main design-system and UX-system entry point. This folder is where agents should
 
 ## Decision Guide
 - Need low-level structure or styling primitives: use `src/components/ui/primitives/`.
-- Need a form control: use `src/components/ui/input/`.
+- Need a form control: import the public control from `@/components/ui/input`, then inspect `src/components/ui/input/` only when changing its implementation.
 - Need checkbox, radio, or toggle semantics: use `src/components/ui/input/choice/`.
-- Need file selection and preview workflows: use `FileInput` from `src/components/ui/input/files/`.
-- Need feedback, empty states, copy, segmented control, skeletons, or disclosure: use `src/components/ui/misc/`.
+- Need file selection and preview workflows: import `FileInput` from `@/components/ui/input`; its implementation lives under `src/components/ui/input/files/`.
+- Need feedback, empty states, copy, segmented control, skeletons, or disclosure: import the public component from `@/components/ui/misc`, then inspect `src/components/ui/misc/` only when changing its implementation.
 - Need date or time display: use `src/components/ui/time/`.
 - Need icons or icon animation helpers: use `src/components/ui/icons/` and `src/components/ui/helpers/`.
 - Need focus, motion tokens, or settings: use `src/components/ui/foundations/`.
@@ -28,6 +28,7 @@ Main design-system and UX-system entry point. This folder is where agents should
 - Favor additive extension through props, variants, slots, and composition over cloning components into page-local folders.
 - Keep shortcut registration scoped and discoverable.
 - When a folder already has a purpose, put work there instead of creating parallel structure.
+- Treat documented family `index.ts` files as public APIs. Application and feature consumers use the entrypoint; family internals and lower-level UI dependencies use direct owner imports when a barrel would invert the dependency graph or create a cycle.
 - Initial-load feedback should default to inline loading states or skeletons, not toasts.
 - Memoization helpers should be rare and justified, not automatic.
 

@@ -8,8 +8,14 @@ Controlled file selection and preview fields for forms and document workflows.
 - You want a file workflow that feels consistent with the rest of the library.
 - The UI should reuse existing preview, list, and button conventions.
 
-## Prefer This File
+## Prefer These Files
 - `src/components/ui/input/files/FileInput.tsx`: the public field for selection, previews, inspection, and editable/read-only file presentation.
+- `src/components/ui/input/files/ProfilePictureInput.tsx`: profile/avatar image selection with preview, validation, and removal behavior.
+- `src/components/ui/input/files/FilePreview.tsx` and `FileInspectModal.tsx`: private preview and inspection composition owned by `FileInput`.
+
+## Public Surface
+- External consumers import `FileInput`, `ProfilePictureInput`, and their public types from `@/components/ui/input`.
+- Files inside this family import implementation owners directly. `FilePreview` and `FileInspectModal` are not public barrel exports.
 
 ## Invariants
 - Prefer `FileInput` for new generic file work; do not compose separate picker and gallery surfaces.

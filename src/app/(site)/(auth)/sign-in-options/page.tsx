@@ -1,4 +1,4 @@
-import { EmailInput } from "@/components/ui/input/EmailInput";
+import { EmailInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import {
 	getSafeContinuationPath,

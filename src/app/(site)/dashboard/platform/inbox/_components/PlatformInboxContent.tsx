@@ -21,8 +21,8 @@ import {
 import {
 	SelectInput,
 	type SelectOption,
-} from "@/components/ui/input/SelectInput";
-import { TextInput } from "@/components/ui/input/TextInput";
+	TextInput,
+} from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";

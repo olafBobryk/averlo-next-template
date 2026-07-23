@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icons/Icon";
-import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
+import { ProfilePicture } from "@/components/ui/misc";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { getAccountPresentation } from "../../_lib/entities/account/presentation";
 import { AccountIdentity } from "../entities/account/AccountIdentity";

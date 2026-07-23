@@ -11,8 +11,7 @@ import { memberRolePresentation } from "@/app/(site)/dashboard/_lib/entities/mem
 import { toOrganizationEntity } from "@/app/(site)/dashboard/_lib/entities/organization/domain";
 import { getOrganizationPresentation } from "@/app/(site)/dashboard/_lib/entities/organization/presentation";
 import { Icon } from "@/components/ui/icons/Icon";
-import { ProfilePictureInput } from "@/components/ui/input/ProfilePictureInput";
-import { TextInput } from "@/components/ui/input/TextInput";
+import { ProfilePictureInput, TextInput } from "@/components/ui/input";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import {
 	ModalDescription,

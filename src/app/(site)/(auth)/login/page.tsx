@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { EmailInput } from "@/components/ui/input/EmailInput";
-import { PasswordInput } from "@/components/ui/input/PasswordInput";
+import { EmailInput, PasswordInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import {

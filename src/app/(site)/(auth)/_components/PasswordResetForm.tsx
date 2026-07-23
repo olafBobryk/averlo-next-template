@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { PasswordInput } from "@/components/ui/input/PasswordInput";
+import { PasswordInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import { resetPassword } from "@/lib/api/auth";

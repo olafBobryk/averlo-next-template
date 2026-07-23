@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { IconName } from "@/components/ui/icons/Icon";
-import { StateIndicator } from "@/components/ui/misc/state/State";
+import { StateIndicator } from "@/components/ui/misc";
 
 export function DashboardEntityState({
 	action,
