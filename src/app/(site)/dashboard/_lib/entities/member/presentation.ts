@@ -8,6 +8,11 @@ import type {
 } from "../../presentation/contracts";
 import type { ReferenceMember } from "./domain";
 
+export type MemberIdentityFacts = Pick<
+	ReferenceMember,
+	"id" | "organizationId" | "role" | "user"
+>;
+
 export const memberPresentationDefinition = {
 	actions: {
 		edit: "Edit member",
@@ -51,11 +56,11 @@ function emailPrefix(email: string) {
 	return email.trim().split("@")[0] || "Member";
 }
 
-export function getMemberDisplayLabel(member: ReferenceMember) {
+export function getMemberDisplayLabel(member: MemberIdentityFacts) {
 	return member.user.name?.trim() || emailPrefix(member.user.email);
 }
 
-export function getMemberInitials(member: ReferenceMember) {
+export function getMemberInitials(member: MemberIdentityFacts) {
 	const source = getMemberDisplayLabel(member)
 		.replace(/[^a-zA-Z0-9\s-]/g, " ")
 		.split(/[\s-]+/)
@@ -91,7 +96,7 @@ function hashSeed(seed: string) {
 	return hash >>> 0;
 }
 
-export function getMemberPresentation(member: ReferenceMember) {
+export function getMemberIdentityPresentation(member: MemberIdentityFacts) {
 	const displayLabel = getMemberDisplayLabel(member);
 	return {
 		avatarAlt: `${displayLabel} profile picture`,
@@ -99,16 +104,29 @@ export function getMemberPresentation(member: ReferenceMember) {
 		avatarUrl: member.user.profilePictureUrl?.trim() || null,
 		displayLabel,
 		emailLabel: member.user.email.trim() || "Email unavailable",
-		href: getMemberProfileHref(member.id),
 		id: member.id,
 		initials: getMemberInitials(member),
-		joinedAtLabel: formatMemberJoinedDate(member.createdAt),
-		mentionLabel: `@${displayLabel}`,
 		organizationId: member.organizationId,
 		role: memberRolePresentation[member.role],
 		roleLabel: memberRolePresentation[member.role].shortLabel,
-		searchText: `${displayLabel} ${member.user.email} ${member.role}`,
 		userId: member.user.id,
+	};
+}
+
+export type MemberIdentityPresentation = ReturnType<
+	typeof getMemberIdentityPresentation
+> & {
+	href?: string;
+};
+
+export function getMemberPresentation(member: ReferenceMember) {
+	const identity = getMemberIdentityPresentation(member);
+	return {
+		...identity,
+		href: getMemberProfileHref(member.id),
+		joinedAtLabel: formatMemberJoinedDate(member.createdAt),
+		mentionLabel: `@${identity.displayLabel}`,
+		searchText: `${identity.displayLabel} ${member.user.email} ${member.role}`,
 	};
 }
 

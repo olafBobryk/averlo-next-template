@@ -2,8 +2,8 @@
 
 import clsx from "clsx";
 import * as React from "react";
+import { Chip, type ChipTone } from "@/components/ui/misc/Chip";
 import { Loader } from "@/components/ui/misc/Loader";
-import { Pill, type PillTone } from "@/components/ui/misc/Pill";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -31,7 +31,7 @@ type HealthCheckIndicatorProps = {
 
 type IndicatorState = "checking" | "operational" | "unavailable";
 
-const statusStyles: Record<IndicatorState, { dot: string; tone: PillTone }> = {
+const statusStyles: Record<IndicatorState, { dot: string; tone: ChipTone }> = {
 	checking: {
 		dot: "text-muted",
 		tone: "neutral",
@@ -139,8 +139,10 @@ export function HealthCheckIndicator({
 
 	if (variant === "sm") {
 		return (
-			<Pill
+			<Chip
 				as="div"
+				contentMode="contents"
+				size="none"
 				tone={styles.tone}
 				className={clsx(
 					"min-w-0 gap-2 px-3 py-1.5 shadow-[0_8px_24px_rgb(0_0_0_/_0.04)] backdrop-blur",
@@ -165,13 +167,15 @@ export function HealthCheckIndicator({
 				>
 					{label}: {statusLabel}
 				</Text>
-			</Pill>
+			</Chip>
 		);
 	}
 
 	return (
-		<Pill
+		<Chip
 			as="div"
+			contentMode="contents"
+			size="none"
 			tone={styles.tone}
 			className={clsx(
 				"overflow-hidden gap-2 px-3 py-1.5 shadow-[0_8px_24px_rgb(0_0_0_/_0.04)] backdrop-blur",
@@ -201,12 +205,12 @@ export function HealthCheckIndicator({
 				variant="ghost"
 				textVariant={"caption"}
 				size="none"
-				className="text-[11px] font-medium text-muted hover:text-foreground"
+				className="text-2xs font-medium text-foreground/80 hover:text-foreground"
 				disabled={isChecking}
 				onClick={() => setRequestIndex((current) => current + 1)}
 			>
 				Refresh
 			</Button>
-		</Pill>
+		</Chip>
 	);
 }

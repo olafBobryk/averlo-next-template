@@ -1,12 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-	MoreMenuDropdown,
-	type MoreMenuOption,
-	moreMenuOptions,
-} from "@/components/ui/misc/MoreMenuDropdown";
 import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirmationModal";
+import {
+	Dropdown,
+	type DropdownMenuOption,
+} from "@/components/ui/primitives/Dropdown";
 import { showToast } from "@/lib/feedback/toast";
 import type {
 	DashboardEntityDeletionDefinition,
@@ -27,10 +26,10 @@ export function useEntityDeletionOption({
 	onDeleted,
 	onOptimisticDelete,
 	onRollback,
-}: EntityDeletionOptionProps): MoreMenuOption {
+}: EntityDeletionOptionProps): DropdownMenuOption {
 	const router = useRouter();
 	const { openConfirmation } = useConfirmationModal();
-	return moreMenuOptions.delete({
+	return Dropdown.menuOptions.delete({
 		disabled: Boolean(definition.disabledReason),
 		label: definition.disabledReason ?? "Delete",
 		onSelect: (event) => {
@@ -78,7 +77,7 @@ export function EntityDeletionDetailMenu({
 		onRollback,
 	});
 	return (
-		<MoreMenuDropdown
+		<Dropdown.Menu
 			ariaLabel={ariaLabel ?? `Open actions for ${definition.entityLabel}`}
 			openOnHover={false}
 			options={[option]}

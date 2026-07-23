@@ -4,9 +4,10 @@ import {
 	getSafeContinuationPath,
 	withSafeContinuation,
 } from "@/lib/auth/continuation";
-import { resolveCurrentSession } from "@/lib/auth/server";
+import { applicationAdapters, resolveCurrentSession } from "@/lib/auth/server";
 import { DashboardFrame } from "./_components/layout/DashboardFrame";
 import { DashboardProviders } from "./_components/providers/DashboardProviders";
+import { formatMemberJoinedDate } from "./_lib/entities/member/presentation";
 
 export default async function DashboardLayout({
 	children,
@@ -36,15 +37,35 @@ export default async function DashboardLayout({
 		email: resolution.user.email,
 		role: resolution.membership.role,
 		isBanned: resolution.user.isBanned,
+		platformRole: resolution.user.platformRole,
 		profilePictureUrl: resolution.user.profilePictureUrl,
 	};
+	const settingsSnapshot = {
+		authMethods: applicationAdapters.auth.methods,
+		identities: resolution.user.identities.map((identity) => ({ ...identity })),
+		joinedAtLabel: formatMemberJoinedDate(resolution.membership.createdAt),
+	};
+	const organizationChoices = (
+		await Promise.all(
+			resolution.memberships.map(async (membership) => ({
+				membership,
+				organization: await applicationAdapters.organizations.getOrganization(
+					membership.organizationId,
+				),
+			})),
+		)
+	).flatMap(({ membership, organization }) =>
+		organization ? [{ membership, organization }] : [],
+	);
 
 	return (
 		<DashboardProviders
 			initialMembership={resolution.membership}
 			initialMemberships={resolution.memberships}
 			initialOrganization={resolution.organization}
+			initialOrganizationChoices={organizationChoices}
 			initialUser={initialUser}
+			settingsSnapshot={settingsSnapshot}
 		>
 			<DashboardFrame>{children}</DashboardFrame>
 		</DashboardProviders>

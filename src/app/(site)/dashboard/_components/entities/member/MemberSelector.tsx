@@ -1,10 +1,11 @@
 "use client";
 
 import { SelectInput } from "@/components/ui/input/SelectInput";
+import { Field } from "@/components/ui/primitives/Field";
 import type { MemberPresentation } from "../../../_lib/entities/member/presentation";
 import { MemberAvatar } from "./MemberAvatar";
 
-export function MemberSelector({
+function MemberSelectorRoot({
 	description,
 	disabled,
 	label = "Owner",
@@ -48,3 +49,21 @@ export function MemberSelector({
 		/>
 	);
 }
+
+function MemberSelectorSkeleton({
+	description,
+	label = "Owner",
+}: {
+	description?: string;
+	label?: string;
+}) {
+	return (
+		<Field.Skeleton description={description} fullWidth label={label}>
+			Example member
+		</Field.Skeleton>
+	);
+}
+
+export const MemberSelector = Object.assign(MemberSelectorRoot, {
+	Skeleton: MemberSelectorSkeleton,
+});

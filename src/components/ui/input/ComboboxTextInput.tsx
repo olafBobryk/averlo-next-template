@@ -4,8 +4,12 @@
 "use client";
 
 import * as React from "react";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Button } from "@/components/ui/primitives/Button";
-import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import {
+	Dropdown,
+	useDropdownListNavigation,
+} from "@/components/ui/primitives/Dropdown";
 import { dropdownListClassName } from "@/components/ui/primitives/dropdownStyles";
 import { Field } from "@/components/ui/primitives/Field";
 import {
@@ -80,7 +84,7 @@ function defaultFilter(query: string, option: ComboboxOption) {
 	return option.label.toLowerCase().includes(q);
 }
 
-export function ComboboxTextInput({
+function ComboboxTextInputRoot({
 	label,
 	placeholder,
 	id,
@@ -154,47 +158,22 @@ export function ComboboxTextInput({
 		return options.filter((opt) => filterOption(inputValue, opt));
 	}, [options, filterOption, inputValue, showResultsOnEmptyQuery]);
 
-	const [activeIndex, setActiveIndex] = React.useState(0);
 	const [menuOpen, setMenuOpen] = React.useState(false);
-	const listRef = React.useRef<HTMLDivElement | null>(null);
-
-	React.useEffect(() => {
-		if (filtered.length === 0) {
-			setActiveIndex(0);
-			return;
-		}
-		if (activeIndex > filtered.length - 1) {
-			setActiveIndex(0);
-		}
-	}, [activeIndex, filtered.length]);
-
-	React.useEffect(() => {
-		if (!menuOpen) return;
-		const selectedIndex = filtered.findIndex(
-			(opt) => (opt.value ?? opt.label) === inputValue,
-		);
-		if (selectedIndex >= 0) {
-			setActiveIndex(selectedIndex);
-		} else if (filtered.length > 0) {
-			setActiveIndex(0);
-		}
-	}, [menuOpen, filtered, inputValue]);
-
-	React.useEffect(() => {
-		if (!menuOpen) return;
-		const option = listRef.current?.querySelector<HTMLElement>(
-			`[data-option-index="${activeIndex}"]`,
-		);
-		option?.scrollIntoView({ block: "nearest" });
-	}, [activeIndex, menuOpen]);
+	const navigationOptions = React.useMemo(
+		() =>
+			filtered.map((option) => ({
+				selected: (option.value ?? option.label) === inputValue,
+			})),
+		[filtered, inputValue],
+	);
+	const { activeIndex, getNextIndex, listRef, setActiveIndex } =
+		useDropdownListNavigation({ isOpen: menuOpen, options: navigationOptions });
 
 	const updateActiveIndex = React.useCallback(
-		(nextIndex: number) => {
-			if (filtered.length === 0) return;
-			const safeIndex = (nextIndex + filtered.length) % filtered.length;
-			setActiveIndex(safeIndex);
+		(direction: 1 | -1) => {
+			setActiveIndex((current) => getNextIndex(current, direction));
 		},
-		[filtered.length],
+		[getNextIndex, setActiveIndex],
 	);
 
 	return (
@@ -326,14 +305,14 @@ export function ComboboxTextInput({
 										if (shouldHideDropdown) return;
 										event.preventDefault();
 										if (!isOpen) openMenu();
-										updateActiveIndex(activeIndex + 1);
+										updateActiveIndex(1);
 										return;
 									}
 									if (event.key === "ArrowUp") {
 										if (shouldHideDropdown) return;
 										event.preventDefault();
 										if (!isOpen) openMenu();
-										updateActiveIndex(activeIndex - 1);
+										updateActiveIndex(-1);
 										return;
 									}
 									if (event.key === "Enter") {
@@ -403,9 +382,7 @@ export function ComboboxTextInput({
 							.join(" ")}
 						optionClassName={optionClassName}
 						optionActiveClassName={optionActiveClassName}
-						optionSelectedClassName={
-							optionSelectedClassName ?? optionActiveClassName
-						}
+						optionSelectedClassName={optionSelectedClassName}
 						disabled={disabled}
 					/>
 				)}
@@ -413,3 +390,7 @@ export function ComboboxTextInput({
 		</Field>
 	);
 }
+
+export const ComboboxTextInput = Object.assign(ComboboxTextInputRoot, {
+	Skeleton: InputSkeleton,
+});

@@ -21,6 +21,17 @@ Shared building blocks for radio, checkbox, and toggle-style inputs.
   - The visible indicator shows focus through `focusRing.peerDefault` or `focusRing.peerError`.
   - Error tone should continue to affect the focus treatment where appropriate.
 - Checkbox, radio, and toggle semantics should remain native and keyboard-friendly.
+- Keep the borderless choice geometry integer-aligned: radio and default
+  checkbox are 22px with fixed 12px marks at 5px insets. The compact checkbox
+  is 18px with the same 12px mark at a 3px inset and is reserved for dense
+  inline authored content such as Markdown task lists. The toggle is 42x26px
+  with a 22x18px thumb at 4px insets and a 12px selected translation.
+- Radio and checkbox selection and hover states must not transform their marks
+  or containers; use color and opacity so the centered artwork cannot drift from
+  subpixel scaling.
+- In full-start, checkbox artwork must render through `Icon name="check"` so it
+  follows the active icon registry. Thin-start retains its local fallback because
+  that profile intentionally prunes the shared icon subsystem.
 
 ## How To Use It
 - Use `ChoiceField` as the structural wrapper whenever you need a custom-looking radio, checkbox, or toggle.

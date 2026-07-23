@@ -1,8 +1,12 @@
 import clsx from "clsx";
 import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
-import { Section } from "@/components/ui/primitives/Section";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Text, type TextProps } from "@/components/ui/primitives/Text";
+import {
+	InternalPage,
+	InternalPageHeader,
+} from "../../_components/InternalPage";
 
 type ToastDemoTone = "loading" | "success" | "error";
 
@@ -166,94 +170,97 @@ function ToastSample({
 	sample: (typeof samples)[number];
 }) {
 	return (
-		<div className="flex min-w-0 items-start gap-3 rounded-lg border border-border bg-surface p-4">
-			<StaticToastIndicator tone={sample.tone} />
-			<div
-				className={clsx("flex min-w-0 flex-1 flex-col", option.gapClassName)}
-			>
-				<Text
-					as="p"
-					variant={option.titleVariant}
-					className={option.titleClassName}
+		<Panel
+			background="surface"
+			border="default"
+			padding="sm"
+			radius="sm"
+			shadow="none"
+		>
+			<div className="flex min-w-0 items-start gap-3">
+				<StaticToastIndicator tone={sample.tone} />
+				<div
+					className={clsx("flex min-w-0 flex-1 flex-col", option.gapClassName)}
 				>
-					{sample.title}
-				</Text>
-				<Text
-					as="p"
-					variant={option.messageVariant}
-					tone="muted"
-					className={clsx(
-						"text-left break-words whitespace-normal",
-						option.messageClassName,
-					)}
+					<Text
+						as="p"
+						variant={option.titleVariant}
+						className={option.titleClassName}
+					>
+						{sample.title}
+					</Text>
+					<Text
+						as="p"
+						variant={option.messageVariant}
+						tone="muted"
+						className={clsx(
+							"text-left break-words whitespace-normal",
+							option.messageClassName,
+						)}
+					>
+						{sample.message}
+					</Text>
+				</div>
+				<Button
+					type="button"
+					aria-label="Dismiss toast"
+					size="icon-sm"
+					variant="ghost"
+					className="-mr-1 -mt-1 text-foreground/50"
 				>
-					{sample.message}
-				</Text>
+					<Icon name="close" size="sm" />
+				</Button>
 			</div>
-			<button
-				type="button"
-				aria-label="Dismiss toast"
-				className="mt-0.5 flex h-[1.5625rem] w-[1.5625rem] shrink-0 items-center justify-center rounded-full text-foreground/50"
-			>
-				<Icon name="close" size="sm" />
-			</button>
-		</div>
+		</Panel>
 	);
 }
 
 export default function ToastPlaygroundPage() {
 	return (
-		<main>
-			<Section padding="hero" innerClassName="flex flex-col gap-8">
-				<header className="flex max-w-3xl flex-col gap-3">
+		<InternalPage className="gap-8">
+			<InternalPageHeader
+				title="Toast hierarchy"
+				description="Compare title and message hierarchy on the circular-indicator toast."
+				action={
 					<Button
 						href="/internal/playground"
 						size="sm"
-						variant="secondary"
+						variant="ghost"
 						className="self-start"
 					>
 						Back to playground
 					</Button>
-					<div className="flex flex-col gap-2">
-						<Text as="h1" variant="headingLg">
-							Toast Hierarchy
-						</Text>
-						<Text variant="body" tone="muted">
-							Compare title/message type choices and vertical separation on the
-							redesigned circular-indicator toast.
-						</Text>
-					</div>
-				</header>
+				}
+			/>
 
-				<div className="grid gap-8">
-					{typographyOptions.map((option) => (
-						<section key={option.id} className="grid gap-3">
-							<div className="flex flex-col gap-1">
-								<Text as="h2" variant="headingSm">
-									{option.name}
-								</Text>
-								<Text variant="body" tone="muted">
-									{option.description}
-								</Text>
-								<Text variant="caption" tone="muted">
-									{option.titleVariant} / {option.messageVariant} /{" "}
-									{option.gapClassName}
-								</Text>
-							</div>
+			<div className="grid gap-8">
+				{typographyOptions.map((option) => (
+					<section key={option.id} className="grid gap-3">
+						<div className="flex flex-col gap-1">
+							<Text as="h2" variant="headingSm">
+								{option.name}
+							</Text>
+							<Text variant="body" tone="muted">
+								{option.description}
+							</Text>
+							<Text variant="caption" tone="muted">
+								{option.titleVariant} / {option.messageVariant} /{" "}
+								{option.gapClassName}
+							</Text>
+						</div>
 
-							<div className="grid gap-3 lg:grid-cols-3">
-								{samples.map((sample) => (
-									<ToastSample
-										key={`${option.id}-${sample.tone}`}
-										option={option}
-										sample={sample}
-									/>
-								))}
-							</div>
-						</section>
-					))}
-				</div>
-			</Section>
-		</main>
+						<div className="grid gap-3 lg:grid-cols-3">
+							{samples.map((sample) => (
+								<ToastSample
+									key={`${option.id}-${sample.tone}`}
+									option={option}
+									sample={sample}
+								/>
+							))}
+						</div>
+					</section>
+				))}
+			</div>
+		</InternalPage>
 	);
 }

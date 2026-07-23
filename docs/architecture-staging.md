@@ -46,12 +46,15 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 afte
 - Source convergence is additive: matching the pinned Inference Console visual and behavioral contracts must not flatten or remove mature template APIs that remain useful.
 - `MarkdownRenderer` remains a shared full-start and thin-start composite over plain Markdown strings.
 - Its contract includes default and compact density, design-system-backed GFM rendering, task lists, tables, images, code, quotes, links, validated generic button directives, and optional durable `@[user:<id>]` mention resolution.
+- Default density owns site and document content; dashboard cards and Markdown modals opt into compact density. Renderer and editor use the same `.markdown-content` typography, list, quote, code, table, and rhythm contract for the selected density.
+- Rendered tasks use `ChoiceIndicatorMulti`. The editor preserves Lexical's native inline checklist marker and interaction model while matching that shared indicator's geometry and tokens without injecting React into Lexical-owned DOM.
 - Markdown rendering does not allow arbitrary HTML, JSX, class injection, data registries, or product-specific directives.
+- Underline is the sole narrow exception: the editor stores paired `<u>...</u>` tags and the renderer recognizes only exact pairs without enabling general raw HTML parsing.
 - `MarkdownEditor` is a full-start-only, client-only composite; thin start retains the renderer without the MDXEditor dependency.
 - The editor persists only plain Markdown strings and supports responsive rich editing, lossless source mode, automatic source fallback, headings, inline formatting, lists and tasks, links, tables, images, code, dividers, undo and redo, optional mention insertion, generic button-directive editing, and default or compact density.
-- The editor toolbar composes the template's existing `MoreMenuDropdown`, `Button`, `Dropdown`, and `Listbox` contracts rather than introducing a duplicate package-owned menu system.
-- The existing `MoreMenuDropdown` remains canonical, including its keyboard navigation, fixed or absolute positioning, portal support, hover and pinned interaction modes, custom triggers, and active or disabled options.
-- `MoreMenuDropdown` exposes typed factories for recurring open, edit, delete, and mark-read actions with consistent icon, separator, disabled, and danger semantics while preserving caller-defined options.
+- The width-aware editor toolbar composes the template's canonical `Icon`, `Dropdown.Menu`, `Dropdown.Listbox`, and `Button` contracts rather than introducing a duplicate package-owned menu system; editor dialogs remain on the Card-owned modal host.
+- `Dropdown.Menu` owns action-menu keyboard navigation, fixed or absolute positioning, portal support, hover and pinned interaction modes, Button-backed triggers, and active or disabled options.
+- `Dropdown.menuOptions` exposes typed factories for recurring open, edit, and delete actions with consistent icons, dividers, disabled states, danger semantics, and stable danger-last ordering.
 - Button convergence maps pinned-source chrome into `primary`, default `secondary`, `ghost`, and contextual `inverse`, with a separate soft `danger` tone. The `none`, `sm`, `md`, `lg`, `xl`, `icon`, `icon-sm`, and `chip` sizes keep geometry independent from appearance.
 - Loading states and variant-aware skeleton treatments follow the converged visual vocabulary without replacing the template's richer existing API surface.
 - Existing Button capabilities such as icon-registry inputs, content and text configuration, radius and hit-area controls, focusability, typed link and button behavior, class and style extension, and layout alignment remain available unless an explicit later decision supersedes them.
@@ -166,6 +169,21 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 afte
 - It uses capability-led example surfaces rather than inventing a fake business product.
 - It demonstrates overview, collection, record-detail, settings, and organization-level patterns with clearly replaceable fixture content.
 - It demonstrates responsive behavior and loading, empty, and error states.
+- It includes authenticated Support plus a separate platform-operations shell.
+  The operator fixture receives organization-independent platform-admin access;
+  organization roles never grant it. Support requests and product reports use
+  resettable server-memory stores and perform no external writes.
+
+## Support and platform-operations decision
+
+- Port the pinned Inference support mailto structure and adapt it with a guarded
+  fixture request form at `/dashboard/support`.
+- Adapt the Zero Emissions report flow to the current Card-owned modal and
+  dashboard entity systems, preserving category, severity, route, viewport,
+  browser context, validation, pending close lock, and automatic triage.
+- Skip attachments, Supabase, storage uploads, email delivery, and product role
+  coupling. Platform Inbox and Reports remain separate peer surfaces under a
+  protected dashboard-pruned shell.
 
 ## Dashboard routes and surface registry
 
@@ -242,10 +260,10 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 afte
 - The template mock adapter may persist active organization selection in a protected server-readable cookie; a product adapter may use an account preference or another product-appropriate mechanism.
 - Singleton mode automatically selects the only valid membership.
 - When multiple memberships exist without a valid active selection, the user must choose through a dedicated organization-selection screen.
-- `/select-organization` is the organization-selection route. It sits after authentication but outside the organization-dependent dashboard shell.
+- `/select-organization` is the mandatory organization-selection fallback. It sits after authentication but outside the organization-dependent dashboard shell because no active organization exists yet.
 - The resolver must never silently select an arbitrary organization.
 - Sign-out clears the active selection, and revoked membership invalidates it immediately.
-- The normal organization switcher is controlled by an explicit feature or configuration setting.
+- The normal organization switcher is controlled by an explicit feature or configuration setting. When enabled, the sidebar owns the current-organization link and direct switch menu, while `/dashboard/organization/switch` provides the full dashboard-shell chooser.
 - The guarded debug menu can switch fixture organizations, enter the demo organization, inspect current membership and capabilities, force interface states, and reset demo fixtures.
 - Demo access is explicit through demo login or organization selection.
 - Demo users receive real demo-organization membership through the same organization context model.
@@ -256,22 +274,24 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-19 afte
 - Organization invitations are explicit organization-scoped records with recipient identity, normalized email, expiry, revocation, reuse, and acceptance state.
 - An invitation link opens an inert review screen. Only an explicit POST accepts the invitation, so link scanners and speculative navigation cannot consume a one-time token.
 - Acceptance verifies the authenticated recipient, normalized email, organization, expiry, revocation, and prior use before atomically creating membership.
-- Reinviting the same pending or expired recipient refreshes the pending invitation and invalidates the earlier link.
+- Duplicate pending invitations are rejected. The explicit Refresh action rotates the token, extends expiry, and invalidates the earlier link.
 - Expired, revoked, mismatched, reused, cross-organization, and already-member attempts fail closed.
 - Authentication-user creation never grants organization access by itself; only the verified invitation-acceptance lifecycle creates the corresponding membership.
 
 ## Organization routes
 
 - `/dashboard/organization` presents organization profile and overview information.
-- `/dashboard/organization/members` presents members, invitations, and access management.
-- `/dashboard/organization/settings` presents organization-owned preferences.
+- `/dashboard/profile` presents the read-only global account and active organization access.
+- `/dashboard/administration` is nested beneath Organization settings and presents pending invitations, members, roles, and ownership management.
+- `/dashboard/organization/members` redirects to `/dashboard/administration#members`.
+- `/dashboard/organization/settings` presents organization identity editing and a concise people/access summary.
 - `/dashboard/settings` remains personal account and interface settings.
 
 ## Settings ownership
 
 - `/dashboard/settings` owns personal profile, interface preferences, authentication, and notification preferences.
-- `/dashboard/organization/settings` owns organization identity, defaults, feature configuration, and organization-level destructive actions.
-- `/dashboard/organization/members` owns members, invitations, and roles.
+- `/dashboard/organization/settings` owns organization identity editing and the Administration entry summary.
+- `/dashboard/administration` owns members, invitations, roles, and ownership transfer.
 
 ## Organization membership and permissions
 

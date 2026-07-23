@@ -44,7 +44,7 @@ function HeaderTopNavLink({
 			variant="ghost"
 			size="none"
 			className={clsx(
-				"text-sm font-medium text-foreground/60 hover:bg-transparent hover:text-foreground",
+				"text-sm font-medium text-foreground/60 hover:text-foreground",
 				className,
 			)}
 		>
@@ -222,7 +222,7 @@ export default function HeaderFull({
 						/>
 						<Button
 							variant="ghost"
-							className="min-h-10 px-3 text-foreground hover:bg-background-hover"
+							className="min-h-10 px-3 text-foreground"
 							aria-controls={menuId}
 							aria-expanded={isMenuOpen}
 							aria-label={

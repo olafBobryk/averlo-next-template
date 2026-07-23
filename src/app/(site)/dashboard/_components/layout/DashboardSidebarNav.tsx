@@ -9,6 +9,7 @@ import {
 	getDashboardCapabilities,
 	getDashboardSidebarGroups,
 	getDashboardSurface,
+	getDashboardSurfaceTrail,
 } from "../../_registry/surfaceRegistry";
 import { useDashboardAuth } from "../providers/DashboardAuthProvider";
 
@@ -22,10 +23,14 @@ export function DashboardSidebarNav({
 	onNavigate: () => void;
 }) {
 	const pathname = usePathname();
-	const { membership } = useDashboardAuth();
-	const capabilities = getDashboardCapabilities(membership.role);
+	const { membership, user } = useDashboardAuth();
+	const capabilities = getDashboardCapabilities(
+		membership.role,
+		user?.platformRole ?? null,
+	);
 	const groups = getDashboardSidebarGroups(capabilities);
 	const activeSurface = getDashboardSurface(pathname);
+	const activeTrail = getDashboardSurfaceTrail(pathname, capabilities);
 
 	return (
 		<nav aria-label="Dashboard navigation" className="grid gap-3">
@@ -41,13 +46,13 @@ export function DashboardSidebarNav({
 					{group.surfaces.map((surface) => {
 						const active =
 							activeSurface?.id === surface.id ||
-							activeSurface?.parentId === surface.id;
+							activeTrail.some((ancestor) => ancestor.href === surface.href);
 						return (
 							<Link
 								aria-current={active ? "page" : undefined}
 								aria-label={surface.label}
 								className={clsx(
-									"relative flex h-9 min-w-0 items-center gap-2 rounded-md text-sm font-medium transition-all motion-interactive",
+									"relative flex h-9 min-w-0 items-center gap-2 overflow-hidden rounded-md text-sm font-medium transition-all motion-interactive",
 									mobileExpanded
 										? "max-lg:justify-start max-lg:px-3"
 										: "max-lg:justify-center max-lg:px-2",
@@ -57,7 +62,7 @@ export function DashboardSidebarNav({
 									focusRing.visibleDefault,
 									active
 										? "bg-primary/10 text-primary"
-										: "text-muted-foreground hover:translate-x-0.5 hover:bg-sidebar-accent/80 hover:text-sidebar-accent-foreground",
+										: "text-muted-foreground hover:bg-sidebar-accent/80 hover:text-sidebar-accent-foreground",
 								)}
 								href={surface.href}
 								key={surface.id}
@@ -67,9 +72,9 @@ export function DashboardSidebarNav({
 								<Icon className="shrink-0" name={surface.icon} size="lg" />
 								<span
 									className={clsx(
-										"min-w-0 flex-1 truncate whitespace-nowrap",
-										mobileExpanded ? "max-lg:not-sr-only" : "max-lg:sr-only",
-										collapsed ? "lg:sr-only" : "lg:not-sr-only",
+										"min-w-0 flex-1 truncate",
+										mobileExpanded ? "max-lg:block" : "max-lg:hidden",
+										collapsed ? "lg:hidden" : "lg:block",
 									)}
 								>
 									{surface.label}

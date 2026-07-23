@@ -3,8 +3,9 @@
 import * as React from "react";
 import { MarkdownRenderer } from "@/components/composites/markdown/MarkdownRenderer";
 import { Icon } from "@/components/ui/icons/Icon";
-import { moreMenuOptions } from "@/components/ui/misc/MoreMenuDropdown";
+import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
+import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { Text } from "@/components/ui/primitives/Text";
 import { showToast } from "@/lib/feedback/toast";
 import type { MemberPresentation } from "../../../_lib/entities/member/presentation";
@@ -30,7 +31,10 @@ const availableProperties = [
 	{ id: "priority", label: "Priority", value: "Normal" },
 ] as const;
 
-export function RecordDetailContent({
+const defaultRecordSkeletonMarkdown =
+	"## Product-ready reference\n\nThis organization-scoped record demonstrates shared presentation, Markdown editing, mutations, and deletion without prescribing a product domain.";
+
+function RecordDetailContentRoot({
 	canWrite,
 	members,
 	record: initialRecord,
@@ -167,9 +171,13 @@ export function RecordDetailContent({
 						</Card.Action>
 					) : null}
 				</Card.Header>
-				<Card.Content className="prose prose-sm max-w-none dark:prose-invert">
+				<Card.Content>
 					{record.descriptionMarkdown ? (
-						<MarkdownRenderer markdown={record.descriptionMarkdown} />
+						<MarkdownRenderer
+							density="compact"
+							markdown={record.descriptionMarkdown}
+							variant="result"
+						/>
 					) : (
 						<Text tone="muted">No description yet.</Text>
 					)}
@@ -212,7 +220,7 @@ export function RecordDetailContent({
 							menuOptions={
 								canWrite
 									? [
-											moreMenuOptions.delete({
+											Dropdown.menuOptions.delete({
 												label: "Remove property",
 												onSelect: () =>
 													void saveProperties(
@@ -233,3 +241,116 @@ export function RecordDetailContent({
 		</div>
 	);
 }
+
+function RecordDetailContentSkeleton({
+	canWrite = true,
+	descriptionMarkdown = defaultRecordSkeletonMarkdown,
+}: {
+	canWrite?: boolean;
+	descriptionMarkdown?: string;
+}) {
+	return (
+		<div className="grid gap-5">
+			<Card>
+				<Card.Header className="border-b">
+					<Card.Title>Record details</Card.Title>
+					<Card.Description>
+						Field metadata comes from the record-owned presentation definition.
+					</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					<dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+						<DashboardDetailField.Skeleton
+							copyable
+							icon={
+								<Icon
+									name={recordFieldDefinitions[1].icon ?? "link"}
+									size="sm"
+								/>
+							}
+							label={recordFieldDefinitions[1].label}
+							value="north-star"
+						/>
+						<DashboardDetailField.Skeleton
+							icon={
+								<Icon
+									name={recordFieldDefinitions[2].icon ?? "flag"}
+									size="sm"
+								/>
+							}
+							label={recordFieldDefinitions[2].label}
+							truncateValue={false}
+						>
+							<RecordStatusChip.Skeleton label="Active" />
+						</DashboardDetailField.Skeleton>
+						<DashboardDetailField.Skeleton
+							icon={<Icon name="user" size="sm" />}
+							label="Owner"
+							truncateValue={false}
+						>
+							<MemberIdentity.Skeleton
+								avatarSize="sm"
+								displayLabel="Template Operator"
+								href
+								variant="actor"
+							/>
+						</DashboardDetailField.Skeleton>
+						<DashboardDetailField.Skeleton
+							icon={
+								<Icon
+									name={recordFieldDefinitions[3].icon ?? "calendar"}
+									size="sm"
+								/>
+							}
+							label={recordFieldDefinitions[3].label}
+							value="Jul 18, 2026, 3:30 PM"
+						/>
+					</dl>
+				</Card.Content>
+			</Card>
+
+			<Card>
+				<Card.Header className="border-b">
+					<Card.Title>Description</Card.Title>
+					<Card.Description>
+						Rendered with the shared Markdown renderer and edited in a focused
+						dashboard modal.
+					</Card.Description>
+					{canWrite ? (
+						<Card.Action>
+							<DashboardMarkdownEditorModalButton.Skeleton />
+						</Card.Action>
+					) : null}
+				</Card.Header>
+				<Card.Content>
+					<MarkdownRenderer.Skeleton
+						density="compact"
+						markdown={descriptionMarkdown}
+						variant="result"
+					/>
+					<Text.Skeleton className="mt-4" tone="muted" variant="caption">
+						Mention example: @Example member
+					</Text.Skeleton>
+				</Card.Content>
+			</Card>
+
+			<DashboardPropertyList.Skeleton
+				action={
+					canWrite ? (
+						<Button.Skeleton size="sm" variant="ghost">
+							+ Add
+						</Button.Skeleton>
+					) : null
+				}
+				items={availableProperties.slice(0, 2).map((property) => ({
+					icon: <Icon name="link" size="sm" />,
+					...property,
+				}))}
+			/>
+		</div>
+	);
+}
+
+export const RecordDetailContent = Object.assign(RecordDetailContentRoot, {
+	Skeleton: RecordDetailContentSkeleton,
+});

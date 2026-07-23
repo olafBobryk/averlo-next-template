@@ -3,13 +3,22 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: trigger wrapper behavior is delegated through render props and nested controls */
 "use client";
 
+import {
+	ArrowSquareOut,
+	CaretDown,
+	DotsThreeVertical,
+	PencilSimpleIcon,
+	Trash,
+} from "@phosphor-icons/react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
 import Portal from "@/components/ui/overlays/Portal";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
-import { Icon } from "../icons/Icon";
+import { Button, type ButtonBaseProps } from "./Button";
+import { dropdownSurfaceClassName } from "./dropdownStyles";
+import { Listbox, type ListboxOption } from "./Listbox";
 import { Panel, type PanelProps } from "./Panel";
 
 export type DropdownTriggerRenderProps = {
@@ -34,7 +43,7 @@ export type DropdownTriggerRenderProps = {
 	chevronIcon: React.ReactNode;
 };
 
-type DropdownProps = {
+export type DropdownProps = {
 	renderTrigger: (props: DropdownTriggerRenderProps) => React.ReactNode;
 	renderMenu: (helpers: {
 		close: (options?: { restoreFocus?: boolean }) => void;
@@ -45,6 +54,7 @@ type DropdownProps = {
 	 */
 	onLeftClick?: () => void;
 	className?: string;
+	collisionPadding?: number;
 	menuClassName?: string;
 	portalTargetId?: string;
 	menuWidth?: number | "trigger";
@@ -66,7 +76,7 @@ type DropdownSide = NonNullable<DropdownProps["side"]>;
 export type DropdownPositionStrategy = "absolute" | "fixed";
 type DropdownAnchorRef = { current: Element | null };
 
-export type DropdownPanelProps = PanelProps<"div"> & {
+export type DropdownSurfaceProps = PanelProps<"div"> & {
 	align?: "start" | "end";
 	anchorRef?: DropdownAnchorRef;
 	collisionPadding?: number;
@@ -80,10 +90,11 @@ export type DropdownPanelProps = PanelProps<"div"> & {
 
 const DEFAULT_CHEVRON_ICON = ({ isOpen }: { isOpen: boolean }) => {
 	return (
-		<Icon
-			name="chevron"
+		<CaretDown
+			aria-hidden
 			data-is-open={isOpen}
 			className="data-[is-open=true]:rotate-180 transition-transform motion-micro"
+			size={15}
 		/>
 	);
 };
@@ -113,6 +124,117 @@ function resolveDropdownSide({
 	return preferredSide;
 }
 
+function resolveAnchoredDropdownPosition({
+	align,
+	anchorRect,
+	collisionPadding,
+	explicitWidth,
+	measuredHeight,
+	measuredWidth,
+	minWidth,
+	offset,
+	positionStrategy,
+	side,
+	wrapperRect,
+	zIndex,
+}: {
+	align: "start" | "end";
+	anchorRect: DOMRect;
+	collisionPadding: number;
+	explicitWidth?: number;
+	measuredHeight: number;
+	measuredWidth: number;
+	minWidth?: number;
+	offset: number;
+	positionStrategy: DropdownPositionStrategy;
+	side: DropdownSide;
+	wrapperRect?: DOMRect;
+	zIndex: number;
+}) {
+	const availableAbove = Math.max(
+		0,
+		anchorRect.top - offset - collisionPadding,
+	);
+	const availableBelow = Math.max(
+		0,
+		window.innerHeight - anchorRect.bottom - offset - collisionPadding,
+	);
+	const resolvedSide = resolveDropdownSide({
+		availableAbove,
+		availableBelow,
+		measuredHeight,
+		preferredSide: side,
+	});
+	const availableHeight =
+		resolvedSide === "top" ? availableAbove : availableBelow;
+	const maxHeight =
+		measuredHeight > availableHeight ? availableHeight : undefined;
+	const renderedHeight = maxHeight ?? measuredHeight;
+
+	if (positionStrategy === "fixed") {
+		let left =
+			align === "end" ? anchorRect.right - measuredWidth : anchorRect.left;
+		const maxLeft = Math.max(
+			collisionPadding,
+			window.innerWidth - measuredWidth - collisionPadding,
+		);
+		left = Math.min(Math.max(left, collisionPadding), maxLeft);
+		const top =
+			resolvedSide === "top"
+				? Math.max(collisionPadding, anchorRect.top - renderedHeight - offset)
+				: Math.max(
+						collisionPadding,
+						Math.min(
+							anchorRect.bottom + offset,
+							window.innerHeight - collisionPadding - renderedHeight,
+						),
+					);
+		return {
+			resolvedSide,
+			style: {
+				left,
+				maxHeight,
+				minWidth,
+				overflowY: maxHeight === undefined ? undefined : "auto",
+				position: "fixed",
+				top,
+				width: explicitWidth,
+				zIndex,
+			} satisfies React.CSSProperties,
+		};
+	}
+
+	if (!wrapperRect) return undefined;
+	const rawLeft =
+		align === "end"
+			? anchorRect.right - wrapperRect.left - measuredWidth
+			: anchorRect.left - wrapperRect.left;
+	const left = Math.max(
+		0,
+		Math.min(rawLeft, Math.max(0, wrapperRect.width - measuredWidth)),
+	);
+	return {
+		resolvedSide,
+		style: {
+			bottom:
+				resolvedSide === "top"
+					? Math.max(0, wrapperRect.bottom - anchorRect.top + offset)
+					: undefined,
+			left,
+			maxHeight,
+			minWidth,
+			overflowY: maxHeight === undefined ? undefined : "auto",
+			position: "absolute",
+			top:
+				resolvedSide === "top"
+					? undefined
+					: anchorRect.bottom - wrapperRect.top + offset,
+			width: explicitWidth,
+			zIndex,
+		} satisfies React.CSSProperties,
+	};
+}
+
 function assignRef<T>(ref: React.Ref<T> | undefined, value: T) {
 	if (!ref) return;
 	if (typeof ref === "function") {
@@ -122,7 +244,7 @@ function assignRef<T>(ref: React.Ref<T> | undefined, value: T) {
 	ref.current = value;
 }
 
-export function DropdownPanel({
+function DropdownSurface({
 	align = "start",
 	anchorRef,
 	className,
@@ -138,7 +260,7 @@ export function DropdownPanel({
 	style,
 	width = "auto",
 	...props
-}: DropdownPanelProps) {
+}: DropdownSurfaceProps) {
 	const panelRef = React.useRef<HTMLDivElement | null>(null);
 	const [mountedPanelNode, setMountedPanelNode] =
 		React.useState<HTMLDivElement | null>(null);
@@ -164,54 +286,20 @@ export function DropdownPanel({
 		const explicitWidth = matchAnchorWidth ? anchorRect.width : undefined;
 		const measuredWidth = explicitWidth ?? panelRect.width;
 		const measuredHeight = panel.scrollHeight || panelRect.height;
-		const availableAbove = Math.max(
-			0,
-			anchorRect.top - offset - collisionPadding,
-		);
-		const availableBelow = Math.max(
-			0,
-			window.innerHeight - anchorRect.bottom - offset - collisionPadding,
-		);
-		const resolvedSide = resolveDropdownSide({
-			availableAbove,
-			availableBelow,
-			measuredHeight,
-			preferredSide: side,
-		});
-		const availableHeight =
-			resolvedSide === "top" ? availableAbove : availableBelow;
-		const maxHeight =
-			measuredHeight > availableHeight ? availableHeight : undefined;
-		const renderedHeight = maxHeight ?? measuredHeight;
-		const viewportWidth = window.innerWidth;
-		let left =
-			align === "end" ? anchorRect.right - measuredWidth : anchorRect.left;
-		const maxLeft = Math.max(
+		const position = resolveAnchoredDropdownPosition({
+			align,
+			anchorRect,
 			collisionPadding,
-			viewportWidth - measuredWidth - collisionPadding,
-		);
-		left = Math.min(Math.max(left, collisionPadding), maxLeft);
-		const top =
-			resolvedSide === "top"
-				? Math.max(collisionPadding, anchorRect.top - renderedHeight - offset)
-				: Math.max(
-						collisionPadding,
-						Math.min(
-							anchorRect.bottom + offset,
-							window.innerHeight - collisionPadding - renderedHeight,
-						),
-					);
-
-		setPositionStyle({
-			left,
-			maxHeight,
+			explicitWidth,
+			measuredHeight,
+			measuredWidth,
 			minWidth: explicitWidth,
-			overflowY: maxHeight === undefined ? undefined : "auto",
-			position: "fixed",
-			top,
-			width: explicitWidth,
+			offset,
+			positionStrategy: "fixed",
+			side,
 			zIndex: 110,
 		});
+		setPositionStyle(position?.style);
 	}, [align, anchorRef, collisionPadding, matchAnchorWidth, offset, side]);
 
 	React.useLayoutEffect(() => {
@@ -249,7 +337,9 @@ export function DropdownPanel({
 			: style;
 	const panel = (
 		<Panel
+			background="card"
 			className={clsx(
+				dropdownSurfaceClassName,
 				"dropdown-panel-enter z-50 min-w-48",
 				positionStrategy === "fixed" ? "fixed" : "absolute mt-2",
 				className,
@@ -270,11 +360,12 @@ export function DropdownPanel({
 	);
 }
 
-export function Dropdown({
+function DropdownRoot({
 	renderTrigger,
 	renderMenu,
 	onLeftClick,
 	className,
+	collisionPadding = COLLISION_PADDING,
 	menuClassName,
 	portalTargetId,
 	menuWidth,
@@ -488,87 +579,32 @@ export function Dropdown({
 			menuRef.current?.scrollHeight ??
 			menuRef.current?.getBoundingClientRect().height ??
 			0;
-		const availableAbove = Math.max(0, rect.top - offset - COLLISION_PADDING);
-		const availableBelow = Math.max(
-			0,
-			window.innerHeight - rect.bottom - offset - COLLISION_PADDING,
-		);
-		const nextSide = resolveDropdownSide({
-			preferredSide: side,
+		const position = resolveAnchoredDropdownPosition({
+			align,
+			anchorRect: rect,
+			collisionPadding,
+			explicitWidth,
 			measuredHeight,
-			availableAbove,
-			availableBelow,
-		});
-		const availableHeight =
-			nextSide === "top" ? availableAbove : availableBelow;
-		const constrainedHeight =
-			measuredHeight > availableHeight ? availableHeight : undefined;
-		const renderedHeight = constrainedHeight ?? measuredHeight;
-
-		setResolvedSide(nextSide);
-
-		if (positionStrategy === "fixed") {
-			const viewportWidth = window.innerWidth;
-			let left = align === "end" ? rect.right - measuredWidth : rect.left;
-			const maxLeft = Math.max(
-				COLLISION_PADDING,
-				viewportWidth - measuredWidth - COLLISION_PADDING,
-			);
-			left = Math.min(Math.max(left, COLLISION_PADDING), maxLeft);
-			const top =
-				nextSide === "top"
-					? Math.max(COLLISION_PADDING, rect.top - renderedHeight - offset)
-					: Math.max(
-							COLLISION_PADDING,
-							Math.min(
-								rect.bottom + offset,
-								window.innerHeight - COLLISION_PADDING - renderedHeight,
-							),
-						);
-
-			setMenuStyle({
-				position: "fixed",
-				top,
-				left,
-				zIndex: 90,
-				width: explicitWidth,
-				minWidth: resolvedMinWidth,
-				maxHeight: constrainedHeight,
-				overflowY: constrainedHeight === undefined ? undefined : "auto",
-			});
-			return;
-		}
-
-		if (!wrapperRef.current) return;
-		const wrapperRect = wrapperRef.current.getBoundingClientRect();
-		const wrapperWidth = wrapperRect.width;
-		const rawLeft =
-			align === "end"
-				? rect.right - wrapperRect.left - measuredWidth
-				: rect.left - wrapperRect.left;
-		const clampedLeft = Math.max(
-			0,
-			Math.min(rawLeft, Math.max(0, wrapperWidth - measuredWidth)),
-		);
-		const top =
-			nextSide === "top" ? undefined : rect.bottom - wrapperRect.top + offset;
-		const bottom =
-			nextSide === "top"
-				? Math.max(0, wrapperRect.bottom - rect.top + offset)
-				: undefined;
-
-		setMenuStyle({
-			position: "absolute",
-			top,
-			bottom,
-			left: clampedLeft,
-			zIndex: 90,
-			width: explicitWidth,
+			measuredWidth,
 			minWidth: resolvedMinWidth,
-			maxHeight: constrainedHeight,
-			overflowY: constrainedHeight === undefined ? undefined : "auto",
+			offset,
+			positionStrategy,
+			side,
+			wrapperRect: wrapperRef.current?.getBoundingClientRect(),
+			zIndex: 90,
 		});
-	}, [align, menuMinWidth, menuWidth, offset, positionStrategy, side]);
+		if (!position) return;
+		setResolvedSide(position.resolvedSide);
+		setMenuStyle(position.style);
+	}, [
+		align,
+		collisionPadding,
+		menuMinWidth,
+		menuWidth,
+		offset,
+		positionStrategy,
+		side,
+	]);
 
 	React.useEffect(() => {
 		if (isOpen) {
@@ -680,7 +716,8 @@ export function Dropdown({
 	);
 
 	const baseMenuClassName = [
-		"min-w-[220px] w-fit rounded-[10px] bg-background border border-border shadow-[2px_4px_15px_-2px_rgba(1,1,3,0.05)] z-[91] overflow-hidden",
+		dropdownSurfaceClassName,
+		"w-fit z-[91]",
 		positionStrategy === "fixed" ? "fixed" : "absolute",
 	]
 		.filter(Boolean)
@@ -754,3 +791,633 @@ export function Dropdown({
 		</div>
 	);
 }
+
+type DropdownMenuEvent =
+	| React.MouseEvent<HTMLElement>
+	| React.KeyboardEvent<HTMLElement>;
+
+type DropdownIcon = Exclude<React.ReactNode, string | number>;
+
+export type DropdownMenuOption = {
+	active?: boolean;
+	className?: string;
+	disabled?: boolean;
+	dividerAfter?: boolean;
+	dividerBefore?: boolean;
+	href?: string;
+	id?: string;
+	label: React.ReactNode;
+	layout?: "default" | "presentation";
+	leadingIcon?: DropdownIcon;
+	onSelect?: (event: DropdownMenuEvent) => void;
+	textClassName?: string;
+	tone?: "danger" | "default";
+	trailingIcon?: DropdownIcon;
+};
+
+type DropdownTriggerButtonProps = Omit<ButtonBaseProps, "children" | "href"> &
+	Omit<
+		React.ButtonHTMLAttributes<HTMLButtonElement>,
+		"children" | "onClick" | "onKeyDown" | "onMouseEnter" | "onMouseLeave"
+	>;
+
+type DropdownCompoundProps = Pick<
+	DropdownProps,
+	| "align"
+	| "collisionPadding"
+	| "menuClassName"
+	| "menuMinWidth"
+	| "menuWidth"
+	| "offset"
+	| "openOnHover"
+	| "pinOnClick"
+	| "portalTargetId"
+	| "positionStrategy"
+	| "side"
+> & {
+	ariaLabel: string;
+	disabled?: boolean;
+	listClassName?: string;
+	menuContentClassName?: string;
+	onOpenChange?: (open: boolean) => void;
+	optionActiveClassName?: string;
+	optionClassName?: string;
+	triggerButtonProps?: DropdownTriggerButtonProps;
+	triggerContent?: React.ReactNode;
+};
+
+export type DropdownMenuProps = DropdownCompoundProps & {
+	options: DropdownMenuOption[];
+};
+
+export type DropdownListboxProps<T> = DropdownCompoundProps & {
+	emptyState?: React.ReactNode;
+	onSelect: (
+		value: T,
+		option: ListboxOption<T>,
+		event: DropdownMenuEvent,
+	) => void;
+	options: ListboxOption<T>[];
+};
+
+export type DropdownNavigableOption = {
+	disabled?: boolean;
+	selected?: boolean;
+};
+
+export function useDropdownListNavigation({
+	isOpen,
+	options,
+}: {
+	isOpen: boolean;
+	options: readonly DropdownNavigableOption[];
+}) {
+	const [activeIndex, setActiveIndex] = React.useState(-1);
+	const listRef = React.useRef<HTMLDivElement | null>(null);
+	const focusOnOpenRef = React.useRef(false);
+	const pendingOpenIndexRef = React.useRef<number | null>(null);
+	const selectedIndex = options.findIndex(
+		(option) => option.selected && !option.disabled,
+	);
+	const enabledIndices = React.useMemo(
+		() =>
+			options
+				.map((option, index) => ({ index, option }))
+				.filter(({ option }) => !option.disabled)
+				.map(({ index }) => index),
+		[options],
+	);
+	const getBoundaryIndex = React.useCallback(
+		(boundary: "first" | "last") =>
+			boundary === "first"
+				? (enabledIndices[0] ?? -1)
+				: (enabledIndices.at(-1) ?? -1),
+		[enabledIndices],
+	);
+	const getNextIndex = React.useCallback(
+		(current: number, direction: 1 | -1) => {
+			if (enabledIndices.length === 0) return -1;
+			const currentPosition = enabledIndices.indexOf(current);
+			const nextPosition =
+				currentPosition === -1
+					? direction === 1
+						? 0
+						: enabledIndices.length - 1
+					: (currentPosition + direction + enabledIndices.length) %
+						enabledIndices.length;
+			return enabledIndices[nextPosition] ?? enabledIndices[0] ?? -1;
+		},
+		[enabledIndices],
+	);
+	const prepareKeyboardOpen = React.useCallback(
+		(direction?: 1 | -1) => {
+			pendingOpenIndexRef.current = direction
+				? getBoundaryIndex(direction === 1 ? "first" : "last")
+				: selectedIndex >= 0
+					? selectedIndex
+					: getBoundaryIndex("first");
+			focusOnOpenRef.current = true;
+		},
+		[getBoundaryIndex, selectedIndex],
+	);
+	const preparePointerOpen = React.useCallback(() => {
+		focusOnOpenRef.current = false;
+		pendingOpenIndexRef.current = null;
+		setActiveIndex(-1);
+	}, []);
+
+	React.useEffect(() => {
+		if (!isOpen) {
+			focusOnOpenRef.current = false;
+			pendingOpenIndexRef.current = null;
+			setActiveIndex(-1);
+			return;
+		}
+		const nextIndex = pendingOpenIndexRef.current ?? -1;
+		pendingOpenIndexRef.current = null;
+		setActiveIndex(nextIndex);
+		if (!focusOnOpenRef.current) return;
+		window.requestAnimationFrame(() => {
+			listRef.current?.focus({ preventScroll: true });
+			focusOnOpenRef.current = false;
+		});
+	}, [isOpen]);
+
+	React.useEffect(() => {
+		if (!isOpen || activeIndex < 0) return;
+		listRef.current
+			?.querySelector<HTMLElement>(`[data-option-index="${activeIndex}"]`)
+			?.scrollIntoView({ block: "nearest" });
+	}, [activeIndex, isOpen]);
+
+	React.useEffect(() => {
+		if (!isOpen || activeIndex < 0 || enabledIndices.includes(activeIndex))
+			return;
+		setActiveIndex(getBoundaryIndex("first"));
+	}, [activeIndex, enabledIndices, getBoundaryIndex, isOpen]);
+
+	return {
+		activeIndex,
+		getBoundaryIndex,
+		getNextIndex,
+		listRef,
+		prepareKeyboardOpen,
+		preparePointerOpen,
+		setActiveIndex,
+	};
+}
+
+function renderDropdownIcon(icon?: DropdownIcon) {
+	return icon ?? null;
+}
+
+function normalizeMenuOptions(options: DropdownMenuOption[]) {
+	const defaultOptions = options.filter((option) => option.tone !== "danger");
+	const dangerOptions = options.filter((option) => option.tone === "danger");
+	return [
+		...defaultOptions,
+		...dangerOptions.map((option, index) => ({
+			...option,
+			dividerBefore:
+				index === 0 && defaultOptions.length > 0 ? true : option.dividerBefore,
+		})),
+	];
+}
+
+function DropdownMenu({
+	align = "start",
+	ariaLabel = "More options",
+	collisionPadding,
+	disabled,
+	listClassName,
+	menuClassName,
+	menuContentClassName,
+	menuMinWidth = DEFAULT_MENU_MIN_WIDTH,
+	menuWidth,
+	offset,
+	onOpenChange,
+	openOnHover = true,
+	optionActiveClassName,
+	optionClassName,
+	options,
+	pinOnClick = false,
+	portalTargetId,
+	positionStrategy = "absolute",
+	side = "bottom",
+	triggerButtonProps,
+	triggerContent,
+}: DropdownMenuProps) {
+	const [isOpen, setIsOpen] = React.useState(false);
+	const listId = React.useId();
+	const normalizedOptions = React.useMemo(
+		() => normalizeMenuOptions(options),
+		[options],
+	);
+	const navigationOptions = React.useMemo(
+		() =>
+			normalizedOptions.map((option) => ({
+				disabled: option.disabled,
+				selected: option.active,
+			})),
+		[normalizedOptions],
+	);
+	const navigation = useDropdownListNavigation({
+		isOpen,
+		options: navigationOptions,
+	});
+	const handleOpenChange = React.useCallback(
+		(next: boolean) => {
+			setIsOpen(next);
+			onOpenChange?.(next);
+		},
+		[onOpenChange],
+	);
+
+	return (
+		<DropdownRoot
+			align={align}
+			autoFocusMenu={false}
+			collisionPadding={collisionPadding}
+			disabled={disabled}
+			menuClassName={clsx("max-w-[calc(100vw-32px)]", menuClassName)}
+			menuMinWidth={menuMinWidth}
+			menuWidth={menuWidth}
+			offset={offset}
+			onOpenChange={handleOpenChange}
+			openOnHover={openOnHover}
+			pinOnClick={pinOnClick}
+			portalTargetId={portalTargetId}
+			positionStrategy={positionStrategy}
+			renderTrigger={(trigger) => (
+				<Button
+					{...triggerButtonProps}
+					align={triggerButtonProps?.align ?? "center"}
+					aria-activedescendant={
+						trigger.isOpen && navigation.activeIndex >= 0
+							? `${listId}-option-${navigation.activeIndex}`
+							: undefined
+					}
+					aria-controls={trigger.isOpen ? listId : undefined}
+					aria-expanded={trigger.isOpen}
+					aria-haspopup="menu"
+					aria-label={ariaLabel}
+					disabled={disabled}
+					onClick={(event) => {
+						if (!trigger.isOpen) navigation.preparePointerOpen();
+						trigger.onRightClick(event);
+					}}
+					onKeyDown={(event) => {
+						if (disabled) return;
+						if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+							event.preventDefault();
+							const direction = event.key === "ArrowDown" ? 1 : -1;
+							if (!trigger.isOpen) {
+								navigation.prepareKeyboardOpen(direction);
+								trigger.openMenu({ focusMenu: true });
+								return;
+							}
+							navigation.setActiveIndex((current) =>
+								navigation.getNextIndex(current, direction),
+							);
+							return;
+						}
+						if (
+							(event.key === "Enter" || event.key === " ") &&
+							!trigger.isOpen
+						) {
+							event.preventDefault();
+							navigation.prepareKeyboardOpen();
+							trigger.openMenu({ focusMenu: true });
+						}
+					}}
+					onMouseEnter={trigger.onRootMouseEnter}
+					onMouseLeave={trigger.onRootMouseLeave}
+					ref={trigger.ref}
+					size={triggerButtonProps?.size ?? "icon-sm"}
+					variant={triggerButtonProps?.variant ?? "ghost"}
+				>
+					{triggerContent ?? <DotsThreeVertical aria-hidden size={15} />}
+				</Button>
+			)}
+			renderMenu={({ close }) => (
+				<Listbox
+					activeIndex={navigation.activeIndex}
+					ariaActivedescendant={
+						navigation.activeIndex >= 0
+							? `${listId}-option-${navigation.activeIndex}`
+							: undefined
+					}
+					className={menuContentClassName}
+					disabled={disabled}
+					listClassName={listClassName}
+					listId={listId}
+					listRef={navigation.listRef}
+					listTabIndex={0}
+					onActiveIndexChange={navigation.setActiveIndex}
+					onKeyDown={(event) => {
+						if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+							event.preventDefault();
+							const direction = event.key === "ArrowDown" ? 1 : -1;
+							navigation.setActiveIndex((current) =>
+								navigation.getNextIndex(current, direction),
+							);
+							return;
+						}
+						if (event.key === "Home" || event.key === "End") {
+							event.preventDefault();
+							navigation.setActiveIndex(
+								navigation.getBoundaryIndex(
+									event.key === "Home" ? "first" : "last",
+								),
+							);
+							return;
+						}
+						if (event.key !== "Enter" && event.key !== " ") return;
+						const option = normalizedOptions[navigation.activeIndex];
+						if (!option || option.disabled) return;
+						event.preventDefault();
+						option.onSelect?.(event);
+						if (option.href) window.location.assign(option.href);
+						close();
+					}}
+					onSelect={(option, _index, event) => {
+						if (disabled || option.value.disabled) {
+							event.preventDefault();
+							return;
+						}
+						option.value.onSelect?.(event);
+						close();
+					}}
+					optionActiveClassName={optionActiveClassName}
+					optionClassName={clsx("text-left", optionClassName)}
+					optionIdPrefix={`${listId}-option`}
+					optionRole="menuitem"
+					options={normalizedOptions.map((option, index) => ({
+						className: option.className,
+						content: (
+							<>
+								{option.leadingIcon ? (
+									<span className="flex shrink-0 items-center">
+										{renderDropdownIcon(option.leadingIcon)}
+									</span>
+								) : null}
+								<span
+									className={clsx(
+										"min-w-0 flex-1",
+										option.layout === "presentation"
+											? "overflow-visible whitespace-normal"
+											: "truncate text-sm",
+										option.tone === "danger"
+											? "text-inherit"
+											: option.active
+												? "text-foreground"
+												: "text-foreground/80",
+										option.textClassName,
+									)}
+								>
+									{option.label}
+								</span>
+								{option.trailingIcon ? (
+									<span className="flex shrink-0 items-center">
+										{renderDropdownIcon(option.trailingIcon)}
+									</span>
+								) : null}
+							</>
+						),
+						disabled: option.disabled,
+						dividerAfter: option.dividerAfter,
+						dividerBefore: option.dividerBefore,
+						href: option.href,
+						key: option.id ?? index,
+						layout: option.layout,
+						selected: option.active,
+						tone: option.tone,
+						value: option,
+					}))}
+					role="menu"
+				/>
+			)}
+			side={side}
+		/>
+	);
+}
+
+function DropdownListbox<T>({
+	align = "start",
+	ariaLabel,
+	collisionPadding,
+	disabled,
+	emptyState,
+	listClassName,
+	menuClassName,
+	menuContentClassName,
+	menuMinWidth = DEFAULT_MENU_MIN_WIDTH,
+	menuWidth,
+	offset,
+	onOpenChange,
+	onSelect,
+	openOnHover = false,
+	optionActiveClassName,
+	optionClassName,
+	options,
+	pinOnClick = false,
+	portalTargetId,
+	positionStrategy = "absolute",
+	side = "bottom",
+	triggerButtonProps,
+	triggerContent,
+}: DropdownListboxProps<T>) {
+	const [isOpen, setIsOpen] = React.useState(false);
+	const listId = React.useId();
+	const navigation = useDropdownListNavigation({ isOpen, options });
+	const handleOpenChange = React.useCallback(
+		(next: boolean) => {
+			setIsOpen(next);
+			onOpenChange?.(next);
+		},
+		[onOpenChange],
+	);
+
+	return (
+		<DropdownRoot
+			align={align}
+			autoFocusMenu={false}
+			collisionPadding={collisionPadding}
+			disabled={disabled}
+			menuClassName={clsx("max-w-[calc(100vw-32px)]", menuClassName)}
+			menuMinWidth={menuMinWidth}
+			menuWidth={menuWidth}
+			offset={offset}
+			onOpenChange={handleOpenChange}
+			openOnHover={openOnHover}
+			pinOnClick={pinOnClick}
+			portalTargetId={portalTargetId}
+			positionStrategy={positionStrategy}
+			renderTrigger={(trigger) => (
+				<Button
+					{...triggerButtonProps}
+					aria-activedescendant={
+						trigger.isOpen && navigation.activeIndex >= 0
+							? `${listId}-option-${navigation.activeIndex}`
+							: undefined
+					}
+					aria-controls={trigger.isOpen ? listId : undefined}
+					aria-expanded={trigger.isOpen}
+					aria-haspopup="listbox"
+					aria-label={ariaLabel}
+					disabled={disabled}
+					onClick={(event) => {
+						if (!trigger.isOpen) navigation.preparePointerOpen();
+						trigger.onRightClick(event);
+					}}
+					onKeyDown={(event) => {
+						if (disabled) return;
+						if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+							event.preventDefault();
+							const direction = event.key === "ArrowDown" ? 1 : -1;
+							if (!trigger.isOpen) {
+								navigation.prepareKeyboardOpen(direction);
+								trigger.openMenu({ focusMenu: true });
+								return;
+							}
+							navigation.setActiveIndex((current) =>
+								navigation.getNextIndex(current, direction),
+							);
+							return;
+						}
+						if (
+							(event.key === "Enter" || event.key === " ") &&
+							!trigger.isOpen
+						) {
+							event.preventDefault();
+							navigation.prepareKeyboardOpen();
+							trigger.openMenu({ focusMenu: true });
+						}
+					}}
+					onMouseEnter={trigger.onRootMouseEnter}
+					onMouseLeave={trigger.onRootMouseLeave}
+					ref={trigger.ref}
+					size={triggerButtonProps?.size ?? "md"}
+					variant={triggerButtonProps?.variant ?? "secondary"}
+				>
+					{triggerContent}
+				</Button>
+			)}
+			renderMenu={({ close }) => (
+				<Listbox
+					activeIndex={navigation.activeIndex}
+					ariaActivedescendant={
+						navigation.activeIndex >= 0
+							? `${listId}-option-${navigation.activeIndex}`
+							: undefined
+					}
+					className={menuContentClassName}
+					disabled={disabled}
+					emptyState={emptyState}
+					listClassName={listClassName}
+					listId={listId}
+					listRef={navigation.listRef}
+					listTabIndex={0}
+					onActiveIndexChange={navigation.setActiveIndex}
+					onKeyDown={(event) => {
+						if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+							event.preventDefault();
+							const direction = event.key === "ArrowDown" ? 1 : -1;
+							navigation.setActiveIndex((current) =>
+								navigation.getNextIndex(current, direction),
+							);
+							return;
+						}
+						if (event.key === "Home" || event.key === "End") {
+							event.preventDefault();
+							navigation.setActiveIndex(
+								navigation.getBoundaryIndex(
+									event.key === "Home" ? "first" : "last",
+								),
+							);
+							return;
+						}
+						if (event.key !== "Enter" && event.key !== " ") return;
+						const option = options[navigation.activeIndex];
+						if (!option || option.disabled || disabled) return;
+						event.preventDefault();
+						onSelect(option.value, option, event);
+						close();
+					}}
+					onSelect={(option, _index, event) => {
+						if (disabled || option.disabled) {
+							event.preventDefault();
+							return;
+						}
+						onSelect(option.value, option, event);
+						close();
+					}}
+					optionActiveClassName={optionActiveClassName}
+					optionClassName={optionClassName}
+					optionIdPrefix={`${listId}-option`}
+					options={options}
+				/>
+			)}
+			side={side}
+		/>
+	);
+}
+
+type DropdownMenuFactoryHandler = (event: DropdownMenuEvent) => void;
+
+export const dropdownMenuOptions = {
+	delete({
+		disabled,
+		label = "Delete",
+		onSelect,
+	}: {
+		disabled?: boolean;
+		label?: React.ReactNode;
+		onSelect?: DropdownMenuFactoryHandler;
+	}): DropdownMenuOption {
+		return {
+			disabled,
+			id: "delete",
+			label,
+			leadingIcon: <Trash aria-hidden size={12} />,
+			onSelect,
+			tone: "danger",
+		};
+	},
+	edit({
+		disabled,
+		onSelect,
+	}: {
+		disabled?: boolean;
+		onSelect: DropdownMenuFactoryHandler;
+	}): DropdownMenuOption {
+		return {
+			disabled,
+			id: "edit",
+			label: "Edit",
+			leadingIcon: <PencilSimpleIcon aria-hidden size={12} />,
+			onSelect,
+		};
+	},
+	open({
+		href,
+		leadingIcon,
+	}: {
+		href: string;
+		leadingIcon?: DropdownIcon;
+	}): DropdownMenuOption {
+		return {
+			href,
+			id: "open",
+			label: "Open",
+			leadingIcon: leadingIcon ?? <ArrowSquareOut aria-hidden size={12} />,
+		};
+	},
+};
+
+export const Dropdown = Object.assign(DropdownRoot, {
+	Listbox: DropdownListbox,
+	Menu: DropdownMenu,
+	Panel: DropdownSurface,
+	menuOptions: dropdownMenuOptions,
+});

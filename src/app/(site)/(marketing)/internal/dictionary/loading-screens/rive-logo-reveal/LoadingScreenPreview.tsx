@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/primitives/Button";
+import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 import type { LoadingScreenPhase } from "./_source/LoadingScreenMount";
 import RiveLoadingAnimation from "./_source/RiveLoadingAnimation";
@@ -18,7 +19,14 @@ export function LoadingScreenPreview() {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<div className="overflow-hidden rounded-2xl border border-border/15 bg-background px-6 py-10">
+			<Panel
+				background="background"
+				border="subtle"
+				overflow="hidden"
+				padding="md"
+				shadow="none"
+				className="py-10"
+			>
 				<div className="flex min-h-48 items-center justify-center">
 					{phase === "done" ? (
 						<Text variant="body" tone="muted">
@@ -32,7 +40,7 @@ export function LoadingScreenPreview() {
 						/>
 					)}
 				</div>
-			</div>
+			</Panel>
 			<div className="flex flex-wrap gap-2">
 				{phases.map((value) => (
 					<Button

@@ -1,13 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import { motion } from "motion/react";
 import * as React from "react";
-import { spring } from "@/components/ui/foundations/spring";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type IconProp = IconName | Exclude<React.ReactNode, string | number>;
 
@@ -40,6 +37,7 @@ type SegmentedControlProps<T extends string> = {
 	ariaLabelledBy?: string;
 	ariaDescribedBy?: string;
 	className?: string;
+	/** Retained for compatibility; segmented selection no longer uses a layout animation. */
 	disableWhenReducedMotion?: boolean;
 };
 
@@ -59,7 +57,6 @@ export function SegmentedControl<T extends string>({
 	disabled,
 	layout = "equal",
 	columns,
-	roundedFull = false,
 	pillClassName,
 	buttonClassName,
 	textClassName,
@@ -69,14 +66,11 @@ export function SegmentedControl<T extends string>({
 	ariaLabelledBy,
 	ariaDescribedBy,
 	className,
-	disableWhenReducedMotion = true,
 }: SegmentedControlProps<T>) {
-	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const isControlled = value !== undefined;
 	const [internalValue, setInternalValue] = React.useState<T | undefined>(
 		defaultValue ?? options[0]?.value,
 	);
-	const layoutId = React.useId();
 
 	React.useEffect(() => {
 		if (!isControlled && internalValue === undefined && options[0]?.value) {
@@ -89,10 +83,9 @@ export function SegmentedControl<T extends string>({
 	const isColumns = layout === "columns";
 	const columnCount = isColumns
 		? Math.max(columns ?? options.length, 1)
-		: undefined;
-	const wrapperRadius = roundedFull ? "rounded-full" : "rounded-[10px]";
-	const pillRadius = roundedFull ? "rounded-full" : "rounded-[6px]";
-	const buttonRadius = roundedFull ? "pill" : "sm";
+		: layout === "equal"
+			? Math.max(options.length, 1)
+			: undefined;
 
 	const handleSelect = (next: T) => {
 		if (next === selectedValue) return;
@@ -103,10 +96,10 @@ export function SegmentedControl<T extends string>({
 	return (
 		<fieldset
 			className={clsx(
-				"relative gap-[5px] bg-surface/70 p-[5px]",
-				wrapperRadius,
-				isColumns ? "grid" : "flex items-center",
-				layout === "auto" ? "w-fit" : "w-full",
+				"gap-2",
+				isColumns || layout === "equal"
+					? "grid w-full"
+					: "flex w-fit flex-wrap items-center",
 				className,
 			)}
 			style={
@@ -129,46 +122,24 @@ export function SegmentedControl<T extends string>({
 					<div
 						key={option.value}
 						className={clsx(
-							"relative min-w-0 max-w-full",
+							"min-w-0 max-w-full",
 							layout === "equal" || layout === "columns"
 								? "flex-1"
 								: "flex-initial",
 						)}
 					>
-						{isSelected ? (
-							motionAllowed ? (
-								<motion.div
-									layoutId={`${layoutId}-pill`}
-									className={clsx(
-										"absolute inset-0 bg-foreground/10",
-										pillRadius,
-										pillClassName,
-									)}
-									transition={{ layout: spring.interactive }}
-								/>
-							) : (
-								<div
-									className={clsx(
-										"absolute inset-0 bg-foreground/10",
-										pillRadius,
-										pillClassName,
-									)}
-								/>
-							)
-						) : null}
 						<Button
-							variant="ghost"
+							variant={isSelected ? "secondary" : "ghost"}
 							align="center"
 							size="md"
-							radius={buttonRadius}
+							radius="pill"
 							aria-pressed={isSelected}
 							disabled={isDisabled}
 							onClick={() => handleSelect(option.value)}
 							className={clsx(
-								"relative z-10 w-full min-w-0",
-								"!px-[15px] !py-[9px] text-sm transition-colors motion-interactive",
+								"w-full min-w-0",
 								isSelected
-									? "text-foreground"
+									? clsx("text-foreground", pillClassName)
 									: "text-foreground/60 hover:text-foreground",
 								layout === "auto" ? "w-auto max-w-full" : "w-full",
 								buttonClassName,

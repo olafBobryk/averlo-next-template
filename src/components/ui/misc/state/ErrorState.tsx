@@ -19,7 +19,7 @@ export type ErrorStateProps = {
 	titleClassName?: string;
 	descriptionClassName?: string;
 	actionClassName?: string;
-} & Pick<StateIndicatorProps, "layout" | "align">;
+} & Pick<StateIndicatorProps, "variant" | "layout" | "align">;
 
 export function ErrorState({
 	title = "Something went wrong",
@@ -27,6 +27,7 @@ export function ErrorState({
 	iconName = "warning",
 	iconSize = "md",
 	iconAnimate = true,
+	variant = "plain",
 	layout = "inline",
 	align = "left",
 	actionLabel = "Try again",
@@ -40,6 +41,7 @@ export function ErrorState({
 }: ErrorStateProps) {
 	return (
 		<StateIndicator
+			variant={variant}
 			title={title}
 			description={description}
 			iconName={iconName}

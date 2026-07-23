@@ -32,8 +32,8 @@ export const fallbackMarketingPages = {
 export const fallbackSiteLayout: SiteLayoutDocument = {
 	header: {
 		cta: {
-			label: "Join Now",
-			href: "/contact",
+			label: "Login",
+			routeId: "login",
 		},
 		menuGroups: [
 			{

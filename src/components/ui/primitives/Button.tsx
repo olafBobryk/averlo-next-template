@@ -32,7 +32,7 @@ const buttonStyles = cva(
 				secondary:
 					"border border-transparent bg-input/50 text-foreground hover:bg-input/70",
 				ghost:
-					"bg-transparent text-foreground hover:bg-muted hover:text-foreground",
+					"!bg-transparent hover:!bg-transparent active:!bg-transparent text-foreground hover:opacity-70 active:opacity-60",
 				inverse:
 					"border-border bg-foreground text-background hover:bg-foreground/90",
 			},
@@ -82,7 +82,7 @@ const buttonDangerStyles = cva("", {
 		variant: {
 			primary: "!bg-danger/20 hover:!bg-danger/30",
 			secondary: "!bg-danger/10 hover:!bg-danger/20",
-			ghost: "!bg-transparent hover:!bg-danger/10",
+			ghost: "!bg-transparent",
 			inverse: "!bg-danger/20 hover:!bg-danger/30",
 		},
 	},
@@ -96,7 +96,7 @@ export type ButtonTone = NonNullable<VariantProps<typeof buttonStyles>["tone"]>;
 
 const DEFAULT_ICON_SIZE = 15; // 0.9375rem – kept in px to match provided assets
 
-type ButtonBaseProps = {
+export type ButtonBaseProps = {
 	children?: React.ReactNode;
 	leadingIcon?: IconProp;
 	trailingIcon?: IconProp;
@@ -279,6 +279,8 @@ function ButtonSkeleton({
 	const isChipSize = size === "chip";
 	const resolvedIconSize = iconSize ?? (isChipSize ? 12 : DEFAULT_ICON_SIZE);
 	const resolvedTextVariant = textVariant ?? (isChipSize ? "chip" : "support");
+	const usesCustomTextPresentation =
+		textVariant !== undefined || textClassName !== undefined;
 	const minWidthClass =
 		isIconSize || fullWidth || hasLabel ? undefined : "min-w-[140px]";
 	const iconStyle = {
@@ -316,7 +318,7 @@ function ButtonSkeleton({
 						style={iconStyle}
 					/>
 				) : null}
-				{isIconSize ? null : isTextChild ? (
+				{isIconSize ? null : isTextChild && usesCustomTextPresentation ? (
 					<Text
 						as="span"
 						variant={resolvedTextVariant}
@@ -326,7 +328,7 @@ function ButtonSkeleton({
 						{label}
 					</Text>
 				) : (
-					<span className="opacity-0 select-none">{label}</span>
+					<span className="truncate opacity-0 select-none">{label}</span>
 				)}
 				{trailingIcon ? (
 					<span

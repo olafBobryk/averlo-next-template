@@ -9,36 +9,31 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
 
 ## Prefer These Files
 - `src/components/ui/misc/Accordion.tsx`: disclosure UI.
-- `src/components/ui/misc/Chip.tsx`: compact linked, button, or static chip for source references, graph labels, and lightweight token-like navigation.
+- `src/components/ui/misc/Chip.tsx`: compact linked, button, or static chip for source references and lightweight token-like navigation.
 - `src/components/ui/misc/CopyField.tsx`: copy-to-clipboard interaction.
-- `src/components/ui/misc/FilePreview.tsx`: file preview tile with shared actions.
-- `src/components/ui/misc/FileGallery.tsx`: horizontal gallery for pending and uploaded file previews.
-- `src/components/ui/misc/FileInspectModal.tsx`: modal body for PDFs and unsupported file previews.
+- `src/components/ui/misc/FilePreview.tsx` and `FileInspectModal.tsx`: internal preview and inspection helpers owned by `FileInput`; feature code should start from the public field.
 - `src/components/ui/misc/HealthCheckIndicator.tsx`: compact service health display backed by a health endpoint.
 - `src/components/ui/misc/ImageSwitcher.tsx`: reusable image switcher with stable transitions, eager preloading, swipe support, and shared pagination controls.
 - `src/components/ui/misc/Loader.tsx`: spinner loader.
-- `src/components/ui/misc/MoreMenuDropdown.tsx`: overflow action menu.
-- `src/components/ui/misc/NullState.tsx`: compact null or unavailable-value treatment for dashboard fields.
 - `src/components/ui/misc/StepIndicator.tsx`: progress indicator used by modal step flows.
 - `src/components/ui/misc/PaginationControls.tsx`: compact previous or next pagination controls.
-- `src/components/ui/misc/Pill.tsx`: compact non-interactive badge with semantic and helper tones.
-- `src/components/ui/misc/ProfilePicture.tsx`: avatar display for profile images, initials, unknown users, and loading state.
+- `src/components/ui/misc/ProfilePicture.tsx`: canonical shadow-free avatar display and overlapping stack for profile images, initials, unknown users, and loading state.
 - `src/components/ui/misc/ScrollBorders.tsx`: scroll container with top/bottom edge affordances and an optional return-to-top action.
 - `src/components/ui/misc/SegmentedControl.tsx`: segmented option selector.
 - `src/components/ui/misc/SocialLinks.tsx`: generic social/profile link cluster backed by the shared icon registry.
 - `src/components/ui/misc/SuspenseBoundary.tsx`: loading and error boundary wrapper.
 - `src/components/ui/misc/Tooltip.tsx`: hover or focus helper text built on the shared dropdown primitive.
-- `src/components/ui/misc/Warning.tsx`: inline or card warning block.
 - `src/components/ui/misc/Skeleton.tsx`: loading placeholder.
 - `src/components/ui/misc/InspectableImage.tsx`: image trigger for inspect modal.
 
 ## Invariants
 - Prefer these shared UX patterns before introducing page-local versions.
-- `Accordion` should continue to use `Button`, `IconSwap`, and motion conventions rather than ad hoc disclosure code.
+- `Accordion` owns the borderless compact disclosure treatment and should continue to use `Button`, the shared icon registry, and motion conventions rather than ad hoc disclosure code. `Accordion.Card` composes the existing Card root and slots for collapsible structured sections without changing Card defaults.
 - `CopyField` should remain the default for copy-to-clipboard UX.
-- `Chip` owns compact interactive or linked label surfaces; keep non-interactive status-only badges on `Pill`.
+- `Chip` owns every compact label and status surface. Its default chrome is a borderless, opaque, surface-aware soft-fill pill; static Chips remain non-interactive, while link and button Chips receive hover, active, and focus treatment. Only `tone="plain"` stays transparent.
 - `SegmentedControl` should remain the default for segmented selection instead of custom pill navs.
 - `SuspenseBoundary` and the state components should remain the default path for async loading and error presentation.
+  - Use the default plain `StateIndicator` for route statuses and `variant="framed"` for contained entity or table empties.
   - When a loading fallback is a ghost or skeleton version of the final UI, keep the live and fallback layouts structurally identical so transitions can crossfade without layout jump.
 - The focus invariant still applies: every interactive surface here must keep visible keyboard focus through the underlying shared controls.
 - `Skeleton` should be preferred over one-off shimmer markup, especially when a component-specific skeleton already exists.
@@ -48,23 +43,24 @@ Cross-cutting UI helpers and feedback components that do not belong to inputs, o
   - Skeleton UIs must remain non-interactive and should not carry hover, click, focus, or blur behavior.
 
 ## How To Use It
-- Use `Accordion` for FAQ rows, expandable settings, and compact disclosure content.
+- Use plain `Accordion` for compact borderless disclosures. Use `Accordion.Card` when a structured Card header, content, actions, or footer must collapse without changing the expanded Card geometry.
+  - Use `Accordion.Skeleton` and `Accordion.Card.Skeleton` for matching loading states. Pass the real title and description for sizing, use `leadingIcon` or `trailingIcon` only when those slots exist, and supply component-owned skeleton nodes through the Card action, content, and footer slots.
 - Use `CopyField` whenever the user copies a token, URL, or identifier.
-- Use `Chip` for compact source links, removable filters, token-like actions, and graph-label visual tokens.
-  - Use `Chip.Skeleton` with children and explicit `leadingIcon` or `trailingIcon` flags when skeleton-loading a final chip so label width, icon space, height, border, and rounded-full geometry match the loaded state.
+- Use `Chip` for compact source links, statuses, removable filters, and token-like actions.
+  - Non-plain Chip tones inherit the nearest `--ui-surface-color` and pre-compose their fills against it. Containers with a distinct uniform surface should declare that variable instead of adding caller-local Chip backgrounds.
+  - Use `Chip.Skeleton` with children and explicit `leadingIcon` or `trailingIcon` flags when skeleton-loading a final chip so label width, icon space, height, transparent border geometry, and rounded-full shape match the loaded state.
 - Use `Loader` inside asynchronous regions, but avoid duplicating loader behavior already built into `Button` or other components.
-- Use `MoreMenuDropdown` for action-overflow menus instead of assembling a new icon-trigger dropdown.
-  - Prefer the exported `moreMenuOptions` factories for standard open, edit, and delete actions so tone, icons, and labels remain consistent.
+- Use `Dropdown.Menu` for action-overflow menus instead of assembling a new icon-trigger dropdown.
+  - Prefer `Dropdown.menuOptions` for standard open, edit, and delete actions so tone, icons, labels, ordering, and dividers remain consistent.
 - Use `PaginationControls` for compact previous or next paging actions before building page-local pager rows.
-- Use `FileGallery` for pending/uploaded file preview strips instead of assembling one-off preview rows.
 - Use `ScrollBorders` when a vertically scrollable region should expose overflow with shared border treatment instead of page-local scroll shadows or one-off borders.
 - Use `Tooltip` for short helper copy on hover or focus instead of hand-rolled positioned labels.
 - Use `InspectableImage` for click-to-zoom image behavior.
 - Use `HealthCheckIndicator` for compact live service status instead of page-local polling badges.
 - Use `ImageSwitcher` for small image carousels or before/after-style media switchers before building page-local slideshow state.
-- Use `Warning` for cautionary messaging; use `variant="card"` when the warning should be visually separated from surrounding content.
-- Use `Pill` for compact labels and statuses when the element is not itself an action.
-- Use `ProfilePicture` for avatar display before assembling image, initial, or fallback badges by hand.
+- Use the shared `StatusMessage` primitive for cautionary and status messaging instead of introducing a misc-level warning surface.
+- Use `ProfilePicture` for avatar display before assembling image, initial, or fallback badges by hand. Use `ProfilePictureStack` for overlapping groups; it owns overlap, surface-independent cutouts, z-order, the neutral overflow count, and the group label.
+- Keep profile-picture geometry on the shared `sm` (32px), `md` (40px), `lg` (56px), `xl` (80px), and `2xl` (96px) scale. Fallbacks use the same borderless helper-color soft fill as the compact pill/chip family, pre-composed into an opaque color against the nearest inherited `--ui-surface-color`; do not reintroduce local size maps, avatar borders, transparent stack fills, or avatar shadows. Stack separation clips the lower profile around the higher profile so it remains correct on every surface without surface-colored rings.
 - Use `SocialLinks` for reusable social/profile link clusters instead of product-local icon-button lists.
 - For initial-load loading states, prefer `Skeleton`, `Text.Skeleton`, and component-specific skeletons before toasts.
   - For `SuspenseBoundary ghost`, build the fallback from component skeletons inside the same wrapper and spacing structure as the resolved content.

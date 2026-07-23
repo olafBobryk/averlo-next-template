@@ -10,6 +10,7 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
 
 ## Prefer These Files
 - `src/components/ui/overlays/modal/ModalShell.tsx`: base portal-backed modal shell.
+- `src/components/ui/overlays/modal/ModalCard.tsx`: mandatory Card-backed modal surface and width contract.
 - `src/components/ui/overlays/modal/ModalHost.tsx`: app-wide modal renderer.
 - `src/components/ui/overlays/modal/useModal.tsx`: low-level modal hook.
 - `src/components/ui/overlays/modal/ConfirmationModal.tsx`: shared confirmation dialog content.
@@ -22,12 +23,16 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
 ## Invariants
 - `ModalHost` must be mounted once near the app root through the mount layer.
 - New modal flows should prefer `useConfirmationModal`, `useImageInspectModal`, or `useModal` instead of home-grown dialog state.
+- Custom mutable modals should call the `setCloseDisabled` render helper while submitting so Escape, backdrop, and explicit close actions share one close lock.
 - The focus invariant is especially strict here:
   - Opening a modal should move users into a clear modal focus context.
   - Focus should remain trapped in the top-most modal while it is open.
   - `Escape` should affect only the top-most modal.
   - Closing a modal should restore focus predictably to the invoking control when possible.
-- Backdrop, shell, and panel behavior should stay centralized in `ModalShell`.
+- `ModalShell` owns only overlay behavior: portal, backdrop, placement, motion, focus, stacking, scroll lock, and dismissal.
+- `ModalHost` wraps hosted content in `ModalCard`. Direct `ModalShell` consumers must render exactly one `ModalCard` themselves.
+- `ModalCard` is the visual surface owner. Do not put `Panel` in `ModalShell`, nest another `Card` around modal slots, or recreate modal chrome with local class overrides.
+- Header, content, and footer spacing belongs to `ModalHeader`, `ModalContent`, and `ModalFooter`; only `ModalContent` owns standard modal scrolling.
 - Destructive confirmation patterns should reuse the shared confirmation modal before introducing custom dialog copy and controls.
 - Confirmation handlers may return `false` to keep the modal open. Use structured `details`, semantic warnings, `confirmVariant`, and `confirmTone` instead of replacing the shared confirmation layout. Destructive confirmations default to the shared soft-danger tone.
 - Form flows should begin with `ModalForm`; use `ModalStepForm` only when the interaction has real ordered steps rather than cosmetic progress.
@@ -37,7 +42,7 @@ Shared modal shell, host, and hooks for confirmation dialogs, image inspection, 
 - Use `useConfirmationModal` for delete, remove, disconnect, or other confirm-before-action flows.
 - Use `useImageInspectModal` or `InspectableImage` for click-to-enlarge imagery.
 - Use `useModal` only when a new modal type truly needs custom content beyond the existing specialized helpers.
-- If styling needs adjustment, prefer modal options such as panel or backdrop class overrides instead of forking the shell.
+- Use typed `cardProps`, `maxWidth`, and `placement` for supported modal differences. Extend the shared contract before adding feature-local shell chrome.
 
 ## Avoid
 - Page-local dialog stacks with their own focus logic.

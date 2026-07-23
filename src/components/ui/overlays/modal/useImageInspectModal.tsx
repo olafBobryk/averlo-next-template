@@ -36,11 +36,8 @@ export function useImageInspectModal(defaultPortalTargetId?: string) {
 					/>
 				),
 				{
-					panelClassName:
-						"!p-0 !bg-transparent h-full w-full !border-0 !rounded-none !shadow-none max-w-none max-h-none",
-					panelWrapperClassName: "!px-10",
-					backdropClassName: "",
-					panelStyle: { boxShadow: "none" },
+					ariaLabel: "Image preview",
+					cardProps: { maxWidth: "4xl" },
 					portalTargetId: targetId,
 				},
 			);

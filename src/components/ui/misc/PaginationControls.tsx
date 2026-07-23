@@ -19,7 +19,7 @@ type PaginationControlsProps = {
 	className?: string;
 };
 
-export function PaginationControls({
+function PaginationControlsRoot({
 	current,
 	total,
 	onPrev,
@@ -66,3 +66,27 @@ export function PaginationControls({
 		</div>
 	);
 }
+
+function PaginationControlsSkeleton({
+	buttonSize = "icon-sm",
+	className,
+	current = 1,
+	total = 10,
+}: Pick<PaginationControlsProps, "buttonSize" | "className"> & {
+	current?: number;
+	total?: number;
+}) {
+	return (
+		<div className={`flex items-center gap-[15px] ${className ?? ""}`}>
+			<Button.Skeleton size={buttonSize} variant="secondary" />
+			<Text.Skeleton className="font-mono">
+				{current}/{total}
+			</Text.Skeleton>
+			<Button.Skeleton size={buttonSize} variant="secondary" />
+		</div>
+	);
+}
+
+export const PaginationControls = Object.assign(PaginationControlsRoot, {
+	Skeleton: PaginationControlsSkeleton,
+});

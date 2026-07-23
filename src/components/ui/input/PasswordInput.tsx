@@ -8,6 +8,7 @@ import {
 	useCopyAction,
 } from "@/components/ui/helpers/useCopyAction";
 import { Icon } from "@/components/ui/icons/Icon";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { Button } from "@/components/ui/primitives/Button";
 import { Field } from "@/components/ui/primitives/Field";
 import {
@@ -19,6 +20,7 @@ import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 type PasswordInputProps = {
 	label: React.ReactNode;
+	labelAction?: React.ReactNode;
 	description?: React.ReactNode;
 	placeholder?: string;
 
@@ -53,6 +55,19 @@ type PasswordInputProps = {
 	size?: InputFrameSize;
 };
 
+type PasswordInputSkeletonProps = Pick<
+	PasswordInputProps,
+	| "className"
+	| "description"
+	| "label"
+	| "labelAction"
+	| "required"
+	| "showStrength"
+	| "size"
+> & {
+	value?: React.ReactNode;
+};
+
 const PASSWORD_RULES = [
 	{
 		id: "length",
@@ -76,8 +91,9 @@ const PASSWORD_RULES = [
 	},
 ];
 
-export function PasswordInput({
+function PasswordInputRoot({
 	label,
+	labelAction,
 	description,
 	placeholder,
 	id,
@@ -165,6 +181,7 @@ export function PasswordInput({
 	return (
 		<Field
 			label={label}
+			labelAction={labelAction}
 			description={description}
 			message={derivedError ?? undefined}
 			tone={tone}
@@ -272,3 +289,37 @@ export function PasswordInput({
 		</Field>
 	);
 }
+
+function PasswordInputSkeleton({
+	className,
+	description,
+	label,
+	labelAction,
+	required,
+	showStrength = false,
+	size,
+	value = "demo-password",
+}: PasswordInputSkeletonProps) {
+	return (
+		<Field
+			className={className}
+			description={description}
+			label={label}
+			labelAction={labelAction}
+			required={required}
+		>
+			<div className="flex flex-col gap-2.5">
+				<InputFrame.Skeleton fullWidth size={size}>
+					{value}
+				</InputFrame.Skeleton>
+				{showStrength ? (
+					<Skeleton className="h-1.5 w-full rounded-full" />
+				) : null}
+			</div>
+		</Field>
+	);
+}
+
+export const PasswordInput = Object.assign(PasswordInputRoot, {
+	Skeleton: PasswordInputSkeleton,
+});

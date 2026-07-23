@@ -1,9 +1,18 @@
+import type {
+	MembershipRole,
+	Organization,
+	OrganizationInvitation,
+	OrganizationMembership,
+	PlatformRole,
+} from "@/lib/auth/contracts";
+
 export type SessionUser = {
 	id: string;
 	name: string;
 	email: string;
 	role: "owner" | "member" | "admin";
 	isBanned: boolean;
+	platformRole: PlatformRole | null;
 	profilePictureUrl?: string;
 };
 
@@ -24,12 +33,34 @@ type LogoutResponse = {
 	message: string;
 };
 
+export type PasswordRecoveryResponse = {
+	delivery: "email" | "local";
+	message: string;
+	previewUrl?: string;
+};
+
 let cachedUser: SessionUser | null = null;
 
+export class AuthApiError extends Error {
+	readonly code?: string;
+
+	constructor(message: string, code?: string) {
+		super(message);
+		this.name = "AuthApiError";
+		this.code = code;
+	}
+}
+
 async function readJson<T>(response: Response): Promise<T> {
-	const body = (await response.json()) as T & { message?: string };
+	const body = (await response.json()) as T & {
+		code?: string;
+		message?: string;
+	};
 	if (!response.ok) {
-		throw new Error(body.message ?? "The authentication request failed.");
+		throw new AuthApiError(
+			body.message ?? "The authentication request failed.",
+			body.code,
+		);
 	}
 	return body;
 }
@@ -70,6 +101,122 @@ export async function logout(): Promise<LogoutResponse> {
 	});
 	cachedUser = null;
 	return readJson<LogoutResponse>(response);
+}
+
+export async function requestPasswordRecovery(email: string) {
+	const response = await fetch("/api/auth/password-recovery", {
+		method: "POST",
+		credentials: "same-origin",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ email }),
+	});
+	return readJson<PasswordRecoveryResponse>(response);
+}
+
+export async function resetPassword(input: {
+	password: string;
+	token: string;
+}) {
+	const response = await fetch("/api/auth/reset-password", {
+		method: "POST",
+		credentials: "same-origin",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify(input),
+	});
+	return readJson<{ message: string }>(response);
+}
+
+export async function selectOrganization(organizationId: string) {
+	const response = await fetch("/api/auth/organization", {
+		method: "POST",
+		credentials: "same-origin",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ organizationId }),
+	});
+	await readJson(response);
+}
+
+export type OrganizationUpdateInput = {
+	name?: string;
+	profilePictureUrl?: string | null;
+	slug?: string;
+};
+
+export async function updateOrganization(input: OrganizationUpdateInput) {
+	const response = await fetch("/api/auth/organization", {
+		method: "PATCH",
+		credentials: "same-origin",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify(input),
+	});
+	const result = await readJson<{ organization: Organization }>(response);
+	return result.organization;
+}
+
+async function administrationRequest<T>(path: string, init: RequestInit) {
+	const response = await fetch(path, {
+		...init,
+		credentials: "same-origin",
+		headers: { "content-type": "application/json", ...init.headers },
+	});
+	return readJson<T>(response);
+}
+
+export async function createOrganizationInvitation(input: {
+	email: string;
+	role: Exclude<MembershipRole, "owner">;
+}) {
+	return administrationRequest<{ invitation: OrganizationInvitation }>(
+		"/api/auth/administration/invitations",
+		{ method: "POST", body: JSON.stringify(input) },
+	);
+}
+
+export async function refreshOrganizationInvitation(invitationId: string) {
+	return administrationRequest<{ invitation: OrganizationInvitation }>(
+		`/api/auth/administration/invitations/${encodeURIComponent(invitationId)}`,
+		{ method: "PATCH", body: "{}" },
+	);
+}
+
+export async function revokeOrganizationInvitation(invitationId: string) {
+	return administrationRequest<{ invitation: OrganizationInvitation }>(
+		`/api/auth/administration/invitations/${encodeURIComponent(invitationId)}`,
+		{ method: "DELETE" },
+	);
+}
+
+export async function updateOrganizationMembershipRole(
+	membershipId: string,
+	role: Exclude<MembershipRole, "owner">,
+) {
+	return administrationRequest<{ membership: OrganizationMembership }>(
+		`/api/auth/administration/memberships/${encodeURIComponent(membershipId)}`,
+		{
+			method: "PATCH",
+			body: JSON.stringify({ action: "change-role", role }),
+		},
+	);
+}
+
+export async function transferOrganizationOwnership(membershipId: string) {
+	return administrationRequest<{
+		currentOwner: OrganizationMembership;
+		newOwner: OrganizationMembership;
+	}>(
+		`/api/auth/administration/memberships/${encodeURIComponent(membershipId)}`,
+		{
+			method: "PATCH",
+			body: JSON.stringify({ action: "transfer-ownership" }),
+		},
+	);
+}
+
+export async function removeOrganizationMembership(membershipId: string) {
+	return administrationRequest<{ membership: OrganizationMembership }>(
+		`/api/auth/administration/memberships/${encodeURIComponent(membershipId)}`,
+		{ method: "DELETE" },
+	);
 }
 
 export function updateStoredSessionUser(

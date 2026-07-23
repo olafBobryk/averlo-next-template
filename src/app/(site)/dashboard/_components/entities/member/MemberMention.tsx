@@ -1,9 +1,10 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { Text } from "@/components/ui/primitives/Text";
 import type { MemberPresentation } from "../../../_lib/entities/member/presentation";
 
-export function MemberMention({
+function MemberMentionRoot({
 	className,
 	presentation,
 }: {
@@ -24,3 +25,26 @@ export function MemberMention({
 		</Link>
 	);
 }
+
+function MemberMentionSkeleton({
+	className,
+	label = "@Example member",
+}: {
+	className?: string;
+	label?: string;
+}) {
+	return (
+		<Text.Skeleton
+			as="span"
+			className={clsx("inline font-medium text-primary", className)}
+			tone={null}
+			variant={null}
+		>
+			{label}
+		</Text.Skeleton>
+	);
+}
+
+export const MemberMention = Object.assign(MemberMentionRoot, {
+	Skeleton: MemberMentionSkeleton,
+});

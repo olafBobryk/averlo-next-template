@@ -9,6 +9,11 @@ import { Text } from "@/components/ui/primitives/Text";
 
 const stateIndicatorStyles = cva("flex w-full min-w-0", {
 	variants: {
+		variant: {
+			plain: "",
+			framed:
+				"rounded-lg border border-dashed border-border bg-muted/25 px-5 py-10",
+		},
 		layout: {
 			inline: "items-center justify-start flex-wrap gap-x-3 gap-y-2",
 			stacked: "flex-col gap-3",
@@ -28,6 +33,7 @@ const stateIndicatorStyles = cva("flex w-full min-w-0", {
 		{ layout: "stacked", align: "right", className: "items-end" },
 	],
 	defaultVariants: {
+		variant: "plain",
 		layout: "inline",
 		align: "left",
 	},
@@ -79,6 +85,7 @@ export type StateIndicatorProps = {
 	iconName?: IconName;
 	iconSize?: "sm" | "md" | "lg";
 	iconAnimate?: boolean;
+	variant?: VariantProps<typeof stateIndicatorStyles>["variant"];
 	layout?: VariantProps<typeof stateIndicatorStyles>["layout"];
 	align?: VariantProps<typeof stateIndicatorStyles>["align"];
 	actionLabel?: string;
@@ -97,6 +104,7 @@ export function StateIndicator({
 	iconName,
 	iconSize = "md",
 	iconAnimate = true,
+	variant = "plain",
 	layout = "inline",
 	align = "left",
 	actionLabel = "Try again",
@@ -117,7 +125,14 @@ export function StateIndicator({
 		) : null);
 
 	return (
-		<div className={clsx(stateIndicatorStyles({ layout, align }), className)}>
+		<div
+			className={clsx(
+				stateIndicatorStyles({ variant, layout, align }),
+				className,
+			)}
+			data-slot="state-indicator"
+			data-variant={variant}
+		>
 			{iconName ? (
 				<Icon
 					name={iconName}

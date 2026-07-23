@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/Panel";
-import { Section } from "@/components/ui/primitives/Section";
+import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
+import { InternalPage, InternalPageHeader } from "../_components/InternalPage";
 
 const playgroundGroups = [
 	{
@@ -27,58 +27,49 @@ const playgroundGroups = [
 
 export default function PlaygroundIndexPage() {
 	return (
-		<main>
-			<Section padding="hero">
-				<div className="flex flex-col gap-6">
-					<header className="flex max-w-3xl flex-col gap-2">
-						<Text as="h1" variant="headingLg">
-							Playground
-						</Text>
-						<Text variant="body" tone="muted">
-							High-churn route experiments live here before they are structured
-							enough for the component demo catalog.
-						</Text>
-					</header>
+		<InternalPage>
+			<InternalPageHeader
+				title="Playground"
+				description="Focused experiments that have not moved into the component catalog."
+			/>
 
-					<div className="grid gap-4">
-						{playgroundGroups.map((group) => (
-							<Panel key={group.id} display="flex" padding="md" gap="md">
-								<div className="flex flex-col gap-2">
-									<Text as="h2" variant="headingSm">
-										{group.title}
-									</Text>
-									<Text variant="body" tone="muted">
-										{group.description}
-									</Text>
-								</div>
+			<div className="grid gap-8">
+				{playgroundGroups.map((group) => (
+					<section key={group.id} className="grid gap-3">
+						<div className="flex max-w-3xl flex-col gap-1">
+							<Text as="h2" variant="headingSm">
+								{group.title}
+							</Text>
+							<Text variant="body" tone="muted">
+								{group.description}
+							</Text>
+						</div>
 
-								<div className="grid gap-3 md:grid-cols-2">
-									{group.links.map((link) => (
-										<div
-											key={link.href}
-											className="flex flex-col gap-3 rounded-lg border border-border/10 bg-surface/50 p-4"
-										>
-											<div className="flex flex-col gap-1">
-												<Text as="h3" variant="headingXs">
-													{link.title}
-												</Text>
-												<Text variant="body" tone="muted">
-													{link.description}
-												</Text>
-											</div>
-											<div>
-												<Button href={link.href} size="sm" variant="secondary">
-													Open playground
-												</Button>
-											</div>
+						<div className="grid gap-4 md:grid-cols-2">
+							{group.links.map((link) => (
+								<Card key={link.href}>
+									<Card.Content className="flex h-full flex-col gap-4">
+										<div className="flex flex-1 flex-col gap-1">
+											<Card.Title as="h3">{link.title}</Card.Title>
+											<Text variant="body" tone="muted">
+												{link.description}
+											</Text>
 										</div>
-									))}
-								</div>
-							</Panel>
-						))}
-					</div>
-				</div>
-			</Section>
-		</main>
+										<Button
+											href={link.href}
+											size="sm"
+											variant="secondary"
+											className="w-fit"
+										>
+											Open playground
+										</Button>
+									</Card.Content>
+								</Card>
+							))}
+						</div>
+					</section>
+				))}
+			</div>
+		</InternalPage>
 	);
 }

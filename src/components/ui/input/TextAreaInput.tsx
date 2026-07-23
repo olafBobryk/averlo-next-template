@@ -2,12 +2,21 @@
 "use client";
 
 import * as React from "react";
+import {
+	InputSkeleton,
+	type InputSkeletonProps,
+} from "@/components/ui/input/InputSkeleton";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
 	type InputFrameSize,
-	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
+
+const textareaSizeClasses: Record<InputFrameSize, string> = {
+	sm: "h-20 min-h-9 px-3 py-2 text-base md:text-sm",
+	md: "min-h-[88px] px-[15px] py-2.5 text-sm",
+	lg: "min-h-[88px] px-4 py-3 text-base",
+};
 
 type TextAreaInputProps = {
 	label: React.ReactNode;
@@ -41,7 +50,7 @@ type TextAreaInputProps = {
 	size?: InputFrameSize;
 };
 
-export function TextAreaInput({
+function TextAreaInputRoot({
 	label,
 	description,
 	placeholder,
@@ -72,6 +81,7 @@ export function TextAreaInput({
 		[descriptionId, derivedError ? messageId : undefined]
 			.filter(Boolean)
 			.join(" ") || undefined;
+	const usesSourceDefaultSize = size === undefined || size === "sm";
 
 	const handleChange: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
 		const next = e.target.value;
@@ -98,7 +108,17 @@ export function TextAreaInput({
 			messageId={messageId}
 			className={className}
 		>
-			<InputFrame tone={tone} size={size} disabled={disabled} fullWidth>
+			<InputFrame
+				tone={tone}
+				size={size}
+				disabled={disabled}
+				fullWidth
+				contentClassName="flex min-w-0 self-stretch"
+				className={[
+					"h-auto items-start !rounded-2xl",
+					usesSourceDefaultSize ? "min-h-9" : "min-h-[88px]",
+				].join(" ")}
+			>
 				<textarea
 					id={inputId}
 					name={name}
@@ -107,12 +127,8 @@ export function TextAreaInput({
 					required={required}
 					rows={rows}
 					className={[
-						inputVariants({
-							size,
-							disabled: disabled ? true : undefined,
-						}),
-						"resize-y",
-						"min-h-[88px]", // a couple lines tall by default
+						"block w-full min-w-0 resize-y bg-transparent text-left text-foreground outline-none placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+						textareaSizeClasses[size ?? "sm"],
 						textareaClassName,
 					]
 						.filter(Boolean)
@@ -128,3 +144,20 @@ export function TextAreaInput({
 		</Field>
 	);
 }
+
+function TextAreaInputSkeleton(props: InputSkeletonProps) {
+	const usesSourceDefaultSize = props.size === undefined || props.size === "sm";
+	return (
+		<InputSkeleton
+			{...props}
+			radius="textarea"
+			inputClassName={
+				usesSourceDefaultSize ? "!h-[82px] min-h-[38px]" : "h-auto min-h-[88px]"
+			}
+		/>
+	);
+}
+
+export const TextAreaInput = Object.assign(TextAreaInputRoot, {
+	Skeleton: TextAreaInputSkeleton,
+});

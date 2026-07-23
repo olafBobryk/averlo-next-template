@@ -1,68 +1,55 @@
+import { Chip } from "@/components/ui/misc/Chip";
 import { Button } from "@/components/ui/primitives/Button";
-import Divider from "@/components/ui/primitives/Divider";
-import { Panel } from "@/components/ui/primitives/Panel";
-import { Section } from "@/components/ui/primitives/Section";
-import { Text } from "@/components/ui/primitives/Text";
+import { Card } from "@/components/ui/primitives/Card";
 import { hrefFor } from "@/lib/routes";
+import {
+	InternalPage,
+	InternalPageHeader,
+} from "../../../_components/InternalPage";
 import { LoadingScreenPreview } from "./LoadingScreenPreview";
 import { manifest } from "./manifest";
 
 export default function RiveLogoRevealDictionaryPage() {
 	return (
-		<Section innerClassName="flex flex-col gap-6">
-			<header className="flex flex-col gap-2">
-				<Text as="h1" variant="headingLg">
-					{manifest.title}
-				</Text>
-				<Text variant="body" tone="muted">
-					{manifest.summary}
-				</Text>
-			</header>
+		<InternalPage>
+			<InternalPageHeader
+				title={manifest.title}
+				description={manifest.summary}
+			/>
 
-			<Panel display="flex" padding="md" gap="md">
-				<Text as="h2" variant="headingSm">
-					Preview
-				</Text>
-				<Text variant="body" tone="muted">
-					This entry keeps the root-mount contract intact while leaving the
-					actual `.riv` runtime swap as a later integration step.
-				</Text>
-				<LoadingScreenPreview />
-			</Panel>
+			<Card>
+				<Card.Header className="border-b">
+					<Card.Title>Preview</Card.Title>
+					<Card.Description>
+						The mount contract is live; the final `.riv` asset remains an
+						integration step.
+					</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					<LoadingScreenPreview />
+				</Card.Content>
+			</Card>
 
-			<Panel display="flex" padding="md" gap="md">
-				<Text as="h2" variant="headingSm">
-					Adaptation points
-				</Text>
-				<div className="flex flex-wrap gap-2">
-					{manifest.adaptationPoints.map((point) => (
-						<Text
-							key={point}
-							variant="caption"
-							className="rounded-full border border-border/15 px-3 py-1"
-						>
-							{point}
-						</Text>
-					))}
-				</div>
-				<Divider />
-				<Text as="h3" variant="headingXs">
-					Notes
-				</Text>
-				<div className="flex flex-col gap-2">
-					{manifest.notes.map((note) => (
-						<Text key={note} variant="body" tone="muted">
-							{note}
-						</Text>
-					))}
-				</div>
-				<Divider />
-				<div className="flex flex-wrap gap-2">
+			<Card>
+				<Card.Header className="border-b">
+					<Card.Title>Implementation notes</Card.Title>
+				</Card.Header>
+				<Card.Content className="grid gap-5">
+					<div className="flex flex-wrap gap-2">
+						{manifest.adaptationPoints.map((point) => (
+							<Chip key={point}>{point}</Chip>
+						))}
+					</div>
+					<ul className="grid gap-2 text-muted-foreground">
+						{manifest.notes.map((note) => (
+							<li key={note}>{note}</li>
+						))}
+					</ul>
 					<Button href={hrefFor("dictionary")} size="sm" variant="secondary">
 						Back to dictionary
 					</Button>
-				</div>
-			</Panel>
-		</Section>
+				</Card.Content>
+			</Card>
+		</InternalPage>
 	);
 }

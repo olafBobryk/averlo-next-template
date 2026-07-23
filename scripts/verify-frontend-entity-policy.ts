@@ -23,7 +23,10 @@ for (const [, key, value] of markers) {
 assert.ok(policy.includes("--no-dashboard-reference-entities"));
 
 for (const relativePath of [
+	"src/app/(site)/dashboard/_lib/entities/account/presentation.ts",
+	"src/app/(site)/dashboard/_lib/entities/invitation/presentation.ts",
 	"src/app/(site)/dashboard/_lib/entities/member/presentation.ts",
+	"src/app/(site)/dashboard/_lib/entities/organization/presentation.ts",
 	"src/app/(site)/dashboard/_lib/entities/record/presentation.ts",
 ]) {
 	const source = readFileSync(resolve(root, relativePath), "utf8");

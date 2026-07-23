@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { DashboardDetailField } from "@/app/(site)/dashboard/_components/detail/DashboardDetailField";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
-import { Text } from "@/components/ui/primitives/Text";
 import { getSafeContinuationPath } from "@/lib/auth/continuation";
 import { toPublicAuthError } from "@/lib/auth/errors";
 import { applicationAdapters } from "@/lib/auth/server";
@@ -44,42 +45,30 @@ export default async function InvitationPage({
 
 	return (
 		<AuthScreen
-			description="Review the recipient and organization. Access changes only after the explicit POST action below."
+			description="Review this invitation before joining the organization."
+			icon="mail"
 			message={query.message}
 			title="Review invitation"
 		>
 			{invitation ? (
 				<>
-					<div className="grid gap-3 rounded-lg border border-border bg-surface-subtle p-4">
-						<div>
-							<Text as="div" tone="muted" variant="caption">
-								Organization
-							</Text>
-							<Text as="div" variant="bodyStrong">
-								{organization?.name ?? invitation.organizationId}
-							</Text>
-						</div>
-						<div>
-							<Text as="div" tone="muted" variant="caption">
-								Recipient
-							</Text>
-							<Text as="div" variant="bodyStrong">
-								{invitation.email}
-							</Text>
-						</div>
-						<div>
-							<Text as="div" tone="muted" variant="caption">
-								Access
-							</Text>
-							<Text as="div" className="capitalize" variant="bodyStrong">
-								{invitation.role}
-							</Text>
-						</div>
-					</div>
-					<StatusMessage tone="info">
-						This GET page is intentionally inert so mail scanners cannot accept
-						one-time invitations.
-					</StatusMessage>
+					<dl className="grid gap-4 sm:grid-cols-2">
+						<DashboardDetailField
+							icon={<Icon name="building" size="sm" />}
+							label="Organization"
+							value={organization?.name ?? invitation.organizationId}
+						/>
+						<DashboardDetailField
+							icon={<Icon name="mail" size="sm" />}
+							label="Recipient"
+							value={invitation.email}
+						/>
+						<DashboardDetailField
+							icon={<Icon name="shield" size="sm" />}
+							label="Access"
+							value={<span className="capitalize">{invitation.role}</span>}
+						/>
+					</dl>
 					<form action={acceptInvitationAction} className="grid gap-3">
 						<input name="invitation" type="hidden" value={invitationId} />
 						<input name="token" type="hidden" value={tokenHash} />

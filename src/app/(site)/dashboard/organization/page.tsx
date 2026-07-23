@@ -1,64 +1,98 @@
+import { Icon } from "@/components/ui/icons/Icon";
 import { Chip } from "@/components/ui/misc/Chip";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
-import { Text } from "@/components/ui/primitives/Text";
+import { DashboardDetailField } from "../_components/detail/DashboardDetailField";
+import { OrganizationIdentity } from "../_components/entities/organization/OrganizationIdentity";
+import {
+	DashboardFooterNote,
+	DashboardFooterNoteLink,
+} from "../_components/layout/DashboardFooterNote";
 import { DashboardSection } from "../_components/layout/DashboardSection";
+import { memberRolePresentation } from "../_lib/entities/member/presentation";
+import { toOrganizationEntity } from "../_lib/entities/organization/domain";
+import { getOrganizationPresentation } from "../_lib/entities/organization/presentation";
 import { requireDashboardCapability } from "../_registry/access.server";
 
 export default async function DashboardOrganizationPage() {
 	const { capabilities, context } =
 		await requireDashboardCapability("organization.read");
+	const presentation = getOrganizationPresentation(
+		toOrganizationEntity(context.organization, context.membership.role),
+	);
+	const canManage = capabilities.has("organization.manage");
+	const rolePresentation = memberRolePresentation[context.membership.role];
+
 	return (
 		<DashboardSection
 			actions={
-				capabilities.has("organization.manage") ? (
-					<Button href="/dashboard/organization/settings" size="sm">
+				canManage ? (
+					<Button
+						href="/dashboard/organization/settings"
+						size="sm"
+						variant="primary"
+					>
 						Organization settings
 					</Button>
 				) : null
 			}
-			description="The active organization remains the authorization and persistence boundary even in singleton mode."
-			title={context.organization.name}
+			contentClassName="grid gap-5"
+			title="Organization"
 		>
-			<div className="grid gap-4 md:grid-cols-2">
-				<Card>
-					<Card.Header>
-						<Card.Title>Organization context</Card.Title>
-						<Card.Description>
-							Resolved on the server before every dashboard request.
-						</Card.Description>
-					</Card.Header>
-					<Card.Content className="grid gap-4">
-						<div className="flex items-center justify-between gap-3">
-							<Text tone="muted">Mode</Text>
-							<Chip className="capitalize">{context.organization.mode}</Chip>
-						</div>
-						<div className="flex items-center justify-between gap-3">
-							<Text tone="muted">Your role</Text>
-							<Chip className="capitalize">{context.membership.role}</Chip>
-						</div>
-					</Card.Content>
-				</Card>
-				{/* prune:dashboard.reference-entities:start */}
-				<Card>
-					<Card.Header>
-						<Card.Title>Members</Card.Title>
-						<Card.Description>
-							Use the member surface for identity and organization access.
-						</Card.Description>
-					</Card.Header>
-					<Card.Content>
-						<Button
-							href="/dashboard/organization/members"
-							size="sm"
-							variant="secondary"
-						>
-							Open members
-						</Button>
-					</Card.Content>
-				</Card>
-				{/* prune:dashboard.reference-entities:end */}
-			</div>
+			<Card>
+				<Card.Header className="border-b">
+					<Card.Title className="inline-flex items-center gap-2">
+						<Icon className="text-muted-foreground" name="building" size="sm" />
+						Organization identity
+					</Card.Title>
+					<Card.Description>
+						The active organization for this dashboard session.
+					</Card.Description>
+				</Card.Header>
+				<Card.Content className="grid gap-5">
+					<OrganizationIdentity avatarSize="xl" presentation={presentation} />
+					<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
+						<DashboardDetailField
+							icon={<Icon name="building" size="sm" />}
+							label="Name"
+							value={context.organization.name}
+						/>
+						<DashboardDetailField
+							copyLabel="Copy organization slug"
+							copyValue={context.organization.slug}
+							icon={<Icon name="at" size="sm" />}
+							label="Slug"
+							value={context.organization.slug}
+						/>
+						<DashboardDetailField
+							icon={<Icon name="shield" size="sm" />}
+							label="Your role"
+							value={
+								<Chip color={rolePresentation.tone}>
+									{rolePresentation.shortLabel}
+								</Chip>
+							}
+						/>
+						<DashboardDetailField
+							icon={<Icon name="users" size="sm" />}
+							label="Organization mode"
+							value={
+								context.organization.mode === "multi"
+									? "Multi-organization"
+									: "Single organization"
+							}
+						/>
+					</dl>
+				</Card.Content>
+			</Card>
+
+			<DashboardFooterNote>
+				Looking for account preferences?{" "}
+				<DashboardFooterNoteLink href="/dashboard/settings">
+					Open Account settings
+				</DashboardFooterNoteLink>
+				.
+			</DashboardFooterNote>
 		</DashboardSection>
 	);
 }

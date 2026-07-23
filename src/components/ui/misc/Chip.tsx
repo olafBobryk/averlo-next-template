@@ -4,6 +4,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { createSurfaceTint } from "@/components/ui/foundations/surfaceTint";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { Text } from "@/components/ui/primitives/Text";
@@ -19,11 +20,17 @@ export type ChipTone =
 	| "danger"
 	| "helper";
 
+export type ChipSize = "sm" | "none";
+export type ChipContentMode = "label" | "contents";
+
 export type ChipProps = {
+	as?: "span" | "div";
 	children: React.ReactNode;
 	href?: string | null;
 	disabled?: boolean;
 	tone?: ChipTone;
+	size?: ChipSize;
+	contentMode?: ChipContentMode;
 	helperIndex?: number;
 	color?: string | null;
 	leadingIcon?: IconProp;
@@ -40,6 +47,9 @@ export type ChipProps = {
 
 type ChipStyle = React.CSSProperties & {
 	"--chip-accent"?: string;
+	"--chip-background"?: string;
+	"--chip-background-active"?: string;
+	"--chip-background-hover"?: string;
 	"--chip-color"?: string;
 };
 
@@ -55,8 +65,8 @@ export type ChipSkeletonProps = {
 export const chipCanvasTokens = {
 	backgroundColor: "rgba(255,255,255,0.86)",
 	mutedBackgroundColor: "rgba(255,255,255,0.56)",
-	borderColor: "rgba(15,23,42,0.14)",
-	mutedBorderColor: "rgba(15,23,42,0.09)",
+	borderColor: "transparent",
+	mutedBorderColor: "transparent",
 	borderWidth: 1,
 	fontFamily: "Geist, Arial, sans-serif",
 	fontWeight: 500,
@@ -99,19 +109,104 @@ const chipColorTokenValues: Record<string, string> = {
 	warning: "var(--warning)",
 };
 
+const CHIP_SURFACE_COLOR = "var(--ui-surface-color,var(--color-background))";
+
+type ChipBackgroundRecipe = {
+	activePercentage: number;
+	hoverPercentage: number;
+	tint: string;
+	tintPercentage: number;
+};
+
+const chipToneBackgroundRecipes: Partial<
+	Record<ChipTone, ChipBackgroundRecipe>
+> = {
+	neutral: {
+		activePercentage: 12,
+		hoverPercentage: 8,
+		tint: "var(--foreground)",
+		tintPercentage: 5,
+	},
+	primary: {
+		activePercentage: 20,
+		hoverPercentage: 15,
+		tint: "var(--primary)",
+		tintPercentage: 10,
+	},
+	success: {
+		activePercentage: 20,
+		hoverPercentage: 15,
+		tint: "var(--success)",
+		tintPercentage: 10,
+	},
+	warning: {
+		activePercentage: 20,
+		hoverPercentage: 15,
+		tint: "var(--warning)",
+		tintPercentage: 10,
+	},
+	danger: {
+		activePercentage: 20,
+		hoverPercentage: 15,
+		tint: "var(--danger)",
+		tintPercentage: 10,
+	},
+	helper: {
+		activePercentage: 24,
+		hoverPercentage: 18,
+		tint: "var(--chip-accent)",
+		tintPercentage: 12,
+	},
+};
+
+function createChipBackgroundStyle(recipe?: ChipBackgroundRecipe): ChipStyle {
+	if (!recipe) return {};
+	return {
+		"--chip-background": createSurfaceTint({
+			surface: CHIP_SURFACE_COLOR,
+			space: "srgb",
+			tint: recipe.tint,
+			tintPercentage: recipe.tintPercentage,
+		}),
+		"--chip-background-active": createSurfaceTint({
+			surface: CHIP_SURFACE_COLOR,
+			space: "srgb",
+			tint: recipe.tint,
+			tintPercentage: recipe.activePercentage,
+		}),
+		"--chip-background-hover": createSurfaceTint({
+			surface: CHIP_SURFACE_COLOR,
+			space: "srgb",
+			tint: recipe.tint,
+			tintPercentage: recipe.hoverPercentage,
+		}),
+	};
+}
+
 const toneClasses: Record<ChipTone, string> = {
-	plain: "border-border bg-background text-foreground",
-	neutral: "border-border bg-background/80 text-foreground/80",
+	plain: "bg-transparent text-foreground",
+	neutral: "bg-[var(--chip-background)] text-foreground/80",
+	primary: "bg-[var(--chip-background)] text-primary",
+	success: "bg-[var(--chip-background)] text-success",
+	warning: "bg-[var(--chip-background)] text-warning",
+	danger: "bg-[var(--chip-background)] text-danger",
+	helper: "bg-[var(--chip-background)] text-[color:var(--chip-accent)]",
+};
+
+const interactiveToneClasses: Record<ChipTone, string> = {
+	plain: "hover:bg-transparent active:bg-transparent",
+	neutral:
+		"hover:bg-[var(--chip-background-hover)] hover:text-foreground active:bg-[var(--chip-background-active)]",
 	primary:
-		"border-primary/25 bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-background))] text-primary",
+		"hover:bg-[var(--chip-background-hover)] active:bg-[var(--chip-background-active)]",
 	success:
-		"border-success/25 bg-[color-mix(in_srgb,var(--color-success)_8%,var(--color-background))] text-success",
+		"hover:bg-[var(--chip-background-hover)] active:bg-[var(--chip-background-active)]",
 	warning:
-		"border-warning/25 bg-[color-mix(in_srgb,var(--color-warning)_10%,var(--color-background))] text-warning",
+		"hover:bg-[var(--chip-background-hover)] active:bg-[var(--chip-background-active)]",
 	danger:
-		"border-danger/25 bg-[color-mix(in_srgb,var(--color-danger)_8%,var(--color-background))] text-danger",
+		"hover:bg-[var(--chip-background-hover)] active:bg-[var(--chip-background-active)]",
 	helper:
-		"border-[color:var(--chip-accent)] bg-[color-mix(in_srgb,var(--chip-accent)_12%,var(--color-background))] text-[color:var(--chip-accent)]",
+		"hover:bg-[var(--chip-background-hover)] active:bg-[var(--chip-background-active)]",
 };
 
 function normalizeHelperIndex(index: number) {
@@ -139,27 +234,37 @@ function renderIcon(icon?: IconProp) {
 function chipClassName(
 	disabled?: boolean,
 	tone: ChipTone = "neutral",
+	size: ChipSize = "sm",
 	className?: string,
 	customColor?: string | null,
+	isInteractive = false,
 ) {
 	return clsx(
-		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 rounded-md border px-2 py-1 transition-colors motion-interactive",
+		"inline-flex min-w-0 max-w-full items-center justify-center rounded-full border border-transparent",
+		size === "sm" ? "gap-1.5 px-2 py-1" : "gap-0 p-0",
 		customColor === "muted"
-			? "border-border bg-muted text-muted-foreground"
+			? "bg-[var(--chip-background)] text-muted-foreground"
 			: customColor
-				? "[border-color:color-mix(in_oklch,var(--chip-color)_25%,transparent)] [background-color:color-mix(in_oklch,var(--chip-color)_10%,transparent)] text-[var(--chip-color)]"
+				? "bg-[var(--chip-background)] text-[var(--chip-color)]"
 				: toneClasses[tone],
 		disabled
 			? "cursor-not-allowed opacity-50"
-			: "hover:border-foreground/20 hover:bg-background-hover hover:text-foreground",
-		focusRing.visibleDefault,
+			: isInteractive && [
+					"cursor-pointer transition-colors motion-interactive",
+					customColor === "muted"
+						? "hover:bg-[var(--chip-background-hover)] active:bg-[var(--chip-background-active)]"
+						: customColor
+							? "hover:bg-[var(--chip-background-hover)] active:bg-[var(--chip-background-active)]"
+							: interactiveToneClasses[tone],
+					focusRing.visibleDefault,
+				],
 		className,
 	);
 }
 
 function chipSkeletonClassName(className?: string) {
 	return clsx(
-		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 rounded-md border px-2 py-1",
+		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 rounded-full border px-2 py-1",
 		"pointer-events-none border-transparent !bg-muted/80",
 		className,
 	);
@@ -229,10 +334,13 @@ function ChipSkeleton({
 
 const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 	{
+		as,
 		children,
 		color,
+		contentMode = "label",
 		href,
 		disabled,
+		size = "sm",
 		tone = "neutral",
 		helperIndex = 0,
 		leadingIcon,
@@ -252,24 +360,46 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 					"--chip-accent": `var(--color-helper-${normalizeHelperIndex(helperIndex)})`,
 				}
 			: undefined;
-	const resolvedStyle = helperStyle ? { ...helperStyle, ...style } : style;
 	const resolvedColor = resolveChipColor(color);
 	const colorStyle: ChipStyle =
 		resolvedColor && resolvedColor !== "muted"
-			? { "--chip-accent": resolvedColor, "--chip-color": resolvedColor }
+			? {
+					"--chip-accent": resolvedColor,
+					"--chip-color": resolvedColor,
+				}
 			: {};
-	const mergedStyle = { ...colorStyle, ...resolvedStyle };
+	const backgroundRecipe =
+		resolvedColor && resolvedColor !== "muted"
+			? {
+					activePercentage: 24,
+					hoverPercentage: 18,
+					tint: resolvedColor,
+					tintPercentage: 10,
+				}
+			: resolvedColor === "muted"
+				? chipToneBackgroundRecipes.neutral
+				: chipToneBackgroundRecipes[tone];
+	const mergedStyle = {
+		...helperStyle,
+		...colorStyle,
+		...createChipBackgroundStyle(backgroundRecipe),
+		...style,
+	};
 	const content = (
 		<>
 			{renderIcon(leadingIcon)}
-			<span
-				className={clsx(
-					"min-w-0 truncate text-xs font-medium",
-					contentClassName,
-				)}
-			>
-				{children}
-			</span>
+			{contentMode === "contents" ? (
+				children
+			) : (
+				<span
+					className={clsx(
+						"min-w-0 truncate text-xs font-medium",
+						contentClassName,
+					)}
+				>
+					{children}
+				</span>
+			)}
 			{renderIcon(trailingIcon)}
 		</>
 	);
@@ -279,7 +409,14 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 			<Link
 				ref={ref as React.Ref<HTMLAnchorElement>}
 				href={href}
-				className={chipClassName(disabled, tone, className, resolvedColor)}
+				className={chipClassName(
+					disabled,
+					tone,
+					size,
+					className,
+					resolvedColor,
+					true,
+				)}
 				style={mergedStyle}
 				title={title}
 				{...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
@@ -296,7 +433,14 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 				type="button"
 				disabled={disabled}
 				onClick={onClick as React.MouseEventHandler<HTMLButtonElement>}
-				className={chipClassName(disabled, tone, className, resolvedColor)}
+				className={chipClassName(
+					disabled,
+					tone,
+					size,
+					className,
+					resolvedColor,
+					true,
+				)}
 				style={mergedStyle}
 				title={title}
 				{...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
@@ -306,12 +450,28 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 		);
 	}
 
+	const staticProps = {
+		className: chipClassName(disabled, tone, size, className, resolvedColor),
+		style: mergedStyle,
+		title,
+	};
+
+	if (as === "div") {
+		return (
+			<div
+				ref={ref as React.Ref<HTMLDivElement>}
+				{...staticProps}
+				{...(rest as React.HTMLAttributes<HTMLDivElement>)}
+			>
+				{content}
+			</div>
+		);
+	}
+
 	return (
 		<span
 			ref={ref as React.Ref<HTMLSpanElement>}
-			className={chipClassName(disabled, tone, className, resolvedColor)}
-			style={mergedStyle}
-			title={title}
+			{...staticProps}
 			{...(rest as React.HTMLAttributes<HTMLSpanElement>)}
 		>
 			{content}

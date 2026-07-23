@@ -32,7 +32,19 @@ type MultiselectInputProps = {
 	labelClassName?: string;
 };
 
-export function MultiselectInput({
+type MultiselectInputSkeletonProps = Pick<
+	MultiselectInputProps,
+	| "className"
+	| "description"
+	| "fieldClassName"
+	| "label"
+	| "labelClassName"
+	| "optionClassName"
+	| "options"
+	| "required"
+>;
+
+function MultiselectInputRoot({
 	label,
 	description,
 	message,
@@ -126,3 +138,41 @@ export function MultiselectInput({
 		</Field>
 	);
 }
+
+function MultiselectInputSkeleton({
+	className,
+	description,
+	fieldClassName,
+	label,
+	labelClassName,
+	optionClassName,
+	options,
+	required,
+}: MultiselectInputSkeletonProps) {
+	return (
+		<Field
+			className={fieldClassName}
+			description={description}
+			disableMessage
+			label={label}
+			required={required}
+		>
+			<div className={clsx("flex flex-col gap-3", className)}>
+				{options.map((option) => (
+					<ChoiceField.Skeleton
+						className={optionClassName}
+						description={option.description}
+						indicator="checkbox"
+						key={option.value}
+						label={option.label}
+						labelClassName={labelClassName}
+					/>
+				))}
+			</div>
+		</Field>
+	);
+}
+
+export const MultiselectInput = Object.assign(MultiselectInputRoot, {
+	Skeleton: MultiselectInputSkeleton,
+});

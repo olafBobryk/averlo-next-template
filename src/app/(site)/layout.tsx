@@ -7,58 +7,6 @@ import { SettingsProvider } from "@/components/ui/foundations/settingsContext";
 import { IconProvider } from "@/components/ui/icons/iconRegistry";
 import { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";
 
-const motionOverrideScript = `
-(() => {
-	try {
-		const params = new URLSearchParams(window.location.search);
-		const isOff = (value) => value === "off" || value === "false";
-		const motion = params.get("motion")?.toLowerCase();
-		const reveal = params.get("reveal")?.toLowerCase();
-		const intro = params.get("intro")?.toLowerCase();
-		const loading = params.get("loading")?.toLowerCase();
-		const motionDisabled = isOff(motion) || isOff(reveal);
-		const loadingDisabled = motionDisabled || isOff(intro) || isOff(loading);
-
-		if (motionDisabled) {
-			document.documentElement.dataset.motionOverride = "off";
-		} else {
-			delete document.documentElement.dataset.motionOverride;
-		}
-
-		if (loadingDisabled) {
-			document.documentElement.dataset.loadingOverride = "off";
-			if (!document.getElementById("loading-screen-override-style")) {
-				const style = document.createElement("style");
-				style.id = "loading-screen-override-style";
-				style.textContent = '[data-loading-screen-mount="true"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}';
-				document.head.appendChild(style);
-			}
-			const removeLoadingMount = () => {
-				document
-					.querySelectorAll('[data-loading-screen-mount="true"]')
-					.forEach((node) => node.remove());
-			};
-			const observer = new MutationObserver(removeLoadingMount);
-			observer.observe(document.documentElement, {
-				childList: true,
-				subtree: true,
-			});
-			removeLoadingMount();
-			window.addEventListener(
-				"DOMContentLoaded",
-				() => {
-					removeLoadingMount();
-					observer.disconnect();
-				},
-				{ once: true },
-			);
-		} else {
-			delete document.documentElement.dataset.loadingOverride;
-		}
-	} catch {}
-})();
-`;
-
 export default function SiteLayout({
 	children,
 }: Readonly<{
@@ -68,11 +16,6 @@ export default function SiteLayout({
 		<SettingsProvider>
 			<MotionProvider expressive={0}>
 				<IconProvider registry={phosphorIconRegistry}>
-					<script
-						// Runs before the loading mount appears so automation URLs never see it.
-						// biome-ignore lint/security/noDangerouslySetInnerHtml: Static bootstrap script reads URL params before hydration.
-						dangerouslySetInnerHTML={{ __html: motionOverrideScript }}
-					/>
 					{children}
 					<FormValidationClientMount />
 					<LoadingScreenMount />

@@ -2,8 +2,7 @@
 
 import { getVisibleDemoPages } from "@/app/(site)/(marketing)/internal/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
-import Divider from "@/components/ui/primitives/Divider";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 
 function groupPages() {
@@ -27,58 +26,39 @@ export default function DemoIndexPage() {
 	const grouped = groupPages();
 
 	return (
-		<div className="w-full space-y-5">
+		<div className="w-full space-y-6">
 			<header className="flex flex-col gap-2">
 				<Text as="h1" variant="headingLg">
 					Demo Index
 				</Text>
 				<Text variant="body" tone="muted">
-					Browse the component library demos. All content is driven by
-					<code className="ml-1">
-						src/app/(site)/(marketing)/internal/demo/content.tsx
-					</code>
-					.
+					Browse live components, states, and skeletons.
 				</Text>
 			</header>
 
-			<Panel display="flex" padding="sm" gap="sm" shadow="none">
-				<Text variant="body">
-					Need to add a demo? Update the content map and it appears everywhere.
-				</Text>
-				<Button href="/internal/demo/ui/primitives" variant="primary" size="sm">
-					Jump to UI Primitives
-				</Button>
-			</Panel>
-
-			<Divider />
-
-			<div className="grid gap-4">
+			<div className="grid gap-6">
 				{grouped.map((group) => (
-					<Panel
-						key={group.key}
-						display="flex"
-						padding="sm"
-						gap="sm"
-						shadow="none"
-					>
-						<div className="flex flex-col gap-2">
-							<Text as="h2" variant="headingSm">
-								{group.key.toUpperCase()}
-							</Text>
-							<div className="flex flex-wrap gap-2">
-								{group.pages.map((page) => (
-									<Button
-										key={page.id}
-										href={`/internal/demo/${page.slug.join("/")}`}
-										variant="secondary"
-										size="sm"
-									>
-										{page.title}
-									</Button>
-								))}
-							</div>
-						</div>
-					</Panel>
+					<section key={group.key} className="grid gap-3">
+						<Text as="h2" variant="headingSm">
+							{group.key.toUpperCase()}
+						</Text>
+						<Card>
+							<Card.Content>
+								<div className="flex flex-wrap gap-2">
+									{group.pages.map((page) => (
+										<Button
+											key={page.id}
+											href={`/internal/demo/${page.slug.join("/")}`}
+											variant="secondary"
+											size="sm"
+										>
+											{page.title}
+										</Button>
+									))}
+								</div>
+							</Card.Content>
+						</Card>
+					</section>
 				))}
 			</div>
 		</div>

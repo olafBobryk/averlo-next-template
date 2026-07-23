@@ -5,6 +5,8 @@ import {
 	getMemberPresentation,
 	memberColumnDefinitions,
 } from "../src/app/(site)/dashboard/_lib/entities/member/presentation";
+import { toOrganizationEntity } from "../src/app/(site)/dashboard/_lib/entities/organization/domain";
+import { getOrganizationPresentation } from "../src/app/(site)/dashboard/_lib/entities/organization/presentation";
 import {
 	getRecordPresentation,
 	recordColumnDefinitions,
@@ -40,6 +42,24 @@ assert.equal(
 );
 assert.equal(memberColumnDefinitions.length, 3);
 assert.ok(memberView.href.endsWith(member.id));
+
+const organizationView = getOrganizationPresentation(
+	toOrganizationEntity(
+		{
+			id: "org-policy-example",
+			mode: "multi",
+			name: "Example Organization",
+			profilePictureUrl: undefined,
+			slug: "example",
+		},
+		"owner",
+	),
+);
+assert.equal(organizationView.displayLabel, "Example Organization");
+assert.equal(organizationView.initials, "EO");
+assert.equal(organizationView.secondaryLabel, "example · Owner");
+assert.equal(organizationView.avatarUrl, null);
+assert.match(organizationView.searchText, /Example Organization example Owner/);
 
 resetReferenceRecordFixtureState();
 assert.equal(listReferenceRecords("org-demo").length, 3);

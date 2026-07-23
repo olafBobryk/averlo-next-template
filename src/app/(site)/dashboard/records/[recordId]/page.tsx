@@ -41,7 +41,6 @@ export default async function DashboardRecordPage({
 					record={record}
 				/>
 			}
-			breadcrumbLabel={presentation.title}
 			description={`Reference detail in ${context.organization.name}.`}
 			title={presentation.title}
 		>

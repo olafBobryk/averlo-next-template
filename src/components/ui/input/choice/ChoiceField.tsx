@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import * as React from "react";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { Text } from "@/components/ui/primitives/Text";
 
 type ChoiceFieldProps = {
@@ -24,7 +25,14 @@ type ChoiceFieldProps = {
 	labelClassName?: string;
 };
 
-export function ChoiceField({
+type ChoiceFieldSkeletonProps = Pick<
+	ChoiceFieldProps,
+	"className" | "description" | "label" | "labelClassName"
+> & {
+	indicator?: "checkbox" | "radio" | "toggle";
+};
+
+function ChoiceFieldRoot({
 	id,
 	name,
 	value,
@@ -95,20 +103,77 @@ export function ChoiceField({
 			{indicator}
 			<span className="flex flex-col items-start">
 				{label ? (
-					<Text
-						as="span"
-						variant="body"
-						className={clsx("text-sm", labelClassName)}
+					<span
+						className={clsx(
+							"text-sm font-medium text-foreground",
+							labelClassName,
+						)}
 					>
 						{label}
-					</Text>
+					</span>
 				) : null}
 				{description ? (
-					<Text as="span" variant="caption" tone="muted">
+					<span className="text-xs font-medium text-muted-foreground">
 						{description}
-					</Text>
+					</span>
 				) : null}
 			</span>
 		</label>
 	);
 }
+
+function ChoiceFieldSkeleton({
+	className,
+	description,
+	indicator = "radio",
+	label,
+	labelClassName,
+}: ChoiceFieldSkeletonProps) {
+	return (
+		<div
+			aria-hidden
+			className={clsx("flex w-full items-center gap-3 text-left", className)}
+		>
+			<Skeleton
+				data-slot="choice-indicator-skeleton"
+				className={clsx(
+					"shrink-0",
+					indicator === "toggle"
+						? "h-[26px] w-[42px] !rounded-full"
+						: indicator === "checkbox"
+							? "size-[22px] !rounded-[8px]"
+							: "size-[22px] !rounded-full",
+				)}
+			/>
+			<span className="flex min-w-0 flex-col items-start">
+				{label ? (
+					<Text.Skeleton
+						as="span"
+						className={clsx(
+							"max-w-full text-sm font-medium text-foreground",
+							labelClassName,
+						)}
+						tone={null}
+						variant={null}
+					>
+						{label}
+					</Text.Skeleton>
+				) : null}
+				{description ? (
+					<Text.Skeleton
+						as="span"
+						className="max-w-full text-xs font-medium text-muted-foreground"
+						tone={null}
+						variant={null}
+					>
+						{description}
+					</Text.Skeleton>
+				) : null}
+			</span>
+		</div>
+	);
+}
+
+export const ChoiceField = Object.assign(ChoiceFieldRoot, {
+	Skeleton: ChoiceFieldSkeleton,
+});

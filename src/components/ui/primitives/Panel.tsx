@@ -6,19 +6,19 @@ import type {
 	ElementType,
 	ReactNode,
 } from "react";
-import { type AccentTone, getAccentClassName } from "./accent";
+import { type AccentTone, getAccentClassName, getAccentStyle } from "./accent";
 
 export type { AccentTone } from "./accent";
 
 const panelStyles = cva("text-foreground", {
 	variants: {
 		background: {
-			background: "bg-background",
-			card: "bg-card text-card-foreground",
-			muted: "bg-muted",
-			surface: "bg-surface",
+			background: "bg-background [--ui-surface-color:var(--color-background)]",
+			card: "bg-card text-card-foreground [--ui-surface-color:var(--color-card)]",
+			muted: "bg-muted [--ui-surface-color:var(--color-muted)]",
+			surface: "bg-surface [--ui-surface-color:var(--color-surface)]",
 			transparent: "bg-transparent",
-			white: "bg-background",
+			white: "bg-background [--ui-surface-color:var(--color-background)]",
 		},
 		border: {
 			default: "border border-border",
@@ -124,6 +124,7 @@ export function Panel<T extends ElementType = "div">({
 	ref,
 	shadow,
 	solidAccentBackground = false,
+	style,
 	tone,
 	width,
 	...rest
@@ -156,6 +157,12 @@ export function Panel<T extends ElementType = "div">({
 			data-accent={accent ?? undefined}
 			data-solid-accent-background={solidAccentBackground || undefined}
 			data-slot="panel"
+			style={{
+				...getAccentStyle(accent, "surface", {
+					solidBackground: solidAccentBackground,
+				}),
+				...style,
+			}}
 			{...(rest as ComponentPropsWithoutRef<ElementType>)}
 		>
 			{children}

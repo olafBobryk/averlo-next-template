@@ -11,15 +11,41 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { ChoiceIndicatorMulti } from "@/components/ui/input/choice/ChoiceIndicators";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { Button, type ButtonProps } from "@/components/ui/primitives/Button";
 import { Text, textVariants } from "@/components/ui/primitives/Text";
 import { splitMarkdownUserMentions } from "@/lib/markdown-mentions";
+import {
+	getMarkdownContentClassName,
+	type MarkdownContentDensity,
+} from "./markdownContent";
 
 export type MarkdownRendererProps = {
 	className?: string;
+	density?: MarkdownContentDensity;
 	markdown: string;
 	resolveUserMention?: (memberId: string) => ReactNode;
+	variant?: MarkdownRendererVariant;
 };
+
+export type MarkdownRendererVariant = "contained" | "result";
+
+const markdownRendererVariantClassNames: Record<
+	MarkdownRendererVariant,
+	string
+> = {
+	contained: "rounded-lg border border-border bg-background p-3",
+	result: "",
+};
+
+const markdownSkeletonLineKeys = [
+	"alpha",
+	"bravo",
+	"charlie",
+	"delta",
+	"echo",
+	"foxtrot",
+];
 
 type MarkdownAstNode = {
 	children?: MarkdownAstNode[];
@@ -72,6 +98,67 @@ function transformMarkdownMentions(node: MarkdownAstNode) {
 
 function remarkUserMentions() {
 	return (tree: MarkdownAstNode) => transformMarkdownMentions(tree);
+}
+
+const underlineOpenTagPattern = /^<u>$/i;
+const underlineCloseTagPattern = /^<\/u>$/i;
+
+function isUnderlineHtmlNode(node: MarkdownAstNode, pattern: RegExp): boolean {
+	return (
+		node.type === "html" &&
+		typeof node.value === "string" &&
+		pattern.test(node.value.trim())
+	);
+}
+
+function findUnderlineClose(children: MarkdownAstNode[], startIndex: number) {
+	let depth = 1;
+	for (let index = startIndex + 1; index < children.length; index += 1) {
+		const child = children[index];
+		if (!child) continue;
+		if (isUnderlineHtmlNode(child, underlineOpenTagPattern)) {
+			depth += 1;
+			continue;
+		}
+		if (!isUnderlineHtmlNode(child, underlineCloseTagPattern)) continue;
+		depth -= 1;
+		if (depth === 0) return index;
+	}
+	return -1;
+}
+
+function transformMarkdownUnderline(node: MarkdownAstNode) {
+	if (!node.children) return;
+	const nextChildren: MarkdownAstNode[] = [];
+
+	for (let index = 0; index < node.children.length; index += 1) {
+		const child = node.children[index];
+		if (!child) continue;
+
+		if (isUnderlineHtmlNode(child, underlineOpenTagPattern)) {
+			const closeIndex = findUnderlineClose(node.children, index);
+			if (closeIndex >= 0) {
+				const underlineNode: MarkdownAstNode = {
+					children: node.children.slice(index + 1, closeIndex),
+					data: { hName: "u" },
+					type: "underline",
+				};
+				transformMarkdownUnderline(underlineNode);
+				nextChildren.push(underlineNode);
+				index = closeIndex;
+				continue;
+			}
+		}
+
+		transformMarkdownUnderline(child);
+		nextChildren.push(child);
+	}
+
+	node.children = nextChildren;
+}
+
+function remarkSafeUnderline() {
+	return (tree: MarkdownAstNode) => transformMarkdownUnderline(tree);
 }
 
 function getUserMentionId(node: unknown) {
@@ -224,8 +311,9 @@ function MarkdownButton({ button }: { button: MarkdownButtonDirective }) {
 	const external = isExternalHref(button.href);
 
 	return (
-		<div className="flex w-full max-w-full">
+		<div className="my-3 flex w-full max-w-full">
 			<Button
+				data-slot="markdown-button"
 				href={button.href}
 				size={button.size}
 				tone={button.tone}
@@ -276,15 +364,7 @@ function createMarkdownComponents(
 				</a>
 			);
 		},
-		blockquote: ({ children }) => (
-			<blockquote className="grid max-w-full grid-cols-[4px_1fr] gap-4 rounded-md bg-surface/70 py-3 pr-4 text-foreground/75">
-				<span
-					aria-hidden="true"
-					className="h-full min-h-8 rounded-full bg-primary/35"
-				/>
-				<div className="grid min-w-0 gap-3">{children}</div>
-			</blockquote>
-		),
+		blockquote: ({ children }) => <blockquote>{children}</blockquote>,
 		code: ({ children, className }) => (
 			<code
 				className={clsx(
@@ -374,7 +454,7 @@ function createMarkdownComponents(
 			if (type !== "checkbox") return null;
 
 			return (
-				<span className="group mt-[0.08em] inline-flex shrink-0">
+				<span className="markdown-task-indicator inline-flex shrink-0">
 					<input
 						aria-label={checked ? "Completed task" : "Incomplete task"}
 						checked={Boolean(checked)}
@@ -386,7 +466,7 @@ function createMarkdownComponents(
 					<ChoiceIndicatorMulti
 						checked={Boolean(checked)}
 						className="pointer-events-none"
-						disabled
+						size="compact"
 					/>
 				</span>
 			);
@@ -394,10 +474,13 @@ function createMarkdownComponents(
 		li: ({ children, className }) => (
 			<li
 				className={clsx(
-					"min-w-0 break-words pl-1 [overflow-wrap:anywhere]",
+					"min-w-0 break-words [overflow-wrap:anywhere]",
 					typeof className === "string" &&
 						className.includes("task-list-item") &&
-						"flex list-none items-start gap-3 pl-0",
+						"task-list-item",
+					(typeof className !== "string" ||
+						!className.includes("task-list-item")) &&
+						"pl-1",
 				)}
 			>
 				{children}
@@ -408,10 +491,9 @@ function createMarkdownComponents(
 				className={clsx(
 					textVariants({
 						variant: "body",
-						tone: "muted",
 						interactive: false,
 					}),
-					"grid max-w-full list-decimal gap-2 pl-5 leading-[1.65]",
+					"max-w-full list-decimal pl-5",
 				)}
 				start={typeof start === "number" ? start : undefined}
 			>
@@ -444,19 +526,14 @@ function createMarkdownComponents(
 				<Text
 					as="p"
 					variant="body"
-					tone="muted"
 					interactive={false}
-					className="max-w-full break-words leading-[1.7] text-foreground/70 [overflow-wrap:anywhere]"
+					className="max-w-full break-words [overflow-wrap:anywhere]"
 				>
 					{children}
 				</Text>
 			);
 		},
-		pre: ({ children }) => (
-			<pre className="max-w-full overflow-x-auto rounded-lg bg-foreground p-4 font-mono text-sm leading-[1.65] text-background shadow-[0_4px_18px_rgba(2,2,2,0.08)] [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-inherit [&_code]:shadow-none">
-				{children}
-			</pre>
-		),
+		pre: ({ children }) => <pre>{children}</pre>,
 		strong: ({ children }) => (
 			<strong className="font-semibold text-foreground/90">{children}</strong>
 		),
@@ -472,17 +549,22 @@ function createMarkdownComponents(
 			);
 		},
 		table: ({ children }) => (
-			<div className="max-w-full overflow-x-auto">
-				<table className="w-full min-w-[36rem] border-collapse text-left">
-					{children}
-				</table>
+			<div
+				className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain"
+				data-slot="markdown-table-scroll"
+			>
+				<table className="w-full border-collapse text-left">{children}</table>
 			</div>
 		),
 		tbody: ({ children }) => <tbody>{children}</tbody>,
 		td: ({ children, align }) => (
 			<td
 				className={clsx(
-					"border-border/65 border-b px-4 py-3 align-top text-foreground/70",
+					textVariants({
+						variant: "body",
+						interactive: false,
+					}),
+					"border-border/65 border-b px-4 py-3 align-top",
 					align === "center" && "text-center",
 					align === "right" && "text-right",
 				)}
@@ -493,7 +575,11 @@ function createMarkdownComponents(
 		th: ({ children, align }) => (
 			<th
 				className={clsx(
-					"border-foreground/25 border-b-2 px-4 py-3 font-semibold text-foreground",
+					textVariants({
+						variant: "bodyStrong",
+						interactive: false,
+					}),
+					"border-foreground/25 border-b-2 px-4 py-3 text-foreground",
 					align === "center" && "text-center",
 					align === "right" && "text-right",
 				)}
@@ -504,36 +590,46 @@ function createMarkdownComponents(
 		),
 		thead: ({ children }) => <thead>{children}</thead>,
 		tr: ({ children }) => <tr>{children}</tr>,
-		ul: ({ children, className }) => (
+		ul: ({ children }) => (
 			<ul
 				className={clsx(
 					textVariants({
 						variant: "body",
-						tone: "muted",
 						interactive: false,
 					}),
-					"grid max-w-full list-disc gap-2 pl-5 leading-[1.65]",
-					typeof className === "string" &&
-						className.includes("contains-task-list") &&
-						"list-none pl-0",
+					"max-w-full list-disc pl-5",
 				)}
 			>
 				{children}
 			</ul>
 		),
+		u: ({ children }) => (
+			<u className="decoration-foreground/60 underline-offset-2">{children}</u>
+		),
 	};
 }
 
-export function MarkdownRenderer({
+function MarkdownRendererRoot({
 	className,
+	density = "default",
 	markdown,
 	resolveUserMention,
+	variant = "contained",
 }: MarkdownRendererProps) {
 	const segments = splitMarkdownByButtonDirectives(markdown);
 	const markdownComponents = createMarkdownComponents(resolveUserMention);
 
 	return (
-		<div className={clsx("grid w-full min-w-0 gap-5", className)}>
+		<div
+			className={clsx(
+				getMarkdownContentClassName(density),
+				"w-full min-w-0",
+				markdownRendererVariantClassNames[variant],
+				className,
+			)}
+			data-slot="markdown-renderer"
+			data-variant={variant}
+		>
 			{segments.map((segment, index) => {
 				if (segment.type === "button") {
 					return (
@@ -551,7 +647,7 @@ export function MarkdownRenderer({
 					<ReactMarkdown
 						// biome-ignore lint/suspicious/noArrayIndexKey: Segment order is derived from static markdown source.
 						key={`markdown-${index}`}
-						remarkPlugins={[remarkGfm, remarkUserMentions]}
+						remarkPlugins={[remarkGfm, remarkSafeUnderline, remarkUserMentions]}
 						components={markdownComponents}
 					>
 						{segment.markdown}
@@ -561,3 +657,47 @@ export function MarkdownRenderer({
 		</div>
 	);
 }
+
+function MarkdownRendererSkeleton({
+	className,
+	density = "default",
+	markdown,
+	lineCount = 4,
+	variant = "contained",
+}: Omit<MarkdownRendererProps, "resolveUserMention"> & { lineCount?: number }) {
+	return (
+		<div className="relative min-w-0" data-slot="markdown-renderer-skeleton">
+			<div aria-hidden className="invisible select-none">
+				<MarkdownRendererRoot
+					className={className}
+					density={density}
+					markdown={markdown}
+					variant={variant}
+				/>
+			</div>
+			<div
+				aria-hidden
+				className={clsx(
+					getMarkdownContentClassName(density),
+					"absolute inset-0 grid content-start overflow-hidden",
+					markdownRendererVariantClassNames[variant],
+					className,
+				)}
+			>
+				{markdownSkeletonLineKeys.slice(0, lineCount).map((lineKey, index) => (
+					<Skeleton
+						className={clsx(
+							"h-4 max-w-full rounded-sm",
+							index === lineCount - 1 ? "w-2/3" : "w-full",
+						)}
+						key={lineKey}
+					/>
+				))}
+			</div>
+		</div>
+	);
+}
+
+export const MarkdownRenderer = Object.assign(MarkdownRendererRoot, {
+	Skeleton: MarkdownRendererSkeleton,
+});

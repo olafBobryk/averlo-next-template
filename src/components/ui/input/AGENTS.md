@@ -10,23 +10,28 @@ Ready-made form controls composed from the primitives. This folder should be the
 
 ## Choose The Highest-Level Match First
 - `src/components/ui/input/TextInput.tsx`: plain single-line text entry.
-- `src/components/ui/input/EditableTextInput.tsx`: inline display-to-edit text control for rename/title flows.
+- `src/components/ui/input/editable/`: display-to-edit field composites for inline rename and stable field-shell editing.
 - `src/components/ui/input/EmailInput.tsx`: email entry with email-centric defaults.
 - `src/components/ui/input/PasswordInput.tsx`: password entry with built-in visibility toggle and optional strength meter.
 - `src/components/ui/input/ProfilePictureInput.tsx`: image picker for profile/avatar flows with preview, type validation, and remove action.
+	- Use the default overlay layout for direct profile controls and `layout="file-row"` for source-style modal forms with a separate removal action.
+	- Use `renderPreview` when a domain presentation owns the avatar fallback, color seed, or icon-only policy; keep the edit preview on that same presentation recipe.
+- `src/components/ui/input/files/FileInput.tsx`: controlled generic-file field for selection, previews, inspection, and editable/read-only presentation. It does not own upload transport or persistence.
 - `src/components/ui/input/TextAreaInput.tsx`: multi-line text input.
 - `src/components/ui/input/NumberInput.tsx`: typed numeric entry.
 - `src/components/ui/input/UnitNumberInput.tsx`: numeric entry with a fixed unit.
 - `src/components/ui/input/SliderInput.tsx`: range-style numeric selection.
+	- Keep native range semantics beneath the shared custom track, progress, thumb, focus, and disabled treatment. The range, number field, and optional unit must remain vertically centered within one `InputFrame`.
 - `src/components/ui/input/PhoneInput.tsx`: phone input with country-aware UX.
 - `src/components/ui/input/SelectInput.tsx`: searchable single-select dropdown.
 - `src/components/ui/input/ComboboxTextInput.tsx`: text-driven combobox.
 - `src/components/ui/input/ComboboxMultiSelectInput.tsx`: multi-select combobox.
 - `src/components/ui/input/ButtonMultiSelectInput.tsx`: compact button-based multi-select for tags, filters, and preference pickers.
-- `src/components/ui/input/DateRangeInput.tsx`: date-range presets plus custom range entry; exported as `DateRangeInput`.
-- `src/components/ui/input/DateInput.tsx`: source-matched single-date calendar input.
+- `src/components/ui/input/date/`: the canonical date subsystem. Import `DateInput` and `DateRangeInput` from `@/components/ui/input/date`.
+	- Both inputs share one source-native calendar popover, UTC date model, keyboard navigation, and utility treatment.
+	- `DateRangeInput` is full-start-only; thin-start retains `DateInput` and the shared calendar core.
 - `src/components/ui/input/ColorInput.tsx` and `ColorSwatchInput.tsx`: full-start color entry and swatch selection controls.
-- `src/components/ui/input/SignaturePad.tsx`: signature capture.
+- `src/components/ui/input/SignatureInput.tsx`: canvas-based signature capture composed through `Field` and `InputFrame`.
 - `src/components/ui/input/SpamProtectionFields.tsx`: hidden honeypot field for form submissions.
 - `src/components/ui/input/RadioInput.tsx`: radio group built on the shared choice system.
 - `src/components/ui/input/MultiselectInput.tsx`: checkbox group built on the shared choice system.
@@ -54,9 +59,12 @@ Ready-made form controls composed from the primitives. This folder should be the
   - Set `loading` on the submit button and disable other conflicting actions while the request is in flight.
   - Do not auto-clear the form after submit unless the product explicitly wants that behavior.
 - `SelectInput.onOptionSelect` may return `true` to intercept a selection before the normal value change. Keep ordinary `onChange` behavior as the default.
+- `SelectInput.showSelectedIcon` mirrors the selected option's passed icon in the closed field when an entity-context selector needs visible identity; leave it off for ordinary text selects.
+- Use `SelectInput.dropdownPositionStrategy="fixed"` inside scrolling Cards and modals so the portaled menu remains viewport-positioned instead of contributing to local overflow. The default remains `absolute` for ordinary page fields.
 - File and profile inputs must clear native file state on form reset and clean up object URLs when files are replaced or the component unmounts.
 - Do not introduce a separate `CheckboxInput`; `MultiselectInput` and the `choice/` subsystem are the canonical checkbox-style controls.
 - Color inputs and the MDX editor are full-start-only profile features. Thin-start must not retain their source files or dependencies.
+- `ColorSwatchInput` controls its semantic `value` and `customColorHex` independently. Supplying one must not make the other read-only; consumers that need both externally controlled should preserve both fields from `onChange`.
 
 ## Page-Level Usage Guidance
 - **Login form:** usually `EmailInput` plus `PasswordInput` without strength meter.
@@ -72,9 +80,15 @@ Ready-made form controls composed from the primitives. This folder should be the
 - Use inline validation through `Field` messages for invalid form data instead of validation toasts.
 - For initial page loads, use skeletons or inline loading states instead of a loading toast.
 
+## Skeleton Ownership
+- Data-bearing inputs expose loading geometry through `Input.Skeleton`.
+- Closed single-field controls delegate to the shared `InputSkeleton`, which composes `Field.Skeleton` and `InputFrame.Skeleton`.
+- Controls with repeated choices, previews, canvases, or additional rows own only that distinct geometry and compose child component skeletons.
+- Static hidden inputs such as spam-protection fields do not need skeleton APIs.
+
 ## How To Extend Safely
 - If the needed UX is text-like, begin from an existing text-like input and preserve `Field` plus `InputFrame` structure.
-- If the needed UX is inline renaming or title editing, use `EditableTextInput` before creating a page-local edit/display toggle.
+- If the needed UX is inline renaming or title editing, use `EditableTextField` from `ui/input/editable` before creating a page-local edit/display toggle.
 - If the needed UX is choice-based, extend the choice subsystem in `choice/` rather than building a new label-plus-hidden-input pattern.
 - If the needed UX opens a menu, see whether `SelectInput`, `ComboboxTextInput`, or `ComboboxMultiSelectInput` already covers it before touching `Dropdown` directly.
 
@@ -85,6 +99,7 @@ Ready-made form controls composed from the primitives. This folder should be the
 - Handling submissions from click handlers alone when a real form would solve the same job.
 
 ## See Also
+- `src/components/ui/input/editable/AGENTS.md`
 - `src/components/ui/input/choice/AGENTS.md`
 - `src/components/ui/input/files/AGENTS.md`
 - `src/components/ui/primitives/AGENTS.md`

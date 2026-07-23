@@ -4,6 +4,9 @@ type DropdownOptionClassOptions = {
 	active?: boolean;
 	selected?: boolean;
 	disabled?: boolean;
+	dividerAfter?: boolean;
+	dividerBefore?: boolean;
+	layout?: "default" | "presentation";
 	tone?: "default" | "danger";
 	className?: string;
 	activeClassName?: string;
@@ -15,14 +18,21 @@ export const dropdownListWrapperClassName = "flex flex-col gap-0 p-0";
 export const dropdownListClassName =
 	"flex max-h-[260px] flex-col gap-0 overflow-y-auto p-0";
 export const dropdownEmptyStateClassName = "px-4 py-3";
+export const dropdownSurfaceClassName =
+	"overflow-hidden rounded-[10px] border border-border bg-card text-card-foreground shadow-[2px_4px_15px_-2px_rgba(1,1,3,0.05)]";
 export const dropdownOptionBaseClassName =
-	"flex w-full min-w-0 items-center gap-2.5 !border-0 !bg-clip-border !px-[15px] !py-2.5 text-left text-sm transition-colors motion-micro text-foreground/80 hover:!bg-foreground/5";
+	"flex w-full min-w-0 items-center gap-2.5 !border-0 !bg-clip-border !px-[15px] !py-2.5 text-left text-sm text-foreground/80 !transition-none [&&]:hover:!bg-foreground/5 [&&]:hover:!opacity-100 [&&]:active:!opacity-100";
+export const dropdownPresentationOptionClassName =
+	"!h-auto !min-h-16 !gap-0 !px-3 !py-3";
 export const dropdownOptionRadiusClassName = "rounded-none";
 
 export function getDropdownOptionClassName({
 	active,
 	selected,
 	disabled,
+	dividerAfter,
+	dividerBefore,
+	layout = "default",
 	tone = "default",
 	className,
 	activeClassName,
@@ -31,18 +41,21 @@ export function getDropdownOptionClassName({
 }: DropdownOptionClassOptions = {}) {
 	return [
 		dropdownOptionBaseClassName,
+		layout === "presentation" ? dropdownPresentationOptionClassName : undefined,
 		dropdownOptionRadiusClassName,
+		dividerBefore ? "!border-t !border-border" : undefined,
+		dividerAfter ? "!border-b !border-border" : undefined,
 		focusRing.visibleDefault,
-		selected ? "!bg-foreground/10 !text-foreground" : undefined,
-		active && !selected && tone === "default"
-			? "!bg-foreground/5 !text-foreground"
+		selected && tone === "default" ? "!text-foreground" : undefined,
+		active && tone === "default"
+			? "[&&]:!bg-foreground/5 !text-foreground"
 			: undefined,
 		tone === "danger"
-			? "!text-danger hover:!bg-danger/10 hover:!text-danger"
+			? "!text-danger [&&]:hover:!bg-danger/10 hover:!text-danger"
 			: undefined,
-		active && tone === "danger" ? "!bg-danger/10 !text-danger" : undefined,
+		active && tone === "danger" ? "[&&]:!bg-danger/10 !text-danger" : undefined,
 		disabled
-			? "cursor-not-allowed opacity-50 hover:bg-transparent"
+			? "cursor-not-allowed opacity-50 [&&]:hover:!bg-transparent"
 			: "cursor-pointer",
 		className,
 		active ? activeClassName : undefined,

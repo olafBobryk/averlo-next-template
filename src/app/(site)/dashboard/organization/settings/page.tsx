@@ -1,48 +1,31 @@
-import { TextInput } from "@/components/ui/input/TextInput";
-import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/Card";
-import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
+import { applicationAdapters } from "@/lib/auth/server";
 import { DashboardSection } from "../../_components/layout/DashboardSection";
+import { isOrganizationInvitationPending } from "../../_lib/entities/invitation/presentation";
 import { requireDashboardCapability } from "../../_registry/access.server";
+import { OrganizationSettingsSection } from "./_components/OrganizationSettingsSection";
 
 export default async function DashboardOrganizationSettingsPage() {
 	const { context } = await requireDashboardCapability("organization.manage");
+	const [members, invitations] = await Promise.all([
+		applicationAdapters.organizations.listOrganizationMembers(
+			context.organization.id,
+		),
+		applicationAdapters.invitations.listInvitations(context.organization.id),
+	]);
+	const now = new Date();
+	const pendingInvitationCount = invitations.filter((invitation) =>
+		isOrganizationInvitationPending(invitation, now),
+	).length;
+
 	return (
 		<DashboardSection
-			description="Provider-neutral organization identity and product defaults."
+			contentClassName="grid gap-5"
 			title="Organization settings"
 		>
-			<Card>
-				<Card.Header>
-					<Card.Title>Organization identity</Card.Title>
-					<Card.Description>
-						The fixture adapter resets these values with the server process.
-					</Card.Description>
-				</Card.Header>
-				<Card.Content>
-					<form className="grid gap-4">
-						<TextInput
-							defaultValue={context.organization.name}
-							label="Name"
-							name="organizationName"
-						/>
-						<TextInput
-							defaultValue={context.organization.slug}
-							label="Slug"
-							name="organizationSlug"
-						/>
-						<div>
-							<Button disabled size="sm" type="submit">
-								Save organization
-							</Button>
-						</div>
-					</form>
-				</Card.Content>
-			</Card>
-			<StatusMessage className="mt-4" tone="info">
-				The reference UI is ready; a durable organization adapter must own the
-				mutation.
-			</StatusMessage>
+			<OrganizationSettingsSection
+				activeMemberCount={members.length}
+				pendingInvitationCount={pendingInvitationCount}
+			/>
 		</DashboardSection>
 	);
 }

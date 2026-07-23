@@ -5,8 +5,9 @@ import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { Icon } from "@/components/ui/icons/Icon";
 import { ColorPickerPanel } from "@/components/ui/input/ColorInput";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 import {
-	DropdownPanel,
+	Dropdown,
 	type DropdownPositionStrategy,
 } from "@/components/ui/primitives/Dropdown";
 import { Field } from "@/components/ui/primitives/Field";
@@ -55,7 +56,7 @@ function normalizeColor(value: string | null | undefined) {
 	return value && /^#[0-9a-f]{6}$/i.test(value) ? value.toUpperCase() : null;
 }
 
-export function ColorSwatchInput<T extends string>({
+function ColorSwatchInputRoot<T extends string>({
 	className,
 	customColorHex,
 	defaultCustomColorHex,
@@ -85,9 +86,10 @@ export function ColorSwatchInput<T extends string>({
 	const [internalCustomColorHex, setInternalCustomColorHex] = React.useState(
 		normalizeColor(defaultCustomColorHex),
 	);
-	const isControlled = value !== undefined;
+	const isValueControlled = value !== undefined;
+	const isCustomColorControlled = customColorHex !== undefined;
 	const selectedValue = value ?? internalValue;
-	const selectedCustomColorHex = isControlled
+	const selectedCustomColorHex = isCustomColorControlled
 		? normalizeColor(customColorHex)
 		: internalCustomColorHex;
 	const selectedPreset = presets.find(
@@ -127,8 +129,8 @@ export function ColorSwatchInput<T extends string>({
 
 	function commit(nextValue: T, nextCustomColorHex: string | null) {
 		const normalizedCustomColorHex = normalizeColor(nextCustomColorHex);
-		if (!isControlled) {
-			setInternalValue(nextValue);
+		if (!isValueControlled) setInternalValue(nextValue);
+		if (!isCustomColorControlled) {
 			setInternalCustomColorHex(normalizedCustomColorHex);
 		}
 		onChange?.({
@@ -263,7 +265,7 @@ export function ColorSwatchInput<T extends string>({
 					</label>
 				</div>
 				{open ? (
-					<DropdownPanel
+					<Dropdown.Panel
 						align="start"
 						anchorRef={rootRef}
 						className={clsx(
@@ -280,9 +282,42 @@ export function ColorSwatchInput<T extends string>({
 							onChange={(nextColor) => commit(selectedValue, nextColor)}
 							value={selectedCustomColorHex ?? defaultCustomColor}
 						/>
-					</DropdownPanel>
+					</Dropdown.Panel>
 				) : null}
 			</div>
 		</Field>
 	);
 }
+
+function ColorSwatchInputSkeleton({
+	className,
+	count = 6,
+	description,
+	label,
+}: {
+	className?: string;
+	count?: number;
+	description?: React.ReactNode;
+	label?: React.ReactNode;
+}) {
+	return (
+		<Field
+			className={className}
+			description={description}
+			disableMessage
+			label={label}
+		>
+			<div className="flex flex-wrap items-center gap-2">
+				{Array.from({ length: count }, (_, index) => `swatch-${index + 1}`).map(
+					(key) => (
+						<Skeleton className="size-7 rounded-full" key={key} />
+					),
+				)}
+			</div>
+		</Field>
+	);
+}
+
+export const ColorSwatchInput = Object.assign(ColorSwatchInputRoot, {
+	Skeleton: ColorSwatchInputSkeleton,
+});

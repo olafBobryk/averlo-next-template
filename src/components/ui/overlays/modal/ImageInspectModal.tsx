@@ -1,8 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Loader } from "@/components/ui/misc/Loader";
 import { Reveal } from "@/components/ui/motion";
+import {
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
 import { showToast } from "@/lib/feedback";
 
@@ -51,36 +58,46 @@ export function ImageInspectModal({
 	const canShowShare = Boolean(onShare || shareUrl);
 
 	return (
-		<div className="relative w-full h-full max-w-full max-h-full p-1 flex flex-col gap-5">
-			<div className="relative justify-end flex gap-2">
+		<>
+			<ModalHeader leadingIcon={<Icon name="camera" size="sm" />}>
+				<ModalTitle>Image preview</ModalTitle>
+			</ModalHeader>
+			<ModalContent className="p-4">
+				<div className="relative h-[min(70dvh,48rem)] w-full overflow-hidden rounded-md bg-background">
+					<Reveal.Image
+						src={src}
+						alt={alt}
+						fill
+						sizes="(min-width: 1024px) 56rem, calc(100vw - 2rem)"
+						priority
+						className="h-full w-full"
+						contentClassName="h-full w-full"
+						imageClassName="object-contain select-none"
+						fallback={
+							<div className="flex h-full w-full items-center justify-center">
+								<Loader />
+							</div>
+						}
+						fallbackClassName="flex items-center justify-center"
+					/>
+				</div>
+			</ModalContent>
+			<ModalFooter>
+				<Button onClick={onClose} type="button" variant="ghost">
+					Close
+				</Button>
 				{canShowShare ? (
 					<Button
-						size="icon"
-						trailingIcon="camera"
-						onClick={handleShare}
-						loading={isSharing}
 						disabled={isSharing}
-					/>
+						leadingIcon="camera"
+						loading={isSharing}
+						onClick={handleShare}
+						type="button"
+					>
+						Share
+					</Button>
 				) : null}
-				<Button size="icon" trailingIcon="cross" onClick={onClose} />
-			</div>
-			<div className="relative w-full h-full">
-				<Reveal.Image
-					src={src}
-					alt={alt}
-					fill
-					priority
-					className="h-full w-full"
-					contentClassName="h-full w-full"
-					imageClassName="object-contain select-none"
-					fallback={
-						<div className="flex h-full w-full items-center justify-center">
-							<Loader className="text-white" />
-						</div>
-					}
-					fallbackClassName="flex items-center justify-center"
-				/>
-			</div>
-		</div>
+			</ModalFooter>
+		</>
 	);
 }

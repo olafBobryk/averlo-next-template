@@ -2,7 +2,7 @@
 "use client";
 
 import clsx from "clsx";
-import type * as React from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/primitives/Button";
 import {
 	dropdownEmptyStateClassName,
@@ -21,6 +21,9 @@ export type ListboxOption<T> = {
 	content: React.ReactNode;
 	href?: string;
 	disabled?: boolean;
+	dividerAfter?: boolean;
+	dividerBefore?: boolean;
+	layout?: "default" | "presentation";
 	tone?: "default" | "danger";
 	selected?: boolean;
 	className?: string;
@@ -84,6 +87,23 @@ export function Listbox<T>({
 	disabled,
 }: ListboxProps<T>) {
 	const resolvedEmpty = emptyState ?? <Text variant="body">No results</Text>;
+	const pointerOwnsActiveIndexRef = React.useRef(false);
+	const handleOptionMouseMove = (index: number, isDisabled: boolean) => {
+		if (isDisabled) return;
+		pointerOwnsActiveIndexRef.current = true;
+		onActiveIndexChange?.(index);
+	};
+	const handleListMouseLeave = () => {
+		if (!pointerOwnsActiveIndexRef.current) return;
+		pointerOwnsActiveIndexRef.current = false;
+		onActiveIndexChange?.(-1);
+	};
+	const handleListKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (
+		event,
+	) => {
+		pointerOwnsActiveIndexRef.current = false;
+		onKeyDown?.(event);
+	};
 
 	const listContent =
 		options.length === 0 ? (
@@ -123,6 +143,9 @@ export function Listbox<T>({
 						active: isActive,
 						selected: isSelected,
 						disabled: isDisabled,
+						dividerAfter: option.dividerAfter,
+						dividerBefore: option.dividerBefore,
+						layout: option.layout,
 						tone: option.tone,
 						className: resolvedOptionClassName,
 						activeClassName: resolvedActiveClassName,
@@ -145,9 +168,7 @@ export function Listbox<T>({
 								}
 								event.preventDefault();
 							},
-							onMouseEnter: () => {
-								if (!isDisabled) onActiveIndexChange?.(index);
-							},
+							onMouseMove: () => handleOptionMouseMove(index, isDisabled),
 							onClick: (event: React.MouseEvent<HTMLDivElement>) => {
 								if (isDisabled) {
 									event.preventDefault();
@@ -208,9 +229,7 @@ export function Listbox<T>({
 							onMouseDown={(event: React.MouseEvent<HTMLElement>) => {
 								event.preventDefault();
 							}}
-							onMouseEnter={() => {
-								if (!isDisabled) onActiveIndexChange?.(index);
-							}}
+							onMouseMove={() => handleOptionMouseMove(index, isDisabled)}
 							onClick={(event: React.MouseEvent<HTMLElement>) => {
 								if (isDisabled) {
 									event.preventDefault();
@@ -234,7 +253,8 @@ export function Listbox<T>({
 				role="menu"
 				tabIndex={listTabIndex}
 				aria-activedescendant={ariaActivedescendant}
-				onKeyDown={onKeyDown}
+				onKeyDown={handleListKeyDown}
+				onMouseLeave={handleListMouseLeave}
 				onFocus={onFocus}
 				className={clsx(dropdownListWrapperClassName, className)}
 			>
@@ -251,7 +271,8 @@ export function Listbox<T>({
 			tabIndex={listTabIndex}
 			aria-activedescendant={ariaActivedescendant}
 			aria-multiselectable={multiselectable ? true : undefined}
-			onKeyDown={onKeyDown}
+			onKeyDown={handleListKeyDown}
+			onMouseLeave={handleListMouseLeave}
 			onFocus={onFocus}
 			className={clsx(dropdownListWrapperClassName, className)}
 		>

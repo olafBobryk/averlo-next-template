@@ -147,6 +147,7 @@ export default function HeaderFull({
 	return (
 		<motion.header
 			data-site-header
+			suppressHydrationWarning
 			ref={headerRef}
 			initial={shouldAnimateEntrance ? HEADER_ENTRANCE_HIDDEN : false}
 			animate={

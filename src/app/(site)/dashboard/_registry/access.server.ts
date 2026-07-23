@@ -12,7 +12,10 @@ export async function requireDashboardCapability(
 ) {
 	const resolution = await resolveCurrentSession();
 	if (resolution.status !== "resolved") notFound();
-	const capabilities = getDashboardCapabilities(resolution.membership.role);
+	const capabilities = getDashboardCapabilities(
+		resolution.membership.role,
+		resolution.user.platformRole,
+	);
 	if (!capabilities.has(capability)) notFound();
 	return { capabilities, context: resolution };
 }

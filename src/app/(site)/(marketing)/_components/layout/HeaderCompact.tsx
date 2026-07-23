@@ -85,6 +85,7 @@ export default function HeaderCompact({
 		<motion.header
 			data-site-header
 			data-open={isMenuOpen}
+			suppressHydrationWarning
 			initial={
 				shouldAnimateEntrance
 					? { ...HEADER_ENTRANCE_HIDDEN, height: COMPACT_CLOSED_HEADER_HEIGHT }

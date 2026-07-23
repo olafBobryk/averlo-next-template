@@ -2,7 +2,7 @@
 "use client";
 
 import { AnimatePresence } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	closeModal as dispatchClose,
 	MODAL_CLOSE_ALL_EVENT,
@@ -11,13 +11,17 @@ import {
 	type ModalRenderFn,
 	type OpenModalOptions,
 } from "@/lib/modal";
+import { ModalCard } from "./ModalCard";
 import { ModalShell } from "./ModalShell";
 
 type ActiveModal = {
+	closeDisabled: boolean;
 	id: string;
 	render: ModalRenderFn;
 	options?: OpenModalOptions;
 };
+
+const modalHostBaseLayerIndex = 80;
 
 export function ModalHost() {
 	const [modals, setModals] = useState<ActiveModal[]>([]);
@@ -25,12 +29,25 @@ export function ModalHost() {
 	const removeModal = useCallback((id: string) => {
 		setModals((prev) => prev.filter((modal) => modal.id !== id));
 	}, []);
+	const setModalCloseDisabled = useCallback(
+		(id: string, closeDisabled: boolean) => {
+			setModals((current) =>
+				current.map((modal) =>
+					modal.id === id ? { ...modal, closeDisabled } : modal,
+				),
+			);
+		},
+		[],
+	);
 
 	useEffect(() => {
 		const handleOpen = (event: Event) => {
 			const { id, render, options } = (event as CustomEvent<ActiveModal>)
 				.detail;
-			setModals((prev) => [...prev, { id, render, options }]);
+			setModals((prev) => [
+				...prev,
+				{ closeDisabled: false, id, render, options },
+			]);
 		};
 
 		const handleClose = (event: Event) => {
@@ -56,29 +73,62 @@ export function ModalHost() {
 
 	return (
 		<AnimatePresence>
-			{modals.map(({ id, render, options }, index) => (
-				<ModalShell
-					key={id}
+			{modals.map((modal, index) => (
+				<HostedModal
 					isTopMost={index === modals.length - 1}
-					onClose={() => {
-						removeModal(id);
-						dispatchClose(id);
-					}}
-					portalTargetId={options?.portalTargetId}
-					panelClassName={options?.panelClassName}
-					panelWrapperClassName={options?.panelWrapperClassName}
-					backdropClassName={options?.backdropClassName}
-					panelStyle={options?.panelStyle}
-				>
-					{render({
-						close: () => {
-							removeModal(id);
-							dispatchClose(id);
-						},
-					})}
-				</ModalShell>
+					key={modal.id}
+					layerIndex={modalHostBaseLayerIndex + index * 10}
+					modal={modal}
+					onClose={removeModal}
+					onCloseDisabledChange={setModalCloseDisabled}
+				/>
 			))}
 		</AnimatePresence>
+	);
+}
+
+function HostedModal({
+	isTopMost,
+	layerIndex,
+	modal,
+	onClose,
+	onCloseDisabledChange,
+}: {
+	isTopMost: boolean;
+	layerIndex: number;
+	modal: ActiveModal;
+	onClose: (id: string) => void;
+	onCloseDisabledChange: (id: string, disabled: boolean) => void;
+}) {
+	const { closeDisabled, id, options, render } = modal;
+	const closeDisabledRef = useRef(closeDisabled);
+	closeDisabledRef.current = closeDisabled;
+	const close = useCallback(() => {
+		if (closeDisabledRef.current) return;
+		onClose(id);
+		dispatchClose(id);
+	}, [id, onClose]);
+	const setCloseDisabled = useCallback(
+		(disabled: boolean) => {
+			closeDisabledRef.current = disabled;
+			onCloseDisabledChange(id, disabled);
+		},
+		[id, onCloseDisabledChange],
+	);
+
+	return (
+		<ModalShell
+			ariaLabel={options?.ariaLabel}
+			isTopMost={isTopMost}
+			layerIndex={layerIndex}
+			onClose={close}
+			placement={options?.placement}
+			portalTargetId={options?.portalTargetId}
+		>
+			<ModalCard {...options?.cardProps}>
+				{render({ close, setCloseDisabled })}
+			</ModalCard>
+		</ModalShell>
 	);
 }
 

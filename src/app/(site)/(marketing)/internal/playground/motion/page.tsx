@@ -5,9 +5,13 @@ import type { MotionMoment } from "@/components/ui/foundations/motionTiming";
 import { MotionScope, Reveal } from "@/components/ui/motion";
 import { RevealGroup, RevealGroupItem } from "@/components/ui/motion/reveal";
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
 import { Panel } from "@/components/ui/primitives/Panel";
-import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
+import {
+	InternalPage,
+	InternalPageHeader,
+} from "../../_components/InternalPage";
 
 const colorBlocks = ["bg-red-500", "bg-sky-500", "bg-emerald-500"];
 const numericStartStage = "motion-playground-numeric-start";
@@ -96,20 +100,38 @@ function QaCard({
 	children: React.ReactNode;
 }) {
 	return (
-		<Panel display="flex" padding="md" gap="md" shadow="none">
-			<div className="flex flex-col gap-2">
+		<Card>
+			<Card.Header className="border-b">
 				<div className="flex flex-wrap items-center justify-between gap-3">
-					<Text as="h2" variant="headingSm">
-						{title}
-					</Text>
+					<Card.Title>{title}</Card.Title>
 					<code className="rounded-md bg-foreground/5 px-3 py-1.5 text-xs text-foreground">
 						{code}
 					</code>
 				</div>
-				<Text variant="body" tone="muted">
-					{expected}
-				</Text>
-			</div>
+				<Card.Description>{expected}</Card.Description>
+			</Card.Header>
+			<Card.Content className="grid gap-4">{children}</Card.Content>
+		</Card>
+	);
+}
+
+function PreviewPanel({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<Panel
+			background="surface"
+			border="subtle"
+			gap="sm"
+			padding="sm"
+			radius="sm"
+			shadow="none"
+			className={className}
+		>
 			{children}
 		</Panel>
 	);
@@ -123,16 +145,18 @@ function ColorBlock({
 	label: string;
 }) {
 	return (
-		<div
-			className={[
-				"flex min-h-28 items-end rounded-lg border border-foreground/10 p-3 shadow-sm",
-				className,
-			].join(" ")}
+		<Panel
+			background="transparent"
+			border="subtle"
+			padding="sm"
+			radius="sm"
+			shadow="sm"
+			className={`flex min-h-28 items-end ${className}`}
 		>
 			<span className="rounded bg-background/85 px-2 py-1 text-xs font-medium text-foreground">
 				{label}
 			</span>
-		</div>
+		</Panel>
 	);
 }
 
@@ -154,12 +178,8 @@ function MotionCharacterQa() {
 			</Button>
 			<div className="grid gap-3 md:grid-cols-3">
 				{characterCases.map((item) => (
-					<MotionScope
-						key={item.label}
-						expressive={item.expressive}
-						className="rounded-lg border border-border/10 bg-surface/50 p-4"
-					>
-						<div className="flex flex-col gap-3">
+					<MotionScope key={item.label} expressive={item.expressive}>
+						<PreviewPanel className="flex flex-col gap-3">
 							<div className="flex flex-col gap-1">
 								<Text variant="bodyStrong">{item.label}</Text>
 								<Text variant="caption" tone="muted">
@@ -175,7 +195,7 @@ function MotionCharacterQa() {
 								/>
 							</div>
 							<MotionTravelTrack active={expanded} />
-						</div>
+						</PreviewPanel>
 					</MotionScope>
 				))}
 			</div>
@@ -201,10 +221,7 @@ function TimingMomentsQa() {
 			</Button>
 			<div className="grid gap-3 md:grid-cols-2">
 				{momentCases.map((item) => (
-					<div
-						key={item.moment}
-						className="rounded-lg border border-border/10 bg-surface/50 p-4"
-					>
+					<PreviewPanel key={item.moment}>
 						<div className="grid gap-3">
 							<div className="flex flex-col gap-1">
 								<Text variant="bodyStrong">{item.label}</Text>
@@ -217,7 +234,7 @@ function TimingMomentsQa() {
 								motionClassName={`motion-${item.moment}`}
 							/>
 						</div>
-					</div>
+					</PreviewPanel>
 				))}
 			</div>
 		</QaCard>
@@ -253,66 +270,70 @@ function RevealApiQa() {
 			<Reveal.Root>
 				<div key={runId} className="grid gap-4 xl:grid-cols-2">
 					<Reveal.Item useViewport={false}>
-						<div className="rounded-lg border border-border/10 bg-surface/50 p-4">
+						<PreviewPanel>
 							<Text as="h3" variant="headingXs">
 								Reveal.Root
 							</Text>
 							<Text variant="body" tone="muted">
 								The resettable scheduler wraps this whole demo.
 							</Text>
-						</div>
+						</PreviewPanel>
 					</Reveal.Item>
 					<Reveal.Scene>
 						<Reveal.Item useViewport={false}>
-							<div className="rounded-lg border border-border/10 bg-surface/50 p-4">
+							<PreviewPanel>
 								<Text as="h3" variant="headingXs">
 									Reveal.Scene
 								</Text>
 								<Text variant="body" tone="muted">
 									Scene context is available for staged children.
 								</Text>
-							</div>
+							</PreviewPanel>
 						</Reveal.Item>
 					</Reveal.Scene>
 					<Reveal.Item useViewport={false}>
-						<div className="rounded-lg border border-border/10 bg-surface/50 p-4">
+						<PreviewPanel>
 							<Text as="h3" variant="headingXs">
 								Reveal.Item
 							</Text>
 							<Text variant="body" tone="muted">
 								Standalone root-scheduled content.
 							</Text>
-						</div>
+						</PreviewPanel>
 					</Reveal.Item>
-					<Reveal.Text
-						as="div"
-						variant="bodyStrong"
-						className="rounded-lg border border-border/10 bg-surface/50 p-4"
-						useViewport={false}
+					<PreviewPanel>
+						<Reveal.Text as="div" variant="bodyStrong" useViewport={false}>
+							Reveal.Text character stagger
+						</Reveal.Text>
+					</PreviewPanel>
+					<PreviewPanel>
+						<Text variant="bodyStrong" as="span">
+							<Reveal.Scramble
+								text="Reveal.Scramble resolves text"
+								maintainSpace
+								useViewport={false}
+							/>
+						</Text>
+					</PreviewPanel>
+					<Panel
+						background="surface"
+						border="subtle"
+						overflow="hidden"
+						padding="none"
+						radius="sm"
+						shadow="none"
 					>
-						Reveal.Text character stagger
-					</Reveal.Text>
-					<Text
-						variant="bodyStrong"
-						as="span"
-						className="rounded-lg border border-border/10 bg-surface/50 p-4"
-					>
-						<Reveal.Scramble
-							text="Reveal.Scramble resolves text"
-							maintainSpace
+						<Reveal.Image
+							src="/test/blob.png"
+							alt="Reveal image demo"
+							fill
+							sizes="(min-width: 1280px) 50vw, 100vw"
+							className="w-full"
 							useViewport={false}
+							contentClassName="aspect-[4/3] w-full overflow-hidden"
+							imageClassName="object-cover"
 						/>
-					</Text>
-					<Reveal.Image
-						src="/test/blob.png"
-						alt="Reveal image demo"
-						fill
-						sizes="(min-width: 1280px) 50vw, 100vw"
-						className="w-full"
-						useViewport={false}
-						contentClassName="aspect-[4/3] w-full overflow-hidden rounded-lg border border-border/10 bg-surface"
-						imageClassName="object-cover"
-					/>
+					</Panel>
 					<Reveal.List
 						active={active}
 						className="grid gap-3 xl:col-span-2 sm:grid-cols-3"
@@ -358,22 +379,21 @@ function RevealNumericStatsQa() {
 						viewportAmount={0.08}
 					>
 						{numericStats.map((stat) => (
-							<Reveal.Item
-								key={stat.label}
-								className="flex min-h-32 flex-col justify-between rounded-lg border border-border/10 bg-surface/50 p-4"
-							>
-								<Reveal.Numeric
-									animation="countUp"
-									as="p"
-									className="m-0 text-4xl font-semibold leading-none tracking-normal tabular-nums text-foreground sm:text-5xl"
-									data-motion-numeric-value={stat.value}
-									text={stat.value}
-									useViewport={false}
-									waitFor={numericStartStage}
-								/>
-								<Text variant="caption" tone="muted" className="mt-3 block">
-									{stat.label}
-								</Text>
+							<Reveal.Item key={stat.label}>
+								<PreviewPanel className="flex min-h-32 flex-col justify-between">
+									<Reveal.Numeric
+										animation="countUp"
+										as="p"
+										className="m-0 text-4xl font-semibold leading-none tracking-normal tabular-nums text-foreground sm:text-5xl"
+										data-motion-numeric-value={stat.value}
+										text={stat.value}
+										useViewport={false}
+										waitFor={numericStartStage}
+									/>
+									<Text variant="caption" tone="muted" className="mt-3 block">
+										{stat.label}
+									</Text>
+								</PreviewPanel>
 							</Reveal.Item>
 						))}
 					</Reveal.List>
@@ -470,18 +490,27 @@ function SceneGateQa() {
 			<Reveal.Root key={runId}>
 				<Reveal.Scene>
 					<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-						<Reveal.Image
-							src="/test/mercury.png"
-							alt="Motion scene media"
-							fill
-							sizes="(min-width: 1024px) 50vw, 100vw"
-							loadStrategy="wait-for-load"
-							after="app"
-							unlock="media"
-							className="w-full"
-							contentClassName="aspect-[4/3] w-full overflow-hidden rounded-lg border border-border/10 bg-surface"
-							imageClassName="object-cover"
-						/>
+						<Panel
+							background="surface"
+							border="subtle"
+							overflow="hidden"
+							padding="none"
+							radius="sm"
+							shadow="none"
+						>
+							<Reveal.Image
+								src="/test/mercury.png"
+								alt="Motion scene media"
+								fill
+								sizes="(min-width: 1024px) 50vw, 100vw"
+								loadStrategy="wait-for-load"
+								after="app"
+								unlock="media"
+								className="w-full"
+								contentClassName="aspect-[4/3] w-full overflow-hidden"
+								imageClassName="object-cover"
+							/>
+						</Panel>
 						<div className="flex flex-col gap-4">
 							<Reveal.List
 								after="media"
@@ -536,41 +565,32 @@ function DisabledModeQa() {
 
 export default function MotionPlaygroundPage() {
 	return (
-		<main>
-			<Section padding="hero">
-				<div className="grid w-full gap-8">
-					<header className="grid w-full gap-3">
-						<Button
-							href="/internal/playground"
-							size="sm"
-							variant="ghost"
-							className="w-fit"
-						>
-							Back to playground
-						</Button>
-						<div className="flex flex-col gap-2">
-							<Text as="h1" variant="headingLg">
-								Motion System QA
-							</Text>
-							<Text variant="body" tone="muted">
-								Compact checks for scoped motion character, timing moments,
-								reveal primitives, scene gates, and disabled automation mode.
-							</Text>
-						</div>
-					</header>
+		<InternalPage maxWidth="wide" className="gap-8">
+			<InternalPageHeader
+				title="Motion system QA"
+				description="Checks for scoped motion character, timing, reveal primitives, scene gates, and automation mode."
+				action={
+					<Button
+						href="/internal/playground"
+						size="sm"
+						variant="ghost"
+						className="w-fit"
+					>
+						Back to playground
+					</Button>
+				}
+			/>
 
-					<div className="grid w-full items-start gap-5 xl:grid-cols-2">
-						<MotionCharacterQa />
-						<TimingMomentsQa />
-						<RevealApiQa />
-						<RevealNumericStatsQa />
-						<RevealGroupCompatibilityQa />
-						<RevealGroupItemCompatibilityQa />
-						<SceneGateQa />
-						<DisabledModeQa />
-					</div>
-				</div>
-			</Section>
-		</main>
+			<div className="grid w-full items-start gap-5 xl:grid-cols-2">
+				<MotionCharacterQa />
+				<TimingMomentsQa />
+				<RevealApiQa />
+				<RevealNumericStatsQa />
+				<RevealGroupCompatibilityQa />
+				<RevealGroupItemCompatibilityQa />
+				<SceneGateQa />
+				<DisabledModeQa />
+			</div>
+		</InternalPage>
 	);
 }

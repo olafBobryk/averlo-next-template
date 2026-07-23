@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
@@ -18,6 +19,7 @@ type SelectInputProps<T extends string = string> = Omit<
 	"children" | "onChange" | "value"
 > & {
 	description?: React.ReactNode;
+	dropdownPositionStrategy?: "absolute" | "fixed";
 	error?: React.ReactNode;
 	label?: React.ReactNode;
 	onChange?: (value: T) => void;
@@ -26,9 +28,10 @@ type SelectInputProps<T extends string = string> = Omit<
 	value?: T;
 };
 
-export function SelectInput<T extends string = string>({
+function SelectInputRoot<T extends string = string>({
 	className,
 	description,
+	dropdownPositionStrategy,
 	error,
 	id,
 	label,
@@ -42,6 +45,7 @@ export function SelectInput<T extends string = string>({
 	const inputId = id ?? generatedId;
 	const descriptionId = description ? `${inputId}-description` : undefined;
 	const errorId = error ? `${inputId}-error` : undefined;
+	void dropdownPositionStrategy;
 
 	return (
 		<Field
@@ -78,3 +82,7 @@ export function SelectInput<T extends string = string>({
 		</Field>
 	);
 }
+
+export const SelectInput = Object.assign(SelectInputRoot, {
+	Skeleton: InputSkeleton,
+});

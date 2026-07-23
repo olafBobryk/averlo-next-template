@@ -1,8 +1,12 @@
 "use client";
 
 import type * as React from "react";
+import type { AppearancePreference } from "@/components/ui/foundations/appearance";
 import type { useSettingsContext } from "@/components/ui/foundations/settingsContext";
+import { Icon } from "@/components/ui/icons/Icon";
+import { RadioInput } from "@/components/ui/input/RadioInput";
 import { ToggleInput } from "@/components/ui/input/ToggleInput";
+import { Card } from "@/components/ui/primitives/Card";
 
 export type SettingsSection = {
 	id: string;
@@ -25,11 +29,34 @@ const BASE_SETTINGS_OPTIONS: React.ComponentProps<
 	{
 		value: "large-text",
 		label: "Increase text size",
-		description: "Scales interface typography up by 10% for readability.",
+		description: "Scales application typography up by 10% for readability.",
 	},
 ];
 
-function AccessibilitySettingsSection({
+function AppearanceSettingsControl({
+	settings,
+}: {
+	settings: BaseSettingsContext;
+}) {
+	return (
+		<RadioInput
+			description="Use your device setting or choose one appearance across the application."
+			label="Appearance"
+			name="application-appearance"
+			onChange={(value) =>
+				settings.setAppearance(value as AppearancePreference)
+			}
+			options={[
+				{ label: "System", value: "system" },
+				{ label: "Light", value: "light" },
+				{ label: "Dark", value: "dark" },
+			]}
+			value={settings.appearance}
+		/>
+	);
+}
+
+function AccessibilitySettingsCard({
 	settings,
 }: {
 	settings: BaseSettingsContext;
@@ -66,12 +93,27 @@ function AccessibilitySettingsSection({
 	}
 
 	return (
-		<ToggleInput
-			label="Accessibility"
-			options={options}
-			value={selectedValues}
-			onChange={handleSettingsChange}
-		/>
+		<Card className="scroll-mt-24" id="accessibility">
+			<Card.Header className="border-b">
+				<Card.Title className="inline-flex items-center gap-2">
+					<Icon className="text-muted-foreground" name="sliders" size="sm" />
+					Accessibility
+				</Card.Title>
+				<Card.Description>
+					Appearance, motion, scrolling, and text preferences.
+				</Card.Description>
+			</Card.Header>
+			<Card.Content className="grid gap-5">
+				<AppearanceSettingsControl settings={settings} />
+				<ToggleInput
+					description="Choose motion, scrolling, and text preferences for this application."
+					label="Interaction and text"
+					onChange={handleSettingsChange}
+					options={options}
+					value={selectedValues}
+				/>
+			</Card.Content>
+		</Card>
 	);
 }
 
@@ -81,7 +123,7 @@ export function buildSharedSettingsSections(
 	return [
 		{
 			id: "accessibility",
-			content: <AccessibilitySettingsSection settings={settings} />,
+			content: <AccessibilitySettingsCard settings={settings} />,
 		},
 	];
 }

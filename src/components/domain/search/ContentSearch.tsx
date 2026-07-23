@@ -42,7 +42,7 @@ function toOptions(entries: ContentSearchEntry[]): ComboboxOption[] {
 	}));
 }
 
-export function ContentSearch({
+function ContentSearchRoot({
 	entries,
 	onNavigate,
 	portalTargetId,
@@ -91,3 +91,7 @@ export function ContentSearch({
 		/>
 	);
 }
+
+export const ContentSearch = Object.assign(ContentSearchRoot, {
+	Skeleton: ComboboxTextInput.Skeleton,
+});

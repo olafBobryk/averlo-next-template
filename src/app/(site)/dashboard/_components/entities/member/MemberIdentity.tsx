@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { Text } from "@/components/ui/primitives/Text";
-import type { MemberPresentation } from "../../../_lib/entities/member/presentation";
+import type { MemberIdentityPresentation } from "../../../_lib/entities/member/presentation";
 import {
 	MemberAvatar,
 	type MemberAvatarSize,
@@ -27,7 +27,7 @@ function MemberIdentityRoot({
 	avatarSize?: MemberAvatarSize;
 	className?: string;
 	href?: boolean;
-	presentation: MemberPresentation;
+	presentation: MemberIdentityPresentation;
 	variant?: MemberIdentityVariant;
 }) {
 	const profile = variant === "profile";
@@ -41,26 +41,27 @@ function MemberIdentityRoot({
 			size={avatarSize ?? defaultAvatarSize[variant]}
 		/>
 	);
-	const label = href ? (
-		<Link
-			className={clsx(
-				"truncate rounded-sm font-medium text-foreground outline-none",
-				focusRing.visibleDefault,
-				profile ? "text-base font-semibold" : "text-sm",
-			)}
-			href={presentation.href}
-		>
-			{presentation.displayLabel}
-		</Link>
-	) : profile ? (
-		<Text as="h2" className="truncate" variant="headingXs">
-			{presentation.displayLabel}
-		</Text>
-	) : (
-		<Text as="span" className="truncate" variant="support">
-			{presentation.displayLabel}
-		</Text>
-	);
+	const label =
+		href && presentation.href ? (
+			<Link
+				className={clsx(
+					"truncate rounded-sm font-medium text-foreground outline-none",
+					focusRing.visibleDefault,
+					profile ? "text-base font-semibold" : "text-sm",
+				)}
+				href={presentation.href}
+			>
+				{presentation.displayLabel}
+			</Link>
+		) : profile ? (
+			<Text as="h2" className="truncate" variant="headingXs">
+				{presentation.displayLabel}
+			</Text>
+		) : (
+			<Text as="span" className="truncate" variant="support">
+				{presentation.displayLabel}
+			</Text>
+		);
 	return (
 		<div
 			className={clsx(
@@ -89,10 +90,16 @@ function MemberIdentityRoot({
 function MemberIdentitySkeleton({
 	avatarSize,
 	className,
+	displayLabel = "Example member",
+	emailLabel = "member@example.com",
+	href = false,
 	variant = "profile",
 }: {
 	avatarSize?: MemberAvatarSize;
 	className?: string;
+	displayLabel?: string;
+	emailLabel?: string;
+	href?: boolean;
 	variant?: MemberIdentityVariant;
 }) {
 	const profile = variant === "profile";
@@ -107,22 +114,39 @@ function MemberIdentitySkeleton({
 			<MemberAvatarSkeleton size={avatarSize ?? defaultAvatarSize[variant]} />
 			<div className={clsx("grid min-w-0 flex-1", profile ? "gap-1" : "gap-0")}>
 				{profile ? (
-					<Text.Skeleton as="h2" className="max-w-48" variant="headingXs">
-						Example member
+					<Text.Skeleton
+						as="h2"
+						className="max-w-48 truncate"
+						variant="headingXs"
+					>
+						{displayLabel}
+					</Text.Skeleton>
+				) : href ? (
+					<Text.Skeleton
+						as="span"
+						className="max-w-48 truncate text-sm font-medium leading-5 text-foreground"
+						tone={null}
+						variant={null}
+					>
+						{displayLabel}
 					</Text.Skeleton>
 				) : (
-					<Text.Skeleton as="span" className="max-w-48" variant="support">
-						Example member
+					<Text.Skeleton
+						as="span"
+						className="max-w-48 truncate"
+						variant="support"
+					>
+						{displayLabel}
 					</Text.Skeleton>
 				)}
 				{variant === "actor" ? null : (
 					<Text.Skeleton
 						as="span"
-						className="max-w-56"
+						className="max-w-56 truncate"
 						tone="muted"
 						variant={profile ? "support" : "caption"}
 					>
-						member@example.com
+						{emailLabel}
 					</Text.Skeleton>
 				)}
 			</div>

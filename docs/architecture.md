@@ -81,12 +81,15 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 
 - `MarkdownRenderer` is shared by full and thin profiles and operates on plain Markdown strings.
 - It supports default and compact density, design-system-backed GFM, task lists, tables, images, code, quotes, links, validated generic button directives, and optional durable `@[user:<id>]` mention resolution.
+- Default density owns site and document content; dashboard cards and Markdown modals opt into compact density. Renderer and editor use the same `.markdown-content` typography, list, quote, code, table, and rhythm contract for the selected density.
+- Rendered tasks use `ChoiceIndicatorMulti`. The editor preserves Lexical's native inline checklist marker and interaction model while matching that shared indicator's geometry and tokens without injecting React into Lexical-owned DOM.
 - It does not accept arbitrary HTML, JSX, class injection, data registries, or product-specific directives.
+- Underline is the sole narrow exception: the editor stores paired `<u>...</u>` tags and the renderer recognizes only exact pairs without enabling general raw HTML parsing.
 - `MarkdownEditor` is a full-start-only client composite; thin start retains the renderer without the MDXEditor dependency.
 - The editor persists only plain Markdown strings and provides responsive rich editing, lossless source mode, automatic source fallback, headings, inline formatting, lists and tasks, links, tables, images, code, dividers, undo and redo, optional mention insertion, generic button-directive editing, and default or compact density.
-- Its toolbar composes the template's existing `MoreMenuDropdown`, `Button`, `Dropdown`, and `Listbox` rather than a duplicate package-owned menu system.
-- Existing `MoreMenuDropdown` behavior remains canonical, including keyboard navigation, fixed or absolute positioning, portal support, hover and pinned modes, custom triggers, and active or disabled options.
-- `MoreMenuDropdown` provides typed factories for recurring open, edit, delete, and mark-read actions with consistent icon, separator, disabled, and danger semantics while retaining caller-defined options.
+- Its width-aware toolbar composes the template's canonical `Icon`, `Dropdown.Menu`, `Dropdown.Listbox`, and `Button` contracts rather than a duplicate package-owned menu system; editor dialogs remain on the Card-owned modal host.
+- `Dropdown.Menu` owns action-menu keyboard navigation, fixed or absolute positioning, portal support, hover and pinned modes, Button-backed triggers, and active or disabled options.
+- `Dropdown.menuOptions` provides typed factories for recurring open, edit, and delete actions with consistent icons, dividers, disabled states, danger semantics, and stable danger-last ordering.
 - Baseline image insertion accepts image URLs only. File upload is a caller or product integration.
 - Markdown stores mentions as durable `@[user:<id>]` references. Callers provide options and rendering resolution; shared Markdown components never fetch organizations or users directly.
 
@@ -117,13 +120,33 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 
 ### Routes and surface registry
 
-- Baseline routes are `/dashboard`, `/dashboard/records`, `/dashboard/records/[recordId]`, and `/dashboard/settings`.
-- Organization routes are `/dashboard/organization`, `/dashboard/organization/members`, and `/dashboard/organization/settings`.
+- Baseline routes include `/dashboard`, `/dashboard/profile`, `/dashboard/administration`, `/dashboard/records`, `/dashboard/records/[recordId]`, `/dashboard/settings`, and `/dashboard/support`.
+- Organization routes are `/dashboard/organization` and `/dashboard/organization/settings`; the legacy `/dashboard/organization/members` route redirects to Administration.
 - A typed dashboard surface registry is the source of truth for route identity, paths, labels, navigation placement, breadcrumbs, visibility, and standard-versus-wide layout mode.
 - Navigation, breadcrumbs, and Command-K consume the same registry and organization context model.
 - Mounted pages and surfaces may register currently available contextual actions with the dashboard shell. Dashboard-local registration is removed when its owner unmounts.
 - Command-K combines live actions with the static surface hierarchy, navigation, active organization context, and capability checks rather than maintaining a separate command model.
 - The overview is a lightweight capability and navigation directory rather than a required metrics dashboard.
+- Dashboard Support combines a configurable mailto action with a guarded,
+  fixture-only request form. Support requests never send email and are visible
+  to platform administrators in `/dashboard/platform/inbox`.
+
+### Platform operations
+
+- `AuthUser.platformRole` is an organization-independent access axis. The
+  fixture operator is a platform administrator; organization owner/admin roles
+  do not imply platform access.
+- `/dashboard/platform` is the capability-gated entry surface for internal
+  operations in the canonical dashboard shell. It links to Inbox for dashboard
+  support requests and Reports for structured issue reports captured from the
+  dashboard modal; those child routes do not appear in the sidebar.
+- Support and report fixtures are in-memory, resettable, and make no external
+  writes. Reports retain route, viewport, and browser context but no
+  attachments. Status and internal notes follow deterministic triage rules.
+- Platform pages use the ordinary dashboard sidebar, top bar, breadcrumbs,
+  Command-K, responsive width, tables, detail fields, member and organization
+  presentation, Cards, Chips, loading states, and form feedback. Their route
+  identity lives in the canonical dashboard surface registry.
 
 ### Shell and application components
 
@@ -208,7 +231,7 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Every domain record, fixture record, relationship, member, invitation, and adapter operation is organization-scoped from its first representation.
 - Singleton mode provisions one normal organization, automatically selects the sole valid membership, and hides switching by default.
 - Singleton organization mode is the expected path for single-tenant and white-labelled products.
-- The underlying organization and membership model still supports multiple organizations. A small explicit configuration enables the normal switcher without rewriting routes, adapters, or entity ownership.
+- The underlying organization and membership model still supports multiple organizations. A small explicit configuration enables the sidebar switch menu and dashboard-shell chooser without rewriting adapters or entity ownership.
 - Organization architecture may be removed only as a deliberate exceptional instance decision.
 
 ### Active organization selection
@@ -216,7 +239,7 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Canonical dashboard URLs do not include an organization slug.
 - The organization adapter owns server-readable active selection and validates membership on every resolution.
 - The template mock may use a protected server-readable cookie; product adapters choose an appropriate account preference or equivalent mechanism.
-- When multiple memberships exist without a valid active selection, `/select-organization` is required after authentication and outside the organization-dependent dashboard shell.
+- When multiple memberships exist without a valid active selection, `/select-organization` is required after authentication and outside the organization-dependent dashboard shell. Once context exists, voluntary switching stays inside the shell at `/dashboard/organization/switch`.
 - The resolver never silently chooses an arbitrary organization.
 - Sign-out clears active selection, and revoked membership invalidates it immediately.
 
@@ -225,7 +248,7 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Invitations are explicit organization-scoped records with recipient identity, normalized email, expiry, revocation, reuse, and acceptance state.
 - Invitation links open an inert review screen. Only an explicit POST accepts an invitation, preventing link scanners or speculative navigation from consuming a one-time token.
 - Acceptance verifies the authenticated recipient, normalized email, organization, expiry, revocation, and prior use before atomically creating membership.
-- Reinviting the same pending or expired recipient refreshes the pending invitation and invalidates the earlier link.
+- Duplicate pending invitations are rejected. The explicit Refresh action rotates the token, extends expiry, and invalidates the earlier link.
 - Expired, revoked, mismatched, reused, cross-organization, and already-member attempts fail closed.
 - Authentication-user creation does not grant organization access; only verified invitation acceptance creates the corresponding membership.
 
@@ -241,9 +264,12 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 ### Settings ownership
 
 - `/dashboard/settings` owns personal profile, interface, authentication, and notification preferences.
+- `/dashboard/profile` is the read-only global account and active-organization access surface.
+- `/dashboard/administration` is nested beneath Organization settings and owns pending invitations, memberships, roles, removals, and ownership transfer.
+- `/dashboard/support` owns authenticated support mailto and fixture request submission.
 - `/dashboard/organization` presents organization profile and overview information.
-- `/dashboard/organization/members` owns members, invitations, roles, and access management.
-- `/dashboard/organization/settings` owns organization identity, defaults, feature configuration, and organization-level destructive actions.
+- `/dashboard/organization/members` redirects to `/dashboard/administration#members`.
+- `/dashboard/organization/settings` owns organization identity editing and a server-derived people/access summary that leads to Administration.
 
 ## Template-instance activation
 

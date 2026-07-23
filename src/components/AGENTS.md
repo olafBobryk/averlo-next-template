@@ -30,7 +30,7 @@ For any new reusable UI-library feature:
 - **Focus invariant:** Every interactive control must preserve visible keyboard focus using the shared focus tokens from `ui/foundations/focus.ts`. Do not invent ad hoc focus rings, remove outlines without replacement, or move focus styling away from the real interactive element.
 - **Form invariant:** Labels, descriptions, errors, required state, IDs, and `aria-describedby` should flow through `Field` plus the relevant input component instead of page-local markup.
 - **Input shell invariant:** Text-like controls should use `InputFrame` for the shell and `inputVariants` or `inputSizeClasses` for the actual input element. Padding belongs on the input, not the wrapper.
-- **Typography invariant:** Use `Text` variants or the shared font utilities. Do not hardcode font families in component-level UI.
+- **Typography invariant:** Use `Text` variants or shared font-size utilities so the application text-scale preference applies consistently. User-facing text must not use unscaled arbitrary pixel or rem sizes; reserve fixed glyph sizes for non-text graphics such as flags and indicators. Do not hardcode font families in component-level UI.
 - **Motion invariant:** CSS motion utilities are the default. Use `motion/react` only where the library already does or where layout/reveal motion truly needs it. Respect reduced motion via `useMotionAllowed`.
   - For entrance reveals, prefer `import { Reveal } from "@/components/ui/motion"` with `Reveal.Root`, `Reveal.List`, and `Reveal.Item`. Marketing pages already provide a route-level `Reveal.Root`; isolated surfaces can rely on the local fallback or add a scoped root.
   - For screenshot scripts and AI traversal, disable reveal motion at the root with the motion setting or a URL override such as `?motion=off` / `?reveal=off`; disabled roots render reveal content visible immediately.
@@ -53,8 +53,8 @@ Use these defaults unless product requirements explicitly say otherwise.
 - **Phone numbers:** Use `PhoneInput` instead of a plain text input plus manual country code UI.
 - **Numeric entry:** Use `NumberInput`, `UnitNumberInput`, or `SliderInput` depending on whether the value is typed, unit-bound, or range-like.
 - **Choice groups:** Use `RadioInput`, `MultiselectInput`, or `ToggleInput`, which already route through the choice system and focus behavior.
-- **Date range filtering:** Use `DateRangeInput` from `ui/input/DateRangeInput.tsx` before creating ad hoc preset filters.
-- **File workflows:** Use `FileUploadInput`, `FileGallery`, and `FilePreview` before custom upload tiles.
+- **Date range filtering:** Use `DateRangeInput` from `ui/input/date` before creating ad hoc preset filters.
+- **File workflows:** Use `FileInput` for controlled file selection, preview, inspection, and editable/read-only presentation before building custom upload tiles.
 - **Copy actions:** Use `CopyField` instead of wiring clipboard actions by hand.
 - **Async states:** Use `Loader`, `SuspenseBoundary`, `ErrorState`, and `IdleState` before custom loading or empty-state wrappers.
 - **Toasts:** Use `showToast` with `ToastHost` for async mutation feedback, but not for initial page-load loading. Toast titles are built in; pass `{ title }` or promise title options when flow-specific titles are needed.
@@ -62,10 +62,11 @@ Use these defaults unless product requirements explicitly say otherwise.
 - **Image inspection:** Use `InspectableImage` or `useImageInspectModal` for click-to-enlarge image behavior.
 - **Image reveal choreography:** Use `Reveal.Image` when an image needs a loading fallback, reveal animation, or should gate later reveal content. Default image reveals ignore load state; use `loadStrategy="wait-for-load"` when reveal or stage unlock must wait for the image.
 - **Segmented options:** Use `SegmentedControl` before rolling custom pill selectors.
-- **Disclosure content:** Use `Accordion` before building new expand/collapse rows.
+- **Disclosure content:** Use plain `Accordion` for compact borderless rows and `Accordion.Card` for collapsible structured Cards before building a new expand/collapse pattern.
 - **Keyboard shortcuts:** Use the native keyboard behavior of controls first; add reusable shortcuts through the shared hotkey convention only when needed.
 
 ## App Standards To Preserve
+- **Application appearance:** Keep `system | light | dark` ownership in the shared `SettingsProvider`. User-facing site routes inherit the root appearance, and atomic theme changes suppress CSS transitions without stopping animation timelines. Do not add auth-, marketing-, or dashboard-local theme authorities.
 - **Transparent gradient-border wrappers:** When reusing a transparent gradient-border treatment, keep wrapper and inner surface responsibilities separate.
   - Apply the border effect to a wrapper element.
   - Keep the wrapper background transparent so the border treatment can render independently.
@@ -123,6 +124,7 @@ Reusable features are not complete until implementation, demo coverage, and docu
 - `src/components/ui/icons/AGENTS.md`
 - `src/components/ui/primitives/AGENTS.md`
 - `src/components/ui/input/AGENTS.md`
+- `src/components/ui/input/editable/AGENTS.md`
 - `src/components/ui/input/choice/AGENTS.md`
 - `src/components/ui/input/files/AGENTS.md`
 - `src/components/ui/misc/AGENTS.md`

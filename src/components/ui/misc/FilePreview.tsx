@@ -1,9 +1,11 @@
 "use client";
 
+import clsx from "clsx";
 import { motion } from "motion/react";
 import * as React from "react";
 import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
-import { Pill, type PillTone } from "@/components/ui/misc/Pill";
+import { Chip, type ChipTone } from "@/components/ui/misc/Chip";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirmationModal";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
@@ -13,7 +15,7 @@ import { InspectableImage } from "./InspectableImage";
 
 export type FilePreviewTag = {
 	label: React.ReactNode;
-	tone?: PillTone;
+	tone?: ChipTone;
 };
 
 export type FilePreviewLabels = {
@@ -76,7 +78,7 @@ type Props = {
 	className?: string;
 };
 
-export function FilePreview({
+function FilePreviewRoot({
 	item,
 	index,
 	urlLooksLikeImage,
@@ -116,10 +118,8 @@ export function FilePreview({
 				/>
 			),
 			{
-				panelClassName:
-					"!p-0 !bg-transparent h-full w-full !border-0 !rounded-none !shadow-none max-w-none max-h-none",
-				panelWrapperClassName: "!px-10",
-				panelStyle: { boxShadow: "none" },
+				ariaLabel: `${name} preview`,
+				cardProps: { maxWidth: "4xl" },
 			},
 		);
 	}, [isPdf, item.url, name, openModal]);
@@ -144,6 +144,7 @@ export function FilePreview({
 				<InspectableImage
 					src={item.url}
 					alt={`file-${index}`}
+					disabled={isDisabled}
 					width={182}
 					height={105}
 					className="w-full h-full!"
@@ -165,7 +166,7 @@ export function FilePreview({
 									as="span"
 									variant="caption"
 									tone="muted"
-									className="block max-w-full whitespace-normal break-words text-[10px]"
+									className="block max-w-full whitespace-normal break-words text-3xs"
 								>
 									{name}
 								</Text>
@@ -178,16 +179,19 @@ export function FilePreview({
 						align="center"
 						className="absolute! inset-0! z-10 h-full! w-full! !rounded-md"
 						aria-label={`Open ${name}`}
+						disabled={isDisabled}
 						onClick={handleOpenFile}
 					/>
 				</div>
 			) : (
 				<Button
+					aria-label={`Open ${name}`}
 					variant="ghost"
 					size="none"
 					align="center"
 					className="h-full w-full !rounded-md p-2 text-sm font-medium"
 					contentClassName="min-w-0 flex-col gap-1 whitespace-normal"
+					disabled={isDisabled}
 					onClick={handleOpenFile}
 				>
 					<Text as="span" variant="bodyStrong" className="block text-xs">
@@ -197,7 +201,7 @@ export function FilePreview({
 						as="span"
 						variant="caption"
 						tone="muted"
-						className="block max-w-full break-words text-[10px]"
+						className="block max-w-full break-words text-3xs"
 					>
 						{name}
 					</Text>
@@ -205,27 +209,28 @@ export function FilePreview({
 			)}
 
 			<div className="absolute top-2 left-2 z-20 flex max-w-[125px] flex-wrap gap-1.5">
-				<Pill
+				<Chip
 					tone={isPending ? "warning" : "success"}
-					className="px-2 py-1 text-[10px] font-medium leading-none backdrop-blur-sm"
+					className="px-2 py-1 text-3xs font-medium leading-none backdrop-blur-sm"
 				>
 					{isPending
 						? (labels?.pending ?? "Pending")
 						: (labels?.uploaded ?? "Uploaded")}
-				</Pill>
+				</Chip>
 				{item.tag ? (
-					<Pill
+					<Chip
 						tone={item.tag.tone ?? "neutral"}
-						className="max-w-full px-2 py-1 text-[10px] font-medium leading-none backdrop-blur-sm"
+						className="max-w-full px-2 py-1 text-3xs font-medium leading-none backdrop-blur-sm"
 					>
 						<span className="min-w-0 truncate">{item.tag.label}</span>
-					</Pill>
+					</Chip>
 				) : null}
 			</div>
 
 			{!hideRemove ? (
 				<Button
-					variant="ghost"
+					aria-label={`Remove ${name}`}
+					variant="secondary"
 					size="icon-sm"
 					trailingIcon="cross"
 					className="absolute! top-2! right-2 z-20"
@@ -253,6 +258,22 @@ export function FilePreview({
 		</motion.div>
 	);
 }
+
+function FilePreviewSkeleton({
+	className,
+	previewHeight = 105,
+}: Pick<Props, "className" | "previewHeight">) {
+	return (
+		<Skeleton
+			className={clsx("aspect-video w-auto shrink-0 rounded-md", className)}
+			style={{ height: previewHeight }}
+		/>
+	);
+}
+
+export const FilePreview = Object.assign(FilePreviewRoot, {
+	Skeleton: FilePreviewSkeleton,
+});
 
 function pdfPreviewUrl(url: string) {
 	const [baseUrl] = url.split("#");

@@ -42,7 +42,14 @@ type EmailInputProps = {
 	size?: InputFrameSize;
 };
 
-export function EmailInput({
+type EmailInputSkeletonProps = Pick<
+	EmailInputProps,
+	"className" | "description" | "label" | "required" | "size"
+> & {
+	value?: React.ReactNode;
+};
+
+function EmailInputRoot({
 	label,
 	description,
 	placeholder,
@@ -166,3 +173,29 @@ export function EmailInput({
 		</Field>
 	);
 }
+
+function EmailInputSkeleton({
+	className,
+	description,
+	label,
+	required,
+	size,
+	value = "operator@averlo.local",
+}: EmailInputSkeletonProps) {
+	return (
+		<Field.Skeleton
+			className={className}
+			description={description}
+			fullWidth
+			label={label}
+			required={required}
+			size={size}
+		>
+			{value}
+		</Field.Skeleton>
+	);
+}
+
+export const EmailInput = Object.assign(EmailInputRoot, {
+	Skeleton: EmailInputSkeleton,
+});

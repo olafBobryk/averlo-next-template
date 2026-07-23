@@ -54,6 +54,27 @@ export async function signOutCurrentSession() {
 	await clearSessionId();
 }
 
+export async function requestPasswordRecovery(input: {
+	email: string;
+	resetUrl: string;
+}) {
+	assertAuthMethodAvailable("password-recovery");
+	return applicationAdapters.auth.requestPasswordRecovery(input);
+}
+
+export async function resetPasswordWithRecovery(input: {
+	password: string;
+	token: string;
+}) {
+	assertAuthMethodAvailable("password-update");
+	return applicationAdapters.auth.resetPassword(input);
+}
+
+export async function validatePasswordRecoveryToken(input: { token: string }) {
+	assertAuthMethodAvailable("password-update");
+	return applicationAdapters.auth.validatePasswordRecoveryToken(input);
+}
+
 export function assertAuthMethodAvailable(method: AuthMethod) {
 	const state = applicationAdapters.auth.methods[method];
 	if (!state.available) {

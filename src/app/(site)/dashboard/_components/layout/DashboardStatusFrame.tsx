@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { NullState } from "@/components/ui/misc/NullState";
+import { StateIndicator } from "@/components/ui/misc/state/State";
 
 export function DashboardStatusFrame({
 	action,
@@ -15,10 +15,15 @@ export function DashboardStatusFrame({
 			className="grid min-h-[28rem] place-items-center"
 			data-slot="dashboard-status-frame"
 		>
-			<div className="grid w-full gap-4">
-				<NullState copy={description} title={title} />
-				{action ? <div className="flex justify-center">{action}</div> : null}
-			</div>
+			<StateIndicator
+				action={action}
+				align="center"
+				className="mx-auto max-w-xl"
+				description={description}
+				descriptionClassName="max-w-md"
+				layout="stacked"
+				title={title}
+			/>
 		</div>
 	);
 }

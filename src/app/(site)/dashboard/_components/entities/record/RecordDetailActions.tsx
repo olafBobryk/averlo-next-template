@@ -34,7 +34,7 @@ import { EntityDeletionDetailMenu } from "../EntityDeletion";
 
 const editableStatuses = ["active", "draft", "review"] as const;
 
-export function RecordDetailActions({
+function RecordDetailActionsRoot({
 	canWrite,
 	members,
 	record,
@@ -54,10 +54,11 @@ export function RecordDetailActions({
 			<Button
 				onClick={() =>
 					openModal(
-						({ close }) => (
+						({ close, setCloseDisabled }) => (
 							<RecordEditForm
 								members={members}
 								onCancel={close}
+								onCloseDisabledChange={setCloseDisabled}
 								onSaved={() => {
 									close();
 									router.refresh();
@@ -66,7 +67,10 @@ export function RecordDetailActions({
 								simulateFailure={simulateFailure}
 							/>
 						),
-						{ id: `edit-record-${record.id}` },
+						{
+							ariaLabel: `Edit ${record.title}`,
+							id: `edit-record-${record.id}`,
+						},
 					)
 				}
 				size="sm"
@@ -99,15 +103,37 @@ export function RecordDetailActions({
 	);
 }
 
+function RecordDetailActionsSkeleton({
+	canWrite = true,
+}: {
+	canWrite?: boolean;
+}) {
+	if (!canWrite) return null;
+	return (
+		<div className="flex items-center gap-2">
+			<Button.Skeleton size="sm" variant="secondary">
+				Edit record
+			</Button.Skeleton>
+			<Button.Skeleton size="icon-sm" variant="secondary" />
+		</div>
+	);
+}
+
+export const RecordDetailActions = Object.assign(RecordDetailActionsRoot, {
+	Skeleton: RecordDetailActionsSkeleton,
+});
+
 function RecordEditForm({
 	members,
 	onCancel,
+	onCloseDisabledChange,
 	onSaved,
 	record,
 	simulateFailure,
 }: {
 	members: readonly MemberPresentation[];
 	onCancel: () => void;
+	onCloseDisabledChange: (disabled: boolean) => void;
 	onSaved: () => void;
 	record: ReferenceRecord;
 	simulateFailure: boolean;
@@ -121,6 +147,10 @@ function RecordEditForm({
 	);
 	const [error, setError] = React.useState<string>();
 	const [saving, setSaving] = React.useState(false);
+	React.useEffect(() => {
+		onCloseDisabledChange(saving);
+		return () => onCloseDisabledChange(false);
+	}, [onCloseDisabledChange, saving]);
 	return (
 		<>
 			<ModalHeader leadingIcon={<Icon name="pencil" size="sm" />}>

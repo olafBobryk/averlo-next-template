@@ -4,7 +4,7 @@ import * as React from "react";
 import type { MemberPresentation } from "../../../_lib/entities/member/presentation";
 import { MemberSelector } from "./MemberSelector";
 
-export function MemberSelectorDemo({
+function MemberSelectorDemoRoot({
 	members,
 }: {
 	members: readonly MemberPresentation[];
@@ -14,3 +14,7 @@ export function MemberSelectorDemo({
 	);
 	return <MemberSelector members={members} onChange={setValue} value={value} />;
 }
+
+export const MemberSelectorDemo = Object.assign(MemberSelectorDemoRoot, {
+	Skeleton: MemberSelector.Skeleton,
+});

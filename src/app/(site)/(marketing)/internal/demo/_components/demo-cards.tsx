@@ -1,7 +1,6 @@
 "use client";
 
-import { CopyField } from "@/components/ui/misc/CopyField";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 
 export type RelatedInfo = { uses: string[]; usedIn: string[] };
@@ -45,41 +44,33 @@ export function ComponentCard({
 	related,
 }: ComponentCardProps) {
 	return (
-		<Panel
-			display="flex"
-			gap="sm"
-			padding="sm"
-			shadow="none"
-			className={["h-full self-stretch border border-border bg-card", className]
+		<Card
+			size="sm"
+			className={["h-full min-w-0 self-stretch", className]
 				.filter(Boolean)
 				.join(" ")}
 		>
-			<div className="flex items-center justify-between gap-2">
-				<Text as="h3" variant="bodyStrong">
-					{name}
-				</Text>
-				<Text variant="caption" tone="muted" className="text-xs">
-					{label}
-				</Text>
-			</div>
-			<div className="min-h-[44px] flex-1">{children}</div>
-			{related ? <RelatedItems {...related} /> : null}
-		</Panel>
-	);
-}
-
-export type UsageCardProps = {
-	name: string;
-	label: string;
-	snippet: string;
-	related?: RelatedInfo;
-};
-
-export function UsageCard({ name, label, snippet, related }: UsageCardProps) {
-	return (
-		<ComponentCard name={name} label={label} related={related}>
-			<CopyField value={snippet} />
-		</ComponentCard>
+			<Card.Header className="border-b">
+				<Card.Title as="h3">{name}</Card.Title>
+				<Card.Action>
+					<Text
+						variant="caption"
+						tone="muted"
+						className="min-w-0 break-words text-right text-xs"
+					>
+						{label}
+					</Text>
+				</Card.Action>
+			</Card.Header>
+			<Card.Content className="min-h-[44px] min-w-0 flex-1">
+				{children}
+			</Card.Content>
+			{related ? (
+				<Card.Footer>
+					<RelatedItems {...related} />
+				</Card.Footer>
+			) : null}
+		</Card>
 	);
 }
 

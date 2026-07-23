@@ -3,6 +3,7 @@
 "use client";
 
 import * as React from "react";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
@@ -57,7 +58,7 @@ function parseNumber(raw: string): number | null {
 	return Number.isFinite(n) ? n : null;
 }
 
-export function NumberInput({
+function NumberInputRoot({
 	label,
 	description,
 	placeholder,
@@ -167,3 +168,7 @@ export function NumberInput({
 		</Field>
 	);
 }
+
+export const NumberInput = Object.assign(NumberInputRoot, {
+	Skeleton: InputSkeleton,
+});

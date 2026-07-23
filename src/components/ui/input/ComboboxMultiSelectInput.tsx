@@ -8,8 +8,12 @@ import * as React from "react";
 import { getSpring } from "@/components/ui/foundations/spring";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { ChoiceIndicatorMulti } from "@/components/ui/input/choice/ChoiceIndicators";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Button } from "@/components/ui/primitives/Button";
-import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import {
+	Dropdown,
+	useDropdownListNavigation,
+} from "@/components/ui/primitives/Dropdown";
 import { dropdownListClassName } from "@/components/ui/primitives/dropdownStyles";
 import { Field } from "@/components/ui/primitives/Field";
 import {
@@ -124,7 +128,7 @@ const contentPaddingBySize: Record<NonNullable<InputFrameSize>, string> = {
 	lg: "px-4 py-[12.5px]",
 };
 
-export function ComboboxMultiSelectInput<T>({
+function ComboboxMultiSelectInputRoot<T>({
 	label,
 	description,
 	placeholder = "Search...",
@@ -194,9 +198,7 @@ export function ComboboxMultiSelectInput<T>({
 	const showSpinner =
 		showSpinnerOnMismatch && normalizedQuery.length > 0 && !exactMatch;
 
-	const [activeIndex, setActiveIndex] = React.useState(0);
 	const [menuOpen, setMenuOpen] = React.useState(false);
-	const listRef = React.useRef<HTMLDivElement | null>(null);
 
 	const availableOptions = React.useMemo(
 		() => filteredOptions.filter((option) => !value.includes(option.value)),
@@ -217,28 +219,15 @@ export function ComboboxMultiSelectInput<T>({
 			.map((entry) => entry.option);
 	}, [availableOptions, normalizedQuery.length, query]);
 
-	React.useEffect(() => {
-		if (displayOptions.length === 0) {
-			setActiveIndex(0);
-			return;
-		}
-		if (activeIndex > displayOptions.length - 1) {
-			setActiveIndex(0);
-		}
-	}, [displayOptions.length, activeIndex]);
-
-	React.useEffect(() => {
-		if (!menuOpen) return;
-		setActiveIndex(0);
-	}, [menuOpen]);
-
-	React.useEffect(() => {
-		if (!menuOpen) return;
-		const option = listRef.current?.querySelector<HTMLElement>(
-			`[data-option-index="${activeIndex}"]`,
-		);
-		option?.scrollIntoView({ block: "nearest" });
-	}, [activeIndex, menuOpen]);
+	const navigationOptions = React.useMemo(
+		() =>
+			displayOptions.map((option) => ({
+				disabled: option.disabled,
+			})),
+		[displayOptions],
+	);
+	const { activeIndex, getNextIndex, listRef, setActiveIndex } =
+		useDropdownListNavigation({ isOpen: menuOpen, options: navigationOptions });
 
 	const describedBy =
 		[descriptionId, derivedError ? messageId : undefined]
@@ -246,13 +235,10 @@ export function ComboboxMultiSelectInput<T>({
 			.join(" ") || undefined;
 
 	const updateActiveIndex = React.useCallback(
-		(nextIndex: number) => {
-			if (displayOptions.length === 0) return;
-			const safeIndex =
-				(nextIndex + displayOptions.length) % displayOptions.length;
-			setActiveIndex(safeIndex);
+		(direction: 1 | -1) => {
+			setActiveIndex((current) => getNextIndex(current, direction));
 		},
-		[displayOptions.length],
+		[getNextIndex, setActiveIndex],
 	);
 
 	const toggleOption = React.useCallback(
@@ -394,7 +380,7 @@ export function ComboboxMultiSelectInput<T>({
 							>
 								{motionAllowed ? (
 									<AnimatePresence initial={false}>
-										{selectedOptions.map((option) => (
+										{selectedOptions.map((option, index) => (
 											<motion.div
 												key={`${option.value}`}
 												layout
@@ -403,7 +389,10 @@ export function ComboboxMultiSelectInput<T>({
 												exit={{ opacity: 0, scale: 0.98 }}
 												transition={chipTransition}
 												className={clsx(
-													"flex items-center gap-1.5 border-r border-foreground/25 pr-2 last:pr-0",
+													"flex items-center gap-1.5 border-r border-foreground/25 pr-2",
+													index === selectedOptions.length - 1
+														? "border-r-0 pr-0"
+														: undefined,
 													chipClassName,
 												)}
 											>
@@ -464,13 +453,13 @@ export function ComboboxMultiSelectInput<T>({
 												if (event.key === "ArrowDown") {
 													event.preventDefault();
 													if (!isOpen) openMenu();
-													updateActiveIndex(activeIndex + 1);
+													updateActiveIndex(1);
 													return;
 												}
 												if (event.key === "ArrowUp") {
 													event.preventDefault();
 													if (!isOpen) openMenu();
-													updateActiveIndex(activeIndex - 1);
+													updateActiveIndex(-1);
 													return;
 												}
 												if (event.key === "Enter") {
@@ -582,13 +571,13 @@ export function ComboboxMultiSelectInput<T>({
 												if (event.key === "ArrowDown") {
 													event.preventDefault();
 													if (!isOpen) openMenu();
-													updateActiveIndex(activeIndex + 1);
+													updateActiveIndex(1);
 													return;
 												}
 												if (event.key === "ArrowUp") {
 													event.preventDefault();
 													if (!isOpen) openMenu();
-													updateActiveIndex(activeIndex - 1);
+													updateActiveIndex(-1);
 													return;
 												}
 												if (event.key === "Enter") {
@@ -652,12 +641,6 @@ export function ComboboxMultiSelectInput<T>({
 											disabled: option.disabled,
 											content: (
 												<>
-													<span className="flex shrink-0 items-center">
-														<ChoiceIndicatorMulti
-															checked={false}
-															disabled={Boolean(option.disabled)}
-														/>
-													</span>
 													{optionIcon ? (
 														<span className="flex shrink-0 items-center">
 															{optionIcon}
@@ -673,6 +656,12 @@ export function ComboboxMultiSelectInput<T>({
 																{option.symbol}
 															</span>
 														) : null}
+													</span>
+													<span className="ml-auto flex shrink-0 items-center">
+														<ChoiceIndicatorMulti
+															checked={false}
+															disabled={Boolean(option.disabled)}
+														/>
 													</span>
 												</>
 											),
@@ -697,7 +686,7 @@ export function ComboboxMultiSelectInput<T>({
 						listId={menuId}
 						optionIdPrefix={menuId ? `${menuId}-option` : undefined}
 						listClassName={clsx(dropdownListClassName, menuListClassName)}
-						optionClassName={optionClassName}
+						optionClassName={clsx("[&>span]:w-full", optionClassName)}
 						optionActiveClassName={optionActiveClassName}
 						multiselectable
 						disabled={disabled}
@@ -707,3 +696,8 @@ export function ComboboxMultiSelectInput<T>({
 		</Field>
 	);
 }
+
+export const ComboboxMultiSelectInput = Object.assign(
+	ComboboxMultiSelectInputRoot,
+	{ Skeleton: InputSkeleton },
+);

@@ -13,10 +13,7 @@ export function MarketingShell({
 }>) {
 	return (
 		<>
-			<Header
-				layout={siteLayout.header}
-				forceScrolledPathPrefixes={["/internal/intelligence/graph"]}
-			/>
+			<Header layout={siteLayout.header} />
 			<Reveal.Root>{children}</Reveal.Root>
 			<Footer layout={siteLayout.footer} socialLinks={siteLayout.socialLinks} />
 			<ScrollController />

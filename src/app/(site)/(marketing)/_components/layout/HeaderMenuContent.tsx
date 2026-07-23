@@ -129,29 +129,26 @@ export function HeaderSearchInput({
 				<Icon
 					name="search"
 					size="md"
-					className="pointer-events-none text-muted"
+					className="pointer-events-none text-muted-foreground"
 				/>
 			}
 			end={
-				<Button
-					type="button"
-					variant="ghost"
-					size="sm"
-					textVariant="menu-description"
-					textTone="muted"
-					className={clsx(
-						"pointer-events-none opacity-0 transition-opacity motion-micro group-hover/header-search:pointer-events-auto group-focus-within/header-search:pointer-events-auto",
-						hasValue
-							? "group-hover/header-search:opacity-100 group-focus-within/header-search:opacity-100"
-							: undefined,
-					)}
-					contentClassName="w-fit"
-					aria-label={clearLabel}
-					onMouseDown={(event) => event.preventDefault()}
-					onClick={onClear}
-				>
-					{clearLabel}
-				</Button>
+				hasValue ? (
+					<Button
+						type="button"
+						variant="ghost"
+						size="sm"
+						textVariant="menu-description"
+						textTone="muted"
+						className="pointer-events-none opacity-0 transition-opacity motion-micro group-hover/header-search:pointer-events-auto group-hover/header-search:opacity-100 group-focus-within/header-search:pointer-events-auto group-focus-within/header-search:opacity-100"
+						contentClassName="w-fit"
+						aria-label={clearLabel}
+						onMouseDown={(event) => event.preventDefault()}
+						onClick={onClear}
+					>
+						{clearLabel}
+					</Button>
+				) : undefined
 			}
 		>
 			<input
@@ -163,7 +160,7 @@ export function HeaderSearchInput({
 				placeholder={placeholder}
 				autoComplete="off"
 				className={clsx(
-					inputVariants({ size: "sm", hasStart: true, hasEnd: true }),
+					inputVariants({ size: "sm", hasStart: true, hasEnd: hasValue }),
 					"[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
 				)}
 			/>
@@ -235,11 +232,12 @@ export function HeaderMenuGroup({
 				<Button
 					href={groupHref}
 					variant="ghost"
+					size="none"
 					align="left"
 					textVariant="menu-title"
 					textTone="inherit"
 					className="w-fit text-foreground hover:!text-foreground active:!text-foreground"
-					contentClassName="w-fit"
+					contentClassName="w-fit gap-[10px]"
 					focusable={focusable}
 					leadingIcon={
 						group.icon ? (
@@ -282,7 +280,7 @@ export function HeaderMenuGroup({
 							key={`${item.label}-${getMarketingLinkHref(item)}`}
 							href={getMarketingLinkHref(item)}
 							variant="ghost"
-							size="sm"
+							size="none"
 							align="left"
 							textVariant="menu-description"
 							textTone="inherit"

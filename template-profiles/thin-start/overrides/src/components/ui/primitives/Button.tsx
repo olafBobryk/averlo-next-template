@@ -19,7 +19,7 @@ export type ButtonSize =
 	| "icon"
 	| "icon-sm";
 
-type ButtonBaseProps = {
+export type ButtonBaseProps = {
 	align?: "left" | "center" | "between";
 	children?: React.ReactNode;
 	className?: string;
@@ -36,9 +36,18 @@ type ButtonBaseProps = {
 	variant?: ButtonVariant;
 };
 
+type ButtonElementProps = Omit<
+	React.ButtonHTMLAttributes<HTMLButtonElement>,
+	"align" | "href"
+> & { href?: undefined };
+
+type AnchorElementProps = Omit<
+	React.AnchorHTMLAttributes<HTMLAnchorElement>,
+	"align"
+> & { href: string };
+
 export type ButtonProps = ButtonBaseProps &
-	Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonBaseProps> &
-	Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonBaseProps>;
+	(ButtonElementProps | AnchorElementProps);
 
 const sizeClasses: Record<ButtonSize, string> = {
 	none: "",
@@ -57,7 +66,7 @@ const variantClasses: Record<ButtonVariant, string> = {
 	secondary:
 		"border border-transparent bg-input/50 text-foreground hover:bg-input/70",
 	ghost:
-		"border border-transparent bg-transparent text-foreground hover:bg-muted",
+		"border border-transparent !bg-transparent hover:!bg-transparent active:!bg-transparent text-foreground hover:opacity-70 active:opacity-60",
 	inverse:
 		"border border-transparent bg-foreground text-background hover:bg-foreground/90",
 };
@@ -104,7 +113,7 @@ function getButtonClassName({
 			(variant === "secondary"
 				? "!bg-danger/10 hover:!bg-danger/20"
 				: variant === "ghost"
-					? "!bg-transparent hover:!bg-danger/10"
+					? "!bg-transparent"
 					: "!bg-danger/20 hover:!bg-danger/30"),
 		radius === "sm" ? "rounded-md" : "rounded-4xl",
 		align === "left" && "justify-start text-left",
@@ -241,7 +250,10 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 	return (
 		<button
 			ref={ref as React.Ref<HTMLButtonElement>}
-			type={type ?? "button"}
+			type={
+				(type as React.ButtonHTMLAttributes<HTMLButtonElement>["type"]) ??
+				"button"
+			}
 			disabled={isDisabled}
 			className={resolvedClassName}
 			data-loading={loading || undefined}

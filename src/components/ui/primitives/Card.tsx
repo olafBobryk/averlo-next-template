@@ -3,7 +3,7 @@ import clsx from "clsx";
 import type { ComponentPropsWithoutRef, ElementType } from "react";
 import { Panel, type PanelProps } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
-import { type AccentTone, getAccentClassName } from "./accent";
+import { type AccentTone, getAccentClassName, getAccentStyle } from "./accent";
 
 export type { AccentTone } from "./accent";
 
@@ -74,6 +74,7 @@ export function CardHeader({
 	accent,
 	className,
 	solidAccentBackground = false,
+	style,
 	...props
 }: CardPartProps) {
 	return (
@@ -88,13 +89,19 @@ export function CardHeader({
 			data-slot="card-header"
 			data-accent={accent ?? undefined}
 			data-solid-accent-background={solidAccentBackground || undefined}
+			style={{
+				...getAccentStyle(accent, "slot", {
+					solidBackground: solidAccentBackground,
+				}),
+				...style,
+			}}
 			{...props}
 		/>
 	);
 }
 
 type CardTitleProps = CardPartProps & {
-	as?: "div" | "h2" | "h3" | "h4";
+	as?: "div" | "h1" | "h2" | "h3" | "h4";
 };
 
 export function CardTitle({ as = "h2", className, ...props }: CardTitleProps) {
@@ -146,6 +153,7 @@ export function CardContent({
 	accent,
 	className,
 	solidAccentBackground = false,
+	style,
 	...props
 }: CardPartProps) {
 	return (
@@ -160,6 +168,12 @@ export function CardContent({
 			data-accent={accent ?? undefined}
 			data-solid-accent-background={solidAccentBackground || undefined}
 			data-slot="card-content"
+			style={{
+				...getAccentStyle(accent, "slot", {
+					solidBackground: solidAccentBackground,
+				}),
+				...style,
+			}}
 			{...props}
 		/>
 	);
@@ -169,6 +183,7 @@ export function CardFooter({
 	accent,
 	className,
 	solidAccentBackground = false,
+	style,
 	...props
 }: CardPartProps) {
 	return (
@@ -183,6 +198,12 @@ export function CardFooter({
 			data-slot="card-footer"
 			data-accent={accent ?? undefined}
 			data-solid-accent-background={solidAccentBackground || undefined}
+			style={{
+				...getAccentStyle(accent, "slot", {
+					solidBackground: solidAccentBackground,
+				}),
+				...style,
+			}}
 			{...props}
 		/>
 	);

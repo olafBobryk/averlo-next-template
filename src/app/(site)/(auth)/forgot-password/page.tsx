@@ -1,11 +1,10 @@
-import { EmailInput } from "@/components/ui/input/EmailInput";
 import { Button } from "@/components/ui/primitives/Button";
 import {
 	getSafeContinuationPath,
 	withSafeContinuation,
 } from "@/lib/auth/continuation";
 import { AuthScreen } from "../_components/AuthScreen";
-import { requestUnavailableAuthMethodAction } from "../actions";
+import { PasswordRecoveryRequestForm } from "../_components/PasswordRecoveryRequestForm";
 
 export default async function ForgotPasswordPage({
 	searchParams,
@@ -16,19 +15,12 @@ export default async function ForgotPasswordPage({
 	const next = getSafeContinuationPath(query.next);
 	return (
 		<AuthScreen
-			description="Production adapters may send a recovery link. The fixture adapter deliberately does not send email."
+			description="Enter your email to receive a password reset link."
+			icon="mail"
 			message={query.message}
 			title="Reset your password"
 		>
-			<form action={requestUnavailableAuthMethodAction} className="grid gap-4">
-				<input name="method" type="hidden" value="password-recovery" />
-				<input name="next" type="hidden" value={next} />
-				<input name="returnTo" type="hidden" value="/forgot-password" />
-				<EmailInput label="Account email" name="email" required />
-				<Button className="w-full" type="submit" variant="primary">
-					Send recovery link
-				</Button>
-			</form>
+			<PasswordRecoveryRequestForm />
 			<Button
 				className="w-full"
 				href={withSafeContinuation("/login", next)}

@@ -2,7 +2,7 @@
 "use client";
 
 import type * as React from "react";
-import { InputFrameSkeleton } from "./InputFrame";
+import { InputFrameSkeleton, type InputFrameSkeletonProps } from "./InputFrame";
 import { Text } from "./Text";
 
 type FieldTone = "default" | "error" | "success";
@@ -24,7 +24,10 @@ type FieldProps = {
 
 type FieldSkeletonProps = Omit<FieldProps, "children" | "message" | "tone"> & {
 	children?: React.ReactNode;
+	fullWidth?: InputFrameSkeletonProps["fullWidth"];
 	inputClassName?: string;
+	radius?: InputFrameSkeletonProps["radius"];
+	size?: InputFrameSkeletonProps["size"];
 	skeletonClassName?: string;
 };
 
@@ -128,7 +131,10 @@ function FieldRoot({
 
 export function FieldSkeleton({
 	children,
+	fullWidth,
 	inputClassName,
+	radius,
+	size,
 	skeletonClassName,
 	...props
 }: FieldSkeletonProps) {
@@ -136,6 +142,9 @@ export function FieldSkeleton({
 		<FieldRoot {...props}>
 			<InputFrameSkeleton
 				className={inputClassName}
+				fullWidth={fullWidth}
+				radius={radius}
+				size={size}
 				skeletonClassName={skeletonClassName}
 			>
 				{children}

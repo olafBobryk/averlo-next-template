@@ -1,14 +1,17 @@
 import { Button } from "@/components/ui/primitives/Button";
 import type { DashboardDebugState } from "../../_registry/debug";
 import { DashboardStatusFrame } from "../layout/DashboardStatusFrame";
-import { DashboardRouteSkeleton } from "../loading/DashboardRouteSkeleton";
+import { DashboardForcedLoadingView } from "../loading/DashboardRouteLoadingViews";
 
 export function DashboardDebugStateView({
+	pathname,
 	state,
 }: {
+	pathname: string;
 	state: DashboardDebugState;
 }) {
-	if (state === "loading") return <DashboardRouteSkeleton />;
+	if (state === "loading")
+		return <DashboardForcedLoadingView pathname={pathname} />;
 	if (state === "empty") {
 		return (
 			<DashboardStatusFrame

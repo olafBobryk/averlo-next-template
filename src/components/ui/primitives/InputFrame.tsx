@@ -156,6 +156,7 @@ export type InputFrameSkeletonProps = Omit<
 	"children" | "disabled" | "tone"
 > & {
 	children?: React.ReactNode;
+	radius?: "pill" | "textarea";
 	skeletonClassName?: string;
 };
 
@@ -165,6 +166,7 @@ export function InputFrameSkeleton({
 	contentClassName: _contentClassName,
 	end: _end,
 	fullWidth,
+	radius = "pill",
 	size = "sm",
 	skeletonClassName,
 	start: _start,
@@ -174,7 +176,8 @@ export function InputFrameSkeleton({
 		<Skeleton
 			className={clsx(
 				inputFrameVariants({ size, fullWidth: fullWidth ? true : undefined }),
-				"pointer-events-none select-none !rounded-3xl border-transparent !bg-muted/80 shadow-none",
+				"pointer-events-none select-none border-transparent !bg-muted/80 shadow-none",
+				radius === "textarea" ? "!rounded-2xl" : "!rounded-3xl",
 				className,
 			)}
 			data-slot="input-frame-skeleton"

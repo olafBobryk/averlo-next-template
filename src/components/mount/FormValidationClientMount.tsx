@@ -2,42 +2,36 @@
 
 import { useEffect } from "react";
 
-function disableNativeValidation(node: ParentNode | HTMLFormElement) {
-	if (node instanceof HTMLFormElement) {
-		node.noValidate = true;
-		return;
+function getForm(target: EventTarget | null) {
+	if (!(target instanceof Element)) return null;
+	if (target instanceof HTMLFormElement) return target;
+	if (
+		target instanceof HTMLButtonElement ||
+		target instanceof HTMLInputElement ||
+		target instanceof HTMLTextAreaElement ||
+		target instanceof HTMLSelectElement
+	) {
+		return target.form;
 	}
-
-	node.querySelectorAll("form").forEach((form) => {
-		form.noValidate = true;
-	});
+	return target.closest("form");
 }
 
 export default function FormValidationClientMount() {
 	useEffect(() => {
-		disableNativeValidation(document);
+		const disableNativeValidation = (event: Event) => {
+			const form = getForm(event.target);
+			if (form) form.noValidate = true;
+		};
+		const eventTypes = ["click", "focusin", "keydown", "pointerdown"] as const;
+		for (const eventType of eventTypes) {
+			document.addEventListener(eventType, disableNativeValidation, true);
+		}
 
-		const observer = new MutationObserver((mutations) => {
-			for (const mutation of mutations) {
-				for (const node of mutation.addedNodes) {
-					if (!(node instanceof Element)) continue;
-
-					if (node instanceof HTMLFormElement) {
-						disableNativeValidation(node);
-						continue;
-					}
-
-					disableNativeValidation(node);
-				}
+		return () => {
+			for (const eventType of eventTypes) {
+				document.removeEventListener(eventType, disableNativeValidation, true);
 			}
-		});
-
-		observer.observe(document.body, {
-			childList: true,
-			subtree: true,
-		});
-
-		return () => observer.disconnect();
+		};
 	}, []);
 
 	return null;

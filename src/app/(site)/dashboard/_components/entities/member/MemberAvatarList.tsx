@@ -1,8 +1,7 @@
-import clsx from "clsx";
+import { ProfilePictureStack } from "@/components/ui/misc/ProfilePicture";
 import type { MemberPresentation } from "../../../_lib/entities/member/presentation";
-import { MemberAvatar } from "./MemberAvatar";
 
-export function MemberAvatarList({
+function MemberAvatarListRoot({
 	className,
 	members,
 	maxVisible = 3,
@@ -12,36 +11,40 @@ export function MemberAvatarList({
 	maxVisible?: number;
 }) {
 	if (members.length === 0) return null;
-	const visible = members.slice(0, maxVisible);
-	const remaining = members.length - visible.length;
 	return (
-		<span
-			aria-label={`Assigned to ${members.map((member) => member.displayLabel).join(", ")}`}
-			className={clsx("inline-flex items-center", className)}
-			role="img"
-		>
-			{visible.map((member, index) => (
-				<span
-					className={clsx("relative", index > 0 && "-ml-2")}
-					key={member.id}
-					style={{ zIndex: visible.length - index }}
-					title={member.displayLabel}
-				>
-					<MemberAvatar
-						alt={member.avatarAlt}
-						className="ring-2 ring-background"
-						colorIndex={member.avatarColorIndex}
-						imageUrl={member.avatarUrl}
-						initials={member.initials}
-						size="sm"
-					/>
-				</span>
-			))}
-			{remaining > 0 ? (
-				<span className="relative z-0 -ml-2 inline-grid size-8 place-items-center rounded-full border border-border bg-muted text-xs font-medium text-muted-foreground ring-2 ring-background">
-					+{remaining}
-				</span>
-			) : null}
-		</span>
+		<ProfilePictureStack
+			ariaLabel={`Assigned to ${members.map((member) => member.displayLabel).join(", ")}`}
+			className={className}
+			items={members.map((member) => ({
+				alt: member.avatarAlt,
+				fallback: member.initials,
+				helperIndex: member.avatarColorIndex,
+				id: member.id,
+				name: member.displayLabel,
+				src: member.avatarUrl,
+			}))}
+			maxVisible={maxVisible}
+			size="sm"
+		/>
 	);
 }
+
+function MemberAvatarListSkeleton({
+	className,
+	count = 3,
+}: {
+	className?: string;
+	count?: number;
+}) {
+	return (
+		<ProfilePictureStack.Skeleton
+			className={className}
+			count={count}
+			size="sm"
+		/>
+	);
+}
+
+export const MemberAvatarList = Object.assign(MemberAvatarListRoot, {
+	Skeleton: MemberAvatarListSkeleton,
+});

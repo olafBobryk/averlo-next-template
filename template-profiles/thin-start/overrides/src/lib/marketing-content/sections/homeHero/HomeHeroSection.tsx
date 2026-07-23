@@ -11,7 +11,7 @@ type HomeHeroSectionProps = {
 	section: HomeHeroSectionBlock;
 };
 
-export function HomeHeroSection({ section }: HomeHeroSectionProps) {
+function HomeHeroSectionRoot({ section }: HomeHeroSectionProps) {
 	const description = section.descriptions[0]?.text ?? "";
 
 	return (
@@ -42,3 +42,31 @@ export function HomeHeroSection({ section }: HomeHeroSectionProps) {
 		</Section>
 	);
 }
+
+function HomeHeroSectionSkeleton({ section }: HomeHeroSectionProps) {
+	const description =
+		section.descriptions[0]?.text ?? "A clear product description";
+	return (
+		<Section
+			id={section.id ?? "home-hero"}
+			padding="hero"
+			data-section-id={section.id ?? "home-hero"}
+			data-section-label="Home Hero"
+			data-section-type={section.blockType}
+		>
+			<div className="mx-auto flex min-h-[70vh] max-w-section-max flex-col justify-center gap-8">
+				<Text.Skeleton as="h1" variant="heading" className="max-w-3xl">
+					{section.headline}
+				</Text.Skeleton>
+				<Text.Skeleton as="p" className="max-w-2xl">
+					{description}
+				</Text.Skeleton>
+				<Button.Skeleton>{section.cta.label}</Button.Skeleton>
+			</div>
+		</Section>
+	);
+}
+
+export const HomeHeroSection = Object.assign(HomeHeroSectionRoot, {
+	Skeleton: HomeHeroSectionSkeleton,
+});

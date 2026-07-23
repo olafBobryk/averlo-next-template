@@ -4,6 +4,7 @@ import {
 	type AccentTone,
 	getAccentClassName,
 	getAccentForegroundClassName,
+	getAccentStyle,
 } from "./accent";
 
 export type StatusMessageTone = Exclude<AccentTone, "neutral">;
@@ -15,6 +16,7 @@ export type StatusMessageProps = React.HTMLAttributes<HTMLParagraphElement> & {
 export function StatusMessage({
 	children,
 	className,
+	style,
 	tone = "info",
 	...rest
 }: StatusMessageProps) {
@@ -28,6 +30,10 @@ export function StatusMessage({
 			)}
 			data-accent={tone}
 			data-solid-accent-background
+			style={{
+				...getAccentStyle(tone, "surface", { solidBackground: true }),
+				...style,
+			}}
 			{...rest}
 		>
 			{children}

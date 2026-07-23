@@ -5,8 +5,10 @@ import * as React from "react";
 import {
 	logout as clearSession,
 	fetchSession,
+	type OrganizationUpdateInput,
 	type SessionUser,
-	updateStoredSessionUser,
+	updateOrganization as updateOrganizationRequest,
+	updateSessionUser,
 } from "@/lib/api/auth";
 import type {
 	Organization,
@@ -22,6 +24,7 @@ import {
 export type DashboardAuthContextValue = {
 	user: SessionUser | null;
 	organization: Organization;
+	organizationChoices: readonly DashboardOrganizationChoice[];
 	membership: OrganizationMembership;
 	memberships: readonly OrganizationMembership[];
 	initializing: boolean;
@@ -29,7 +32,13 @@ export type DashboardAuthContextValue = {
 	error: Error | null;
 	refresh: (options?: { silent?: boolean }) => Promise<void>;
 	logout: () => Promise<void>;
-	updateUser: (patch: Partial<SessionUser>) => void;
+	updateOrganization: (patch: OrganizationUpdateInput) => Promise<void>;
+	updateUser: (patch: Partial<SessionUser>) => Promise<void>;
+};
+
+export type DashboardOrganizationChoice = {
+	membership: OrganizationMembership;
+	organization: Organization;
 };
 
 const DashboardAuthContext =
@@ -46,15 +55,23 @@ export function DashboardAuthProvider({
 	initialMembership,
 	initialMemberships,
 	initialOrganization,
+	initialOrganizationChoices,
 	initialUser,
 }: {
 	children: React.ReactNode;
 	initialMembership: OrganizationMembership;
 	initialMemberships: readonly OrganizationMembership[];
 	initialOrganization: Organization;
+	initialOrganizationChoices: readonly DashboardOrganizationChoice[];
 	initialUser: SessionUser;
 }) {
+	const router = useRouter();
 	const [user, setUser] = React.useState<SessionUser | null>(initialUser);
+	const [organization, setOrganization] =
+		React.useState<Organization>(initialOrganization);
+	const [organizationChoices, setOrganizationChoices] = React.useState<
+		readonly DashboardOrganizationChoice[]
+	>(initialOrganizationChoices);
 	const [initializing] = React.useState(false);
 	const [loading, setLoading] = React.useState(false);
 	const [error, setError] = React.useState<Error | null>(null);
@@ -89,20 +106,45 @@ export function DashboardAuthProvider({
 		}
 	}, []);
 
-	const updateUser = React.useCallback((patch: Partial<SessionUser>) => {
-		setUser((current) => {
-			if (!current) return current;
-			const nextUser = { ...current, ...patch };
-			updateStoredSessionUser(patch);
-			return nextUser;
-		});
-	}, []);
+	const updateUser = React.useCallback(
+		async (patch: Partial<SessionUser>) => {
+			const nextUser = await updateSessionUser(patch);
+			setUser(nextUser);
+			router.refresh();
+		},
+		[router],
+	);
+
+	const updateOrganization = React.useCallback(
+		async (patch: OrganizationUpdateInput) => {
+			const nextOrganization = await updateOrganizationRequest(patch);
+			setOrganization(nextOrganization);
+			setOrganizationChoices((current) =>
+				current.map((choice) =>
+					choice.organization.id === nextOrganization.id
+						? { ...choice, organization: nextOrganization }
+						: choice,
+				),
+			);
+			router.refresh();
+		},
+		[router],
+	);
+
+	React.useEffect(() => {
+		setOrganization(initialOrganization);
+	}, [initialOrganization]);
+
+	React.useEffect(() => {
+		setOrganizationChoices(initialOrganizationChoices);
+	}, [initialOrganizationChoices]);
 
 	return (
 		<DashboardAuthContext.Provider
 			value={{
 				user,
-				organization: initialOrganization,
+				organization,
+				organizationChoices,
 				membership: initialMembership,
 				memberships: initialMemberships,
 				initializing,
@@ -110,6 +152,7 @@ export function DashboardAuthProvider({
 				error,
 				refresh,
 				logout,
+				updateOrganization,
 				updateUser,
 			}}
 		>

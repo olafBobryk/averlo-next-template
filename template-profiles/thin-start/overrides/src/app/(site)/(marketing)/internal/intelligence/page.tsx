@@ -83,9 +83,6 @@ export default async function TemplateIntelligencePage({
 						</Text>
 					</header>
 					<div className="flex gap-3">
-						<Button href="/internal/intelligence/graph" variant="ghost">
-							Graph summary
-						</Button>
 						<Button
 							href="/internal/intelligence?view=benchmarks"
 							variant="ghost"

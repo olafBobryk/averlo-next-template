@@ -1,32 +1,32 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
-import { Button } from "@/components/ui/primitives/Button";
-import { withSafeContinuation } from "@/lib/auth/continuation";
-import { dashboardFeatureConfig } from "../../_registry/surfaceRegistry";
-import { ProfilePicture } from "../entities/users/ProfilePicture";
+import { useRouter } from "next/navigation";
+import { Icon } from "@/components/ui/icons/Icon";
+import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
+import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import { getAccountPresentation } from "../../_lib/entities/account/presentation";
+import { AccountIdentity } from "../entities/account/AccountIdentity";
 import { useDashboardAuth } from "../providers/DashboardAuthProvider";
 
 export function DashboardAccountMenu() {
-	const pathname = usePathname();
 	const router = useRouter();
-	const { loading, logout, memberships, organization, user } =
+	const { loading, logout, membership, organization, user } =
 		useDashboardAuth();
 	if (!user) return null;
-	const switchHref = `${withSafeContinuation(
-		"/select-organization",
-		pathname,
-	)}&switch=1`;
+	const accountPresentation = getAccountPresentation({
+		membership,
+		organization,
+		user,
+	});
 
 	async function handleSignOut() {
 		await logout();
-		router.replace("/login?message=signed-out");
+		router.replace("/login");
 		router.refresh();
 	}
 
 	return (
-		<MoreMenuDropdown
+		<Dropdown.Menu
 			align="end"
 			ariaLabel="Open account menu"
 			menuWidth={290}
@@ -35,63 +35,49 @@ export function DashboardAccountMenu() {
 			positionStrategy="fixed"
 			options={[
 				{
-					disabled: true,
 					id: "account",
-					label: `${user.name} · ${organization.name}`,
+					href: accountPresentation.profileHref,
+					label: (
+						<AccountIdentity
+							presentation={accountPresentation}
+							variant="compact"
+						/>
+					),
+					dividerAfter: true,
+					layout: "presentation",
 				},
 				{
 					href: "/dashboard/settings",
 					id: "account-settings",
 					label: "Account settings",
-					leadingIcon: "gear",
+					leadingIcon: <Icon name="gear" size="sm" />,
 				},
 				{
 					href: "/dashboard/organization",
 					id: "organization",
 					label: "Organization",
-					leadingIcon: "building",
+					leadingIcon: <Icon name="building" size="sm" />,
 				},
-				...(dashboardFeatureConfig.organizationSwitcher &&
-				memberships.length > 1
-					? [
-							{
-								href: switchHref,
-								id: "switch-organization",
-								label: "Switch organization",
-								leadingIcon: "users" as const,
-							},
-						]
-					: []),
 				{
 					id: "sign-out",
 					label: loading ? "Signing out…" : "Sign out",
-					leadingIcon: "log-out",
+					leadingIcon: <Icon name="log-out" size="sm" />,
 					onSelect: () => void handleSignOut(),
-					separatorBefore: true,
 					tone: "danger",
 				},
 			]}
-			renderTrigger={(trigger) => (
-				<Button
-					aria-expanded={trigger.isOpen}
-					aria-haspopup="menu"
-					aria-label="Open account menu"
-					className="!size-10 !rounded-full !p-0"
-					onClick={trigger.onRightClick}
-					onMouseEnter={trigger.onRootMouseEnter}
-					onMouseLeave={trigger.onRootMouseLeave}
-					ref={trigger.ref}
-					size="icon-sm"
-					variant="ghost"
-				>
-					<ProfilePicture
-						className="!size-8"
-						name={user.name}
-						size="sm"
-						src={user.profilePictureUrl}
-					/>
-				</Button>
-			)}
+			triggerButtonProps={{
+				className: "!size-10 !rounded-full !p-0",
+				size: "icon-sm",
+				variant: "ghost",
+			}}
+			triggerContent={
+				<ProfilePicture
+					name={user.name}
+					size="sm"
+					src={user.profilePictureUrl}
+				/>
+			}
 		/>
 	);
 }

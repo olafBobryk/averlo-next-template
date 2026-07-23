@@ -31,7 +31,7 @@ type ToggleInputProps = {
 	value?: string[];
 };
 
-export function ToggleInput({
+function ToggleInputRoot({
 	className,
 	defaultValue,
 	description,
@@ -120,3 +120,51 @@ export function ToggleInput({
 		</Field>
 	);
 }
+
+function ToggleInputSkeleton({
+	className,
+	description,
+	fieldClassName,
+	label,
+	labelClassName,
+	optionClassName,
+	options,
+	required,
+}: Pick<
+	ToggleInputProps,
+	| "className"
+	| "description"
+	| "fieldClassName"
+	| "label"
+	| "labelClassName"
+	| "optionClassName"
+	| "options"
+	| "required"
+>) {
+	return (
+		<Field
+			className={fieldClassName}
+			description={description}
+			disableMessage
+			label={label}
+			required={required}
+		>
+			<div className={clsx("flex flex-col gap-3", className)}>
+				{options.map((option) => (
+					<ChoiceField.Skeleton
+						className={optionClassName}
+						description={option.description}
+						indicator="toggle"
+						key={option.value}
+						label={option.label}
+						labelClassName={labelClassName}
+					/>
+				))}
+			</div>
+		</Field>
+	);
+}
+
+export const ToggleInput = Object.assign(ToggleInputRoot, {
+	Skeleton: ToggleInputSkeleton,
+});

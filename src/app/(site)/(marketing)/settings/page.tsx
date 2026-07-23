@@ -22,7 +22,8 @@ export default function MarketingSettingsPage() {
 					Settings
 				</Text>
 				<Text variant="body" tone="muted">
-					Accessibility preferences are stored locally and applied immediately.
+					Appearance and accessibility preferences are stored locally and
+					applied across the application.
 				</Text>
 			</header>
 			<Divider />

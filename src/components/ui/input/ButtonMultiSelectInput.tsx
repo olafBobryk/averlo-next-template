@@ -33,7 +33,18 @@ export type ButtonMultiSelectInputProps<T extends string = string> = Omit<
 	value?: readonly T[];
 };
 
-export function ButtonMultiSelectInput<T extends string = string>({
+type ButtonMultiSelectInputSkeletonProps<T extends string = string> = Pick<
+	ButtonMultiSelectInputProps<T>,
+	| "className"
+	| "description"
+	| "fieldClassName"
+	| "label"
+	| "options"
+	| "required"
+	| "size"
+>;
+
+function ButtonMultiSelectInputRoot<T extends string = string>({
 	className,
 	defaultValue = [],
 	description,
@@ -156,3 +167,40 @@ export function ButtonMultiSelectInput<T extends string = string>({
 		</Field>
 	);
 }
+
+function ButtonMultiSelectInputSkeleton<T extends string = string>({
+	className,
+	description,
+	fieldClassName,
+	label,
+	options,
+	required,
+	size = "sm",
+}: ButtonMultiSelectInputSkeletonProps<T>) {
+	return (
+		<Field
+			className={fieldClassName}
+			description={description}
+			disableMessage
+			label={label}
+			required={required}
+		>
+			<div
+				className={clsx("flex min-w-0 flex-wrap items-start gap-2", className)}
+			>
+				{options.map((option) => (
+					<Button.Skeleton key={option.value} size={size} variant="secondary">
+						{option.label}
+					</Button.Skeleton>
+				))}
+			</div>
+		</Field>
+	);
+}
+
+export const ButtonMultiSelectInput = Object.assign(
+	ButtonMultiSelectInputRoot,
+	{
+		Skeleton: ButtonMultiSelectInputSkeleton,
+	},
+);

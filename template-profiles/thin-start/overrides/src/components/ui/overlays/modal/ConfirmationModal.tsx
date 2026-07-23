@@ -1,6 +1,13 @@
 "use client";
 
 import * as React from "react";
+import {
+	ModalContent,
+	ModalDescription,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 
@@ -10,76 +17,105 @@ export type ConfirmationModalDetail = {
 };
 
 type ConfirmationModalProps = {
-	title: string;
-	description: string;
 	confirmLabel: string;
 	confirmTone?: React.ComponentProps<typeof Button>["tone"];
 	confirmVariant?: React.ComponentProps<typeof Button>["variant"];
+	description: string;
 	details?: readonly ConfirmationModalDetail[];
-	onConfirm: () => unknown;
 	onClose: () => void;
+	onCloseDisabledChange?: (disabled: boolean) => void;
+	onConfirm: () => unknown;
+	title: string;
 	warning?: string;
 };
 
 export function ConfirmationModal({
-	title,
-	description,
 	confirmLabel,
 	confirmTone = "danger",
 	confirmVariant = "secondary",
+	description,
 	details,
-	onConfirm,
 	onClose,
+	onCloseDisabledChange,
+	onConfirm,
+	title,
 	warning,
 }: ConfirmationModalProps) {
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-	const handleConfirm = async () => {
+	React.useEffect(() => {
+		onCloseDisabledChange?.(isSubmitting);
+		return () => onCloseDisabledChange?.(false);
+	}, [isSubmitting, onCloseDisabledChange]);
+
+	async function handleConfirm() {
 		if (isSubmitting) return;
 		setIsSubmitting(true);
 		try {
 			const shouldClose = await onConfirm();
-			if (shouldClose !== false) onClose();
+			if (shouldClose !== false) {
+				onCloseDisabledChange?.(false);
+				onClose();
+			}
 		} finally {
 			setIsSubmitting(false);
 		}
-	};
+	}
 
 	return (
-		<div className="grid gap-5">
-			<div className="grid gap-2">
-				<Text as="h2" variant="heading">
-					{title}
-				</Text>
-				<Text tone="muted">{description}</Text>
-				{details?.length ? (
-					<dl className="grid divide-y divide-border rounded-md border border-border bg-surface px-4">
-						{details.map((detail) => (
-							<div className="grid gap-1 py-3" key={detail.label}>
-								<dt className="text-sm font-medium">{detail.label}</dt>
-								<dd className="text-sm text-muted-foreground">
-									{detail.description}
-								</dd>
-							</div>
-						))}
-					</dl>
-				) : null}
-				{warning ? <Text className="text-danger">{warning}</Text> : null}
-			</div>
-			<div className="flex justify-end gap-2">
-				<Button type="button" variant="ghost" onClick={onClose}>
+		<>
+			<ModalHeader
+				closeDisabled={isSubmitting}
+				leadingIcon={
+					<span aria-hidden className="text-danger">
+						!
+					</span>
+				}
+			>
+				<ModalTitle>{title}</ModalTitle>
+				<ModalDescription>{description}</ModalDescription>
+			</ModalHeader>
+			{details?.length || warning ? (
+				<ModalContent className="grid gap-4">
+					{details?.length ? (
+						<dl className="grid">
+							{details.map((detail) => (
+								<div
+									className="grid gap-1 border-t border-border/70 py-3 first:border-t-0 first:pt-0 last:pb-0"
+									key={detail.label}
+								>
+									<Text as="dt" variant="support">
+										{detail.label}
+									</Text>
+									<Text as="dd" tone="muted" variant="support">
+										{detail.description}
+									</Text>
+								</div>
+							))}
+						</dl>
+					) : null}
+					{warning ? <Text className="text-danger">{warning}</Text> : null}
+				</ModalContent>
+			) : null}
+			<ModalFooter>
+				<Button
+					disabled={isSubmitting}
+					onClick={onClose}
+					type="button"
+					variant="ghost"
+				>
 					Cancel
 				</Button>
 				<Button
-					type="button"
 					loading={isSubmitting}
 					onClick={handleConfirm}
 					tone={confirmTone}
+					type="button"
 					variant={confirmVariant}
 				>
 					{confirmLabel}
 				</Button>
-			</div>
-		</div>
+			</ModalFooter>
+		</>
 	);
 }

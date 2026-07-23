@@ -4,8 +4,13 @@
 
 import * as React from "react";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Button } from "@/components/ui/primitives/Button";
-import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import {
+	Dropdown,
+	type DropdownPositionStrategy,
+	useDropdownListNavigation,
+} from "@/components/ui/primitives/Dropdown";
 import { dropdownListClassName } from "@/components/ui/primitives/dropdownStyles";
 import { Field } from "@/components/ui/primitives/Field";
 import {
@@ -54,6 +59,8 @@ export type SelectInputProps<T> = {
 	optionActiveClassName?: string;
 	optionSelectedClassName?: string;
 	portalTargetId?: string;
+	dropdownPositionStrategy?: DropdownPositionStrategy;
+	showSelectedIcon?: boolean;
 };
 
 const normalizeQuery = (value: string) =>
@@ -94,7 +101,7 @@ const renderOptionIcon = (icon?: IconProp, size: "sm" | "md" | "lg" = "sm") => {
 	return icon;
 };
 
-export function SelectInput<T>({
+function SelectInputRoot<T>({
 	label,
 	description,
 	placeholder = "Select option",
@@ -119,6 +126,8 @@ export function SelectInput<T>({
 	optionActiveClassName,
 	optionSelectedClassName,
 	portalTargetId,
+	dropdownPositionStrategy = "absolute",
+	showSelectedIcon = false,
 }: SelectInputProps<T>) {
 	const inputRef = React.useRef<HTMLInputElement | null>(null);
 	const [searchQuery, setSearchQuery] = React.useState("");
@@ -134,6 +143,9 @@ export function SelectInput<T>({
 
 	const selectedOption =
 		options.find((option) => option.value === value) ?? null;
+	const selectedOptionIcon = showSelectedIcon
+		? renderOptionIcon(selectedOption?.icon, "sm")
+		: null;
 	const formatOptionLabel = React.useCallback(
 		(option?: SelectOption<T> | null) => {
 			if (!option) return "";
@@ -162,42 +174,19 @@ export function SelectInput<T>({
 			.map((entry) => entry.option);
 	}, [options, filterOption, searchQuery, normalizedQuery]);
 
-	const [activeIndex, setActiveIndex] = React.useState(0);
 	const [menuOpen, setMenuOpen] = React.useState(false);
-	const listRef = React.useRef<HTMLDivElement | null>(null);
-
-	React.useEffect(() => {
-		if (filteredOptions.length === 0) {
-			setActiveIndex(0);
-			return;
-		}
-		if (activeIndex > filteredOptions.length - 1) {
-			setActiveIndex(0);
-		}
-	}, [activeIndex, filteredOptions.length]);
-
-	React.useEffect(() => {
-		if (!menuOpen) return;
-		const selectedIndex = filteredOptions.findIndex(
-			(option) => option.value === value,
-		);
-		const exactIndex = exactMatch
-			? filteredOptions.findIndex((option) => option.value === exactMatch.value)
-			: -1;
-		if (exactIndex >= 0) {
-			setActiveIndex(exactIndex);
-			return;
-		}
-		setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-	}, [menuOpen, filteredOptions, value, exactMatch]);
-
-	React.useEffect(() => {
-		if (!menuOpen) return;
-		const option = listRef.current?.querySelector<HTMLElement>(
-			`[data-option-index="${activeIndex}"]`,
-		);
-		option?.scrollIntoView({ block: "nearest" });
-	}, [activeIndex, menuOpen]);
+	const navigationOptions = React.useMemo(
+		() =>
+			filteredOptions.map((option) => ({
+				disabled: option.disabled,
+				selected: exactMatch
+					? option.value === exactMatch.value
+					: option.value === value,
+			})),
+		[exactMatch, filteredOptions, value],
+	);
+	const { activeIndex, getNextIndex, listRef, setActiveIndex } =
+		useDropdownListNavigation({ isOpen: menuOpen, options: navigationOptions });
 
 	const describedBy =
 		[descriptionId, derivedError ? messageId : undefined]
@@ -205,13 +194,10 @@ export function SelectInput<T>({
 			.join(" ") || undefined;
 
 	const updateActiveIndex = React.useCallback(
-		(nextIndex: number) => {
-			if (filteredOptions.length === 0) return;
-			const safeIndex =
-				(nextIndex + filteredOptions.length) % filteredOptions.length;
-			setActiveIndex(safeIndex);
+		(direction: 1 | -1) => {
+			setActiveIndex((current) => getNextIndex(current, direction));
 		},
-		[filteredOptions.length],
+		[getNextIndex, setActiveIndex],
 	);
 
 	const selectOption = (option: SelectOption<T>) => {
@@ -236,6 +222,7 @@ export function SelectInput<T>({
 			className={className}
 		>
 			<Dropdown
+				positionStrategy={dropdownPositionStrategy}
 				portalTargetId={portalTargetId}
 				menuWidth="trigger"
 				align="start"
@@ -268,6 +255,11 @@ export function SelectInput<T>({
 							size={size}
 							disabled={disabled}
 							fullWidth
+							start={
+								selectedOptionIcon ? (
+									<span aria-hidden>{selectedOptionIcon}</span>
+								) : undefined
+							}
 							end={
 								<Button
 									data-dropdown-chevron
@@ -312,6 +304,7 @@ export function SelectInput<T>({
 								className={[
 									inputVariants({
 										size,
+										hasStart: selectedOptionIcon ? true : undefined,
 										hasEnd: true,
 										disabled: disabled ? true : undefined,
 									}),
@@ -324,13 +317,13 @@ export function SelectInput<T>({
 									if (event.key === "ArrowDown") {
 										event.preventDefault();
 										if (!isOpen) openMenu();
-										updateActiveIndex(activeIndex + 1);
+										updateActiveIndex(1);
 										return;
 									}
 									if (event.key === "ArrowUp") {
 										event.preventDefault();
 										if (!isOpen) openMenu();
-										updateActiveIndex(activeIndex - 1);
+										updateActiveIndex(-1);
 										return;
 									}
 									if (event.key === "Enter") {
@@ -444,9 +437,7 @@ export function SelectInput<T>({
 							.join(" ")}
 						optionClassName={optionClassName}
 						optionActiveClassName={optionActiveClassName}
-						optionSelectedClassName={
-							optionSelectedClassName ?? optionActiveClassName
-						}
+						optionSelectedClassName={optionSelectedClassName}
 						disabled={disabled}
 					/>
 				)}
@@ -454,3 +445,7 @@ export function SelectInput<T>({
 		</Field>
 	);
 }
+
+export const SelectInput = Object.assign(SelectInputRoot, {
+	Skeleton: InputSkeleton,
+});

@@ -3,33 +3,64 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
-import { focusRing } from "@/components/ui/foundations/focus";
 import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
-import type { AccordionProps } from "@/components/ui/misc/Accordion.shared";
+import type {
+	AccordionActionProps,
+	AccordionCardProps,
+	AccordionContentProps,
+	AccordionDescriptionProps,
+	AccordionFooterProps,
+	AccordionHeaderProps,
+	AccordionProps,
+	AccordionStateProps,
+	AccordionTitleProps,
+} from "@/components/ui/misc/Accordion.shared";
+import { Button } from "@/components/ui/primitives/Button";
+import {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
-export function AccordionClient({
-	buttonClassName,
-	children,
-	className,
-	contentClassName,
+type DisclosureState = {
+	contentId: string;
+	disabled: boolean;
+	handleToggle: () => void;
+	isContentOverflowVisible: boolean;
+	isOpen: boolean;
+	setIsContentOverflowVisible: React.Dispatch<React.SetStateAction<boolean>>;
+	shouldAnimate: boolean;
+	titleId: string;
+};
+
+const AccordionCardContext = React.createContext<DisclosureState | null>(null);
+
+function useAccordionCardContext(componentName: string) {
+	const context = React.useContext(AccordionCardContext);
+	if (!context) {
+		throw new Error(`${componentName} must be used inside Accordion.Card.`);
+	}
+	return context;
+}
+
+function useDisclosureState({
 	defaultOpen = false,
-	description,
 	disabled = false,
 	disableWhenReducedMotion = true,
 	forceReducedMotion,
-	icon,
-	iconClassName,
 	onOpenChange,
 	open,
-	title,
-	titleClassName,
-	triggerClassName,
-}: AccordionProps) {
-	const id = React.useId();
+}: AccordionStateProps): DisclosureState {
+	const id = React.useId().replace(/:/g, "");
 	const contentId = `accordion-content-${id}`;
+	const titleId = `accordion-title-${id}`;
 	const isControlled = open !== undefined;
 	const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
 	const isOpen = isControlled ? open : internalOpen;
@@ -49,27 +80,116 @@ export function AccordionClient({
 		onOpenChange?.(nextOpen);
 	}
 
+	return {
+		contentId,
+		disabled,
+		handleToggle,
+		isContentOverflowVisible,
+		isOpen,
+		setIsContentOverflowVisible,
+		shouldAnimate,
+		titleId,
+	};
+}
+
+function CollapsibleRegion({
+	children,
+	className,
+	includeId = true,
+	state,
+}: {
+	children: React.ReactNode;
+	className?: string;
+	includeId?: boolean;
+	state: DisclosureState;
+}) {
+	if (state.shouldAnimate) {
+		return (
+			<AnimatePresence initial={false}>
+				{state.isOpen ? (
+					<motion.div
+						animate={{ height: "auto", opacity: 1 }}
+						className={clsx(
+							state.isContentOverflowVisible
+								? "!overflow-visible"
+								: "overflow-hidden",
+							className,
+						)}
+						exit={{ height: 0, opacity: 0 }}
+						id={includeId ? state.contentId : undefined}
+						initial={{ height: 0, opacity: 0 }}
+						onAnimationComplete={() => {
+							if (state.isOpen) state.setIsContentOverflowVisible(true);
+						}}
+						transition={spring.disclosure}
+					>
+						{children}
+					</motion.div>
+				) : null}
+			</AnimatePresence>
+		);
+	}
+
+	return state.isOpen ? (
+		<div
+			className={clsx("!overflow-visible", className)}
+			id={includeId ? state.contentId : undefined}
+		>
+			{children}
+		</div>
+	) : null;
+}
+
+export function AccordionClient({
+	buttonClassName,
+	children,
+	className,
+	contentClassName,
+	defaultOpen = false,
+	description,
+	disabled = false,
+	disableWhenReducedMotion = true,
+	forceReducedMotion,
+	icon,
+	iconClassName,
+	onOpenChange,
+	open,
+	title,
+	titleClassName,
+	triggerClassName,
+}: AccordionProps) {
+	const state = useDisclosureState({
+		defaultOpen,
+		disabled,
+		disableWhenReducedMotion,
+		forceReducedMotion,
+		onOpenChange,
+		open,
+	});
+
 	return (
 		<div
 			className={clsx(
-				"group/accordion rounded-md border border-border/70 bg-surface/60 transition-colors motion-micro",
+				"group/accordion rounded-none border-0 bg-transparent transition-colors motion-micro",
 				disabled && "opacity-60",
 				className,
 			)}
-			data-open={isOpen ? "true" : "false"}
+			data-open={state.isOpen ? "true" : "false"}
 		>
-			<button
-				aria-controls={contentId}
-				aria-expanded={isOpen}
+			<Button
+				align="left"
+				aria-controls={state.contentId}
+				aria-expanded={state.isOpen}
 				className={clsx(
-					"flex min-h-11 w-full cursor-pointer items-center gap-1.5 rounded-md px-3 py-2.5 text-left transition-colors motion-interactive hover:bg-muted/55 disabled:cursor-not-allowed",
-					focusRing.visibleDefault,
+					"!min-h-0 w-full !rounded-md !border-0 !px-0 !py-2.5 hover:!bg-transparent hover:opacity-70 disabled:!opacity-100",
 					buttonClassName,
 					triggerClassName,
 				)}
+				contentClassName="w-full gap-1.5"
 				disabled={disabled}
-				onClick={handleToggle}
-				type="button"
+				onClick={state.handleToggle}
+				size="none"
+				variant="ghost"
 			>
 				{icon ? (
 					<span
@@ -101,45 +221,169 @@ export function AccordionClient({
 				>
 					<Icon name="chevron-down" size="sm" />
 				</span>
-			</button>
-			{shouldAnimate ? (
-				<AnimatePresence initial={false}>
-					{isOpen ? (
-						<motion.div
-							animate={{ height: "auto", opacity: 1 }}
-							className={
-								isContentOverflowVisible
-									? "!overflow-visible"
-									: "overflow-hidden"
-							}
-							exit={{ height: 0, opacity: 0 }}
-							id={contentId}
-							initial={{ height: 0, opacity: 0 }}
-							onAnimationComplete={() => {
-								if (isOpen) setIsContentOverflowVisible(true);
-							}}
-							transition={spring.disclosure}
-						>
-							<div
-								className={clsx(
-									"border-t border-border/70 p-3",
-									contentClassName,
-								)}
-							>
-								{children}
-							</div>
-						</motion.div>
-					) : null}
-				</AnimatePresence>
-			) : isOpen ? (
-				<div className="!overflow-visible" id={contentId}>
-					<div
-						className={clsx("border-t border-border/70 p-3", contentClassName)}
-					>
-						{children}
-					</div>
+			</Button>
+			<CollapsibleRegion state={state}>
+				<div className={clsx("border-t-0 px-0 py-3", contentClassName)}>
+					{children}
 				</div>
-			) : null}
+			</CollapsibleRegion>
 		</div>
+	);
+}
+
+function AccordionCardToggle() {
+	const state = useAccordionCardContext("Accordion.Card toggle");
+
+	return (
+		<Button
+			aria-controls={state.contentId}
+			aria-expanded={state.isOpen}
+			aria-label={state.isOpen ? "Collapse section" : "Expand section"}
+			aria-labelledby={state.titleId}
+			disabled={state.disabled}
+			onClick={state.handleToggle}
+			size="icon-sm"
+			variant="ghost"
+		>
+			<Icon
+				aria-hidden
+				className={clsx(
+					"transition-transform motion-micro",
+					state.isOpen && "rotate-180",
+				)}
+				name="chevron-down"
+				size="sm"
+			/>
+		</Button>
+	);
+}
+
+export function AccordionCardHeader({
+	children,
+	className,
+	style,
+	...props
+}: AccordionHeaderProps) {
+	const state = useAccordionCardContext("Accordion.Header");
+
+	return (
+		<CardHeader
+			{...props}
+			className={clsx(
+				"grid-cols-[minmax(0,1fr)_auto_auto] transition-[padding,border-color] motion-micro",
+				className,
+				!state.isOpen && "!border-transparent !pb-0",
+			)}
+			style={{
+				...style,
+				gridTemplateColumns: "minmax(0, 1fr) auto auto",
+			}}
+		>
+			{children}
+			<CardAction className="!col-start-3 !row-start-1 self-center">
+				<AccordionCardToggle />
+			</CardAction>
+		</CardHeader>
+	);
+}
+
+export function AccordionCardTitle({
+	className,
+	...props
+}: AccordionTitleProps) {
+	const state = useAccordionCardContext("Accordion.Title");
+	return (
+		<CardTitle
+			className={clsx("!col-start-1 !row-start-1", className)}
+			{...props}
+			id={state.titleId}
+		/>
+	);
+}
+
+export function AccordionCardDescription({
+	className,
+	...props
+}: AccordionDescriptionProps) {
+	return (
+		<CardDescription
+			className={clsx("!col-start-1 !row-start-2", className)}
+			{...props}
+		/>
+	);
+}
+
+export function AccordionCardAction({
+	children,
+	className,
+	...props
+}: AccordionActionProps) {
+	return (
+		<CardAction
+			className={clsx(
+				"!col-start-2 !row-start-1 flex items-center gap-2 self-center",
+				className,
+			)}
+			{...props}
+		>
+			{children}
+		</CardAction>
+	);
+}
+
+export function AccordionCardContent(props: AccordionContentProps) {
+	const state = useAccordionCardContext("Accordion.Content");
+	return (
+		<CollapsibleRegion state={state}>
+			<CardContent {...props} />
+		</CollapsibleRegion>
+	);
+}
+
+export function AccordionCardFooter({
+	className,
+	...props
+}: AccordionFooterProps) {
+	const state = useAccordionCardContext("Accordion.Footer");
+	return (
+		<CollapsibleRegion includeId={false} state={state}>
+			<CardFooter className={clsx(className, "!pb-0")} {...props} />
+		</CollapsibleRegion>
+	);
+}
+
+export function AccordionCardClient({
+	children,
+	className,
+	defaultOpen = false,
+	disabled = false,
+	disableWhenReducedMotion = true,
+	forceReducedMotion,
+	onOpenChange,
+	open,
+	...cardProps
+}: AccordionCardProps) {
+	const state = useDisclosureState({
+		defaultOpen,
+		disabled,
+		disableWhenReducedMotion,
+		forceReducedMotion,
+		onOpenChange,
+		open,
+	});
+	return (
+		<AccordionCardContext.Provider value={state}>
+			<Card
+				{...cardProps}
+				className={clsx(
+					"group/accordion-card !pb-4 transition-[gap] motion-micro data-[open=false]:gap-0 data-[size=sm]:!pb-3",
+					disabled && "opacity-60",
+					className,
+				)}
+				data-open={state.isOpen ? "true" : "false"}
+			>
+				{children}
+			</Card>
+		</AccordionCardContext.Provider>
 	);
 }

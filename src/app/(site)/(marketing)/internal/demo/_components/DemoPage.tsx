@@ -1,19 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { Fragment } from "react";
 import {
 	ComponentCard,
 	ComponentGroup,
-	UsageCard,
 } from "@/app/(site)/(marketing)/internal/demo/_components/demo-cards";
 import type {
 	DemoComponentItem,
 	DemoPage as DemoPageType,
 } from "@/app/(site)/(marketing)/internal/demo/content";
 import { Button } from "@/components/ui/primitives/Button";
-import Divider from "@/components/ui/primitives/Divider";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 
 export type DemoPageProps = {
@@ -58,12 +54,19 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 						This demo route does not exist yet.
 					</Text>
 				</header>
-				<Panel display="flex" padding="sm" gap="sm" shadow="none">
-					<Text variant="body">Go back to the demo index.</Text>
-					<Button href="/internal/demo" variant="secondary" size="sm">
-						Open demo index
-					</Button>
-				</Panel>
+				<Card>
+					<Card.Content className="flex flex-col gap-4">
+						<Text variant="body">Go back to the demo index.</Text>
+						<Button
+							href="/internal/demo"
+							variant="secondary"
+							size="sm"
+							className="w-fit"
+						>
+							Open demo index
+						</Button>
+					</Card.Content>
+				</Card>
 			</div>
 		);
 	}
@@ -98,19 +101,6 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 						{page.description}
 					</Text>
 				) : null}
-				{isSkeletonMode ? (
-					<Text variant="caption" tone="muted" className="text-xs">
-						Skeleton compare view
-					</Text>
-				) : null}
-				{page.slug.length > 0 ? (
-					<Text variant="caption" tone="muted" className="text-xs">
-						Path:{" "}
-						<Link
-							href={`/internal/demo/${page.slug.join("/")}`}
-						>{`/internal/demo/${page.slug.join("/")}`}</Link>
-					</Text>
-				) : null}
 				{hasSkeletons && page.slug.length > 0 ? (
 					<div className="flex flex-wrap gap-2">
 						<Button
@@ -124,10 +114,10 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 				) : null}
 			</header>
 
-			{visibleGroups.map((group, index) => (
-				<Fragment key={group.id}>
-					{index > 0 ? <Divider /> : null}
+			<div className="grid gap-8">
+				{visibleGroups.map((group) => (
 					<ComponentGroup
+						key={group.id}
 						title={group.title}
 						description={group.description}
 						columns={isSkeletonMode ? "grid-cols-1" : group.columns}
@@ -161,34 +151,20 @@ export function DemoPage({ page, mode = "full" }: DemoPageProps) {
 										</div>,
 									];
 								})
-							: group.items.map((item) => {
-									if (item.kind === "usage") {
-										return (
-											<UsageCard
-												key={item.id}
-												name={item.name}
-												label={item.label}
-												snippet={item.snippet}
-												related={item.related}
-											/>
-										);
-									}
-
-									return (
-										<ComponentCard
-											key={item.id}
-											name={item.name}
-											label={item.label}
-											related={item.related}
-											className={item.className}
-										>
-											<item.Render />
-										</ComponentCard>
-									);
-								})}
+							: group.items.map((item) => (
+									<ComponentCard
+										key={item.id}
+										name={item.name}
+										label={item.label}
+										related={item.related}
+										className={item.className}
+									>
+										<item.Render />
+									</ComponentCard>
+								))}
 					</ComponentGroup>
-				</Fragment>
-			))}
+				))}
+			</div>
 		</div>
 	);
 }

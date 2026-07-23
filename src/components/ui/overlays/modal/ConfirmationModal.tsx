@@ -31,6 +31,7 @@ export type ConfirmationModalProps = {
 	details?: readonly ConfirmationModalDetail[];
 	onConfirm: () => unknown;
 	onClose: () => void;
+	onCloseDisabledChange?: (disabled: boolean) => void;
 	warning?: string;
 };
 
@@ -43,17 +44,26 @@ export function ConfirmationModal({
 	details,
 	onConfirm,
 	onClose,
+	onCloseDisabledChange,
 	warning,
 }: ConfirmationModalProps) {
 	const impactTitleId = React.useId();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+	React.useEffect(() => {
+		onCloseDisabledChange?.(isSubmitting);
+		return () => onCloseDisabledChange?.(false);
+	}, [isSubmitting, onCloseDisabledChange]);
 
 	async function handleConfirm() {
 		if (isSubmitting) return;
 		setIsSubmitting(true);
 		try {
 			const shouldClose = await onConfirm();
-			if (shouldClose !== false) onClose();
+			if (shouldClose !== false) {
+				onCloseDisabledChange?.(false);
+				onClose();
+			}
 		} finally {
 			setIsSubmitting(false);
 		}

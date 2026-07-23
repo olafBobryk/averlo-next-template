@@ -198,12 +198,27 @@ export function HeaderSearchInput({
 	return (
 		<InputFrame
 			className={clsx(
-				"group/header-search min-h-10 gap-1 px-3 text-foreground",
+				"group/header-search min-h-10 text-foreground",
 				className ??
 					"mr-3 w-[220px] min-w-[220px] max-w-[220px] flex-none basis-[220px]",
 			)}
+			start={<HeaderIcon name="search" className="text-muted-foreground" />}
+			end={
+				hasValue ? (
+					<Button
+						type="button"
+						variant="ghost"
+						size="none"
+						className="min-h-8 px-2 text-xs text-muted-foreground opacity-0 transition-opacity group-hover/header-search:opacity-100 group-focus-within/header-search:opacity-100"
+						aria-label={clearLabel}
+						onMouseDown={(event) => event.preventDefault()}
+						onClick={onClear}
+					>
+						{clearLabel}
+					</Button>
+				) : undefined
+			}
 		>
-			<HeaderIcon name="search" className="text-muted" />
 			<input
 				id={searchId}
 				type="search"
@@ -214,23 +229,10 @@ export function HeaderSearchInput({
 				autoComplete="off"
 				className={clsx(
 					inputTextClasses,
-					"min-w-0 px-1 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
+					"min-w-0 !pl-0 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
+					hasValue && "!pr-0",
 				)}
 			/>
-			<Button
-				type="button"
-				variant="ghost"
-				size="none"
-				className={clsx(
-					"min-h-8 px-2 text-xs text-muted opacity-0 transition-opacity group-hover/header-search:opacity-100 group-focus-within/header-search:opacity-100",
-					!hasValue && "pointer-events-none",
-				)}
-				aria-label={clearLabel}
-				onMouseDown={(event) => event.preventDefault()}
-				onClick={onClear}
-			>
-				{clearLabel}
-			</Button>
 		</InputFrame>
 	);
 }
@@ -292,7 +294,8 @@ export function HeaderMenuGroup({
 					href={groupHref}
 					variant="ghost"
 					size="none"
-					className="w-fit justify-start text-sm font-medium text-foreground hover:bg-transparent"
+					className="w-fit justify-start text-sm font-medium text-foreground"
+					contentClassName="gap-2"
 					leadingIcon={
 						group.icon ? (
 							<HeaderIcon name={group.icon} className="text-foreground" />
@@ -318,7 +321,7 @@ export function HeaderMenuGroup({
 							href={getMarketingLinkHref(item)}
 							variant="ghost"
 							size="none"
-							className="w-fit justify-start text-sm font-normal text-muted hover:bg-transparent hover:text-foreground"
+							className="w-fit justify-start text-sm font-normal text-muted hover:text-foreground"
 							onClick={onNavigate}
 						>
 							{item.label}

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/Panel";
-import { Section } from "@/components/ui/primitives/Section";
+import { Card } from "@/components/ui/primitives/Card";
+import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import { Text } from "@/components/ui/primitives/Text";
 import {
 	readTemplateIntelligenceAgentMap,
@@ -10,6 +10,7 @@ import {
 	type TemplateIntelligenceBenchmarkRun,
 	type TemplateIntelligenceIndex,
 } from "@/lib/template-intelligence";
+import { InternalPage, InternalPageHeader } from "../_components/InternalPage";
 import { BenchmarkRunToggle } from "./BenchmarkRunToggle";
 
 type SearchParams = Promise<
@@ -132,27 +133,21 @@ function BenchmarkBar({
 
 function MissingIndexState({ path }: { path: string }) {
 	return (
-		<main>
-			<Section padding="hero">
-				<div className="flex max-w-3xl flex-col gap-6">
-					<header className="flex flex-col gap-2">
-						<Text as="h1" variant="headingLg">
-							Template Intelligence
-						</Text>
-						<Text variant="body" tone="muted">
-							The generated repo intelligence index is not available yet.
-						</Text>
-					</header>
+		<InternalPage>
+			<InternalPageHeader
+				title="Template Intelligence"
+				description="The generated repository index is not available yet."
+			/>
 
-					<Panel display="flex" padding="md" gap="md" shadow="none">
-						<Text variant="body">
-							Run <code>npm run intelligence:generate</code> to create{" "}
-							<code>{path}</code>.
-						</Text>
-					</Panel>
-				</div>
-			</Section>
-		</main>
+			<Card>
+				<Card.Content>
+					<Text variant="body">
+						Run <code>npm run intelligence:generate</code> to create{" "}
+						<code>{path}</code>.
+					</Text>
+				</Card.Content>
+			</Card>
+		</InternalPage>
 	);
 }
 
@@ -164,92 +159,81 @@ function ReadyState({
 	agentMapResult: Awaited<ReturnType<typeof readTemplateIntelligenceAgentMap>>;
 }) {
 	return (
-		<main>
-			<Section padding="hero" maxWidth="wide">
-				<div className="mx-auto flex w-full max-w-5xl flex-col gap-10 text-center">
-					<header className="mx-auto flex max-w-3xl flex-col gap-3">
-						<Text as="h1" variant="headingLg">
-							Template Intelligence
+		<InternalPage
+			maxWidth="wide"
+			className="mx-auto max-w-5xl gap-8 text-center"
+		>
+			<InternalPageHeader
+				className="mx-auto items-center"
+				title="Template Intelligence"
+				description="Generated map of the template surfaces to inspect before changing shared code."
+			/>
+
+			<div className="grid gap-4 md:grid-cols-4">
+				<Card size="sm">
+					<Card.Content className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Files indexed
 						</Text>
-						<Text variant="body" tone="muted">
-							Generated map of the template surfaces agents and maintainers need
-							before changing shared code.
+						<Text as="p" variant="headingMd">
+							{index.fileCount}
 						</Text>
-					</header>
+					</Card.Content>
+				</Card>
+				<Card size="sm">
+					<Card.Content className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Concept groups
+						</Text>
+						<Text as="p" variant="headingMd">
+							{index.conceptCount}
+						</Text>
+					</Card.Content>
+				</Card>
+				<Card size="sm">
+					<Card.Content className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Relationships
+						</Text>
+						<Text as="p" variant="headingMd">
+							{index.relationships.length}
+						</Text>
+					</Card.Content>
+				</Card>
+				<Card size="sm">
+					<Card.Content className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Task topics
+						</Text>
+						<Text as="p" variant="headingMd">
+							{agentMapResult.status === "ready"
+								? agentMapResult.agentMap.topics.length
+								: 0}
+						</Text>
+					</Card.Content>
+				</Card>
+			</div>
 
-					<div className="grid gap-4 md:grid-cols-4">
-						<Panel display="flex" padding="md" gap="sm" shadow="none">
-							<Text variant="caption" tone="muted">
-								Files indexed
-							</Text>
-							<Text as="p" variant="headingMd">
-								{index.fileCount}
-							</Text>
-						</Panel>
-						<Panel display="flex" padding="md" gap="sm" shadow="none">
-							<Text variant="caption" tone="muted">
-								Concept groups
-							</Text>
-							<Text as="p" variant="headingMd">
-								{index.conceptCount}
-							</Text>
-						</Panel>
-						<Panel display="flex" padding="md" gap="sm" shadow="none">
-							<Text variant="caption" tone="muted">
-								Relationships
-							</Text>
-							<Text as="p" variant="headingMd">
-								{index.relationships.length}
-							</Text>
-						</Panel>
-						<Panel display="flex" padding="md" gap="sm" shadow="none">
-							<Text variant="caption" tone="muted">
-								Task topics
-							</Text>
-							<Text as="p" variant="headingMd">
-								{agentMapResult.status === "ready"
-									? agentMapResult.agentMap.topics.length
-									: 0}
-							</Text>
-						</Panel>
-					</div>
-
-					<div className="flex justify-center">
-						<Button
-							href="/internal/intelligence/graph"
-							variant="primary"
-							size="lg"
-						>
-							Open intelligence graph
-						</Button>
-					</div>
-
-					<Panel
-						display="flex"
-						padding="lg"
-						gap="md"
-						shadow="none"
-						className="mx-auto max-w-3xl items-center text-center"
+			<Card className="mx-auto max-w-3xl text-center">
+				<Card.Header className="border-b">
+					<Card.Title>Benchmark lookup cost</Card.Title>
+					<Card.Description>
+						Compare Control, TemplateSerena, and Graphify workflows when
+						benchmark runs are intentionally recorded.
+					</Card.Description>
+				</Card.Header>
+				<Card.Content className="flex justify-center">
+					<Button
+						href="/internal/intelligence?view=benchmarks"
+						variant="secondary"
+						size="md"
+						className="mx-auto w-fit"
 					>
-						<Text as="h2" variant="headingSm">
-							Benchmark lookup cost
-						</Text>
-						<Text variant="body" tone="muted">
-							Compare Control, TemplateSerena, and Graphify workflows when
-							benchmark runs are intentionally recorded.
-						</Text>
-						<Button
-							href="/internal/intelligence?view=benchmarks"
-							variant="secondary"
-							size="md"
-							className="mx-auto w-fit"
-						>
-							View benchmarks
-						</Button>
-					</Panel>
-				</div>
-			</Section>
-		</main>
+						View benchmarks
+					</Button>
+				</Card.Content>
+			</Card>
+		</InternalPage>
 	);
 }
 
@@ -273,124 +257,120 @@ function BenchmarkState({
 		.at(-1);
 
 	return (
-		<main>
-			<Section padding="hero" maxWidth="wide">
-				<div className="flex flex-col gap-6">
-					<header className="flex max-w-4xl flex-col gap-3">
-						<div className="flex flex-col gap-2">
-							<Text as="h1" variant="headingLg">
-								Intelligence Benchmarks
-							</Text>
-							<Text variant="body" tone="muted">
-								Recorded lookup-cost comparisons for Control, TemplateSerena,
-								and Graphify agent workflows.
-							</Text>
-						</div>
-						<Button
-							href="/internal/intelligence"
-							variant="secondary"
-							size="sm"
-							className="w-fit"
-						>
-							Back to overview
-						</Button>
-					</header>
+		<InternalPage maxWidth="wide" className="mx-auto max-w-5xl">
+			<InternalPageHeader
+				title="Intelligence Benchmarks"
+				description="Recorded lookup-cost comparisons across repository navigation strategies."
+				action={
+					<Button
+						href="/internal/intelligence"
+						variant="ghost"
+						size="sm"
+						className="w-fit"
+					>
+						Back to overview
+					</Button>
+				}
+			/>
 
-					<BenchmarkRunToggle isExample={isExample} />
+			<BenchmarkRunToggle isExample={isExample} />
 
-					{isExample ? (
-						<Panel display="flex" padding="md" gap="sm" shadow="none">
-							<Text variant="bodyStrong">Placeholder data</Text>
-							<Text variant="body" tone="muted">
-								This view is populated from the example JSONL file for visual
-								QA. It is not benchmark history.
-							</Text>
-						</Panel>
-					) : null}
+			{isExample ? (
+				<StatusMessage>
+					Placeholder data is shown for visual QA, not benchmark history.
+				</StatusMessage>
+			) : null}
 
-					{invalidLineCount > 0 ? (
-						<Panel display="flex" padding="md" gap="sm" shadow="none">
-							<Text variant="bodyStrong">Skipped invalid JSONL lines</Text>
-							<Text variant="body" tone="muted">
-								{invalidLineCount} malformed benchmark{" "}
-								{invalidLineCount === 1 ? "line was" : "lines were"} ignored.
-							</Text>
-						</Panel>
-					) : null}
+			{invalidLineCount > 0 ? (
+				<StatusMessage tone="warning">
+					{invalidLineCount} malformed benchmark{" "}
+					{invalidLineCount === 1 ? "line was" : "lines were"} ignored.
+				</StatusMessage>
+			) : null}
 
-					{runs.length === 0 ? (
-						<Panel display="flex" padding="md" gap="md" shadow="none">
-							<Text as="h2" variant="headingSm">
-								No real benchmark runs recorded
-							</Text>
-							<Text variant="body" tone="muted">
-								The active run log intentionally starts empty. Use{" "}
-								<code>npm run intelligence:record</code> after an intentional
-								benchmark pass, or switch to placeholder data for chart QA.
-							</Text>
-						</Panel>
-					) : (
-						<>
-							<div className="grid gap-4 md:grid-cols-3">
-								<Panel display="flex" padding="md" gap="sm" shadow="none">
-									<Text variant="caption" tone="muted">
-										Runs
-									</Text>
-									<Text as="p" variant="headingMd">
-										{runs.length}
-									</Text>
-								</Panel>
-								<Panel display="flex" padding="md" gap="sm" shadow="none">
-									<Text variant="caption" tone="muted">
-										Strategies
-									</Text>
-									<Text as="p" variant="headingMd">
-										{summaries.length}
-									</Text>
-								</Panel>
-								<Panel display="flex" padding="md" gap="sm" shadow="none">
-									<Text variant="caption" tone="muted">
-										Latest
-									</Text>
-									<Text as="p" variant="headingMd">
-										{latestDate ?? "n/a"}
-									</Text>
-								</Panel>
-							</div>
+			{runs.length === 0 ? (
+				<Card>
+					<Card.Content className="grid gap-1">
+						<Card.Title>No real benchmark runs recorded</Card.Title>
+						<Card.Description>
+							The active run log intentionally starts empty. Use{" "}
+							<code>npm run intelligence:record</code> after an intentional
+							benchmark pass, or switch to placeholder data for chart QA.
+						</Card.Description>
+					</Card.Content>
+				</Card>
+			) : (
+				<>
+					<div className="grid w-full grid-cols-3 gap-2 sm:gap-4">
+						<Card className="min-w-0 w-full" size="sm">
+							<Card.Content className="grid gap-1">
+								<Text variant="caption" tone="muted">
+									Runs
+								</Text>
+								<Text as="p" variant="headingMd">
+									{runs.length}
+								</Text>
+							</Card.Content>
+						</Card>
+						<Card className="min-w-0 w-full" size="sm">
+							<Card.Content className="grid gap-1">
+								<Text variant="caption" tone="muted">
+									Strategies
+								</Text>
+								<Text as="p" variant="headingMd">
+									{summaries.length}
+								</Text>
+							</Card.Content>
+						</Card>
+						<Card className="min-w-0 w-full" size="sm">
+							<Card.Content className="grid gap-1">
+								<Text variant="caption" tone="muted">
+									Latest
+								</Text>
+								<Text as="p" variant="headingMd">
+									{latestDate ?? "n/a"}
+								</Text>
+							</Card.Content>
+						</Card>
+					</div>
 
-							<div className="grid gap-4 lg:grid-cols-2">
-								<Panel display="flex" padding="md" gap="md" shadow="none">
-									<div className="flex flex-col gap-2">
-										<Text as="h2" variant="headingSm">
-											Strategy Totals
-										</Text>
-										<Text variant="body" tone="muted">
-											Lookup actions combine shell commands and semantic tool
-											calls so strategies share one comparison scale.
-										</Text>
-									</div>
-									<div className="grid gap-3">
-										{summaries.map((summary) => (
-											<BenchmarkBar
-												key={summary.strategy}
-												label={`${summary.strategy} (${summary.runCount})`}
-												value={summary.totalLookupActions}
-												max={maxLookupActions}
-											/>
-										))}
-									</div>
-								</Panel>
+					<div className="grid gap-4 md:grid-cols-2">
+						<Card>
+							<Card.Header className="border-b">
+								<Card.Title>Strategy totals</Card.Title>
+								<Card.Description>
+									Lookup actions combine shell commands and semantic tool calls
+									so strategies share one comparison scale.
+								</Card.Description>
+							</Card.Header>
+							<Card.Content>
+								<div className="grid gap-3">
+									{summaries.map((summary) => (
+										<BenchmarkBar
+											key={summary.strategy}
+											label={`${summary.strategy} (${summary.runCount})`}
+											value={summary.totalLookupActions}
+											max={maxLookupActions}
+										/>
+									))}
+								</div>
+							</Card.Content>
+						</Card>
 
-								<Panel display="flex" padding="md" gap="md" shadow="none">
-									<Text as="h2" variant="headingSm">
-										Strategy Details
-									</Text>
-									<div className="grid gap-2">
-										{summaries.map((summary) => (
-											<div
-												key={summary.strategy}
-												className="grid gap-1 rounded-lg bg-foreground/[0.03] p-3"
-											>
+						<Card>
+							<Card.Header className="border-b">
+								<Card.Title>Strategy details</Card.Title>
+							</Card.Header>
+							<Card.Content>
+								<div className="grid gap-2">
+									{summaries.map((summary) => (
+										<Card
+											key={summary.strategy}
+											size="sm"
+											background="surface"
+											border="none"
+										>
+											<Card.Content className="grid gap-1">
 												<Text variant="bodyStrong">{summary.strategy}</Text>
 												<Text variant="caption" tone="muted">
 													{summary.totalShellCommands} shell ·{" "}
@@ -399,16 +379,16 @@ function BenchmarkState({
 													correctness {formatNumber(summary.averageCorrectness)}
 													/3
 												</Text>
-											</div>
-										))}
-									</div>
-								</Panel>
-							</div>
-						</>
-					)}
-				</div>
-			</Section>
-		</main>
+											</Card.Content>
+										</Card>
+									))}
+								</div>
+							</Card.Content>
+						</Card>
+					</div>
+				</>
+			)}
+		</InternalPage>
 	);
 }
 

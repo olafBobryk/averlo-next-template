@@ -55,7 +55,7 @@ function formatAgo(msDiff: number): string {
 	return isFuture ? `in ${plural(d, "day")}` : `${plural(d, "day")} ago`;
 }
 
-export function DateAgo({
+function DateAgoRoot({
 	date,
 	leadingText,
 	trailingText,
@@ -82,3 +82,5 @@ export function DateAgo({
 		</Text>
 	);
 }
+
+export const DateAgo = Object.assign(DateAgoRoot, { Skeleton: Text.Skeleton });

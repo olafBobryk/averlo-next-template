@@ -86,7 +86,7 @@ function isExternalHref(href: string) {
 	return /^(https?:)?\/\//.test(href);
 }
 
-export function SocialLinks({
+function SocialLinksRoot({
 	buttonClassName,
 	className,
 	excludeIcons = [],
@@ -127,10 +127,7 @@ export function SocialLinks({
 						rel={external ? "noreferrer" : undefined}
 						leadingIcon={link.resolvedIcon ?? undefined}
 						iconSize={iconSize}
-						className={clsx(
-							isIconOnly ? "rounded-full" : "rounded-[8px]",
-							buttonClassName,
-						)}
+						className={buttonClassName}
 					>
 						{showLabels ? link.label : null}
 					</Button>
@@ -139,3 +136,29 @@ export function SocialLinks({
 		</div>
 	);
 }
+
+function SocialLinksSkeleton({
+	className,
+	count = 4,
+	showLabels = false,
+	size,
+}: Pick<SocialLinksProps, "className" | "showLabels" | "size"> & {
+	count?: number;
+}) {
+	const resolvedSize = size ?? (showLabels ? "sm" : "icon");
+	return (
+		<div className={clsx("flex flex-wrap items-center gap-2", className)}>
+			{Array.from({ length: count }, (_, index) => `social-${index + 1}`).map(
+				(key) => (
+					<Button.Skeleton key={key} size={resolvedSize} variant="secondary">
+						{showLabels ? "Social link" : undefined}
+					</Button.Skeleton>
+				),
+			)}
+		</div>
+	);
+}
+
+export const SocialLinks = Object.assign(SocialLinksRoot, {
+	Skeleton: SocialLinksSkeleton,
+});

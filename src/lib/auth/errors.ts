@@ -5,10 +5,22 @@ export type AuthErrorCode =
 	| "invitation-accepted"
 	| "invitation-expired"
 	| "invitation-invalid"
+	| "invitation-member-conflict"
+	| "invitation-pending-conflict"
+	| "invitation-role-forbidden"
 	| "invitation-recipient-mismatch"
 	| "invitation-revoked"
 	| "membership-required"
+	| "membership-role-forbidden"
+	| "membership-self-removal"
+	| "membership-owner-protected"
+	| "organization-invalid"
 	| "organization-selection-required"
+	| "organization-slug-conflict"
+	| "organization-update-forbidden"
+	| "password-recovery-expired"
+	| "password-recovery-invalid"
+	| "password-recovery-unavailable"
 	| "session-required";
 
 export class AuthDomainError extends Error {
@@ -46,6 +58,18 @@ const publicErrors = {
 		status: 404,
 		message: "This invitation is not valid.",
 	},
+	"invitation-member-conflict": {
+		status: 409,
+		message: "This account already has access to the organization.",
+	},
+	"invitation-pending-conflict": {
+		status: 409,
+		message: "A pending invitation already exists for this email address.",
+	},
+	"invitation-role-forbidden": {
+		status: 403,
+		message: "Only the organization owner can assign administrator access.",
+	},
 	"invitation-recipient-mismatch": {
 		status: 403,
 		message: "Sign in with the email address that received this invitation.",
@@ -58,9 +82,45 @@ const publicErrors = {
 		status: 403,
 		message: "An active organization membership is required.",
 	},
+	"membership-role-forbidden": {
+		status: 403,
+		message: "You do not have permission to change this membership.",
+	},
+	"membership-self-removal": {
+		status: 409,
+		message: "Use a dedicated leave-organization flow to remove yourself.",
+	},
+	"membership-owner-protected": {
+		status: 409,
+		message: "Transfer ownership before changing or removing the owner.",
+	},
+	"organization-invalid": {
+		status: 400,
+		message: "Enter a valid organization name and slug.",
+	},
 	"organization-selection-required": {
 		status: 409,
 		message: "Choose an organization before continuing.",
+	},
+	"organization-slug-conflict": {
+		status: 409,
+		message: "That organization slug is already in use.",
+	},
+	"organization-update-forbidden": {
+		status: 403,
+		message: "You do not have permission to update this organization.",
+	},
+	"password-recovery-expired": {
+		status: 410,
+		message: "This password reset link has expired.",
+	},
+	"password-recovery-invalid": {
+		status: 400,
+		message: "This password reset link is not valid.",
+	},
+	"password-recovery-unavailable": {
+		status: 503,
+		message: "Password recovery is not available for this application.",
 	},
 	"session-required": {
 		status: 401,

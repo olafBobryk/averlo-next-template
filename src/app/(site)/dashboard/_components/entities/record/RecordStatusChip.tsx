@@ -13,7 +13,7 @@ const chipTone = {
 	React.ComponentProps<typeof Chip>["tone"]
 >;
 
-export function RecordStatusChip({
+function RecordStatusChipRoot({
 	label,
 	tone,
 }: {
@@ -22,3 +22,11 @@ export function RecordStatusChip({
 }) {
 	return <Chip tone={chipTone[tone]}>{label}</Chip>;
 }
+
+function RecordStatusChipSkeleton({ label = "Draft" }: { label?: string }) {
+	return <Chip.Skeleton>{label}</Chip.Skeleton>;
+}
+
+export const RecordStatusChip = Object.assign(RecordStatusChipRoot, {
+	Skeleton: RecordStatusChipSkeleton,
+});

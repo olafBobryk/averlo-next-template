@@ -19,9 +19,11 @@ export function DashboardDetailFieldClient({
 	href,
 	icon,
 	label,
+	labelClassName,
 	onClick,
 	truncateValue = true,
 	value,
+	valueClassName: valueClassNameProp,
 }: DashboardDetailFieldProps) {
 	const copyTarget = copyValue?.trim() ?? "";
 	const isCopyable = copyTarget.length > 0;
@@ -33,6 +35,7 @@ export function DashboardDetailFieldClient({
 	const valueClassName = clsx(
 		"min-w-0 text-sm font-medium text-foreground",
 		truncateValue && "truncate",
+		valueClassNameProp,
 	);
 	const controlClassName = clsx(
 		"inline-flex max-w-full min-w-0 rounded-sm text-left outline-none transition-opacity motion-interactive hover:opacity-70 disabled:pointer-events-none disabled:opacity-50",
@@ -40,8 +43,15 @@ export function DashboardDetailFieldClient({
 		valueClassName,
 	);
 	return (
-		<div className={clsx("grid min-w-0 gap-2", className)}>
-			<dt className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+		<div
+			className={clsx("grid min-w-0 self-start content-start gap-2", className)}
+		>
+			<dt
+				className={clsx(
+					"flex items-center gap-2 text-xs font-medium text-muted-foreground",
+					labelClassName,
+				)}
+			>
 				{icon}
 				{label}
 			</dt>

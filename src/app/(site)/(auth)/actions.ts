@@ -90,7 +90,7 @@ export async function requestUnavailableAuthMethodAction(formData: FormData) {
 
 export async function signOutAction() {
 	await signOutCurrentSession();
-	redirect("/login?message=signed-out");
+	redirect("/login");
 }
 
 export async function selectOrganizationAction(formData: FormData) {

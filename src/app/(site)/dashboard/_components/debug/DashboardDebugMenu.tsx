@@ -1,8 +1,8 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
-import { Button } from "@/components/ui/primitives/Button";
+import { Icon } from "@/components/ui/icons/Icon";
+import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { showToast } from "@/lib/feedback";
 import {
 	type DashboardDebugState,
@@ -82,7 +82,7 @@ export function DashboardDebugMenu({
 	const capabilityLabel = [...capabilities].sort().join(", ");
 	return (
 		<div className="fixed bottom-4 right-4 z-50">
-			<MoreMenuDropdown
+			<Dropdown.Menu
 				align="end"
 				ariaLabel="Open dashboard debug menu"
 				menuWidth={310}
@@ -96,7 +96,13 @@ export function DashboardDebugMenu({
 						href: "/dashboard/reference/entities?motion=off&reveal=off",
 						id: "entity-reference",
 						label: "Open entity reference",
-						leadingIcon: "cards",
+						leadingIcon: <Icon name="cards" size="sm" />,
+					},
+					{
+						href: "/dashboard/reference/skeletons?motion=off&reveal=off",
+						id: "skeleton-reference",
+						label: "Open skeleton reference",
+						leadingIcon: <Icon name="spinner" size="sm" />,
 					},
 					{
 						id: "mutation-failure",
@@ -104,7 +110,7 @@ export function DashboardDebugMenu({
 							searchParams.get("debug-mutation") === "fail"
 								? "Disable mutation failures"
 								: "Force mutation failures",
-						leadingIcon: "warning",
+						leadingIcon: <Icon name="warning" size="sm" />,
 						onSelect: toggleMutationFailure,
 					},
 					// prune:dashboard.reference-entities:end
@@ -116,7 +122,7 @@ export function DashboardDebugMenu({
 					{
 						id: "force-loading",
 						label: forceLoading ? "Disable forced loading" : "Force loading",
-						leadingIcon: "spinner",
+						leadingIcon: <Icon name="spinner" size="sm" />,
 						onSelect: () => onForceLoadingChange(!forceLoading),
 					},
 					...(
@@ -134,18 +140,18 @@ export function DashboardDebugMenu({
 					{
 						id: "fixture-demo",
 						label: "Enter singleton demo",
-						leadingIcon: "home",
+						leadingIcon: <Icon name="home" size="sm" />,
 						onSelect: () =>
 							void enterFixture(
 								"operator@averlo.local",
 								"/dashboard?motion=off&reveal=off",
 							),
-						separatorBefore: true,
+						dividerBefore: true,
 					},
 					{
 						id: "fixture-multi",
 						label: "Enter multi-org review",
-						leadingIcon: "users",
+						leadingIcon: <Icon name="users" size="sm" />,
 						onSelect: () =>
 							void enterFixture(
 								"multi@averlo.local",
@@ -156,32 +162,22 @@ export function DashboardDebugMenu({
 						disabled: true,
 						id: "capabilities",
 						label: `Capabilities: ${capabilityLabel}`,
-						separatorBefore: true,
+						dividerBefore: true,
 					},
 					{
 						id: "fixture-reset",
 						label: "Reset fixture state",
-						leadingIcon: "trash",
+						leadingIcon: <Icon name="trash" size="sm" />,
 						onSelect: () => void resetFixtures(),
 						tone: "danger",
 					},
 				]}
-				renderTrigger={(trigger) => (
-					<Button
-						aria-expanded={trigger.isOpen}
-						aria-haspopup="menu"
-						aria-label="Open dashboard debug menu"
-						className="shadow-lg"
-						onClick={trigger.onRightClick}
-						onMouseEnter={trigger.onRootMouseEnter}
-						onMouseLeave={trigger.onRootMouseLeave}
-						ref={trigger.ref}
-						size="sm"
-						variant="inverse"
-					>
-						Debug
-					</Button>
-				)}
+				triggerButtonProps={{
+					className: "shadow-lg",
+					size: "sm",
+					variant: "inverse",
+				}}
+				triggerContent="Debug"
 			/>
 		</div>
 	);

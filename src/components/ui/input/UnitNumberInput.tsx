@@ -11,6 +11,10 @@ type UnitNumberInputProps = Omit<
 	unit: React.ReactNode;
 };
 
-export function UnitNumberInput({ unit, ...props }: UnitNumberInputProps) {
+function UnitNumberInputRoot({ unit, ...props }: UnitNumberInputProps) {
 	return <NumberInput {...props} unit={unit} />;
 }
+
+export const UnitNumberInput = Object.assign(UnitNumberInputRoot, {
+	Skeleton: NumberInput.Skeleton,
+});

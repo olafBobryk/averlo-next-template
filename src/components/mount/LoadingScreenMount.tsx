@@ -96,7 +96,7 @@ export default function LoadingScreenMount() {
 	return (
 		<motion.div
 			aria-hidden="true"
-			className={`fixed inset-0 flex items-center justify-center bg-white pointer-events-none ${
+			className={`fixed inset-0 flex items-center justify-center bg-background pointer-events-none ${
 				phase === "transitioning" ? "z-40" : "z-[9999]"
 			}`}
 			data-loading-screen-mount="true"

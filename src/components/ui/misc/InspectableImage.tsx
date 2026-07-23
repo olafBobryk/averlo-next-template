@@ -7,6 +7,7 @@ import { useImageInspectModal } from "../overlays/modal/useImageInspectModal";
 
 type InspectableImageProps = Omit<ImageProps, "onClick"> & {
 	className?: string; // applied to button
+	disabled?: boolean;
 	inspectShareUrl?: string;
 	inspectOnShare?: () => void | Promise<void>;
 	inspectPortalTargetId?: string;
@@ -14,6 +15,7 @@ type InspectableImageProps = Omit<ImageProps, "onClick"> & {
 
 export function InspectableImage({
 	className,
+	disabled = false,
 	inspectShareUrl,
 	inspectOnShare,
 	inspectPortalTargetId,
@@ -47,6 +49,7 @@ export function InspectableImage({
 				.filter(Boolean)
 				.join(" ")}
 			contentClassName="h-full w-full"
+			disabled={disabled}
 			onClick={handleOpen}
 		>
 			<Image {...imageProps} className="w-full h-full object-cover" />

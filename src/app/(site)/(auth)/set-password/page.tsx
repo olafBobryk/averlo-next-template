@@ -13,7 +13,8 @@ export default async function SetPasswordPage({
 	const next = getSafeContinuationPath(query.next);
 	return (
 		<AuthScreen
-			description="Invitation and provider adapters may establish a verified account setup session before enabling this form."
+			description="Choose a password to finish setting up your account."
+			icon="lock"
 			message={query.message}
 			title="Finish account setup"
 		>
@@ -23,14 +24,14 @@ export default async function SetPasswordPage({
 				<input name="returnTo" type="hidden" value="/set-password" />
 				<PasswordInput
 					autoComplete="new-password"
-					label="Password"
+					label="New password"
 					name="password"
 					required
 					showStrength
 				/>
 				<PasswordInput
 					autoComplete="new-password"
-					label="Confirm password"
+					label="Confirm new password"
 					name="passwordConfirm"
 					required
 				/>

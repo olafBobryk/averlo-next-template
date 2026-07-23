@@ -16,7 +16,7 @@ import { showToast } from "@/lib/feedback/toast";
 
 export type DashboardMarkdownSaveResult = { error?: string; ok: boolean };
 
-export function DashboardMarkdownEditorModalButton({
+function DashboardMarkdownEditorModalButtonRoot({
 	description,
 	disabled = false,
 	initialMarkdown = "",
@@ -42,12 +42,13 @@ export function DashboardMarkdownEditorModalButton({
 			onClick={() => {
 				if (disabled) return;
 				openModal(
-					({ close }) => (
+					({ close, setCloseDisabled }) => (
 						<DashboardMarkdownEditorModalForm
 							description={description}
 							initialMarkdown={initialMarkdown}
 							mentions={mentions}
 							onCancel={close}
+							onCloseDisabledChange={setCloseDisabled}
 							onSave={onSave}
 							onSaved={() => {
 								showToast.success(successMessage);
@@ -56,7 +57,11 @@ export function DashboardMarkdownEditorModalButton({
 							title={title}
 						/>
 					),
-					{ id: modalId, panelWrapperClassName: "!max-w-4xl" },
+					{
+						ariaLabel: title,
+						cardProps: { maxWidth: "4xl" },
+						id: modalId,
+					},
 				);
 			}}
 			type="button"
@@ -67,11 +72,21 @@ export function DashboardMarkdownEditorModalButton({
 	);
 }
 
+function DashboardMarkdownEditorModalButtonSkeleton() {
+	return <Button.Skeleton variant="ghost">Edit</Button.Skeleton>;
+}
+
+export const DashboardMarkdownEditorModalButton = Object.assign(
+	DashboardMarkdownEditorModalButtonRoot,
+	{ Skeleton: DashboardMarkdownEditorModalButtonSkeleton },
+);
+
 function DashboardMarkdownEditorModalForm({
 	description,
 	initialMarkdown,
 	mentions,
 	onCancel,
+	onCloseDisabledChange,
 	onSave,
 	onSaved,
 	title,
@@ -80,6 +95,7 @@ function DashboardMarkdownEditorModalForm({
 	initialMarkdown: string;
 	mentions?: readonly { id: string; label: string }[];
 	onCancel: () => void;
+	onCloseDisabledChange: (disabled: boolean) => void;
 	onSave: (markdown: string) => Promise<DashboardMarkdownSaveResult>;
 	onSaved: () => void;
 	title: string;
@@ -87,6 +103,10 @@ function DashboardMarkdownEditorModalForm({
 	const [markdown, setMarkdown] = React.useState(initialMarkdown);
 	const [error, setError] = React.useState<string>();
 	const [saving, setSaving] = React.useState(false);
+	React.useEffect(() => {
+		onCloseDisabledChange(saving);
+		return () => onCloseDisabledChange(false);
+	}, [onCloseDisabledChange, saving]);
 	return (
 		<>
 			<ModalHeader leadingIcon={<Icon name="pencil" size="sm" />}>
@@ -133,6 +153,7 @@ function DashboardMarkdownEditorModalForm({
 				<MarkdownEditor
 					ariaLabel={title}
 					defaultMarkdown={initialMarkdown}
+					density="compact"
 					disabled={saving}
 					mentions={mentions ? [...mentions] : undefined}
 					onChange={setMarkdown}

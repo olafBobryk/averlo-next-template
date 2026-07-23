@@ -8,11 +8,14 @@ export type AuthIdentity = {
 	verified: boolean;
 };
 
+export type PlatformRole = "admin";
+
 export type AuthUser = {
 	id: string;
 	name: string;
 	email: string;
 	isBanned: boolean;
+	platformRole: PlatformRole | null;
 	profilePictureUrl?: string;
 	identities: readonly AuthIdentity[];
 };
@@ -20,18 +23,31 @@ export type AuthUser = {
 export type Organization = {
 	id: string;
 	name: string;
+	profilePictureUrl?: string;
 	slug: string;
 	mode: "singleton" | "multi";
+};
+
+export type OrganizationUpdate = {
+	name?: string;
+	profilePictureUrl?: string;
+	slug?: string;
 };
 
 export type MembershipRole = "owner" | "admin" | "member";
 
 export type OrganizationMembership = {
+	createdAt: string;
 	id: string;
 	organizationId: string;
 	role: MembershipRole;
 	status: "active" | "revoked";
 	userId: string;
+};
+
+export type OrganizationMember = {
+	membership: OrganizationMembership;
+	user: AuthUser;
 };
 
 export type OrganizationInvitation = {
@@ -52,6 +68,11 @@ export type AuthSession = {
 	selectedOrganizationId: string | null;
 	createdAt: string;
 	expiresAt: string;
+};
+
+export type PasswordRecoveryRequest = {
+	delivery: "email" | "local";
+	previewUrl?: string;
 };
 
 export type AuthMethod =
@@ -106,19 +127,51 @@ export interface AuthAdapter {
 		userId: string,
 		patch: Partial<Pick<AuthUser, "name" | "profilePictureUrl">>,
 	): Promise<AuthUser>;
+	requestPasswordRecovery(input: {
+		email: string;
+		resetUrl: string;
+	}): Promise<PasswordRecoveryRequest>;
+	validatePasswordRecoveryToken(input: { token: string }): Promise<void>;
+	resetPassword(input: { password: string; token: string }): Promise<void>;
 }
 
 export interface OrganizationAdapter {
 	resolveSession(sessionId: string | null): Promise<SessionResolution>;
 	getOrganization(organizationId: string): Promise<Organization | null>;
+	updateOrganization(input: {
+		organizationId: string;
+		patch: OrganizationUpdate;
+	}): Promise<Organization>;
 	selectOrganization(
 		sessionId: string,
 		organizationId: string,
 	): Promise<ResolvedOrganizationContext>;
 	listMemberships(userId: string): Promise<readonly OrganizationMembership[]>;
+	listOrganizationMembers(
+		organizationId: string,
+	): Promise<readonly OrganizationMember[]>;
+	updateMembershipRole(input: {
+		actorMembershipId: string;
+		membershipId: string;
+		role: Exclude<MembershipRole, "owner">;
+	}): Promise<OrganizationMembership>;
+	removeMembership(input: {
+		actorMembershipId: string;
+		membershipId: string;
+	}): Promise<OrganizationMembership>;
+	transferOwnership(input: {
+		actorMembershipId: string;
+		membershipId: string;
+	}): Promise<{
+		currentOwner: OrganizationMembership;
+		newOwner: OrganizationMembership;
+	}>;
 }
 
 export interface InvitationAdapter {
+	listInvitations(
+		organizationId: string,
+	): Promise<readonly OrganizationInvitation[]>;
 	previewInvitation(input: {
 		invitationId: string;
 		tokenHash: string;
@@ -129,9 +182,18 @@ export interface InvitationAdapter {
 		userId: string;
 	}): Promise<OrganizationMembership>;
 	createInvitation(input: {
+		actorMembershipId: string;
 		organizationId: string;
 		email: string;
 		role: Exclude<MembershipRole, "owner">;
+	}): Promise<OrganizationInvitation>;
+	refreshInvitation(input: {
+		actorMembershipId: string;
+		invitationId: string;
+	}): Promise<OrganizationInvitation>;
+	revokeInvitation(input: {
+		actorMembershipId: string;
+		invitationId: string;
 	}): Promise<OrganizationInvitation>;
 }
 

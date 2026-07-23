@@ -16,16 +16,17 @@ export default async function SignInOptionsPage({
 	const next = getSafeContinuationPath(query.next);
 	return (
 		<AuthScreen
-			description="Additional methods stay fail-closed until the active auth adapter explicitly implements them."
+			description="Enter your email address to receive a sign-in link."
+			icon="link"
 			message={query.message}
-			title="Sign-in options"
+			title="Magic link"
 		>
 			<form action={requestUnavailableAuthMethodAction} className="grid gap-4">
 				<input name="method" type="hidden" value="magic-link-sign-in" />
 				<input name="next" type="hidden" value={next} />
 				<input name="returnTo" type="hidden" value="/sign-in-options" />
-				<EmailInput label="Email for magic link" name="email" required />
-				<Button className="w-full" type="submit" variant="secondary">
+				<EmailInput label="Email" name="email" required />
+				<Button className="w-full" type="submit" variant="primary">
 					Request magic link
 				</Button>
 			</form>
@@ -34,7 +35,7 @@ export default async function SignInOptionsPage({
 				href={withSafeContinuation("/login", next)}
 				variant="ghost"
 			>
-				Use password sign in
+				Use password
 			</Button>
 		</AuthScreen>
 	);

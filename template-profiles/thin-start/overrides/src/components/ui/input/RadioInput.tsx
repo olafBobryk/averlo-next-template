@@ -31,7 +31,7 @@ type RadioInputProps = {
 	value?: string;
 };
 
-export function RadioInput({
+function RadioInputRoot({
 	className,
 	defaultValue,
 	description,
@@ -117,3 +117,50 @@ export function RadioInput({
 		</Field>
 	);
 }
+
+function RadioInputSkeleton({
+	className,
+	description,
+	fieldClassName,
+	label,
+	labelClassName,
+	optionClassName,
+	options,
+	required,
+}: Pick<
+	RadioInputProps,
+	| "className"
+	| "description"
+	| "fieldClassName"
+	| "label"
+	| "labelClassName"
+	| "optionClassName"
+	| "options"
+	| "required"
+>) {
+	return (
+		<Field
+			className={fieldClassName}
+			description={description}
+			disableMessage
+			label={label}
+			required={required}
+		>
+			<div className={clsx("flex flex-col gap-3", className)}>
+				{options.map((option) => (
+					<ChoiceField.Skeleton
+						className={optionClassName}
+						description={option.description}
+						key={option.value}
+						label={option.label}
+						labelClassName={labelClassName}
+					/>
+				))}
+			</div>
+		</Field>
+	);
+}
+
+export const RadioInput = Object.assign(RadioInputRoot, {
+	Skeleton: RadioInputSkeleton,
+});

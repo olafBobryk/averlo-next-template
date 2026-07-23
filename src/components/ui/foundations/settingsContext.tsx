@@ -2,9 +2,24 @@
 
 import * as React from "react";
 import { SCROLL_CONFIG } from "@/config/scrollConfig";
+import {
+	APP_SETTINGS_STORAGE_KEY,
+	type AppearancePreference,
+	applyDocumentAppearance,
+	clearDocumentAppearance,
+	DEFAULT_APPEARANCE,
+	isAppearancePreference,
+	isResolvedAppearance,
+	PREVIOUS_DASHBOARD_SETTINGS_STORAGE_KEY,
+	type ResolvedAppearance,
+	resolveAppearance,
+} from "./appearance";
 
 type SettingsContextValue = {
+	appearance: AppearancePreference;
 	motionDisabled: boolean;
+	resolvedAppearance: ResolvedAppearance;
+	setAppearance: (value: AppearancePreference) => void;
 	setMotionDisabled: (value: boolean) => void;
 	smoothScrollAvailable: boolean;
 	smoothScrollDisabled: boolean;
@@ -15,6 +30,7 @@ type SettingsContextValue = {
 
 type SettingsProviderProps = {
 	children: React.ReactNode;
+	defaultAppearance?: AppearancePreference;
 	defaultMotionDisabled?: boolean;
 	defaultSmoothScrollDisabled?: boolean;
 	defaultTextScale?: number;
@@ -22,12 +38,15 @@ type SettingsProviderProps = {
 };
 
 type StoredSettings = {
+	appearance?: AppearancePreference;
 	motionDisabled?: boolean;
 	smoothScrollDisabled?: boolean;
 	textScale?: number;
 };
 
-const DEFAULT_STORAGE_KEY = "averlo-ui-settings";
+type LegacyDashboardSettings = {
+	dashboardAppearance?: "light" | "dark";
+};
 
 const SettingsContext = React.createContext<SettingsContextValue | undefined>(
 	undefined,
@@ -48,6 +67,20 @@ const readStoredSettings = (storageKey: string) => {
 	}
 };
 
+const readLegacyAppearance = () => {
+	try {
+		const raw = localStorage.getItem(PREVIOUS_DASHBOARD_SETTINGS_STORAGE_KEY);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw) as LegacyDashboardSettings;
+		return parsed.dashboardAppearance === "light" ||
+			parsed.dashboardAppearance === "dark"
+			? parsed.dashboardAppearance
+			: null;
+	} catch {
+		return null;
+	}
+};
+
 const writeStoredSettings = (storageKey: string, settings: StoredSettings) => {
 	try {
 		localStorage.setItem(storageKey, JSON.stringify(settings));
@@ -58,31 +91,54 @@ const writeStoredSettings = (storageKey: string, settings: StoredSettings) => {
 
 export function SettingsProvider({
 	children,
+	defaultAppearance = DEFAULT_APPEARANCE,
 	defaultMotionDisabled = false,
 	defaultSmoothScrollDisabled = false,
 	defaultTextScale = 1,
-	storageKey = DEFAULT_STORAGE_KEY,
+	storageKey = APP_SETTINGS_STORAGE_KEY,
 }: SettingsProviderProps) {
 	const smoothScrollAvailable = SCROLL_CONFIG.enableSmoothScroll;
+	const [appearance, setAppearanceState] =
+		React.useState<AppearancePreference>(defaultAppearance);
 	const [motionDisabled, setMotionDisabled] = React.useState(
 		defaultMotionDisabled,
 	);
+	const [resolvedAppearance, setResolvedAppearance] =
+		React.useState<ResolvedAppearance>(
+			resolveAppearance(defaultAppearance, false),
+		);
 	const [smoothScrollDisabled, setSmoothScrollDisabled] = React.useState(
 		smoothScrollAvailable ? defaultSmoothScrollDisabled : true,
 	);
 	const [textScale, setTextScale] = React.useState(defaultTextScale);
 	const hasHydrated = React.useRef(false);
 
+	function setAppearance(nextAppearance: AppearancePreference) {
+		const nextResolvedAppearance = resolveAppearance(
+			nextAppearance,
+			window.matchMedia("(prefers-color-scheme: dark)").matches,
+		);
+		applyDocumentAppearance({
+			appearance: nextAppearance,
+			atomic: nextResolvedAppearance !== resolvedAppearance,
+			resolvedAppearance: nextResolvedAppearance,
+		});
+		setAppearanceState(nextAppearance);
+		setResolvedAppearance(nextResolvedAppearance);
+	}
+
 	React.useEffect(() => {
 		if (!storageKey || !hasHydrated.current) return;
 		writeStoredSettings(storageKey, {
+			appearance,
 			motionDisabled,
 			smoothScrollDisabled,
 			textScale,
 		});
-	}, [motionDisabled, smoothScrollDisabled, textScale, storageKey]);
+	}, [appearance, motionDisabled, smoothScrollDisabled, textScale, storageKey]);
 
 	React.useEffect(() => {
+		if (!hasHydrated.current) return;
 		document.documentElement.style.setProperty(
 			"--text-scale",
 			String(textScale),
@@ -94,11 +150,27 @@ export function SettingsProvider({
 	}, [textScale]);
 
 	React.useEffect(() => {
-		if (!storageKey) {
-			hasHydrated.current = true;
-			return;
-		}
-		const stored = readStoredSettings(storageKey);
+		const stored = storageKey ? readStoredSettings(storageKey) : null;
+		const nextAppearance = isAppearancePreference(stored?.appearance)
+			? stored.appearance
+			: (readLegacyAppearance() ?? defaultAppearance);
+		const documentResolvedAppearance =
+			document.documentElement.dataset.resolvedAppearance;
+		const nextResolvedAppearance = isResolvedAppearance(
+			documentResolvedAppearance,
+		)
+			? documentResolvedAppearance
+			: resolveAppearance(
+					nextAppearance,
+					window.matchMedia("(prefers-color-scheme: dark)").matches,
+				);
+
+		setAppearanceState(nextAppearance);
+		setResolvedAppearance(nextResolvedAppearance);
+		applyDocumentAppearance({
+			appearance: nextAppearance,
+			resolvedAppearance: nextResolvedAppearance,
+		});
 		if (typeof stored?.motionDisabled === "boolean") {
 			setMotionDisabled(stored.motionDisabled);
 		}
@@ -110,17 +182,55 @@ export function SettingsProvider({
 		} else if (!smoothScrollAvailable) {
 			setSmoothScrollDisabled(true);
 		}
-		if (isValidTextScale(stored?.textScale)) {
-			setTextScale(stored.textScale);
-		}
+		const nextTextScale = isValidTextScale(stored?.textScale)
+			? stored.textScale
+			: defaultTextScale;
+		document.documentElement.style.setProperty(
+			"--text-scale",
+			String(nextTextScale),
+		);
+		setTextScale(nextTextScale);
 		hasHydrated.current = true;
-	}, [storageKey]);
+	}, [defaultAppearance, defaultTextScale, storageKey]);
+
+	React.useEffect(() => {
+		if (appearance !== "system") return;
+		const media = window.matchMedia("(prefers-color-scheme: dark)");
+		const handleChange = () => {
+			const nextResolvedAppearance = resolveAppearance("system", media.matches);
+			if (nextResolvedAppearance === resolvedAppearance) return;
+			applyDocumentAppearance({
+				appearance: "system",
+				atomic: true,
+				resolvedAppearance: nextResolvedAppearance,
+			});
+			setResolvedAppearance(nextResolvedAppearance);
+		};
+		media.addEventListener("change", handleChange);
+		return () => media.removeEventListener("change", handleChange);
+	}, [appearance, resolvedAppearance]);
+
+	React.useEffect(() => () => clearDocumentAppearance(), []);
 
 	React.useEffect(() => {
 		if (!storageKey) return;
 		const handleStorage = (event: StorageEvent) => {
 			if (event.key !== storageKey) return;
 			const stored = readStoredSettings(storageKey);
+			const nextAppearance = isAppearancePreference(stored?.appearance)
+				? stored.appearance
+				: defaultAppearance;
+			const nextResolvedAppearance = resolveAppearance(
+				nextAppearance,
+				window.matchMedia("(prefers-color-scheme: dark)").matches,
+			);
+			applyDocumentAppearance({
+				appearance: nextAppearance,
+				atomic: nextResolvedAppearance !== resolvedAppearance,
+				resolvedAppearance: nextResolvedAppearance,
+			});
+			setAppearanceState(nextAppearance);
+			setResolvedAppearance(nextResolvedAppearance);
 			if (typeof stored?.motionDisabled === "boolean") {
 				setMotionDisabled(stored.motionDisabled);
 			}
@@ -132,19 +242,24 @@ export function SettingsProvider({
 			} else if (!smoothScrollAvailable) {
 				setSmoothScrollDisabled(true);
 			}
-			if (isValidTextScale(stored?.textScale)) {
-				setTextScale(stored.textScale);
-			}
+			setTextScale(
+				isValidTextScale(stored?.textScale)
+					? stored.textScale
+					: defaultTextScale,
+			);
 		};
 
 		window.addEventListener("storage", handleStorage);
 		return () => window.removeEventListener("storage", handleStorage);
-	}, [storageKey]);
+	}, [defaultAppearance, defaultTextScale, resolvedAppearance, storageKey]);
 
 	return (
 		<SettingsContext.Provider
 			value={{
+				appearance,
 				motionDisabled,
+				resolvedAppearance,
+				setAppearance,
 				setMotionDisabled,
 				smoothScrollAvailable,
 				smoothScrollDisabled,

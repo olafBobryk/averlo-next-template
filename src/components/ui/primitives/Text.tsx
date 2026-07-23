@@ -13,31 +13,28 @@ export const textVariants = cva("", {
 			headingPage:
 				"[font-family:var(--font-heading)] text-2xl font-semibold leading-tight md:text-3xl",
 			headingHero:
-				"[font-family:var(--font-heading)] text-[calc(70px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
+				"[font-family:var(--font-heading)] text-display-hero font-semibold -tracking-[0.02em] leading-[1.05]",
 			heading2xxl:
-				"[font-family:var(--font-heading)] text-[calc(50px*var(--text-scale,1))] font-semibold -tracking-[0.02em] leading-[1.05]",
+				"[font-family:var(--font-heading)] text-display-2xxl font-semibold -tracking-[0.02em] leading-[1.05]",
 			headingXxl:
-				"[font-family:var(--font-heading)] text-[calc(36px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-display-xxl font-semibold -tracking-[0.02em]",
 			headingXl:
-				"[font-family:var(--font-heading)] text-[calc(26px*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-display-xl font-semibold -tracking-[0.02em]",
 			headingLg:
-				"[font-family:var(--font-heading)] text-[calc(1.25rem*var(--text-scale,1))] font-semibold -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-xl font-semibold -tracking-[0.02em]",
 			headingMd:
-				"[font-family:var(--font-heading)] text-[calc(1.25rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-xl font-medium -tracking-[0.02em]",
 			headingSm:
-				"[font-family:var(--font-heading)] text-[calc(1.125rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
+				"[font-family:var(--font-heading)] text-lg font-medium -tracking-[0.02em]",
 			headingXs:
-				"[font-family:var(--font-heading)] text-[calc(1rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
-			body: "text-[calc(0.875rem*var(--text-scale,1))] font-normal",
+				"[font-family:var(--font-heading)] text-base font-medium -tracking-[0.02em]",
+			body: "text-sm font-normal",
 			support: "text-sm leading-6",
-			bodyStrong:
-				"text-[calc(0.875rem*var(--text-scale,1))] font-medium -tracking-[0.02em]",
-			caption: "text-[calc(0.75rem*var(--text-scale,1))] font-normal",
-			nav: "text-[calc(0.875rem*var(--text-scale,1))] font-medium leading-none",
-			"menu-title":
-				"text-[calc(0.875rem*var(--text-scale,1))] font-medium leading-[1.15]",
-			"menu-description":
-				"text-[calc(0.75rem*var(--text-scale,1))] font-normal leading-[1.2]",
+			bodyStrong: "text-sm font-medium -tracking-[0.02em]",
+			caption: "text-xs font-normal",
+			nav: "text-sm font-medium leading-none",
+			"menu-title": "text-sm font-medium leading-[1.15]",
+			"menu-description": "text-xs font-normal leading-[1.2]",
 		},
 		tone: {
 			default: "",
@@ -150,34 +147,22 @@ function TextSkeleton({
 	children,
 	...rest
 }: TextSkeletonProps) {
-	const Tag = as as
-		| "span"
-		| "p"
-		| "div"
-		| "label"
-		| "h1"
-		| "h2"
-		| "h3"
-		| "h4"
-		| "h5"
-		| "h6";
-	const resolvedVariant = textVariants({
-		variant,
-		tone,
-		theme,
-		interactive,
-		className: textClassName,
-	});
-
 	return (
 		<Skeleton
+			as={as === "span" || as === "label" ? "span" : "div"}
 			className={clsx(
 				"w-fit max-w-full",
-				textVariants({ variant, tone, theme, interactive, className }),
+				textVariants({
+					variant,
+					tone,
+					theme,
+					interactive,
+					className: clsx(className, textClassName),
+				}),
 			)}
 			{...rest}
 		>
-			<Tag className={resolvedVariant}>{children ?? "Loading"}</Tag>
+			<span>{children ?? "Loading"}</span>
 		</Skeleton>
 	);
 }

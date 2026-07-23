@@ -2,15 +2,16 @@
 
 import clsx from "clsx";
 import type * as React from "react";
+import { Button } from "@/components/ui/primitives/Button";
 import {
-	MoreMenuDropdown,
-	type MoreMenuOption,
-} from "@/components/ui/misc/MoreMenuDropdown";
+	Dropdown,
+	type DropdownMenuOption,
+} from "@/components/ui/primitives/Dropdown";
 import { Text } from "@/components/ui/primitives/Text";
 
 export type DashboardPropertyOption = {
 	disabled?: boolean;
-	icon?: React.ReactNode;
+	icon?: Exclude<React.ReactNode, string | number>;
 	id: string;
 	label: React.ReactNode;
 };
@@ -38,7 +39,7 @@ function DashboardPropertyListHeader({
 	options?: readonly DashboardPropertyOption[];
 	title?: React.ReactNode;
 }) {
-	const addOptions: MoreMenuOption[] = options.map((option) => ({
+	const addOptions: DropdownMenuOption[] = options.map((option) => ({
 		disabled: option.disabled,
 		id: option.id,
 		label: option.label,
@@ -52,21 +53,17 @@ function DashboardPropertyListHeader({
 			</Text>
 			{actions ??
 				(addOptions.length > 0 ? (
-					<MoreMenuDropdown
+					<Dropdown.Menu
 						ariaLabel="Add property"
 						openOnHover={false}
 						options={addOptions}
 						positionStrategy="fixed"
-						renderTrigger={(trigger) => (
-							<button
-								className="rounded-md px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-								onClick={trigger.onRightClick}
-								ref={trigger.ref as React.Ref<HTMLButtonElement>}
-								type="button"
-							>
-								+ Add
-							</button>
-						)}
+						triggerButtonProps={{
+							className: "text-muted-foreground hover:text-foreground",
+							size: "sm",
+							variant: "ghost",
+						}}
+						triggerContent="+ Add"
 					/>
 				) : null)}
 		</div>
@@ -96,7 +93,7 @@ function DashboardPropertyRow({
 	children: React.ReactNode;
 	icon: React.ReactNode;
 	label: string;
-	menuOptions?: MoreMenuOption[];
+	menuOptions?: DropdownMenuOption[];
 }) {
 	return (
 		<div className="grid min-h-12 grid-cols-[minmax(8rem,.6fr)_minmax(0,1fr)_auto] items-center gap-4 py-2 max-sm:grid-cols-[1fr_auto]">
@@ -114,7 +111,7 @@ function DashboardPropertyRow({
 			<div className="flex justify-end">
 				{action ??
 					(menuOptions ? (
-						<MoreMenuDropdown
+						<Dropdown.Menu
 							ariaLabel={`Manage ${label.toLowerCase()}`}
 							options={menuOptions}
 							positionStrategy="fixed"
@@ -125,8 +122,49 @@ function DashboardPropertyRow({
 	);
 }
 
+function DashboardPropertyListSkeleton({
+	action,
+	items,
+	title = "Properties",
+}: {
+	action?: React.ReactNode;
+	items: readonly {
+		icon: React.ReactNode;
+		id: string;
+		label: string;
+		value: string;
+	}[];
+	title?: React.ReactNode;
+}) {
+	return (
+		<DashboardPropertyListRoot>
+			<DashboardPropertyListHeader actions={action} title={title} />
+			<DashboardPropertyListRows>
+				{items.map((item) => (
+					<DashboardPropertyRow
+						action={<Button.Skeleton size="icon-sm" variant="secondary" />}
+						icon={item.icon}
+						key={item.id}
+						label={item.label}
+					>
+						<Text.Skeleton
+							as="span"
+							className="max-w-48 text-sm text-foreground"
+							tone={null}
+							variant={null}
+						>
+							{item.value}
+						</Text.Skeleton>
+					</DashboardPropertyRow>
+				))}
+			</DashboardPropertyListRows>
+		</DashboardPropertyListRoot>
+	);
+}
+
 export const DashboardPropertyList = Object.assign(DashboardPropertyListRoot, {
 	Header: DashboardPropertyListHeader,
 	Row: DashboardPropertyRow,
 	Rows: DashboardPropertyListRows,
+	Skeleton: DashboardPropertyListSkeleton,
 });

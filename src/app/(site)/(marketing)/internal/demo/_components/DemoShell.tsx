@@ -1,11 +1,12 @@
 "use client";
 
+import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { focusRing } from "@/components/ui/foundations/focus";
 import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/Panel";
+import { Card } from "@/components/ui/primitives/Card";
 import { Section } from "@/components/ui/primitives/Section";
-import { Text } from "@/components/ui/primitives/Text";
 import { getVisibleDemoPages } from "../content";
 
 const NAV_PADDING_BASE = 12;
@@ -23,47 +24,54 @@ export function DemoShell({ children }: DemoShellProps) {
 	const visiblePages = getVisibleDemoPages();
 
 	return (
-		<Section innerClassName="flex w-full flex-col gap-8 lg:flex-row">
+		<Section
+			padding="hero"
+			innerClassName="flex w-full flex-col gap-8 lg:flex-row"
+		>
 			<aside className="w-full shrink-0 lg:w-64">
-				<div className="flex flex-col gap-4 lg:sticky lg:top-24">
-					<Panel display="flex" padding="sm" gap="sm" shadow="none">
-						<div className="flex flex-col gap-2">
-							<Text as="h2" variant="headingXs">
-								Demo Index
-							</Text>
-							<Text variant="caption" tone="muted" className="text-xs">
-								UI system showcase derived from a single content map.
-							</Text>
-							<Button href="/internal/demo" size="sm" variant="secondary">
-								Overview
-							</Button>
-						</div>
-					</Panel>
-					<Panel display="flex" padding="sm" gap="sm" shadow="none">
-						<nav className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:flex lg:flex-col">
-							{visiblePages.map((page) => {
-								const href = buildPath(page.slug);
-								const active = pathname === href;
-								const paddingLeft = (page.slug.length - 1) * NAV_PADDING_BASE;
+				<div className="lg:sticky lg:top-24">
+					<Card size="sm">
+						<Card.Header className="border-b">
+							<Card.Title>Demo catalog</Card.Title>
+							<Card.Action>
+								<Button href="/internal/demo" size="sm" variant="secondary">
+									Overview
+								</Button>
+							</Card.Action>
+						</Card.Header>
+						<Card.Content>
+							<nav className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:flex lg:flex-col">
+								{visiblePages.map((page) => {
+									const href = buildPath(page.slug);
+									const active = pathname === href;
+									const paddingLeft =
+										12 + (page.slug.length - 1) * NAV_PADDING_BASE;
 
-								return (
-									<Link
-										key={page.id}
-										href={href}
-										className={[
-											"rounded-lg px-2 py-1 text-sm transition-colors motion-interactive",
-											active
-												? "bg-primary/10 text-primary"
-												: "text-foreground/80 hover:text-foreground",
-										].join(" ")}
-										style={{ paddingLeft: 8 + paddingLeft }}
-									>
-										{page.title}
-									</Link>
-								);
-							})}
-						</nav>
-					</Panel>
+									return (
+										<Link
+											aria-current={active ? "page" : undefined}
+											aria-label={page.title}
+											key={page.id}
+											href={href}
+											className={clsx(
+												"relative flex h-9 min-w-0 items-center rounded-md text-sm font-medium transition-all motion-interactive",
+												focusRing.visibleDefault,
+												active
+													? "bg-primary/10 text-primary"
+													: "text-muted-foreground hover:bg-sidebar-accent/80 hover:text-sidebar-accent-foreground",
+											)}
+											style={{ paddingLeft, paddingRight: 12 }}
+											title={page.title}
+										>
+											<span className="min-w-0 flex-1 truncate whitespace-nowrap">
+												{page.title}
+											</span>
+										</Link>
+									);
+								})}
+							</nav>
+						</Card.Content>
+					</Card>
 				</div>
 			</aside>
 			<main className="min-w-0 flex-1">{children}</main>

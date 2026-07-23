@@ -6,6 +6,7 @@ import {
 	CopyStatusIcon,
 	useCopyAction,
 } from "@/components/ui/helpers/useCopyAction";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Button } from "@/components/ui/primitives/Button";
 import { Field } from "@/components/ui/primitives/Field";
 import {
@@ -48,7 +49,7 @@ type TextInputProps = {
 	size?: InputFrameSize;
 };
 
-export function TextInput({
+function TextInputRoot({
 	label,
 	description,
 	placeholder,
@@ -172,3 +173,7 @@ export function TextInput({
 		</Field>
 	);
 }
+
+export const TextInput = Object.assign(TextInputRoot, {
+	Skeleton: InputSkeleton,
+});

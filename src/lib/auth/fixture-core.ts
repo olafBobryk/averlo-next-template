@@ -1,19 +1,25 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import type {
 	AdapterMethodAvailability,
 	AuthIdentity,
 	AuthSession,
 	AuthUser,
+	MembershipRole,
 	Organization,
 	OrganizationInvitation,
 	OrganizationMembership,
+	OrganizationUpdate,
 	ResolvedOrganizationContext,
 	SessionResolution,
 } from "./contracts";
 import { AuthDomainError } from "./errors";
+import { isPasswordRecoveryAvailable } from "./passwordRecoveryCapability";
 
 const sessionLifetimeMs = 8 * 60 * 60 * 1000;
 const invitationLifetimeMs = 7 * 24 * 60 * 60 * 1000;
+const passwordRecoveryLifetimeMs = 30 * 60 * 1000;
+
+const passwordRecoveryAvailable = isPasswordRecoveryAvailable();
 
 export const fixtureAuthMethods: AdapterMethodAvailability = {
 	"password-sign-in": { available: true },
@@ -22,12 +28,16 @@ export const fixtureAuthMethods: AdapterMethodAvailability = {
 		reason: "The fixture adapter does not send email.",
 	},
 	"password-recovery": {
-		available: false,
-		reason: "The fixture adapter does not send recovery email.",
+		available: passwordRecoveryAvailable,
+		reason: passwordRecoveryAvailable
+			? undefined
+			: "Configure APP_ORIGIN, PASSWORD_RESET_FROM, and RESEND_API_KEY.",
 	},
 	"password-update": {
-		available: false,
-		reason: "Fixture credentials reset whenever the server process resets.",
+		available: passwordRecoveryAvailable,
+		reason: passwordRecoveryAvailable
+			? undefined
+			: "Configure APP_ORIGIN, PASSWORD_RESET_FROM, and RESEND_API_KEY.",
 	},
 	"identity-link": {
 		available: false,
@@ -42,12 +52,28 @@ export type FixtureCredential = {
 	userId: string;
 };
 
+type FixturePasswordRecovery = {
+	email: string;
+	expiresAt: string;
+	resetUrl: string;
+	tokenHash: string;
+	userId: string;
+};
+
+export type FixtureRecoveryOutboxEntry = {
+	createdAt: string;
+	email: string;
+	resetUrl: string;
+};
+
 export type FixtureAuthState = {
 	credentials: FixtureCredential[];
 	identities: Map<string, AuthIdentity[]>;
 	invitations: Map<string, OrganizationInvitation>;
 	memberships: Map<string, OrganizationMembership>;
 	organizations: Map<string, Organization>;
+	passwordRecoveries: Map<string, FixturePasswordRecovery>;
+	recoveryOutbox: FixtureRecoveryOutboxEntry[];
 	sessions: Map<string, AuthSession>;
 	users: Map<string, AuthUser>;
 };
@@ -58,6 +84,7 @@ const initialUsers: AuthUser[] = [
 		name: "Template Operator",
 		email: "operator@averlo.local",
 		isBanned: false,
+		platformRole: "admin",
 		identities: [],
 	},
 	{
@@ -65,6 +92,7 @@ const initialUsers: AuthUser[] = [
 		name: "Multi-org Reviewer",
 		email: "multi@averlo.local",
 		isBanned: false,
+		platformRole: null,
 		identities: [],
 	},
 	{
@@ -72,6 +100,15 @@ const initialUsers: AuthUser[] = [
 		name: "Invited Teammate",
 		email: "invitee@averlo.local",
 		isBanned: false,
+		platformRole: null,
+		identities: [],
+	},
+	{
+		id: "user-demo-member",
+		name: "Demo Member",
+		email: "member@averlo.local",
+		isBanned: false,
+		platformRole: null,
 		identities: [],
 	},
 ];
@@ -93,6 +130,7 @@ const initialOrganizations: Organization[] = [
 
 const initialMemberships: OrganizationMembership[] = [
 	{
+		createdAt: "2026-01-12T08:00:00.000Z",
 		id: "membership-template-owner",
 		organizationId: "org-demo",
 		role: "owner",
@@ -100,6 +138,7 @@ const initialMemberships: OrganizationMembership[] = [
 		userId: "user-template-owner",
 	},
 	{
+		createdAt: "2026-02-14T10:00:00.000Z",
 		id: "membership-multi-demo",
 		organizationId: "org-demo",
 		role: "admin",
@@ -107,11 +146,20 @@ const initialMemberships: OrganizationMembership[] = [
 		userId: "user-multi-org",
 	},
 	{
+		createdAt: "2026-03-04T09:30:00.000Z",
 		id: "membership-multi-sandbox",
 		organizationId: "org-sandbox",
 		role: "owner",
 		status: "active",
 		userId: "user-multi-org",
+	},
+	{
+		createdAt: "2026-04-18T11:15:00.000Z",
+		id: "membership-demo-member",
+		organizationId: "org-demo",
+		role: "member",
+		status: "active",
+		userId: "user-demo-member",
 	},
 ];
 
@@ -179,6 +227,8 @@ export function createFixtureAuthState(now = new Date()): FixtureAuthState {
 				{ ...organization },
 			]),
 		),
+		passwordRecoveries: new Map(),
+		recoveryOutbox: [],
 		sessions: new Map(),
 		users,
 	};
@@ -242,6 +292,119 @@ export function listActiveFixtureMemberships(
 		(membership) =>
 			membership.userId === userId && membership.status === "active",
 	);
+}
+
+function requireActiveFixtureMembership(
+	state: FixtureAuthState,
+	membershipId: string,
+) {
+	const membership = state.memberships.get(membershipId);
+	if (!membership || membership.status !== "active") {
+		throw new AuthDomainError("membership-required");
+	}
+	return membership;
+}
+
+function requireFixtureAccessManager(
+	state: FixtureAuthState,
+	actorMembershipId: string,
+) {
+	const actor = requireActiveFixtureMembership(state, actorMembershipId);
+	if (actor.role !== "owner" && actor.role !== "admin") {
+		throw new AuthDomainError("membership-role-forbidden");
+	}
+	return actor;
+}
+
+export function listFixtureOrganizationMembers(
+	state: FixtureAuthState,
+	organizationId: string,
+) {
+	return [...state.memberships.values()]
+		.filter(
+			(membership) =>
+				membership.organizationId === organizationId &&
+				membership.status === "active",
+		)
+		.flatMap((membership) => {
+			const user = state.users.get(membership.userId);
+			return user
+				? [
+						{
+							membership: { ...membership },
+							user: copyUser(user, state.identities.get(user.id) ?? []),
+						},
+					]
+				: [];
+		})
+		.sort((left, right) => left.user.name.localeCompare(right.user.name));
+}
+
+export function updateFixtureMembershipRole(
+	state: FixtureAuthState,
+	input: {
+		actorMembershipId: string;
+		membershipId: string;
+		role: Exclude<MembershipRole, "owner">;
+	},
+) {
+	const actor = requireFixtureAccessManager(state, input.actorMembershipId);
+	const target = requireActiveFixtureMembership(state, input.membershipId);
+	if (actor.organizationId !== target.organizationId) {
+		throw new AuthDomainError("membership-role-forbidden");
+	}
+	if (target.role === "owner") {
+		throw new AuthDomainError("membership-owner-protected");
+	}
+	if (actor.role !== "owner") {
+		throw new AuthDomainError("membership-role-forbidden");
+	}
+	const next = { ...target, role: input.role };
+	state.memberships.set(next.id, next);
+	return { ...next };
+}
+
+export function removeFixtureMembership(
+	state: FixtureAuthState,
+	input: { actorMembershipId: string; membershipId: string },
+) {
+	const actor = requireFixtureAccessManager(state, input.actorMembershipId);
+	const target = requireActiveFixtureMembership(state, input.membershipId);
+	if (actor.organizationId !== target.organizationId) {
+		throw new AuthDomainError("membership-role-forbidden");
+	}
+	if (actor.id === target.id) {
+		throw new AuthDomainError("membership-self-removal");
+	}
+	if (target.role === "owner") {
+		throw new AuthDomainError("membership-owner-protected");
+	}
+	if (actor.role === "admin" && target.role !== "member") {
+		throw new AuthDomainError("membership-role-forbidden");
+	}
+	const next = { ...target, status: "revoked" as const };
+	state.memberships.set(next.id, next);
+	return { ...next };
+}
+
+export function transferFixtureOwnership(
+	state: FixtureAuthState,
+	input: { actorMembershipId: string; membershipId: string },
+) {
+	const actor = requireActiveFixtureMembership(state, input.actorMembershipId);
+	const target = requireActiveFixtureMembership(state, input.membershipId);
+	if (
+		actor.role !== "owner" ||
+		actor.organizationId !== target.organizationId ||
+		actor.id === target.id
+	) {
+		throw new AuthDomainError("membership-role-forbidden");
+	}
+	const currentOwner = { ...actor, role: "admin" as const };
+	const newOwner = { ...target, role: "owner" as const };
+	state.memberships.set(currentOwner.id, currentOwner);
+	state.memberships.set(newOwner.id, newOwner);
+	return { currentOwner: { ...currentOwner }, newOwner: { ...newOwner } };
 }
 
 function buildResolvedContext(
@@ -352,6 +515,129 @@ export function updateFixtureUser(
 	return copyUser(next, state.identities.get(userId) ?? []);
 }
 
+function normalizeOrganizationSlug(value: string) {
+	return value
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "");
+}
+
+export function updateFixtureOrganization(
+	state: FixtureAuthState,
+	organizationId: string,
+	patch: OrganizationUpdate,
+) {
+	const organization = state.organizations.get(organizationId);
+	if (!organization) throw new AuthDomainError("membership-required");
+
+	const name = Object.hasOwn(patch, "name")
+		? (patch.name?.trim() ?? "")
+		: organization.name;
+	const slug = Object.hasOwn(patch, "slug")
+		? normalizeOrganizationSlug(patch.slug ?? "")
+		: organization.slug;
+	if (!name || !slug) throw new AuthDomainError("organization-invalid");
+
+	const slugInUse = [...state.organizations.values()].some(
+		(candidate) =>
+			candidate.id !== organizationId && candidate.slug.toLowerCase() === slug,
+	);
+	if (slugInUse) throw new AuthDomainError("organization-slug-conflict");
+
+	const next: Organization = {
+		...organization,
+		name,
+		slug,
+		profilePictureUrl: Object.hasOwn(patch, "profilePictureUrl")
+			? patch.profilePictureUrl
+			: organization.profilePictureUrl,
+	};
+	state.organizations.set(organizationId, next);
+	return { ...next };
+}
+
+function hashFixtureRecoveryToken(token: string) {
+	return createHash("sha256").update(token).digest("hex");
+}
+
+export function requestFixturePasswordRecovery(
+	state: FixtureAuthState,
+	input: { email: string; resetUrl: string },
+	now = new Date(),
+) {
+	const email = input.email.trim().toLowerCase();
+	const user = [...state.users.values()].find(
+		(candidate) => candidate.email.toLowerCase() === email,
+	);
+	if (!user) return null;
+
+	const token = randomBytes(32).toString("base64url");
+	const resetUrl = new URL(input.resetUrl);
+	resetUrl.searchParams.set("token", token);
+	const tokenHash = hashFixtureRecoveryToken(token);
+	const recovery: FixturePasswordRecovery = {
+		email: user.email,
+		expiresAt: nowIso(new Date(now.getTime() + passwordRecoveryLifetimeMs)),
+		resetUrl: resetUrl.toString(),
+		tokenHash,
+		userId: user.id,
+	};
+
+	state.passwordRecoveries.set(tokenHash, recovery);
+	state.recoveryOutbox.push({
+		createdAt: nowIso(now),
+		email: user.email,
+		resetUrl: recovery.resetUrl,
+	});
+	return { ...recovery };
+}
+
+export function resetFixturePassword(
+	state: FixtureAuthState,
+	input: { password: string; token: string },
+	now = new Date(),
+) {
+	const { recovery, tokenHash } = readFixturePasswordRecovery(
+		state,
+		input.token,
+		now,
+	);
+
+	const credential = state.credentials.find(
+		(candidate) => candidate.userId === recovery.userId,
+	);
+	if (!credential) throw new AuthDomainError("password-recovery-invalid");
+	credential.password = input.password;
+	state.passwordRecoveries.delete(tokenHash);
+	for (const [sessionId, session] of state.sessions) {
+		if (session.userId === recovery.userId) state.sessions.delete(sessionId);
+	}
+}
+
+export function validateFixturePasswordRecoveryToken(
+	state: FixtureAuthState,
+	input: { token: string },
+	now = new Date(),
+) {
+	readFixturePasswordRecovery(state, input.token, now);
+}
+
+function readFixturePasswordRecovery(
+	state: FixtureAuthState,
+	token: string,
+	now: Date,
+) {
+	const tokenHash = hashFixtureRecoveryToken(token);
+	const recovery = state.passwordRecoveries.get(tokenHash);
+	if (!recovery) throw new AuthDomainError("password-recovery-invalid");
+	if (new Date(recovery.expiresAt).getTime() <= now.getTime()) {
+		state.passwordRecoveries.delete(tokenHash);
+		throw new AuthDomainError("password-recovery-expired");
+	}
+	return { recovery, tokenHash };
+}
+
 function validateFixtureInvitation(
 	state: FixtureAuthState,
 	input: { invitationId: string; tokenHash: string },
@@ -399,8 +685,14 @@ export function acceptFixtureInvitation(
 			membership.organizationId === invitation.organizationId,
 	);
 	const membership: OrganizationMembership = existing
-		? { ...existing, role: invitation.role, status: "active" }
+		? {
+				...existing,
+				createdAt: existing.createdAt || nowIso(now),
+				role: invitation.role,
+				status: "active",
+			}
 		: {
+				createdAt: nowIso(now),
 				id: `membership-${randomUUID()}`,
 				organizationId: invitation.organizationId,
 				role: invitation.role,
@@ -419,22 +711,35 @@ export function acceptFixtureInvitation(
 
 export function createFixtureInvitation(
 	state: FixtureAuthState,
-	input: Pick<OrganizationInvitation, "email" | "organizationId" | "role">,
+	input: Pick<OrganizationInvitation, "email" | "organizationId" | "role"> & {
+		actorMembershipId: string;
+	},
 	now = new Date(),
 ) {
+	const actor = requireFixtureAccessManager(state, input.actorMembershipId);
+	if (actor.organizationId !== input.organizationId) {
+		throw new AuthDomainError("membership-role-forbidden");
+	}
+	if (input.role === "admin" && actor.role !== "owner") {
+		throw new AuthDomainError("invitation-role-forbidden");
+	}
 	const email = input.email.trim().toLowerCase();
-	for (const [id, invitation] of state.invitations) {
-		if (
+	const alreadyMember = listFixtureOrganizationMembers(
+		state,
+		input.organizationId,
+	).some((member) => member.user.email.toLowerCase() === email);
+	if (alreadyMember) {
+		throw new AuthDomainError("invitation-member-conflict");
+	}
+	const pendingInvitation = [...state.invitations.values()].find(
+		(invitation) =>
 			invitation.email.toLowerCase() === email &&
 			invitation.organizationId === input.organizationId &&
 			!invitation.acceptedAt &&
-			!invitation.revokedAt
-		) {
-			state.invitations.set(id, {
-				...invitation,
-				revokedAt: nowIso(now),
-			});
-		}
+			!invitation.revokedAt,
+	);
+	if (pendingInvitation) {
+		throw new AuthDomainError("invitation-pending-conflict");
 	}
 
 	const invitation: OrganizationInvitation = {
@@ -450,6 +755,63 @@ export function createFixtureInvitation(
 	};
 	state.invitations.set(invitation.id, invitation);
 	return { ...invitation };
+}
+
+export function listFixtureInvitations(
+	state: FixtureAuthState,
+	organizationId: string,
+) {
+	return [...state.invitations.values()]
+		.filter((invitation) => invitation.organizationId === organizationId)
+		.map((invitation) => ({ ...invitation }))
+		.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+}
+
+function requireManageableFixtureInvitation(
+	state: FixtureAuthState,
+	input: { actorMembershipId: string; invitationId: string },
+) {
+	const actor = requireFixtureAccessManager(state, input.actorMembershipId);
+	const invitation = state.invitations.get(input.invitationId);
+	if (
+		!invitation ||
+		invitation.organizationId !== actor.organizationId ||
+		invitation.acceptedAt ||
+		invitation.revokedAt
+	) {
+		throw new AuthDomainError("invitation-invalid");
+	}
+	if (actor.role === "admin" && invitation.role !== "member") {
+		throw new AuthDomainError("invitation-role-forbidden");
+	}
+	return invitation;
+}
+
+export function refreshFixtureInvitation(
+	state: FixtureAuthState,
+	input: { actorMembershipId: string; invitationId: string },
+	now = new Date(),
+) {
+	const invitation = requireManageableFixtureInvitation(state, input);
+	const next = {
+		...invitation,
+		createdAt: nowIso(now),
+		expiresAt: nowIso(new Date(now.getTime() + invitationLifetimeMs)),
+		tokenHash: randomBytes(24).toString("base64url"),
+	};
+	state.invitations.set(next.id, next);
+	return { ...next };
+}
+
+export function revokeFixtureInvitation(
+	state: FixtureAuthState,
+	input: { actorMembershipId: string; invitationId: string },
+	now = new Date(),
+) {
+	const invitation = requireManageableFixtureInvitation(state, input);
+	const next = { ...invitation, revokedAt: nowIso(now) };
+	state.invitations.set(next.id, next);
+	return { ...next };
 }
 
 export function removeFixtureIdentity(

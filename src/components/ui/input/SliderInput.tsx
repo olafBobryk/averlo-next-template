@@ -2,6 +2,7 @@
 "use client";
 
 import * as React from "react";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
@@ -36,7 +37,7 @@ type SliderInputProps = {
 	size?: InputFrameSize;
 };
 
-export function SliderInput({
+function SliderInputRoot({
 	label,
 	description,
 	placeholder,
@@ -63,12 +64,12 @@ export function SliderInput({
 	const describedBy =
 		[descriptionId, error ? messageId : undefined].filter(Boolean).join(" ") ||
 		undefined;
-
-	const sliderValue = React.useMemo(() => {
-		if (typeof value === "number" && Number.isFinite(value)) return value;
-		if (typeof min === "number") return min;
-		return 0;
-	}, [value, min]);
+	const resolvedSize = size ?? "sm";
+	const sliderValue =
+		typeof value === "number" && Number.isFinite(value) ? value : min;
+	const boundedSliderValue = Math.min(max, Math.max(min, sliderValue));
+	const progress =
+		max > min ? ((boundedSliderValue - min) / (max - min)) * 100 : 0;
 
 	const handleNumberChange: React.ChangeEventHandler<HTMLInputElement> = (
 		e,
@@ -98,24 +99,41 @@ export function SliderInput({
 		>
 			<InputFrame
 				tone={tone}
-				size={size}
+				size={resolvedSize}
 				disabled={disabled}
 				fullWidth
-				contentClassName={inputPaddingXClasses[size ?? "md"]}
+				contentClassName={`flex items-center ${inputPaddingXClasses[resolvedSize]}`}
 			>
-				<div className="flex w-full items-center gap-3">
-					<input
-						type="range"
-						min={min}
-						max={max}
-						step={step}
-						value={sliderValue}
-						onChange={handleSliderChange}
-						disabled={disabled}
-						className="flex-1 accent-primary"
-						aria-label={typeof label === "string" ? label : undefined}
-					/>
-					<div className="flex items-center gap-2">
+				<div className="flex h-full w-full items-center gap-3">
+					<div className="group relative flex h-full min-h-8 min-w-0 flex-1 items-center has-[:disabled]:opacity-50">
+						<span
+							aria-hidden
+							className="pointer-events-none absolute inset-x-0 h-1.5 overflow-hidden rounded-full bg-foreground/10 transition-[background-color,box-shadow] motion-interactive group-hover:bg-foreground/15 group-has-[:focus-visible]:ring-3 group-has-[:focus-visible]:ring-ring/30"
+							data-slot="slider-track"
+						>
+							<span
+								className="block h-full rounded-full bg-primary"
+								data-slot="slider-progress"
+								style={{ width: `${progress}%` }}
+							/>
+						</span>
+						<input
+							aria-describedby={describedBy}
+							aria-invalid={Boolean(error)}
+							aria-label={
+								typeof label === "string" ? `${label} slider` : "Slider"
+							}
+							className="absolute inset-x-0 top-1/2 h-8 w-full -translate-y-1/2 cursor-pointer appearance-none bg-transparent outline-none disabled:cursor-not-allowed [&::-moz-range-progress]:bg-transparent [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:shadow-sm [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:-mt-[5px] [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-sm"
+							disabled={disabled}
+							max={max}
+							min={min}
+							onChange={handleSliderChange}
+							step={step}
+							type="range"
+							value={boundedSliderValue}
+						/>
+					</div>
+					<div className="flex h-full shrink-0 items-center gap-2">
 						<input
 							id={inputId}
 							name={name}
@@ -128,12 +146,11 @@ export function SliderInput({
 							placeholder={placeholder}
 							required={required}
 							className={[
-								"w-20 min-w-0 bg-transparent pr-0! text-right text-foreground outline-none placeholder:text-muted/70 disabled:cursor-not-allowed",
+								"!h-full !w-20 min-w-0 bg-transparent !px-0 !py-0 text-right text-foreground outline-none placeholder:text-muted/70 disabled:cursor-not-allowed",
 
 								"[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-								inputClassName,
 								inputVariants({
-									size,
+									size: resolvedSize,
 									disabled: disabled ? true : undefined,
 								}),
 								inputClassName,
@@ -146,7 +163,7 @@ export function SliderInput({
 							aria-describedby={describedBy}
 						/>
 						{unit ? (
-							<span className="whitespace-nowrap text-sm text-muted/70">
+							<span className="whitespace-nowrap text-sm text-muted-foreground">
 								{unit}
 							</span>
 						) : null}
@@ -156,3 +173,7 @@ export function SliderInput({
 		</Field>
 	);
 }
+
+export const SliderInput = Object.assign(SliderInputRoot, {
+	Skeleton: InputSkeleton,
+});

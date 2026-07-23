@@ -6,12 +6,12 @@ import { SpamProtectionFields } from "@/components/ui/input/SpamProtectionFields
 import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
 import { TextInput } from "@/components/ui/input/TextInput";
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
 import { submitSpamProtectedExample } from "@/lib/api";
 import { showToast } from "@/lib/feedback";
@@ -132,82 +132,82 @@ export function SpamProtectedFormPreview() {
 	}
 
 	return (
-		<Panel display="flex" padding="md" gap="md">
-			<div className="flex flex-col gap-2">
-				<Text as="h2" variant="headingSm">
-					Working preview
-				</Text>
-				<Text variant="body" tone="muted">
+		<Card>
+			<Card.Header className="border-b">
+				<Card.Title>Working preview</Card.Title>
+				<Card.Description>
 					Submit once to set the cooldown cookie, then submit again within 60
 					seconds to see the server-side throttle response.
-				</Text>
-			</div>
-			<form
-				ref={formRef}
-				onSubmit={handleSubmit}
-				noValidate
-				className="flex w-full flex-col gap-6"
-			>
-				<TextInput
-					label="Name"
-					name="name"
-					required
-					value={name}
-					onChange={(value) => {
-						setName(value);
-						setErrors((current) => ({ ...current, name: undefined }));
-					}}
-					error={errors.name}
-				/>
-				<EmailInput
-					label="Email"
-					name="email"
-					required
-					value={email}
-					onChange={(value) => {
-						setEmail(value);
-						setErrors((current) => ({ ...current, email: undefined }));
-					}}
-					error={errors.email}
-				/>
-				<TextAreaInput
-					label="Message"
-					name="message"
-					required
-					rows={4}
-					value={message}
-					onChange={(value) => {
-						setMessage(value);
-						setErrors((current) => ({ ...current, message: undefined }));
-					}}
-					error={errors.message}
-				/>
-				<div key={fileInputResetKey}>
-					<ExampleFileInput file={attachment} onChange={setAttachment} />
-				</div>
-				<SpamProtectionFields />
-				<div className="flex flex-wrap gap-3">
-					<Button type="submit" variant="primary" loading={submitting}>
-						Submit example form
-					</Button>
-					<Button
-						type="button"
-						variant="secondary"
-						onClick={() => {
-							formRef.current?.reset();
-							setName("");
-							setEmail("");
-							setMessage("");
-							setAttachment(null);
-							setErrors({});
-							setFileInputResetKey((current) => current + 1);
+				</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<form
+					ref={formRef}
+					onSubmit={handleSubmit}
+					noValidate
+					className="flex w-full flex-col gap-6"
+				>
+					<TextInput
+						label="Name"
+						name="name"
+						required
+						value={name}
+						onChange={(value) => {
+							setName(value);
+							setErrors((current) => ({ ...current, name: undefined }));
 						}}
-						disabled={submitting}
-					>
-						Reset
-					</Button>
-				</div>
-			</form>
-		</Panel>
+						error={errors.name}
+					/>
+					<EmailInput
+						label="Email"
+						name="email"
+						required
+						value={email}
+						onChange={(value) => {
+							setEmail(value);
+							setErrors((current) => ({ ...current, email: undefined }));
+						}}
+						error={errors.email}
+					/>
+					<TextAreaInput
+						label="Message"
+						name="message"
+						required
+						rows={4}
+						value={message}
+						onChange={(value) => {
+							setMessage(value);
+							setErrors((current) => ({ ...current, message: undefined }));
+						}}
+						error={errors.message}
+					/>
+					<div key={fileInputResetKey}>
+						<ExampleFileInput file={attachment} onChange={setAttachment} />
+					</div>
+					<SpamProtectionFields />
+					<div className="flex flex-wrap gap-3">
+						<Button type="submit" variant="primary" loading={submitting}>
+							Submit example form
+						</Button>
+						<Button
+							type="button"
+							variant="secondary"
+							onClick={() => {
+								formRef.current?.reset();
+								setName("");
+								setEmail("");
+								setMessage("");
+								setAttachment(null);
+								setErrors({});
+								setFileInputResetKey((current) => current + 1);
+							}}
+							disabled={submitting}
+						>
+							Reset
+						</Button>
+					</div>
+				</form>
+			</Card.Content>
+		</Card>
 	);
 }

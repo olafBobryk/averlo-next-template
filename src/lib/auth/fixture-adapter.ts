@@ -15,12 +15,24 @@ import {
 	fixtureAuthMethods,
 	getFixtureSession,
 	listActiveFixtureMemberships,
+	listFixtureInvitations,
+	listFixtureOrganizationMembers,
 	previewFixtureInvitation,
+	refreshFixtureInvitation,
 	removeFixtureIdentity,
+	removeFixtureMembership,
+	requestFixturePasswordRecovery,
+	resetFixturePassword,
 	resolveFixtureSession,
+	revokeFixtureInvitation,
 	selectFixtureOrganization,
+	transferFixtureOwnership,
+	updateFixtureMembershipRole,
+	updateFixtureOrganization,
 	updateFixtureUser,
+	validateFixturePasswordRecoveryToken,
 } from "./fixture-core";
+import { sendPasswordRecoveryEmail } from "./passwordRecoveryEmail";
 
 declare global {
 	var __averloFixtureAuthState: FixtureAuthState | undefined;
@@ -59,6 +71,27 @@ export const fixtureAdapters: ApplicationAdapters = {
 		) {
 			return updateFixtureUser(getFixtureAuthState(), userId, patch);
 		},
+		async requestPasswordRecovery(input) {
+			const recovery = requestFixturePasswordRecovery(
+				getFixtureAuthState(),
+				input,
+			);
+			if (!recovery) return { delivery: "email" as const };
+
+			const delivered = await sendPasswordRecoveryEmail({
+				recoveryUrl: recovery.resetUrl,
+				to: recovery.email,
+			});
+			return delivered
+				? { delivery: "email" as const }
+				: { delivery: "local" as const, previewUrl: recovery.resetUrl };
+		},
+		async validatePasswordRecoveryToken(input) {
+			validateFixturePasswordRecoveryToken(getFixtureAuthState(), input);
+		},
+		async resetPassword(input) {
+			resetFixturePassword(getFixtureAuthState(), input);
+		},
 	},
 	organizations: {
 		async resolveSession(sessionId) {
@@ -66,6 +99,13 @@ export const fixtureAdapters: ApplicationAdapters = {
 		},
 		async getOrganization(organizationId) {
 			return getFixtureAuthState().organizations.get(organizationId) ?? null;
+		},
+		async updateOrganization(input) {
+			return updateFixtureOrganization(
+				getFixtureAuthState(),
+				input.organizationId,
+				input.patch,
+			);
 		},
 		async selectOrganization(sessionId, organizationId) {
 			return selectFixtureOrganization(
@@ -77,8 +117,26 @@ export const fixtureAdapters: ApplicationAdapters = {
 		async listMemberships(userId) {
 			return listActiveFixtureMemberships(getFixtureAuthState(), userId);
 		},
+		async listOrganizationMembers(organizationId) {
+			return listFixtureOrganizationMembers(
+				getFixtureAuthState(),
+				organizationId,
+			);
+		},
+		async updateMembershipRole(input) {
+			return updateFixtureMembershipRole(getFixtureAuthState(), input);
+		},
+		async removeMembership(input) {
+			return removeFixtureMembership(getFixtureAuthState(), input);
+		},
+		async transferOwnership(input) {
+			return transferFixtureOwnership(getFixtureAuthState(), input);
+		},
 	},
 	invitations: {
+		async listInvitations(organizationId) {
+			return listFixtureInvitations(getFixtureAuthState(), organizationId);
+		},
 		async previewInvitation(input) {
 			return previewFixtureInvitation(getFixtureAuthState(), input);
 		},
@@ -86,9 +144,18 @@ export const fixtureAdapters: ApplicationAdapters = {
 			return acceptFixtureInvitation(getFixtureAuthState(), input);
 		},
 		async createInvitation(
-			input: Pick<OrganizationInvitation, "email" | "organizationId" | "role">,
+			input: Pick<
+				OrganizationInvitation,
+				"email" | "organizationId" | "role"
+			> & { actorMembershipId: string },
 		) {
 			return createFixtureInvitation(getFixtureAuthState(), input);
+		},
+		async refreshInvitation(input) {
+			return refreshFixtureInvitation(getFixtureAuthState(), input);
+		},
+		async revokeInvitation(input) {
+			return revokeFixtureInvitation(getFixtureAuthState(), input);
 		},
 	},
 	identities: {

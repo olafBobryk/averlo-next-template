@@ -42,87 +42,12 @@ other local artifacts.
 The index is refreshed before development and build scripts through package
 lifecycle hooks.
 
-## Visualizer
+## Maintainer overview
 
 The `/internal/intelligence` page reads the generated index server-side and
-shows the maintainer overview: title, summary, index stats, graph launcher, and
-benchmark launcher. The interactive graph lives at `/internal/intelligence/graph`
-so the map can run as a first-viewport inspection surface while still using the
-shared marketing shell, visible header, `Section.Background`, `Button`, `Text`,
-`Card`, and rounded `SegmentedControl` primitives.
-
-The graph route shows:
-
-- graph modes for agent navigation, design-system discovery, internal knowledge,
-  content architecture, Payload scaffolding, pruning, dev workflow, and route
-  surfaces
-- selectable 3D graph nodes with weighted links, visible physics, and focus
-  states
-- a separate 2D focus map for the selected node, direct neighbors, and
-  hover-expanded next-step context
-- a segmented digital-twin graph surface powered by
-  `react-force-graph-3d`, `react-force-graph-2d`, `three`,
-  `three-spritetext`, and `d3-force`
-- source-style 3D node labels rendered as floating chip-style SpriteText labels
-  attached to the nodes, with labels consuming the shared
-  `src/components/ui/misc/Chip.tsx` visual contract, offset far enough to clear
-  the node sphere, and node details opened in a stable side panel on the left
-- a compact foreground connection legend where link colors explain relationship
-  meaning such as maps to, depends on, owns, calls, provides, drives, and
-  resolved by
-- plain relationship lines without directional arrows, moving particles, or
-  decorative travel indicators
-- relation-scaled repulsion and link attraction so high-degree nodes create
-  clear spacing without flattening the graph into a rigid board; node size also
-  scales gently with connection count
-
-The graph modes are:
-
-- **Concepts:** concept and source-type relationships weighted by shared files
-  and overlap
-- **Task Map:** generated task topics connected to concrete starting files for
-  agents, grouped into path-family lanes such as config, docs, app routes,
-  components, library, scripts, and agent rules
-- **Prune Ownership:** optional surfaces connected to prune flags, central
-  rewrites, package entries, and validation checks in clear ownership lanes
-- **Content Boundaries:** static, Payload-ready, and Payload-powered modes
-  connected to render contracts, source adapters, and docs
-
-The graph defaults to a 3D overview with live force simulation. Selecting a
-node focuses the camera and exposes the node details in a stable side panel
-that is shared by the 3D overview and 2D focus map. The panel lives in the same
-foreground section flow as the graph title, Back, Reset, and view controls
-instead of the canvas background layer. Pressing Space, or using the Focus
-control, opens the 2D focus map.
-The 2D map keeps the current focus node centered, shows only direct neighbors by
-default, and reveals a hovered neighbor's next-step nodes in an outer preview
-ring while unrelated neighbors fade back. It uses the same force-graph physics
-model as the overview, with the center node pinned and neighboring nodes guided
-by link, charge, collision, and soft x/y forces so connections stay attached as
-the map settles. Clicking any visible 2D node promotes it to the centered focus
-node. View mode and graph mode switching use rounded `SegmentedControl`
-controls in normal section content with primary active pills, while the force
-graph remains the interactive background. The graph canvas uses the shared
-`InteractionGate` overlay to prevent accidental page interaction with a
-modal-style dark backdrop; click or keyboard-focus the map to interact, and
-press Escape to release it. Node details close on background or outside-panel
-clicks, so graph inspection does not depend on projected canvas anchor timing.
-Colors stay semantic: nodes represent artifact kind, while connection colors
-represent relationship kind and dim by opacity when outside the active
-neighborhood.
-The overview page does not repeat the graph's node/file detail panels.
-
-The force-graph renderer is shared with `/internal/reference`, where it acts as
-the live design-system reference for 3D overview plus 2D focus graph surfaces.
-Only graph content should vary between surfaces: views, nodes, links, and node
-detail metadata. The shell, focus gate, controls, legend, labels, side panel,
-and 2D focus behavior should stay consistent.
-
-Because `/internal/reference` now uses the same graph renderer, graph packages
-are no longer owned solely by Template Intelligence. `--no-intelligence`
-removes the intelligence surface, scripts, docs, and generated artifacts, but
-keeps the shared `Chip`, graph renderer, and graph dependencies while reference
-graph usage remains.
+shows the maintainer summary, index statistics, and benchmark tools. Detailed
+lookup remains available through the local `intelligence:query` command instead
+of shipping an interactive graph renderer in the template.
 
 ## Benchmarks
 

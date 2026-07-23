@@ -4,13 +4,7 @@
 import clsx from "clsx";
 import { motion } from "motion/react";
 import * as React from "react";
-import {
-	type CSSProperties,
-	type MouseEvent,
-	type ReactNode,
-	useEffect,
-	useRef,
-} from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
 import { Icon } from "@/components/ui/icons/Icon";
 import Portal from "@/components/ui/overlays/Portal";
@@ -23,10 +17,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/primitives/Card";
-import { Panel } from "@/components/ui/primitives/Panel";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
-type ModalShellProps = {
+export type ModalShellProps = {
 	ariaLabel?: string;
 	onClose: () => void;
 	children: ReactNode;
@@ -38,13 +31,9 @@ type ModalShellProps = {
 		scale?: boolean;
 	};
 	disableWhenReducedMotion?: boolean;
-
-	// NEW
-	panelClassName?: string;
-	panelWrapperClassName?: string;
-	backdropClassName?: string;
-	panelStyle?: CSSProperties;
 	isTopMost?: boolean;
+	layerIndex?: number;
+	placement?: "center" | "top";
 };
 
 type ModalShellContextValue = { onClose: () => void };
@@ -91,6 +80,7 @@ export function ModalHeader({
 					{showCloseButton && closeHandler ? (
 						<Button
 							aria-label={closeLabel}
+							autoFocus
 							className="text-foreground/60 hover:text-foreground"
 							disabled={closeDisabled}
 							onClick={closeHandler}
@@ -166,9 +156,6 @@ export function ModalDescription(
 const overlayTransition = resolveMotionTransition("overlay");
 const panelTransition = resolveMotionTransition("disclosure");
 
-const DEFAULT_PANEL =
-	"flex will-change-opacity max-w-full w-[450px] max-w-lg overflow-hidden overflow-y-auto";
-
 const FOCUSABLE_SELECTOR = [
 	"a[href]",
 	"button:not([disabled])",
@@ -184,6 +171,8 @@ function getFocusableElements(root: HTMLElement) {
 	).filter(
 		(node) =>
 			node.tabIndex >= 0 &&
+			!node.hidden &&
+			node.getClientRects().length > 0 &&
 			node.getAttribute("aria-hidden") !== "true" &&
 			!node.closest("[inert]"),
 	);
@@ -197,11 +186,9 @@ export function ModalShell({
 	panelDirection = "down",
 	animate = { y: true, opacity: true },
 	disableWhenReducedMotion = true,
-	panelClassName,
-	panelWrapperClassName,
-	backdropClassName,
-	panelStyle,
 	isTopMost = true,
+	layerIndex,
+	placement = "center",
 }: ModalShellProps) {
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
 	const previousActiveElementRef = useRef<HTMLElement | null>(null);
@@ -254,22 +241,19 @@ export function ModalShell({
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [isTopMost, onClose]);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		previousActiveElementRef.current =
 			document.activeElement instanceof HTMLElement
 				? document.activeElement
 				: null;
 
-		const frame = window.requestAnimationFrame(() => {
-			const wrapper = wrapperRef.current;
-			if (!wrapper || !isTopMost) return;
-
+		const wrapper = wrapperRef.current;
+		if (wrapper && isTopMost) {
 			const [firstFocusable] = getFocusableElements(wrapper);
 			(firstFocusable ?? wrapper).focus({ preventScroll: true });
-		});
+		}
 
 		return () => {
-			window.cancelAnimationFrame(frame);
 			const previous = previousActiveElementRef.current;
 			if (previous && document.contains(previous)) {
 				previous.focus({ preventScroll: true });
@@ -334,16 +318,6 @@ export function ModalShell({
 		? { ...(animateOpacity ? { opacity: 0 } : {}) }
 		: undefined;
 
-	const panelWrapperInitial = motionAllowed
-		? { ...(animateOpacity ? { opacity: 0 } : {}) }
-		: undefined;
-	const panelWrapperAnimate = motionAllowed
-		? { ...(animateOpacity ? { opacity: 1 } : {}) }
-		: undefined;
-	const panelWrapperExit = motionAllowed
-		? { ...(animateOpacity ? { opacity: 0 } : {}) }
-		: undefined;
-
 	const panelInitial = motionAllowed
 		? {
 				...(animateOpacity ? { opacity: 0 } : {}),
@@ -378,66 +352,47 @@ export function ModalShell({
 
 	return (
 		<Portal target={portalTargetId}>
-			<div className="fixed top-0 pointer-events-auto w-full vh-max inset-0 z-80">
-				<motion.div
+			<div
+				className={clsx(
+					"fixed inset-0 z-80 flex w-full justify-center overflow-hidden overscroll-contain px-4 sm:px-6",
+					placement === "top"
+						? "items-start py-[9vh]"
+						: "items-center py-4 sm:py-6",
+				)}
+				data-modal-shell=""
+				style={layerIndex ? { zIndex: layerIndex } : undefined}
+			>
+				<motion.button
+					aria-label="Close modal"
 					key="modal-backdrop"
-					className={[
-						"absolute will-change-opacity inset-0 z-[81] bg-gradient-to-b from-black/25 to-black/70",
-						backdropClassName,
-					]
-						.filter(Boolean)
-						.join(" ")}
+					className="absolute inset-0 bg-background/20 backdrop-blur-md will-change-opacity"
 					initial={backdropInitial}
 					animate={backdropAnimate}
 					exit={backdropExit}
 					transition={motionAllowed ? overlayTransition : undefined}
 					onClick={onClose}
+					type="button"
 				/>
 
 				<motion.div
 					ref={wrapperRef}
-					key="modal-panel-wrapper"
-					className={[
-						"relative z-[82] flex will-change-opacity h-full w-full items-center justify-center p-[50px]",
-						panelWrapperClassName,
-					]
-						.filter(Boolean)
-						.join(" ")}
-					initial={panelWrapperInitial}
-					animate={panelWrapperAnimate}
-					exit={panelWrapperExit}
-					transition={motionAllowed ? overlayTransition : undefined}
+					key="modal-content-wrapper"
+					className="relative flex max-h-[calc(100dvh-2rem)] w-full min-w-0 justify-center will-change-transform sm:max-h-[calc(100dvh-3rem)]"
+					initial={panelInitial}
+					animate={panelAnimate}
+					exit={panelExit}
+					transition={motionAllowed ? panelTransition : undefined}
 					aria-modal="true"
 					role="dialog"
 					aria-label={ariaLabel}
 					tabIndex={-1}
-					onClick={onClose}
+					onClick={(event) => {
+						if (event.target === event.currentTarget) onClose();
+					}}
 				>
-					<Panel
-						as={motion.div}
-						display="flex"
-						columns={1}
-						className={[DEFAULT_PANEL, panelClassName]
-							.filter(Boolean)
-							.join(" ")}
-						style={panelStyle}
-						// transition={
-						// \tmotionAllowed
-						// \t\t? { ...panelTransition, delay: 0.04 }
-						// \t\t: undefined
-						// }
-						initial={panelInitial}
-						animate={panelAnimate}
-						exit={panelExit}
-						transition={motionAllowed ? panelTransition : undefined}
-						onClick={(event: MouseEvent<HTMLDivElement>) =>
-							event.stopPropagation()
-						}
-					>
-						<ModalShellContext.Provider value={{ onClose }}>
-							{children}
-						</ModalShellContext.Provider>
-					</Panel>
+					<ModalShellContext.Provider value={{ onClose }}>
+						{children}
+					</ModalShellContext.Provider>
 				</motion.div>
 			</div>
 		</Portal>

@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import type * as React from "react";
-import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { Text } from "@/components/ui/primitives/Text";
 
 function DashboardPageHeaderRoot({
@@ -37,11 +36,32 @@ function DashboardPageHeaderRoot({
 	);
 }
 
-function DashboardPageHeaderSkeleton() {
+function DashboardPageHeaderSkeleton({
+	action,
+	description,
+	title = "Dashboard page",
+}: {
+	action?: React.ReactNode;
+	description?: React.ReactNode;
+	title?: React.ReactNode;
+}) {
 	return (
-		<div className="grid gap-2">
-			<Skeleton className="h-8 w-48" />
-			<Skeleton className="h-4 w-full max-w-lg" />
+		<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+			<div className="grid min-w-0 gap-1">
+				<Text.Skeleton
+					as="h1"
+					className="min-w-0 truncate"
+					variant="headingPage"
+				>
+					{title}
+				</Text.Skeleton>
+				{description ? (
+					<Text.Skeleton tone="muted" variant="support">
+						{description}
+					</Text.Skeleton>
+				) : null}
+			</div>
+			{action ? <div className="shrink-0">{action}</div> : null}
 		</div>
 	);
 }

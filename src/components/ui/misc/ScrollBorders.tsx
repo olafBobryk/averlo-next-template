@@ -143,7 +143,7 @@ const ScrollBordersRoot = React.forwardRef<HTMLDivElement, ScrollBordersProps>(
 				{...rest}
 			>
 				{children}
-				<span className="max-h-0 h-0 relative w-full">
+				<span className="relative block h-0 max-h-0 w-full">
 					<AnimatePresence initial={false}>
 						{isHovered && !showBottomBorder && hasOverflow && showBackToTop ? (
 							<motion.div
@@ -159,10 +159,13 @@ const ScrollBordersRoot = React.forwardRef<HTMLDivElement, ScrollBordersProps>(
 								}
 							>
 								<Button
-									size="sm"
-									variant="ghost"
+									aria-label="Back to top"
+									hitArea="touch"
 									leadingIcon="arrow-up"
 									onClick={handleScrollToTop}
+									size="icon-sm"
+									title="Back to top"
+									variant="primary"
 								/>
 							</motion.div>
 						) : null}

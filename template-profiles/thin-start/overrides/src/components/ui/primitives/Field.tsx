@@ -1,6 +1,10 @@
 import clsx from "clsx";
 import type * as React from "react";
-import { InputFrame } from "@/components/ui/primitives/InputFrame";
+import {
+	InputFrame,
+	type InputFrameSize,
+	type InputFrameSkeletonProps,
+} from "@/components/ui/primitives/InputFrame";
 import { Text } from "@/components/ui/primitives/Text";
 
 type FieldProps = {
@@ -87,17 +91,41 @@ function FieldRoot({
 }
 
 function FieldSkeleton({
+	children = "Input",
 	className,
 	description,
+	fullWidth = true,
+	inputClassName,
 	label,
-}: Pick<FieldProps, "className" | "description" | "label">) {
+	radius,
+	required,
+	size,
+}: Pick<FieldProps, "className" | "description" | "label" | "required"> & {
+	children?: React.ReactNode;
+	fullWidth?: boolean;
+	inputClassName?: string;
+	radius?: InputFrameSkeletonProps["radius"];
+	size?: InputFrameSize;
+}) {
 	return (
 		<div aria-hidden className={clsx("flex flex-col gap-3", className)}>
-			{label ? <Text.Skeleton>{label}</Text.Skeleton> : null}
+			{label ? (
+				<Text.Skeleton>
+					{label}
+					{required ? " *" : ""}
+				</Text.Skeleton>
+			) : null}
 			{description ? (
 				<Text.Skeleton variant="support">{description}</Text.Skeleton>
 			) : null}
-			<InputFrame.Skeleton fullWidth>Input</InputFrame.Skeleton>
+			<InputFrame.Skeleton
+				className={inputClassName}
+				fullWidth={fullWidth}
+				radius={radius}
+				size={size}
+			>
+				{children}
+			</InputFrame.Skeleton>
 		</div>
 	);
 }

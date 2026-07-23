@@ -10,6 +10,15 @@ type ChoiceIndicatorBaseProps = {
 	className?: string;
 };
 
+export type ChoiceIndicatorSize = "compact" | "default";
+
+type ChoiceIndicatorMultiProps = ChoiceIndicatorBaseProps & {
+	size?: ChoiceIndicatorSize;
+};
+
+const uncheckedIndicatorSurface =
+	"bg-input group-hover:bg-input/80 dark:group-hover:bg-foreground/25 group-data-[tone=error]/field:bg-danger/15";
+
 export function ChoiceIndicatorRadio({
 	checked,
 	disabled,
@@ -18,31 +27,22 @@ export function ChoiceIndicatorRadio({
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator flex h-[22px] w-[22px] items-center justify-center rounded-full bg-background group-hover:bg-background-hover group-active:bg-background-active motion-micro",
+				"choice-field-indicator relative size-[22px] shrink-0 overflow-hidden rounded-full transition-colors motion-micro",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",
-				!checked ? "group-hover:scale-[1.05] group-active:scale-[0.95]" : "",
+				checked
+					? "bg-primary group-hover:bg-primary-hover group-active:bg-primary-active"
+					: uncheckedIndicatorSurface,
 				className,
 			)}
 		>
 			<div
 				className={clsx(
-					"flex h-[22px] w-[22px] items-center justify-center rounded-full border transition-colors motion-interactive",
-					checked
-						? "border-white/15 bg-primary"
-						: "border-foreground/20 group-data-[tone=error]/field:border-danger",
+					"absolute inset-[5px] size-3 rounded-full bg-primary-foreground transition-[scale] motion-interactive",
+					checked ? "scale-100" : "scale-0",
 				)}
-			>
-				<div
-					className={clsx(
-						"h-[12px] w-[12px] rounded-full transition-[transform,opacity] motion-interactive",
-						checked
-							? "scale-100 bg-primary-foreground"
-							: "scale-0 bg-transparent",
-					)}
-				/>
-			</div>
+			/>
 		</div>
 	);
 }
@@ -51,44 +51,34 @@ export function ChoiceIndicatorMulti({
 	checked,
 	disabled,
 	className,
-}: ChoiceIndicatorBaseProps) {
+	size = "default",
+}: ChoiceIndicatorMultiProps) {
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator flex h-[22px] w-[22px] items-center justify-center rounded-[8px] group-hover:bg-background-hover group-hover:scale-[1.05] group-active:bg-background-active group-active:scale-[0.95] motion-micro",
+				"choice-field-indicator relative shrink-0 overflow-hidden transition-colors motion-micro",
+				size === "compact"
+					? "size-[18px] rounded-[6px]"
+					: "size-[22px] rounded-[8px]",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",
+				checked
+					? "bg-primary group-hover:bg-primary-hover group-active:bg-primary-active"
+					: uncheckedIndicatorSurface,
 				className,
 			)}
 		>
-			<div
+			<Icon
+				aria-hidden
+				name="check"
+				size="sm"
 				className={clsx(
-					"flex h-[22px] w-[22px] rounded-[8px] border transition-all motion-interactive overflow-hidden",
-					checked
-						? "border-white/15 bg-primary"
-						: "border-foreground/20 group-data-[tone=error]/field:border-danger",
-					disabled ? "opacity-60" : "opacity-100",
+					"absolute text-primary-foreground transition-[scale] motion-interactive",
+					size === "compact" ? "inset-[3px]" : "inset-[5px]",
+					checked ? "scale-100" : "scale-0",
 				)}
-			>
-				<div
-					className={clsx(
-						"w-full h-full flex items-center justify-center motion-micro transition-colors",
-						checked
-							? "group-hover:bg-primary-hover group-active:bg-primary-active"
-							: "",
-					)}
-				>
-					<Icon
-						name="check"
-						size="sm"
-						className={clsx(
-							"text-primary-foreground transition-transform motion-interactive",
-							checked ? "scale-100" : "scale-0",
-						)}
-					/>
-				</div>
-			</div>
+			/>
 		</div>
 	);
 }
@@ -101,38 +91,24 @@ export function ChoiceIndicatorToggle({
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator flex h-[26px] min-w-[42px] items-center justify-center rounded-full overflow-hidden bg-background group-hover:bg-background-hover group-active:bg-background-active group-hover:scale-[1.05] group-active:scale-[0.95] motion-micro",
+				"choice-field-indicator relative h-[26px] min-w-[42px] shrink-0 overflow-hidden rounded-full transition-colors motion-micro",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",
+				checked
+					? "bg-primary group-hover:bg-primary-hover group-active:bg-primary-active"
+					: uncheckedIndicatorSurface,
 				className,
 			)}
 		>
 			<div
 				className={clsx(
-					"relative flex h-[26px] min-w-[42px] items-center rounded-full overflow-hidden border transition-colors motion-interactive",
+					"absolute left-1 top-1 h-[18px] w-[22px] rounded-full transition-[background-color,translate,box-shadow] motion-interactive",
 					checked
-						? "border-white/15 bg-primary"
-						: "border-foreground/20 group-data-[tone=error]/field:border-danger",
-					disabled ? "opacity-60" : "opacity-100",
+						? "translate-x-3 bg-primary-foreground shadow-sm"
+						: "translate-x-0 bg-muted-foreground/55 dark:bg-muted-foreground",
 				)}
-			>
-				<div
-					className={clsx(
-						"w-full h-full flex items-center justify-center motion-micro transition-colors",
-						checked
-							? "group-hover:bg-primary-hover group-active:bg-primary-active"
-							: "",
-					)}
-				>
-					<div
-						className={clsx(
-							"absolute left-[3px] top-[3px] h-[18px] w-[22px] border border-foreground/20 rounded-full bg-background shadow-sm transition-transform motion-interactive",
-							checked ? "translate-x-[12px] border-none" : "translate-x-0",
-						)}
-					/>
-				</div>
-			</div>
+			/>
 		</div>
 	);
 }

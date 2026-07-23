@@ -2,20 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Icon } from "@/components/ui/icons/Icon";
+import { focusRing } from "@/components/ui/foundations/focus";
+import { Icon, type IconName } from "@/components/ui/icons/Icon";
+import { ModalCard } from "@/components/ui/overlays/modal/ModalCard";
 import {
-	ModalContent,
 	ModalDescription,
-	ModalHeader,
 	ModalShell,
 	ModalTitle,
 } from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
+import { getDropdownOptionClassName } from "@/components/ui/primitives/dropdownStyles";
 import {
 	InputFrame,
 	inputVariants,
 } from "@/components/ui/primitives/InputFrame";
-import { Text } from "@/components/ui/primitives/Text";
 import type { Organization } from "@/lib/auth/contracts";
 import {
 	type DashboardCapability,
@@ -27,10 +27,18 @@ export type DashboardContextualCommand = {
 	capability?: DashboardCapability;
 	description: string;
 	href?: string;
+	icon?: IconName;
 	id: string;
 	keywords?: readonly string[];
 	label: string;
+	parentId?: string;
 	run?: () => void;
+};
+
+type DashboardCommandTreeNode = {
+	children: DashboardCommandTreeNode[];
+	command: DashboardContextualCommand;
+	directlyMatched: boolean;
 };
 
 type DashboardCommandContextValue = {
@@ -41,8 +49,206 @@ type DashboardCommandContextValue = {
 	) => () => void;
 };
 
+type DashboardCommandRegistration = {
+	commands: readonly DashboardContextualCommand[];
+	ownerId: string;
+};
+
 const DashboardCommandContext =
 	React.createContext<DashboardCommandContextValue | null>(null);
+
+function getOptionId(commandId: string) {
+	return `dashboard-command-option-${commandId.replaceAll(".", "-")}`;
+}
+
+function getNextCommandId({
+	currentId,
+	direction,
+	resultIds,
+}: {
+	currentId?: string;
+	direction: "next" | "previous";
+	resultIds: string[];
+}) {
+	if (resultIds.length === 0) return undefined;
+	if (!currentId) return resultIds[0];
+	const currentIndex = resultIds.indexOf(currentId);
+	if (currentIndex === -1) return resultIds[0];
+	const offset = direction === "next" ? 1 : -1;
+	return resultIds[
+		(currentIndex + offset + resultIds.length) % resultIds.length
+	];
+}
+
+function collapseRedundantCommandTreeContext(
+	nodes: DashboardCommandTreeNode[],
+): DashboardCommandTreeNode[] {
+	const collapsedNodes = nodes.map((node) => ({
+		...node,
+		children: collapseRedundantCommandTreeContext(node.children),
+	}));
+	if (collapsedNodes.length !== 1) return collapsedNodes;
+	const [onlyNode] = collapsedNodes;
+	if (!onlyNode || onlyNode.directlyMatched || onlyNode.children.length === 0) {
+		return collapsedNodes;
+	}
+	return onlyNode.children;
+}
+
+function buildDashboardCommandTree({
+	commands,
+	matchedCommands,
+}: {
+	commands: DashboardContextualCommand[];
+	matchedCommands: DashboardContextualCommand[];
+}) {
+	const commandById = new Map(commands.map((command) => [command.id, command]));
+	const directlyMatchedIds = new Set(
+		matchedCommands.map((command) => command.id),
+	);
+	const includedIds = new Set<string>();
+	for (const matchedCommand of matchedCommands) {
+		let current: DashboardContextualCommand | undefined = matchedCommand;
+		const visited = new Set<string>();
+		while (current && !visited.has(current.id)) {
+			visited.add(current.id);
+			includedIds.add(current.id);
+			current = current.parentId
+				? commandById.get(current.parentId)
+				: undefined;
+		}
+	}
+	const treeNodeById = new Map<string, DashboardCommandTreeNode>();
+	for (const command of commands) {
+		if (!includedIds.has(command.id)) continue;
+		treeNodeById.set(command.id, {
+			children: [],
+			command,
+			directlyMatched: directlyMatchedIds.has(command.id),
+		});
+	}
+	const roots: DashboardCommandTreeNode[] = [];
+	for (const command of commands) {
+		const treeNode = treeNodeById.get(command.id);
+		if (!treeNode) continue;
+		const parent = command.parentId
+			? treeNodeById.get(command.parentId)
+			: undefined;
+		if (parent) parent.children.push(treeNode);
+		else roots.push(treeNode);
+	}
+	return collapseRedundantCommandTreeContext(roots);
+}
+
+function DashboardCommandTree({
+	activeCommandId,
+	executeCommand,
+	nodes,
+	onActiveCommandChange,
+}: {
+	activeCommandId?: string;
+	executeCommand: (command: DashboardContextualCommand) => void;
+	nodes: DashboardCommandTreeNode[];
+	onActiveCommandChange: (commandId: string) => void;
+}) {
+	return (
+		<div className="grid gap-1">
+			{nodes.map((node) => (
+				<DashboardCommandTreeItem
+					activeCommandId={activeCommandId}
+					executeCommand={executeCommand}
+					key={node.command.id}
+					onActiveCommandChange={onActiveCommandChange}
+					treeNode={node}
+				/>
+			))}
+		</div>
+	);
+}
+
+function DashboardCommandTreeItem({
+	activeCommandId,
+	executeCommand,
+	onActiveCommandChange,
+	treeNode,
+}: {
+	activeCommandId?: string;
+	executeCommand: (command: DashboardContextualCommand) => void;
+	onActiveCommandChange: (commandId: string) => void;
+	treeNode: DashboardCommandTreeNode;
+}) {
+	const { command, directlyMatched } = treeNode;
+	const isActive = activeCommandId === command.id;
+	const rowContent = (
+		<>
+			<span
+				className={[
+					"grid size-9 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors motion-interactive",
+					directlyMatched
+						? "group-hover:text-foreground group-focus-visible:text-foreground group-data-[active=true]:text-foreground"
+						: undefined,
+				]
+					.filter(Boolean)
+					.join(" ")}
+			>
+				<Icon className="!size-[18px]" name={command.icon ?? "search"} />
+			</span>
+			<span className="grid min-w-0 gap-0.5">
+				<span className="block truncate font-medium text-foreground">
+					{command.label}
+				</span>
+				<span className="line-clamp-2 text-xs leading-4 text-muted-foreground">
+					{command.description}
+				</span>
+			</span>
+		</>
+	);
+
+	return (
+		<div className="grid gap-1" role="presentation">
+			{directlyMatched ? (
+				<Button
+					align="left"
+					aria-selected={isActive}
+					className={getDropdownOptionClassName({
+						active: isActive,
+						selected: isActive,
+						className:
+							"group !items-start !rounded-md !py-2 !pr-3 !pl-2 motion-interactive",
+					})}
+					contentClassName="gap-3"
+					data-active={isActive ? "true" : undefined}
+					data-command-result=""
+					id={getOptionId(command.id)}
+					onClick={() => executeCommand(command)}
+					onMouseDown={(event) => event.preventDefault()}
+					onMouseMove={() => onActiveCommandChange(command.id)}
+					role="option"
+					size="none"
+					tabIndex={-1}
+					type="button"
+					variant="ghost"
+				>
+					{rowContent}
+				</Button>
+			) : (
+				<div className="flex items-start gap-3 rounded-md py-2 pr-3 pl-2 text-left text-sm">
+					{rowContent}
+				</div>
+			)}
+			{treeNode.children.length > 0 ? (
+				<div className="relative ml-4 grid gap-1 pl-5 before:absolute before:bottom-1 before:left-0 before:top-0 before:w-px before:bg-border">
+					<DashboardCommandTree
+						activeCommandId={activeCommandId}
+						executeCommand={executeCommand}
+						nodes={treeNode.children}
+						onActiveCommandChange={onActiveCommandChange}
+					/>
+				</div>
+			) : null}
+		</div>
+	);
+}
 
 function commandMatches(command: DashboardContextualCommand, query: string) {
 	const normalized = query.trim().toLowerCase();
@@ -64,10 +270,11 @@ export function DashboardCommandProvider({
 }) {
 	const router = useRouter();
 	const inputRef = React.useRef<HTMLInputElement>(null);
+	const [activeCommandId, setActiveCommandId] = React.useState<string>();
 	const [open, setOpen] = React.useState(false);
 	const [query, setQuery] = React.useState("");
 	const [registrations, setRegistrations] = React.useState(
-		new Map<symbol, readonly DashboardContextualCommand[]>(),
+		new Map<symbol, DashboardCommandRegistration>(),
 	);
 	const staticCommands = React.useMemo(
 		() => getDashboardNavigationCommands(capabilities),
@@ -75,24 +282,56 @@ export function DashboardCommandProvider({
 	);
 	const contextualCommands = React.useMemo(
 		() =>
-			[...registrations.values()]
-				.flat()
-				.filter((command) =>
-					hasDashboardCapability(capabilities, command.capability),
-				),
-		[capabilities, registrations],
+			[...registrations.values()].flatMap(({ commands, ownerId }) => {
+				const parentCommand = staticCommands
+					.filter(
+						(command) =>
+							command.id.startsWith("navigate.") &&
+							ownerId.startsWith(command.id.slice("navigate.".length)),
+					)
+					.sort((a, b) => b.id.length - a.id.length)[0];
+				return commands
+					.filter((command) =>
+						hasDashboardCapability(capabilities, command.capability),
+					)
+					.map((command) => ({
+						...command,
+						parentId: command.parentId ?? parentCommand?.id,
+					}));
+			}),
+		[capabilities, registrations, staticCommands],
 	);
 	const commands = React.useMemo(
 		() => [...contextualCommands, ...staticCommands],
 		[contextualCommands, staticCommands],
 	);
-	const filteredCommands = commands.filter((command) =>
-		commandMatches(command, query),
+	const filteredCommands = React.useMemo(
+		() => commands.filter((command) => commandMatches(command, query)),
+		[commands, query],
+	);
+	const resultIds = React.useMemo(
+		() => filteredCommands.map((command) => command.id),
+		[filteredCommands],
+	);
+	const effectiveActiveCommandId = resultIds.includes(activeCommandId ?? "")
+		? activeCommandId
+		: resultIds[0];
+	const activeCommand = filteredCommands.find(
+		(command) => command.id === effectiveActiveCommandId,
+	);
+	const commandTree = React.useMemo(
+		() =>
+			buildDashboardCommandTree({
+				commands,
+				matchedCommands: filteredCommands,
+			}),
+		[commands, filteredCommands],
 	);
 
 	const close = React.useCallback(() => {
 		setOpen(false);
 		setQuery("");
+		setActiveCommandId(undefined);
 	}, []);
 
 	React.useEffect(() => {
@@ -108,7 +347,17 @@ export function DashboardCommandProvider({
 
 	React.useEffect(() => {
 		if (!open) return;
-		const frame = window.requestAnimationFrame(() => inputRef.current?.focus());
+		let frame = 0;
+		let attempts = 0;
+		const focusInput = () => {
+			if (inputRef.current) {
+				inputRef.current.focus({ preventScroll: true });
+				return;
+			}
+			attempts += 1;
+			if (attempts < 4) frame = window.requestAnimationFrame(focusInput);
+		};
+		frame = window.requestAnimationFrame(focusInput);
 		return () => window.cancelAnimationFrame(frame);
 	}, [open]);
 
@@ -117,7 +366,7 @@ export function DashboardCommandProvider({
 			const token = Symbol(ownerId);
 			setRegistrations((current) => {
 				const next = new Map(current);
-				next.set(token, nextCommands);
+				next.set(token, { commands: nextCommands, ownerId });
 				return next;
 			});
 			return () => {
@@ -146,6 +395,37 @@ export function DashboardCommandProvider({
 		if (command.href) router.push(command.href);
 	}
 
+	function clearQuery() {
+		setQuery("");
+		setActiveCommandId(undefined);
+		inputRef.current?.focus();
+	}
+
+	function handleInputKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+		if (event.key === "Escape") {
+			event.preventDefault();
+			close();
+			return;
+		}
+		if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+			event.preventDefault();
+			setActiveCommandId((currentId) =>
+				getNextCommandId({
+					currentId: resultIds.includes(currentId ?? "")
+						? currentId
+						: effectiveActiveCommandId,
+					direction: event.key === "ArrowDown" ? "next" : "previous",
+					resultIds,
+				}),
+			);
+			return;
+		}
+		if (event.key === "Enter" && activeCommand) {
+			event.preventDefault();
+			execute(activeCommand);
+		}
+	}
+
 	return (
 		<DashboardCommandContext.Provider value={contextValue}>
 			{children}
@@ -153,54 +433,95 @@ export function DashboardCommandProvider({
 				<ModalShell
 					ariaLabel="Dashboard commands"
 					onClose={close}
-					panelClassName="w-[min(42rem,calc(100vw-2rem))] max-w-2xl"
-					panelWrapperClassName="items-start p-4 pt-[12vh] sm:p-8 sm:pt-[12vh]"
+					placement="top"
 				>
-					<ModalHeader>
-						<ModalTitle>Commands</ModalTitle>
-						<ModalDescription>
-							{organization.name} · navigation and current-page actions
-						</ModalDescription>
-					</ModalHeader>
-					<ModalContent className="grid gap-3 p-3">
-						<InputFrame fullWidth>
-							<Icon className="ml-3 text-muted-foreground" name="search" />
-							<input
-								aria-label="Search dashboard commands"
-								className={inputVariants({ hasStart: true })}
-								onChange={(event) => setQuery(event.target.value)}
-								placeholder="Search pages and actions"
-								ref={inputRef}
-								value={query}
-							/>
-						</InputFrame>
-						<div className="max-h-[min(55vh,30rem)] overflow-y-auto">
-							{filteredCommands.length > 0 ? (
-								<div className="grid gap-1" role="listbox">
-									{filteredCommands.map((command) => (
+					<ModalCard
+						background="transparent"
+						border="default"
+						className="max-h-[min(760px,82vh)] border-border/80 bg-popover/94 backdrop-blur-xl shadow-foreground/15"
+						maxWidth="2xl"
+						shadow="2xl"
+						style={{
+							backgroundColor:
+								"color-mix(in oklab, var(--color-popover) 94%, transparent)",
+						}}
+					>
+						<div className="sr-only">
+							<ModalTitle>Commands</ModalTitle>
+							<ModalDescription>
+								{organization.name} · navigation and current-page actions
+							</ModalDescription>
+						</div>
+						<div className="flex max-h-[min(760px,82vh)] flex-col">
+							<div className="border-b border-border/75 p-3">
+								<InputFrame
+									contentClassName="flex min-w-0 items-center"
+									fullWidth
+									start={
+										<Icon className="text-muted-foreground" name="search" />
+									}
+								>
+									<input
+										aria-activedescendant={
+											effectiveActiveCommandId
+												? getOptionId(effectiveActiveCommandId)
+												: undefined
+										}
+										aria-controls="dashboard-command-results"
+										aria-label="Search dashboard commands"
+										autoComplete="off"
+										className={inputVariants({
+											hasEnd: Boolean(query),
+											hasStart: true,
+										})}
+										onChange={(event) => {
+											setQuery(event.target.value);
+											setActiveCommandId(undefined);
+										}}
+										onKeyDown={handleInputKeyDown}
+										placeholder="Search pages and actions"
+										ref={inputRef}
+										type="text"
+										value={query}
+									/>
+									{query ? (
 										<button
-											className="grid w-full gap-0.5 rounded-md px-3 py-2 text-left transition-colors motion-interactive hover:bg-background-hover focus-visible:bg-background-hover"
-											key={command.id}
-											onClick={() => execute(command)}
-											role="option"
+											aria-label="Clear search"
+											className={[
+												"mr-2 grid size-7 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors motion-interactive hover:bg-background-hover hover:text-foreground",
+												focusRing.visibleDefault,
+											]
+												.filter(Boolean)
+												.join(" ")}
+											onClick={clearQuery}
 											type="button"
 										>
-											<Text as="span" variant="bodyStrong">
-												{command.label}
-											</Text>
-											<Text as="span" tone="muted" variant="caption">
-												{command.description}
-											</Text>
+											<Icon className="!size-4" name="close" />
 										</button>
-									))}
-								</div>
-							) : (
-								<Text className="px-3 py-8 text-center" tone="muted">
-									No matching commands.
-								</Text>
-							)}
+									) : null}
+								</InputFrame>
+							</div>
+							<div
+								className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2"
+								id="dashboard-command-results"
+							>
+								{filteredCommands.length > 0 ? (
+									<div aria-label="Dashboard commands" role="listbox">
+										<DashboardCommandTree
+											activeCommandId={effectiveActiveCommandId}
+											executeCommand={execute}
+											nodes={commandTree}
+											onActiveCommandChange={setActiveCommandId}
+										/>
+									</div>
+								) : (
+									<p className="px-3 py-8 text-center text-sm text-muted-foreground">
+										No matching commands.
+									</p>
+								)}
+							</div>
 						</div>
-					</ModalContent>
+					</ModalCard>
 				</ModalShell>
 			) : null}
 		</DashboardCommandContext.Provider>
@@ -211,19 +532,31 @@ export function DashboardCommandTrigger() {
 	const context = React.useContext(DashboardCommandContext);
 	if (!context) return null;
 	return (
-		<Button
-			aria-label="Open dashboard commands"
-			className="h-10 min-w-10 gap-2 px-3"
-			leadingIcon="search"
-			onClick={context.open}
-			size="sm"
-			variant="secondary"
-		>
-			<span className="hidden sm:inline">Search</span>
-			<kbd className="hidden rounded border border-border bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground md:inline">
-				⌘K
-			</kbd>
-		</Button>
+		<>
+			<InputFrame className="hidden !w-[280px] min-w-[280px] max-w-[280px] bg-input/50 md:flex">
+				<button
+					aria-label="Open dashboard commands"
+					className="flex h-full w-full min-w-0 items-center gap-2 px-3 text-left text-sm text-muted-foreground outline-none transition-colors motion-interactive hover:text-foreground"
+					onClick={context.open}
+					type="button"
+				>
+					<Icon className="!size-4 shrink-0" name="search" />
+					<span className="min-w-0 flex-1 truncate">Search</span>
+					<span className="inline-flex shrink-0 items-center text-2xs leading-none text-muted-foreground">
+						⌘K
+					</span>
+				</button>
+			</InputFrame>
+			<Button
+				aria-label="Open dashboard commands"
+				className="md:hidden"
+				onClick={context.open}
+				size="icon-sm"
+				variant="ghost"
+			>
+				<Icon className="!size-4" name="search" />
+			</Button>
+		</>
 	);
 }
 

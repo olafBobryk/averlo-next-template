@@ -1,10 +1,17 @@
 "use client";
 
 import clsx from "clsx";
+import { motion } from "motion/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import * as React from "react";
 import Logo from "@/components/branding/Logo";
+import {
+	instantTransition,
+	resolveMotionTransition,
+} from "@/components/ui/foundations/motionTiming";
+import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import {
 	dashboardDebugEnabled,
 	isDashboardDebugState,
@@ -19,12 +26,109 @@ import {
 } from "../commands/DashboardCommandProvider";
 import { DashboardDebugMenu } from "../debug/DashboardDebugMenu";
 import { DashboardDebugStateView } from "../debug/DashboardDebugStateView";
+import { ReportIssueModal } from "../feedback/ReportIssueModal";
 import { useDashboardAuth } from "../providers/DashboardAuthProvider";
-import { useDashboardSettingsContext } from "../providers/DashboardSettingsProvider";
 import { DashboardAccountMenu } from "./DashboardAccountMenu";
+import { DashboardOrganizationSwitcher } from "./DashboardOrganizationSwitcher";
 import { DashboardSidebarNav } from "./DashboardSidebarNav";
 
 const forceLoadingStorageKey = "averlo-dashboard:force-loading";
+const footerLayoutTransition = resolveMotionTransition("overlay", {
+	distance: "near",
+	intensity: "subtle",
+	surface: "flat",
+});
+
+function DashboardFooterActions({
+	collapsed,
+	currentRoute,
+	onNavigate,
+	platformAdmin,
+}: {
+	collapsed: boolean;
+	currentRoute: string;
+	onNavigate: () => void;
+	platformAdmin: boolean;
+}) {
+	const { openModal } = useModal();
+	const motionAllowed = useMotionAllowed(true);
+
+	function openReportIssue() {
+		openModal(
+			({ close, setCloseDisabled }) => (
+				<ReportIssueModal
+					currentRoute={currentRoute}
+					onClose={close}
+					onCloseDisabledChange={setCloseDisabled}
+				/>
+			),
+			{
+				ariaLabel: "Report issue",
+				cardProps: { maxWidth: "xl" },
+				id: "dashboard-report-issue",
+			},
+		);
+		onNavigate();
+	}
+
+	const actions = [
+		{
+			href: "/dashboard/support",
+			icon: "question",
+			id: "support",
+			label: "Support",
+		},
+		{
+			icon: "flag",
+			id: "report",
+			label: "Report issue",
+			onClick: openReportIssue,
+		},
+		...(platformAdmin
+			? [
+					{
+						href: "/dashboard/platform",
+						icon: "shield",
+						id: "platform",
+						label: "Manage platform",
+					},
+				]
+			: []),
+	] as const;
+
+	return (
+		<div
+			className={clsx(
+				"flex w-full items-center gap-1",
+				collapsed ? "flex-col" : "flex-row flex-wrap justify-start",
+			)}
+		>
+			{actions.map((action) => (
+				<motion.span
+					className="inline-flex"
+					key={action.id}
+					layout="position"
+					transition={
+						motionAllowed ? footerLayoutTransition : instantTransition
+					}
+				>
+					<Button
+						aria-label={action.label}
+						className="!text-muted-foreground hover:!text-sidebar-accent-foreground"
+						href={"href" in action ? action.href : undefined}
+						iconSize={20}
+						leadingIcon={action.icon}
+						onClick={"onClick" in action ? action.onClick : () => onNavigate()}
+						size="icon"
+						title={action.label}
+						type={"href" in action ? undefined : "button"}
+						variant="ghost"
+					/>
+				</motion.span>
+			))}
+		</div>
+	);
+}
 
 export function DashboardFrame({
 	children,
@@ -33,15 +137,14 @@ export function DashboardFrame({
 }>) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const { membership, organization } = useDashboardAuth();
-	const { dashboardAppearance } = useDashboardSettingsContext();
+	const { membership, organization, user } = useDashboardAuth();
 	const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 	const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
 	const [forceLoading, setForceLoading] = React.useState(false);
 	const surface = getDashboardSurface(pathname);
 	const capabilities = React.useMemo(
-		() => getDashboardCapabilities(membership.role),
-		[membership.role],
+		() => getDashboardCapabilities(membership.role, user?.platformRole ?? null),
+		[membership.role, user?.platformRole],
 	);
 	const debugStateValue = searchParams.get("debug-state");
 	const debugState =
@@ -50,18 +153,7 @@ export function DashboardFrame({
 			: forceLoading
 				? "loading"
 				: null;
-
-	React.useEffect(() => {
-		const { body } = document;
-		const hadDarkClass = body.classList.contains("dark");
-		const previousColorScheme = body.style.colorScheme;
-		body.classList.toggle("dark", dashboardAppearance === "dark");
-		body.style.colorScheme = dashboardAppearance;
-		return () => {
-			body.classList.toggle("dark", hadDarkClass);
-			body.style.colorScheme = previousColorScheme;
-		};
-	}, [dashboardAppearance]);
+	const currentRoute = `${pathname}${searchParams.size ? `?${searchParams.toString()}` : ""}`;
 
 	React.useEffect(() => {
 		try {
@@ -72,6 +164,11 @@ export function DashboardFrame({
 			setForceLoading(false);
 		}
 	}, []);
+
+	React.useEffect(() => {
+		if (!pathname) return;
+		setMobileSidebarOpen(false);
+	}, [pathname]);
 
 	function handleForceLoadingChange(value: boolean) {
 		setForceLoading(value);
@@ -122,40 +219,63 @@ export function DashboardFrame({
 							/>
 						) : null}
 						<Button
-							aria-expanded={
-								mobileSidebarOpen || (!sidebarCollapsed && !mobileSidebarOpen)
-							}
+							aria-expanded={mobileSidebarOpen}
 							aria-label={
-								sidebarCollapsed ? "Expand sidebar" : "Toggle sidebar"
+								mobileSidebarOpen ? "Collapse sidebar" : "Open sidebar"
 							}
-							className="!size-10 !p-0"
-							leadingIcon={sidebarCollapsed ? "plus" : "menu"}
-							onClick={() => {
-								if (window.matchMedia("(min-width: 1024px)").matches) {
-									setSidebarCollapsed((current) => !current);
-									return;
-								}
-								setMobileSidebarOpen((current) => !current);
-							}}
+							className="!size-10 !p-0 lg:hidden"
+							leadingIcon={mobileSidebarOpen ? "sidebar-collapse" : "menu"}
+							onClick={() => setMobileSidebarOpen((current) => !current)}
+							size="icon-sm"
+							variant="ghost"
+						/>
+						<Button
+							aria-expanded={!sidebarCollapsed}
+							aria-label={
+								sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+							}
+							className="!size-10 !p-0 max-lg:hidden"
+							leadingIcon={sidebarCollapsed ? "menu" : "sidebar-collapse"}
+							onClick={() => setSidebarCollapsed((current) => !current)}
 							size="icon-sm"
 							variant="ghost"
 						/>
 					</div>
-					<div className="min-h-0 flex-1 overflow-y-auto px-2 py-4 lg:px-3">
-						<DashboardSidebarNav
-							collapsed={sidebarCollapsed}
-							mobileExpanded={mobileSidebarOpen}
-							onNavigate={() => setMobileSidebarOpen(false)}
-						/>
+					<div className="min-h-0 flex-1 overflow-y-auto py-4">
+						<div className="grid">
+							<div className="border-b border-sidebar-border/70 px-2 pb-4 lg:px-3">
+								<DashboardOrganizationSwitcher
+									collapsed={sidebarCollapsed}
+									mobileExpanded={mobileSidebarOpen}
+									onNavigate={() => setMobileSidebarOpen(false)}
+								/>
+							</div>
+							<div className="px-2 pt-4 lg:px-3">
+								<DashboardSidebarNav
+									collapsed={sidebarCollapsed}
+									mobileExpanded={mobileSidebarOpen}
+									onNavigate={() => setMobileSidebarOpen(false)}
+								/>
+							</div>
+						</div>
 					</div>
-					<div className="flex min-h-16 items-center justify-center border-t border-sidebar-border/70 p-3 lg:justify-start">
-						<Button
-							aria-label="Open support"
-							href="/contact"
-							leadingIcon="flag"
-							size="icon-sm"
-							variant="secondary"
-						/>
+					<div className="border-t border-sidebar-border/70 p-3">
+						<div className="lg:hidden">
+							<DashboardFooterActions
+								collapsed={!mobileSidebarOpen}
+								currentRoute={currentRoute}
+								onNavigate={() => setMobileSidebarOpen(false)}
+								platformAdmin={user?.platformRole === "admin"}
+							/>
+						</div>
+						<div className="max-lg:hidden">
+							<DashboardFooterActions
+								collapsed={sidebarCollapsed}
+								currentRoute={currentRoute}
+								onNavigate={() => undefined}
+								platformAdmin={user?.platformRole === "admin"}
+							/>
+						</div>
 					</div>
 				</aside>
 				<div
@@ -175,10 +295,12 @@ export function DashboardFrame({
 						)}
 					>
 						<div className="flex min-h-16 items-center gap-3 px-4 sm:px-6">
-							<div className="flex min-w-0 flex-1 justify-end">
+							<div className="flex min-w-0 flex-1 items-center justify-end">
 								<DashboardCommandTrigger />
 							</div>
-							<DashboardAccountMenu />
+							<div className="ml-auto flex items-center gap-2">
+								<DashboardAccountMenu />
+							</div>
 						</div>
 					</header>
 					<main
@@ -191,18 +313,22 @@ export function DashboardFrame({
 						id="dashboard-main"
 						tabIndex={-1}
 					>
-						<div className="relative min-h-[calc(100svh-8rem)]">
+						<div className="relative min-h-[calc(100svh-8rem)] min-w-0">
 							<div
 								aria-hidden={debugState ? true : undefined}
-								className={
-									debugState ? "invisible pointer-events-none" : undefined
-								}
+								className={clsx(
+									"min-w-0",
+									debugState && "invisible pointer-events-none",
+								)}
 							>
 								{children}
 							</div>
 							{debugState ? (
 								<div className="absolute inset-0 bg-background">
-									<DashboardDebugStateView state={debugState} />
+									<DashboardDebugStateView
+										pathname={pathname}
+										state={debugState}
+									/>
 								</div>
 							) : null}
 						</div>

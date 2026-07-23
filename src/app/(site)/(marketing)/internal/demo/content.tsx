@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { type JSX, type Ref, useRef, useState } from "react";
+import { type JSX, type ReactNode, type Ref, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import {
 	MarkdownEditor,
 	MarkdownRenderer,
 } from "@/components/composites/markdown";
+import type { AppearancePreference } from "@/components/ui/foundations/appearance";
+import { useSettingsContext } from "@/components/ui/foundations/settingsContext";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import {
 	CopyStatusIcon,
@@ -28,11 +30,17 @@ import {
 	ChoiceIndicatorRadio,
 	ChoiceIndicatorToggle,
 } from "@/components/ui/input/choice/ChoiceIndicators";
-import { DateInput } from "@/components/ui/input/DateInput";
-import { DateRangeInput } from "@/components/ui/input/DateRangeInput";
-import { EditableTextInput } from "@/components/ui/input/EditableTextInput";
+import {
+	DateInput,
+	DateRangeInput,
+	type DateRangeValue,
+} from "@/components/ui/input/date";
 import { EmailInput } from "@/components/ui/input/EmailInput";
-import { FileUploadInput } from "@/components/ui/input/files/FileUploadInput";
+import { EditableTextField } from "@/components/ui/input/editable";
+import {
+	FileInput,
+	type FileInputItem,
+} from "@/components/ui/input/files/FileInput";
 import { MultiselectInput } from "@/components/ui/input/MultiselectInput";
 import { NumberInput } from "@/components/ui/input/NumberInput";
 import { PasswordInput } from "@/components/ui/input/PasswordInput";
@@ -40,10 +48,7 @@ import { PhoneInput } from "@/components/ui/input/PhoneInput";
 import { ProfilePictureInput } from "@/components/ui/input/ProfilePictureInput";
 import { RadioInput } from "@/components/ui/input/RadioInput";
 import { SelectInput } from "@/components/ui/input/SelectInput";
-import {
-	SignaturePad,
-	type SignaturePadHandle,
-} from "@/components/ui/input/SignaturePad";
+import { SignatureInput } from "@/components/ui/input/SignatureInput";
 import { SliderInput } from "@/components/ui/input/SliderInput";
 import { TextAreaInput } from "@/components/ui/input/TextAreaInput";
 import { TextInput } from "@/components/ui/input/TextInput";
@@ -52,11 +57,6 @@ import { UnitNumberInput } from "@/components/ui/input/UnitNumberInput";
 import { Accordion } from "@/components/ui/misc/Accordion";
 import { Chip } from "@/components/ui/misc/Chip";
 import { CopyField } from "@/components/ui/misc/CopyField";
-import { FileGallery } from "@/components/ui/misc/FileGallery";
-import {
-	FilePreview,
-	type FilePreviewItem,
-} from "@/components/ui/misc/FilePreview";
 import { HealthCheckIndicator } from "@/components/ui/misc/HealthCheckIndicator";
 import {
 	ImageSwitcher,
@@ -64,11 +64,11 @@ import {
 } from "@/components/ui/misc/ImageSwitcher";
 import { InspectableImage } from "@/components/ui/misc/InspectableImage";
 import { Loader } from "@/components/ui/misc/Loader";
-import { MoreMenuDropdown } from "@/components/ui/misc/MoreMenuDropdown";
-import { NullState } from "@/components/ui/misc/NullState";
 import { PaginationControls } from "@/components/ui/misc/PaginationControls";
-import { Pill } from "@/components/ui/misc/Pill";
-import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
+import {
+	ProfilePicture,
+	ProfilePictureStack,
+} from "@/components/ui/misc/ProfilePicture";
 import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
 import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
@@ -79,7 +79,6 @@ import { ErrorState } from "@/components/ui/misc/state/ErrorState";
 import { IdleState } from "@/components/ui/misc/state/IdleState";
 import { StateIndicator } from "@/components/ui/misc/state/State";
 import { Tooltip } from "@/components/ui/misc/Tooltip";
-import { Warning } from "@/components/ui/misc/Warning";
 import { Reveal } from "@/components/ui/motion";
 import {
 	ActiveStageHost,
@@ -91,6 +90,12 @@ import { ScrollHighlightText } from "@/components/ui/motion/ScrollHighlightText"
 import { ScrollLag } from "@/components/ui/motion/ScrollLag";
 import { ScrollParallax } from "@/components/ui/motion/ScrollParallax";
 import { ScrollWidth } from "@/components/ui/motion/ScrollWidth";
+import {
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/overlays/modal/ModalShell";
 import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirmationModal";
 import { useImageInspectModal } from "@/components/ui/overlays/modal/useImageInspectModal";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
@@ -149,12 +154,7 @@ export type DemoComponentItem = DemoItemBase & {
 	skeleton?: DemoSkeletonItem;
 };
 
-export type DemoUsageItem = DemoItemBase & {
-	kind: "usage";
-	snippet: string;
-};
-
-export type DemoItem = DemoComponentItem | DemoUsageItem;
+export type DemoItem = DemoComponentItem;
 
 export type DemoGroup = {
 	id: string;
@@ -179,6 +179,31 @@ const LISTBOX_OPTIONS = [
 	{ value: "gamma", content: "Gamma" },
 	{ value: "delta", content: "Delta" },
 ];
+
+function AppearanceSettingsDemo() {
+	const settings = useSettingsContext();
+	if (!settings)
+		return <Text tone="muted">Settings provider unavailable.</Text>;
+	return (
+		<div className="grid gap-3">
+			<SegmentedControl<AppearancePreference>
+				ariaLabel="Demo application appearance"
+				columns={3}
+				layout="columns"
+				onChange={settings.setAppearance}
+				options={[
+					{ label: "System", value: "system" },
+					{ label: "Light", value: "light" },
+					{ label: "Dark", value: "dark" },
+				]}
+				value={settings.appearance}
+			/>
+			<Text tone="muted" variant="caption">
+				Resolved appearance: {settings.resolvedAppearance}
+			</Text>
+		</div>
+	);
+}
 
 const mockHealthSuccessClient = createApiClient({
 	baseUrl: "https://demo.api.local",
@@ -230,7 +255,7 @@ const imageSwitcherDemoImages = [
 const MARKDOWN_RENDERER_DEMO_MARKDOWN = [
 	"# Markdown Renderer",
 	"",
-	"This renderer maps plain markdown onto the template design system and supports [internal links](/internal/demo), [external links](https://example.com), **strong copy**, _emphasis_, ~~deleted text~~, and `inlineCode`.",
+	"This renderer maps plain markdown onto the template design system and supports [internal links](/internal/demo), [external links](https://example.com), **strong copy**, _emphasis_, ~~deleted text~~, <u>underlined text</u>, and `inlineCode`.",
 	"",
 	"::button[Open Reference]{href=/internal/reference variant=primary size=md}",
 	"",
@@ -274,7 +299,40 @@ const MARKDOWN_RENDERER_DEMO_MARKDOWN = [
 	"| Tables | yes |",
 	"| Button directive | yes |",
 	"",
-	'Raw HTML remains escaped text: <script>alert("blocked")</script>',
+	"Raw HTML remains escaped text: &lt;unsafe-component&gt;blocked&lt;/unsafe-component&gt;",
+].join("\n");
+
+const MARKDOWN_EDITOR_DEMO_MARKDOWN = [
+	"## Project note",
+	"",
+	"Draft **rich content**, _emphasis_, ~~revisions~~, and `inline code` through the application toolbar.",
+	"",
+	"> The rich canvas and rendered output share the same stored Markdown string.",
+	"",
+	"- Ordinary bullet",
+	"- Another ordinary bullet",
+	"",
+	"Checklist:",
+	"",
+	"- [x] Confirm the source-owned toolbar",
+	"- [ ] Review the current-system adaptations",
+	"",
+	"```ts",
+	"const density = 'shared';",
+	"```",
+	"",
+	"| Surface | State |",
+	"| --- | --- |",
+	"| Editor | Populated |",
+	"| Renderer | Synchronized |",
+	"",
+	"::button[Open Reference]{href=/internal/reference variant=primary tone=default size=md}",
+].join("\n");
+
+const MARKDOWN_EDITOR_INVALID_MARKDOWN = [
+	"## Source fallback",
+	"",
+	"<unclosed-component",
 ].join("\n");
 
 const activeStageDemoItems = [
@@ -338,22 +396,28 @@ function RevealNumericStatsDemo() {
 					viewportAmount={0.08}
 				>
 					{revealNumericStats.map((stat) => (
-						<Reveal.Item
-							key={stat.label}
-							className="flex min-h-32 flex-col justify-between rounded-lg border border-border/10 bg-surface/50 p-4"
-						>
-							<Reveal.Numeric
-								animation="countUp"
-								as="p"
-								className="m-0 text-4xl font-semibold leading-none tracking-normal tabular-nums text-foreground sm:text-5xl"
-								data-demo-numeric-value={stat.value}
-								text={stat.value}
-								useViewport={false}
-								waitFor={revealNumericStartStage}
-							/>
-							<Text variant="caption" tone="muted" className="mt-3 block">
-								{stat.label}
-							</Text>
+						<Reveal.Item key={stat.label}>
+							<Panel
+								background="surface"
+								border="subtle"
+								padding="sm"
+								radius="sm"
+								shadow="none"
+								className="flex min-h-32 flex-col justify-between"
+							>
+								<Reveal.Numeric
+									animation="countUp"
+									as="p"
+									className="m-0 text-4xl font-semibold leading-none tracking-normal tabular-nums text-foreground sm:text-5xl"
+									data-demo-numeric-value={stat.value}
+									text={stat.value}
+									useViewport={false}
+									waitFor={revealNumericStartStage}
+								/>
+								<Text variant="caption" tone="muted" className="mt-3 block">
+									{stat.label}
+								</Text>
+							</Panel>
 						</Reveal.Item>
 					))}
 				</Reveal.List>
@@ -366,7 +430,13 @@ function TouchScreenStatusDemo() {
 	const isTouchScreen = useTouchScreen();
 
 	return (
-		<div className="rounded-lg border border-border/10 bg-surface/50 p-4">
+		<Panel
+			background="surface"
+			border="subtle"
+			padding="sm"
+			radius="sm"
+			shadow="none"
+		>
 			<Text variant="bodyStrong">
 				{isTouchScreen ? "Touch / coarse pointer" : "Hover / fine pointer"}
 			</Text>
@@ -375,7 +445,62 @@ function TouchScreenStatusDemo() {
 					? "Use this branch for touch-safe controls and hover fallbacks."
 					: "Use this branch for hover previews and pointer-rich controls."}
 			</Text>
-		</div>
+		</Panel>
+	);
+}
+
+function ShareReportDemo({ skeleton = false }: { skeleton?: boolean }) {
+	return (
+		<Card size="sm">
+			<Card.Header className="border-b">
+				{skeleton ? (
+					<>
+						<Text.Skeleton as="h3" variant="headingSm">
+							Share report
+						</Text.Skeleton>
+						<Text.Skeleton variant="body">
+							Copy this link and send it to your team.
+						</Text.Skeleton>
+					</>
+				) : (
+					<>
+						<Card.Title as="h3">Share report</Card.Title>
+						<Card.Description>
+							Copy this link and send it to your team.
+						</Card.Description>
+					</>
+				)}
+			</Card.Header>
+			<Card.Content>
+				{skeleton ? (
+					<CopyField.Skeleton placeholder="https://example.com/reports/q1-summary" />
+				) : (
+					<CopyField value="https://example.com/reports/q1-summary" />
+				)}
+			</Card.Content>
+			<Card.Footer className="justify-end">
+				{skeleton ? (
+					<Button.Skeleton variant="primary">Continue</Button.Skeleton>
+				) : (
+					<Button variant="primary">Continue</Button>
+				)}
+			</Card.Footer>
+		</Card>
+	);
+}
+
+function DemoMediaFrame({ children }: { children: ReactNode }) {
+	return (
+		<Panel
+			background="surface"
+			border="subtle"
+			overflow="hidden"
+			padding="none"
+			radius="lg"
+			shadow="none"
+		>
+			{children}
+		</Panel>
 	);
 }
 
@@ -392,17 +517,21 @@ function ActiveStageHostDemoContent() {
 			</div>
 			<div className="grid gap-2 sm:grid-cols-3">
 				{activeStageDemoItems.map((item, index) => (
-					<button
+					<Button
 						key={item.title}
 						type="button"
-						className="rounded-lg border border-border bg-surface p-3 text-left transition-colors motion-interactive data-[active=true]:border-primary/40 data-[active=true]:bg-primary/10"
+						size="none"
+						variant="secondary"
+						align="left"
+						className="w-full rounded-lg p-3 data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
+						contentClassName="flex-col items-start gap-1"
 						{...getItemProps(index)}
 					>
 						<Text variant="bodyStrong">{item.title}</Text>
-						<Text variant="caption" tone="muted" className="mt-1 block">
+						<Text variant="caption" tone="muted">
 							{item.description}
 						</Text>
-					</button>
+					</Button>
 				))}
 			</div>
 			<Text variant="caption" tone="muted">
@@ -470,7 +599,6 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ErrorState",
 			"HeaderCompact",
 			"Loader",
-			"MoreMenuDropdown",
 			"PasswordInput",
 			"PhoneInput",
 			"ProfilePictureInput",
@@ -479,7 +607,6 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"SocialLinks",
 			"StateIndicator",
 			"ToastHost",
-			"Warning",
 		],
 	},
 	customRegistry: { uses: [], usedIn: ["Button", "Icon", "iconRegistry"] },
@@ -501,9 +628,8 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"DateAgo",
 			"DateIndicator",
 			"DateRangeInput",
-			"EditableTextInput",
+			"EditableTextField",
 			"Field",
-			// "FilePreview",
 			"Footer",
 			"Listbox",
 			"MarkdownRenderer",
@@ -513,8 +639,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"SelectInput",
 			"StateIndicator",
 			"ToastHost",
-			"FileUploadInput",
-			"Warning",
+			"FileInput",
 		],
 	},
 	Button: {
@@ -526,8 +651,8 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ComboboxTextInput",
 			"ConfirmationModal",
 			"CopyField",
-			"EditableTextInput",
-			"FilePreview",
+			"EditableTextField",
+			"FileInput",
 			"Footer",
 			"HeaderCompact",
 			"HeaderFull",
@@ -535,7 +660,6 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"InspectableImage",
 			"Listbox",
 			"MarkdownRenderer",
-			"MoreMenuDropdown",
 			"PasswordInput",
 			"PhoneInput",
 			"ProfilePictureInput",
@@ -544,17 +668,20 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"SocialLinks",
 			"StateIndicator",
 			"ToastHost",
-			"FileGallery",
+			"FileInput",
 		],
 	},
-	Chip: { uses: ["Icon", "Skeleton", "focus"], usedIn: ["GraphMap"] },
+	Chip: {
+		uses: ["Icon", "Skeleton", "focus"],
+		usedIn: ["FilePreview", "HealthCheckIndicator", "ProfilePicture"],
+	},
 	InputFrame: {
 		uses: ["focus"],
 		usedIn: [
 			"ComboboxMultiSelectInput",
 			"ComboboxTextInput",
 			"DateRangeInput",
-			"EditableTextInput",
+			"EditableTextField",
 			"EmailInput",
 			"NumberInput",
 			"PasswordInput",
@@ -566,12 +693,11 @@ const relatedMap: Record<string, RelatedInfo> = {
 		],
 	},
 	Dropdown: {
-		uses: ["Icon", "Portal"],
+		uses: ["Button", "Icon", "Listbox", "Portal"],
 		usedIn: [
 			"ComboboxMultiSelectInput",
 			"ComboboxTextInput",
 			"DateRangeInput",
-			"MoreMenuDropdown",
 			"PhoneInput",
 			"SelectInput",
 		],
@@ -585,7 +711,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: [
 			"ComboboxMultiSelectInput",
 			"ComboboxTextInput",
-			"EditableTextInput",
+			"EditableTextField",
 			"EmailInput",
 			"ButtonMultiSelectInput",
 			"MultiselectInput",
@@ -607,7 +733,6 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"ComboboxMultiSelectInput",
 			"ComboboxTextInput",
 			"DateRangeInput",
-			"MoreMenuDropdown",
 			"PhoneInput",
 			"SelectInput",
 		],
@@ -710,7 +835,7 @@ const relatedMap: Record<string, RelatedInfo> = {
 	},
 	TextAreaInput: { uses: ["Field", "InputFrame"], usedIn: [] },
 	TextInput: { uses: ["Field", "InputFrame"], usedIn: [] },
-	EditableTextInput: {
+	EditableTextField: {
 		uses: ["Button", "Field", "InputFrame", "Text"],
 		usedIn: [],
 	},
@@ -726,10 +851,23 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: [],
 	},
 	DateRangeInput: {
-		uses: ["Dropdown", "Icon", "InputFrame", "Listbox", "Text", "focus"],
+		uses: [
+			"Button",
+			"CalendarPopover",
+			"Dropdown.Panel",
+			"Field",
+			"InputFrame",
+		],
 		usedIn: [],
 	},
-	SignaturePad: { uses: [], usedIn: [] },
+	DateInput: {
+		uses: ["CalendarPopover", "Dropdown.Panel", "Field", "InputFrame"],
+		usedIn: [],
+	},
+	SignatureInput: {
+		uses: ["Button", "Field", "InputFrame"],
+		usedIn: [],
+	},
 	PhoneInput: {
 		uses: [
 			"Button",
@@ -808,11 +946,10 @@ const relatedMap: Record<string, RelatedInfo> = {
 		uses: ["Text"],
 		usedIn: ["MultiselectInput", "RadioInput", "ToggleInput"],
 	},
-	FileUploadInput: {
-		uses: ["Button", "Field", "InputFrame", "Text"],
+	FileInput: {
+		uses: ["Button", "Field", "FilePreview", "IdleState"],
 		usedIn: [],
 	},
-	FileGallery: { uses: ["FilePreview", "IdleState"], usedIn: [] },
 	Skeleton: { uses: [], usedIn: ["Button", "ProfilePicture", "Text"] },
 	SegmentedControl: {
 		uses: ["Button", "Icon", "Text", "spring"],
@@ -850,15 +987,11 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: ["SuspenseBoundary"],
 	},
 	Accordion: {
-		uses: ["Button", "Icon", "IconSwap", "Text", "spring"],
+		uses: ["Button", "Card", "Icon", "Text", "spring"],
 		usedIn: [],
 	},
 	SuspenseBoundary: {
 		uses: ["ErrorState", "Loader", "motionTiming"],
-		usedIn: [],
-	},
-	MoreMenuDropdown: {
-		uses: ["Button", "Dropdown", "Icon", "Listbox"],
 		usedIn: [],
 	},
 	ImageSwitcher: {
@@ -886,17 +1019,12 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"SuspenseBoundary",
 		],
 	},
-	Warning: { uses: ["Icon", "Text"], usedIn: [] },
 	HealthCheckIndicator: {
-		uses: ["Button", "Loader", "Pill", "Text"],
+		uses: ["Button", "Chip", "Loader", "Text"],
 		usedIn: [],
 	},
-	Pill: {
-		uses: [],
-		usedIn: ["FilePreview", "HealthCheckIndicator", "ProfilePicture"],
-	},
 	ProfilePicture: {
-		uses: ["Pill", "Skeleton", "Text"],
+		uses: ["Chip", "Skeleton", "Text"],
 		usedIn: ["ProfilePictureInput"],
 	},
 	FilePreview: {
@@ -904,12 +1032,12 @@ const relatedMap: Record<string, RelatedInfo> = {
 			"Button",
 			"FileInspectModal",
 			"InspectableImage",
-			"Pill",
+			"Chip",
 			"Text",
 			"useConfirmationModal",
 			"useModal",
 		],
-		usedIn: ["FileGallery"],
+		usedIn: ["FileInput"],
 	},
 	FileInspectModal: {
 		uses: ["Button", "Text"],
@@ -929,14 +1057,21 @@ const relatedMap: Record<string, RelatedInfo> = {
 		usedIn: ["FilePreview"],
 	},
 	ModalShell: {
-		uses: ["Card", "Portal"],
+		uses: ["Portal"],
 		usedIn: ["ModalHost"],
+	},
+	ModalCard: {
+		uses: ["Card"],
+		usedIn: ["ModalHost", "DashboardCommandProvider"],
 	},
 	useImageInspectModal: {
 		uses: ["ImageInspectModal", "useModal"],
 		usedIn: ["InspectableImage"],
 	},
-	ModalHost: { uses: ["ModalShell"], usedIn: ["ModalClientMount"] },
+	ModalHost: {
+		uses: ["ModalCard", "ModalShell"],
+		usedIn: ["ModalClientMount"],
+	},
 	useModal: {
 		uses: [],
 		usedIn: ["useConfirmationModal", "useImageInspectModal"],
@@ -968,6 +1103,119 @@ function OverviewLinks({ links }: { links: OverviewLink[] }) {
 					{link.label}
 				</Button>
 			))}
+		</div>
+	);
+}
+
+function updateChoiceIndicatorLabValues(
+	current: string[],
+	value: string,
+	checked: boolean,
+) {
+	return checked
+		? Array.from(new Set([...current, value]))
+		: current.filter((item) => item !== value);
+}
+function LockedChoiceIndicatorLab() {
+	const [radio, setRadio] = useState("team");
+	const [multi, setMulti] = useState(["mentions"]);
+	const [toggles, setToggles] = useState(["motion"]);
+
+	return (
+		<div className="grid gap-5">
+			<Text tone="muted" variant="caption">
+				The production indicators: solid radio and checkbox, plus the muted
+				contrast toggle. All rows remain standard ChoiceField instances.
+			</Text>
+
+			<div className="grid gap-3">
+				<Text variant="bodyStrong">Radio</Text>
+				{[
+					["team", "Team workspace"],
+					["private", "Private drafts"],
+				].map(([value, label]) => (
+					<ChoiceField
+						checked={radio === value}
+						description={
+							value === "team"
+								? "Shared with your team."
+								: "Visible only to you."
+						}
+						id={`indicator-lab-solid-radio-${value}`}
+						indicator={<ChoiceIndicatorRadio checked={radio === value} />}
+						key={value}
+						label={label}
+						name="indicator-lab-solid-radio"
+						onChange={setRadio}
+						value={value}
+					/>
+				))}
+			</div>
+
+			<Divider />
+
+			<div className="grid gap-3">
+				<Text variant="bodyStrong">Checkbox</Text>
+				{[
+					["mentions", "Mentions", false],
+					["digest", "Weekly digest", false],
+					["sms", "SMS alerts", true],
+				].map(([value, label, disabled]) => {
+					const checked = multi.includes(String(value));
+					return (
+						<ChoiceField
+							checked={checked}
+							disabled={Boolean(disabled)}
+							id={`indicator-lab-solid-multi-${value}`}
+							indicator={
+								<ChoiceIndicatorMulti
+									checked={checked}
+									disabled={Boolean(disabled)}
+								/>
+							}
+							inputType="checkbox"
+							key={String(value)}
+							label={String(label)}
+							name="indicator-lab-solid-multi"
+							onChange={(next, nextChecked) =>
+								setMulti((current) =>
+									updateChoiceIndicatorLabValues(current, next, nextChecked),
+								)
+							}
+							value={String(value)}
+						/>
+					);
+				})}
+			</div>
+
+			<Divider />
+
+			<div className="grid gap-3">
+				<Text variant="bodyStrong">Toggle</Text>
+				{[
+					["motion", "Reduced motion"],
+					["scroll", "Smooth scrolling"],
+				].map(([value, label]) => {
+					const checked = toggles.includes(value);
+					return (
+						<ChoiceField
+							checked={checked}
+							id={`indicator-lab-toggle-muted-${value}`}
+							indicator={<ChoiceIndicatorToggle checked={checked} />}
+							inputType="checkbox"
+							key={value}
+							label={label}
+							name="indicator-lab-toggle-muted"
+							onChange={(next, nextChecked) =>
+								setToggles((current) =>
+									updateChoiceIndicatorLabValues(current, next, nextChecked),
+								)
+							}
+							value={value}
+						/>
+					);
+				})}
+			</div>
 		</div>
 	);
 }
@@ -1016,167 +1264,6 @@ export const demoPages: DemoPage[] = [
 		],
 	},
 	{
-		id: "layout",
-		slug: ["layout"],
-		title: "Layout",
-		description: "Shell + navigation structure",
-		groups: [
-			{
-				id: "layout-links",
-				title: "Layout Sections",
-				description: "Navigate header and footer demos",
-				items: [
-					{
-						id: "layout-links-card",
-						kind: "component",
-						name: "Layout Links",
-						label: "Jump to section",
-						Render() {
-							return (
-								<OverviewLinks
-									links={[
-										{ href: "/internal/demo/layout/header", label: "Header" },
-										{ href: "/internal/demo/layout/footer", label: "Footer" },
-									]}
-								/>
-							);
-						},
-					},
-				],
-			},
-		],
-	},
-	{
-		id: "layout-header",
-		slug: ["layout", "header"],
-		title: "Layout: Header",
-		description: "Header variants and usage",
-		groups: [
-			{
-				id: "layout-header-usage",
-				title: "Header Components",
-				description: "Usage-only cards",
-				items: [
-					{
-						id: "header",
-						kind: "usage",
-						name: "Header",
-						label: "Responsive header wrapper",
-						snippet: "<Header layout={siteLayout.header} />",
-						related: relatedMap.Header,
-					},
-					{
-						id: "header-full",
-						kind: "usage",
-						name: "HeaderFull",
-						label: "Desktop grouped header",
-						snippet:
-							"<HeaderFull isScrolled={false} layout={siteLayout.header} />",
-						related: relatedMap.HeaderFull,
-					},
-					{
-						id: "header-compact",
-						kind: "usage",
-						name: "HeaderCompact",
-						label: "Mobile grouped header",
-						snippet:
-							"<HeaderCompact isScrolled={false} layout={siteLayout.header} />",
-						related: relatedMap.HeaderCompact,
-					},
-					{
-						id: "header-menu-content",
-						kind: "usage",
-						name: "HeaderMenuContent",
-						label: "Grouped menu and search primitives",
-						snippet:
-							"<HeaderMenuGrid groups={siteLayout.header.menuGroups} columnCount={6} />",
-						related: relatedMap.HeaderMenuContent,
-					},
-					{
-						id: "marketing-content-search",
-						kind: "usage",
-						name: "MarketingContentSearch",
-						label: "Marketing route search adapter",
-						snippet:
-							"<MarketingContentSearch navLinks={siteLayout.header.navLinks} />",
-						related: relatedMap.MarketingContentSearch,
-					},
-					{
-						id: "content-search",
-						kind: "usage",
-						name: "ContentSearch",
-						label: "Shared route search",
-						snippet:
-							'<ContentSearch entries={[{ id: "settings", label: "Settings", href: "/settings" }]} input={{ className: "w-[16rem]", size: "sm" }} />',
-						related: relatedMap.ContentSearch,
-					},
-				],
-			},
-		],
-	},
-	{
-		id: "layout-footer",
-		slug: ["layout", "footer"],
-		title: "Layout: Footer",
-		description: "Footer shell usage",
-		groups: [
-			{
-				id: "layout-footer-usage",
-				title: "Footer",
-				description: "Usage-only cards",
-				items: [
-					{
-						id: "footer",
-						kind: "usage",
-						name: "Footer",
-						label: "Footer shell",
-						snippet: "<Footer />",
-						related: relatedMap.Footer,
-					},
-				],
-			},
-		],
-	},
-	{
-		id: "mount",
-		slug: ["mount"],
-		title: "Mount",
-		description: "Client mounts for shared app systems",
-		groups: [
-			{
-				id: "mount-usage",
-				title: "Client Mounts",
-				description: "Usage-only cards",
-				items: [
-					{
-						id: "modal-client-mount",
-						kind: "usage",
-						name: "ModalClientMount",
-						label: "Mounts modal host",
-						snippet: "<ModalClientMount />",
-						related: relatedMap.ModalClientMount,
-					},
-					{
-						id: "form-validation-client-mount",
-						kind: "usage",
-						name: "FormValidationClientMount",
-						label: "Disables native form validation UI",
-						snippet: "<FormValidationClientMount />",
-						related: relatedMap.FormValidationClientMount,
-					},
-					{
-						id: "toast-client-mount",
-						kind: "usage",
-						name: "ToastClientMount",
-						label: "Mounts toast host",
-						snippet: "<ToastClientMount />",
-						related: relatedMap.ToastClientMount,
-					},
-				],
-			},
-		],
-	},
-	{
 		id: "composites",
 		slug: ["composites"],
 		title: "Composites",
@@ -1219,7 +1306,7 @@ export const demoPages: DemoPage[] = [
 				id: "markdown-renderer",
 				title: "Markdown Renderer",
 				description:
-					"Plain markdown rendered through Text, Button, focus, table, code, image, and list styles.",
+					"Default document and compact dashboard densities share the same authored-content contract in rendered and editable modes.",
 				columns: "grid-cols-1",
 				items: [
 					{
@@ -1239,28 +1326,20 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "markdown-renderer-usage",
-						kind: "usage",
-						name: "MarkdownRenderer",
-						label: "Button directive",
-						related: relatedMap.MarkdownRenderer,
-						snippet:
-							'<MarkdownRenderer markdown={"# Title\\n\\n::button[Open Reference]{href=/internal/reference variant=primary size=md}"} />',
-					},
-					{
 						id: "markdown-editor-live",
 						kind: "component",
 						name: "MarkdownEditor",
-						label: "Rich text, source, and mentions",
+						label: "Full authoring and synchronized output",
 						Render() {
 							const [markdown, setMarkdown] = useState(
-								"## Project note\n\nWrite a polished update and mention a teammate.",
+								MARKDOWN_EDITOR_DEMO_MARKDOWN,
 							);
 							return (
 								<div className="grid max-w-3xl gap-4">
 									<MarkdownEditor
 										ariaLabel="Project note"
 										defaultMarkdown={markdown}
+										density="default"
 										mentions={[
 											{
 												id: "4b533f14-6dd0-4dbf-9f73-212be08f5211",
@@ -1269,14 +1348,92 @@ export const demoPages: DemoPage[] = [
 										]}
 										onChange={setMarkdown}
 									/>
-									<Panel background="muted" border="subtle" padding="sm">
+									<div className="grid gap-2">
+										<Text as="h4" tone="muted" variant="caption">
+											Rendered output
+										</Text>
 										<MarkdownRenderer
+											density="default"
 											markdown={markdown}
 											resolveUserMention={() => (
 												<Chip color="info">@Ada Lovelace</Chip>
 											)}
+											variant="result"
 										/>
-									</Panel>
+									</div>
+								</div>
+							);
+						},
+					},
+					{
+						id: "markdown-editor-responsive",
+						kind: "component",
+						name: "MarkdownEditor",
+						label: "Compact dashboard authoring and synchronized output",
+						Render() {
+							const [markdown, setMarkdown] = useState(
+								MARKDOWN_EDITOR_DEMO_MARKDOWN,
+							);
+							return (
+								<div className="grid max-w-3xl gap-4">
+									<MarkdownEditor
+										ariaLabel="Compact project note"
+										defaultMarkdown={markdown}
+										density="compact"
+										mentions={[
+											{
+												id: "4b533f14-6dd0-4dbf-9f73-212be08f5211",
+												label: "Ada Lovelace",
+											},
+										]}
+										onChange={setMarkdown}
+									/>
+									<div className="grid gap-2">
+										<Text as="h4" tone="muted" variant="caption">
+											Rendered output
+										</Text>
+										<MarkdownRenderer
+											density="compact"
+											markdown={markdown}
+											variant="result"
+										/>
+									</div>
+								</div>
+							);
+						},
+					},
+					{
+						id: "markdown-editor-invalid-source",
+						kind: "component",
+						name: "MarkdownEditor",
+						label: "Invalid Markdown source mode",
+						Render() {
+							return (
+								<div className="max-w-3xl">
+									<MarkdownEditor
+										ariaLabel="Invalid Markdown source mode"
+										defaultMarkdown={MARKDOWN_EDITOR_INVALID_MARKDOWN}
+									/>
+								</div>
+							);
+						},
+					},
+					{
+						id: "markdown-editor-disabled",
+						kind: "component",
+						name: "MarkdownEditor",
+						label: "Disabled state",
+						Render() {
+							return (
+								<div className="max-w-3xl">
+									<MarkdownEditor
+										ariaLabel="Disabled Markdown editor"
+										defaultMarkdown={
+											"## Read only\n\nDisabled editors retain their document geometry.\n\n- [x] Completed read-only task"
+										}
+										density="compact"
+										disabled
+									/>
 								</div>
 							);
 						},
@@ -1418,7 +1575,7 @@ export const demoPages: DemoPage[] = [
 						id: "chip",
 						kind: "component",
 						name: "Chip",
-						label: "Compact metadata label",
+						label: "Borderless compact metadata label",
 						related: relatedMap.Chip,
 						Render() {
 							return (
@@ -1539,21 +1696,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "button-usage",
-						kind: "usage",
-						name: "Button",
-						label: "Hierarchy, danger tone, and unboxed sizing",
-						snippet: `<div className="flex items-center gap-2">
-  <Button variant="primary">Continue</Button>
-  <Button>Save for later</Button>
-  <Button variant="ghost">Cancel</Button>
-  <Button tone="danger">Delete</Button>
-  <Button variant="ghost" size="none" className="text-sm font-medium">
-    Inline action
-  </Button>
-</div>`,
-					},
-					{
 						id: "card",
 						kind: "component",
 						name: "Card",
@@ -1561,48 +1703,28 @@ export const demoPages: DemoPage[] = [
 						related: relatedMap.Card,
 						Render() {
 							return (
-								<div className="flex flex-col gap-2">
-									<Card>
-										<CardHeader>
-											<CardTitle>Default card</CardTitle>
-											<CardDescription>Pinned source defaults.</CardDescription>
-										</CardHeader>
-										<CardContent>
-											<Text variant="caption" tone="muted">
-												Default ring, 8px radius, no shadow, and structured
-												spacing.
-											</Text>
-										</CardContent>
-									</Card>
-									<Card
-										display="flex"
-										padding="none"
-										gap="none"
-										shadow="sm"
-										background="surface"
-										className="border border-border/10"
-									>
-										<CardHeader>
-											<CardTitle>Surface card</CardTitle>
-											<CardDescription>Softer background.</CardDescription>
-										</CardHeader>
-									</Card>
-								</div>
+								<Card>
+									<CardHeader className="border-b">
+										<div className="flex items-center gap-2">
+											<Icon
+												name="cards"
+												size="sm"
+												className="text-muted-foreground"
+											/>
+											<CardTitle as="h4">Project</CardTitle>
+										</div>
+										<CardDescription>
+											Structured card with an informative header.
+										</CardDescription>
+									</CardHeader>
+									<CardContent>
+										<Button size="sm" variant="secondary">
+											Open details
+										</Button>
+									</CardContent>
+								</Card>
 							);
 						},
-					},
-					{
-						id: "section",
-						kind: "usage",
-						name: "Section",
-						label: "Page section",
-						snippet: `<Section padding="default" background="surface">
-  <Section.Background>
-    <img src="/hero.jpg" alt="" className="h-full w-full object-cover" />
-  </Section.Background>
-  ...
-</Section>`,
-						related: relatedMap.Section,
 					},
 					{
 						id: "divider",
@@ -1810,15 +1932,6 @@ export const demoPages: DemoPage[] = [
 							);
 						},
 					},
-					{
-						id: "dropdown-styles",
-						kind: "usage",
-						name: "dropdownStyles",
-						label: "Shared listbox styles",
-						snippet:
-							"import { dropdownListClassName } from '@/components/ui/primitives/dropdownStyles'",
-						related: relatedMap.dropdownStyles,
-					},
 				],
 			},
 		],
@@ -1911,64 +2024,60 @@ export const demoPages: DemoPage[] = [
 								<div className="flex flex-col gap-4">
 									<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 										{iconNames.map((name) => (
-											<div
+											<Panel
 												key={name}
-												className="flex items-center gap-3 rounded-xl border border-border/10 bg-background/60 px-3 py-2"
+												background="background"
+												border="subtle"
+												display="block"
+												padding="xs"
+												radius="sm"
+												shadow="none"
 											>
-												<Icon name={name as IconName} size="md" />
-												<span className="text-[11px] font-medium text-foreground/70">
-													{name}
-												</span>
-											</div>
+												<div className="flex items-center gap-3">
+													<Icon name={name as IconName} size="md" />
+													<span className="text-2xs font-medium text-foreground/70">
+														{name}
+													</span>
+												</div>
+											</Panel>
 										))}
 									</div>
 									<div className="flex flex-wrap gap-2">
-										<div className="flex items-center gap-3 rounded-xl border border-border/10 bg-background/60 px-3 py-2">
-											<Icon name="arrow-right" size="md" mirrorInRtl />
-											<span className="text-[11px] font-medium text-foreground/70">
-												LTR mirrored icon
-											</span>
-										</div>
-										<div
-											dir="rtl"
-											className="flex items-center gap-3 rounded-xl border border-border/10 bg-background/60 px-3 py-2"
+										<Panel
+											background="background"
+											border="subtle"
+											display="block"
+											padding="xs"
+											radius="sm"
+											shadow="none"
 										>
-											<Icon name="arrow-right" size="md" mirrorInRtl />
-											<span className="text-[11px] font-medium text-foreground/70">
-												RTL mirrored icon
-											</span>
-										</div>
+											<div className="flex items-center gap-3">
+												<Icon name="arrow-right" size="md" mirrorInRtl />
+												<span className="text-2xs font-medium text-foreground/70">
+													LTR mirrored icon
+												</span>
+											</div>
+										</Panel>
+										<Panel
+											dir="rtl"
+											background="background"
+											border="subtle"
+											display="block"
+											padding="xs"
+											radius="sm"
+											shadow="none"
+										>
+											<div className="flex items-center gap-3">
+												<Icon name="arrow-right" size="md" mirrorInRtl />
+												<span className="text-2xs font-medium text-foreground/70">
+													RTL mirrored icon
+												</span>
+											</div>
+										</Panel>
 									</div>
 								</div>
 							);
 						},
-					},
-					{
-						id: "icon-map",
-						kind: "usage",
-						name: "customRegistry",
-						label: "Icon data map",
-						snippet:
-							"import { customRegistry } from '@/components/ui/icons/customRegistry'",
-						related: relatedMap.customRegistry,
-					},
-					{
-						id: "icon-registry",
-						kind: "usage",
-						name: "iconRegistry",
-						label: "Registry helper",
-						snippet:
-							"import { registerIcons } from '@/components/ui/icons/iconRegistry'",
-						related: relatedMap.iconRegistry,
-					},
-					{
-						id: "phosphor-registry",
-						kind: "usage",
-						name: "phosphorRegistry",
-						label: "Phosphor wiring",
-						snippet:
-							"import { phosphorRegistry } from '@/components/ui/icons/phosphorRegistry'",
-						related: relatedMap.phosphorRegistry,
 					},
 				],
 			},
@@ -2021,36 +2130,37 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "editable-text-input",
+						id: "editable-text-field",
 						kind: "component",
-						name: "EditableTextInput",
-						label: "Inline edit",
-						related: relatedMap.EditableTextInput,
+						name: "EditableTextField",
+						label: "Display-to-edit field",
+						related: relatedMap.EditableTextField,
 						Render() {
-							const [title, setTitle] = useState("Template dashboard");
+							const [fieldTitle, setFieldTitle] =
+								useState("Template dashboard");
+							const [inlineTitle, setInlineTitle] = useState("Rename inline");
 
 							return (
-								<div className="flex max-w-sm flex-col items-start gap-3">
-									<EditableTextInput
-										value={title}
-										onSubmit={async (nextTitle) => setTitle(nextTitle)}
+								<div className="grid w-full max-w-sm gap-4">
+									<EditableTextField
+										description="Uses one stable field shell while viewing and editing."
+										label="Dashboard title"
+										onSave={async (nextTitle) => setFieldTitle(nextTitle)}
 										validate={(nextTitle) =>
 											nextTitle ? null : "Enter a title."
 										}
-										ariaLabel={`Rename ${title}`}
-										editAriaLabel="Title"
-										submitAriaLabel="Save title"
-										cancelAriaLabel="Cancel rename"
-										displayButtonVariant="ghost"
-										displayTextVariant="body"
-										displayTextTone="muted"
-										displayTrailingIcon="pencil"
-										displayClassName="min-w-0 max-w-full"
-										displayContentClassName="min-w-0 max-w-full"
-										displayTextClassName="truncate"
-										formClassName="w-full"
-										fieldClassName="gap-1"
-										frameClassName="bg-background! shadow-none"
+										value={fieldTitle}
+									/>
+									<EditableTextField
+										ariaLabel={`Rename ${inlineTitle}`}
+										onSave={async (nextTitle) => setInlineTitle(nextTitle)}
+										presentation="inline"
+										value={inlineTitle}
+									/>
+									<EditableTextField.Skeleton
+										description="Uses one stable field shell while viewing and editing."
+										label="Loading title"
+										value="Template dashboard"
 									/>
 								</div>
 							);
@@ -2068,12 +2178,37 @@ export const demoPages: DemoPage[] = [
 							>(null);
 
 							return (
-								<div className="flex max-w-sm flex-col gap-2">
+								<div className="flex max-w-md flex-col gap-5">
 									<ProfilePictureInput
 										label="Profile picture"
 										description="JPG, PNG, or WebP up to 25 MB."
 										name="Ada Lovelace"
 										onChange={(file) => setSelectedFileName(file?.name ?? null)}
+									/>
+									<ProfilePictureInput
+										description="Source-style modal row."
+										label="Profile picture · file row"
+										layout="file-row"
+										name="Ada Lovelace"
+										onChange={(file) => setSelectedFileName(file?.name ?? null)}
+									/>
+									<ProfilePictureInput
+										description="Keeps a domain-owned fallback and color seed."
+										label="Profile picture · presentation preview"
+										layout="file-row"
+										name="Ada Lovelace"
+										onChange={(file) => setSelectedFileName(file?.name ?? null)}
+										renderPreview={({ className, name, size, src }) => (
+											<ProfilePicture
+												alt="Ada Lovelace presentation"
+												className={className}
+												fallback="AL"
+												helperIndex={4}
+												name={name}
+												size={size}
+												src={src}
+											/>
+										)}
 									/>
 									<Text as="p" variant="caption" tone="muted">
 										{selectedFileName
@@ -2090,13 +2225,36 @@ export const demoPages: DemoPage[] = [
 						name: "DateInput",
 						label: "Calendar date input",
 						Render() {
-							const [date, setDate] = useState("2026-07-19");
+							const [date, setDate] = useState<string | null>("2026-07-19");
 							return (
-								<DateInput
-									label="Review date"
-									value={date}
-									onChange={setDate}
-								/>
+								<div className="grid gap-4">
+									<DateInput
+										label="Review date"
+										value={date}
+										onChange={setDate}
+									/>
+									<DateInput label="Empty date" />
+									<DateInput
+										dropdownPositionStrategy="fixed"
+										label="Constrained date"
+										max="2026-07-28"
+										min="2026-07-10"
+										value="2026-07-22"
+									/>
+									<DateInput
+										disabled
+										label="Disabled date"
+										value="2026-07-19"
+									/>
+									<DateInput
+										error="Choose a valid date."
+										label="Invalid date"
+									/>
+									<DateInput.Skeleton
+										label="Loading date"
+										value="Jul 19, 2026"
+									/>
+								</div>
 							);
 						},
 					},
@@ -2126,18 +2284,6 @@ export const demoPages: DemoPage[] = [
 								</div>
 							);
 						},
-					},
-					{
-						id: "profile-picture-input-usage",
-						kind: "usage",
-						name: "ProfilePictureInput",
-						label: "Usage",
-						related: relatedMap.ProfilePictureInput,
-						snippet: `<ProfilePictureInput
-  name={user.name}
-  currentUrl={user.profilePictureUrl}
-  onChange={(file) => setProfilePictureFile(file)}
-/>`,
 					},
 					{
 						id: "email-input",
@@ -2355,6 +2501,7 @@ export const demoPages: DemoPage[] = [
 							return (
 								<div className="flex flex-col gap-2">
 									<SelectInput
+										dropdownPositionStrategy="fixed"
 										label="Select"
 										placeholder="Select option"
 										value={select}
@@ -2464,51 +2611,57 @@ export const demoPages: DemoPage[] = [
 						label: "Date range",
 						related: relatedMap.DateRangeInput,
 						Render() {
-							const [resetSignal, setResetSignal] = useState(0);
+							const [range, setRange] = useState<DateRangeValue | null>({
+								end: "2026-07-15",
+								start: "2026-07-10",
+							});
 
 							return (
-								<div className="flex flex-col gap-2">
-									<DateRangeInput onChange={() => {}} />
-									<div className="flex flex-wrap items-center gap-2">
-										<DateRangeInput
-											resetSignal={resetSignal}
-											resetTo="last_7_days"
-											onChange={() => {}}
-										/>
-										<Button
-											size="sm"
-											variant="secondary"
-											onClick={() => setResetSignal((value) => value + 1)}
-										>
-											Reset to last 7 days
-										</Button>
-									</div>
+								<div className="grid gap-4">
+									<DateRangeInput
+										label="Reporting window"
+										onChange={setRange}
+										value={range}
+									/>
+									<DateRangeInput label="Empty range" />
+									<DateRangeInput
+										dropdownPositionStrategy="fixed"
+										label="Constrained range"
+										max="2026-08-31"
+										min="2026-06-01"
+									/>
+									<DateRangeInput
+										disabled
+										label="Disabled range"
+										value={{ end: "2026-07-22", start: "2026-07-01" }}
+									/>
+									<DateRangeInput.Skeleton
+										label="Loading range"
+										value="Jul 10, 2026 - Jul 15, 2026"
+									/>
 								</div>
 							);
 						},
 					},
 					{
-						id: "signature-pad",
+						id: "signature-input",
 						kind: "component",
-						name: "SignaturePad",
-						label: "Canvas signature",
-						related: relatedMap.SignaturePad,
+						name: "SignatureInput",
+						label: "Canvas signature input",
+						related: relatedMap.SignatureInput,
 						Render() {
-							const signatureRef = useRef<SignaturePadHandle>(null);
-
 							return (
-								<div className="flex w-full flex-col gap-2">
-									<SignaturePad
-										ref={signatureRef}
-										className="h-24 w-full rounded-lg border border-border/15"
+								<div className="grid w-full gap-4">
+									<SignatureInput
+										description="Draw inside the field."
+										height={120}
+										label="Signature"
 									/>
-									<Button
-										variant="secondary"
-										size="sm"
-										onClick={() => signatureRef.current?.clear()}
-									>
-										Clear
-									</Button>
+									<SignatureInput disabled height={96} label="Disabled" />
+									<SignatureInput.Skeleton
+										height={120}
+										label="Loading signature"
+									/>
 								</div>
 							);
 						},
@@ -2547,15 +2700,6 @@ export const demoPages: DemoPage[] = [
 								</div>
 							);
 						},
-					},
-					{
-						id: "editable-text-input-usage",
-						kind: "usage",
-						name: "EditableTextInput",
-						label: "Optimistic title edit",
-						related: relatedMap.EditableTextInput,
-						snippet:
-							'<EditableTextInput value={title} onSubmit={saveTitle} ariaLabel="Rename dashboard" displayButtonVariant="ghost" displayTrailingIcon="pencil" />',
 					},
 				],
 			},
@@ -2670,15 +2814,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "thin-start-choice-usage",
-						kind: "usage",
-						name: "Choice inputs",
-						label: "Thin-start usage",
-						related: relatedMap.RadioInput,
-						snippet:
-							'const options = [{ value: "fast", label: "Fast" }, { value: "steady", label: "Steady" }];\\n\\n<RadioInput label="Mode" options={options} value={mode} onChange={setMode} />\\n<MultiselectInput label="Channels" options={options} value={channels} onChange={setChannels} />\\n<ButtonMultiSelectInput label="Tags" options={options} value={tags} onChange={setTags} />\\n<ToggleInput label="Preferences" options={options} value={preferences} onChange={setPreferences} />',
-					},
-					{
 						id: "choice-field",
 						kind: "component",
 						name: "ChoiceField",
@@ -2761,6 +2896,43 @@ export const demoPages: DemoPage[] = [
 		],
 	},
 	{
+		id: "ui-input-choice-lab",
+		slug: ["ui", "input", "choice", "lab"],
+		title: "Choice Indicator Review",
+		description:
+			"Locked production treatment for solid radio and checkbox indicators with the muted contrast toggle.",
+		visibility: "dev-only",
+		groups: [
+			{
+				id: "choice-indicator-locked",
+				title: "Locked choice indicators",
+				description:
+					"These examples now render the shared production indicators rather than page-local experiments.",
+				columns: "grid-cols-1 xl:grid-cols-2",
+				items: [
+					{
+						id: "choice-locked-indicators",
+						kind: "component",
+						name: "Production indicators",
+						label: "Solid + muted contrast",
+						related: {
+							uses: [
+								"ChoiceField",
+								"ChoiceIndicatorRadio",
+								"ChoiceIndicatorMulti",
+								"ChoiceIndicatorToggle",
+							],
+							usedIn: [],
+						},
+						Render() {
+							return <LockedChoiceIndicatorLab />;
+						},
+					},
+				],
+			},
+		],
+	},
+	{
 		id: "ui-input-files",
 		slug: ["ui", "input", "files"],
 		title: "UI Input: Files",
@@ -2773,98 +2945,53 @@ export const demoPages: DemoPage[] = [
 				columns: "grid-cols-1 lg:grid-cols-2",
 				items: [
 					{
-						id: "file-upload-input",
+						id: "file-input",
 						kind: "component",
-						name: "FileUploadInput",
-						label: "File picker",
-						related: relatedMap.FileUploadInput,
+						name: "FileInput",
+						label: "Selection + previews",
+						related: relatedMap.FileInput,
+						className: "lg:col-span-2",
 						Render() {
-							const [files, setFiles] = useState<File[]>([]);
-
-							return (
-								<div className="flex w-full flex-col gap-2">
-									<FileUploadInput
-										files={files}
-										onFilesChange={setFiles}
-										label="Attachments"
-										description="Select images or PDFs for this workflow."
-										dropTitle="Drop signed files here"
-										dropDescription="PDFs and images appear below before they are saved."
-										pendingFilesLabel={(count) =>
-											`${count} ready ${count === 1 ? "file" : "files"}`
-										}
-									/>
-								</div>
-							);
-						},
-					},
-					{
-						id: "file-gallery",
-						kind: "component",
-						name: "FileGallery",
-						label: "File gallery",
-						related: relatedMap.FileGallery,
-						Render() {
-							const [urls, setUrls] = useState([
-								"/test/mercury.png",
-								"https://example.com/report.pdf",
-							]);
-
-							return (
-								<FileGallery
-									uploadedUrls={urls}
-									labels={{
-										uploaded: "Saved",
-										removeTitle: "Remove attachment",
-										removeConfirmLabel: "Remove attachment",
-									}}
-									onRemoveUploaded={(url) =>
-										setUrls((current) => current.filter((item) => item !== url))
-									}
-								/>
-							);
-						},
-					},
-					{
-						id: "file-preview",
-						kind: "component",
-						name: "FilePreview",
-						label: "Preview cards",
-						related: relatedMap.FilePreview,
-						Render() {
-							const [files, setFiles] = useState<FilePreviewItem[]>([
+							const [items, setItems] = useState<FileInputItem[]>([
 								{
-									key: "img-1",
-									status: "uploaded",
-									url: "/test/mercury.png",
+									key: "saved-image",
 									name: "mercury.png",
-								},
-								{
-									key: "pending-1",
-									status: "pending",
+									status: "uploaded",
 									type: "image/png",
-									url: "/test/blob.png",
-									name: "blob.png",
+									url: "/test/mercury.png",
 								},
 							]);
+							const [emptyItems, setEmptyItems] = useState<FileInputItem[]>([]);
 
 							return (
-								<div className="flex flex-wrap gap-2">
-									{files.map((file, index) => (
-										<FilePreview
-											key={file.key}
-											item={file}
-											index={index}
-											urlLooksLikeImage={(url) => url.endsWith(".png")}
-											isDisabled={false}
-											onRemovePending={(url) =>
-												setFiles((prev) => prev.filter((f) => f.url !== url))
-											}
-											onRemoveUploaded={(url) =>
-												setFiles((prev) => prev.filter((f) => f.url !== url))
-											}
+								<div className="grid gap-6">
+									<FileInput
+										accept="image/*,application/pdf"
+										items={items}
+										onItemsChange={setItems}
+										label="Attachments"
+										description="Add, drop, inspect, and remove images or PDFs. Other file types are rejected inline."
+										labels={{ uploaded: "Saved" }}
+									/>
+									<div className="grid gap-4 md:grid-cols-3">
+										<FileInput
+											items={emptyItems}
+											label="Empty editable"
+											onItemsChange={setEmptyItems}
 										/>
-									))}
+										<FileInput
+											items={items}
+											label="Read only"
+											mode="read"
+											onItemsChange={setItems}
+										/>
+										<FileInput
+											disabled
+											items={items}
+											label="Disabled"
+											onItemsChange={setItems}
+										/>
+									</div>
 								</div>
 							);
 						},
@@ -2891,18 +3018,98 @@ export const demoPages: DemoPage[] = [
 						label: "Disclosure",
 						related: relatedMap.Accordion,
 						Render() {
+							const [cardOpen, setCardOpen] = useState(true);
+
 							return (
-								<div className="flex flex-col gap-2">
-									<Accordion title="Accordion title">
-										This is accordion body content.
-									</Accordion>
-									<Accordion title="Open by default" defaultOpen>
-										Default open content.
-									</Accordion>
-									<Accordion title="Disabled" disabled>
-										Disabled content.
-									</Accordion>
-									<Accordion.Skeleton />
+								<div className="grid gap-6">
+									<div className="grid gap-2">
+										<Accordion
+											description="Closed without a leading icon."
+											title="Compact disclosure"
+										>
+											This borderless row is closed by default.
+										</Accordion>
+										<Accordion
+											defaultOpen
+											description="Open with a leading icon."
+											icon={<Icon name="info" size="sm" />}
+											title="Open disclosure"
+										>
+											Open content keeps the same horizontal edge as its
+											trigger.
+										</Accordion>
+										<Accordion title="Disabled disclosure" disabled>
+											Disabled content.
+										</Accordion>
+										<Accordion.Skeleton
+											description="Closed without a leading icon."
+											title="Compact disclosure"
+										/>
+										<Accordion.Skeleton
+											description="Open with a leading icon."
+											leadingIcon
+											open
+											title="Open disclosure"
+										>
+											<Text.Skeleton tone="muted" variant="support">
+												Open content keeps the same horizontal edge as its
+												trigger.
+											</Text.Skeleton>
+										</Accordion.Skeleton>
+										<Accordion.Skeleton
+											title="Skeleton without a trailing icon"
+											trailingIcon={false}
+										/>
+									</div>
+									<Accordion.Card onOpenChange={setCardOpen} open={cardOpen}>
+										<Accordion.Header className="border-b">
+											<Accordion.Title>Collapsible Card</Accordion.Title>
+											<Accordion.Description>
+												Card slots keep their normal geometry while content and
+												footer collapse together.
+											</Accordion.Description>
+											<Accordion.Action>
+												<Button size="sm">Review</Button>
+											</Accordion.Action>
+										</Accordion.Header>
+										<Accordion.Content>
+											<Text tone="muted" variant="support">
+												The chevron alone controls this structured disclosure.
+											</Text>
+										</Accordion.Content>
+										<Accordion.Footer className="justify-end">
+											<Button size="sm" variant="primary">
+												Continue
+											</Button>
+										</Accordion.Footer>
+									</Accordion.Card>
+									<Accordion.Card disabled>
+										<Accordion.Header>
+											<Accordion.Title>Disabled Card</Accordion.Title>
+											<Accordion.Description>
+												Its disclosure control remains unavailable.
+											</Accordion.Description>
+										</Accordion.Header>
+										<Accordion.Content>Disabled content.</Accordion.Content>
+									</Accordion.Card>
+									<Accordion.Card.Skeleton
+										action={<Button.Skeleton size="sm">Review</Button.Skeleton>}
+										description="Card slots keep their normal geometry while content and footer collapse together."
+										footer={
+											<Button.Skeleton size="sm" variant="primary">
+												Continue
+											</Button.Skeleton>
+										}
+										footerClassName="justify-end"
+										headerClassName="border-b"
+										open
+										title="Collapsible Card"
+									/>
+									<Accordion.Card.Skeleton
+										description="A structural Card skeleton can omit the disclosure icon."
+										title="No trailing caret"
+										trailingIcon={false}
+									/>
 								</div>
 							);
 						},
@@ -3023,15 +3230,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "copy-action-usage",
-						kind: "usage",
-						name: "useCopyAction",
-						label: "Status icon usage",
-						related: relatedMap.useCopyAction,
-						snippet:
-							'const { copied, handleCopy } = useCopyAction({ value, toastMessage: "Copied" });\\n\\n<Button onClick={() => void handleCopy()} trailingIcon={<CopyStatusIcon copied={copied} />}>\\n  {copied ? "Copied" : "Copy"}\\n</Button>',
-					},
-					{
 						id: "social-links",
 						kind: "component",
 						name: "SocialLinks",
@@ -3063,27 +3261,19 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "social-links-usage",
-						kind: "usage",
-						name: "SocialLinks",
-						label: "Generic social links",
-						related: relatedMap.SocialLinks,
-						snippet:
-							'<SocialLinks\\n  links={[\\n    { href: "https://instagram.com/example", label: "Instagram" },\\n    { href: "https://x.com/example", label: "X" },\\n    { href: "https://linkedin.com/company/example", label: "LinkedIn" },\\n  ]}\\n/>',
-					},
-					{
-						id: "more-menu-dropdown",
+						id: "dropdown-menu",
 						kind: "component",
-						name: "MoreMenuDropdown",
+						name: "Dropdown.Menu",
 						label: "Overflow menu",
-						related: relatedMap.MoreMenuDropdown,
+						related: relatedMap.Dropdown,
 						Render() {
 							return (
-								<MoreMenuDropdown
+								<Dropdown.Menu
+									ariaLabel="Open overflow menu"
 									options={[
 										{ label: "Edit", href: "/" },
-										{ label: "Duplicate", onClick: () => {} },
-										{ label: "Archive", onClick: () => {} },
+										{ label: "Duplicate", onSelect: () => {} },
+										{ label: "Archive", onSelect: () => {} },
 									]}
 								/>
 							);
@@ -3112,20 +3302,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "pagination-controls-usage",
-						kind: "usage",
-						name: "PaginationControls",
-						label: "Usage",
-						snippet: `<PaginationControls
-  current={page}
-  total={totalPages}
-  onPrev={() => setPage((value) => Math.max(1, value - 1))}
-  onNext={() => setPage((value) => Math.min(totalPages, value + 1))}
-  disablePrev={page <= 1}
-  disableNext={page >= totalPages}
-/>`,
-					},
-					{
 						id: "image-switcher",
 						kind: "component",
 						name: "ImageSwitcher",
@@ -3146,21 +3322,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "image-switcher-usage",
-						kind: "usage",
-						name: "ImageSwitcher",
-						label: "Usage",
-						snippet: `<ImageSwitcher
-  images={[
-    { src: "/test/mercury.png", alt: "Mercury-like abstract surface" },
-    { src: "/test/blob.png", alt: "Soft abstract blob" },
-  ]}
-  frameClassName="h-64 max-w-xl"
-  controlsClassName="justify-center"
-  sizes="(min-width: 768px) 36rem, 100vw"
-/>`,
-					},
-					{
 						id: "scroll-borders",
 						kind: "component",
 						name: "ScrollBorders",
@@ -3171,9 +3332,14 @@ export const demoPages: DemoPage[] = [
 								<ScrollBorders className="h-40 overflow-y-auto bg-surface px-4 py-3">
 									<div className="flex flex-col gap-3">
 										{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((sectionNumber) => (
-											<div
+											<Panel
 												key={`scroll-borders-demo-${sectionNumber}`}
-												className="rounded-md border border-border/10 bg-background px-3 py-2"
+												background="background"
+												border="subtle"
+												gap="none"
+												padding="xs"
+												radius="xs"
+												shadow="none"
 											>
 												<Text as="p" variant="bodyStrong">
 													Section {sectionNumber}
@@ -3182,7 +3348,7 @@ export const demoPages: DemoPage[] = [
 													Keep longer scroll regions readable without inventing
 													page-local chrome.
 												</Text>
-											</div>
+											</Panel>
 										))}
 									</div>
 								</ScrollBorders>
@@ -3196,9 +3362,14 @@ export const demoPages: DemoPage[] = [
 									<ScrollBorders.Skeleton className="h-40 rounded-lg bg-surface px-4 py-3">
 										<div className="flex flex-col gap-3">
 											{[1, 2, 3, 4, 5].map((sectionNumber) => (
-												<div
+												<Panel
 													key={`scroll-borders-skeleton-${sectionNumber}`}
-													className="rounded-md border border-border/10 bg-background px-3 py-2"
+													background="background"
+													border="subtle"
+													gap="none"
+													padding="xs"
+													radius="xs"
+													shadow="none"
 												>
 													<Text.Skeleton as="p" variant="bodyStrong">
 														Section {sectionNumber}
@@ -3207,23 +3378,13 @@ export const demoPages: DemoPage[] = [
 														Keep longer scroll regions readable without
 														inventing page-local chrome.
 													</Text.Skeleton>
-												</div>
+												</Panel>
 											))}
 										</div>
 									</ScrollBorders.Skeleton>
 								);
 							},
 						},
-					},
-					{
-						id: "scroll-borders-usage",
-						kind: "usage",
-						name: "ScrollBorders",
-						label: "Usage",
-						related: relatedMap.ScrollBorders,
-						snippet: `<ScrollBorders className="h-40 overflow-y-auto rounded-lg bg-surface px-4 py-3">
-  <div className="flex flex-col gap-3">{children}</div>
-</ScrollBorders>`,
 					},
 					{
 						id: "tooltip",
@@ -3242,15 +3403,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "tooltip-usage",
-						kind: "usage",
-						name: "Tooltip",
-						label: "Usage",
-						snippet: `<Tooltip content="Search the shared component library.">
-  <Button size="sm" variant="secondary">Library tip</Button>
-</Tooltip>`,
-					},
-					{
 						id: "loader",
 						kind: "component",
 						name: "Loader",
@@ -3263,16 +3415,6 @@ export const demoPages: DemoPage[] = [
 									<Loader className="text-muted-foreground" />
 								</div>
 							);
-						},
-					},
-					{
-						id: "warning",
-						kind: "component",
-						name: "Warning",
-						label: "Inline warning",
-						related: relatedMap.Warning,
-						Render() {
-							return <Warning message="Heads up: warning helper." />;
 						},
 					},
 					{
@@ -3291,14 +3433,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "health-check-indicator-usage",
-						kind: "usage",
-						name: "HealthCheckIndicator",
-						label: "Usage",
-						related: relatedMap.HealthCheckIndicator,
-						snippet: `<HealthCheckIndicator label="Supabase" endpoint="/api/health" />`,
-					},
-					{
 						id: "profile-picture",
 						kind: "component",
 						name: "ProfilePicture",
@@ -3306,11 +3440,18 @@ export const demoPages: DemoPage[] = [
 						related: relatedMap.ProfilePicture,
 						Render() {
 							return (
-								<div className="flex flex-wrap items-center gap-3">
-									<ProfilePicture name="Ada Lovelace" size="sm" />
-									<ProfilePicture name="Grace Hopper" />
-									<ProfilePicture name="Unknown user" />
-									<ProfilePicture size="lg" />
+								<div className="grid gap-4">
+									<div className="flex flex-wrap items-center gap-3">
+										<ProfilePicture name="Ada Lovelace" size="sm" />
+										<ProfilePicture name="Grace Hopper" />
+										<ProfilePicture name="Unknown user" size="lg" />
+										<ProfilePicture
+											fallback="AL"
+											name="Ada Lovelace"
+											size="xl"
+										/>
+										<ProfilePicture size="2xl" />
+									</div>
 								</div>
 							);
 						},
@@ -3323,68 +3464,53 @@ export const demoPages: DemoPage[] = [
 										<ProfilePicture loading size="sm" />
 										<ProfilePicture loading />
 										<ProfilePicture loading size="lg" />
+										<ProfilePicture loading size="2xl" />
 									</div>
 								);
 							},
 						},
 					},
 					{
-						id: "profile-picture-usage",
-						kind: "usage",
-						name: "ProfilePicture",
-						label: "Usage",
-						related: relatedMap.ProfilePicture,
-						snippet: `<ProfilePicture
-  name={user.name}
-  src={user.profilePictureUrl}
-  size="md"
-/>`,
-					},
-					{
-						id: "pill",
+						id: "profile-picture-stack",
 						kind: "component",
-						name: "Pill",
-						label: "Status badge",
-						related: relatedMap.Pill,
+						name: "ProfilePictureStack",
+						label: "Collaborator group",
+						related: relatedMap.ProfilePicture,
 						Render() {
 							return (
-								<div className="flex flex-wrap gap-2">
-									<Pill tone="plain" className="px-3 py-1 text-xs">
-										Plain
-									</Pill>
-									<Pill tone="neutral" className="px-3 py-1 text-xs">
-										Neutral
-									</Pill>
-									<Pill tone="primary" className="px-3 py-1 text-xs">
-										Primary
-									</Pill>
-									<Pill tone="success" className="px-3 py-1 text-xs">
-										Success
-									</Pill>
-									<Pill tone="warning" className="px-3 py-1 text-xs">
-										Warning
-									</Pill>
-									<Pill tone="danger" className="px-3 py-1 text-xs">
-										Danger
-									</Pill>
-									<Pill
-										tone="helper"
-										helperIndex={3}
-										className="px-3 py-1 text-xs"
-									>
-										Helper
-									</Pill>
+								<div className="scroll-target" id="profile-picture-stack">
+									<ProfilePictureStack
+										ariaLabel="Project collaborators"
+										items={[
+											{
+												fallback: "AL",
+												helperIndex: 0,
+												id: "ada-lovelace",
+												name: "Ada Lovelace",
+											},
+											{
+												fallback: "GH",
+												helperIndex: 2,
+												id: "grace-hopper",
+												name: "Grace Hopper",
+											},
+											{
+												fallback: "KJ",
+												helperIndex: 4,
+												id: "katherine-johnson",
+												name: "Katherine Johnson",
+											},
+											{
+												fallback: "HM",
+												helperIndex: 6,
+												id: "hedy-lamarr",
+												name: "Hedy Lamarr",
+											},
+										]}
+									/>
 								</div>
 							);
 						},
-					},
-					{
-						id: "pill-usage",
-						kind: "usage",
-						name: "Pill",
-						label: "Usage",
-						related: relatedMap.Pill,
-						snippet: `<Pill tone="success" className="px-3 py-1 text-xs">Operational</Pill>`,
 					},
 					{
 						id: "skeleton",
@@ -3450,20 +3576,7 @@ export const demoPages: DemoPage[] = [
 													</div>
 												}
 											>
-												<div className="rounded-lg border border-border/10 bg-surface px-4 py-4">
-													<div className="flex flex-col gap-3">
-														<Text as="h3" variant="headingSm">
-															Share report
-														</Text>
-														<Text variant="body" tone="muted">
-															Copy this link and send it to your team.
-														</Text>
-														<CopyField value="https://example.com/reports/q1-summary" />
-														<div className="flex justify-end">
-															<Button variant="primary">Continue</Button>
-														</div>
-													</div>
-												</div>
+												<ShareReportDemo />
 											</SuspenseBoundary>
 										</div>
 										<div className="flex flex-col gap-2">
@@ -3474,39 +3587,9 @@ export const demoPages: DemoPage[] = [
 												loading={contentState === "loading"}
 												error={contentState === "error"}
 												ghost
-												fallback={
-													<div className="rounded-lg border border-border/10 bg-surface px-4 py-4">
-														<div className="flex flex-col gap-3">
-															<Text.Skeleton as="h3" variant="headingSm">
-																Share report
-															</Text.Skeleton>
-															<Text.Skeleton variant="body">
-																Copy this link and send it to your team.
-															</Text.Skeleton>
-															<CopyField.Skeleton placeholder="https://example.com/reports/q1-summary" />
-															<div className="flex justify-end">
-																<Button.Skeleton variant="primary">
-																	Continue
-																</Button.Skeleton>
-															</div>
-														</div>
-													</div>
-												}
+												fallback={<ShareReportDemo skeleton />}
 											>
-												<div className="rounded-lg border border-border/10 bg-surface px-4 py-4">
-													<div className="flex flex-col gap-3">
-														<Text as="h3" variant="headingSm">
-															Share report
-														</Text>
-														<Text variant="body" tone="muted">
-															Copy this link and send it to your team.
-														</Text>
-														<CopyField value="https://example.com/reports/q1-summary" />
-														<div className="flex justify-end">
-															<Button variant="primary">Continue</Button>
-														</div>
-													</div>
-												</div>
+												<ShareReportDemo />
 											</SuspenseBoundary>
 										</div>
 									</div>
@@ -3522,13 +3605,14 @@ export const demoPages: DemoPage[] = [
 						related: relatedMap.InspectableImage,
 						Render() {
 							return (
-								<InspectableImage
-									src="/test/blob.png"
-									alt="Preview"
-									width={120}
-									height={80}
-									className="rounded-lg overflow-hidden border border-border/10"
-								/>
+								<DemoMediaFrame>
+									<InspectableImage
+										src="/test/blob.png"
+										alt="Preview"
+										width={120}
+										height={80}
+									/>
+								</DemoMediaFrame>
 							);
 						},
 					},
@@ -3557,13 +3641,19 @@ export const demoPages: DemoPage[] = [
 							return (
 								<div className="grid gap-4">
 									<StateIndicator
-										title="Offline"
-										description="Check your connection"
-										iconName="warning"
+										align="center"
+										description="This dashboard route is unavailable."
+										layout="stacked"
+										title="Surface unavailable"
 									/>
-									<NullState
+									<StateIndicator
+										align="center"
+										description="Create the first record to populate this surface."
+										iconClassName="text-muted-foreground"
+										iconName="cards"
+										layout="stacked"
 										title="No records yet"
-										copy="Create the first record to populate this surface."
+										variant="framed"
 									/>
 								</div>
 							);
@@ -3655,88 +3745,83 @@ export const demoPages: DemoPage[] = [
 										<Text variant="caption" tone="muted">
 											Default: ignores image load
 										</Text>
-										<Reveal.Image
-											src="/test/blob.png"
-											alt="Abstract blob"
-											fill
-											sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-											useViewport={false}
-											className="w-full"
-											contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
-											imageClassName="object-cover"
-										/>
+										<DemoMediaFrame>
+											<Reveal.Image
+												src="/test/blob.png"
+												alt="Abstract blob"
+												fill
+												sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+												useViewport={false}
+												className="w-full"
+												contentClassName="aspect-[4/3] w-full overflow-hidden"
+												imageClassName="object-cover"
+											/>
+										</DemoMediaFrame>
 									</div>
 									<div className="flex flex-col gap-2">
 										<Text variant="caption" tone="muted">
 											Opt-in: waits for image load
 										</Text>
-										<Reveal.Image
-											src="/test/mercury.png"
-											alt="Mercury-like abstract surface"
-											fill
-											sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-											useViewport={false}
-											loadStrategy="wait-for-load"
-											placeholder="blur"
-											blurDataURL={imageSwitcherDemoImages[0].blurDataURL}
-											className="w-full"
-											contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
-											imageClassName="object-cover"
-											fallback={<Skeleton className="h-full w-full" />}
-										/>
+										<DemoMediaFrame>
+											<Reveal.Image
+												src="/test/mercury.png"
+												alt="Mercury-like abstract surface"
+												fill
+												sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+												useViewport={false}
+												loadStrategy="wait-for-load"
+												placeholder="blur"
+												blurDataURL={imageSwitcherDemoImages[0].blurDataURL}
+												className="w-full"
+												contentClassName="aspect-[4/3] w-full overflow-hidden"
+												imageClassName="object-cover"
+												fallback={<Skeleton className="h-full w-full" />}
+											/>
+										</DemoMediaFrame>
 									</div>
 									<div className="flex flex-col gap-2">
 										<Text variant="caption" tone="muted">
 											Corner clip with overlay
 										</Text>
-										<Reveal.Image
-											src="/test/blob.png"
-											alt="Abstract blob with overlay"
-											fill
-											sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-											useViewport={false}
-											revealVariant="corner-clip"
-											revealOrigin="top-left"
-											revealFinalRadius={16}
-											className="w-full"
-											contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
-											imageClassName="object-cover"
-											overlay={
-												<div className="absolute inset-x-3 bottom-3 rounded-lg border border-background/20 bg-background/85 p-3 text-foreground shadow-sm backdrop-blur-sm">
-													<Text variant="bodyStrong">Overlay content</Text>
-													<Text
-														variant="caption"
-														tone="muted"
-														className="mt-1 block"
+										<DemoMediaFrame>
+											<Reveal.Image
+												src="/test/blob.png"
+												alt="Abstract blob with overlay"
+												fill
+												sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+												useViewport={false}
+												revealVariant="corner-clip"
+												revealOrigin="top-left"
+												revealFinalRadius={16}
+												className="w-full"
+												contentClassName="aspect-[4/3] w-full overflow-hidden"
+												imageClassName="object-cover"
+												overlay={
+													<Panel
+														background="background"
+														border="subtle"
+														gap="none"
+														padding="xs"
+														radius="sm"
+														shadow="sm"
+														className="absolute inset-x-3 bottom-3 bg-background/85 text-foreground backdrop-blur-sm"
 													>
-														Content stays inside the reveal mask.
-													</Text>
-												</div>
-											}
-										/>
+														<Text variant="bodyStrong">Overlay content</Text>
+														<Text
+															variant="caption"
+															tone="muted"
+															className="mt-1 block"
+														>
+															Content stays inside the reveal mask.
+														</Text>
+													</Panel>
+												}
+											/>
+										</DemoMediaFrame>
 									</div>
 								</div>
 							);
 						},
-					},
-					{
-						id: "reveal-image-corner-clip-usage",
-						kind: "usage",
-						name: "Reveal.Image",
-						label: "Corner clip usage",
-						related: relatedMap["Reveal.Image"],
-						snippet: `<Reveal.Image
-	src="/test/blob.png"
-	alt="Preview"
-	fill
-	sizes="(min-width: 768px) 50vw, 100vw"
-	revealVariant="corner-clip"
-	revealOrigin="top-left"
-	revealFinalRadius={16}
-	overlay={<div className="absolute inset-x-3 bottom-3">...</div>}
-	contentClassName="aspect-[4/3] overflow-hidden rounded-2xl"
-	imageClassName="object-cover"
-/>`,
 					},
 					{
 						id: "reveal-text",
@@ -3801,29 +3886,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "reveal-numeric-usage",
-						kind: "usage",
-						name: "Reveal.Numeric",
-						label: "Count-up usage",
-						related: relatedMap["Reveal.Numeric"],
-						snippet: `const numericStartStage = "stats-numeric-start";
-
-<Reveal.Root>
-	<Reveal.Scene>
-		<Reveal.List unlockOnStartStage={numericStartStage}>
-			<Reveal.Item>
-				<Reveal.Numeric
-					animation="countUp"
-					text="128+"
-					useViewport={false}
-					waitFor={numericStartStage}
-				/>
-			</Reveal.Item>
-		</Reveal.List>
-	</Reveal.Scene>
-</Reveal.Root>`,
-					},
-					{
 						id: "letter-wave",
 						kind: "component",
 						name: "LetterWave",
@@ -3853,18 +3915,6 @@ export const demoPages: DemoPage[] = [
 						},
 					},
 					{
-						id: "active-stage-host-usage",
-						kind: "usage",
-						name: "ActiveStageHost",
-						label: "Active stage usage",
-						related: relatedMap.ActiveStageHost,
-						snippet: `import { ActiveStageHost, useActiveStage } from "@/components/ui/motion/ActiveStageHost";
-
-<ActiveStageHost count={items.length} cycleWhen="inView">
-	<YourStageList />
-</ActiveStageHost>`,
-					},
-					{
 						id: "use-touch-screen",
 						kind: "component",
 						name: "useTouchScreen",
@@ -3873,16 +3923,6 @@ export const demoPages: DemoPage[] = [
 						Render() {
 							return <TouchScreenStatusDemo />;
 						},
-					},
-					{
-						id: "use-touch-screen-usage",
-						kind: "usage",
-						name: "useTouchScreen",
-						label: "Touch-aware branch",
-						related: relatedMap.useTouchScreen,
-						snippet: `const isTouchScreen = useTouchScreen();
-
-return isTouchScreen ? <TouchSafeControls /> : <HoverPreviewControls />;`,
 					},
 					{
 						id: "reveal-image-group",
@@ -3912,18 +3952,20 @@ return isTouchScreen ? <TouchSafeControls /> : <HoverPreviewControls />;`,
 											Mercury
 										</Button>
 									</div>
-									<Reveal.Image
-										key={imageSrc}
-										src={imageSrc}
-										alt="Image-driven reveal"
-										fill
-										sizes="(min-width: 768px) 50vw, 100vw"
-										useViewport={false}
-										className="w-full"
-										contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
-										imageClassName="object-cover"
-										onRevealStateChange={setImageReady}
-									/>
+									<DemoMediaFrame>
+										<Reveal.Image
+											key={imageSrc}
+											src={imageSrc}
+											alt="Image-driven reveal"
+											fill
+											sizes="(min-width: 768px) 50vw, 100vw"
+											useViewport={false}
+											className="w-full"
+											contentClassName="aspect-[4/3] w-full overflow-hidden"
+											imageClassName="object-cover"
+											onRevealStateChange={setImageReady}
+										/>
+									</DemoMediaFrame>
 									<Reveal.List
 										active={imageReady}
 										className="flex flex-col gap-2"
@@ -3974,19 +4016,21 @@ return isTouchScreen ? <TouchSafeControls /> : <HoverPreviewControls />;`,
 									</div>
 									<MotionScene key={imageSrc}>
 										<div className="flex flex-col gap-3">
-											<Reveal.Image
-												src={imageSrc}
-												alt="Motion scene image"
-												fill
-												sizes="(min-width: 768px) 50vw, 100vw"
-												useViewport={false}
-												loadStrategy="wait-for-load"
-												after="app"
-												unlock="media"
-												className="w-full"
-												contentClassName="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/10 bg-surface"
-												imageClassName="object-cover"
-											/>
+											<DemoMediaFrame>
+												<Reveal.Image
+													src={imageSrc}
+													alt="Motion scene image"
+													fill
+													sizes="(min-width: 768px) 50vw, 100vw"
+													useViewport={false}
+													loadStrategy="wait-for-load"
+													after="app"
+													unlock="media"
+													className="w-full"
+													contentClassName="aspect-[4/3] w-full overflow-hidden"
+													imageClassName="object-cover"
+												/>
+											</DemoMediaFrame>
 											<Reveal.List
 												after="media"
 												unlock="content"
@@ -4018,11 +4062,11 @@ return isTouchScreen ? <TouchSafeControls /> : <HoverPreviewControls />;`,
 												className="flex gap-2"
 												stagger={0.12}
 											>
-												<Reveal.Item className="rounded-full border border-border/10 bg-surface px-3 py-1">
-													<Text variant="caption">Scene</Text>
+												<Reveal.Item>
+													<Chip>Scene</Chip>
 												</Reveal.Item>
-												<Reveal.Item className="rounded-full border border-border/10 bg-surface px-3 py-1">
-													<Text variant="caption">Unlocked</Text>
+												<Reveal.Item>
+													<Chip>Unlocked</Chip>
 												</Reveal.Item>
 											</Reveal.List>
 										</div>
@@ -4056,25 +4100,6 @@ return isTouchScreen ? <TouchSafeControls /> : <HoverPreviewControls />;`,
 								</div>
 							);
 						},
-					},
-					{
-						id: "motion-scene-usage",
-						kind: "usage",
-						name: "MotionScene",
-						label: "Staged usage",
-						related: relatedMap.MotionScene,
-						snippet: `import { Reveal } from "@/components/ui/motion";
-import { MotionScene } from "@/components/ui/motion/MotionScene";
-
-<Reveal.Root>
-	<MotionScene>
-		<Reveal.Image loadStrategy="wait-for-load" after="app" unlock="media" {...imageProps} />
-		<Reveal.List after="media" unlock="content">
-			<Reveal.Item>...</Reveal.Item>
-		</Reveal.List>
-		<Reveal.Scramble after="content" text="..." maintainSpace />
-	</MotionScene>
-</Reveal.Root>`,
 					},
 					{
 						id: "scroll-highlight-text",
@@ -4118,24 +4143,6 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 						},
 					},
 					{
-						id: "scroll-highlight-text-usage",
-						kind: "usage",
-						name: "ScrollHighlightText",
-						label: "Scroll + viewport usage",
-						related: relatedMap.ScrollHighlightText,
-						snippet: `<ScrollHighlightText highlightRange={[0.12, 0.9]}>
-	Clarity arrives as the section lands.
-</ScrollHighlightText>
-
-<ScrollHighlightText
-	variant="viewport"
-	baseColor="rgb(var(--color-foreground-rgb) / 0.45)"
-	targetColor="rgb(var(--color-primary-rgb) / 1)"
->
-	Viewport state can drive one clean color transition.
-</ScrollHighlightText>`,
-					},
-					{
 						id: "scroll-lag",
 						kind: "component",
 						name: "ScrollLag",
@@ -4143,9 +4150,17 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 						related: relatedMap.ScrollLag,
 						Render() {
 							return (
-								<ScrollLag className="rounded-lg border border-border/10 bg-surface px-3 py-2">
-									<Text variant="bodyStrong">ScrollLag</Text>
-								</ScrollLag>
+								<Panel
+									background="surface"
+									border="subtle"
+									padding="xs"
+									radius="sm"
+									shadow="none"
+								>
+									<ScrollLag>
+										<Text variant="bodyStrong">ScrollLag</Text>
+									</ScrollLag>
+								</Panel>
 							);
 						},
 					},
@@ -4194,12 +4209,17 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 						related: relatedMap.ScrollParallax,
 						Render() {
 							return (
-								<ScrollParallax
-									className="rounded-lg border border-border/10 bg-surface px-3 py-2"
-									magnitude={50}
+								<Panel
+									background="surface"
+									border="subtle"
+									padding="xs"
+									radius="sm"
+									shadow="none"
 								>
-									<Text variant="bodyStrong">Parallax</Text>
-								</ScrollParallax>
+									<ScrollParallax magnitude={50}>
+										<Text variant="bodyStrong">Parallax</Text>
+									</ScrollParallax>
+								</Panel>
 							);
 						},
 					},
@@ -4249,12 +4269,19 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 						Render() {
 							return (
 								<div className="flex flex-col gap-2">
-									<div
-										id="portal-demo-target"
-										className="rounded-lg border border-dashed border-border/20 p-2 text-xs text-muted-foreground"
-									>
+									<Text variant="caption" tone="muted">
 										Portal target
-									</div>
+									</Text>
+									<Panel
+										id="portal-demo-target"
+										background="surface"
+										border="subtle"
+										display="block"
+										padding="xs"
+										radius="sm"
+										shadow="none"
+										className="min-h-10 border-dashed text-xs text-muted-foreground"
+									/>
 									<Portal target="portal-demo-target">
 										<Text variant="caption" tone="muted">
 											Portaled text
@@ -4294,17 +4321,26 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 										size="sm"
 										variant="primary"
 										onClick={() =>
-											openModal(({ close }) => (
-												<div className="flex flex-col gap-3">
-													<Text as="h3" variant="headingMd">
-														Modal content
-													</Text>
-													<Text variant="body" tone="muted">
-														Opened via useModal.
-													</Text>
-													<Button onClick={close}>Close</Button>
-												</div>
-											))
+											openModal(
+												({ close }) => (
+													<>
+														<ModalHeader
+															leadingIcon={<Icon name="cards" size="sm" />}
+														>
+															<ModalTitle>Modal content</ModalTitle>
+														</ModalHeader>
+														<ModalContent>
+															<Text variant="body" tone="muted">
+																Opened via useModal.
+															</Text>
+														</ModalContent>
+														<ModalFooter>
+															<Button onClick={close}>Close</Button>
+														</ModalFooter>
+													</>
+												),
+												{ ariaLabel: "Modal content" },
+											)
 										}
 									>
 										Open modal
@@ -4375,38 +4411,6 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 								</Button>
 							);
 						},
-					},
-					{
-						id: "modal-shell",
-						kind: "usage",
-						name: "ModalShell",
-						label: "Modal shell",
-						snippet: "<ModalShell onClose={close}>...</ModalShell>",
-						related: relatedMap.ModalShell,
-					},
-					{
-						id: "modal-host",
-						kind: "usage",
-						name: "ModalHost",
-						label: "Modal host",
-						snippet: "<ModalHost />",
-						related: relatedMap.ModalHost,
-					},
-					{
-						id: "confirmation-modal",
-						kind: "usage",
-						name: "ConfirmationModal",
-						label: "Modal content",
-						snippet: "<ConfirmationModal {...props} />",
-						related: relatedMap.ConfirmationModal,
-					},
-					{
-						id: "image-inspect-modal",
-						kind: "usage",
-						name: "ImageInspectModal",
-						label: "Modal content",
-						snippet: "<ImageInspectModal {...props} />",
-						related: relatedMap.ImageInspectModal,
 					},
 				],
 			},
@@ -4520,15 +4524,6 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 							);
 						},
 					},
-					{
-						id: "show-toast-usage",
-						kind: "usage",
-						name: "showToast.promise",
-						label: "Async toast helper",
-						snippet:
-							"showToast.success('Saved.', { title: 'Success' })\nawait showToast.promise(savePromise, { loading: 'Saving...', success: 'Saved.', error: 'Failed.' }, { loadingTitle: 'Request', successTitle: 'Success', errorTitle: 'Failed' })",
-						related: relatedMap.showToast,
-					},
 				],
 			},
 		],
@@ -4580,48 +4575,12 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 				description: "Utilities and providers",
 				items: [
 					{
-						id: "settings-provider",
-						kind: "usage",
-						name: "SettingsProvider",
-						label: "Motion settings provider",
-						snippet:
-							"<SettingsProvider defaultMotionDisabled={false}>...</SettingsProvider>",
+						id: "appearance-setting",
+						kind: "component",
+						name: "Appearance setting",
+						label: "Atomic application appearance",
 						related: relatedMap.SettingsProvider,
-					},
-					{
-						id: "use-settings-context",
-						kind: "usage",
-						name: "useSettingsContext",
-						label: "Settings hook",
-						snippet: "const settings = useSettingsContext()",
-						related: relatedMap.useSettingsContext,
-					},
-					{
-						id: "focus",
-						kind: "usage",
-						name: "focus",
-						label: "Focus ring tokens",
-						snippet:
-							"import { focusRing } from '@/components/ui/foundations/focus'",
-						related: relatedMap.focus,
-					},
-					{
-						id: "spring",
-						kind: "usage",
-						name: "spring",
-						label: "Motion springs",
-						snippet:
-							"import { springs } from '@/components/ui/foundations/spring'",
-						related: relatedMap.spring,
-					},
-					{
-						id: "motion-timing",
-						kind: "usage",
-						name: "motionTiming",
-						label: "Timing tokens",
-						snippet:
-							"import { motionTiming } from '@/components/ui/foundations/motionTiming'",
-						related: relatedMap.motionTiming,
+						Render: AppearanceSettingsDemo,
 					},
 				],
 			},
@@ -4648,40 +4607,49 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 						related: relatedMap.Section,
 						Render() {
 							return (
-								<Section
-									padding="soft"
-									background="surface"
-									className="min-h-[240px] rounded-2xl border border-border/15"
-									innerClassName="flex h-full flex-col justify-between gap-6"
+								<Panel
+									background="transparent"
+									border="subtle"
+									overflow="hidden"
+									padding="none"
+									radius="lg"
+									shadow="none"
 								>
-									<Section.Background className="opacity-70">
-										<Image
-											src="/test/blob.png"
-											alt=""
-											fill
-											className="object-cover"
-											aria-hidden={true}
-										/>
-										<div className="absolute inset-0 bg-linear-to-br from-background/90 via-background/45 to-transparent" />
-									</Section.Background>
-									<div className="flex max-w-lg flex-col gap-2">
-										<Text as="h3" variant="headingMd">
-											Full-bleed media behind bounded content
-										</Text>
-										<Text variant="body" tone="muted">
-											The background spans the full section while the copy stays
-											inside the normal max-width wrapper.
-										</Text>
-									</div>
-									<div className="flex flex-wrap gap-2">
-										<Button variant="primary" size="sm">
-											Primary action
-										</Button>
-										<Button variant="secondary" size="sm">
-											Secondary
-										</Button>
-									</div>
-								</Section>
+									<Section
+										padding="soft"
+										background="surface"
+										className="min-h-[240px]"
+										innerClassName="flex h-full flex-col justify-between gap-6"
+									>
+										<Section.Background className="opacity-70">
+											<Image
+												src="/test/blob.png"
+												alt=""
+												fill
+												className="object-cover"
+												aria-hidden={true}
+											/>
+											<div className="absolute inset-0 bg-linear-to-br from-background/90 via-background/45 to-transparent" />
+										</Section.Background>
+										<div className="flex max-w-lg flex-col gap-2">
+											<Text as="h3" variant="headingMd">
+												Full-bleed media behind bounded content
+											</Text>
+											<Text variant="body" tone="muted">
+												The background spans the full section while the copy
+												stays inside the normal max-width wrapper.
+											</Text>
+										</div>
+										<div className="flex flex-wrap gap-2">
+											<Button variant="primary" size="sm">
+												Primary action
+											</Button>
+											<Button variant="secondary" size="sm">
+												Secondary
+											</Button>
+										</div>
+									</Section>
+								</Panel>
 							);
 						},
 					},
@@ -4693,49 +4661,59 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 						related: relatedMap.Section,
 						Render() {
 							return (
-								<Section
-									padding="soft"
-									background="foreground"
-									className="min-h-[240px] rounded-2xl border border-border/10 text-background"
-									innerClassName="flex h-full flex-col justify-between gap-6"
-									maxWidth="wide"
+								<Panel
+									background="transparent"
+									border="subtle"
+									overflow="hidden"
+									padding="none"
+									radius="lg"
+									shadow="none"
 								>
-									<Section.Background className="opacity-80">
-										<div className="h-full w-full bg-linear-to-br from-primary/30 via-transparent to-background/10" />
-										<div className="absolute -left-10 top-6 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-										<div className="absolute right-8 top-8 h-24 w-24 rounded-full border border-white/20" />
-										<div className="absolute inset-x-0 bottom-0 h-20 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_55%)]" />
-									</Section.Background>
-									<div className="flex max-w-xl flex-col gap-3">
-										<Text
-											as="h3"
-											variant="headingMd"
-											className="text-background"
-										>
-											Node backgrounds are not limited to images
-										</Text>
-										<Text variant="body" className="text-background/80">
-											Patterns, gradients, ambient shapes, and layered media can
-											live behind the section without changing foreground
-											layout.
-										</Text>
-									</div>
-									<Panel
-										display="flex"
-										padding="sm"
-										gap="sm"
-										shadow="none"
-										background="transparent"
-										className="max-w-md border border-white/15 text-background"
+									<Section
+										padding="soft"
+										background="foreground"
+										className="min-h-[240px] text-background"
+										innerClassName="flex h-full flex-col justify-between gap-6"
+										maxWidth="wide"
 									>
-										<Text variant="bodyStrong" className="text-background">
-											Same foreground structure
-										</Text>
-										<Text variant="caption" className="text-background/80">
-											The section API still controls spacing and width.
-										</Text>
-									</Panel>
-								</Section>
+										<Section.Background className="opacity-80">
+											<div className="h-full w-full bg-linear-to-br from-primary/30 via-transparent to-background/10" />
+											<div className="absolute -left-10 top-6 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+											<div className="absolute right-8 top-8 h-24 w-24 rounded-full border border-white/20" />
+											<div className="absolute inset-x-0 bottom-0 h-20 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_55%)]" />
+										</Section.Background>
+										<div className="flex max-w-xl flex-col gap-3">
+											<Text
+												as="h3"
+												variant="headingMd"
+												className="text-background"
+											>
+												Node backgrounds are not limited to images
+											</Text>
+											<Text variant="body" className="text-background/80">
+												Patterns, gradients, ambient shapes, and layered media
+												can live behind the section without changing foreground
+												layout.
+											</Text>
+										</div>
+										<Panel
+											border="subtle"
+											display="flex"
+											padding="sm"
+											gap="sm"
+											shadow="none"
+											background="transparent"
+											className="max-w-md !border-white/15 text-background"
+										>
+											<Text variant="bodyStrong" className="text-background">
+												Same foreground structure
+											</Text>
+											<Text variant="caption" className="text-background/80">
+												The section API still controls spacing and width.
+											</Text>
+										</Panel>
+									</Section>
+								</Panel>
 							);
 						},
 					},
@@ -4749,64 +4727,61 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 							const [taps, setTaps] = useState(0);
 
 							return (
-								<Section
-									padding="soft"
-									background="surface"
-									className="min-h-[240px] rounded-2xl border border-border/15"
-									innerClassName="flex h-full flex-col gap-4"
+								<Panel
+									background="transparent"
+									border="subtle"
+									overflow="hidden"
+									padding="none"
+									radius="lg"
+									shadow="none"
 								>
-									<Section.Background interactive>
-										<div className="h-full w-full bg-linear-to-br from-primary/10 via-transparent to-foreground/5" />
-										<Button
-											size="sm"
-											variant="secondary"
-											className="absolute bottom-4 right-4"
-											onClick={() => setTaps((value) => value + 1)}
-										>
-											Background action
-										</Button>
-									</Section.Background>
-									<div className="flex max-w-md flex-col gap-2">
-										<Text as="h3" variant="headingMd">
-											Interactive backgrounds stay opt-in
-										</Text>
-										<Text variant="body" tone="muted">
-											By default the background is decorative and ignores
-											pointer events. Set <code>interactive</code> only when the
-											background needs real controls.
-										</Text>
-									</div>
-									<Panel
-										display="flex"
-										padding="sm"
-										gap="sm"
-										shadow="none"
-										className="max-w-md border border-border/15"
+									<Section
+										padding="soft"
+										background="surface"
+										className="min-h-[240px]"
+										innerClassName="flex h-full flex-col gap-4"
 									>
-										<Text variant="bodyStrong">
-											Interactive background taps
-										</Text>
-										<Text variant="caption" tone="muted">
-											{taps} tap{taps === 1 ? "" : "s"} registered from the
-											background action.
-										</Text>
-									</Panel>
-								</Section>
+										<Section.Background interactive>
+											<div className="h-full w-full bg-linear-to-br from-primary/10 via-transparent to-foreground/5" />
+											<Button
+												size="sm"
+												variant="secondary"
+												className="absolute bottom-4 right-4"
+												onClick={() => setTaps((value) => value + 1)}
+											>
+												Background action
+											</Button>
+										</Section.Background>
+										<div className="flex max-w-md flex-col gap-2">
+											<Text as="h3" variant="headingMd">
+												Interactive backgrounds stay opt-in
+											</Text>
+											<Text variant="body" tone="muted">
+												By default the background is decorative and ignores
+												pointer events. Set <code>interactive</code> only when
+												the background needs real controls.
+											</Text>
+										</div>
+										<Panel
+											border="subtle"
+											display="flex"
+											padding="sm"
+											gap="sm"
+											shadow="none"
+											className="max-w-md"
+										>
+											<Text variant="bodyStrong">
+												Interactive background taps
+											</Text>
+											<Text variant="caption" tone="muted">
+												{taps} tap{taps === 1 ? "" : "s"} registered from the
+												background action.
+											</Text>
+										</Panel>
+									</Section>
+								</Panel>
 							);
 						},
-					},
-					{
-						id: "section-background-usage",
-						kind: "usage",
-						name: "Section.Background",
-						label: "Usage snippet",
-						related: relatedMap.Section,
-						snippet: `<Section padding="default" background="surface" className="rounded-2xl overflow-hidden">
-  <Section.Background className="opacity-70">
-    <img src="/hero.jpg" alt="" className="h-full w-full object-cover" />
-  </Section.Background>
-  <Text as="h2" variant="headingLg">Section content</Text>
-</Section>`,
 					},
 				],
 			},
@@ -4907,32 +4882,6 @@ import { MotionScene } from "@/components/ui/motion/MotionScene";
 								</div>
 							);
 						},
-					},
-					{
-						id: "create-api-client",
-						kind: "usage",
-						name: "createApiClient",
-						label: "Reusable request factory",
-						snippet:
-							"const api = createApiClient({ baseUrl: process.env.NEXT_PUBLIC_BACKEND_API_URL! })",
-						related: relatedMap.createApiClient,
-					},
-					{
-						id: "create-mock-fetch",
-						kind: "usage",
-						name: "createMockFetch",
-						label: "Fake transport for demos and tests",
-						snippet:
-							"const mockFetch = createMockFetch([{ matcher: '/', method: 'GET', response: { body: { message: 'OK' } } }])",
-						related: relatedMap.createMockFetch,
-					},
-					{
-						id: "check-health",
-						kind: "usage",
-						name: "checkHealth",
-						label: "Endpoint wrapper",
-						snippet: "const health = await checkHealth(api.request)",
-						related: relatedMap.checkHealth,
 					},
 				],
 			},

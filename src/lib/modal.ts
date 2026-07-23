@@ -1,15 +1,18 @@
 // lib/modal.ts
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
+import type { ModalCardProps } from "@/components/ui/overlays/modal/ModalCard";
 
-export type ModalRenderFn = (helpers: { close: () => void }) => ReactNode;
+export type ModalRenderFn = (helpers: {
+	close: () => void;
+	setCloseDisabled: (disabled: boolean) => void;
+}) => ReactNode;
 
 export type OpenModalOptions = {
-	portalTargetId?: string;
+	ariaLabel?: string;
+	cardProps?: Omit<ModalCardProps, "children">;
 	id?: string;
-	panelClassName?: string;
-	panelWrapperClassName?: string;
-	backdropClassName?: string;
-	panelStyle?: CSSProperties;
+	placement?: "center" | "top";
+	portalTargetId?: string;
 };
 
 type ModalOpenEventDetail = {

@@ -13,7 +13,7 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - `src/components/ui/primitives/Button.tsx`: canonical action and button-like link component.
 - `src/components/ui/primitives/InputFrame.tsx`: canonical shell for text-like inputs.
 - `src/components/ui/primitives/Field.tsx`: canonical label, description, and message wrapper.
-- `src/components/ui/primitives/Dropdown.tsx`: canonical trigger-plus-menu overlay primitive.
+- `src/components/ui/primitives/Dropdown.tsx`: canonical trigger-plus-menu overlay primitive with `Dropdown.Menu`, `Dropdown.Listbox`, and `Dropdown.Panel` extensions.
 - `src/components/ui/primitives/Listbox.tsx`: canonical accessible option list for menus and selectors.
 - `src/components/ui/primitives/Panel.tsx`: generic surface, layout, and overlay-root primitive.
 - `src/components/ui/primitives/Card.tsx`: structured card built on `Panel`, with owned header, action, content, and footer slots.
@@ -31,9 +31,15 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
   - Use `primary`, `secondary`, and `ghost` for action hierarchy; reserve `inverse` for controls on contextual high-contrast surfaces.
   - Use `tone="danger"` for destructive meaning instead of introducing a danger appearance variant. Danger remains a soft treatment at every hierarchy level.
   - Ghost buttons use the normal size shell by default. Use `size="none"` only when the caller deliberately owns all dimensions, spacing, and typography.
+  - Ghost interaction is opacity-only and never paints a hover surface. Use it for navigation-style actions such as header search results and footer links.
 - `InputFrame` should own the visual shell for text-like controls.
 - `Field` should own labels, descriptions, required markers, and inline status messages.
 - `Dropdown` and `Listbox` should own menu positioning and accessible option-list behavior rather than page-local popover logic.
+	- Use `Dropdown.Menu` for action menus, `Dropdown.Listbox` for selectable entity menus, and low-level `Dropdown` only for editable or otherwise specialized triggers.
+	- Use `Dropdown.Panel` for independently controlled anchored date, color, and swatch surfaces.
+	- Use `layout="presentation"` and semantic divider properties instead of caller-owned list-row height, padding, gap, or border overrides.
+	- Listbox option hover is an immediate background-only state. Neutralize the nested ghost Button's opacity interaction and do not transition the option background.
+	- Pointer-opened lists start without an active option or active background. Passive pointer entry caused by portal placement must not activate a row; actual pointer movement may. Pointer-owned active state clears when the pointer leaves the list, while keyboard-owned active state remains available for navigation. The first ArrowDown or ArrowUp establishes the first or last enabled option, while keyboard-triggered opening may establish that option immediately. Keep `aria-selected` and explicit selection indicators distinct from the hover/keyboard-active background.
   - Use the default fixed positioning when the menu must stay attached during scroll.
   - Use the absolute positioning option only when a one-time local placement is acceptable and the menu should stay in the trigger's local layout context.
 - The focus invariant must remain intact:
@@ -51,14 +57,16 @@ Lowest-level reusable building blocks. Agents should check this folder before wr
 - Use `Dropdown` when you need a trigger and floating menu; use `Listbox` when the menu is fundamentally a list of options.
   - Prefer the default fixed strategy for filter menus and controls inside scrolling layouts.
 - Use `Panel`, `Card`, `Section`, and `Divider` to preserve shared container spacing and surface rhythm.
-  - Use `Panel` for non-semantic surfaces, generic grouped layout, and overlay roots.
+	- Use `Panel` for non-semantic surfaces, generic grouped layout, and overlay roots.
+	- Opaque `Panel` backgrounds publish their resolved token through the inherited `--ui-surface-color` variable. Transparent panels inherit the nearest surface. Descendants that must pre-compose opaque color treatments should consume that variable rather than assuming the page background.
   - Use `Card` only when its structured slots describe the content.
   - Use `CardHeader`, `CardContent`, and `CardFooter` under a real `Card` root; do not imitate Card data attributes on `Panel`.
   - Use semantic `accent` values from `accent.ts`; do not pass product-specific color strings into shared surfaces.
   - Use `Divider` instead of ad hoc border divs when separating content groups or labeling a horizontal break.
   - Labeled `Divider` rules must terminate at the label's padded box. Do not paint `bg-background` behind the label; the divider must remain neutral on Card, Panel, modal, and page surfaces.
 - Use `Section.Background` when a section needs image, gradient, or node-based background media behind its normal content flow.
-  - The background spans the full section, not the inner max-width container.
+	- `padding="hero"` reserves the responsive site-header height plus one normal section-padding unit above the content, while retaining normal section padding horizontally and below.
+	- The background spans the full section, not the inner max-width container.
   - It is decorative by default; set `interactive` only when the background truly needs live controls.
 - When building transparent bordered cards, keep the wrapper transparent, keep the card background explicit, and align wrapper and card radii.
 

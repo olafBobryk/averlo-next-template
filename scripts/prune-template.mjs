@@ -29,7 +29,7 @@ const SURFACES = {
 		id: "dashboard.reference-entities",
 		flag: "--no-dashboard-reference-entities",
 		description:
-			"Remove the dashboard reference member/record verticals, examples, policy, and focused verifiers while retaining dashboard core.",
+			"Remove dashboard reference record/member routes, examples, policy, and focused verifiers while retaining dashboard and platform core presentation.",
 		dependentSurfaces: ["dashboard"],
 		ownedPaths: [
 			"docs/frontend-entity-policy.md",
@@ -39,28 +39,23 @@ const SURFACES = {
 			"scripts/verify-frontend-entity-policy.ts",
 			"scripts/verify-profile-pruning.mjs",
 			"src/app/(site)/dashboard/records",
-			"src/app/(site)/dashboard/organization/members",
+			"src/app/(site)/dashboard/organization/members/[memberId]",
 			"src/app/(site)/dashboard/reference",
 			"src/app/(site)/dashboard/_components/commands/DashboardEntityCommands.tsx",
-			"src/app/(site)/dashboard/_components/data",
-			"src/app/(site)/dashboard/_components/detail",
-			"src/app/(site)/dashboard/_components/entities/AGENTS.md",
-			"src/app/(site)/dashboard/_components/entities/DashboardEntityState.tsx",
 			"src/app/(site)/dashboard/_components/entities/EntityDeletion.tsx",
-			"src/app/(site)/dashboard/_components/entities/member",
 			"src/app/(site)/dashboard/_components/entities/record",
-			"src/app/(site)/dashboard/_lib/AGENTS.md",
-			"src/app/(site)/dashboard/_lib/entities",
+			"src/app/(site)/dashboard/_lib/entities/record",
 			"src/app/(site)/dashboard/_lib/entity-lifecycle.ts",
 			"src/app/(site)/dashboard/_lib/fixtures",
-			"src/app/(site)/dashboard/_lib/presentation",
 		],
 		markerFiles: [
 			"scripts/verify-dashboard-surfaces.ts",
 			"src/app/(site)/dashboard/page.tsx",
+			"src/app/(site)/dashboard/layout.tsx",
 			"src/app/(site)/dashboard/organization/page.tsx",
 			"src/app/(site)/dashboard/_components/debug/DashboardDebugMenu.tsx",
 			"src/app/(site)/dashboard/_components/layout/DashboardSidebarNav.tsx",
+			"src/app/(site)/dashboard/_components/loading/DashboardRouteLoadingViews.tsx",
 			"src/app/(site)/dashboard/_registry/surfaceRegistry.ts",
 			"src/app/api/debug/fixture/reset/route.ts",
 		],
@@ -76,7 +71,7 @@ const SURFACES = {
 			{
 				label: "reference entity routes and imports",
 				pattern:
-					/(dashboard\.reference\.entities|dashboard\.records|dashboard\.record|dashboard\.organization\.members|dashboard\.organization\.member|\/dashboard\/records|\/dashboard\/reference\/entities|_lib\/entities|reference-records|reference-members)/,
+					/(dashboard\.reference\.entities|dashboard\.records|dashboard\.record|dashboard\.organization\.members|dashboard\.organization\.member|\/dashboard\/records|\/dashboard\/reference\/entities|reference-records|reference-members)/,
 			},
 		],
 	},
@@ -89,10 +84,14 @@ const SURFACES = {
 		ownedPaths: [
 			"scripts/verify-auth-organization.ts",
 			"scripts/verify-dashboard-surfaces.ts",
+			"scripts/verify-platform-operations.ts",
 			"src/app/(site)/dashboard",
 			"src/app/(site)/(auth)",
 			"src/app/api/auth",
 			"src/app/api/debug",
+			"src/app/api/feedback",
+			"src/app/api/platform",
+			"src/app/api/support",
 			"src/lib/api/auth.ts",
 			"src/lib/auth",
 			"src/proxy.ts",
@@ -119,9 +118,14 @@ const SURFACES = {
 				label: "dashboard auth import",
 				pattern: /from\s+["']@\/lib\/api\/auth["']/,
 			},
+			{
+				label: "dashboard support and platform operations",
+				pattern:
+					/(\/dashboard\/(?:platform|support)|\/api\/(?:feedback|platform|support)|platformRole|Platform Inbox|ReportIssueModal)/,
+			},
 		],
 		markerFiles: [],
-		packageScripts: ["verify:auth", "verify:dashboard"],
+		packageScripts: ["verify:auth", "verify:dashboard", "verify:platform"],
 	},
 	demo: {
 		id: "demo",
@@ -327,16 +331,6 @@ const SCROLL_PERFORMANCE_PACKAGE_SCRIPTS = [
 
 const SCROLL_PERFORMANCE_PACKAGE_DEPENDENCIES = ["playwright"];
 
-const GRAPH_PACKAGE_DEPENDENCIES = [
-	"react-force-graph-2d",
-	"react-force-graph-3d",
-	"d3-force",
-	"three",
-	"three-spritetext",
-	"@types/d3-force",
-	"@types/three",
-];
-
 function printUsage() {
 	console.log(`Usage: npm run prune:template -- [flags]
 
@@ -522,22 +516,12 @@ async function collectPlan(surfaceIds) {
 	const rewriteCentral = surfaceIds.some(
 		(surfaceId) => surfaceId !== "dashboardReferenceEntities",
 	);
-	const removesAllGraphConsumers =
-		surfaceIds.includes("intelligence") && surfaceIds.includes("reference");
-
 	for (const surfaceId of surfaceIds) {
 		for (const ownedPath of SURFACES[surfaceId].ownedPaths) {
 			const absolutePath = path.join(ROOT, ownedPath);
 			if (await pathExists(absolutePath)) {
 				deletedPaths.push(absolutePath);
 			}
-		}
-	}
-
-	if (removesAllGraphConsumers) {
-		const graphMapPath = path.join(ROOT, "src/components/ui/misc/GraphMap.tsx");
-		if (await pathExists(graphMapPath)) {
-			deletedPaths.push(graphMapPath);
 		}
 	}
 
@@ -575,7 +559,6 @@ async function collectPlan(surfaceIds) {
 			...(surfaceIds.includes("scrollPerformance")
 				? SCROLL_PERFORMANCE_PACKAGE_DEPENDENCIES
 				: []),
-			...(removesAllGraphConsumers ? GRAPH_PACKAGE_DEPENDENCIES : []),
 		],
 		packageScripts: [
 			...surfaceIds.flatMap(

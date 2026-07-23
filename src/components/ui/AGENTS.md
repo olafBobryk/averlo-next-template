@@ -12,7 +12,7 @@ Main design-system and UX-system entry point. This folder is where agents should
 - Need low-level structure or styling primitives: use `src/components/ui/primitives/`.
 - Need a form control: use `src/components/ui/input/`.
 - Need checkbox, radio, or toggle semantics: use `src/components/ui/input/choice/`.
-- Need file upload helpers: use `src/components/ui/input/files/`.
+- Need file selection and preview workflows: use `FileInput` from `src/components/ui/input/files/`.
 - Need feedback, empty states, copy, segmented control, skeletons, or disclosure: use `src/components/ui/misc/`.
 - Need date or time display: use `src/components/ui/time/`.
 - Need icons or icon animation helpers: use `src/components/ui/icons/` and `src/components/ui/helpers/`.

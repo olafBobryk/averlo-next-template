@@ -1,12 +1,22 @@
 "use client";
 
 import clsx from "clsx";
+import dynamic from "next/dynamic";
 import * as React from "react";
+import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
 import { Button } from "@/components/ui/primitives/Button";
-import { MarkdownEditorClient } from "./MarkdownEditorClient";
+import type { MarkdownContentDensity } from "./markdownContent";
 
-export type MarkdownEditorDensity = "compact" | "default";
+const MarkdownEditorClient = dynamic(
+	() =>
+		import("./MarkdownEditorClient").then(
+			(module) => module.MarkdownEditorClient,
+		),
+	{ ssr: false },
+);
+
+export type MarkdownEditorDensity = MarkdownContentDensity;
 
 export type MarkdownEditorMentionOption = {
 	id: string;
@@ -25,7 +35,7 @@ export type MarkdownEditorProps = {
 	placeholder?: string;
 };
 
-export function MarkdownEditor({
+function MarkdownEditorRoot({
 	ariaLabel,
 	className,
 	defaultMarkdown = "",
@@ -54,7 +64,6 @@ export function MarkdownEditor({
 				ariaLabel={ariaLabel}
 				density={density}
 				disabled={disabled}
-				key={defaultMarkdown}
 				markdown={markdown}
 				mentions={mentions}
 				onChange={handleChange}
@@ -63,6 +72,37 @@ export function MarkdownEditor({
 		</div>
 	);
 }
+
+function MarkdownEditorSkeleton({
+	className,
+	density = "default",
+}: Pick<MarkdownEditorProps, "className" | "density">) {
+	return (
+		<div
+			aria-hidden
+			className={clsx(
+				"min-w-0 w-full overflow-hidden rounded-[12px] border border-border bg-card",
+				className,
+			)}
+		>
+			<div className="flex min-h-11 items-center gap-2 border-b border-border px-3">
+				<Skeleton className="h-7 w-20 rounded-[8px]" />
+				<Skeleton className="h-7 w-24 rounded-[8px]" />
+				<Skeleton className="h-7 w-16 rounded-[8px]" />
+			</div>
+			<Skeleton
+				className={clsx(
+					"m-4 w-[calc(100%-2rem)] rounded-[8px]",
+					density === "compact" ? "h-32" : "h-56",
+				)}
+			/>
+		</div>
+	);
+}
+
+export const MarkdownEditor = Object.assign(MarkdownEditorRoot, {
+	Skeleton: MarkdownEditorSkeleton,
+});
 
 export type MarkdownEditorModalFormProps = MarkdownEditorProps & {
 	cancelLabel?: React.ReactNode;

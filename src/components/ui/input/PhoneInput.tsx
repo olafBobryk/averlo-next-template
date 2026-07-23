@@ -11,8 +11,12 @@ import {
 import * as React from "react";
 import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon } from "@/components/ui/icons/Icon";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Button } from "@/components/ui/primitives/Button";
-import { Dropdown } from "@/components/ui/primitives/Dropdown";
+import {
+	Dropdown,
+	useDropdownListNavigation,
+} from "@/components/ui/primitives/Dropdown";
 import { dropdownListClassName } from "@/components/ui/primitives/dropdownStyles";
 import { Field } from "@/components/ui/primitives/Field";
 import {
@@ -109,7 +113,7 @@ const defaultValidate = (value: PhoneValue, country?: CountryCode) => {
 		: "Enter a valid phone number.";
 };
 
-export function PhoneInput({
+function PhoneInputRoot({
 	label,
 	description,
 	placeholder = "Phone number",
@@ -288,36 +292,22 @@ export function PhoneInput({
 			: matchCountryFromValue(displayValue);
 
 	const showSpinner = showSpinnerOnMismatch && !iconCountry;
-	const [activeIndex, setActiveIndex] = React.useState(0);
 	const [menuOpen, setMenuOpen] = React.useState(false);
-	const listRef = React.useRef<HTMLDivElement | null>(null);
-
-	React.useEffect(() => {
-		if (filteredCountries.length === 0) {
-			setActiveIndex(0);
-			return;
-		}
-		if (activeIndex > filteredCountries.length - 1) {
-			setActiveIndex(0);
-		}
-	}, [activeIndex, filteredCountries.length]);
-
-	React.useEffect(() => {
-		if (!menuOpen) return;
-		const option = listRef.current?.querySelector<HTMLElement>(
-			`[data-option-index="${activeIndex}"]`,
-		);
-		option?.scrollIntoView({ block: "nearest" });
-	}, [activeIndex, menuOpen]);
+	const navigationOptions = React.useMemo(
+		() =>
+			filteredCountries.map((country) => ({
+				selected: country.code === selectedCountry?.code,
+			})),
+		[filteredCountries, selectedCountry?.code],
+	);
+	const { activeIndex, getNextIndex, listRef, setActiveIndex } =
+		useDropdownListNavigation({ isOpen: menuOpen, options: navigationOptions });
 
 	const updateActiveIndex = React.useCallback(
-		(nextIndex: number) => {
-			if (filteredCountries.length === 0) return;
-			const safeIndex =
-				(nextIndex + filteredCountries.length) % filteredCountries.length;
-			setActiveIndex(safeIndex);
+		(direction: 1 | -1) => {
+			setActiveIndex((current) => getNextIndex(current, direction));
 		},
-		[filteredCountries.length],
+		[getNextIndex, setActiveIndex],
 	);
 
 	const applyDialCode = React.useCallback(
@@ -535,13 +525,13 @@ export function PhoneInput({
 									if (event.key === "ArrowDown") {
 										event.preventDefault();
 										if (!isOpen) openMenu();
-										updateActiveIndex(activeIndex + 1);
+										updateActiveIndex(1);
 										return;
 									}
 									if (event.key === "ArrowUp") {
 										event.preventDefault();
 										if (!isOpen) openMenu();
-										updateActiveIndex(activeIndex - 1);
+										updateActiveIndex(-1);
 										return;
 									}
 									if (event.key === "Enter") {
@@ -660,9 +650,7 @@ export function PhoneInput({
 						listClassName={dropdownListClassName}
 						optionClassName={optionClassName}
 						optionActiveClassName={optionActiveClassName}
-						optionSelectedClassName={
-							optionSelectedClassName ?? optionActiveClassName
-						}
+						optionSelectedClassName={optionSelectedClassName}
 						disabled={disabled}
 					/>
 				)}
@@ -670,6 +658,10 @@ export function PhoneInput({
 		</Field>
 	);
 }
+
+export const PhoneInput = Object.assign(PhoneInputRoot, {
+	Skeleton: InputSkeleton,
+});
 
 export const PHONE_COUNTRIES: CountryOption[] = getCountries().map((code) => ({
 	code,

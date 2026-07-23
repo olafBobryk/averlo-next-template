@@ -13,7 +13,7 @@ const chipTone = {
 	React.ComponentProps<typeof Chip>["tone"]
 >;
 
-export function MemberRoleChip({
+function MemberRoleChipRoot({
 	label,
 	tone,
 }: {
@@ -22,3 +22,11 @@ export function MemberRoleChip({
 }) {
 	return <Chip tone={chipTone[tone]}>{label}</Chip>;
 }
+
+function MemberRoleChipSkeleton({ label = "Member" }: { label?: string }) {
+	return <Chip.Skeleton>{label}</Chip.Skeleton>;
+}
+
+export const MemberRoleChip = Object.assign(MemberRoleChipRoot, {
+	Skeleton: MemberRoleChipSkeleton,
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import { Field } from "@/components/ui/primitives/Field";
 import {
 	InputFrame,
@@ -16,7 +17,7 @@ type TextInputProps = Omit<
 	label?: React.ReactNode;
 };
 
-export function TextInput({
+function TextInputRoot({
 	className,
 	description,
 	error,
@@ -51,3 +52,7 @@ export function TextInput({
 		</Field>
 	);
 }
+
+export const TextInput = Object.assign(TextInputRoot, {
+	Skeleton: InputSkeleton,
+});

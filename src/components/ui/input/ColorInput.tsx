@@ -2,8 +2,9 @@
 
 import clsx from "clsx";
 import * as React from "react";
+import { InputSkeleton } from "@/components/ui/input/InputSkeleton";
 import {
-	DropdownPanel,
+	Dropdown,
 	type DropdownPositionStrategy,
 } from "@/components/ui/primitives/Dropdown";
 import { Field } from "@/components/ui/primitives/Field";
@@ -169,7 +170,7 @@ export function ColorPickerPanel({
 	);
 }
 
-export function ColorInput({
+function ColorInputRoot({
 	className,
 	defaultValue,
 	description,
@@ -282,7 +283,7 @@ export function ColorInput({
 					</button>
 				</InputFrame>
 				{open ? (
-					<DropdownPanel
+					<Dropdown.Panel
 						align="start"
 						anchorRef={rootRef}
 						className={clsx(
@@ -304,9 +305,13 @@ export function ColorInput({
 							onChange={commitValue}
 							value={selectedValue}
 						/>
-					</DropdownPanel>
+					</Dropdown.Panel>
 				) : null}
 			</div>
 		</Field>
 	);
 }
+
+export const ColorInput = Object.assign(ColorInputRoot, {
+	Skeleton: InputSkeleton,
+});

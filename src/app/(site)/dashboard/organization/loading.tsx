@@ -1,5 +1,5 @@
-import { DashboardRouteSkeleton } from "../_components/loading/DashboardRouteSkeleton";
+import { DashboardOrganizationLoadingView } from "../_components/loading/DashboardRouteLoadingViews";
 
 export default function DashboardOrganizationLoading() {
-	return <DashboardRouteSkeleton rows={3} />;
+	return <DashboardOrganizationLoadingView />;
 }

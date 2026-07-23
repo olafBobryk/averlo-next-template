@@ -11,3 +11,14 @@
   `false` to keep a failed confirmation open.
 - Use the shared table, detail, property-list, Markdown, selector, More-menu,
   state, toast, and modal components before creating entity-local substitutes.
+- `DashboardTablePanel` owns responsive data-table mechanics. Its first identity
+  column is always retained, optional columns are removed from right to left
+  when their card overflows, and a final `kind: "action"` column is always
+  visible and sticky. Set a higher `responsivePriority` only when a call site
+  needs a later optional column to survive longer than the positional default.
+- Compose each table's required `header` with the shared `Card.Header` slots.
+  Keep search, filters, summaries, and table-level actions in that caller-owned
+  header rather than adding table-specific toolbar props or a second Card.
+- A table supports at most one action column, and it must be the final column.
+  Mirror `kind` and `responsivePriority` in `DashboardTablePanel.Skeleton` so
+  live and loading layouts prune in the same order.

@@ -46,7 +46,7 @@ function getOrdinalSuffix(day: number): string {
 	return "th";
 }
 
-export function DateIndicator({
+function DateIndicatorRoot({
 	date,
 	leadingText,
 	...textProps
@@ -63,3 +63,7 @@ export function DateIndicator({
 		</Text>
 	);
 }
+
+export const DateIndicator = Object.assign(DateIndicatorRoot, {
+	Skeleton: Text.Skeleton,
+});

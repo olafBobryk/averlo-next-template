@@ -1,0 +1,541 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import { Icon } from "@/components/ui/icons/Icon";
+import { Chip } from "@/components/ui/misc/Chip";
+import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
+import {
+	ModalDescription,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/overlays/modal/ModalShell";
+import { useModal } from "@/components/ui/overlays/modal/useModal";
+import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/Card";
+import { requestPasswordRecovery } from "@/lib/api/auth";
+import { showToast } from "@/lib/feedback";
+import { DashboardDetailField } from "../../_components/detail/DashboardDetailField";
+import { MemberRoleChip } from "../../_components/entities/member/MemberRoleChip";
+import { useDashboardAuth } from "../../_components/providers/DashboardAuthProvider";
+import { memberRolePresentation } from "../../_lib/entities/member/presentation";
+import {
+	dashboardCapabilityLabels,
+	getDashboardCapabilities,
+} from "../../_registry/surfaceRegistry";
+import type { DashboardSettingsSnapshot } from "./settingsSnapshot";
+
+function DashboardSettingsHeaderActionsRoot() {
+	const { membership, user } = useDashboardAuth();
+	const canManage = Boolean(
+		user &&
+			getDashboardCapabilities(membership.role, user.platformRole).has(
+				"organization.manage",
+			),
+	);
+	return (
+		<div className="flex flex-wrap gap-2">
+			<Button
+				href="/dashboard/profile"
+				size="sm"
+				trailingIcon="external-link"
+				variant="primary"
+			>
+				Open profile
+			</Button>
+			{canManage ? (
+				<Button
+					href="/dashboard/organization/settings"
+					size="sm"
+					variant="ghost"
+				>
+					Organization settings
+				</Button>
+			) : null}
+		</div>
+	);
+}
+
+function DashboardSettingsHeaderActionsSkeleton() {
+	const { membership, user } = useDashboardAuth();
+	const canManage = Boolean(
+		user &&
+			getDashboardCapabilities(membership.role, user.platformRole).has(
+				"organization.manage",
+			),
+	);
+	return (
+		<div className="flex flex-wrap gap-2">
+			<Button.Skeleton size="sm" trailingIcon variant="primary">
+				Open profile
+			</Button.Skeleton>
+			{canManage ? (
+				<Button.Skeleton size="sm" variant="ghost">
+					Organization settings
+				</Button.Skeleton>
+			) : null}
+		</div>
+	);
+}
+
+export const DashboardSettingsHeaderActions = Object.assign(
+	DashboardSettingsHeaderActionsRoot,
+	{ Skeleton: DashboardSettingsHeaderActionsSkeleton },
+);
+
+function AccountDetailsSettingsSectionRoot({
+	joinedAtLabel,
+}: Pick<DashboardSettingsSnapshot, "joinedAtLabel">) {
+	const { membership, user } = useDashboardAuth();
+	if (!user) return null;
+
+	const capabilities = [
+		...getDashboardCapabilities(membership.role, user.platformRole),
+	];
+	const rolePresentation = memberRolePresentation[membership.role];
+
+	return (
+		<Card className="scroll-mt-24" id="account-details">
+			<Card.Header className="border-b">
+				<Card.Title className="inline-flex items-center gap-2">
+					<Icon className="text-muted-foreground" name="user" size="sm" />
+					Account details
+				</Card.Title>
+				<Card.Description>
+					Read-only account identity and organization membership details.
+				</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<dl className="grid gap-4 sm:grid-cols-2">
+					<DashboardDetailField
+						copyLabel="Copy email address"
+						copyValue={user.email}
+						icon={<Icon name="mail" size="sm" />}
+						label="Email"
+						value={user.email || "Email unavailable"}
+					/>
+					<DashboardDetailField
+						icon={<Icon name="calendar" size="sm" />}
+						label="Joined"
+						value={joinedAtLabel}
+					/>
+					<DashboardDetailField
+						icon={<Icon name="check" size="sm" />}
+						label="Permissions"
+						truncateValue={false}
+						value={
+							<span className="flex flex-wrap gap-2">
+								{capabilities.map((capability) => (
+									<Chip key={capability}>
+										{dashboardCapabilityLabels[capability]}
+									</Chip>
+								))}
+							</span>
+						}
+					/>
+					<DashboardDetailField
+						icon={<Icon name="shield" size="sm" />}
+						label="Organization role"
+						truncateValue={false}
+						value={
+							<MemberRoleChip
+								label={rolePresentation.shortLabel}
+								tone={rolePresentation.tone}
+							/>
+						}
+					/>
+				</dl>
+			</Card.Content>
+		</Card>
+	);
+}
+
+function AccountDetailsSettingsSectionSkeleton({
+	joinedAtLabel,
+}: Pick<DashboardSettingsSnapshot, "joinedAtLabel">) {
+	const { membership, user } = useDashboardAuth();
+	if (!user) return null;
+	const capabilities = [
+		...getDashboardCapabilities(membership.role, user.platformRole),
+	];
+	const rolePresentation = memberRolePresentation[membership.role];
+
+	return (
+		<Card className="scroll-mt-24" id="account-details">
+			<Card.Header className="border-b">
+				<Card.Title className="inline-flex items-center gap-2">
+					<Icon className="text-muted-foreground" name="user" size="sm" />
+					Account details
+				</Card.Title>
+				<Card.Description>
+					Read-only account identity and organization membership details.
+				</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<dl className="grid gap-4 sm:grid-cols-2">
+					<DashboardDetailField.Skeleton
+						copyable
+						icon={<Icon name="mail" size="sm" />}
+						label="Email"
+						value={user.email || "Email unavailable"}
+					/>
+					<DashboardDetailField.Skeleton
+						icon={<Icon name="calendar" size="sm" />}
+						label="Joined"
+						value={joinedAtLabel}
+					/>
+					<DashboardDetailField.Skeleton
+						icon={<Icon name="check" size="sm" />}
+						label="Permissions"
+						truncateValue={false}
+					>
+						<span className="flex flex-wrap gap-2">
+							{capabilities.map((capability) => (
+								<Chip.Skeleton key={capability}>
+									{dashboardCapabilityLabels[capability]}
+								</Chip.Skeleton>
+							))}
+						</span>
+					</DashboardDetailField.Skeleton>
+					<DashboardDetailField.Skeleton
+						icon={<Icon name="shield" size="sm" />}
+						label="Organization role"
+						truncateValue={false}
+					>
+						<MemberRoleChip.Skeleton label={rolePresentation.shortLabel} />
+					</DashboardDetailField.Skeleton>
+				</dl>
+			</Card.Content>
+		</Card>
+	);
+}
+
+export const AccountDetailsSettingsSection = Object.assign(
+	AccountDetailsSettingsSectionRoot,
+	{ Skeleton: AccountDetailsSettingsSectionSkeleton },
+);
+
+function SecuritySettingsSectionRoot({
+	authMethods,
+	identities,
+}: Pick<DashboardSettingsSnapshot, "authMethods" | "identities">) {
+	const { user } = useDashboardAuth();
+	if (!user) return null;
+
+	const passwordEnabled =
+		authMethods["password-sign-in"].available &&
+		identities.some((identity) => identity.provider === "password");
+	const externalIdentities = identities.filter(
+		(identity) => identity.provider !== "password",
+	);
+
+	return (
+		<Card className="scroll-mt-24" id="security-sign-in">
+			<Card.Header className="border-b">
+				<Card.Title className="inline-flex items-center gap-2">
+					<Icon className="text-muted-foreground" name="lock" size="sm" />
+					Security and sign-in
+				</Card.Title>
+				<Card.Description>
+					Password, recovery, identity, and session status for this account.
+				</Card.Description>
+				<Card.Action>
+					<DashboardSignOutButton />
+				</Card.Action>
+			</Card.Header>
+			<Card.Content>
+				<dl className="grid">
+					<SignInMethodRow
+						action={
+							authMethods["password-recovery"].available ? (
+								<PasswordRecoveryModalButton email={user.email} />
+							) : null
+						}
+						icon={<Icon name="lock" size="sm" />}
+						label="Password"
+						value={passwordEnabled ? "Enabled" : "Unavailable"}
+					/>
+					<SignInMethodRow
+						icon={<Icon name="mail" size="sm" />}
+						label="Magic link"
+						value={
+							authMethods["magic-link-sign-in"].available
+								? "Available"
+								: "Unavailable"
+						}
+					/>
+					{externalIdentities.map((identity) => (
+						<SignInMethodRow
+							icon={<Icon name="link" size="sm" />}
+							key={identity.id}
+							label={identity.provider}
+							value={identity.verified ? "Connected" : "Verification required"}
+						/>
+					))}
+				</dl>
+			</Card.Content>
+		</Card>
+	);
+}
+
+function SecuritySettingsSectionSkeleton({
+	authMethods,
+	identities,
+}: Pick<DashboardSettingsSnapshot, "authMethods" | "identities">) {
+	const { user } = useDashboardAuth();
+	if (!user) return null;
+	const passwordEnabled =
+		authMethods["password-sign-in"].available &&
+		identities.some((identity) => identity.provider === "password");
+	const externalIdentities = identities.filter(
+		(identity) => identity.provider !== "password",
+	);
+
+	return (
+		<Card className="scroll-mt-24" id="security-sign-in">
+			<Card.Header className="border-b">
+				<Card.Title className="inline-flex items-center gap-2">
+					<Icon className="text-muted-foreground" name="lock" size="sm" />
+					Security and sign-in
+				</Card.Title>
+				<Card.Description>
+					Password, recovery, identity, and session status for this account.
+				</Card.Description>
+				<Card.Action>
+					<DashboardSignOutButton />
+				</Card.Action>
+			</Card.Header>
+			<Card.Content>
+				<dl className="grid">
+					<SignInMethodRowSkeleton
+						action={
+							authMethods["password-recovery"].available ? (
+								<PasswordRecoveryModalButton email={user.email} />
+							) : null
+						}
+						icon={<Icon name="lock" size="sm" />}
+						label="Password"
+						value={passwordEnabled ? "Enabled" : "Unavailable"}
+					/>
+					<SignInMethodRowSkeleton
+						icon={<Icon name="mail" size="sm" />}
+						label="Magic link"
+						value={
+							authMethods["magic-link-sign-in"].available
+								? "Available"
+								: "Unavailable"
+						}
+					/>
+					{externalIdentities.map((identity) => (
+						<SignInMethodRowSkeleton
+							icon={<Icon name="link" size="sm" />}
+							key={identity.id}
+							label={identity.provider}
+							value={identity.verified ? "Connected" : "Verification required"}
+						/>
+					))}
+				</dl>
+			</Card.Content>
+		</Card>
+	);
+}
+
+export const SecuritySettingsSection = Object.assign(
+	SecuritySettingsSectionRoot,
+	{ Skeleton: SecuritySettingsSectionSkeleton },
+);
+
+function DashboardSignOutButton() {
+	const router = useRouter();
+	const { loading, logout } = useDashboardAuth();
+
+	async function handleSignOut() {
+		if (loading) return;
+		try {
+			await showToast.promise(logout(), {
+				loading: "Signing out...",
+				success: "Signed out.",
+				error: "Unable to sign out.",
+			});
+			router.replace("/login");
+			router.refresh();
+		} catch {
+			// The shared promise toast already reports the failed mutation.
+		}
+	}
+
+	return (
+		<Button
+			leadingIcon="log-out"
+			loading={loading}
+			onClick={handleSignOut}
+			size="sm"
+			tone="danger"
+			type="button"
+			variant="secondary"
+		>
+			Sign out
+		</Button>
+	);
+}
+
+function SignInMethodRow({
+	action,
+	icon,
+	label,
+	value,
+}: {
+	action?: React.ReactNode;
+	icon: React.ReactNode;
+	label: string;
+	value: string;
+}) {
+	return (
+		<div className="flex flex-col gap-3 border-t border-border/70 py-4 first:border-t-0 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+			<DashboardDetailField icon={icon} label={label} value={value} />
+			{action ? (
+				<div className="flex shrink-0 justify-start sm:justify-end">
+					{action}
+				</div>
+			) : null}
+		</div>
+	);
+}
+
+function SignInMethodRowSkeleton({
+	action,
+	icon,
+	label,
+	value,
+}: {
+	action?: React.ReactNode;
+	icon: React.ReactNode;
+	label: string;
+	value: string;
+}) {
+	return (
+		<div className="flex flex-col gap-3 border-t border-border/70 py-4 first:border-t-0 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+			<DashboardDetailField.Skeleton icon={icon} label={label} value={value} />
+			{action ? (
+				<div className="flex shrink-0 justify-start sm:justify-end">
+					{action}
+				</div>
+			) : null}
+		</div>
+	);
+}
+
+function PasswordRecoveryModalButton({ email }: { email: string }) {
+	const { openModal } = useModal();
+
+	function openPasswordRecoveryModal() {
+		openModal(
+			({ close, setCloseDisabled }) => (
+				<PasswordRecoveryModal
+					email={email}
+					onClose={close}
+					onCloseDisabledChange={setCloseDisabled}
+				/>
+			),
+			{
+				ariaLabel: "Reset password",
+				id: "account-password-recovery",
+			},
+		);
+	}
+
+	return (
+		<Button
+			leadingIcon="lock"
+			onClick={openPasswordRecoveryModal}
+			size="sm"
+			type="button"
+			variant="ghost"
+		>
+			Reset password
+		</Button>
+	);
+}
+
+function PasswordRecoveryModal({
+	email,
+	onClose,
+	onCloseDisabledChange,
+}: {
+	email: string;
+	onClose: () => void;
+	onCloseDisabledChange: (disabled: boolean) => void;
+}) {
+	const [pending, setPending] = React.useState(false);
+
+	React.useEffect(() => {
+		onCloseDisabledChange(pending);
+		return () => onCloseDisabledChange(false);
+	}, [onCloseDisabledChange, pending]);
+
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		if (pending) return;
+		setPending(true);
+		try {
+			const result = await showToast.promise(requestPasswordRecovery(email), {
+				loading: "Requesting password reset...",
+				success: "Password reset link requested.",
+				error: "Unable to request a password reset.",
+			});
+			if (result.previewUrl) {
+				window.location.assign(result.previewUrl);
+				return;
+			}
+			onClose();
+		} catch {
+			// The shared promise toast already reports the failed request.
+		} finally {
+			setPending(false);
+		}
+	}
+
+	return (
+		<>
+			<ModalHeader
+				closeDisabled={pending}
+				closeLabel="Close password reset"
+				leadingIcon={<Icon name="lock" size="sm" />}
+			>
+				<ModalTitle>Reset password</ModalTitle>
+				<ModalDescription>
+					We will send a password reset link to {email}.
+				</ModalDescription>
+			</ModalHeader>
+			<ModalForm
+				contentClassName="grid gap-4"
+				footer={
+					<>
+						<Button
+							disabled={pending}
+							onClick={onClose}
+							type="button"
+							variant="ghost"
+						>
+							Cancel
+						</Button>
+						<Button
+							leadingIcon="lock"
+							loading={pending}
+							type="submit"
+							variant="primary"
+						>
+							Send reset link
+						</Button>
+					</>
+				}
+				onSubmit={handleSubmit}
+			>
+				<p className="text-sm text-muted-foreground">
+					For your security, all active sessions will end when the new password
+					is set.
+				</p>
+			</ModalForm>
+		</>
+	);
+}

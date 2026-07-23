@@ -1,43 +1,33 @@
-import { PasswordInput } from "@/components/ui/input/PasswordInput";
-import { Button } from "@/components/ui/primitives/Button";
-import { getSafeContinuationPath } from "@/lib/auth/continuation";
+import { toPublicAuthError } from "@/lib/auth/errors";
+import { validatePasswordRecoveryToken } from "@/lib/auth/server";
 import { AuthScreen } from "../_components/AuthScreen";
-import { requestUnavailableAuthMethodAction } from "../actions";
+import { PasswordResetForm } from "../_components/PasswordResetForm";
 
 export default async function ResetPasswordPage({
 	searchParams,
 }: {
-	searchParams: Promise<{ message?: string; next?: string }>;
+	searchParams: Promise<{ message?: string; token?: string }>;
 }) {
 	const query = await searchParams;
-	const next = getSafeContinuationPath(query.next);
+	let recoveryError: string | undefined;
+	if (!query.token) {
+		recoveryError = "password-recovery-invalid";
+	} else {
+		try {
+			await validatePasswordRecoveryToken({ token: query.token });
+		} catch (error) {
+			recoveryError = toPublicAuthError(error).code;
+		}
+	}
+
 	return (
 		<AuthScreen
-			description="A production adapter should validate its recovery session before this form is enabled."
-			message={query.message}
+			description="Choose a new password for your account."
+			icon="lock"
+			message={recoveryError ?? query.message}
 			title="Choose a new password"
 		>
-			<form action={requestUnavailableAuthMethodAction} className="grid gap-4">
-				<input name="method" type="hidden" value="password-update" />
-				<input name="next" type="hidden" value={next} />
-				<input name="returnTo" type="hidden" value="/reset-password" />
-				<PasswordInput
-					autoComplete="new-password"
-					label="New password"
-					name="password"
-					required
-					showStrength
-				/>
-				<PasswordInput
-					autoComplete="new-password"
-					label="Confirm password"
-					name="passwordConfirm"
-					required
-				/>
-				<Button className="w-full" type="submit" variant="primary">
-					Update password
-				</Button>
-			</form>
+			{recoveryError ? null : <PasswordResetForm token={query.token} />}
 		</AuthScreen>
 	);
 }

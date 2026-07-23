@@ -41,7 +41,7 @@ export function useConfirmationModal(defaultPortalTargetId?: string) {
 			const targetId = portalTargetId ?? defaultPortalTargetId;
 
 			openModal(
-				({ close }) => (
+				({ close, setCloseDisabled }) => (
 					<ConfirmationModal
 						title={title}
 						description={description}
@@ -51,10 +51,11 @@ export function useConfirmationModal(defaultPortalTargetId?: string) {
 						details={details}
 						onConfirm={onConfirm}
 						onClose={close}
+						onCloseDisabledChange={setCloseDisabled}
 						warning={warning}
 					/>
 				),
-				targetId ? { portalTargetId: targetId } : undefined,
+				{ ariaLabel: title, portalTargetId: targetId },
 			);
 		},
 		[openModal, defaultPortalTargetId],

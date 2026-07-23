@@ -1,9 +1,8 @@
-import { DashboardBreadcrumbs } from "./DashboardBreadcrumbs";
 import { DashboardPageHeader } from "./DashboardPageHeader";
+import { DashboardSurfaceTrail } from "./DashboardSurfaceTrail";
 
 export function DashboardSection({
 	actions,
-	breadcrumbLabel,
 	children,
 	className,
 	contentClassName,
@@ -11,7 +10,6 @@ export function DashboardSection({
 	title,
 }: {
 	actions?: React.ReactNode;
-	breadcrumbLabel?: string;
 	children: React.ReactNode;
 	className?: string;
 	contentClassName?: string;
@@ -19,8 +17,10 @@ export function DashboardSection({
 	title?: React.ReactNode;
 }) {
 	return (
-		<section className={["grid gap-5", className].filter(Boolean).join(" ")}>
-			<DashboardBreadcrumbs lastLabel={breadcrumbLabel} />
+		<section
+			className={["grid min-w-0 gap-5", className].filter(Boolean).join(" ")}
+		>
+			<DashboardSurfaceTrail />
 			{title ? (
 				<DashboardPageHeader
 					action={actions}
@@ -28,7 +28,9 @@ export function DashboardSection({
 					title={title}
 				/>
 			) : null}
-			<div className={contentClassName}>{children}</div>
+			<div className={["min-w-0", contentClassName].filter(Boolean).join(" ")}>
+				{children}
+			</div>
 		</section>
 	);
 }

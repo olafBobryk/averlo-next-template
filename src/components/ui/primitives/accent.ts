@@ -1,4 +1,6 @@
 import clsx from "clsx";
+import type { CSSProperties } from "react";
+import { createSurfaceTint } from "@/components/ui/foundations/surfaceTint";
 
 export type AccentTone = "danger" | "info" | "neutral" | "success" | "warning";
 
@@ -21,28 +23,32 @@ const accentSlotClassNames = {
 } satisfies Record<AccentTone, string>;
 
 const solidAccentSurfaceClassNames = {
-	danger:
-		"border-danger/20 [background-color:color-mix(in_oklch,var(--card)_95%,var(--danger)_5%)] ring-danger/20",
-	info: "border-primary/20 [background-color:color-mix(in_oklch,var(--card)_95%,var(--primary)_5%)] ring-primary/20",
-	neutral:
-		"border-border/70 [background-color:color-mix(in_oklch,var(--card)_60%,var(--muted)_40%)]",
-	success:
-		"border-success/20 [background-color:color-mix(in_oklch,var(--card)_95%,var(--success)_5%)] ring-success/20",
-	warning:
-		"border-warning/25 [background-color:color-mix(in_oklch,var(--card)_95%,var(--warning)_5%)] ring-warning/20",
+	danger: "border-danger/20 bg-[var(--accent-background)] ring-danger/20",
+	info: "border-primary/20 bg-[var(--accent-background)] ring-primary/20",
+	neutral: "border-border/70 bg-[var(--accent-background)]",
+	success: "border-success/20 bg-[var(--accent-background)] ring-success/20",
+	warning: "border-warning/25 bg-[var(--accent-background)] ring-warning/20",
 } satisfies Record<AccentTone, string>;
 
 const solidAccentSlotClassNames = {
-	danger:
-		"[background-color:color-mix(in_oklch,var(--card)_95%,var(--danger)_5%)]",
-	info: "[background-color:color-mix(in_oklch,var(--card)_95%,var(--primary)_5%)]",
-	neutral:
-		"[background-color:color-mix(in_oklch,var(--card)_55%,var(--muted)_45%)]",
-	success:
-		"[background-color:color-mix(in_oklch,var(--card)_95%,var(--success)_5%)]",
-	warning:
-		"[background-color:color-mix(in_oklch,var(--card)_95%,var(--warning)_5%)]",
+	danger: "bg-[var(--accent-background)]",
+	info: "bg-[var(--accent-background)]",
+	neutral: "bg-[var(--accent-background)]",
+	success: "bg-[var(--accent-background)]",
+	warning: "bg-[var(--accent-background)]",
 } satisfies Record<AccentTone, string>;
+
+const accentTintColors = {
+	danger: "var(--danger)",
+	info: "var(--primary)",
+	neutral: "var(--muted)",
+	success: "var(--success)",
+	warning: "var(--warning)",
+} satisfies Record<AccentTone, string>;
+
+type AccentStyle = CSSProperties & {
+	"--accent-background"?: string;
+};
 
 const accentForegroundClassNames = {
 	danger: "text-danger",
@@ -73,4 +79,22 @@ export function getAccentForegroundClassName(
 	accent: AccentTone | null | undefined,
 ) {
 	return accent ? accentForegroundClassNames[accent] : undefined;
+}
+
+export function getAccentStyle(
+	accent: AccentTone | null | undefined,
+	scope: AccentScope = "surface",
+	options: { solidBackground?: boolean } = {},
+): AccentStyle | undefined {
+	if (!accent || !options.solidBackground) return undefined;
+	const tintPercentage =
+		accent === "neutral" ? (scope === "surface" ? 40 : 45) : 5;
+	return {
+		"--accent-background": createSurfaceTint({
+			surface: "var(--card)",
+			space: "oklch",
+			tint: accentTintColors[accent],
+			tintPercentage,
+		}),
+	};
 }

@@ -1,21 +1,26 @@
 import { Icon } from "@/components/ui/icons/Icon";
 import { Accordion } from "@/components/ui/misc/Accordion";
+import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { Text } from "@/components/ui/primitives/Text";
 import { DashboardTablePanel } from "../../_components/data/DashboardTablePanel";
-import { DashboardDetailField } from "../../_components/detail/DashboardDetailField";
+import { AccountIdentity } from "../../_components/entities/account/AccountIdentity";
 import { DashboardEntityState } from "../../_components/entities/DashboardEntityState";
 import { MemberAvatarList } from "../../_components/entities/member/MemberAvatarList";
 import { MemberIdentity } from "../../_components/entities/member/MemberIdentity";
 import { MemberMention } from "../../_components/entities/member/MemberMention";
 import { MemberRoleChip } from "../../_components/entities/member/MemberRoleChip";
 import { MemberSelectorDemo } from "../../_components/entities/member/MemberSelectorDemo";
+import { OrganizationIdentity } from "../../_components/entities/organization/OrganizationIdentity";
 import { RecordStatusChip } from "../../_components/entities/record/RecordStatusChip";
 import { DashboardSection } from "../../_components/layout/DashboardSection";
+import { getAccountPresentation } from "../../_lib/entities/account/presentation";
 import {
 	getMemberPresentation,
 	memberPresentationDefinition,
 } from "../../_lib/entities/member/presentation";
+import { toOrganizationEntity } from "../../_lib/entities/organization/domain";
+import { getOrganizationPresentation } from "../../_lib/entities/organization/presentation";
 import {
 	getRecordPresentation,
 	recordColumnDefinitions,
@@ -23,6 +28,13 @@ import {
 import { listReferenceMembers } from "../../_lib/fixtures/reference-members.server";
 import { listReferenceRecords } from "../../_lib/fixtures/reference-records.server";
 import { requireDashboardCapability } from "../../_registry/access.server";
+import {
+	AccordionSkeletonReference,
+	AccountSkeletonReferenceCard,
+	MemberSkeletonReferenceCard,
+	OrganizationSkeletonReferenceCard,
+	RecordTableSkeletonReference,
+} from "./EntitySkeletonReference";
 
 export default async function DashboardEntityReferencePage() {
 	const { context } = await requireDashboardCapability("debug.use");
@@ -31,11 +43,35 @@ export default async function DashboardEntityReferencePage() {
 	);
 	const records = listReferenceRecords(context.organization.id).slice(0, 2);
 	const exampleMember = members[0];
+	const organization = getOrganizationPresentation(
+		toOrganizationEntity(context.organization, context.membership.role),
+	);
+	const account = getAccountPresentation({
+		membership: context.membership,
+		organization: context.organization,
+		user: context.user,
+	});
 	return (
 		<DashboardSection
 			description="Dashboard-owned entity contracts, fetch-free renderers, and live-versus-skeleton parity."
-			title="Entity presentation reference"
+			title="Entity reference"
 		>
+			<div className="grid gap-5 xl:grid-cols-2">
+				<Card>
+					<Card.Header className="border-b">
+						<Card.Title>Account presentation · live</Card.Title>
+						<Card.Description>
+							Profile and account-menu identity share one global account model.
+						</Card.Description>
+					</Card.Header>
+					<Card.Content className="grid gap-5">
+						<AccountIdentity presentation={account} variant="profile" />
+						<AccountIdentity presentation={account} variant="compact" />
+					</Card.Content>
+				</Card>
+				<AccountSkeletonReferenceCard />
+			</div>
+
 			<div className="grid gap-5 xl:grid-cols-2">
 				<Card>
 					<Card.Header className="border-b">
@@ -84,24 +120,24 @@ export default async function DashboardEntityReferencePage() {
 					</Card.Content>
 				</Card>
 
+				<MemberSkeletonReferenceCard />
+			</div>
+
+			<div className="grid gap-5 xl:grid-cols-2">
 				<Card>
 					<Card.Header className="border-b">
-						<Card.Title>Member presentation · skeleton</Card.Title>
+						<Card.Title>Organization presentation · live</Card.Title>
 						<Card.Description>
-							The owning components reserve the same avatar, text, border, and
-							gap geometry.
+							The switcher and chooser share one compact identity across
+							profile-picture and plain-icon modes.
 						</Card.Description>
 					</Card.Header>
-					<Card.Content className="grid gap-5">
-						<MemberIdentity.Skeleton variant="profile" />
-						<MemberIdentity.Skeleton variant="compact" />
-						<MemberIdentity.Skeleton variant="actor" />
-						<DashboardDetailField.Skeleton
-							label="Member detail"
-							value="Example member"
-						/>
+					<Card.Content className="grid gap-4">
+						<OrganizationIdentity presentation={organization} />
+						<OrganizationIdentity presentation={organization} visual="icon" />
 					</Card.Content>
 				</Card>
+				<OrganizationSkeletonReferenceCard />
 			</div>
 
 			<div className="grid gap-5 xl:grid-cols-2">
@@ -124,53 +160,68 @@ export default async function DashboardEntityReferencePage() {
 									/>
 								);
 							},
+							responsivePriority: 10,
 							rowLink: false,
 						},
 						{
 							header: recordColumnDefinitions[2].label,
 							id: recordColumnDefinitions[2].id,
 							render: (record) => getRecordPresentation(record).updatedAtLabel,
+							responsivePriority: 100,
+						},
+						{
+							header: "Actions",
+							id: "actions",
+							kind: "action",
+							render: (record) => (
+								<Button
+									href={getRecordPresentation(record).href}
+									size="sm"
+									variant="secondary"
+								>
+									Open
+								</Button>
+							),
 						},
 					]}
-					description="The same record presentation columns used by the product route."
 					getRowHref={(record) => getRecordPresentation(record).href}
 					getRowKey={(record) => record.id}
-					minWidth="520px"
+					header={
+						<Card.Header className="min-w-0 border-b">
+							<Card.Title className="inline-flex min-w-0 flex-wrap items-center gap-2">
+								Responsive record table · live
+							</Card.Title>
+							<Card.Description className="min-w-0 break-words">
+								A constrained table where Updated outranks Status and Actions
+								always remains visible.
+							</Card.Description>
+						</Card.Header>
+					}
+					id="responsive-record-table-reference"
 					rows={records}
-					title="Record table · live"
 				/>
-				<DashboardTablePanel.Skeleton
-					columns={recordColumnDefinitions.map((column) => ({
-						id: column.id,
-						label: column.label,
-					}))}
-					description="The table namespace owns loading geometry."
-					title="Record table · skeleton"
-				/>
+				<RecordTableSkeletonReference />
 			</div>
 
 			<div className="grid gap-5 xl:grid-cols-2">
-				<Card>
-					<Card.Header className="border-b">
-						<Card.Title>Disclosure · live</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<Accordion title="Presentation boundary" defaultOpen>
-							<Text tone="muted" variant="support">
-								Routes resolve organization data; presentation components
-								receive ready view models and never fetch.
-							</Text>
-						</Accordion>
-					</Card.Content>
-				</Card>
-				<Card>
-					<Card.Header className="border-b">
-						<Card.Title>Disclosure · skeleton</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<Accordion.Skeleton />
-					</Card.Content>
-				</Card>
+				<Accordion.Card defaultOpen>
+					<Accordion.Header className="border-b">
+						<Accordion.Title>Disclosure · live</Accordion.Title>
+						<Accordion.Description>
+							Presentation components receive resolved view models.
+						</Accordion.Description>
+						<Accordion.Action>
+							<Button size="sm">Inspect</Button>
+						</Accordion.Action>
+					</Accordion.Header>
+					<Accordion.Content>
+						<Text tone="muted" variant="support">
+							Routes resolve organization data; presentation components receive
+							ready view models and never fetch.
+						</Text>
+					</Accordion.Content>
+				</Accordion.Card>
+				<AccordionSkeletonReference />
 			</div>
 
 			<Card>
@@ -186,7 +237,7 @@ export default async function DashboardEntityReferencePage() {
 				</Card.Header>
 				<Card.Content>
 					<pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 text-xs">
-						<code>{`const presentation = getMemberPresentation(member);\n<MemberIdentity presentation={presentation} variant="compact" />`}</code>
+						<code>{`const member = getMemberPresentation(memberFacts);\n<MemberIdentity presentation={member} variant="compact" />\n\nconst organization = getOrganizationPresentation(organizationFacts);\n<OrganizationIdentity presentation={organization} />\n\nconst columns = [\n  { id: "name", header: "Name", render: renderName },\n  { id: "updated", header: "Updated", responsivePriority: 100, render: renderUpdated },\n  { id: "actions", header: "Actions", kind: "action", render: renderActions },\n];`}</code>
 					</pre>
 				</Card.Content>
 			</Card>

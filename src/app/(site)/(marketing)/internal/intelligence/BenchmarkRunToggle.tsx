@@ -9,8 +9,6 @@ const BENCHMARK_RUN_OPTIONS = [
 	{ value: "real", label: "Real runs" },
 	{ value: "placeholder", label: "Placeholder" },
 ] as const;
-const PRIMARY_SEGMENTED_CLASS =
-	"w-fit border border-primary/15 bg-white/85 shadow-[2px_4px_15px_-2px_rgba(1,1,3,0.08)]";
 
 export function BenchmarkRunToggle({ isExample }: { isExample: boolean }) {
 	const router = useRouter();
@@ -27,12 +25,7 @@ export function BenchmarkRunToggle({ isExample }: { isExample: boolean }) {
 				);
 			}}
 			layout="auto"
-			roundedFull
-			pillClassName="!bg-primary"
-			activeTextClassName="!text-primary-foreground"
-			inactiveTextClassName="!text-foreground/55 group-hover:!text-foreground"
 			ariaLabel="Benchmark run data source"
-			className={PRIMARY_SEGMENTED_CLASS}
 		/>
 	);
 }
