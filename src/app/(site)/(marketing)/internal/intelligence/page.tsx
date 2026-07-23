@@ -169,7 +169,7 @@ function ReadyState({
 				description="Generated map of the template surfaces to inspect before changing shared code."
 			/>
 
-			<div className="grid gap-4 md:grid-cols-4">
+			<div className="grid w-full gap-4 md:grid-cols-4">
 				<Card size="sm">
 					<Card.Content className="grid gap-1">
 						<Text variant="caption" tone="muted">

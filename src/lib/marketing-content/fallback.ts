@@ -21,6 +21,50 @@ export const fallbackHomePage: MarketingPageDocument = {
 				label: "Contact",
 				href: "/contact",
 			},
+			services: [
+				{
+					id: "demo",
+					title: "Demo",
+					description:
+						"Browse live primitives, states, and skeletons before composing them into a product.",
+					surfaceIds: ["demo", "demoPrimitives"],
+				},
+				{
+					id: "intelligence",
+					title: "Intelligence",
+					description:
+						"Generate a repository map and query the right surfaces before changing shared code.",
+					surfaceIds: ["intelligence"],
+				},
+				{
+					id: "playground",
+					title: "Playground",
+					description:
+						"Try reveal, scroll, and choreography ideas in isolation before they enter the system.",
+					surfaceIds: ["playground"],
+				},
+				{
+					id: "prune",
+					title: "Prune",
+					description:
+						"Dry-run optional surfaces, then remove them without leaving stale routes or dependencies.",
+					surfaceIds: ["prune"],
+				},
+				{
+					id: "thin-start",
+					title: "Thin start",
+					description:
+						"Keep the canonical visual core in a minimal, independently verifiable workspace.",
+					surfaceIds: ["thinStart"],
+				},
+				{
+					id: "full-start",
+					title: "Full start",
+					description:
+						"Begin with an organization-first dashboard, complete responsive states, and product-ready operations.",
+					surfaceIds: ["fullStart"],
+				},
+			],
 		},
 	],
 };

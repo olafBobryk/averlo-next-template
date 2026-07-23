@@ -43,6 +43,23 @@ export type HomeHeroSectionBlock = MarketingSectionBase<"homeHero"> & {
 		text: string;
 	}>;
 	cta: MarketingLink;
+	services: HomeHeroServiceItem[];
+};
+
+export type TemplateServiceSurfaceId =
+	| "demo"
+	| "demoPrimitives"
+	| "fullStart"
+	| "intelligence"
+	| "playground"
+	| "prune"
+	| "thinStart";
+
+export type HomeHeroServiceItem = {
+	id: string;
+	title: string;
+	description: string;
+	surfaceIds: TemplateServiceSurfaceId[];
 };
 
 export type MarketingSection = HomeHeroSectionBlock;

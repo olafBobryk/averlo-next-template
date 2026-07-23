@@ -889,6 +889,63 @@ function renderMarketingContentSearchFile(state) {
 }
 
 function renderMarketingContentFallbackFile(state) {
+	const serviceEntries = [];
+	const addServiceEntry = (id, title, description, surfaceIds) => {
+		serviceEntries.push(
+			"\t\t\t\t{",
+			`\t\t\t\t\tid: ${JSON.stringify(id)},`,
+			`\t\t\t\t\ttitle: ${JSON.stringify(title)},`,
+			`\t\t\t\t\tdescription: ${JSON.stringify(description)},`,
+			`\t\t\t\t\tsurfaceIds: ${JSON.stringify(surfaceIds)},`,
+			"\t\t\t\t},",
+		);
+	};
+
+	if (state.hasDemo) {
+		addServiceEntry(
+			"demo",
+			"Demo",
+			"Browse live primitives, states, and skeletons before composing them into a product.",
+			["demo", "demoPrimitives"],
+		);
+	}
+	if (state.hasIntelligence) {
+		addServiceEntry(
+			"intelligence",
+			"Intelligence",
+			"Generate a repository map and query the right surfaces before changing shared code.",
+			["intelligence"],
+		);
+	}
+	if (state.hasPlayground) {
+		addServiceEntry(
+			"playground",
+			"Playground",
+			"Try reveal, scroll, and choreography ideas in isolation before they enter the system.",
+			["playground"],
+		);
+	}
+	addServiceEntry(
+		"prune",
+		"Prune",
+		"Dry-run optional surfaces, then remove them without leaving stale routes or dependencies.",
+		["prune"],
+	);
+	addServiceEntry(
+		"thin-start",
+		"Thin start",
+		"Keep the canonical visual core in a minimal, independently verifiable workspace.",
+		["thinStart"],
+	);
+	if (state.hasDashboard) {
+		addServiceEntry(
+			"full-start",
+			"Full start",
+			"Begin with an organization-first dashboard, complete responsive states, and product-ready operations.",
+			["fullStart"],
+		);
+	}
+
 	const navEntries = [
 		"\t\t\t{",
 		'\t\t\t\tlabel: "Home",',
@@ -1074,6 +1131,9 @@ function renderMarketingContentFallbackFile(state) {
 		'\t\t\t\tlabel: "Contact",',
 		'\t\t\t\thref: "/contact",',
 		"\t\t\t},",
+		"\t\t\tservices: [",
+		...serviceEntries,
+		"\t\t\t],",
 		"\t\t},",
 		"\t],",
 		"};",
