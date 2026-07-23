@@ -51,22 +51,26 @@ of shipping an interactive graph renderer in the template.
 
 ## Benchmarks
 
-The active benchmark run log intentionally starts empty:
+The tracked benchmark log contains preserved legacy observations plus any
+schema-v3 executed runs recorded by strategy commands:
 
 ```text
 docs/worklogs/template-intelligence-benchmark-runs.jsonl
 ```
 
 Benchmarking is explicit maintainer work, not a default implementation
-requirement. Use Template Intelligence directly for normal agent orientation:
+requirement. Legacy observations are historical context and are not ranked as
+matched comparisons. Use Template Intelligence directly for normal agent
+orientation:
 
 ```bash
 npm run intelligence:generate
 npm run intelligence:query -- route-architecture
 ```
 
-Record intentional `TemplateSerena` runs only when a warm Serena service is
-available or when the command explicitly warms it:
+Run an intentional `TemplateSerena` benchmark only when a warm Serena service
+is available or when the command explicitly warms it. Successful commands
+record their own validated execution row:
 
 ```bash
 npm run intelligence:serena:ensure
@@ -113,9 +117,10 @@ npm run intelligence:serena:debug -- --port-range-start 9200 --port-range-count 
 ```
 
 `TemplateSerena` benchmark rows require Template Intelligence plus at least one
-successful Serena semantic call. The lower-level `npm run intelligence:record`
-command rejects `--strategy TemplateSerena` when `--semantic-calls` is `0`; use
-`Control` for no-intelligence baselines.
+successful Serena semantic call. The unified `npm run intelligence:benchmark`
+command also owns Control, TemplateMap, and Graphify measurement and recording.
+The lower-level `npm run intelligence:record` command is reserved for explicit
+administrative import and recovery.
 
 The benchmark view is available at:
 

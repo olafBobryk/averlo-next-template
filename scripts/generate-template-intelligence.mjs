@@ -289,6 +289,30 @@ const AGENT_MAP = {
 				"Use npm run dev:agent, keep user ports reserved, use isolated dist dirs and generated tsconfig files, and use automation URL query flags for automated traversal.",
 		},
 		{
+			id: "intelligence-benchmark",
+			title: "Template Intelligence benchmark evidence and recording",
+			aliases: [
+				"benchmark",
+				"recording",
+				"graphify",
+				"template-serena",
+				"template-map",
+			],
+			paths: [
+				"docs/worklogs/template-intelligence-benchmark.md",
+				"scripts/run-template-intelligence-benchmark.mjs",
+				"scripts/run-template-intelligence-hybrid.mjs",
+				"scripts/lib/template-intelligence-benchmark.mjs",
+				"scripts/record-template-intelligence-benchmark.mjs",
+				"scripts/clear-template-intelligence-benchmark.mjs",
+				"scripts/verify-template-intelligence-benchmark.mjs",
+				"src/lib/template-intelligence/index.ts",
+				"src/app/(site)/(marketing)/internal/intelligence/page.tsx",
+			],
+			notes:
+				"Use one command-owned strategy run for deterministic measurement and persistence. Legacy observations are preserved but not ranked; only schema-v3 runs sharing a scenario and run-group ID form comparable cohorts. The standalone recorder is administrative only.",
+		},
+		{
 			id: "new-internal-surface",
 			title: "New internal authoring surface placement",
 			aliases: ["internal-surface", "authoring-surface", "new-surface"],

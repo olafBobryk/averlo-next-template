@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
+import path from "node:path";
 import process from "node:process";
+import {
+	appendExecutedBenchmarkRun,
+	createExecutedBenchmarkRun,
+} from "./lib/template-intelligence-benchmark.mjs";
 import {
 	ensureSerenaService,
 	getWarmSerenaState,
@@ -76,6 +81,11 @@ Optional:
   --serena-port 9121
   --port-range-start 9121
   --port-range-count 50
+  --scenario-id route-architecture
+  --run-group-id route-bakeoff
+  --benchmark-mode live-passive
+  --task-class implementation
+  --output tmp/intelligence-benchmark-smoke.jsonl
   --correctness 3
   --wrong-turns 0
   --generated-artifact-mistakes 0
@@ -152,14 +162,17 @@ async function main() {
 	const serenaPort = readNumber(values, "serena-port", 0);
 	const portRangeStart = readNumber(values, "port-range-start", 9121);
 	const portRangeCount = readNumber(values, "port-range-count", 50);
-	const correctness = readNumber(values, "correctness", 3);
-	const wrongTurns = readNumber(values, "wrong-turns", 0);
+	const correctness = readNumber(values, "correctness", undefined);
+	const wrongTurns = readNumber(values, "wrong-turns", undefined);
 	const generatedArtifactMistakes = readNumber(
 		values,
 		"generated-artifact-mistakes",
-		0,
+		undefined,
 	);
 	const extraNotes = readString(values, "notes");
+	const outputPath = readString(values, "output");
+	const benchmarkMode = readString(values, "benchmark-mode") ?? "live-passive";
+	const startedAt = performance.now();
 
 	if (!taskId || !taskName || topics.length === 0 || !serenaFile) {
 		printUsage();
@@ -167,6 +180,7 @@ async function main() {
 	}
 
 	let semanticCalls = 0;
+	let outputBytes = 0;
 
 	try {
 		run("npm", ["run", "intelligence:generate"]);
@@ -197,6 +211,7 @@ async function main() {
 				relative_path: serenaFile,
 			});
 			semanticCalls += 1;
+			outputBytes += Buffer.byteLength(overview);
 			console.log(
 				`Serena get_symbols_overview returned ${overview.length} bytes.`,
 			);
@@ -208,6 +223,7 @@ async function main() {
 					depth: 1,
 				});
 				semanticCalls += 1;
+				outputBytes += Buffer.byteLength(symbolResult);
 				console.log(
 					`Serena find_symbol returned ${symbolResult.length} bytes.`,
 				);
@@ -232,31 +248,34 @@ async function main() {
 			.filter(Boolean)
 			.join(" ");
 
-		run("npm", [
-			"run",
-			"intelligence:record",
-			"--",
-			"--task-id",
+		const benchmarkRun = createExecutedBenchmarkRun({
 			taskId,
-			"--task-name",
 			taskName,
-			"--strategy",
-			"TemplateSerena",
-			"--shell-commands",
-			String(shellCommands),
-			"--semantic-calls",
-			String(semanticCalls),
-			"--lookup-actions",
-			String(shellCommands + semanticCalls),
-			"--correctness",
-			String(correctness),
-			"--wrong-turns",
-			String(wrongTurns),
-			"--generated-artifact-mistakes",
-			String(generatedArtifactMistakes),
-			"--notes",
+			strategy: "TemplateSerena",
+			benchmarkMode,
+			measurementSource: "command",
+			sourceCommand: "intelligence:hybrid",
+			scenarioId: readString(values, "scenario-id"),
+			runGroupId: readString(values, "run-group-id"),
+			taskClass: readString(values, "task-class"),
+			date: readString(values, "date"),
+			shellCommands,
+			semanticCalls,
+			outputBytes,
+			elapsedSeconds: (performance.now() - startedAt) / 1000,
+			correctness,
+			wrongTurns,
+			generatedArtifactMistakes,
+			resolution: readString(values, "resolution"),
 			notes,
-		]);
+		});
+		const result = await appendExecutedBenchmarkRun(benchmarkRun, {
+			root: ROOT,
+			outputPath,
+		});
+		console.log(
+			`${result.status === "duplicate" ? "Already recorded" : "Recorded"} ${benchmarkRun.strategy} ${benchmarkRun.taskId} in ${path.relative(ROOT, result.path)} (${benchmarkRun.runId}).`,
+		);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
 		console.warn(`TemplateSerena benchmark not recorded: ${message}`);

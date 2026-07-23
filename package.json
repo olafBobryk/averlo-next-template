@@ -5,6 +5,7 @@
 	"scripts": {
 		"intelligence:generate": "node scripts/generate-template-intelligence.mjs",
 		"intelligence:query": "node scripts/generate-template-intelligence.mjs --query",
+		"intelligence:benchmark": "node scripts/run-template-intelligence-benchmark.mjs",
 		"intelligence:record": "node scripts/record-template-intelligence-benchmark.mjs",
 		"intelligence:record:clear": "node scripts/clear-template-intelligence-benchmark.mjs",
 		"intelligence:hybrid": "node scripts/run-template-intelligence-hybrid.mjs",
@@ -34,6 +35,7 @@
 		"verify:auth": "tsx scripts/verify-auth-organization.ts",
 		"verify:dashboard": "tsx scripts/verify-dashboard-surfaces.ts",
 		"verify:platform": "tsx scripts/verify-platform-operations.ts",
+		"verify:intelligence-benchmark": "node scripts/verify-template-intelligence-benchmark.mjs",
 		"verify:modals": "node scripts/verify-modal-system.mjs",
 		"verify:reference-entities": "tsx scripts/verify-reference-entities.ts",
 		"verify:entity-deletion": "tsx scripts/verify-entity-deletion.ts",
