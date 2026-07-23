@@ -36,7 +36,11 @@ export function DashboardBannedFallback() {
 	);
 }
 
-export function DashboardUnauthenticatedFallback() {
+export function DashboardUnauthenticatedFallback({
+	loginHref = hrefFor("login"),
+}: {
+	loginHref?: string;
+}) {
 	return (
 		<div className="flex items-center justify-center w-full h-full">
 			<StatusContent
@@ -44,7 +48,7 @@ export function DashboardUnauthenticatedFallback() {
 				body="Dashboard routes require an authenticated session, so the template is sending you to the dedicated auth shell."
 				enableRevealMotion={false}
 				actions={
-					<Button variant="primary" href={hrefFor("login")}>
+					<Button variant="primary" href={loginHref}>
 						Go to login
 					</Button>
 				}
