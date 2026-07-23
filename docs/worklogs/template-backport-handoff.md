@@ -11,10 +11,10 @@ shares its visual foundation through filesystem-backed materialization.
 
 - Canonical checkout:
   `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template`
-- Integrated closeout worktree:
-  `/Users/olafbobryk/.codex/worktrees/ad4c/averlo-next-template`
+- The superseded shared-checkout task is archived; its former app-managed
+  worktree is no longer part of the active handoff.
 - Final branch state: local `main`, `codex/inference-port`, and
-  `codex/input-frame-parity-pilot` fast-forward to the verified closeout commit.
+  `codex/input-frame-parity-pilot` point to the same verified closeout tip.
 - Baseline: `50616826610a9acded69625133e476694cdf3358`
 - Source: `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console`
 - Source policy: use `git show` or `git archive` at the pinned commit; never read
@@ -262,17 +262,20 @@ complete and its closing commit follows this handoff update.
 - The dependency graph is coordinated on Payload `3.86.0`, Next.js `16.2.11`,
   MDXEditor `4.1.0`, Sharp `0.35.3`, and tsx `4.23.1`. Narrow overrides keep all
   transitive advisory paths patched; full and production-only audits are zero.
+  Dependency pinning is format-preserving, so a clean install leaves the
+  tracked manifest unchanged.
 - Full lint/typecheck, focused verifiers, 51-route build, and smoke pass. A
   freshly materialized thin profile passes strict API review, clean install,
   typecheck, 9-route build, and smoke while excluding dashboard and MDXEditor
   ownership.
 - Final browser evidence is ignored under
   `.codex/review/port-closeout-modal-after-fix/` and
-  `.codex/review/port-closeout-mutations-final/`. The retained review URL is
-  `http://localhost:3060/dashboard/records?motion=off&reveal=off`.
+  `.codex/review/port-closeout-mutations-final/`. The current isolated review
+  entry is
+  `http://localhost:3013/login?next=%2Fdashboard%2Frecords%3Fmotion%3Doff%26reveal%3Doff&motion=off&reveal=off`.
 - No remote push or worktree removal is part of closeout. Homepage-section,
-  bounded-fix, and behavior-preserving cleanup work move to separate prepared
-  app-managed worktrees after local `main` advances.
+  bounded-fix, and behavior-preserving cleanup work now wait in separate clean,
+  app-managed worktrees at the same local-main baseline.
 
 ## Required gates
 
