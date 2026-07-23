@@ -30,6 +30,7 @@ const ActiveStageContext = React.createContext<ActiveStageContextValue | null>(
 
 export type ActiveStageHostProps = {
 	count: number;
+	autoCycle?: boolean;
 	intervalMs?: number;
 	initialIndex?: number;
 	startWhen?: "immediate" | "sceneReady";
@@ -54,6 +55,7 @@ function clampIndex(index: number, count: number) {
 
 export function ActiveStageHost({
 	count,
+	autoCycle = true,
 	intervalMs = 3000,
 	initialIndex = 0,
 	startWhen = "immediate",
@@ -105,6 +107,7 @@ export function ActiveStageHost({
 	}, [readyToCycle]);
 
 	React.useEffect(() => {
+		if (!autoCycle) return undefined;
 		if (count <= 1) return undefined;
 		if (!readyToCycle) return undefined;
 		if (hasInteraction) {
@@ -132,7 +135,14 @@ export function ActiveStageHost({
 		frameId = window.requestAnimationFrame(tick);
 
 		return () => window.cancelAnimationFrame(frameId);
-	}, [count, hasInteraction, intervalMs, readyToCycle, timerStartedAt]);
+	}, [
+		autoCycle,
+		count,
+		hasInteraction,
+		intervalMs,
+		readyToCycle,
+		timerStartedAt,
+	]);
 
 	const setActive = (index: number) => {
 		setActiveIndex(clampIndex(index, count));

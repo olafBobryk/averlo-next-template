@@ -1,13 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useCallback, useId, useMemo, useState } from "react";
-import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import {
-	instantTransition,
-	resolveMotionTransition,
-} from "@/components/ui/foundations/motionTiming";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 import {
 	ActiveStageHost,
@@ -17,7 +11,6 @@ import { Button } from "@/components/ui/primitives/Button";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { useIsSmUp } from "@/hooks/useTailwindBreakpoints";
 import type {
 	HomeHeroServiceItem,
@@ -86,10 +79,6 @@ type SurfaceGroupProps = {
 
 const assemblyHostClassName =
 	"pointer-events-none absolute inset-0 z-10 overflow-visible";
-const serviceContentTransition = resolveMotionTransition("ambient", {
-	intensity: "subtle",
-	surface: "flat",
-});
 
 function RealSurface({ surfaceId }: { surfaceId: TemplateServiceSurfaceId }) {
 	const surface = renderedSurfaces[surfaceId];
@@ -140,8 +129,9 @@ function InteractiveSurfaceHitbox({
 	serviceIndex: number;
 	surfaceIds: readonly TemplateServiceSurfaceId[];
 }) {
-	const { getItemProps, isActive } = useActiveStage();
-	const active = isActive(serviceIndex);
+	const { getItemProps, hasInteraction, isActive } = useActiveStage();
+	const active = hasInteraction && isActive(serviceIndex);
+	const itemProps = getItemProps(serviceIndex);
 	const surfaceNames = surfaceIds.map(
 		(surfaceId) => renderedSurfaces[surfaceId].name,
 	);
@@ -167,7 +157,8 @@ function InteractiveSurfaceHitbox({
 				contentClassName="!block w-full"
 				data-service-id={service.id}
 				data-surface-hitbox={surfaceIds.join(",")}
-				{...getItemProps(serviceIndex)}
+				{...itemProps}
+				data-active={active}
 			>
 				<span className="grid w-full gap-4">
 					{surfaceIds.map((surfaceId) => (
@@ -309,13 +300,7 @@ function ActiveServiceCallout({
 	calloutId: string;
 	service: HomeHeroServiceItem;
 }) {
-	const motionAllowed = useMotionAllowed(true);
-	const motionDisabled = useMotionDisableOverride();
 	const isSmUp = useIsSmUp();
-	const contentTransition =
-		motionAllowed && !motionDisabled
-			? serviceContentTransition
-			: instantTransition;
 	const alignsEnd = service.surfaceIds.some((surfaceId) =>
 		["fullStart", "playground", "thinStart"].includes(surfaceId),
 	);
@@ -326,37 +311,25 @@ function ActiveServiceCallout({
 	);
 
 	const content = (
-		<motion.div layout className="grid" transition={contentTransition}>
-			<AnimatePresence initial={false} mode="popLayout">
-				<motion.div
-					layout
-					key={service.id}
-					initial={{ opacity: 0, y: 8 }}
-					animate={{ opacity: 1, y: 0 }}
-					exit={{ opacity: 0, y: -6 }}
-					transition={contentTransition}
-					className="grid gap-2"
-				>
-					<Text
-						as="p"
-						variant="headingMd"
-						interactive={false}
-						className="text-pretty"
-					>
-						{service.title}
-					</Text>
-					<Text
-						as="p"
-						variant="support"
-						tone="muted"
-						interactive={false}
-						className="text-pretty"
-					>
-						{service.description}
-					</Text>
-				</motion.div>
-			</AnimatePresence>
-		</motion.div>
+		<div className="grid gap-2">
+			<Text
+				as="p"
+				variant="headingMd"
+				interactive={false}
+				className="text-pretty"
+			>
+				{service.title}
+			</Text>
+			<Text
+				as="p"
+				variant="support"
+				tone="muted"
+				interactive={false}
+				className="text-pretty"
+			>
+				{service.description}
+			</Text>
+		</div>
 	);
 
 	if (!isSmUp) {
@@ -403,7 +376,7 @@ function LiveSurfaceAssemblyGrid({
 }: {
 	services: HomeHeroServiceItem[];
 }) {
-	const { activeIndex } = useActiveStage();
+	const { activeIndex, hasInteraction } = useActiveStage();
 	const calloutId = useId();
 	const [hitboxNodes, setHitboxNodes] = useState<Array<HTMLElement | null>>([]);
 	const registerHitbox = useCallback(
@@ -421,7 +394,7 @@ function LiveSurfaceAssemblyGrid({
 		() => ({ current: hitboxNodes[activeIndex] ?? null }),
 		[activeIndex, hitboxNodes],
 	);
-	const activeService = services[activeIndex];
+	const activeService = hasInteraction ? services[activeIndex] : undefined;
 
 	return (
 		<>
@@ -446,19 +419,13 @@ export function HomeHeroSurfaceAssembly({
 }: {
 	services: HomeHeroServiceItem[];
 }) {
-	const motionAllowed = useMotionAllowed(true);
-	const motionDisabled = useMotionDisableOverride();
-	const cycleIntervalMs =
-		motionAllowed && !motionDisabled ? 5000 : Number.MAX_SAFE_INTEGER;
-
 	if (services.length === 0) return null;
 
 	return (
 		<ActiveStageHost
+			autoCycle={false}
 			count={services.length}
-			cycleWhen="inView"
 			initialIndex={0}
-			intervalMs={cycleIntervalMs}
 			className={assemblyHostClassName}
 		>
 			<LiveSurfaceAssemblyGrid services={services} />
