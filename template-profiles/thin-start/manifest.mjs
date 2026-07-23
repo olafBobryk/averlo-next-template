@@ -165,6 +165,7 @@ export const thinStartProfile = {
 				"lint",
 				"typecheck",
 				"verify:static",
+				"verify:surface-contracts",
 				"verify:build",
 				"verify:smoke",
 				"verify",

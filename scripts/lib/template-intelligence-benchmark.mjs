@@ -30,6 +30,13 @@ export function getBenchmarkRunsPath(root) {
 	);
 }
 
+export function getLocalBenchmarkRunsPath(root) {
+	return path.join(
+		root,
+		".template-intelligence/explicit-benchmark-runs.jsonl",
+	);
+}
+
 function requireNonEmptyString(value, field) {
 	if (typeof value !== "string" || !value.trim()) {
 		throw new Error(`${field} must be a non-empty string.`);
@@ -251,7 +258,7 @@ export async function appendExecutedBenchmarkRun(
 
 	const runsPath = outputPath
 		? path.resolve(root, outputPath)
-		: getBenchmarkRunsPath(root);
+		: getLocalBenchmarkRunsPath(root);
 	await fs.mkdir(path.dirname(runsPath), { recursive: true });
 
 	const lockPath = `${runsPath}.lock`;

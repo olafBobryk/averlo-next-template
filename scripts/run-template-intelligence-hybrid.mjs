@@ -269,13 +269,19 @@ async function main() {
 			resolution: readString(values, "resolution"),
 			notes,
 		});
-		const result = await appendExecutedBenchmarkRun(benchmarkRun, {
-			root: ROOT,
-			outputPath,
-		});
-		console.log(
-			`${result.status === "duplicate" ? "Already recorded" : "Recorded"} ${benchmarkRun.strategy} ${benchmarkRun.taskId} in ${path.relative(ROOT, result.path)} (${benchmarkRun.runId}).`,
-		);
+		if (outputPath) {
+			const result = await appendExecutedBenchmarkRun(benchmarkRun, {
+				root: ROOT,
+				outputPath,
+			});
+			console.log(
+				`${result.status === "duplicate" ? "Already recorded" : "Recorded"} ${benchmarkRun.strategy} ${benchmarkRun.taskId} in ${path.relative(ROOT, result.path)} (${benchmarkRun.runId}).`,
+			);
+		} else {
+			console.log(
+				`Completed ${benchmarkRun.strategy} ${benchmarkRun.taskId}. No explicit run file was written; trusted Codex hooks record the surrounding turn automatically. Pass --output for an intentional standalone record.`,
+			);
+		}
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
 		console.warn(`TemplateSerena benchmark not recorded: ${message}`);

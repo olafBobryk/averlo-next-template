@@ -69,8 +69,8 @@ function printUsage() {
   --shell-commands 15 \\
   --semantic-calls 2
 
-Normal benchmark workers should use npm run intelligence:benchmark or npm run
-intelligence:hybrid so measurement and persistence stay command-owned.
+Normal Codex work is recorded by repository hooks. This command is reserved for
+intentional standalone import and recovery.
 
 Strategies: ${Array.from(VALID_STRATEGIES).join(", ")}
 Modes: ${Array.from(VALID_BENCHMARK_MODES).join(", ")}

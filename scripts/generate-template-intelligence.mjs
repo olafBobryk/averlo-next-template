@@ -310,7 +310,7 @@ const AGENT_MAP = {
 				"src/app/(site)/(marketing)/internal/intelligence/page.tsx",
 			],
 			notes:
-				"Use one command-owned strategy run for deterministic measurement and persistence. Legacy observations are preserved but not ranked; only schema-v3 runs sharing a scenario and run-group ID form comparable cohorts. The standalone recorder is administrative only.",
+				"Trusted Codex hooks record privacy-safe session and turn metadata automatically in ignored local state. Curated legacy observations and visual fixtures remain separate and are never ranked as automatic comparative evidence.",
 		},
 		{
 			id: "new-internal-surface",

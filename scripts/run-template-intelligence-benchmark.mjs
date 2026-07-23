@@ -58,8 +58,8 @@ function printUsage() {
 
 TemplateMap also requires --topics. TemplateSerena accepts the same --topics,
 --serena-file, and --serena-symbol inputs as intelligence:hybrid. Graphify uses
---query for its graph query. Every successful strategy command validates and
-persists its own executed-run record.
+--query for its graph query. Trusted Codex hooks record the surrounding turn.
+Pass --output only for an intentional standalone executed-run record.
 
 Optional:
   --scenario-id route-architecture
@@ -250,10 +250,17 @@ if (strategy === "Control") {
 }
 
 const benchmarkRun = createExecutedBenchmarkRun(measurement);
-const result = await appendExecutedBenchmarkRun(benchmarkRun, {
-	root: ROOT,
-	outputPath: readString(values, "output"),
-});
-console.log(
-	`${result.status === "duplicate" ? "Already recorded" : "Recorded"} ${benchmarkRun.strategy} ${benchmarkRun.taskId} in ${path.relative(ROOT, result.path)} (${benchmarkRun.runId}).`,
-);
+const outputPath = readString(values, "output");
+if (outputPath) {
+	const result = await appendExecutedBenchmarkRun(benchmarkRun, {
+		root: ROOT,
+		outputPath,
+	});
+	console.log(
+		`${result.status === "duplicate" ? "Already recorded" : "Recorded"} ${benchmarkRun.strategy} ${benchmarkRun.taskId} in ${path.relative(ROOT, result.path)} (${benchmarkRun.runId}).`,
+	);
+} else {
+	console.log(
+		`Completed ${benchmarkRun.strategy} ${benchmarkRun.taskId}. No explicit run file was written; trusted Codex hooks record the surrounding turn automatically. Pass --output for an intentional standalone record.`,
+	);
+}

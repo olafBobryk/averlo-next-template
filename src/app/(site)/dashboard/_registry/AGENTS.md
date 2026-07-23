@@ -4,7 +4,13 @@
   static commands derive from `surfaceRegistry.ts`. Do not mirror dashboard
   routes in the global marketing route registry.
 - New surfaces declare their route, parent, sidebar tier, required capability,
-  layout width, and commands in one registry entry.
+  layout width, dashboard domain area, optional non-route source roots, and
+  commands in one registry entry.
+- Adding, moving, or removing a dashboard destination in a template instance
+  requires updating its canonical registry entry in the same change. Standard
+  verification discovers unregistered pages and stale registered routes.
+- Dashboard domain reporting is derived from relative edited paths. Treat it as
+  observed activity only, never proof that a domain was inspected or corrected.
 - Capability-hidden destinations must also be denied by their server page; UI
   visibility alone is not authorization.
 - Contextual commands register through the shell-owned command provider and must

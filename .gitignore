@@ -39,7 +39,8 @@ yarn-error.log*
 .env.local
 
 # local agent/worktree metadata
-/.codex/
+/.codex/*
+!/.codex/hooks.json
 /.worktrees/
 /tmp/
 /.thin-start/

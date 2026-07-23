@@ -1,16 +1,22 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { dirname, relative, resolve } from "node:path";
 import { isOrganizationInvitationPending } from "../src/app/(site)/dashboard/_lib/entities/invitation/presentation";
 import {
 	dashboardDebugStates,
 	isDashboardDebugState,
 } from "../src/app/(site)/dashboard/_registry/debug";
 import {
+	dashboardDomainAreaLabels,
+	dashboardSurfaceRegistry,
 	getDashboardCapabilities,
+	getDashboardDomainAreaInventory,
+	getDashboardDomainAreasForEditedPaths,
 	getDashboardNavigationCommands,
 	getDashboardSidebarGroups,
 	getDashboardSurface,
+	getDashboardSurfaceById,
+	getDashboardSurfaceSourceRoots,
 	getDashboardSurfaceTrail,
 } from "../src/app/(site)/dashboard/_registry/surfaceRegistry";
 
@@ -30,6 +36,157 @@ const pendingInvitation = {
 	role: "member" as const,
 	tokenHash: "summary-token",
 };
+
+const surfaceIds = new Set<string>();
+const surfaceHrefs = new Set<string>();
+const sourceRootOwners = new Map<string, string>();
+
+for (const surface of dashboardSurfaceRegistry) {
+	assert.ok(!surfaceIds.has(surface.id), `Duplicate surface id: ${surface.id}`);
+	assert.ok(
+		!surfaceHrefs.has(surface.href),
+		`Duplicate surface href: ${surface.href}`,
+	);
+	assert.ok(
+		surface.domainArea in dashboardDomainAreaLabels,
+		`Unknown domain area for ${surface.id}: ${surface.domainArea}`,
+	);
+	if (surface.parentId) {
+		assert.ok(
+			getDashboardSurfaceById(surface.parentId),
+			`Missing parent ${surface.parentId} for ${surface.id}`,
+		);
+	}
+
+	for (const sourceRoot of getDashboardSurfaceSourceRoots(surface)) {
+		assert.ok(
+			!sourceRoot.startsWith("/") && !sourceRoot.includes(".."),
+			`Source ownership must be repository-relative: ${sourceRoot}`,
+		);
+		assert.ok(
+			existsSync(resolve(root, sourceRoot)),
+			`Missing source ownership root for ${surface.id}: ${sourceRoot}`,
+		);
+		const existingOwner = sourceRootOwners.get(sourceRoot);
+		assert.ok(
+			!existingOwner,
+			`Ambiguous source ownership root ${sourceRoot}: ${existingOwner} and ${surface.id}`,
+		);
+		sourceRootOwners.set(sourceRoot, surface.id);
+	}
+
+	surfaceIds.add(surface.id);
+	surfaceHrefs.add(surface.href);
+}
+
+const dashboardRouteRoot = resolve(root, "src/app/(site)/dashboard");
+const pageFiles: string[] = [];
+function collectPageFiles(directory: string) {
+	for (const entry of readdirSync(directory, { withFileTypes: true })) {
+		const absolutePath = resolve(directory, entry.name);
+		if (entry.isDirectory()) collectPageFiles(absolutePath);
+		else if (entry.name === "page.tsx") pageFiles.push(absolutePath);
+	}
+}
+collectPageFiles(dashboardRouteRoot);
+
+const explicitRouteExemptions = new Map([
+	[
+		"[...catchAll]/page.tsx",
+		"structural catch-all owned by the dashboard shell",
+	],
+	["organization/members/page.tsx", "redirect-only compatibility route"],
+]);
+
+for (const [exemptPath] of explicitRouteExemptions) {
+	assert.ok(
+		pageFiles.some(
+			(filePath) =>
+				relative(dashboardRouteRoot, filePath).replaceAll("\\", "/") ===
+				exemptPath,
+		),
+		`Stale dashboard route exemption: ${exemptPath}`,
+	);
+}
+
+for (const pageFile of pageFiles) {
+	const relativePagePath = relative(dashboardRouteRoot, pageFile).replaceAll(
+		"\\",
+		"/",
+	);
+	if (explicitRouteExemptions.has(relativePagePath)) continue;
+	const routeDirectory = dirname(relativePagePath).replaceAll("\\", "/");
+	const href =
+		routeDirectory === "." ? "/dashboard" : `/dashboard/${routeDirectory}`;
+	assert.ok(
+		surfaceHrefs.has(href),
+		`Dashboard page is missing a canonical surface: ${relativePagePath}`,
+	);
+}
+
+for (const surface of dashboardSurfaceRegistry) {
+	const routeSuffix = surface.href.slice("/dashboard".length);
+	const pagePath = resolve(
+		dashboardRouteRoot,
+		`.${routeSuffix || ""}`,
+		"page.tsx",
+	);
+	assert.ok(
+		existsSync(pagePath),
+		`Canonical surface is missing its dashboard page: ${surface.href}`,
+	);
+}
+
+const domainInventory = getDashboardDomainAreaInventory();
+const hasReferenceEntitySurfaces = existsSync(
+	resolve(root, "src/app/(site)/dashboard/records/page.tsx"),
+);
+for (const areaId of [
+	"dashboard-core",
+	"account",
+	"organization",
+	"platform",
+] as const) {
+	assert.ok(
+		domainInventory.some((area) => area.id === areaId),
+		`Missing dashboard domain area: ${areaId}`,
+	);
+}
+// prune:dashboard.reference-entities:start
+assert.ok(domainInventory.some((area) => area.id === "product"));
+assert.ok(domainInventory.some((area) => area.id === "reference"));
+assert.deepEqual(
+	getDashboardDomainAreasForEditedPaths([
+		"src/app/(site)/dashboard/records/page.tsx",
+		"src/app/(site)/dashboard/platform/reports/page.tsx",
+		"src/app/(site)/dashboard/records/loading.tsx",
+	]).map((area) => area.id),
+	["product", "platform"],
+);
+// prune:dashboard.reference-entities:end
+assert.deepEqual(
+	getDashboardDomainAreasForEditedPaths([
+		"src/app/(site)/dashboard/_registry/surfaceRegistry.ts",
+		"src/app/api/auth/administration/invitations/route.ts",
+		"src/app/(site)/dashboard/settings/page.tsx",
+	]).map((area) => area.id),
+	["dashboard-core", "account", "organization"],
+);
+assert.deepEqual(
+	getDashboardDomainAreasForEditedPaths([
+		"/absolute/path/src/app/(site)/dashboard/page.tsx",
+		"src/app/(site)/(marketing)/page.tsx",
+	]),
+	[],
+);
+if (!hasReferenceEntitySurfaces) {
+	assert.equal(
+		domainInventory.some(
+			(area) => area.id === "product" || area.id === "reference",
+		),
+		false,
+	);
+}
 
 assert.equal(
 	isOrganizationInvitationPending(pendingInvitation, invitationNow),

@@ -3,15 +3,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { getBenchmarkRunsPath } from "./lib/template-intelligence-benchmark.mjs";
+import { getLocalBenchmarkRunsPath } from "./lib/template-intelligence-benchmark.mjs";
 
 const ROOT = process.cwd();
-const RUNS_PATH = getBenchmarkRunsPath(ROOT);
+const RUNS_PATH = getLocalBenchmarkRunsPath(ROOT);
 const args = new Set(process.argv.slice(2));
 
 if (!args.has("--yes") || !args.has("--executed-runs")) {
 	console.error(
-		"Refusing to clear benchmark data. To remove schema-v3 executed runs while preserving legacy observations, use: npm run intelligence:record:clear -- --executed-runs --yes",
+		"Refusing to clear local explicit benchmark data. Use: npm run intelligence:record:clear -- --executed-runs --yes",
 	);
 	process.exit(1);
 }
@@ -42,5 +42,5 @@ await fs.writeFile(
 );
 
 console.log(
-	`Removed ${removedCount} executed run${removedCount === 1 ? "" : "s"} from ${path.relative(ROOT, RUNS_PATH)} and preserved ${preserved.length} legacy or unknown record${preserved.length === 1 ? "" : "s"}.`,
+	`Removed ${removedCount} explicit run${removedCount === 1 ? "" : "s"} from ${path.relative(ROOT, RUNS_PATH)} and preserved ${preserved.length} unknown record${preserved.length === 1 ? "" : "s"}.`,
 );

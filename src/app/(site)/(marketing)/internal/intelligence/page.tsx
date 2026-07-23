@@ -1,8 +1,18 @@
+// biome-ignore-all assist/source/organizeImports: The dashboard import must remain inside its prune marker block.
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/Card";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import { Text } from "@/components/ui/primitives/Text";
+// prune:dashboard:start
 import {
+	DashboardDomainChips,
+	DashboardDomainOverview,
+} from "@/app/(site)/dashboard/_components/intelligence/DashboardDomainIntelligence";
+// prune:dashboard:end
+import {
+	type CodexTurnRecordingReadResult,
+	type CodexTurnSummary,
+	readCodexTurnRecording,
 	readTemplateIntelligenceAgentMap,
 	readTemplateIntelligenceBenchmarkExampleRuns,
 	readTemplateIntelligenceBenchmarkRuns,
@@ -16,12 +26,6 @@ import { BenchmarkRunToggle } from "./BenchmarkRunToggle";
 type SearchParams = Promise<
 	Record<string, string | string[] | undefined> | undefined
 >;
-
-type ComparableBenchmarkCohort = {
-	id: string;
-	scenarioId: string;
-	runs: TemplateIntelligenceBenchmarkRun[];
-};
 
 function getViewParam(
 	searchParams: Record<string, string | string[] | undefined> | undefined,
@@ -45,61 +49,96 @@ function formatNumber(value: number) {
 	return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
-function getComparableCohorts(
-	runs: TemplateIntelligenceBenchmarkRun[],
-	isExample: boolean,
-): ComparableBenchmarkCohort[] {
-	const byCohort = new Map<string, TemplateIntelligenceBenchmarkRun[]>();
-
-	for (const run of runs) {
-		const scenarioId = run.scenarioId ?? (isExample ? run.taskName : undefined);
-		if (!run.runGroupId || !scenarioId) continue;
-		if (!isExample && run.schemaVersion !== 3) continue;
-		const cohortId = `${scenarioId}:${run.runGroupId}`;
-		const cohortRuns = byCohort.get(cohortId) ?? [];
-		cohortRuns.push(run);
-		byCohort.set(cohortId, cohortRuns);
-	}
-
-	return [...byCohort.entries()]
-		.filter(
-			([, cohortRuns]) =>
-				new Set(cohortRuns.map((run) => run.strategy)).size > 1,
-		)
-		.map(([id, cohortRuns]) => ({
-			id,
-			scenarioId:
-				cohortRuns[0]?.scenarioId ?? cohortRuns[0]?.taskName ?? "unknown",
-			runs: cohortRuns.sort((a, b) => a.strategy.localeCompare(b.strategy)),
-		}));
+function formatDuration(seconds: number | undefined) {
+	if (seconds === undefined) return "—";
+	if (seconds < 60) return `${formatNumber(seconds)}s`;
+	return `${formatNumber(seconds / 60)}m`;
 }
 
-function BenchmarkBar({
-	value,
-	max,
-	label,
-}: {
-	value: number;
-	max: number;
-	label: string;
-}) {
-	const width = max > 0 ? Math.max(4, Math.round((value / max) * 100)) : 0;
+function formatTimestamp(value: string | undefined) {
+	if (!value) return "Unknown time";
+	return new Intl.DateTimeFormat("en", {
+		dateStyle: "medium",
+		timeStyle: "short",
+	}).format(new Date(value));
+}
+
+function shortId(value: string) {
+	return value.length > 12 ? `${value.slice(0, 8)}…${value.slice(-4)}` : value;
+}
+
+function TurnCard({ turn }: { turn: CodexTurnSummary }) {
+	const shellCount = turn.toolCounts.shell ?? 0;
+	const editCount = turn.toolCounts["file-edit"] ?? 0;
 
 	return (
-		<div className="grid gap-1">
-			<div className="flex items-center justify-between gap-3">
-				<Text variant="caption">{label}</Text>
-				<Text variant="caption" tone="muted">
-					{formatNumber(value)}
-				</Text>
-			</div>
-			<div className="h-2 overflow-hidden rounded-full bg-foreground/10">
-				<div
-					className="h-full rounded-full bg-primary"
-					style={{ width: `${width}%` }}
-				/>
-			</div>
-		</div>
+		<Card size="sm">
+			<Card.Header className="border-b">
+				<div className="flex flex-wrap items-start justify-between gap-2">
+					<div className="grid gap-1">
+						<Card.Title>{turn.observedPath}</Card.Title>
+						<Card.Description>
+							{formatTimestamp(turn.startedAt ?? turn.completedAt)} · turn{" "}
+							{shortId(turn.turnId)}
+						</Card.Description>
+					</div>
+					<Text
+						variant="caption"
+						tone="muted"
+						className={turn.status === "complete" ? undefined : "text-warning"}
+					>
+						{turn.status}
+					</Text>
+				</div>
+			</Card.Header>
+			<Card.Content className="grid gap-4">
+				<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+					<div className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Duration
+						</Text>
+						<Text variant="body">{formatDuration(turn.durationSeconds)}</Text>
+					</div>
+					<div className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Observed tools
+						</Text>
+						<Text variant="body">{turn.toolCount}</Text>
+					</div>
+					<div className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Shell / edits
+						</Text>
+						<Text variant="body">
+							{shellCount} / {editCount}
+						</Text>
+					</div>
+					<div className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Subagents
+						</Text>
+						<Text variant="body">{turn.subagentCount}</Text>
+					</div>
+					<div className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Model
+						</Text>
+						<Text variant="body">{turn.model ?? "Unknown"}</Text>
+					</div>
+				</div>
+				{/* prune:dashboard:start */}
+				<DashboardDomainChips editedPaths={turn.editedPaths} />
+				{/* prune:dashboard:end */}
+				{turn.editedPaths.length > 0 ? (
+					<div className="grid gap-1">
+						<Text variant="caption" tone="muted">
+							Observed edited files
+						</Text>
+						<Text variant="caption">{turn.editedPaths.join(", ")}</Text>
+					</div>
+				) : null}
+			</Card.Content>
+		</Card>
 	);
 }
 
@@ -185,10 +224,10 @@ function ReadyState({
 
 			<Card className="mx-auto max-w-3xl text-center">
 				<Card.Header className="border-b">
-					<Card.Title>Benchmark lookup cost</Card.Title>
+					<Card.Title>Codex turn recording</Card.Title>
 					<Card.Description>
-						Compare Control, TemplateSerena, and Graphify workflows when
-						benchmark runs are intentionally recorded.
+						Inspect automatically observed local sessions and turns without
+						manual worker recording.
 					</Card.Description>
 				</Card.Header>
 				<Card.Content className="flex justify-center">
@@ -198,7 +237,7 @@ function ReadyState({
 						size="md"
 						className="mx-auto w-fit"
 					>
-						View benchmarks
+						View recordings
 					</Button>
 				</Card.Content>
 			</Card>
@@ -207,27 +246,31 @@ function ReadyState({
 }
 
 function BenchmarkState({
-	runs,
-	invalidLineCount,
+	legacyRuns,
+	legacyInvalidLineCount,
+	recording,
+	exampleRuns,
+	exampleInvalidLineCount,
 	isExample,
 }: {
-	runs: TemplateIntelligenceBenchmarkRun[];
-	invalidLineCount: number;
+	legacyRuns: TemplateIntelligenceBenchmarkRun[];
+	legacyInvalidLineCount: number;
+	recording: CodexTurnRecordingReadResult;
+	exampleRuns: TemplateIntelligenceBenchmarkRun[];
+	exampleInvalidLineCount: number;
 	isExample: boolean;
 }) {
-	const comparableCohorts = getComparableCohorts(runs, isExample);
-	const legacyRunCount = isExample
-		? 0
-		: runs.filter((run) => run.schemaVersion < 3).length;
-	const executedRunCount = isExample
-		? runs.length
-		: runs.filter((run) => run.schemaVersion === 3).length;
+	const completedTurns = recording.turns.filter(
+		(turn) => turn.status === "complete",
+	).length;
+	const incompleteTurns = recording.turns.length - completedTurns;
+	const recentTurns = recording.turns.slice(0, 20);
 
 	return (
 		<InternalPage>
 			<InternalPageHeader
-				title="Intelligence Benchmarks"
-				description="Recorded lookup-cost comparisons across repository navigation strategies."
+				title="Codex Turn Recording"
+				description="Privacy-safe local evidence from trusted Codex lifecycle hooks."
 				action={
 					<Button
 						href="/internal/intelligence"
@@ -243,124 +286,125 @@ function BenchmarkState({
 			<BenchmarkRunToggle isExample={isExample} />
 
 			{isExample ? (
-				<StatusMessage>
-					Placeholder data is shown for visual QA, not benchmark history.
-				</StatusMessage>
-			) : null}
-
-			{invalidLineCount > 0 ? (
-				<StatusMessage tone="warning">
-					{invalidLineCount} malformed benchmark{" "}
-					{invalidLineCount === 1 ? "line was" : "lines were"} ignored.
-				</StatusMessage>
-			) : null}
-
-			{runs.length === 0 ? (
-				<Card>
-					<Card.Content className="grid gap-1">
-						<Card.Title>No real benchmark runs recorded</Card.Title>
-						<Card.Description>
-							Run a strategy through <code>npm run intelligence:benchmark</code>
-							. Successful commands measure, validate, and persist their own
-							execution record.
-						</Card.Description>
-					</Card.Content>
-				</Card>
+				<>
+					<StatusMessage>
+						Placeholder data is shown for visual QA only. It is never loaded as
+						recorded activity or benchmark history.
+					</StatusMessage>
+					{exampleInvalidLineCount > 0 ? (
+						<StatusMessage tone="warning">
+							{exampleInvalidLineCount} malformed fixture{" "}
+							{exampleInvalidLineCount === 1 ? "line was" : "lines were"}{" "}
+							ignored.
+						</StatusMessage>
+					) : null}
+					<div className="grid gap-4 lg:grid-cols-2">
+						{exampleRuns.map((run) => (
+							<Card key={`${run.taskId}:${run.strategy}`} size="sm">
+								<Card.Header className="border-b">
+									<Card.Title>{run.strategy}</Card.Title>
+									<Card.Description>{run.taskName}</Card.Description>
+								</Card.Header>
+								<Card.Content>
+									<Text variant="caption" tone="muted">
+										{run.shellCommands} shell · {run.semanticCalls} semantic ·{" "}
+										{run.lookupActions} lookup actions
+									</Text>
+								</Card.Content>
+							</Card>
+						))}
+					</div>
+				</>
 			) : (
 				<>
+					{recording.invalidLineCount > 0 ? (
+						<StatusMessage tone="warning">
+							{recording.invalidLineCount} malformed local event{" "}
+							{recording.invalidLineCount === 1 ? "line was" : "lines were"}{" "}
+							ignored.
+						</StatusMessage>
+					) : null}
+					{legacyInvalidLineCount > 0 ? (
+						<StatusMessage tone="warning">
+							{legacyInvalidLineCount} malformed legacy observation{" "}
+							{legacyInvalidLineCount === 1 ? "line was" : "lines were"}{" "}
+							ignored.
+						</StatusMessage>
+					) : null}
 					<div className="grid w-full gap-2 sm:grid-cols-3 sm:gap-4">
 						<Card className="min-w-0 w-full" size="sm">
 							<Card.Content className="grid gap-1">
 								<Text variant="caption" tone="muted">
-									Legacy observations
+									Recorded sessions
 								</Text>
 								<Text as="p" variant="headingMd">
-									{legacyRunCount}
+									{recording.sessions.length}
 								</Text>
 							</Card.Content>
 						</Card>
 						<Card className="min-w-0 w-full" size="sm">
 							<Card.Content className="grid gap-1">
 								<Text variant="caption" tone="muted">
-									Executed runs
+									Completed turns
 								</Text>
 								<Text as="p" variant="headingMd">
-									{executedRunCount}
+									{completedTurns}
 								</Text>
 							</Card.Content>
 						</Card>
 						<Card className="min-w-0 w-full" size="sm">
 							<Card.Content className="grid gap-1">
 								<Text variant="caption" tone="muted">
-									Matched cohorts
+									Open or partial
 								</Text>
 								<Text as="p" variant="headingMd">
-									{comparableCohorts.length}
+									{incompleteTurns}
 								</Text>
 							</Card.Content>
 						</Card>
 					</div>
+					<Text variant="caption" tone="muted">
+						Tool totals include only local paths observed by Codex hooks. Hosted
+						tools outside those hooks are excluded.
+					</Text>
+					{/* prune:dashboard:start */}
+					<DashboardDomainOverview turns={recording.turns} />
+					{/* prune:dashboard:end */}
 
-					{legacyRunCount > 0 ? (
-						<StatusMessage>
-							Legacy observations are preserved as history and excluded from
-							strategy rankings.
-						</StatusMessage>
-					) : null}
-
-					{comparableCohorts.length === 0 ? (
+					{recording.status === "missing" || recording.turns.length === 0 ? (
 						<Card>
 							<Card.Content className="grid gap-1">
-								<Card.Title>No matched comparison cohorts</Card.Title>
+								<Card.Title>No local Codex turns recorded yet</Card.Title>
 								<Card.Description>
-									Preserved does not mean comparable. Cross-strategy charts
-									appear only after two or more executed strategies share a
-									scenario and run group.
+									Trust the repository hook, then start a new Codex turn. Events
+									will be written automatically to <code>{recording.path}</code>
+									.
 								</Card.Description>
 							</Card.Content>
 						</Card>
 					) : (
 						<div className="grid gap-4">
-							{comparableCohorts.map((cohort) => {
-								const maxLookupActions = Math.max(
-									1,
-									...cohort.runs.map((run) => run.lookupActions),
-								);
-
-								return (
-									<Card key={cohort.id}>
-										<Card.Header className="border-b">
-											<Card.Title>{cohort.scenarioId}</Card.Title>
-											<Card.Description>
-												Matched run group {cohort.runs[0]?.runGroupId}
-											</Card.Description>
-										</Card.Header>
-										<Card.Content className="grid gap-4 lg:grid-cols-2">
-											{cohort.runs.map((run) => (
-												<div
-													className="grid gap-2"
-													key={run.runId ?? run.taskId}
-												>
-													<BenchmarkBar
-														label={run.strategy}
-														value={run.lookupActions}
-														max={maxLookupActions}
-													/>
-													<Text variant="caption" tone="muted">
-														{run.shellCommands} shell · {run.semanticCalls}{" "}
-														semantic
-														{run.correctness === undefined
-															? " · unrated"
-															: ` · correctness ${formatNumber(run.correctness)}/3`}
-													</Text>
-												</div>
-											))}
-										</Card.Content>
-									</Card>
-								);
-							})}
+							{recentTurns.map((turn) => (
+								<TurnCard key={turn.id} turn={turn} />
+							))}
 						</div>
 					)}
+
+					<Card>
+						<Card.Header className="border-b">
+							<Card.Title>Curated legacy observations</Card.Title>
+							<Card.Description>
+								Historical self-reported rows are preserved for review and never
+								mixed with automatic turn telemetry or strategy rankings.
+							</Card.Description>
+						</Card.Header>
+						<Card.Content className="grid gap-1">
+							<Text variant="headingMd">{legacyRuns.length}</Text>
+							<Text variant="caption" tone="muted">
+								Unique historical observations with source provenance.
+							</Text>
+						</Card.Content>
+					</Card>
 				</>
 			)}
 		</InternalPage>
@@ -377,14 +421,19 @@ export default async function TemplateIntelligencePage({
 
 	if (view === "benchmarks") {
 		const isExample = getExampleParam(resolvedSearchParams);
-		const result = isExample
-			? await readTemplateIntelligenceBenchmarkExampleRuns()
-			: await readTemplateIntelligenceBenchmarkRuns();
+		const [legacyResult, recording, exampleResult] = await Promise.all([
+			readTemplateIntelligenceBenchmarkRuns(),
+			readCodexTurnRecording(),
+			readTemplateIntelligenceBenchmarkExampleRuns(),
+		]);
 
 		return (
 			<BenchmarkState
-				runs={result.runs}
-				invalidLineCount={result.invalidLineCount}
+				legacyRuns={legacyResult.runs}
+				legacyInvalidLineCount={legacyResult.invalidLineCount}
+				recording={recording}
+				exampleRuns={exampleResult.runs}
+				exampleInvalidLineCount={exampleResult.invalidLineCount}
 				isExample={isExample}
 			/>
 		);

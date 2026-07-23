@@ -1,160 +1,122 @@
-# Repo Intelligence Benchmark
+# Repo Intelligence Recording
 
 ## Purpose
 
-Measure which minimal repository-navigation path gives agents useful upward
-pressure during implementation and template instancing without turning
-historical observations into unsupported strategy claims.
+Capture how Codex actually navigates this repository without asking the worker
+to run or annotate a second recording command.
 
-The strategy definitions are:
+The recording system keeps three sources separate:
 
-- `Control`: a deterministic direct-search baseline with no Template
-  Intelligence, Serena, or Graphify activity.
-- `TemplateMap`: deterministic Template Intelligence generation and topic query
-  without Serena.
-- `TemplateSerena`: Template Intelligence plus at least one successful Serena
-  semantic call. Historical `Hybrid` observations map here while retaining
-  their legacy name.
-- `Graphify`: an actual Graphify build and at least one successful graph query
-  with non-empty query evidence and measured build/query time.
+- Automatic Codex hook events are ignored local telemetry.
+- The tracked run log contains 34 curated legacy observations with provenance.
+- The example run log contains placeholder visual fixtures only.
 
-## Evidence classes
+None of these sources supports automatic correctness or strategy-ranking
+claims.
 
-The system keeps four concepts separate:
+## Automatic collection
 
-- Legacy observations preserve historical measurements but are not comparative
-  benchmark evidence.
-- Executed runs are schema-v3 records created only after a strategy command
-  succeeds and its evidence validates.
-- Scenario fixtures define tasks or support visual QA. They are never loaded as
-  real history.
-- Policy decisions describe intended use without pretending a tool ran.
+Codex discovers the committed `.codex/hooks.json` in a trusted project. One
+privacy-safe command hook handles `SessionStart`, `UserPromptSubmit`,
+`PostToolUse`, `SubagentStart`, `SubagentStop`, and `Stop`.
 
-Preserved does not mean comparable. Only executed runs sharing both a
-`scenarioId` and `runGroupId`, with at least two strategies represented, may be
-shown as a cross-strategy cohort.
+The recorder appends schema-v1 `codex-hook-event` rows to:
 
-## Command-owned recording
-
-Workers use one strategy command. Successful commands measure, validate, and
-atomically persist their own executed-run row; there is no second recording
-step.
-
-Run a direct-search Control pass:
-
-```bash
-npm run intelligence:benchmark -- \
-  --strategy Control \
-  --task-id T1-control \
-  --task-name "Route architecture" \
-  --query "route architecture" \
-  --scenario-id route-architecture \
-  --run-group-id route-bakeoff \
-  --benchmark-mode triple-run
+```text
+.template-intelligence/codex-turn-events.jsonl
 ```
 
-Run TemplateMap:
+The file is ignored by Git and written with owner-only permissions. A short
+file lock prevents concurrent hooks from corrupting JSONL rows. Stable event
+identifiers allow the reader to deduplicate retried turn, tool, and subagent
+events.
 
-```bash
-npm run intelligence:benchmark -- \
-  --strategy TemplateMap \
-  --task-id T1-template-map \
-  --task-name "Route architecture" \
-  --topics route-architecture,dev-server \
-  --scenario-id route-architecture \
-  --run-group-id route-bakeoff \
-  --benchmark-mode triple-run
-```
+The hook records only:
 
-Run TemplateSerena through the unified command:
+- session and turn identifiers;
+- recording timestamps, model, permission mode, and lifecycle source;
+- normalized local tool category and derived activity signals;
+- repository-relative paths parsed from `apply_patch`;
+- subagent identifier and type.
 
-```bash
-npm run intelligence:benchmark -- \
-  --strategy TemplateSerena \
-  --task-id T1-template-serena \
-  --task-name "Route architecture" \
-  --topics route-architecture,dev-server \
-  --serena-file src/config/routes.ts \
-  --serena-symbol appRoutes \
-  --scenario-id route-architecture \
-  --run-group-id route-bakeoff \
-  --benchmark-mode triple-run \
-  --require-serena
-```
+It never persists prompt text, shell commands, tool inputs or responses,
+transcripts, assistant messages, environment values, or absolute paths. Errors
+emit one payload-free diagnostic and exit successfully so recording cannot
+block Codex.
 
-`npm run intelligence:hybrid` remains a compatibility entry point with the same
-command-owned TemplateSerena persistence behavior.
+Codex requires the exact project hook definition to be reviewed and trusted.
+Use `/hooks` when a hook is awaiting review. Official behavior is documented
+in the [Codex Hooks guide](https://learn.chatgpt.com/docs/hooks).
 
-Run Graphify:
+## Turn aggregation
 
-```bash
-npm run intelligence:benchmark -- \
-  --strategy Graphify \
-  --task-id T1-graphify \
-  --task-name "Route architecture" \
-  --query "Where should an agent start for route architecture?" \
-  --scenario-id route-architecture \
-  --run-group-id route-bakeoff \
-  --benchmark-mode triple-run
-```
+Events are grouped by `sessionId` and `turnId`.
 
-Graphify remains local and benchmark-only. `graphify-out/` stays ignored and
-the command uses CLI output rather than Graphify's generated HTML surface.
+- A turn with both `UserPromptSubmit` and `Stop` is complete.
+- A start without a stop remains open.
+- A stop or tool event without a start remains partial.
+- Tool and subagent counts cover supported local hook paths only. Hosted tools
+  that bypass local hooks are not included.
 
-Use `--output /tmp/intelligence-benchmark-smoke.jsonl` for smoke tests that
-must not touch the tracked log.
+Observed paths are derived without worker annotation:
 
-## Deterministic and annotated fields
+- `Control`: no Template Intelligence, Serena, or Graphify signal.
+- `TemplateMap`: Template Intelligence generation or query only.
+- `TemplateSerena`: Template Intelligence plus Serena.
+- `Graphify`: Graphify without another intelligence engine.
+- `Serena-only`: Serena without Template Intelligence.
+- `Mixed`: Graphify combined with Template Intelligence or Serena.
 
-Commands own observable facts such as strategy, command identity, shell and
-semantic call counts, Graphify query count, output size, elapsed time, and
-suggested files that can be parsed from command output.
+Direct search is retained as an activity signal but does not turn an otherwise
+observed intelligence path into `Mixed`.
 
-Correctness, wrong turns, resolution, actual files, missed files, and notes are
-optional annotations. Commands never invent favorable defaults for them.
+## Explicit maintainer utilities
 
-The schema-v3 validator enforces strategy evidence before persistence:
+`npm run intelligence:benchmark`, `npm run intelligence:hybrid`, and
+`npm run intelligence:record` remain available for compatibility and
+intentional experiments. They do not modify curated history by default.
+Pass `--output <path>` when an explicit standalone schema-v3 record is
+required.
 
-- Control and TemplateMap reject semantic and graph calls.
-- TemplateSerena requires a successful semantic call.
-- Graphify requires graph activity, non-empty evidence, and measured build and
-  query time.
-- `triple-run` requires both a scenario ID and run-group ID.
+Without `--output`, the surrounding trusted Codex turn is the recording source.
+The standalone recorder defaults to the ignored local path
+`.template-intelligence/explicit-benchmark-runs.jsonl`.
 
-Persistence uses a content-derived run ID, a short-lived file lock, one-line
-append, and duplicate detection. Repeating an identical administrative record
-is idempotent.
-
-## Administrative tools
-
-`npm run intelligence:record` remains available for explicit import and
-recovery. It uses the same schema-v3 validator but is not the normal worker
-path.
-
-To remove schema-v3 executed runs while preserving legacy and unknown records:
+Clear ignored explicit records with:
 
 ```bash
 npm run intelligence:record:clear -- --executed-runs --yes
 ```
 
-There is no command that silently empties the complete history file.
+This command never clears curated legacy history or automatic turn events.
 
-## Benchmark modes
+## Historical cleanup
 
-- `live-passive` records real navigation activity without claiming a controlled
-  comparison.
-- `shadow-replay` reruns a concluded scenario against known source evidence.
-- `triple-run` is the controlled comparison mode. Every strategy row uses the
-  same scenario and run-group IDs.
+The tracked file
+`docs/worklogs/template-intelligence-benchmark-runs.jsonl` contains exactly 34
+legacy observations:
 
-## Decision use
+- 26 rows from the current template history, with the introducing commit
+  recovered from Git blame;
+- eight unique rows recovered from
+  `c4f5771bcca9abc4daafb7d40eeb7b1c80226732`.
 
-The internal benchmark route reads the tracked log at:
+Each row preserves its original project, task identity, strategy, metrics, and
+notes while adding `evidenceClass`, `evidenceQuality`, `sourceRepository`,
+and `sourceCommit`.
+
+Copied Inference rows are duplicates and are not added. The Inference Graphify
+policy row is not an executed run. Averlo Rebrand example metrics remain visual
+fixtures and are not benchmark history.
+
+## Review surface
+
+The local recording and curated history are available at:
 
 ```text
 /internal/intelligence?view=benchmarks
 ```
 
-Legacy history is counted but not ranked. Comparative charts appear only for
-matched cohorts. Promote a strategy only after repeated matched cohorts show
-fewer missed files or wrong turns with acceptable setup and query cost.
+Use `example=on` only for visual fixture review. The real view shows recent
+automatic turns and a separate curated legacy count; it does not render
+cross-strategy rankings.
