@@ -23,6 +23,23 @@ export const dashboardCapabilityLabels = {
 export type DashboardLayoutWidth = "standard" | "wide";
 export type DashboardSidebarTier = "primary" | "secondary" | "utility";
 
+export type DashboardDomainAreaId =
+	| "dashboard-core"
+	| "product"
+	| "account"
+	| "organization"
+	| "platform"
+	| "reference";
+
+export const dashboardDomainAreaLabels = {
+	"dashboard-core": "Dashboard core",
+	product: "Product",
+	account: "Account",
+	organization: "Organization",
+	platform: "Platform",
+	reference: "Reference",
+} as const satisfies Record<DashboardDomainAreaId, string>;
+
 export type DashboardCommandDefinition = {
 	capability?: DashboardCapability;
 	description: string;
@@ -36,6 +53,7 @@ export type DashboardSurface = {
 	capability?: DashboardCapability;
 	commands: readonly DashboardCommandDefinition[];
 	description: string;
+	domainArea: DashboardDomainAreaId;
 	href: string;
 	icon: IconName;
 	id: DashboardSurfaceId;
@@ -50,6 +68,7 @@ export type DashboardSurface = {
 	parentId?: DashboardSurfaceId;
 	sidebar: boolean;
 	sidebarTier: DashboardSidebarTier;
+	sourceRoots?: readonly string[];
 };
 
 export type DashboardSurfaceId =
@@ -88,6 +107,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 	{
 		commands: [],
 		description: "Open the organization overview and recent product activity.",
+		domainArea: "dashboard-core",
 		href: "/dashboard",
 		icon: "home",
 		id: "dashboard.overview",
@@ -111,6 +131,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 			},
 		],
 		description: "Browse the organization-scoped reference record collection.",
+		domainArea: "product",
 		href: "/dashboard/records",
 		icon: "database",
 		id: "dashboard.records",
@@ -119,11 +140,18 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		match: "exact",
 		sidebar: true,
 		sidebarTier: "primary",
+		sourceRoots: [
+			"src/app/(site)/dashboard/_components/entities/record",
+			"src/app/(site)/dashboard/_lib/entities/record",
+			"src/app/(site)/dashboard/_lib/fixtures/reference-records.core.ts",
+			"src/app/(site)/dashboard/_lib/fixtures/reference-records.server.ts",
+		],
 	},
 	{
 		capability: "records.read",
 		commands: [],
 		description: "Review one organization-scoped reference record.",
+		domainArea: "product",
 		href: "/dashboard/records/[recordId]",
 		icon: "cards",
 		id: "dashboard.record",
@@ -138,6 +166,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 	{
 		commands: [],
 		description: "Manage the current account and application preferences.",
+		domainArea: "account",
 		href: "/dashboard/settings",
 		icon: "gear",
 		id: "dashboard.settings",
@@ -146,11 +175,18 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		match: "exact",
 		sidebar: true,
 		sidebarTier: "utility",
+		sourceRoots: [
+			"src/app/(site)/dashboard/_components/entities/account",
+			"src/app/(site)/dashboard/_lib/entities/account",
+			"src/app/api/auth/password-recovery",
+			"src/app/api/auth/reset-password",
+		],
 	},
 	{
 		capability: "dashboard.view",
 		commands: [],
 		description: "Review the signed-in account and active organization access.",
+		domainArea: "account",
 		href: "/dashboard/profile",
 		icon: "user",
 		id: "dashboard.profile",
@@ -175,6 +211,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		],
 		description:
 			"Manage organization invitations, memberships, roles, and ownership.",
+		domainArea: "organization",
 		href: "/dashboard/administration",
 		icon: "shield",
 		id: "dashboard.administration",
@@ -184,11 +221,18 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		parentId: "dashboard.organization.settings",
 		sidebar: false,
 		sidebarTier: "secondary",
+		sourceRoots: [
+			"src/app/(site)/dashboard/_components/entities/member",
+			"src/app/(site)/dashboard/_lib/entities/invitation",
+			"src/app/(site)/dashboard/_lib/entities/member",
+			"src/app/api/auth/administration",
+		],
 	},
 	{
 		capability: "dashboard.view",
 		commands: [],
 		description: "Email support or save a request to the demo Platform Inbox.",
+		domainArea: "dashboard-core",
 		href: "/dashboard/support",
 		icon: "question",
 		id: "dashboard.support",
@@ -202,6 +246,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "platform.manage",
 		commands: [],
 		description: "Open internal platform support and report operations.",
+		domainArea: "platform",
 		href: "/dashboard/platform",
 		icon: "shield",
 		id: "dashboard.platform",
@@ -210,11 +255,16 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		match: "exact",
 		sidebar: false,
 		sidebarTier: "utility",
+		sourceRoots: [
+			"src/app/(site)/dashboard/_lib/platform",
+			"src/app/api/platform",
+		],
 	},
 	{
 		capability: "platform.manage",
 		commands: [],
 		description: "Review support requests submitted from dashboard support.",
+		domainArea: "platform",
 		href: "/dashboard/platform/inbox",
 		icon: "mail",
 		id: "dashboard.platform.inbox",
@@ -229,6 +279,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "platform.manage",
 		commands: [],
 		description: "Triage one dashboard support request.",
+		domainArea: "platform",
 		href: "/dashboard/platform/inbox/[id]",
 		icon: "mail",
 		id: "dashboard.platform.inbox.request",
@@ -243,6 +294,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "platform.manage",
 		commands: [],
 		description: "Review product reports captured from dashboard routes.",
+		domainArea: "platform",
 		href: "/dashboard/platform/reports",
 		icon: "flag",
 		id: "dashboard.platform.reports",
@@ -257,6 +309,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "platform.manage",
 		commands: [],
 		description: "Triage one structured product report.",
+		domainArea: "platform",
 		href: "/dashboard/platform/reports/[id]",
 		icon: "flag",
 		id: "dashboard.platform.report",
@@ -271,6 +324,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "organization.read",
 		commands: [],
 		description: "Review the active organization and its product boundary.",
+		domainArea: "organization",
 		href: "/dashboard/organization",
 		icon: "building",
 		id: "dashboard.organization",
@@ -279,11 +333,17 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		match: "exact",
 		sidebar: false,
 		sidebarTier: "secondary",
+		sourceRoots: [
+			"src/app/(site)/dashboard/_components/entities/organization",
+			"src/app/(site)/dashboard/_lib/entities/organization",
+			"src/app/api/auth/organization",
+		],
 	},
 	{
 		capability: "organization.read",
 		commands: [],
 		description: "Choose the active organization for this dashboard session.",
+		domainArea: "organization",
 		href: "/dashboard/organization/switch",
 		icon: "users",
 		id: "dashboard.organization.switch",
@@ -299,6 +359,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "organization.read",
 		commands: [],
 		description: "Review one organization-scoped member presentation.",
+		domainArea: "organization",
 		href: "/dashboard/organization/members/[memberId]",
 		icon: "user",
 		id: "dashboard.organization.member",
@@ -314,6 +375,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "organization.manage",
 		commands: [],
 		description: "Manage organization identity and product defaults.",
+		domainArea: "organization",
 		href: "/dashboard/organization/settings",
 		icon: "sliders",
 		id: "dashboard.organization.settings",
@@ -329,6 +391,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "debug.use",
 		commands: [],
 		description: "Review live and skeleton entity presentation contracts.",
+		domainArea: "reference",
 		href: "/dashboard/reference/entities",
 		icon: "cards",
 		id: "dashboard.reference.entities",
@@ -343,6 +406,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 		capability: "debug.use",
 		commands: [],
 		description: "Review component-owned loading geometry side by side.",
+		domainArea: "reference",
 		href: "/dashboard/reference/skeletons",
 		icon: "spinner",
 		id: "dashboard.reference.skeletons",
@@ -355,6 +419,91 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] = [
 	},
 	// prune:dashboard.reference-entities:end
 ] as const;
+
+export type DashboardDomainAreaInventoryItem = {
+	id: DashboardDomainAreaId;
+	label: string;
+	surfaceCount: number;
+	surfaceIds: DashboardSurfaceId[];
+	surfaceLabels: string[];
+};
+
+const DASHBOARD_ROUTE_SOURCE_ROOT = "src/app/(site)/dashboard";
+
+function normalizeRepositoryPath(value: string) {
+	const normalized = value.replaceAll("\\", "/").replace(/^\.\//, "");
+	if (
+		!normalized ||
+		normalized.startsWith("/") ||
+		normalized === ".." ||
+		normalized.startsWith("../") ||
+		normalized.includes("/../")
+	) {
+		return null;
+	}
+	return normalized.replace(/\/$/, "");
+}
+
+function repositoryPathMatchesRoot(repositoryPath: string, root: string) {
+	return repositoryPath === root || repositoryPath.startsWith(`${root}/`);
+}
+
+export function getDashboardSurfaceSourceRoots(surface: DashboardSurface) {
+	const routeSuffix = surface.href.slice("/dashboard".length);
+	return [
+		`${DASHBOARD_ROUTE_SOURCE_ROOT}${routeSuffix}`,
+		...(surface.sourceRoots ?? []),
+	] as const;
+}
+
+export function getDashboardDomainAreaInventory() {
+	return (
+		Object.entries(dashboardDomainAreaLabels) as [
+			DashboardDomainAreaId,
+			string,
+		][]
+	)
+		.map(([id, label]) => {
+			const surfaces = dashboardSurfaceRegistry.filter(
+				(surface) => surface.domainArea === id,
+			);
+			return {
+				id,
+				label,
+				surfaceCount: surfaces.length,
+				surfaceIds: surfaces.map((surface) => surface.id),
+				surfaceLabels: surfaces.map((surface) => surface.label),
+			} satisfies DashboardDomainAreaInventoryItem;
+		})
+		.filter((area) => area.surfaceCount > 0);
+}
+
+export function getDashboardDomainAreasForEditedPaths(
+	editedPaths: readonly string[],
+) {
+	const ownership = dashboardSurfaceRegistry
+		.flatMap((surface) =>
+			getDashboardSurfaceSourceRoots(surface).map((root) => ({
+				areaId: surface.domainArea,
+				root,
+			})),
+		)
+		.sort((left, right) => right.root.length - left.root.length);
+	const matchedAreas = new Set<DashboardDomainAreaId>();
+
+	for (const editedPath of editedPaths) {
+		const normalizedPath = normalizeRepositoryPath(editedPath);
+		if (!normalizedPath) continue;
+		const match = ownership.find(({ root }) =>
+			repositoryPathMatchesRoot(normalizedPath, root),
+		);
+		if (match) matchedAreas.add(match.areaId);
+	}
+
+	return getDashboardDomainAreaInventory().filter((area) =>
+		matchedAreas.has(area.id),
+	);
+}
 
 export const dashboardFeatureConfig = {
 	organizationSwitcher:

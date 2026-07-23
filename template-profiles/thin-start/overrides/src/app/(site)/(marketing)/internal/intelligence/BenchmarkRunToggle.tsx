@@ -17,7 +17,7 @@ export function BenchmarkRunToggle({ isExample }: { isExample: boolean }) {
 				)
 			}
 		>
-			{isExample ? "Show real runs" : "Show example runs"}
+			{isExample ? "Show local turns" : "Show visual fixture"}
 		</button>
 	);
 }

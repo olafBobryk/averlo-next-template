@@ -6,8 +6,8 @@ import { SegmentedControl } from "@/components/ui/misc/SegmentedControl";
 type BenchmarkRunView = "real" | "placeholder";
 
 const BENCHMARK_RUN_OPTIONS = [
-	{ value: "real", label: "Real runs" },
-	{ value: "placeholder", label: "Placeholder" },
+	{ value: "real", label: "Local turns" },
+	{ value: "placeholder", label: "Visual fixture" },
 ] as const;
 
 export function BenchmarkRunToggle({ isExample }: { isExample: boolean }) {
@@ -25,7 +25,7 @@ export function BenchmarkRunToggle({ isExample }: { isExample: boolean }) {
 				);
 			}}
 			layout="auto"
-			ariaLabel="Benchmark run data source"
+			ariaLabel="Codex recording data source"
 		/>
 	);
 }

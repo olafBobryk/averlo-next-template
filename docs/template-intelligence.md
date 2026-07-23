@@ -49,24 +49,38 @@ shows the maintainer summary, index statistics, and benchmark tools. Detailed
 lookup remains available through the local `intelligence:query` command instead
 of shipping an interactive graph renderer in the template.
 
-## Benchmarks
+## Codex turn recording
 
-The active benchmark run log intentionally starts empty:
+Trusted Codex sessions automatically record privacy-safe lifecycle and local
+tool metadata through `.codex/hooks.json`. The hook writes an ignored,
+owner-readable event log without requiring a worker command:
 
 ```text
-docs/worklogs/template-intelligence-benchmark-runs.jsonl
+.template-intelligence/codex-turn-events.jsonl
 ```
 
-Benchmarking is explicit maintainer work, not a default implementation
-requirement. Use Template Intelligence directly for normal agent orientation:
+The recorder stores session and turn identifiers, timestamps, model and
+permission mode, normalized tool categories, derived intelligence signals,
+relative edited paths, and subagent identifiers. It never stores prompt text,
+commands, tool responses, transcripts, assistant messages, environment values,
+or absolute paths. Open or partial turns remain visible when Codex stops before
+a normal `Stop` event.
+
+Codex requires review and trust for the exact repository hook definition. Use
+`/hooks` when a new or changed hook is awaiting review. Once trusted, normal
+sessions record automatically. See the official [Codex Hooks
+guide](https://learn.chatgpt.com/docs/hooks).
+
+Use Template Intelligence directly for normal agent orientation:
 
 ```bash
 npm run intelligence:generate
 npm run intelligence:query -- route-architecture
 ```
 
-Record intentional `TemplateSerena` runs only when a warm Serena service is
-available or when the command explicitly warms it:
+Run an intentional `TemplateSerena` workload only when a warm Serena service is
+available or when the command explicitly warms it. The surrounding Codex turn
+records this activity automatically:
 
 ```bash
 npm run intelligence:serena:ensure
@@ -93,8 +107,8 @@ npm run intelligence:hybrid -- \
 ```
 
 Without a warm Serena service, `npm run intelligence:hybrid` still generates and
-queries Template Intelligence, prints a no-row-recorded message, and exits
-cleanly unless `--require-serena` is passed.
+queries Template Intelligence and exits cleanly unless `--require-serena` is
+passed.
 
 If local port discovery needs inspection, run:
 
@@ -112,10 +126,21 @@ npm run intelligence:serena:debug -- --serena-port 9121
 npm run intelligence:serena:debug -- --port-range-start 9200 --port-range-count 20
 ```
 
-`TemplateSerena` benchmark rows require Template Intelligence plus at least one
-successful Serena semantic call. The lower-level `npm run intelligence:record`
-command rejects `--strategy TemplateSerena` when `--semantic-calls` is `0`; use
-`Control` for no-intelligence baselines.
+The optional `npm run intelligence:benchmark` and lower-level
+`npm run intelligence:record` commands remain maintainer utilities. They write
+an explicit standalone record only when `--output` is supplied; otherwise their
+default data remains ignored and never modifies curated history.
+
+The tracked benchmark log contains 34 recovered legacy observations with source
+provenance:
+
+```text
+docs/worklogs/template-intelligence-benchmark-runs.jsonl
+```
+
+Those historical self-reports are preserved for review but never mixed with
+automatic turn telemetry or used for strategy rankings. Placeholder visual QA
+rows remain in the separate example file.
 
 The benchmark view is available at:
 
@@ -123,8 +148,30 @@ The benchmark view is available at:
 /internal/intelligence?view=benchmarks
 ```
 
-Use `example=on` for placeholder visual QA data. Placeholder data must not be
-treated as real benchmark history.
+Use `example=on` for placeholder visual QA data. Placeholder data is never
+treated as automatic activity or benchmark history.
+
+### Dashboard domain coverage
+
+Full-start recordings classify relative edited paths against the canonical
+dashboard surface registry. The registry owns the active Dashboard core,
+Product, Account, Organization, Platform, and Reference areas together with
+their route and optional non-route source ownership. The recording view derives
+its area inventory, per-turn chips, and aggregate touched counts at render time;
+the hook event schema does not store a second domain model.
+
+Pruning a dashboard child surface removes its registry entries, so areas with
+no remaining canonical surfaces disappear automatically. Thin-start and
+`--no-dashboard` instances keep Codex turn recording but omit dashboard-domain
+reporting. Historical observations and visual fixtures are never assigned
+dashboard areas retroactively.
+
+Implementation instances must update the canonical registry whenever they add,
+move, or remove a dashboard destination. `npm run verify:static` includes the
+dependency-free `verify:surface-contracts` gate: dashboard instances fail for
+unregistered pages, stale routes, invalid domain ownership, or ambiguous source
+roots, while intentionally dashboard-free profiles pass without retaining
+dashboard tooling.
 
 Like the rest of `/internal`, this page is guarded from client-clone
 production by the internal marketing layout. The canonical

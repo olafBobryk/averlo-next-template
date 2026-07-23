@@ -1,22 +1,16 @@
 #!/usr/bin/env node
 
-import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import {
+	appendExecutedBenchmarkRun,
+	createExecutedBenchmarkRun,
+	VALID_BENCHMARK_MODES,
+	VALID_RESOLUTIONS,
+	VALID_STRATEGIES,
+} from "./lib/template-intelligence-benchmark.mjs";
 
 const ROOT = process.cwd();
-const STRATEGY_ALIASES = new Map([["Hybrid", "TemplateSerena"]]);
-const VALID_STRATEGIES = new Set(["Control", "TemplateSerena", "Graphify"]);
-const VALID_BENCHMARK_MODES = new Set([
-	"live-passive",
-	"shadow-replay",
-	"triple-run",
-]);
-const VALID_RESOLUTIONS = new Set(["promote", "hold", "inconclusive"]);
-const RUNS_PATH = path.join(
-	ROOT,
-	"docs/worklogs/template-intelligence-benchmark-runs.jsonl",
-);
 
 function parseArgs(argv) {
 	const values = new Map();
@@ -27,16 +21,12 @@ function parseArgs(argv) {
 
 		const [key, inlineValue] = arg.slice(2).split("=");
 		const nextValue = inlineValue ?? argv[index + 1];
-
 		if (inlineValue === undefined) index += 1;
+
 		const currentValue = values.get(key);
-		if (currentValue === undefined) {
-			values.set(key, nextValue);
-		} else if (Array.isArray(currentValue)) {
-			currentValue.push(nextValue);
-		} else {
-			values.set(key, [currentValue, nextValue]);
-		}
+		if (currentValue === undefined) values.set(key, nextValue);
+		else if (Array.isArray(currentValue)) currentValue.push(nextValue);
+		else values.set(key, [currentValue, nextValue]);
 	}
 
 	return values;
@@ -44,208 +34,131 @@ function parseArgs(argv) {
 
 function readString(values, key) {
 	const value = values.get(key);
-	if (Array.isArray(value)) {
-		const lastValue = value.at(-1);
-		return typeof lastValue === "string" && lastValue.trim()
-			? lastValue.trim()
-			: null;
-	}
-	return typeof value === "string" && value.trim() ? value.trim() : null;
+	const candidate = Array.isArray(value) ? value.at(-1) : value;
+	return typeof candidate === "string" && candidate.trim()
+		? candidate.trim()
+		: undefined;
 }
 
 function readStringList(values, key) {
 	const value = values.get(key);
-	if (value === undefined) return [];
-
-	const valuesToRead = Array.isArray(value) ? value : [value];
-	return valuesToRead
+	if (value === undefined) return undefined;
+	const entries = Array.isArray(value) ? value : [value];
+	const list = entries
 		.flatMap((entry) => String(entry).split(","))
 		.map((entry) => entry.trim())
 		.filter(Boolean);
+	return list.length > 0 ? list : undefined;
 }
 
-function readNumber(values, key, fallback = 0) {
-	const value = values.get(key);
+function readNumber(values, key, fallback) {
+	const value = readString(values, key);
 	if (value === undefined) return fallback;
-
 	const parsed = Number(value);
 	if (!Number.isFinite(parsed) || parsed < 0) {
 		throw new Error(`--${key} must be a non-negative number.`);
 	}
-
 	return parsed;
 }
 
 function printUsage() {
-	console.log(`Usage: npm run intelligence:record -- \\
+	console.log(`Administrative import usage: npm run intelligence:record -- \\
   --task-id T1 \\
   --task-name "Route architecture" \\
   --strategy TemplateSerena \\
   --shell-commands 15 \\
-  --semantic-calls 2 \\
-  --correctness 3
+  --semantic-calls 2
+
+Normal Codex work is recorded by repository hooks. This command is reserved for
+intentional standalone import and recovery.
+
+Strategies: ${Array.from(VALID_STRATEGIES).join(", ")}
+Modes: ${Array.from(VALID_BENCHMARK_MODES).join(", ")}
+Resolutions: ${Array.from(VALID_RESOLUTIONS).join(", ")}
 
 Optional:
   --date YYYY-MM-DD
+  --scenario-id route-architecture
+  --run-group-id route-bakeoff
   --benchmark-mode live-passive
   --task-class implementation
   --resolution inconclusive
   --output tmp/intelligence-benchmark-smoke.jsonl
+  --source-command imported-observation
   --elapsed-seconds 120
   --setup-seconds 0
   --build-seconds 0
   --query-seconds 0
   --output-bytes 0
-  --suggested-files "src/app/page.tsx,src/config/routes.ts"
+  --graph-nodes 0
+  --graph-edges 0
+  --graph-queries 0
+  --suggested-files src/app/page.tsx,src/config/routes.ts
   --actual-files src/app/page.tsx
+  --correctness 3
   --wrong-turns 1
   --generated-artifact-mistakes 0
-  --notes "Short note"
+  --notes "Short evidence note"
 `);
 }
 
 const values = parseArgs(process.argv.slice(2));
 const taskId = readString(values, "task-id");
 const taskName = readString(values, "task-name");
-const inputStrategy = readString(values, "strategy");
-const strategy = STRATEGY_ALIASES.get(inputStrategy) ?? inputStrategy;
+const strategy = readString(values, "strategy");
 
-if (!taskId || !taskName || !inputStrategy) {
+if (!taskId || !taskName || !strategy) {
 	printUsage();
 	process.exit(1);
 }
 
-const shellCommands = readNumber(values, "shell-commands");
-const semanticCalls = readNumber(values, "semantic-calls");
-const correctness = readNumber(values, "correctness");
-const benchmarkMode = readString(values, "benchmark-mode") ?? "live-passive";
-const resolution = readString(values, "resolution") ?? "inconclusive";
-const outputPath = readString(values, "output");
-
-if (!VALID_STRATEGIES.has(strategy)) {
-	throw new Error(
-		`--strategy must be one of: ${Array.from(VALID_STRATEGIES).join(", ")}. Legacy --strategy Hybrid is accepted as TemplateSerena.`,
-	);
-}
-
-if (strategy === "TemplateSerena" && semanticCalls === 0) {
-	throw new Error(
-		"--strategy TemplateSerena requires --semantic-calls greater than 0. Use --strategy Control for no-intelligence baselines.",
-	);
-}
-
-if (!VALID_BENCHMARK_MODES.has(benchmarkMode)) {
-	throw new Error(
-		`--benchmark-mode must be one of: ${Array.from(VALID_BENCHMARK_MODES).join(", ")}.`,
-	);
-}
-
-if (!VALID_RESOLUTIONS.has(resolution)) {
-	throw new Error(
-		`--resolution must be one of: ${Array.from(VALID_RESOLUTIONS).join(", ")}.`,
-	);
-}
-
-if (correctness > 3) {
-	throw new Error("--correctness must be between 0 and 3.");
-}
-
-const run = {
-	schemaVersion: 2,
-	date: readString(values, "date") ?? new Date().toISOString().slice(0, 10),
-	project: "averlo-next-template",
+const input = {
 	taskId,
 	taskName,
 	strategy,
-	benchmarkMode,
-	shellCommands,
-	semanticCalls,
-	lookupActions: readNumber(
+	measurementSource: "administrative",
+	sourceCommand:
+		readString(values, "source-command") ?? "intelligence:record import",
+	shellCommands: readNumber(values, "shell-commands", 0),
+	semanticCalls: readNumber(values, "semantic-calls", 0),
+	lookupActions: readNumber(values, "lookup-actions", undefined),
+	date: readString(values, "date"),
+	scenarioId: readString(values, "scenario-id"),
+	runGroupId: readString(values, "run-group-id"),
+	taskClass: readString(values, "task-class"),
+	benchmarkMode: readString(values, "benchmark-mode"),
+	beforeCommit: readString(values, "before-commit"),
+	afterCommit: readString(values, "after-commit"),
+	resolution: readString(values, "resolution"),
+	setupSeconds: readNumber(values, "setup-seconds", undefined),
+	buildSeconds: readNumber(values, "build-seconds", undefined),
+	querySeconds: readNumber(values, "query-seconds", undefined),
+	outputBytes: readNumber(values, "output-bytes", undefined),
+	graphNodes: readNumber(values, "graph-nodes", undefined),
+	graphEdges: readNumber(values, "graph-edges", undefined),
+	graphQueries: readNumber(values, "graph-queries", undefined),
+	suggestedFiles: readStringList(values, "suggested-files"),
+	actualFiles: readStringList(values, "actual-files"),
+	missedFiles: readStringList(values, "missed-files"),
+	unnecessaryFiles: readStringList(values, "unnecessary-files"),
+	fallbacksUsed: readStringList(values, "fallbacks-used"),
+	elapsedSeconds: readNumber(values, "elapsed-seconds", undefined),
+	correctness: readNumber(values, "correctness", undefined),
+	wrongTurns: readNumber(values, "wrong-turns", undefined),
+	generatedArtifactMistakes: readNumber(
 		values,
-		"lookup-actions",
-		shellCommands + semanticCalls,
+		"generated-artifact-mistakes",
+		undefined,
 	),
-	correctness,
-	resolution,
+	notes: readString(values, "notes"),
 };
 
-if (inputStrategy !== strategy) run.legacyStrategy = inputStrategy;
-
-const stringFields = [
-	"run-group-id",
-	"task-class",
-	"before-commit",
-	"after-commit",
-];
-for (const field of stringFields) {
-	const value = readString(values, field);
-	if (!value) continue;
-
-	const camelCaseField = field.replace(/-([a-z])/g, (_, letter) =>
-		letter.toUpperCase(),
-	);
-	run[camelCaseField] = value;
-}
-
-const optionalNumberFields = [
-	"setup-seconds",
-	"build-seconds",
-	"query-seconds",
-	"output-bytes",
-	"graph-nodes",
-	"graph-edges",
-	"graph-queries",
-];
-for (const field of optionalNumberFields) {
-	const value = readNumber(values, field, -1);
-	if (value < 0) continue;
-
-	const camelCaseField = field.replace(/-([a-z])/g, (_, letter) =>
-		letter.toUpperCase(),
-	);
-	run[camelCaseField] = value;
-}
-
-const listFields = [
-	"suggested-files",
-	"actual-files",
-	"missed-files",
-	"unnecessary-files",
-	"fallbacks-used",
-];
-for (const field of listFields) {
-	const list = readStringList(values, field);
-	if (list.length === 0) continue;
-
-	const camelCaseField = field.replace(/-([a-z])/g, (_, letter) =>
-		letter.toUpperCase(),
-	);
-	run[camelCaseField] = list;
-}
-
-const elapsedSeconds = readNumber(values, "elapsed-seconds", -1);
-if (elapsedSeconds >= 0) run.elapsedSeconds = elapsedSeconds;
-
-const wrongTurns = readNumber(values, "wrong-turns", -1);
-if (wrongTurns >= 0) run.wrongTurns = wrongTurns;
-
-const generatedArtifactMistakes = readNumber(
-	values,
-	"generated-artifact-mistakes",
-	-1,
-);
-if (generatedArtifactMistakes >= 0) {
-	run.generatedArtifactMistakes = generatedArtifactMistakes;
-}
-
-const notes = readString(values, "notes");
-if (notes) run.notes = notes;
-
-const runsPath = outputPath ? path.resolve(ROOT, outputPath) : RUNS_PATH;
-
-await fs.mkdir(path.dirname(runsPath), { recursive: true });
-await fs.appendFile(runsPath, `${JSON.stringify(run)}\n`, "utf8");
-
+const run = createExecutedBenchmarkRun(input);
+const outputPath = readString(values, "output");
+const result = await appendExecutedBenchmarkRun(run, {
+	root: ROOT,
+	outputPath,
+});
 console.log(
-	`Recorded ${run.strategy} ${run.taskId} in ${path.relative(ROOT, runsPath)}.`,
+	`${result.status === "duplicate" ? "Already recorded" : "Recorded"} ${run.strategy} ${run.taskId} in ${path.relative(ROOT, result.path)} (${run.runId}).`,
 );

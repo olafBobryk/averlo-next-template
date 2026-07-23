@@ -1,6 +1,6 @@
 # Architecture Staging
 
-Consolidated into [the final architecture](./architecture.md) on 2026-07-20 after the pinned-source surface rescan and accepted mutation-policy delta, then reviewed with no unresolved or drifted decisions. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles.
+Consolidated into [the final architecture](./architecture.md) on 2026-07-20 after the pinned-source surface rescan and accepted mutation-policy delta, then reviewed with no unresolved or drifted decisions. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles. The bounded Template Intelligence history cleanup and native Codex hook recorder were accepted and completed on 2026-07-23; neither changes the product architecture in the consolidated document.
 
 ## Template relationship and convergence scope
 
@@ -375,6 +375,41 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-20 afte
   mutation consumers, backend actions, roles, and domain workflows remain
   excluded. The separately delegated strict visual-parity task retains exclusive
   ownership of the full and thin `InputFrame` files during this work.
+
+## Template Intelligence benchmark cleanup
+
+- The cleanup is complete. The tracked history preserves 34 unique legacy
+  observations: the 26 current template rows plus the eight unique rows
+  recovered from commit `c4f5771bcca9abc4daafb7d40eeb7b1c80226732`.
+- Deduplicate copied Inference rows against their template source rather than
+  treating the copies as additional observations.
+- Keep the Inference Graphify policy-only row out of benchmark evidence because
+  it does not represent an executed Graphify run.
+- Keep Averlo Rebrand example metrics out of benchmark evidence. Useful task or
+  scenario descriptions may be retained as examples without promoting their
+  placeholder measurements.
+- Preserve original metrics and add only verifiable source provenance. Do not
+  fabricate timings, files, task classes, cohort identifiers, or other missing
+  fields during cleanup.
+- Do not use the recovered material to claim comparative strategy performance;
+  it contains no matched executed Control or Graphify cohorts.
+- Every tracked row retains its original metrics and strategy while adding
+  source repository, source commit, and legacy evidence quality.
+
+## Native Codex turn recording
+
+- Repository-local Codex lifecycle hooks automatically record trusted sessions
+  and turns without a launcher, daemon, or worker command.
+- Raw events stay in ignored `.template-intelligence` state. Curated legacy
+  history remains tracked separately and is never automatically modified.
+- The recorder stores only lifecycle and normalized activity metadata. Prompt,
+  command, response, transcript, assistant-message, environment, and absolute
+  path content is excluded.
+- Observed paths are derived from independent Template Intelligence, Serena,
+  Graphify, and direct-search signals. Mixed or incomplete activity is labeled
+  honestly rather than forced into a benchmark strategy.
+- Automatic activity is observational and cannot claim correctness, complete
+  tool coverage, or comparative strategy performance.
 
 ## Final architecture disposition
 

@@ -1,104 +1,122 @@
-# Repo Intelligence Benchmark
+# Repo Intelligence Recording
 
 ## Purpose
 
-Measure which minimal repo-intelligence path gives agents the best upward
-pressure during implementation and template instancing. The active benchmark
-paths are `Control`, `TemplateSerena`, and `Graphify`.
+Capture how Codex actually navigates this repository without asking the worker
+to run or annotate a second recording command.
 
-Existing schema v1 rows are kept as history. New rows use schema v2.
-`TemplateSerena` is the canonical name for the old Template Intelligence plus
-Serena `Hybrid` path; the recorder still accepts `--strategy Hybrid` as a
-legacy alias.
+The recording system keeps three sources separate:
 
-## Commands
+- Automatic Codex hook events are ignored local telemetry.
+- The tracked run log contains 34 curated legacy observations with provenance.
+- The example run log contains placeholder visual fixtures only.
 
-Record live work after a task or commit:
+None of these sources supports automatic correctness or strategy-ranking
+claims.
 
-```bash
-npm run intelligence:record -- \
-  --task-id example-task \
-  --task-name "Example task" \
-  --strategy Control \
-  --benchmark-mode live-passive \
-  --task-class implementation \
-  --shell-commands 12 \
-  --semantic-calls 0 \
-  --correctness 3 \
-  --resolution inconclusive \
-  --actual-files src/app/page.tsx,src/config/routes.ts \
-  --notes "Short evidence note."
+## Automatic collection
+
+Codex discovers the committed `.codex/hooks.json` in a trusted project. One
+privacy-safe command hook handles `SessionStart`, `UserPromptSubmit`,
+`PostToolUse`, `SubagentStart`, `SubagentStop`, and `Stop`.
+
+The recorder appends schema-v1 `codex-hook-event` rows to:
+
+```text
+.template-intelligence/codex-turn-events.jsonl
 ```
 
-Use `--output tmp/intelligence-benchmark-smoke.jsonl` for smoke tests and
-experiments that should not append to the tracked run log.
+The file is ignored by Git and written with owner-only permissions. A short
+file lock prevents concurrent hooks from corrupting JSONL rows. Stable event
+identifiers allow the reader to deduplicate retried turn, tool, and subagent
+events.
 
-Clear temporary real runs with:
+The hook records only:
+
+- session and turn identifiers;
+- recording timestamps, model, permission mode, and lifecycle source;
+- normalized local tool category and derived activity signals;
+- repository-relative paths parsed from `apply_patch`;
+- subagent identifier and type.
+
+It never persists prompt text, shell commands, tool inputs or responses,
+transcripts, assistant messages, environment values, or absolute paths. Errors
+emit one payload-free diagnostic and exit successfully so recording cannot
+block Codex.
+
+Codex requires the exact project hook definition to be reviewed and trusted.
+Use `/hooks` when a hook is awaiting review. Official behavior is documented
+in the [Codex Hooks guide](https://learn.chatgpt.com/docs/hooks).
+
+## Turn aggregation
+
+Events are grouped by `sessionId` and `turnId`.
+
+- A turn with both `UserPromptSubmit` and `Stop` is complete.
+- A start without a stop remains open.
+- A stop or tool event without a start remains partial.
+- Tool and subagent counts cover supported local hook paths only. Hosted tools
+  that bypass local hooks are not included.
+
+Observed paths are derived without worker annotation:
+
+- `Control`: no Template Intelligence, Serena, or Graphify signal.
+- `TemplateMap`: Template Intelligence generation or query only.
+- `TemplateSerena`: Template Intelligence plus Serena.
+- `Graphify`: Graphify without another intelligence engine.
+- `Serena-only`: Serena without Template Intelligence.
+- `Mixed`: Graphify combined with Template Intelligence or Serena.
+
+Direct search is retained as an activity signal but does not turn an otherwise
+observed intelligence path into `Mixed`.
+
+## Explicit maintainer utilities
+
+`npm run intelligence:benchmark`, `npm run intelligence:hybrid`, and
+`npm run intelligence:record` remain available for compatibility and
+intentional experiments. They do not modify curated history by default.
+Pass `--output <path>` when an explicit standalone schema-v3 record is
+required.
+
+Without `--output`, the surrounding trusted Codex turn is the recording source.
+The standalone recorder defaults to the ignored local path
+`.template-intelligence/explicit-benchmark-runs.jsonl`.
+
+Clear ignored explicit records with:
 
 ```bash
-npm run intelligence:record:clear -- --yes
+npm run intelligence:record:clear -- --executed-runs --yes
 ```
 
-The visual benchmark route still reads the tracked run log:
+This command never clears curated legacy history or automatic turn events.
+
+## Historical cleanup
+
+The tracked file
+`docs/worklogs/template-intelligence-benchmark-runs.jsonl` contains exactly 34
+legacy observations:
+
+- 26 rows from the current template history, with the introducing commit
+  recovered from Git blame;
+- eight unique rows recovered from
+  `c4f5771bcca9abc4daafb7d40eeb7b1c80226732`.
+
+Each row preserves its original project, task identity, strategy, metrics, and
+notes while adding `evidenceClass`, `evidenceQuality`, `sourceRepository`,
+and `sourceCommit`.
+
+Copied Inference rows are duplicates and are not added. The Inference Graphify
+policy row is not an executed run. Averlo Rebrand example metrics remain visual
+fixtures and are not benchmark history.
+
+## Review surface
+
+The local recording and curated history are available at:
 
 ```text
 /internal/intelligence?view=benchmarks
 ```
 
-## Benchmark Paths
-
-`Control` is the no-intelligence baseline. Do not run Template Intelligence,
-Serena, or Graphify first. Record the manual `rg`, file-read, and inspection
-cost.
-
-`TemplateSerena` is the current warm optional path:
-
-```bash
-npm run intelligence:generate
-npm run intelligence:query -- ui-primitives
-npm run intelligence:serena:ensure
-npm run intelligence:hybrid -- \
-  --task-id example-task \
-  --task-name "Example task" \
-  --topics ui-primitives \
-  --serena-file src/components/ui/primitives/Button.tsx \
-  --serena-symbol Button \
-  --require-serena
-```
-
-`Graphify` is a no-new-UI pilot. Keep `graphify-out/` ignored, skip Graphify's
-generated HTML review surface, and use the CLI/report/JSON output only:
-
-```bash
-uvx --from graphifyy graphify . --no-viz
-uvx --from graphifyy graphify query "Where should an agent start for this task?"
-```
-
-After using Graphify, record build/query cost, graph size, suggested files,
-actual files, missed files, and whether Serena/manual search was still needed.
-
-## Benchmark Modes
-
-`live-passive` is the default for real work. Record one row after a completed
-task/commit describing which path was used and whether it helped.
-
-`shadow-replay` is for concluded commits. Record `beforeCommit`, `afterCommit`,
-known `actualFiles`, and what a path would have suggested before implementation.
-Use it to extract lessons without changing code.
-
-`triple-run` is optional. Use one `runGroupId` and three rows when comparing all
-paths on the same task is worth the ceremony. It is not required for normal
-work.
-
-## Decision Use
-
-Template instancing should choose an initial benchmark path, not a permanent
-intelligence system:
-
-- `Control` for tiny, thin, or simple instances.
-- `TemplateSerena` for implementation-heavy work that needs exact symbols.
-- `Graphify` for unfamiliar, inherited, cross-boundary, or docs-heavy repos.
-
-Promote a path only after several rows show fewer missed files, fewer wrong
-turns, and acceptable setup/build friction. Keep `graphify-out/` local and
-ignored unless shared graph state is explicitly accepted later.
+Use `example=on` only for visual fixture review. The real view shows recent
+automatic turns and a separate curated legacy count; it does not render
+cross-strategy rankings.
