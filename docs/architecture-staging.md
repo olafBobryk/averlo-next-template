@@ -1,6 +1,6 @@
 # Architecture Staging
 
-Consolidated into [the final architecture](./architecture.md) on 2026-07-20 after the pinned-source surface rescan and accepted mutation-policy delta, then reviewed with no unresolved or drifted decisions. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles. A bounded Template Intelligence benchmark-cleanup batch was accepted on 2026-07-23 and is pending consolidation; future benchmark-system architecture remains unaccepted.
+Consolidated into [the final architecture](./architecture.md) on 2026-07-20 after the pinned-source surface rescan and accepted mutation-policy delta, then reviewed with no unresolved or drifted decisions. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles. A bounded Template Intelligence benchmark-cleanup batch was accepted on 2026-07-23 and is pending completion, not consolidation into final architecture; future benchmark-system architecture remains unaccepted.
 
 ## Template relationship and convergence scope
 
@@ -396,6 +396,9 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-20 afte
 - Recorder architecture, strategy definitions, deterministic command behavior,
   validation rules, scoring, annotations, clearing behavior, and future
   benchmark collection remain outside this accepted cleanup batch.
+- This one-time cleanup disposition should be marked complete after the source
+  material is recovered and classified. It does not become durable benchmark
+  architecture merely because it is tracked in this acceptance ledger.
 
 ## Final architecture disposition
 
