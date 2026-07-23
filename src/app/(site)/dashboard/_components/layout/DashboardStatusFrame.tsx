@@ -12,7 +12,7 @@ export function DashboardStatusFrame({
 }) {
 	return (
 		<div
-			className="grid min-h-[28rem] place-items-center"
+			className="grid min-h-[calc(100svh-8rem)] w-full place-items-center"
 			data-slot="dashboard-status-frame"
 		>
 			<StateIndicator
