@@ -1,7 +1,13 @@
 "use client";
 
+import { motion } from "motion/react";
 import Image from "next/image";
 import { useCallback, useId, useMemo, useState } from "react";
+import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import {
+	instantTransition,
+	resolveMotionTransition,
+} from "@/components/ui/foundations/motionTiming";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 import {
 	ActiveStageHost,
@@ -11,6 +17,7 @@ import { Button } from "@/components/ui/primitives/Button";
 import { Dropdown } from "@/components/ui/primitives/Dropdown";
 import { Panel } from "@/components/ui/primitives/Panel";
 import { Text } from "@/components/ui/primitives/Text";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { useIsSmUp } from "@/hooks/useTailwindBreakpoints";
 import type {
 	HomeHeroServiceItem,
@@ -79,6 +86,10 @@ type SurfaceGroupProps = {
 
 const assemblyHostClassName =
 	"pointer-events-none absolute inset-0 z-10 overflow-visible";
+const serviceContentTransition = resolveMotionTransition("ambient", {
+	intensity: "subtle",
+	surface: "flat",
+});
 
 function RealSurface({ surfaceId }: { surfaceId: TemplateServiceSurfaceId }) {
 	const surface = renderedSurfaces[surfaceId];
@@ -300,7 +311,13 @@ function ActiveServiceCallout({
 	calloutId: string;
 	service: HomeHeroServiceItem;
 }) {
+	const motionAllowed = useMotionAllowed(true);
+	const motionDisabled = useMotionDisableOverride();
 	const isSmUp = useIsSmUp();
+	const contentTransition =
+		motionAllowed && !motionDisabled
+			? serviceContentTransition
+			: instantTransition;
 	const alignsEnd = service.surfaceIds.some((surfaceId) =>
 		["fullStart", "playground", "thinStart"].includes(surfaceId),
 	);
@@ -311,7 +328,7 @@ function ActiveServiceCallout({
 	);
 
 	const content = (
-		<div className="grid gap-2">
+		<motion.div layout className="grid gap-2" transition={contentTransition}>
 			<Text
 				as="p"
 				variant="headingMd"
@@ -329,7 +346,7 @@ function ActiveServiceCallout({
 			>
 				{service.description}
 			</Text>
-		</div>
+		</motion.div>
 	);
 
 	if (!isSmUp) {
