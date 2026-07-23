@@ -2,13 +2,14 @@
 
 Final accepted architecture for the Averlo full-start and thin-start profiles.
 This document defines durable system boundaries and does not authorize or prescribe an implementation sequence.
-Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2026-07-19, including the pinned-source surface rescan, with no unresolved or drifted decisions.
+Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2026-07-20, including the pinned-source surface rescan and mutation-policy delta, with no unresolved or drifted decisions.
 
 ## Source relationship
 
 - Full start is the canonical broad template system.
 - Inference Console is a pinned visual and behavioral reference, not a runtime dependency, general component donor, backend blueprint, or source dependency.
 - Inference Console revision `8a13d12ea11461fe204625bd1247a6db16c4a207` is the immutable baseline for this convergence. Later source changes require an explicit repin decision.
+- The committed mutation-policy delta through `1c6208b37fabb4666c142490608f45662013b0f7` is a separately accepted behavioral reference. It does not repin the visual baseline or authorize unrelated source changes.
 - Structural primitive convergence begins with `Panel` and `Card`; styling convergence covers the complete shared consumer layer.
 - Source convergence is additive. Matching the reference must not flatten mature template APIs that remain useful.
 
@@ -107,6 +108,10 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - `ModalForm` includes a generic `ModalStepForm` and `StepIndicator` matching the pinned source's visual and interaction design while retaining stronger compatible template modal APIs.
 - Completed step panels remain mounted and hidden so field state survives navigation. Back and Next never submit; only the final action validates and submits.
 - The shared confirmation system supports structured impact details, warnings, semantic confirm variants, and asynchronous confirmation that may return `false` to keep the modal open after a failed mutation.
+- Full and thin `ModalShell` implementations expose `useModalSubmission`, reject duplicate submissions, and block Escape, backdrop, and header-close dismissal while a mutation is pending. The port preserves the full shell's stronger focus, stacking, scroll-lock, motion, and composition behavior and the thin shell's smaller public surface.
+- Shared modal options carry an accessible label through the host. Both confirmation implementations consume the shell submission contract. Full-start `ModalStepForm` accepts submission state and disables Back, Cancel, and Next while pending; its caller-owned final action uses the Button loading contract.
+- Server-backed modal actions return local discriminated results shaped as `{ ok, message, fieldErrors? }`. Field-error keys remain form or domain owned; there is no global catch-all modal mutation result type. Validation stays inline, while overall success, partial success, and recoverable failure use the shared toast system.
+- Recoverable failure clears pending state and preserves the mounted modal and entered values. Same-route success closes and performs one local update or `router.refresh()`. Navigation success performs one `router.push()` or `router.replace()`, closes without refreshing, and remains submission-locked until unmount so the destination loading boundary owns pending presentation.
 - Existing template helpers remain canonical where they provide an equivalent or stronger contract.
 
 ## Full-start dashboard
@@ -186,10 +191,13 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - The detail reference demonstrates page actions, structured properties, related data, and a focused edit modal.
 - `DashboardDetailField` supports static, link, action, copy, truncation, icon, disabled, and skeleton states.
 - `DashboardPropertyList` provides responsive identity, value, and action columns, add-property selection, and row actions.
-- `DashboardMarkdownEditorModalButton` provides focused Markdown editing. Callers own asynchronous persistence; the composite owns modal composition, validation display, loading feedback, errors, and success toasts.
+- `DashboardMarkdownEditorModalButton` provides focused Markdown editing. Callers own asynchronous persistence; the composite owns modal composition, shared submission locking, validation display, loading feedback, errors, and success toasts.
 - Detail and property components own presentation and interaction composition only. Routes own property schemas, authorization, persistence, and product-specific editors.
 - Fixture adapters provide organization-scoped, resettable create, edit, archive, and delete commands and demonstrate confirmation, validation, toast, optimistic, and failure feedback.
-- An entity-neutral deletion lifecycle definition and dashboard composition centralize impact descriptions, confirmation structure, danger-menu placement, mutation feedback, refresh behavior, and disabled explanations. Owning adapters retain the mutation and entity-specific consequences.
+- An entity-neutral deletion lifecycle definition and dashboard composition centralize impact descriptions, confirmation structure, danger-menu placement, mutation feedback, completion behavior, and disabled explanations. Owning adapters retain the mutation and entity-specific consequences.
+- Entity deletion completion is typed as `refresh` or `navigate`. The shared API retains refresh as a compatibility default, while reference consumers declare completion explicitly. Deleting the entity represented by the current detail route uses replacement navigation; feature callbacks do not duplicate the route change or refresh the deleted route.
+- Optimistic deletion rolls back after either a failed result or a thrown mutation. Failure reports through the shared toast system and returns `false` so confirmation remains open.
+- Reference adoption covers record create and edit, dashboard and reusable Markdown modal forms, entity confirmation and deletion, and the internal asynchronous-mutation demonstration. The non-persistent report-issue stub and non-modal profile form remain outside this modal policy.
 - The framed and dashed no-data treatment proven by Inference Console is a dashboard-oriented variant or wrapper around the canonical `StateIndicator`, not a competing global null-state system.
 - Demo persistence may be explicitly non-durable; production adapters own durable storage.
 
@@ -291,4 +299,5 @@ Reviewed against [the staging acceptance ledger](./architecture-staging.md) on 2
 - Entity-presentation verification covers the example member across identity, table, detail, selector, Command-K, Markdown mention, empty, and loading surfaces and checks that owning definitions are reused rather than copied into routes.
 - Profile verification proves that thin start excludes dashboard presentation and reference-entity capabilities, that dashboard pruning removes both, and that pruning `dashboard.reference-entities` leaves no reference-entity imports, dependencies, demonstrations, policy hooks, or generated output behind.
 - Focused behavioral or structural verification covers authentication entry, invitation acceptance, viable-identity protection, entity deletion, component skeleton parity, and profile pruning. Product-specific Inference Console verifier scripts are not copied.
+- Mutation verification covers duplicate-submit rejection, dismissal locking, inline field errors, retained values after failure, confirmation `false` behavior, optimistic rollback after returned and thrown failures, explicit refresh-versus-navigation completion, and the absence of navigation-plus-refresh handoffs.
 - Dashboard visual review covers the baseline route matrix in light and dark modes, desktop and mobile shell behavior, Command-K, and deterministic live, loading, empty, error, unavailable, and not-found states.

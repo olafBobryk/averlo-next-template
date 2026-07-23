@@ -61,6 +61,12 @@ path, failures must leave durable state unchanged, and destructive actions use
 the shared confirmation system. Returning `false` from confirmation keeps the
 modal open so the failure remains actionable.
 
+Server-backed entity modals use the shared modal submission contract. Their
+actions return local `{ ok, message, fieldErrors? }` results; field keys stay
+with the owning entity. Same-route completion performs one local update or
+refresh. Detail deletion declares navigation completion, uses replacement when
+the current entity disappears, and never combines that navigation with refresh.
+
 ## Agent workflow
 
 Before adding an entity:

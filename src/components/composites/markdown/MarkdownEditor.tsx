@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import * as React from "react";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { ModalForm } from "@/components/ui/overlays/modal/ModalForm";
+import { useModalSubmission } from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
 import type { MarkdownContentDensity } from "./markdownContent";
 
@@ -120,7 +121,17 @@ export function MarkdownEditorModalForm({
 	...editorProps
 }: MarkdownEditorModalFormProps) {
 	const [markdown, setMarkdown] = React.useState(defaultMarkdown);
-	const [submitting, setSubmitting] = React.useState(false);
+	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
+
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		if (!beginSubmission()) return;
+		try {
+			await onSubmitMarkdown(markdown);
+		} finally {
+			endSubmission();
+		}
+	}
 
 	return (
 		<ModalForm
@@ -128,32 +139,24 @@ export function MarkdownEditorModalForm({
 			footer={
 				<>
 					<Button
-						disabled={submitting}
+						disabled={isSubmitting}
 						onClick={onCancel}
 						type="button"
 						variant="ghost"
 					>
 						{cancelLabel}
 					</Button>
-					<Button loading={submitting} type="submit" variant="primary">
+					<Button loading={isSubmitting} type="submit" variant="primary">
 						{submitLabel}
 					</Button>
 				</>
 			}
-			onSubmit={async (event) => {
-				event.preventDefault();
-				setSubmitting(true);
-				try {
-					await onSubmitMarkdown(markdown);
-				} finally {
-					setSubmitting(false);
-				}
-			}}
+			onSubmit={handleSubmit}
 		>
 			<MarkdownEditor
 				{...editorProps}
 				defaultMarkdown={defaultMarkdown}
-				disabled={editorProps.disabled || submitting}
+				disabled={editorProps.disabled || isSubmitting}
 				onChange={setMarkdown}
 			/>
 		</ModalForm>

@@ -35,6 +35,7 @@ const SURFACES = {
 			"docs/frontend-entity-policy.md",
 			"scripts/verify-reference-entities.ts",
 			"scripts/verify-entity-deletion.ts",
+			"scripts/verify-mutation-policy.ts",
 			"scripts/verify-entity-skeletons.ts",
 			"scripts/verify-frontend-entity-policy.ts",
 			"scripts/verify-profile-pruning.mjs",
@@ -62,6 +63,7 @@ const SURFACES = {
 		packageScripts: [
 			"verify:reference-entities",
 			"verify:entity-deletion",
+			"verify:mutation-policy",
 			"verify:entity-skeletons",
 			"verify:frontend-entity-policy",
 			"verify:frontend-entities",

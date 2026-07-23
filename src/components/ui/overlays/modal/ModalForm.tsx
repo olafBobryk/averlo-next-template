@@ -60,6 +60,7 @@ export type ModalStepFormProps<TStep extends string = string> = Omit<
 	backLabel?: React.ReactNode;
 	cancelLabel?: React.ReactNode;
 	currentStep: TStep;
+	isSubmitting?: boolean;
 	nextLabel?: React.ReactNode;
 	onCancel?: () => void;
 	onStepChange: (step: TStep) => void;
@@ -78,6 +79,7 @@ export function ModalStepForm<TStep extends string = string>({
 	cancelLabel = "Cancel",
 	contentClassName,
 	currentStep,
+	isSubmitting = false,
 	nextLabel = "Next",
 	onCancel,
 	onStepChange,
@@ -93,6 +95,9 @@ export function ModalStepForm<TStep extends string = string>({
 	const previousStep = getAdjacentEnabledStep(steps, currentIndex, -1);
 	const nextStep = getAdjacentEnabledStep(steps, currentIndex, 1);
 	const isFinalStep = !nextStep;
+	const indicatorSteps = isSubmitting
+		? steps.map((step) => ({ ...step, disabled: true }))
+		: steps;
 
 	function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
 		if (!isFinalStep || isStepNavigationSubmit(event)) {
@@ -108,7 +113,7 @@ export function ModalStepForm<TStep extends string = string>({
 	) {
 		event.preventDefault();
 		event.stopPropagation();
-		if (step) onStepChange(step);
+		if (step && !isSubmitting) onStepChange(step);
 	}
 
 	return (
@@ -119,6 +124,7 @@ export function ModalStepForm<TStep extends string = string>({
 					{previousStep ? (
 						<Button
 							{...{ [stepNavigationAttribute]: "true" }}
+							disabled={isSubmitting}
 							leadingIcon="arrow-left"
 							onClick={(event) => goToStep(previousStep.id, event)}
 							type="button"
@@ -127,7 +133,12 @@ export function ModalStepForm<TStep extends string = string>({
 							{backLabel}
 						</Button>
 					) : onCancel ? (
-						<Button onClick={onCancel} type="button" variant="ghost">
+						<Button
+							disabled={isSubmitting}
+							onClick={onCancel}
+							type="button"
+							variant="ghost"
+						>
 							{cancelLabel}
 						</Button>
 					) : null}
@@ -136,6 +147,7 @@ export function ModalStepForm<TStep extends string = string>({
 					) : (
 						<Button
 							{...{ [stepNavigationAttribute]: "true" }}
+							disabled={isSubmitting}
 							onClick={(event) => goToStep(nextStep?.id, event)}
 							trailingIcon="arrow-right"
 							type="button"
@@ -152,8 +164,10 @@ export function ModalStepForm<TStep extends string = string>({
 				aria-label={ariaLabel}
 				className={stepIndicatorClassName}
 				currentStep={currentStep}
-				onStepChange={onStepChange}
-				steps={steps}
+				onStepChange={(step) => {
+					if (!isSubmitting) onStepChange(step);
+				}}
+				steps={indicatorSteps}
 			/>
 			{panels.map((panel) => (
 				<div

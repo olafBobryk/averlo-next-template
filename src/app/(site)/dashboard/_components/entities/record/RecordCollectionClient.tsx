@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
 import { TextInput } from "@/components/ui/input/TextInput";
@@ -11,6 +11,7 @@ import {
 	ModalDescription,
 	ModalHeader,
 	ModalTitle,
+	useModalSubmission,
 } from "@/components/ui/overlays/modal/ModalShell";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
@@ -415,6 +416,7 @@ function RecordRowActions({
 }) {
 	const presentation = getRecordPresentation(record);
 	const deleteOption = useEntityDeletionOption({
+		completion: { type: "refresh" },
 		definition: {
 			entityLabel: presentation.title,
 			entityTypeLabel: recordPresentationDefinition.nouns.singular,
@@ -483,11 +485,10 @@ function RecordCreateButton({
 	const openedAutomatically = React.useRef(false);
 	const openCreateModal = React.useCallback(() => {
 		openModal(
-			({ close, setCloseDisabled }) => (
+			({ close }) => (
 				<RecordCreateForm
 					members={members}
 					onCancel={close}
-					onCloseDisabledChange={setCloseDisabled}
 					onCreated={(record) => {
 						onCreated(record);
 						close();
@@ -513,28 +514,56 @@ function RecordCreateButton({
 function RecordCreateForm({
 	members,
 	onCancel,
-	onCloseDisabledChange,
 	onCreated,
 	simulateFailure,
 }: {
 	members: readonly MemberPresentation[];
 	onCancel: () => void;
-	onCloseDisabledChange: (disabled: boolean) => void;
 	onCreated: (record: ReferenceRecord) => void;
 	simulateFailure: boolean;
 }) {
-	const router = useRouter();
 	const [title, setTitle] = React.useState("");
 	const [ownerMemberId, setOwnerMemberId] = React.useState<string | null>(
 		members[0]?.id ?? null,
 	);
 	const [review, setReview] = React.useState<string[]>([]);
 	const [error, setError] = React.useState<string>();
-	const [saving, setSaving] = React.useState(false);
-	React.useEffect(() => {
-		onCloseDisabledChange(saving);
-		return () => onCloseDisabledChange(false);
-	}, [onCloseDisabledChange, saving]);
+	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
+
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		if (title.trim().length < 2) {
+			setError("Enter a record title.");
+			return;
+		}
+		if (!beginSubmission()) return;
+		setError(undefined);
+		let shouldEndSubmission = true;
+		try {
+			const result = await createReferenceRecordAction(
+				{
+					ownerMemberId,
+					status: review.includes("review") ? "review" : "draft",
+					title,
+				},
+				simulateFailure,
+			);
+			if (!result.ok) {
+				setError(result.fieldErrors?.title);
+				showToast.error(result.message, { title: "Creation failed" });
+				return;
+			}
+			showToast.success(result.message);
+			shouldEndSubmission = false;
+			onCreated(result.record);
+		} catch {
+			showToast.error("The record could not be created. Try again.", {
+				title: "Creation failed",
+			});
+		} finally {
+			if (shouldEndSubmission) endSubmission();
+		}
+	}
 	return (
 		<>
 			<ModalHeader leadingIcon={<Icon name="plus" size="sm" />}>
@@ -548,46 +577,19 @@ function RecordCreateForm({
 				footer={
 					<>
 						<Button
-							disabled={saving}
+							disabled={isSubmitting}
 							onClick={onCancel}
 							type="button"
 							variant="ghost"
 						>
 							Cancel
 						</Button>
-						<Button loading={saving} type="submit">
+						<Button loading={isSubmitting} type="submit">
 							Create record
 						</Button>
 					</>
 				}
-				onSubmit={async (event) => {
-					event.preventDefault();
-					if (title.trim().length < 2) {
-						setError("Enter a record title.");
-						return;
-					}
-					setError(undefined);
-					setSaving(true);
-					try {
-						const result = await createReferenceRecordAction(
-							{
-								ownerMemberId,
-								status: review.includes("review") ? "review" : "draft",
-								title,
-							},
-							simulateFailure,
-						);
-						if (!result.ok) {
-							setError(result.message);
-							return;
-						}
-						onCreated(result.record);
-						showToast.success(result.message);
-						router.refresh();
-					} finally {
-						setSaving(false);
-					}
-				}}
+				onSubmit={handleSubmit}
 			>
 				<TextInput
 					error={error}

@@ -7,7 +7,11 @@ import type {
 } from "../entities/record/domain";
 
 export type ReferenceRecordMutationResult =
-	| { message: string; ok: false }
+	| {
+			fieldErrors?: { title?: string };
+			message: string;
+			ok: false;
+	  }
 	| { message: string; ok: true; record: ReferenceRecord };
 
 type ReferenceRecordFixtureState = Map<string, Map<string, ReferenceRecord>>;
@@ -142,8 +146,11 @@ function uniqueSlug(
 	return `${base}-${suffix}`;
 }
 
-function failure(message: string): ReferenceRecordMutationResult {
-	return { message, ok: false };
+function failure(
+	message: string,
+	fieldErrors?: { title?: string },
+): ReferenceRecordMutationResult {
+	return { fieldErrors, message, ok: false };
 }
 
 function shouldSimulateFailure(simulateFailure?: boolean) {
@@ -171,12 +178,19 @@ export function createReferenceRecord(
 	options: { simulateFailure?: boolean } = {},
 ): ReferenceRecordMutationResult {
 	if (shouldSimulateFailure(options.simulateFailure)) {
-		return failure("Simulated fixture failure. No record was created.");
+		return failure("Simulated fixture failure. No record was created.", {
+			title: "The fixture rejected this title. Your value was kept.",
+		});
 	}
 	const title = normalizeTitle(input.title);
-	if (title.length < 2) return failure("Enter a record title.");
+	if (title.length < 2)
+		return failure("Enter a record title.", {
+			title: "Enter a record title.",
+		});
 	if (title.length > 100)
-		return failure("Keep the title under 100 characters.");
+		return failure("Keep the title under 100 characters.", {
+			title: "Keep the title under 100 characters.",
+		});
 	const records = getOrganizationRecords(organizationId);
 	const now = new Date().toISOString();
 	const record: ReferenceRecord = {
@@ -209,6 +223,7 @@ export function updateReferenceRecord(
 	if (shouldSimulateFailure(options.simulateFailure)) {
 		return failure(
 			"Simulated fixture failure. Your previous values were kept.",
+			{ title: "The fixture rejected this title. Your value was kept." },
 		);
 	}
 	const records = getOrganizationRecords(organizationId);
@@ -216,7 +231,10 @@ export function updateReferenceRecord(
 	if (!current) return failure("The record is no longer available.");
 	const title =
 		patch.title === undefined ? current.title : normalizeTitle(patch.title);
-	if (title.length < 2) return failure("Enter a record title.");
+	if (title.length < 2)
+		return failure("Enter a record title.", {
+			title: "Enter a record title.",
+		});
 	const next: ReferenceRecord = {
 		...current,
 		...patch,

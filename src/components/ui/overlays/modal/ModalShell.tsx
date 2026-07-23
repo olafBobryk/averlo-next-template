@@ -36,7 +36,12 @@ export type ModalShellProps = {
 	placement?: "center" | "top";
 };
 
-type ModalShellContextValue = { onClose: () => void };
+type ModalShellContextValue = {
+	beginSubmission: () => boolean;
+	endSubmission: () => void;
+	isSubmitting: boolean;
+	onClose: () => void;
+};
 type ModalHeaderContextValue = { leadingIcon?: ReactNode };
 
 const ModalShellContext = React.createContext<ModalShellContextValue | null>(
@@ -45,6 +50,18 @@ const ModalShellContext = React.createContext<ModalShellContextValue | null>(
 const ModalHeaderContext = React.createContext<ModalHeaderContextValue | null>(
 	null,
 );
+
+export function useModalSubmission() {
+	const context = React.useContext(ModalShellContext);
+	if (!context) {
+		throw new Error("useModalSubmission must be used inside ModalShell.");
+	}
+	return {
+		beginSubmission: context.beginSubmission,
+		endSubmission: context.endSubmission,
+		isSubmitting: context.isSubmitting,
+	};
+}
 
 type ModalHeaderProps = React.ComponentPropsWithoutRef<"div"> & {
 	actions?: ReactNode;
@@ -68,6 +85,8 @@ export function ModalHeader({
 }: ModalHeaderProps) {
 	const modalContext = React.useContext(ModalShellContext);
 	const closeHandler = onClose ?? modalContext?.onClose;
+	const resolvedCloseDisabled =
+		closeDisabled || Boolean(modalContext?.isSubmitting);
 
 	return (
 		<CardHeader className={clsx("border-b px-5 py-4", className)} {...props}>
@@ -82,7 +101,7 @@ export function ModalHeader({
 							aria-label={closeLabel}
 							autoFocus
 							className="text-foreground/60 hover:text-foreground"
-							disabled={closeDisabled}
+							disabled={resolvedCloseDisabled}
 							onClick={closeHandler}
 							size="icon-sm"
 							type="button"
@@ -192,6 +211,25 @@ export function ModalShell({
 }: ModalShellProps) {
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
 	const previousActiveElementRef = useRef<HTMLElement | null>(null);
+	const submissionRef = useRef(false);
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+	function beginSubmission() {
+		if (submissionRef.current) return false;
+		submissionRef.current = true;
+		setIsSubmitting(true);
+		return true;
+	}
+
+	function endSubmission() {
+		submissionRef.current = false;
+		setIsSubmitting(false);
+	}
+
+	function requestClose() {
+		if (submissionRef.current) return;
+		onClose();
+	}
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -200,7 +238,7 @@ export function ModalShell({
 			if (event.key === "Escape") {
 				event.preventDefault();
 				event.stopPropagation();
-				onClose();
+				if (!submissionRef.current) onClose();
 				return;
 			}
 
@@ -370,7 +408,7 @@ export function ModalShell({
 					animate={backdropAnimate}
 					exit={backdropExit}
 					transition={motionAllowed ? overlayTransition : undefined}
-					onClick={onClose}
+					onClick={requestClose}
 					type="button"
 				/>
 
@@ -387,10 +425,17 @@ export function ModalShell({
 					aria-label={ariaLabel}
 					tabIndex={-1}
 					onClick={(event) => {
-						if (event.target === event.currentTarget) onClose();
+						if (event.target === event.currentTarget) requestClose();
 					}}
 				>
-					<ModalShellContext.Provider value={{ onClose }}>
+					<ModalShellContext.Provider
+						value={{
+							beginSubmission,
+							endSubmission,
+							isSubmitting,
+							onClose: requestClose,
+						}}
+					>
 						{children}
 					</ModalShellContext.Provider>
 				</motion.div>

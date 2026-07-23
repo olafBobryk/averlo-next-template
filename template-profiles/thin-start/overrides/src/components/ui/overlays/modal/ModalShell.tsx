@@ -23,7 +23,12 @@ type ModalShellProps = {
 	portalTargetId?: string;
 };
 
-type ModalShellContextValue = { onClose: () => void };
+type ModalShellContextValue = {
+	beginSubmission: () => boolean;
+	endSubmission: () => void;
+	isSubmitting: boolean;
+	onClose: () => void;
+};
 type ModalHeaderContextValue = { leadingIcon?: React.ReactNode };
 
 const ModalShellContext = React.createContext<ModalShellContextValue | null>(
@@ -32,6 +37,18 @@ const ModalShellContext = React.createContext<ModalShellContextValue | null>(
 const ModalHeaderContext = React.createContext<ModalHeaderContextValue | null>(
 	null,
 );
+
+export function useModalSubmission() {
+	const context = React.useContext(ModalShellContext);
+	if (!context) {
+		throw new Error("useModalSubmission must be used inside ModalShell.");
+	}
+	return {
+		beginSubmission: context.beginSubmission,
+		endSubmission: context.endSubmission,
+		isSubmitting: context.isSubmitting,
+	};
+}
 
 const FOCUSABLE_SELECTOR = [
 	"a[href]",
@@ -66,13 +83,33 @@ export function ModalShell({
 }: ModalShellProps) {
 	const wrapperRef = React.useRef<HTMLDivElement | null>(null);
 	const previousActiveElementRef = React.useRef<HTMLElement | null>(null);
+	const submissionRef = React.useRef(false);
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+	function beginSubmission() {
+		if (submissionRef.current) return false;
+		submissionRef.current = true;
+		setIsSubmitting(true);
+		return true;
+	}
+
+	function endSubmission() {
+		submissionRef.current = false;
+		setIsSubmitting(false);
+	}
+
+	function requestClose() {
+		if (submissionRef.current) return;
+		onClose();
+	}
 
 	React.useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
 			if (!isTopMost) return;
 			if (event.key === "Escape") {
 				event.preventDefault();
-				onClose();
+				event.stopPropagation();
+				if (!submissionRef.current) onClose();
 				return;
 			}
 			if (event.key !== "Tab" || !wrapperRef.current) return;
@@ -95,7 +132,6 @@ export function ModalShell({
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [isTopMost, onClose]);
-
 	React.useLayoutEffect(() => {
 		previousActiveElementRef.current =
 			document.activeElement instanceof HTMLElement
@@ -143,7 +179,7 @@ export function ModalShell({
 				<button
 					aria-label="Close modal"
 					className="absolute inset-0 bg-background/20 backdrop-blur-md"
-					onClick={onClose}
+					onClick={requestClose}
 					type="button"
 				/>
 				<div
@@ -154,7 +190,14 @@ export function ModalShell({
 					role="dialog"
 					tabIndex={-1}
 				>
-					<ModalShellContext.Provider value={{ onClose }}>
+					<ModalShellContext.Provider
+						value={{
+							beginSubmission,
+							endSubmission,
+							isSubmitting,
+							onClose: requestClose,
+						}}
+					>
 						{children}
 					</ModalShellContext.Provider>
 				</div>
@@ -185,6 +228,8 @@ export function ModalHeader({
 }: ModalHeaderProps) {
 	const modalContext = React.useContext(ModalShellContext);
 	const closeHandler = onClose ?? modalContext?.onClose;
+	const resolvedCloseDisabled =
+		closeDisabled || Boolean(modalContext?.isSubmitting);
 	return (
 		<CardHeader className={clsx("border-b px-5 py-4", className)} {...props}>
 			<ModalHeaderContext.Provider value={{ leadingIcon }}>
@@ -197,7 +242,7 @@ export function ModalHeader({
 						<Button
 							aria-label={closeLabel}
 							autoFocus
-							disabled={closeDisabled}
+							disabled={resolvedCloseDisabled}
 							onClick={closeHandler}
 							size="icon-sm"
 							type="button"

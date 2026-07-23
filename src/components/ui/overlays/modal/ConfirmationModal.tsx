@@ -8,6 +8,7 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalTitle,
+	useModalSubmission,
 } from "@/components/ui/overlays/modal/ModalShell";
 import {
 	Button,
@@ -48,7 +49,7 @@ export function ConfirmationModal({
 	warning,
 }: ConfirmationModalProps) {
 	const impactTitleId = React.useId();
-	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
 
 	React.useEffect(() => {
 		onCloseDisabledChange?.(isSubmitting);
@@ -56,16 +57,16 @@ export function ConfirmationModal({
 	}, [isSubmitting, onCloseDisabledChange]);
 
 	async function handleConfirm() {
-		if (isSubmitting) return;
-		setIsSubmitting(true);
+		if (!beginSubmission()) return;
+		let shouldEndSubmission = true;
 		try {
 			const shouldClose = await onConfirm();
 			if (shouldClose !== false) {
-				onCloseDisabledChange?.(false);
 				onClose();
+				shouldEndSubmission = false;
 			}
 		} finally {
-			setIsSubmitting(false);
+			if (shouldEndSubmission) endSubmission();
 		}
 	}
 

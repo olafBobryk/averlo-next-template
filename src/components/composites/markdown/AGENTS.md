@@ -31,4 +31,5 @@ Reusable markdown rendering surfaces that compose design-system primitives into 
 - Keep responsive toolbar collapse measurement-driven. Collapse structure, text, and history groups in that order, merge them progressively into Editor options, and restore them when width returns.
 - Keep `MarkdownRenderer` thin-start compatible; if it imports a design-system helper, make sure the thin-start API review explicitly allows that helper.
 - Keep `MarkdownEditor`, its MDXEditor dependency, editor CSS, and modal editing composition full-start-only. The thin profile must export only the renderer.
+- `MarkdownEditorModalForm` uses the shared modal submission contract so pending saves reject duplicate submit and lock conflicting dismissal. Callers continue to own persistence and result feedback.
 - Mention rendering remains presentation-only: route/adapters resolve entity data, and the renderer/editor must not fetch.

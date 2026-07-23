@@ -11,6 +11,9 @@
 - Active source:
   `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console` at pinned commit
   `8a13d12ea11461fe204625bd1247a6db16c4a207`.
+- Accepted mutation behavior reference:
+  `1c6208b37fabb4666c142490608f45662013b0f7`; the later commit is scoped to the
+  committed modal-mutation policy delta and does not repin the visual baseline.
 - Source access: read only through `git show` or `git archive`; ignore its dirty
   working tree.
 - Historical Source B:
@@ -40,6 +43,7 @@ organization-powered full-start dashboard.
 | P1-C5 | Reference entities, mutations, policy, pruning, skill, closure | Adapt | complete | Dashboard-owned member/record layers, fetch-free presentation, entity commands, fixture CRUD, deletion rollback, live/skeleton reference, repository policy, child pruning, and the validated user skill are implemented; full/thin and disposable prune gates pass | Closed; closing commit follows this ledger update |
 | Post-C5 Card parity | Strict source-versus-target default Card correction | Adapt | complete | Card now owns the pinned 8px radius, ring/no-shadow chrome, and 16px/12px structured gaps without changing generic Panel defaults; default and small strict light/dark comparisons reach 0 changed pixels | Closed; correction commit follows this ledger update |
 | Post-C5 Divider context | Surface-neutral labeled Divider correction | Adapt | complete | Labeled rules terminate at the label's padded box instead of painting `bg-background`, so the same primitive works on page, Card, Panel, and modal surfaces without a color seam | Closed; correction commit follows this ledger update |
+| Post-C5 mutation policy | Shared modal submission and explicit mutation completion | Adapt | complete | Full/thin submission guards, dismissal locking, structured local results, explicit deletion completion, optimistic rollback, demo, policy, and verifiers are implemented and verified without touching the parity-owned InputFrame files | Closed; cohesive commit follows this ledger update |
 
 ### Current classifications
 
@@ -53,6 +57,7 @@ organization-powered full-start dashboard.
 | INF-UI-023 | Full-only MDX editor, source mode, mentions, and modal editing | Adapt | Keep the existing renderer shared; strip editor source, CSS, and `@mdxeditor/editor` from thin output and lockfile. |
 | INF-UI-024 | Date, color, selection interception, file/profile lifecycle, More-menu factories, and null-state improvements | Adapt | Date contracts are reusable; color controls are full-only; existing Multiselect/ChoiceField remains canonical instead of adding CheckboxInput. |
 | INF-UI-025 | Source modal forms, step indicator, and richer confirmation contract | Adapt | Confirmation supports details, warnings, variants, and `false`-keeps-open without replacing the existing modal host/focus APIs. |
+| INF-UI-026 | Async modal submission and explicit mutation completion policy through `1c6208b` | Adapt | Port the generic full/thin submission guard, local structured results, same-route versus navigation handoff, and entity deletion completion while retaining stronger template focus, optimistic rollback, and compatibility APIs. |
 | INF-AUTH-001 | Provider-neutral auth/org/membership/invitation/private-file contracts | Adapt | Implement in P1-C3 with non-durable fixture adapter and server-resolved org context. |
 | INF-DASH-001 | Dashboard shell, surface registry, contextual Command-K, deterministic debug state | Adapt | Implement in P1-C4 without Inference notifications or profile gradient. |
 | INF-ENTITY-001 | Dashboard-owned entity presentation foundation and reference members/records | Adapt | Implement file-based dependency layers in P1-C5; no global presentation registry. |
@@ -81,7 +86,7 @@ organization-powered full-start dashboard.
 | Source | Root | Role | Current use |
 | --- | --- | --- | --- |
 | Template | `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template-inference-port` | Isolated target worktree | Receives the accepted five-chunk port before any merge decision. |
-| Inference Console | `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console` at `8a13d12` | Pinned product source | Read-only source for visual primitives, dashboard patterns, auth/org contracts, and presentation patterns. |
+| Inference Console | `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console` at visual pin `8a13d12` and accepted mutation reference `1c6208b` | Pinned product source | Read-only source for visual primitives, dashboard patterns, auth/org contracts, presentation patterns, and the bounded modal-mutation policy delta. |
 | Averlo Rebrand | `/Users/olafbobryk/Documents/Code/Averlo/2026/averlo-rebrand` | Product descendant | Source for dev/test workflow, orchestration, scroll-performance, content, metadata, shell, and motion patterns. |
 | Historical Template UI | Git ref `7235466` in this repo | Pre-thin-start template state | Primary source for recovered helpers, richer Button behavior, and future form/misc UI packets that already belonged to the template. |
 
@@ -269,3 +274,6 @@ organization-powered full-start dashboard.
 | 2026-07-20 | Live xl Card demo review at `http://localhost:3074/internal/demo/ui/primitives?motion=off&reveal=off` | passed | The hot-reloaded default Card computed to an 8px radius, 0px real border, 1px foreground ring with no shadow, and 16px gap. Light and forced-dark 1440x1000 captures were inspected. |
 | 2026-07-20 | Focused Biome, `git diff --check`, full/thin typecheck, shared Panel/Card `cmp`, and strict thin API review | passed | The full and freshly materialized thin profiles retain byte-identical Panel/Card implementations. Strict review reported no broad, outside-allowlist, parked-reference, or compatibility-marker findings. |
 | 2026-07-20 | Labeled Divider light/dark page and elevated-surface review at `http://localhost:3090` | passed | Replaced the label's `bg-background` paint-over with two flexible rule segments that stop at the unchanged padded label box. Login and internal primitive demo captures preserve the 384x21 and 260x21 divider geometry, render a transparent label background, and report no console or request failures. |
+| 2026-07-20 | `npm run verify:mutation-policy`, `npm run verify:frontend-entities`, `npm run verify:dashboard`, `npm run verify:profile-pruning`, focused Biome, `npm run typecheck`, `git diff --check` | passed | Verified the full/thin submission guard, dismissal locking, structured local results, explicit refresh/navigation deletion completion, rollback contracts, policy markers, and pruning ownership. |
+| 2026-07-20 | Full build/smoke and disposable thin materialization, strict API review, install, typecheck, build, smoke, and full-only absence assertions | passed | Full built 39 routes. Thin built 10 routes with the shared modal submission contract present and dashboard, Markdown editor, and mutation verifier ownership absent. |
+| 2026-07-20 | Live mutation lifecycle review at `http://localhost:3090` | passed | The async demo rejected conflicting submission controls and Escape while pending; failed record creation retained its title with inline and toast feedback; failed deletion kept confirmation mounted and restored the optimistic row; list deletion stayed on the collection route; detail deletion replaced navigation to `/dashboard/records`; the Markdown modal remained mounted with inline failure feedback; fixture state was reset and no console warnings/errors remained. |

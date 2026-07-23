@@ -18,6 +18,11 @@ assert.ok(
 		"verify:frontend-entities",
 	),
 );
+assert.ok(
+	thinStartProfile.packageChanges.scripts.remove.includes(
+		"verify:mutation-policy",
+	),
+);
 
 for (const flags of [
 	["--no-dashboard-reference-entities", "--dry-run"],
