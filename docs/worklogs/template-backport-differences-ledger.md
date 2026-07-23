@@ -6,7 +6,7 @@
   Console source into full and thin template profiles, while keeping the full
   profile product-ready and the thin profile intentionally smaller.
 - Template root:
-  `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template-inference-port`
+  `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template`
 - Template baseline: `50616826610a9acded69625133e476694cdf3358`.
 - Active source:
   `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console` at pinned commit
@@ -26,8 +26,9 @@
   `c7397aa` reduced the shared UI surface.
 - Framework: Use `template-backport-workflow` classifications:
   `Port`, `Adapt`, `Skip`, and `Defer`.
-- Delivery branch: `codex/inference-port`; one verified commit per chunk.
-- Last updated: 2026-07-20
+- Delivery branches: `codex/inference-port` for the staged port and
+  `codex/input-frame-parity-pilot` for the integrated closeout.
+- Last updated: 2026-07-23
 
 ## Active Inference Console Port
 
@@ -44,6 +45,7 @@ organization-powered full-start dashboard.
 | Post-C5 Card parity | Strict source-versus-target default Card correction | Adapt | complete | Card now owns the pinned 8px radius, ring/no-shadow chrome, and 16px/12px structured gaps without changing generic Panel defaults; default and small strict light/dark comparisons reach 0 changed pixels | Closed; correction commit follows this ledger update |
 | Post-C5 Divider context | Surface-neutral labeled Divider correction | Adapt | complete | Labeled rules terminate at the label's padded box instead of painting `bg-background`, so the same primitive works on page, Card, Panel, and modal surfaces without a color seam | Closed; correction commit follows this ledger update |
 | Post-C5 mutation policy | Shared modal submission and explicit mutation completion | Adapt | complete | Full/thin submission guards, dismissal locking, structured local results, explicit deletion completion, optimistic rollback, demo, policy, and verifiers are implemented and verified without touching the parity-owned InputFrame files | Closed; cohesive commit follows this ledger update |
+| Integrated closeout | Accumulated visual review, mutation reconciliation, dependency hardening, and main handoff | Adapt | complete | Review work checkpointed at `7942996`; mutation branch reconciled at `b5e0fc6`; full and thin builds, browser mutation lifecycle, strict API review, and zero-vulnerability audits pass | Closed; final hygiene commit and local-main fast-forward follow this ledger update |
 
 ### Current classifications
 
@@ -197,6 +199,35 @@ organization-powered full-start dashboard.
 | Orchestration starter examples | `ARB-ORG-001` | Decide whether the template should ship starter project-local shapes beyond the generic strategy support docs. | Shape-strategy adapter check; no product graph references. |
 
 ## Verification Log
+
+### 2026-07-23 integrated closeout
+
+- Preserved 347 accumulated review files in `7942996` without committing local
+  `.codex` evidence or `test-results` output.
+- Merged the accepted mutation-policy history in `b5e0fc6`, keeping Card-owned
+  modal presentation and the stronger focus/stacking behavior while restoring
+  synchronous submission guards, pending dismissal locks, structured failures,
+  deletion completion branches, and optimistic rollback.
+- Browser verification exposed and corrected one integration-only target miss:
+  the legacy confirmation host lock prevented successful programmatic close.
+  Confirmation now relies on the shell submission lock for user dismissal and
+  closes successfully without unlocking first.
+- Upgraded the coordinated Payload suite to `3.86.0`, Next.js minimum to
+  `16.2.11`, MDXEditor to `4.1.0`, Sharp to `0.35.3`, and tsx to `4.23.1`, with
+  narrow transitive overrides for patched js-yaml, PostCSS, DOMPurify, Sharp,
+  and esbuild releases. Full and production-only `npm audit` both report zero
+  vulnerabilities.
+- Full verification passes lint, typecheck, modal/mutation/auth/dashboard/
+  platform/entity/skeleton/pruning verifiers, a 51-route production build, and
+  smoke checks.
+- A fresh thin workspace passes strict API review, clean install, typecheck,
+  a 9-route production build, and smoke. Dashboard, mutation-verifier, and
+  MDXEditor ownership are absent; the shared modal submission contract remains.
+- The final isolated browser matrix at `http://localhost:3060` covers desktop
+  and narrow light/dark modal surfaces, focus return, Command-K, pending Escape
+  locking, duplicate-submit rejection, retained failed values, confirmation
+  success, optimistic deletion rollback, collection completion, detail
+  replacement navigation, and zero application console/request failures.
 
 | Date | Check | Result | Notes |
 | --- | --- | --- | --- |

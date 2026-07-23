@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/test-results/
 
 # next.js
 /.next/
@@ -38,9 +39,7 @@ yarn-error.log*
 .env.local
 
 # local agent/worktree metadata
-/.codex/preview.json
-/.codex/serena.json
-/.codex/tmp/
+/.codex/
 /.worktrees/
 /tmp/
 /.thin-start/

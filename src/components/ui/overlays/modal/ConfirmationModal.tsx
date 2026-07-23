@@ -45,16 +45,10 @@ export function ConfirmationModal({
 	details,
 	onConfirm,
 	onClose,
-	onCloseDisabledChange,
 	warning,
 }: ConfirmationModalProps) {
 	const impactTitleId = React.useId();
 	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
-
-	React.useEffect(() => {
-		onCloseDisabledChange?.(isSubmitting);
-		return () => onCloseDisabledChange?.(false);
-	}, [isSubmitting, onCloseDisabledChange]);
 
 	async function handleConfirm() {
 		if (!beginSubmission()) return;

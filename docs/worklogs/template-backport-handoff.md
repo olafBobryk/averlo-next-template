@@ -9,9 +9,12 @@ shares its visual foundation through filesystem-backed materialization.
 
 ## Working state
 
-- Target worktree:
-  `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template-inference-port`
-- Branch: `codex/inference-port`
+- Canonical checkout:
+  `/Users/olafbobryk/Documents/Code/Personal/2025/averlo-next-template`
+- Integrated closeout worktree:
+  `/Users/olafbobryk/.codex/worktrees/ad4c/averlo-next-template`
+- Final branch state: local `main`, `codex/inference-port`, and
+  `codex/input-frame-parity-pilot` fast-forward to the verified closeout commit.
 - Baseline: `50616826610a9acded69625133e476694cdf3358`
 - Source: `/Users/olafbobryk/Documents/Code/Mazi/2026/inference-console`
 - Source policy: use `git show` or `git archive` at the pinned commit; never read
@@ -241,9 +244,35 @@ complete and its closing commit follows this handoff update.
   dismissal locking, duplicate-submit control, retained inline failure values,
   confirmation-held-open rollback, same-route refresh, detail replacement
   navigation, Markdown failure retention, fixture reset, and console health.
-- The strict visual-parity worker continues to own only the full and thin
-  `InputFrame` files. Its commit remains outside this branch until explicit
-  review acceptance.
+- The reviewed InputFrame parity work is included in the integrated closeout
+  history; no reserved parity file ownership remains after local-main handoff.
+
+## Integrated closeout
+
+- Status: complete after the hygiene commit containing this handoff update.
+- Accumulated visual and product review changes are preserved in checkpoint
+  `7942996`. Accepted mutation history is reconciled in merge commit `b5e0fc6`.
+- The reconciliation retains Card-owned modal surfaces, focus trapping, focus
+  return, stacking, motion, and scroll locking. Full and thin shells share the
+  synchronous `useModalSubmission` guard, pending dismissal behavior, and
+  confirmation completion semantics.
+- Browser review caught and fixed a dual-lock regression before closure:
+  successful confirmation now closes programmatically while submission remains
+  locked against user dismissal.
+- The dependency graph is coordinated on Payload `3.86.0`, Next.js `16.2.11`,
+  MDXEditor `4.1.0`, Sharp `0.35.3`, and tsx `4.23.1`. Narrow overrides keep all
+  transitive advisory paths patched; full and production-only audits are zero.
+- Full lint/typecheck, focused verifiers, 51-route build, and smoke pass. A
+  freshly materialized thin profile passes strict API review, clean install,
+  typecheck, 9-route build, and smoke while excluding dashboard and MDXEditor
+  ownership.
+- Final browser evidence is ignored under
+  `.codex/review/port-closeout-modal-after-fix/` and
+  `.codex/review/port-closeout-mutations-final/`. The retained review URL is
+  `http://localhost:3060/dashboard/records?motion=off&reveal=off`.
+- No remote push or worktree removal is part of closeout. Homepage-section,
+  bounded-fix, and behavior-preserving cleanup work move to separate prepared
+  app-managed worktrees after local `main` advances.
 
 ## Required gates
 

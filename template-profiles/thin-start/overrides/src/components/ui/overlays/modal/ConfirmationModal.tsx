@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import {
 	ModalContent,
 	ModalDescription,
@@ -37,17 +37,11 @@ export function ConfirmationModal({
 	description,
 	details,
 	onClose,
-	onCloseDisabledChange,
 	onConfirm,
 	title,
 	warning,
 }: ConfirmationModalProps) {
 	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
-
-	React.useEffect(() => {
-		onCloseDisabledChange?.(isSubmitting);
-		return () => onCloseDisabledChange?.(false);
-	}, [isSubmitting, onCloseDisabledChange]);
 
 	async function handleConfirm() {
 		if (!beginSubmission()) return;
