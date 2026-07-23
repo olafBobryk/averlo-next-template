@@ -1,6 +1,6 @@
 # Architecture Staging
 
-Consolidated into [the final architecture](./architecture.md) on 2026-07-20 after the pinned-source surface rescan and accepted mutation-policy delta, then reviewed with no unresolved or drifted decisions. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles.
+Consolidated into [the final architecture](./architecture.md) on 2026-07-20 after the pinned-source surface rescan and accepted mutation-policy delta, then reviewed with no unresolved or drifted decisions. Retained as the historical acceptance ledger for the Averlo full-start and thin-start profiles. A new accepted Template Intelligence benchmark-evidence batch was added on 2026-07-23 and is pending consolidation.
 
 ## Template relationship and convergence scope
 
@@ -375,6 +375,45 @@ Consolidated into [the final architecture](./architecture.md) on 2026-07-20 afte
   mutation consumers, backend actions, roles, and domain workflows remain
   excluded. The separately delegated strict visual-parity task retains exclusive
   ownership of the full and thin `InputFrame` files during this work.
+
+## Template Intelligence benchmark evidence and recording
+
+- The benchmark system distinguishes four record classes: legacy observations,
+  executed benchmark runs, scenario fixtures, and policy decisions. These
+  classes are stored and rendered separately rather than sharing one analytic
+  run population.
+- Preserved data is not automatically comparable. Only successfully executed
+  runs from a matched scenario and run group may support cross-strategy
+  rankings or claims. Unmatched executed runs may support operational trends;
+  legacy observations may support historical review only.
+- The 34 unique historical `Hybrid` observations remain recoverable history.
+  Recovery preserves their original metrics and records source repository,
+  source commit, original task identity, and evidence quality without
+  fabricating timings, files, task classes, or cohort identifiers.
+- Historical rows with successful Serena semantic calls use the canonical
+  `TemplateSerena` strategy while retaining `legacyStrategy: "Hybrid"` and a
+  versioned strategy definition. `TemplateMap` means deterministic Template
+  Intelligence generation and query without Serena. `Graphify` means an actual
+  graph build or query with corresponding graph evidence.
+- Copied Inference rows are deduplicated against their template source. The
+  Inference Graphify policy-only row remains a policy decision and never enters
+  run analytics. Averlo Rebrand example rows remain scenario or visual fixtures
+  and never enter run analytics.
+- Strategy-specific validation is structural. `TemplateSerena` requires a
+  successful Serena semantic call. `Graphify` requires actual graph activity
+  and graph evidence. `Control` cannot contain intelligence or semantic calls.
+  Policy and fixture records cannot satisfy executed-run requirements.
+- Worker-facing benchmark collection is command-owned and deterministic. A
+  worker invokes one strategy command or benchmark wrapper; that command owns
+  measurement, validation, and atomic persistence of the execution record.
+  Normal benchmark work does not require a second manual recording command.
+- Deterministically observable execution facts belong to the command-owned run
+  record. Subjective or post-hoc assessments remain optional annotations and do
+  not block or silently alter the execution record.
+- The standalone recorder remains an administrative boundary for recovery,
+  import, fixtures, and explicit annotation. It is not the normal worker path.
+- Clearing active benchmark work must archive or explicitly target disposable
+  records; it must not erase preserved history by default.
 
 ## Final architecture disposition
 
