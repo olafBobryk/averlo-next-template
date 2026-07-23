@@ -18,4 +18,4 @@ function resolved(name) {
 	}
 });
 
-writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
+writeFileSync("package.json", `${JSON.stringify(pkg, null, "\t")}\n`);
