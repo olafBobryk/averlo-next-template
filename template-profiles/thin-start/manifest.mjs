@@ -242,6 +242,8 @@ export const thinStartProfile = {
 			"@/components/ui/time/",
 		],
 		compatibilityMarkerExemptions: [
+			"src/app/(site)/(marketing)/internal/intelligence/page.tsx",
+			"src/lib/template-intelligence/index.ts",
 			"src/components/ui/motion/reveal/legacyCore.tsx",
 		],
 	},

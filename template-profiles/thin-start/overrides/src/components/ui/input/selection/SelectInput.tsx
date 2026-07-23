@@ -14,7 +14,7 @@ export type SelectOption<T extends string = string> = {
 	disabled?: boolean;
 };
 
-type SelectInputProps<T extends string = string> = Omit<
+export type SelectInputProps<T extends string = string> = Omit<
 	React.SelectHTMLAttributes<HTMLSelectElement>,
 	"children" | "onChange" | "value"
 > & {
