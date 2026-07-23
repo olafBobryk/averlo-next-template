@@ -52,6 +52,7 @@ export const thinStartProfile = {
 		"src/components/ui/primitives/Panel.tsx",
 		"src/components/ui/primitives/Card.tsx",
 		"src/components/ui/misc/Skeleton.tsx",
+		"src/lib/marketing-content/sections/homeHero/HomeHeroSurfaceAssembly.tsx",
 	],
 	overrides: overrideFiles.map((target) => ({
 		source: `template-profiles/thin-start/overrides/${target}`,

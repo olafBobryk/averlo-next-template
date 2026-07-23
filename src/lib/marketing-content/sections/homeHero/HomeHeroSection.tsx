@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/primitives/Button";
 import { Section } from "@/components/ui/primitives/Section";
 import { Text } from "@/components/ui/primitives/Text";
 import type { HomeHeroSectionBlock } from "../../types";
+import {
+	HomeHeroSurfaceAssembly,
+	HomeHeroSurfaceAssemblySkeleton,
+} from "./HomeHeroSurfaceAssembly";
 
 type HomeHeroSectionProps = {
 	section: HomeHeroSectionBlock;
@@ -21,15 +25,14 @@ function HomeHeroSectionRoot({ section }: HomeHeroSectionProps) {
 				height="hero"
 				background="background"
 				padding="hero"
+				className="!overflow-visible"
 			>
-				<Section.Background
-					interactive
-					className="flex justify-center rtl:-scale-x-100"
-				>
+				<Section.Background className="flex justify-center overflow-hidden rtl:-scale-x-100">
 					<div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_at_top,rgb(var(--color-primary-rgb)_/_0.24),transparent_62%)]" />
 					<div className="absolute left-1/2 top-0 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full bg-primary/12 blur-[120px]" />
 				</Section.Background>
-				<Reveal.List className="w-full flex flex-col justify-between grow">
+				<HomeHeroSurfaceAssembly services={section.services} />
+				<Reveal.List className="pointer-events-none relative z-20 flex w-full grow flex-col justify-between">
 					<div className="flex flex-col gap-10 max-w-150 items-start">
 						<div className="space-y-[25px]">
 							<Reveal.Item
@@ -61,7 +64,12 @@ function HomeHeroSectionRoot({ section }: HomeHeroSectionProps) {
 								show: { opacity: 1, x: 0 },
 							}}
 						>
-							<Button href={section.cta.href} variant="primary" size="md">
+							<Button
+								href={section.cta.href}
+								variant="primary"
+								size="md"
+								className="pointer-events-auto"
+							>
 								{section.cta.label}
 							</Button>
 						</Reveal.Item>
@@ -92,15 +100,14 @@ function HomeHeroSectionSkeleton({ section }: HomeHeroSectionProps) {
 			height="hero"
 			background="background"
 			padding="hero"
+			className="!overflow-visible"
 		>
-			<Section.Background
-				interactive
-				className="flex justify-center rtl:-scale-x-100"
-			>
+			<Section.Background className="flex justify-center overflow-hidden rtl:-scale-x-100">
 				<div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_at_top,rgb(var(--color-primary-rgb)_/_0.24),transparent_62%)]" />
 				<div className="absolute left-1/2 top-0 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full bg-primary/12 blur-[120px]" />
 			</Section.Background>
-			<div className="w-full flex flex-col justify-between grow">
+			<HomeHeroSurfaceAssemblySkeleton services={section.services} />
+			<div className="pointer-events-none relative z-20 flex w-full grow flex-col justify-between">
 				<div className="flex flex-col gap-10 max-w-150 items-start">
 					<div className="space-y-[25px]">
 						<Text.Skeleton as="h1" variant="headingHero">
