@@ -222,7 +222,10 @@ test("Systemize Composition separates ownership confidence from visual outcomes"
 		confidence,
 		/Do not confidence-score an accepted role that already belongs to an established\s+semantic or repository owner/u,
 	);
-	assert.match(confidence, /cannot downgrade a settled owner into human review/u);
+	assert.match(
+		confidence,
+		/cannot downgrade a settled owner into human review/u,
+	);
 	assert.match(confidence, /visual preservation is not assumed/u);
 	assert.match(
 		confidence,
@@ -443,10 +446,7 @@ test("Systemize exhaustively replaces evidenced existing-owner domains", async (
 		evidencedOwners,
 		/replace the inherited primary recipe as\s+required automatic work/u,
 	);
-	assert.match(
-		evidencedOwners,
-		/Sharing one route does not create ambiguity/u,
-	);
+	assert.match(evidencedOwners, /Sharing one route does not create ambiguity/u);
 	assert.match(
 		evidencedOwners,
 		/add a\s+source-neutral opt-in value to the existing owner and migrate the accepted\s+consumers automatically/u,
@@ -509,17 +509,20 @@ test("Systemize replaces central recipes without migrating correct template call
 			readSkill("systemize-composition", "agents/openai.yaml"),
 		]);
 
-	assert.match(systemize, /Stable semantic owner APIs are compatibility boundaries/u);
-	assert.match(systemize, /leave that call site intact and replace the\s+recipe centrally/u);
+	assert.match(
+		systemize,
+		/Stable semantic owner APIs are compatibility boundaries/u,
+	);
+	assert.match(
+		systemize,
+		/leave that call site intact and replace the\s+recipe centrally/u,
+	);
 	assert.match(systemize, /do not require a caller-by-caller migration/u);
 	assert.match(
 		systemize,
 		/Edit a caller only when it names the wrong semantic role, uses a breaking API\s+that independently must change, or contains a local visual override/u,
 	);
-	assert.match(
-		systemize,
-		/unchanged inherited consumers never justify it/u,
-	);
+	assert.match(systemize, /unchanged inherited consumers never justify it/u);
 	assert.match(
 		typography,
 		/preserving semantic variant names, not\s+preserving their old pixels/u,
@@ -544,15 +547,15 @@ test("Systemize replaces central recipes without migrating correct template call
 		evidencedOwners,
 		/Keep\s+correct existing `Logo` call sites intact/u,
 	);
-	assert.match(
-		evidencedOwners,
-		/Reconcile each variant independently/u,
-	);
+	assert.match(evidencedOwners, /Reconcile each variant independently/u);
 	assert.match(
 		confidence,
 		/Correct inherited callers do not need migration or visual\s+preservation/u,
 	);
-	assert.match(metadata, /Preserve stable semantic APIs, not inherited pixels/u);
+	assert.match(
+		metadata,
+		/Preserve stable semantic APIs, not inherited pixels/u,
+	);
 	assert.doesNotMatch(
 		typography,
 		/enumerate and intentionally migrate other inherited-template consumers/iu,
@@ -671,10 +674,7 @@ test("Systemize automatic execution reconciles every candidate before stopping",
 		systemize,
 		/Choose default versus\s+opt-in shape from canonical-versus-additional role evidence/u,
 	);
-	assert.match(
-		systemize,
-		/Expected effects on inherited consumers/u,
-	);
+	assert.match(systemize, /Expected effects on inherited consumers/u);
 	assert.match(
 		systemize,
 		/required-automatic or high-confidence action-manifest row cannot be omitted,\s+deferred, or reclassified before its isolated attempt/u,
@@ -735,7 +735,10 @@ test("Systemize automatic execution reconciles every candidate before stopping",
 		/Do not call Systemize complete when any required check fails/u,
 	);
 	assert.match(metadata, /keep blocked required rows incomplete/u);
-	assert.match(systemize, /Automatic work remains an uncommitted review candidate/u);
+	assert.match(
+		systemize,
+		/Automatic work remains an uncommitted review candidate/u,
+	);
 	assert.doesNotMatch(
 		systemize,
 		/manifest\.md|action-manifest\.json|implementation ledger/iu,
