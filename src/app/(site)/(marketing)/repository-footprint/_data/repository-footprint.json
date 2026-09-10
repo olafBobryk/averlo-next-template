@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "28df64897cf24e541d6d026c1a6060774fbe7e65",
+	"head": "e1b1d046bdbe9d29692bbb7fcedb7e4ed9038d09",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -2018,6 +2018,393 @@
 			"lines": 112349,
 			"textBytes": 3295194,
 			"tokens": 843924
+		},
+		{
+			"date": "2026-08-16",
+			"hash": "243df82453b0a3e6dc40097cefc0ef7014f77253",
+			"subject": "fix(ci): synchronize dependency lockfile",
+			"files": 1046,
+			"lines": 112349,
+			"textBytes": 3295194,
+			"tokens": 843924
+		},
+		{
+			"date": "2026-08-16",
+			"hash": "eef9b405573b3b774212c0e6a4fe77dec8bff3f4",
+			"subject": "Harden static composition zero-diff loop",
+			"files": 1047,
+			"lines": 112733,
+			"textBytes": 3311370,
+			"tokens": 847866
+		},
+		{
+			"date": "2026-08-16",
+			"hash": "3385d7f328615a0abc623c8ada4d3f3b11f047f5",
+			"subject": "fix: isolate Figma composition source",
+			"files": 1047,
+			"lines": 112757,
+			"textBytes": 3313090,
+			"tokens": 848244
+		},
+		{
+			"date": "2026-08-16",
+			"hash": "60b7360a321ab396a0387a2011cb669ae065da3f",
+			"subject": "fix: persist static composition progress",
+			"files": 1049,
+			"lines": 113000,
+			"textBytes": 3323153,
+			"tokens": 850613
+		},
+		{
+			"date": "2026-08-20",
+			"hash": "575eea489e8e4baffe35abcb78f5f3599c30edc0",
+			"subject": "fix: baseline composition before correction",
+			"files": 1049,
+			"lines": 113077,
+			"textBytes": 3327630,
+			"tokens": 851661
+		},
+		{
+			"date": "2026-08-20",
+			"hash": "1fd9c0f592ad2de9ad3c77880058c78fd836ae7e",
+			"subject": "fix: verify generated site layout capabilities",
+			"files": 1049,
+			"lines": 113081,
+			"textBytes": 3327752,
+			"tokens": 851686
+		},
+		{
+			"date": "2026-08-20",
+			"hash": "a8965b1e73031d3f9c9d152632cd6b37669db367",
+			"subject": "fix: fail closed on stale workflow delivery",
+			"files": 1049,
+			"lines": 113179,
+			"textBytes": 3332433,
+			"tokens": 852756
+		},
+		{
+			"date": "2026-08-20",
+			"hash": "e06da38f523e543fa38053bb915069a973a630b1",
+			"subject": "fix: keep Averlo composition workflows explicit",
+			"files": 1049,
+			"lines": 113154,
+			"textBytes": 3331136,
+			"tokens": 852486
+		},
+		{
+			"date": "2026-08-20",
+			"hash": "7d9a240eef02c9f89b4684c83f7c29a61159210e",
+			"subject": "fix: keep static composition continuations implicit",
+			"files": 1049,
+			"lines": 113154,
+			"textBytes": 3331227,
+			"tokens": 852508
+		},
+		{
+			"date": "2026-08-20",
+			"hash": "69eb16437ab3c6468cc3538bdc865b88c115616a",
+			"subject": "fix: preserve composition goal continuity",
+			"files": 1049,
+			"lines": 113168,
+			"textBytes": 3331899,
+			"tokens": 852666
+		},
+		{
+			"date": "2026-08-21",
+			"hash": "9e8aefc88c9ffebf87e42cef6ae4dc9d6cee3dd8",
+			"subject": "feat: stage static composition realization",
+			"files": 1049,
+			"lines": 113309,
+			"textBytes": 3340283,
+			"tokens": 854427
+		},
+		{
+			"date": "2026-08-22",
+			"hash": "54f4fde9f6e69035b8e722c6186ae55577e795ac",
+			"subject": "fix: require evidence-scoped owner migration",
+			"files": 1049,
+			"lines": 113443,
+			"textBytes": 3347263,
+			"tokens": 855934
+		},
+		{
+			"date": "2026-08-22",
+			"hash": "1ac1ef8ba1d2b88e180e805e35e7b740011535d1",
+			"subject": "refactor: split static composition planes",
+			"files": 1053,
+			"lines": 113380,
+			"textBytes": 3340386,
+			"tokens": 854391
+		},
+		{
+			"date": "2026-08-25",
+			"hash": "53380760dadd364d3577f4141144bc900476df2b",
+			"subject": "feat: harden preview capture workflow",
+			"files": 1057,
+			"lines": 114381,
+			"textBytes": 3367139,
+			"tokens": 861525
+		},
+		{
+			"date": "2026-08-25",
+			"hash": "fa6637bab9a5b47bc5a484d3ebe438be6f08a97c",
+			"subject": "refactor: simplify composition around human review",
+			"files": 1055,
+			"lines": 114137,
+			"textBytes": 3354845,
+			"tokens": 858728
+		},
+		{
+			"date": "2026-08-25",
+			"hash": "37016b90211fcd1d740dafcb90659eb99a2b78dc",
+			"subject": "fix: bound composition authority and sections",
+			"files": 1056,
+			"lines": 114386,
+			"textBytes": 3365202,
+			"tokens": 861033
+		},
+		{
+			"date": "2026-08-26",
+			"hash": "eccc99ab5d8f028b9716fe183001f40135dd26a4",
+			"subject": "fix: enforce marketing page ownership before composition",
+			"files": 1056,
+			"lines": 114473,
+			"textBytes": 3369279,
+			"tokens": 861961
+		},
+		{
+			"date": "2026-08-26",
+			"hash": "1106c7419afb483bb80732e0cc24ff75f6755fcb",
+			"subject": "fix: checkpoint compose authority boundaries",
+			"files": 1056,
+			"lines": 114665,
+			"textBytes": 3376929,
+			"tokens": 863675
+		},
+		{
+			"date": "2026-08-26",
+			"hash": "226fdf6bcba8970dc9baca7a22a3f58f34dd7b2f",
+			"subject": "fix: close compose planning boundary gaps",
+			"files": 1056,
+			"lines": 114720,
+			"textBytes": 3380222,
+			"tokens": 864386
+		},
+		{
+			"date": "2026-08-26",
+			"hash": "41928d820f88d7865de68d1c7bc17de8d334b61a",
+			"subject": "fix: reuse composition agent space",
+			"files": 1056,
+			"lines": 114771,
+			"textBytes": 3383641,
+			"tokens": 865073
+		},
+		{
+			"date": "2026-08-26",
+			"hash": "55d98781f8633727373f82ec5c642086b0fd0a49",
+			"subject": "fix: package composition dependencies",
+			"files": 1056,
+			"lines": 114808,
+			"textBytes": 3385894,
+			"tokens": 865560
+		},
+		{
+			"date": "2026-08-26",
+			"hash": "69deb51ce0ca0f9b84312828e10b5b1238922d00",
+			"subject": "fix: converge composition cases depth first",
+			"files": 1056,
+			"lines": 114873,
+			"textBytes": 3389171,
+			"tokens": 866282
+		},
+		{
+			"date": "2026-08-26",
+			"hash": "e13df525be745415be78caa215930a4cb486253b",
+			"subject": "fix: repair composition comparison boundaries",
+			"files": 1056,
+			"lines": 114905,
+			"textBytes": 3391381,
+			"tokens": 866740
+		},
+		{
+			"date": "2026-08-26",
+			"hash": "78c3559190378e33a91c91eac6d27f86bfab4640",
+			"subject": "fix: reject nonzero composition rationalizations",
+			"files": 1056,
+			"lines": 114953,
+			"textBytes": 3394538,
+			"tokens": 867433
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "fa993ad299479ba9b84c3605f73537a8f95a5090",
+			"subject": "fix: remove composition test instrumentation",
+			"files": 1056,
+			"lines": 114934,
+			"textBytes": 3393115,
+			"tokens": 867104
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "eba941ff3001ecc191381b8bf3a847c9622ba5d1",
+			"subject": "feat: scope compose work to source sections",
+			"files": 1058,
+			"lines": 115179,
+			"textBytes": 3400129,
+			"tokens": 869038
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "ffbc7dbb9dbc99d15130ab724d82fa4c1ee5197b",
+			"subject": "fix: keep compose sections in one turn",
+			"files": 1056,
+			"lines": 114937,
+			"textBytes": 3393205,
+			"tokens": 867219
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "8857330e89b8ae8ae72b47709dd00d7a1a4eb99e",
+			"subject": "feat: compose marketing verification",
+			"files": 1059,
+			"lines": 115817,
+			"textBytes": 3418883,
+			"tokens": 873790
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "de66b9ec74da025062a5d3e751ea8fc5f31736ce",
+			"subject": "fix: separate systemization from visual outcomes",
+			"files": 1059,
+			"lines": 115852,
+			"textBytes": 3420600,
+			"tokens": 874136
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "47ac832e828d29431fc5d272e3983ac8c98b1f51",
+			"subject": "fix: center systemization on product owners",
+			"files": 1059,
+			"lines": 116039,
+			"textBytes": 3429515,
+			"tokens": 875976
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "f73a506cb15d6a231fc0477b4131614b17f70ba2",
+			"subject": "fix: distinguish compounds from primitive roles",
+			"files": 1059,
+			"lines": 116117,
+			"textBytes": 3433067,
+			"tokens": 876720
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "c18695dfac4f455da830265a29ed75a6f9e2d529",
+			"subject": "fix: systemize repeated owner axes",
+			"files": 1059,
+			"lines": 116169,
+			"textBytes": 3435434,
+			"tokens": 877223
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "55fad6279fdd85526fc83a542ffa397daecd1dff",
+			"subject": "fix: require primitive and identity migrations",
+			"files": 1059,
+			"lines": 116216,
+			"textBytes": 3437690,
+			"tokens": 877687
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "5cb094ea18dca8625bdcbe1498b4b91ff26b8952",
+			"subject": "fix: exhaustively replace evidenced owner domains",
+			"files": 1061,
+			"lines": 116404,
+			"textBytes": 3446980,
+			"tokens": 879522
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "fb6ff92ce74e6e2111bc9959e11e031cc5f3b522",
+			"subject": "fix: resolve evidenced owner axes centrally",
+			"files": 1061,
+			"lines": 116430,
+			"textBytes": 3448327,
+			"tokens": 879802
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "e38da843d7c6d2698afd371f4e592ec6b2bb090a",
+			"subject": "fix: require automatic systemize reconciliation",
+			"files": 1061,
+			"lines": 116518,
+			"textBytes": 3452615,
+			"tokens": 880675
+		},
+		{
+			"date": "2026-08-27",
+			"hash": "bae87449bd92bb614e81296deb8472a0817887e3",
+			"subject": "fix: separate systemize confidence from blockers",
+			"files": 1061,
+			"lines": 116581,
+			"textBytes": 3455535,
+			"tokens": 881297
+		},
+		{
+			"date": "2026-08-28",
+			"hash": "75e6477c6054af1535e2800758c0eb90638e785b",
+			"subject": "fix: require deterministic systemize migrations",
+			"files": 1061,
+			"lines": 116647,
+			"textBytes": 3459706,
+			"tokens": 882092
+		},
+		{
+			"date": "2026-08-28",
+			"hash": "92d2de5fe537982c07929318132b1f949b5d6c8b",
+			"subject": "fix: replace system recipes in place",
+			"files": 1061,
+			"lines": 116741,
+			"textBytes": 3464665,
+			"tokens": 883112
+		},
+		{
+			"date": "2026-08-28",
+			"hash": "15dcf1981a142fd8b4fce6dd24a54d5336058d73",
+			"subject": "fix: prevent additive systemize escapes",
+			"files": 1061,
+			"lines": 116828,
+			"textBytes": 3469317,
+			"tokens": 884064
+		},
+		{
+			"date": "2026-08-16",
+			"hash": "f1a7f778ce1e4a55e23aa28fd59a45b549e76d5a",
+			"subject": "fix(ci): synchronize dependency lockfile",
+			"files": 1045,
+			"lines": 112216,
+			"textBytes": 3287190,
+			"tokens": 842329
+		},
+		{
+			"date": "2026-08-16",
+			"hash": "6c1f76cea9fc11ad2edc569eff9e3e412ccfef9f",
+			"subject": "fix(ci): restore npm 10 peer lock entry",
+			"files": 1045,
+			"lines": 112216,
+			"textBytes": 3287190,
+			"tokens": 842329
+		},
+		{
+			"date": "2026-09-10",
+			"hash": "e1b1d046bdbe9d29692bbb7fcedb7e4ed9038d09",
+			"subject": "Merge remote-tracking branch 'origin/main'",
+			"files": 1061,
+			"lines": 116828,
+			"textBytes": 3469317,
+			"tokens": 884064
 		}
 	],
 	"version": 1
