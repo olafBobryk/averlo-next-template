@@ -16,6 +16,12 @@ text-motion implementations.
 
 - The site-level `MotionProvider` owns the single global motion scheduler.
   Page-local or nested global schedulers are prohibited.
+- `ScrollController` owns Lenis as the optional page-scroll transport and keeps
+  GSAP `ScrollTrigger` synchronized with it. Motion sources must not create a
+  second scroll transport.
+- GSAP drives reveal, in-view, and scroll-linked source progress. Motion drives
+  direct interaction sources such as hover and boolean state. Effects remain
+  driver-agnostic and consume only the shared scalar progress contract.
 - `MotionSource.Sequence` enters its nearest scheduler once and owns relative
   descendant reveal-source batching.
 - Viewport re-entry reset remains scheduler- and source-owned, cascading

@@ -185,6 +185,111 @@ export const SharedScrollScene: Story = {
 	},
 };
 
+export const HybridDriverBoundary: Story = {
+	args: { children: <span>Hybrid source</span>, strategy: { type: "scroll" } },
+	render: () => (
+		<div className="min-h-[260vh] bg-background px-6 py-12 text-foreground sm:px-10">
+			<div className="mx-auto grid max-w-4xl gap-6">
+				<div className="grid gap-2">
+					<Text as="h2" variant="headingLg">
+						One composition API, two focused drivers
+					</Text>
+					<Text tone="muted">
+						GSAP owns reveal and scroll progress. Motion remains responsible for
+						direct interaction.
+					</Text>
+				</div>
+
+				<MotionSource.Root strategy={{ type: "reveal" }}>
+					<MotionEffect.Entrance>
+						<Panel padding="md">
+							<Text variant="caption" tone="muted">
+								GSAP reveal source
+							</Text>
+							<Text className="mt-2" variant="headingLg">
+								The scheduler still composes this reusable effect.
+							</Text>
+						</Panel>
+					</MotionEffect.Entrance>
+				</MotionSource.Root>
+
+				<MotionSource.Root
+					asChild
+					strategy={{ type: "hover", timing: "component" }}
+				>
+					<button
+						className={`rounded-lg border border-subtle p-6 text-start ${focusRing.visibleDefault}`}
+						type="button"
+					>
+						<Text variant="caption" tone="muted">
+							Motion hover source
+						</Text>
+						<MotionEffect.UnderlineText className="mt-2 block text-xl font-medium">
+							Hover or focus stays attached to your hand.
+						</MotionEffect.UnderlineText>
+					</button>
+				</MotionSource.Root>
+
+				<MotionSource.Root
+					className="mt-[70vh]"
+					strategy={{ type: "in-view", once: false }}
+				>
+					<MotionEffect.Entrance distance={32}>
+						<Panel padding="md">
+							<Text variant="caption" tone="muted">
+								GSAP in-view source
+							</Text>
+							<Text className="mt-2" variant="headingLg">
+								Scroll away and return to replay the same effect.
+							</Text>
+						</Panel>
+					</MotionEffect.Entrance>
+				</MotionSource.Root>
+
+				<MotionSource.Root
+					className="mt-[55vh] grid gap-4"
+					strategy={{
+						offset: ["start 88%", "end 28%"],
+						type: "scroll",
+					}}
+				>
+					<Text variant="caption" tone="muted">
+						GSAP ScrollTrigger progress
+					</Text>
+					<MotionEffect.TextHighlight className="text-4xl font-medium sm:text-6xl">
+						One progress source still coordinates every descendant effect.
+					</MotionEffect.TextHighlight>
+					<MotionEffect.Divider />
+				</MotionSource.Root>
+			</div>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const sources = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>("[data-motion-source]"),
+		);
+		const driverFor = (strategy: string) =>
+			sources.find((source) => source.dataset.motionSourceStrategy === strategy)
+				?.dataset.motionSourceDriver;
+
+		await expect(driverFor("reveal")).toBe("gsap");
+		await expect(driverFor("in-view")).toBe("gsap");
+		await expect(driverFor("scroll")).toBe("gsap");
+		await expect(driverFor("hover")).toBe("motion");
+		await waitFor(
+			() => {
+				const entrance = canvasElement.querySelector<HTMLElement>(
+					'[data-motion-effect="entrance"]',
+				);
+				expect(
+					Number.parseFloat(entrance?.style.opacity ?? "0"),
+				).toBeGreaterThan(0.99);
+			},
+			{ timeout: 3000 },
+		);
+	},
+};
+
 export const RevealSequence: Story = {
 	args: { children: <span>Reveal content</span>, strategy: { type: "reveal" } },
 	render: () => (

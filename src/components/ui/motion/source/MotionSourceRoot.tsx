@@ -5,10 +5,7 @@ import {
 	animate,
 	type MotionValue,
 	type UseScrollOptions,
-	useInView,
 	useMotionValue,
-	useScroll,
-	useSpring,
 } from "motion/react";
 import {
 	type ComponentPropsWithoutRef,
@@ -27,7 +24,8 @@ import {
 	getMotionTiming,
 	type MotionTimingPreset,
 } from "@/components/ui/foundations/motionTiming";
-import { getSpring } from "@/components/ui/foundations/spring";
+import { gsap, ScrollTrigger } from "@/components/ui/motion/runtime/gsap";
+import { getGsapTiming } from "@/components/ui/motion/runtime/timing";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import {
@@ -79,6 +77,25 @@ const defaultScrollOffset: UseScrollOptions["offset"] = [
 	"end start",
 ];
 
+type MotionSourceDriver = "gsap" | "motion";
+
+function toScrollTriggerPoint(point: unknown) {
+	if (typeof point === "number") return `${point * 100}%`;
+	if (point === "start") return "top";
+	if (point === "end") return "bottom";
+	return String(point);
+}
+
+function toScrollTriggerPosition(value: unknown, fallback: string) {
+	if (Array.isArray(value)) {
+		return value.map(toScrollTriggerPoint).join(" ");
+	}
+	if (typeof value === "string") {
+		return value.split(/\s+/).map(toScrollTriggerPoint).join(" ");
+	}
+	return fallback;
+}
+
 const SlotWithRef = forwardRef<HTMLElement, React.ComponentProps<typeof Slot>>(
 	(props, ref) => <Slot ref={ref} {...props} />,
 );
@@ -116,27 +133,35 @@ function ScrollSource({
 	const enabled =
 		appReady && motionAllowed && !motionDisabled && breakpointActive;
 	const staticProgress = clampMotionProgress(strategy.staticProgress ?? 1);
-	const { scrollYProgress } = useScroll({
-		target: targetRef,
-		offset: strategy.offset ?? defaultScrollOffset,
-	});
-	const springProgress = useSpring(scrollYProgress, getSpring("scroll"));
-	const sourceProgress =
-		strategy.smooth === false ? scrollYProgress : springProgress;
 	const progress = useMotionValue(staticProgress);
+	const offset = strategy.offset ?? defaultScrollOffset;
+	const start = toScrollTriggerPosition(offset?.[0], "top bottom");
+	const end = toScrollTriggerPosition(offset?.[1], "bottom top");
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (!enabled) {
 			progress.jump(staticProgress);
 			return;
 		}
-		progress.jump(sourceProgress.get());
-		return sourceProgress.on("change", (value) => progress.set(value));
-	}, [enabled, progress, sourceProgress, staticProgress]);
+		const target = targetRef.current;
+		if (!target) return;
+
+		const trigger = ScrollTrigger.create({
+			end,
+			invalidateOnRefresh: true,
+			onRefresh: (self) => progress.jump(self.progress),
+			onUpdate: (self) => progress.set(self.progress),
+			start,
+			trigger: target,
+		});
+		progress.jump(trigger.progress);
+		return () => trigger.kill();
+	}, [enabled, end, progress, start, staticProgress]);
 
 	return (
 		<SourceFrame
 			{...props}
+			driver="gsap"
 			mode={enabled ? "animated" : "static-final"}
 			progress={progress}
 			strategyType="scroll"
@@ -222,6 +247,7 @@ function InteractionSource({
 	return (
 		<SourceFrame
 			{...props}
+			driver="motion"
 			mode={mode}
 			progress={progress}
 			strategyType={strategy.type}
@@ -260,6 +286,7 @@ function BooleanSource({
 	return (
 		<SourceFrame
 			{...props}
+			driver="motion"
 			mode={mode}
 			progress={progress}
 			strategyType="boolean"
@@ -280,21 +307,60 @@ function InViewSource({
 	const motionAllowed = useMotionAllowed(true);
 	const motionDisabled = useMotionDisableOverride();
 	const enabled = appReady && motionAllowed && !motionDisabled;
-	const inView = useInView(targetRef, {
-		amount: strategy.amount ?? 0.2,
-		once: strategy.once ?? true,
-	});
 	const progress = useMotionValue(appReady ? 0 : 1);
-	useProgressTarget(
-		progress,
-		enabled ? Number(inView) : 1,
-		enabled ? "animated" : "static-final",
-		"grand",
-	);
+	const amount = clampMotionProgress(strategy.amount ?? 0.2);
+	const once = strategy.once ?? true;
+
+	useLayoutEffect(() => {
+		if (!enabled) {
+			progress.jump(1);
+			return;
+		}
+		const target = targetRef.current;
+		if (!target) return;
+
+		let tween: gsap.core.Tween | null = null;
+		let hasEntered = false;
+		const setTarget = (value: number) => {
+			tween?.kill();
+			const proxy = { value: progress.get() };
+			tween = gsap.to(proxy, {
+				...getGsapTiming("grand"),
+				onUpdate: () => progress.set(proxy.value),
+				value,
+			});
+		};
+		const show = () => {
+			hasEntered = true;
+			setTarget(1);
+		};
+		const hide = () => {
+			if (!once || !hasEntered) setTarget(0);
+		};
+		const trigger = ScrollTrigger.create({
+			end: `bottom ${amount * 100}%`,
+			invalidateOnRefresh: true,
+			onEnter: show,
+			onEnterBack: show,
+			onLeave: hide,
+			onLeaveBack: hide,
+			start: `top ${(1 - amount) * 100}%`,
+			trigger: target,
+		});
+
+		if (trigger.isActive || (once && trigger.progress > 0)) show();
+		else progress.jump(0);
+
+		return () => {
+			tween?.kill();
+			trigger.kill();
+		};
+	}, [amount, enabled, once, progress]);
 
 	return (
 		<SourceFrame
 			{...props}
+			driver="gsap"
 			mode={enabled ? "animated" : "static-final"}
 			progress={progress}
 			strategyType="in-view"
@@ -312,14 +378,14 @@ function RevealSource({
 	const targetRef = useRef<HTMLElement | null>(null);
 	const appReady = useAppReady();
 	const progress = useMotionValue(appReady ? 0 : 1);
-	const animationRef = useRef<ReturnType<typeof animate> | null>(null);
+	const animationRef = useRef<gsap.core.Tween | null>(null);
 	const completionResolverRef = useRef<(() => void) | null>(null);
 	const finish = useCallback(() => {
 		completionResolverRef.current?.();
 		completionResolverRef.current = null;
 	}, []);
 	const stop = useCallback(() => {
-		animationRef.current?.stop();
+		animationRef.current?.kill();
 		animationRef.current = null;
 		finish();
 	}, [finish]);
@@ -331,13 +397,16 @@ function RevealSource({
 			stop();
 			return new Promise<void>((resolve) => {
 				completionResolverRef.current = resolve;
-				animationRef.current = animate(progress, 1, {
-					...getMotionTiming("grand"),
+				const proxy = { value: progress.get() };
+				animationRef.current = gsap.to(proxy, {
+					...getGsapTiming("grand"),
 					delay,
+					onUpdate: () => progress.set(proxy.value),
 					onComplete: () => {
 						animationRef.current = null;
 						finish();
 					},
+					value: 1,
 				});
 			});
 		},
@@ -363,6 +432,7 @@ function RevealSource({
 	return (
 		<SourceFrame
 			{...props}
+			driver="gsap"
 			mode={appReady && !disabled ? "animated" : "static-final"}
 			progress={progress}
 			strategyType="reveal"
@@ -375,6 +445,7 @@ function SourceFrame({
 	as: Tag = "div",
 	asChild = false,
 	children,
+	driver,
 	mode,
 	progress,
 	strategyType,
@@ -383,6 +454,7 @@ function SourceFrame({
 	...rest
 }: Omit<MotionSourceRootProps, "strategy"> &
 	MotionSourceContextValue & {
+		driver: MotionSourceDriver;
 		targetRef: React.RefObject<HTMLElement | null>;
 		timing?: MotionSourceTiming;
 	}) {
@@ -397,6 +469,7 @@ function SourceFrame({
 			<Frame
 				ref={targetRef}
 				data-motion-source=""
+				data-motion-source-driver={driver}
 				data-motion-source-mode={mode}
 				data-motion-source-strategy={strategyType}
 				data-motion-source-timing={timing}
