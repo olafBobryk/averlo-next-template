@@ -217,13 +217,19 @@ function validateMetadata(entry) {
 	if (metadata.target !== "averlo-next-template") {
 		throw new Error(`${context} has unsupported backport target.`);
 	}
+	if (typeof metadata.canonicalStoryId !== "string") {
+		throw new Error(
+			`${context} requires a literal canonicalStoryId; source.storyId is provenance and cannot substitute for it.`,
+		);
+	}
 	if (
-		typeof metadata.canonicalStoryId !== "string" ||
 		!/^[a-z0-9]+(?:-[a-z0-9]+)*--[a-z0-9]+(?:-[a-z0-9]+)*$/.test(
 			metadata.canonicalStoryId,
 		)
 	) {
-		throw new Error(`${context} has an invalid canonicalStoryId.`);
+		throw new Error(
+			`${context} canonicalStoryId must use lowercase kebab-case on both sides of --.`,
+		);
 	}
 	if (!new Set(["copy", "adapt"]).has(metadata.strategy)) {
 		throw new Error(`${context} strategy must be copy or adapt.`);

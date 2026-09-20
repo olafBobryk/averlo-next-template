@@ -121,6 +121,29 @@ test("reports legacy lineage without blocking a valid story", async () => {
 	});
 });
 
+test("requires an explicit canonical target instead of falling back to source provenance", async () => {
+	await withWorkspace(async (root) => {
+		await createRepository(
+			root,
+			"missing-canonical-target",
+			storySource().replace(
+				'canonicalStoryId: "ui-primitives-dropdown--contextual-destructive-action",',
+				'source: { repository: "instance/example", storyId: "ui-primitives-dropdown--contextual-destructive-action" },',
+			),
+		);
+		const report = await scanWorkspace({
+			template: templateRoot,
+			workspace: root,
+		});
+		assert.equal(report.entries.length, 0);
+		assert.equal(report.errors.length, 1);
+		assert.match(
+			report.errors[0].message,
+			/requires a literal canonicalStoryId/,
+		);
+	});
+});
+
 test("rejects dynamic participating metadata and ignores ordinary dynamic tags", async () => {
 	await withWorkspace(async (root) => {
 		await createRepository(

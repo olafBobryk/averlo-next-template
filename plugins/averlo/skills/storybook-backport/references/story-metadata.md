@@ -20,6 +20,11 @@ without meeting the eligibility gate, remove its backport tag and metadata
 instead of retaining rejection history for something that was never a valid
 candidate.
 
+Every marked source story requires a literal `canonicalStoryId`, using lowercase
+kebab-case on both sides of `--`. `source.storyId` records its instance
+provenance; it is never an implicit fallback for the canonical target. The two
+values may be identical, but that decision must be written explicitly.
+
 ## Source story
 
 ```ts
