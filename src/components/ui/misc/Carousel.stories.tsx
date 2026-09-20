@@ -21,6 +21,25 @@ const items = ["Strategy", "Design", "Delivery", "Review"].map(
 	}),
 );
 
+const responsiveItems = [
+	"Discover",
+	"Frame",
+	"Design",
+	"Build",
+	"Validate",
+].map((label, index) => ({
+	content: (
+		<Panel className="grid min-h-64 content-between" padding="md">
+			<Text as="h3" variant="headingMd">
+				{label}
+			</Text>
+			<Text tone="muted">Reusable phase {index + 1}</Text>
+		</Panel>
+	),
+	id: label.toLowerCase(),
+	label,
+}));
+
 const meta = {
 	id: "ui-misc-carousel",
 	title: "UI/Misc/Carousel",
@@ -65,5 +84,62 @@ export const WithoutSectionGutter: Story = {
 		ariaLabel: "Compact phases",
 		gutter: "none",
 		items: items.slice(0, 3),
+	},
+};
+
+export const ResponsiveGridAtWide: Story = {
+	args: {
+		ariaLabel: "Project phases",
+		items: responsiveItems,
+		paginationLabel: "Choose a project phase",
+		wideLayout: { columns: 5, from: "xl" },
+	},
+	decorators: [
+		(Story) => (
+			<div className="px-[var(--spacing-section-x)] py-4">
+				<Story />
+			</div>
+		),
+	],
+	parameters: { layout: "fullscreen" },
+	play: async ({ canvas }) => {
+		const region = canvas.getByRole("region", { name: "Project phases" });
+		await waitFor(() =>
+			expect(region).toHaveAttribute(
+				"data-carousel-presentation",
+				window.matchMedia("(min-width: 1280px)").matches ? "grid" : "carousel",
+			),
+		);
+		await expect(canvas.getAllByRole("group")).toHaveLength(
+			responsiveItems.length,
+		);
+	},
+};
+
+export const RightToLeftKeyboardNavigation: Story = {
+	args: {
+		ariaLabel: "مراحل المشروع",
+		gutter: "none",
+		items: responsiveItems.slice(0, 3),
+		onIndexChange: fn(),
+		paginationLabel: "اختر مرحلة المشروع",
+	},
+	decorators: [
+		(Story) => (
+			<div dir="rtl">
+				<Story />
+			</div>
+		),
+	],
+	play: async ({ args, canvas, userEvent }) => {
+		const region = canvas.getByRole("region", { name: "مراحل المشروع" });
+		region.focus();
+		await userEvent.keyboard("{ArrowLeft}");
+		await waitFor(() => expect(args.onIndexChange).toHaveBeenCalledWith(1));
+		await waitFor(() =>
+			expect(
+				canvas.getByRole("button", { name: "Show slide 2: Frame" }),
+			).toHaveAttribute("aria-current", "true"),
+		);
 	},
 };

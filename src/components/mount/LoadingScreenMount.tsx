@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import Logo from "@/components/branding/Logo";
 import {
 	hasIntroDisabledSearchParam,
@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/foundations/motionDisableOverride";
 import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
-import { markAppReady } from "@/lib/appReadySignal";
+import { markAppReady, markAppVisible } from "@/lib/appReadySignal";
+import { shouldPlayLoadingIntroForDocument } from "@/lib/loadingScreenLifecycle";
 import { Text } from "../ui/primitives/Text";
 
 type Phase = "loading" | "revealing" | "transitioning" | "done";
@@ -26,9 +27,9 @@ function waitFor(duration: number) {
 
 export default function LoadingScreenMount() {
 	const immediateIntroDisabled = hasIntroDisabledSearchParam();
-	const [phase, setPhase] = useState<Phase>(() =>
-		hasIntroDisabledSearchParam() ? "done" : "loading",
-	);
+	const [introClaimed, setIntroClaimed] = useState(false);
+	const [introResolved, setIntroResolved] = useState(false);
+	const [phase, setPhase] = useState<Phase>("done");
 	const motionAllowed = useMotionAllowed(true);
 	const motionDisabled = useMotionDisableOverride();
 	const introOverrideDisabled = useIntroDisableOverride();
@@ -38,11 +39,46 @@ export default function LoadingScreenMount() {
 		motionDisabled ||
 		!motionAllowed;
 
+	useLayoutEffect(() => {
+		const bootstrapClaim =
+			document.documentElement.dataset.loadingBootstrap === "true";
+		const claimed =
+			!hasIntroDisabledSearchParam() &&
+			(bootstrapClaim || shouldPlayLoadingIntroForDocument());
+		setIntroClaimed(claimed);
+		setPhase(claimed ? "loading" : "done");
+		setIntroResolved(true);
+		if (!claimed) {
+			markAppReady();
+			markAppVisible();
+		}
+	}, []);
+
 	useEffect(() => {
-		if (!introDisabled) return;
+		if (!introResolved || !introClaimed) return;
+		// Keep the parser cover through the React overlay's first composited frame.
+		// WebKit can otherwise paint the page between the two layers.
+		let releaseFrame: number | undefined;
+		const paintFrame = window.requestAnimationFrame(() => {
+			releaseFrame = window.requestAnimationFrame(() => {
+				delete document.documentElement.dataset.loadingBootstrap;
+			});
+		});
+
+		return () => {
+			window.cancelAnimationFrame(paintFrame);
+			if (releaseFrame !== undefined) {
+				window.cancelAnimationFrame(releaseFrame);
+			}
+		};
+	}, [introClaimed, introResolved]);
+
+	useEffect(() => {
+		if (!introResolved || (!introDisabled && introClaimed)) return;
 		markAppReady();
+		markAppVisible();
 		setPhase("done");
-	}, [introDisabled]);
+	}, [introClaimed, introDisabled, introResolved]);
 
 	useEffect(() => {
 		if (!immediateIntroDisabled) return;
@@ -65,7 +101,7 @@ export default function LoadingScreenMount() {
 	}, [introDisabled, phase]);
 
 	useEffect(() => {
-		if (introDisabled) return;
+		if (!introResolved || introDisabled || !introClaimed) return;
 		let t1: ReturnType<typeof setTimeout> | undefined;
 		let cancelled = false;
 		Promise.all([
@@ -88,9 +124,17 @@ export default function LoadingScreenMount() {
 			cancelled = true;
 			clearTimeout(t1);
 		};
-	}, [introDisabled]);
+	}, [introClaimed, introDisabled, introResolved]);
 
-	if (immediateIntroDisabled || introDisabled || phase === "done") return null;
+	if (
+		!introResolved ||
+		immediateIntroDisabled ||
+		introDisabled ||
+		!introClaimed ||
+		phase === "done"
+	) {
+		return null;
+	}
 
 	return (
 		<motion.div
@@ -99,10 +143,12 @@ export default function LoadingScreenMount() {
 				phase === "transitioning" ? "z-40" : "z-[9999]"
 			}`}
 			data-loading-screen-mount="true"
+			data-loading-stage={phase}
 			animate={{ opacity: phase === "transitioning" ? 0 : 1 }}
 			transition={getMotionTiming("grand")}
 			onAnimationComplete={() => {
 				if (phase !== "transitioning") return;
+				markAppVisible();
 				setPhase("done");
 			}}
 		>

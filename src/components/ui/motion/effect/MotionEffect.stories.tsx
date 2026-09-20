@@ -1,10 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Link from "next/link";
-import { Component, type ErrorInfo, type ReactNode, useState } from "react";
+import {
+	Component,
+	type ErrorInfo,
+	type ReactNode,
+	useEffect,
+	useState,
+} from "react";
 import { expect, userEvent, waitFor } from "storybook/test";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { MotionProvider } from "@/components/ui/foundations/MotionProvider";
+import { SettingsProvider } from "@/components/ui/foundations/settingsContext";
 import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/surfaces";
+import { Card, Panel } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import type { MotionCompositionMetadata } from "../compositionMetadata";
@@ -28,7 +36,8 @@ const meta = {
 		"MotionEffect.Scramble": MotionEffect.Scramble,
 		"MotionEffect.Number": MotionEffect.Number,
 		"MotionEffect.Clip": MotionEffect.Clip,
-		"MotionEffect.GridClip": MotionEffect.GridClip,
+		"MotionEffect.CounterpartReveal": MotionEffect.CounterpartReveal,
+		"MotionEffect.GridReveal": MotionEffect.GridReveal,
 		"MotionEffect.ScaleFade": MotionEffect.ScaleFade,
 	},
 	excludeStories: ["catalogContract"],
@@ -334,71 +343,359 @@ export const TextStaggerModes: Story = {
 	},
 };
 
-function GridClipTeachingSurface() {
+function StatRevealCompositionSurface() {
 	const [active, setActive] = useState(false);
 	return (
-		<div className="grid gap-6 p-8">
+		<div className="grid gap-8 p-8">
 			<Button
 				onClick={() => setActive((value) => !value)}
 				size="sm"
 				variant="secondary"
 			>
-				{active ? "Reverse grid clip" : "Complete grid clip"}
+				{active ? "Reverse statistic" : "Complete statistic"}
 			</Button>
-			<div className="grid justify-items-start gap-6 overflow-x-auto">
-				{[
-					["landscape", "h-80 w-[56rem]"],
-					["portrait", "h-96 w-80"],
-				].map(([name, size]) => (
-					<MotionSource.Root
-						className={size}
-						key={name}
-						strategy={{ type: "boolean", active, timing: "grand" }}
-					>
-						<MotionEffect.GridClip
-							className="h-full"
-							data-testid={`grid-clip-${name}`}
-						>
-							<div className="h-full bg-[radial-gradient(circle_at_25%_20%,var(--color-primary),transparent_36%),linear-gradient(135deg,var(--color-foreground),var(--color-surface))]" />
-						</MotionEffect.GridClip>
-					</MotionSource.Root>
-				))}
-			</div>
+			<MotionSource.Root
+				strategy={{ type: "boolean", active, timing: "grand" }}
+			>
+				<MotionEffect.TextStagger
+					blurOffset="10px"
+					className="font-medium"
+					segments={[
+						{ className: "text-2xl", text: "USD ", unit: "whole" },
+						{
+							className: "text-4xl",
+							render: (text) => (
+								<MotionEffect.Number range={[0.58, 1]} text={text} />
+							),
+							text: "250",
+							unit: "whole",
+						},
+						{ className: "text-2xl", text: "k", unit: "whole" },
+					]}
+					treatment="blur"
+				/>
+			</MotionSource.Root>
 		</div>
 	);
 }
 
-export const GridClipMedia: Story = {
-	args: { children: <span>Grid-clipped media</span> },
+export const StatRevealComposition: Story = {
+	args: { children: <span>Statistic reveal composition</span> },
+	tags: ["backport-canonical"],
 	parameters: {
+		backport: {
+			schemaVersion: 1,
+			target: "averlo-next-template",
+			canonicalStoryId: "ui-motion-motion-effect--stat-reveal-composition",
+			strategy: "adapt",
+			rationale:
+				"Adapt the reusable prefix, count-up value, and suffix reveal as a product-neutral composition using the template's existing motion effects.",
+			source: {
+				repository: "averloco/pearl",
+				storyId: "ui-motion-motion-effect--pearl-stat-reveal",
+				fingerprint:
+					"sha256:c5d7f102b98b5804b8c49b77099e5b054ace8058ac569318a6317b1705e75b7c",
+			},
+		},
 		motionComposition: {
-			effects: ["grid-clip"],
+			effects: ["text-stagger", "number"],
 			focusHints: ["section", "page"],
-			role: "grid-clipped-media",
+			role: "stat-reveal-composition",
+			schemaVersion: 1,
+			staticPattern: "standalone-text",
+			sources: ["boolean"],
+			status: "approved",
+		} satisfies MotionCompositionMetadata,
+	},
+	render: () => <StatRevealCompositionSurface />,
+	play: async ({ canvas, canvasElement }) => {
+		const reveals = canvasElement.querySelectorAll<HTMLElement>(
+			'[data-motion-effect="text-stagger"]',
+		);
+		const tokens = canvasElement.querySelectorAll<HTMLElement>(
+			"[data-motion-effect-text-stagger-token]",
+		);
+		const number = canvasElement.querySelector<HTMLElement>(
+			'[data-motion-effect="number"]',
+		);
+		const numberVisual = number?.querySelector<HTMLElement>(
+			'[aria-hidden="true"]',
+		);
+		const prefixTokenVisual =
+			tokens[0]?.querySelector<HTMLElement>(":scope > span");
+		const numberTokenVisual =
+			tokens[1]?.querySelector<HTMLElement>(":scope > span");
+		await expect(reveals).toHaveLength(1);
+		await expect(tokens).toHaveLength(3);
+		await expect(number).not.toBeNull();
+		await expect(numberVisual).not.toBeNull();
+		await expect(prefixTokenVisual).not.toBeNull();
+		await expect(numberTokenVisual).not.toBeNull();
+		await expect(
+			reveals[0]?.querySelector(":scope > .sr-only"),
+		).toHaveTextContent("USD 250k");
+		await expect(numberVisual).toHaveTextContent("000");
+		await waitFor(() =>
+			expect(
+				getComputedStyle(numberTokenVisual as HTMLElement).filter,
+			).toContain("blur(5px)"),
+		);
+		await waitFor(() =>
+			expect(
+				Number(getComputedStyle(numberTokenVisual as HTMLElement).opacity),
+			).toBe(0),
+		);
+		await expect(
+			getComputedStyle(numberTokenVisual as HTMLElement).transform,
+		).toBe(getComputedStyle(prefixTokenVisual as HTMLElement).transform);
+		await expect(
+			Number.parseFloat(
+				getComputedStyle(numberTokenVisual as HTMLElement).fontSize,
+			),
+		).toBeGreaterThan(
+			Number.parseFloat(
+				getComputedStyle(prefixTokenVisual as HTMLElement).fontSize,
+			),
+		);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Complete statistic" }),
+		);
+		await waitFor(() => expect(numberVisual).toHaveTextContent("250"));
+		await waitFor(() =>
+			expect(
+				getComputedStyle(numberTokenVisual as HTMLElement).filter,
+			).toContain("blur(0px)"),
+		);
+		await waitFor(() =>
+			expect(
+				Number(getComputedStyle(numberTokenVisual as HTMLElement).opacity),
+			).toBe(1),
+		);
+		await waitFor(() =>
+			expect(
+				Number(
+					getComputedStyle(
+						reveals[0]?.querySelector<HTMLElement>(
+							"[data-motion-effect-text-stagger-token] > span",
+						) as HTMLElement,
+					).opacity,
+				),
+			).toBe(1),
+		);
+		await expect(
+			canvas.getByRole("button", { name: "Reverse statistic" }),
+		).toBeVisible();
+	},
+};
+
+const gridTileStyle = {
+	backgroundImage:
+		"linear-gradient(132deg, #9fd8f8 0%, #46657f 42%, #1d242b 43%, #e4af68 100%)",
+};
+
+function GridRevealTeachingSurface() {
+	const [active, setActive] = useState(false);
+	const [narrow, setNarrow] = useState(false);
+	return (
+		<SettingsProvider defaultMotionDisabled={false} storageKey={null}>
+			<MotionProvider expressive={0}>
+				<div className="grid gap-6 p-8">
+					<div className="flex flex-wrap gap-3">
+						<Button
+							onClick={() => setActive((value) => !value)}
+							size="sm"
+							variant="secondary"
+						>
+							{active ? "Reset grid reveal" : "Play grid reveal"}
+						</Button>
+						<Button
+							onClick={() => setNarrow((value) => !value)}
+							size="sm"
+							variant="secondary"
+						>
+							{narrow ? "Use wide landscape" : "Use narrow landscape"}
+						</Button>
+					</div>
+					<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+						<MotionSource.Root
+							className="relative overflow-hidden rounded-xl"
+							data-testid="grid-landscape"
+							strategy={{ type: "boolean", active, timing: "grand" }}
+							style={{ height: 360, width: narrow ? 460 : 900 }}
+						>
+							<MotionEffect.GridReveal tileStyle={gridTileStyle} />
+						</MotionSource.Root>
+						<MotionSource.Root
+							className="relative h-[440px] overflow-hidden rounded-xl"
+							data-testid="grid-portrait"
+							strategy={{ type: "boolean", active, timing: "grand" }}
+						>
+							<MotionEffect.GridReveal tileStyle={gridTileStyle} />
+						</MotionSource.Root>
+					</div>
+				</div>
+			</MotionProvider>
+		</SettingsProvider>
+	);
+}
+
+export const GridRevealMedia: Story = {
+	args: { children: <span>Grid reveal media</span> },
+	tags: ["backport-canonical"],
+	parameters: {
+		backport: {
+			schemaVersion: 1,
+			target: "averlo-next-template",
+			canonicalStoryId: "ui-motion-motion-effect--grid-reveal-media",
+			strategy: "copy",
+			rationale:
+				"Replace the legacy SVG grid mask with the reusable responsive tile-clipped image reveal, including seam protection and RTL ordering.",
+			source: {
+				repository: "averloco/pearl",
+				storyId: "ui-motion-motion-effect--grid-reveal-media",
+				fingerprint:
+					"sha256:3fec2d8f71989585401935e6e1c9784a702490f34ac48eaf4b62b8e41cb8be05",
+			},
+		},
+		motionComposition: {
+			effects: ["grid-reveal"],
+			focusHints: ["section", "page"],
+			role: "grid-reveal-media",
 			schemaVersion: 1,
 			staticPattern: "media-frame",
 			sources: ["boolean"],
 			status: "approved",
 		} satisfies MotionCompositionMetadata,
 	},
-	render: () => <GridClipTeachingSurface />,
-	play: async ({ canvas, userEvent }) => {
-		const landscape = canvas.getByTestId("grid-clip-landscape");
-		const portrait = canvas.getByTestId("grid-clip-portrait");
-		await expect(
-			Number(landscape.dataset.motionGridClipColumns),
-		).toBeGreaterThan(Number(portrait.dataset.motionGridClipColumns));
-		await expect(
-			landscape.querySelectorAll("[data-motion-grid-clip-tile]").length,
-		).toBeGreaterThan(0);
-		await userEvent.click(
-			canvas.getByRole("button", { name: "Complete grid clip" }),
+	render: () => <GridRevealTeachingSurface />,
+	play: async ({ canvas, canvasElement }) => {
+		const landscape = canvas.getByTestId("grid-landscape");
+		const portrait = canvas.getByTestId("grid-portrait");
+		const landscapeGrid = landscape.querySelector<HTMLElement>(
+			'[data-motion-effect="grid-reveal"]',
+		);
+		const portraitGrid = portrait.querySelector<HTMLElement>(
+			'[data-motion-effect="grid-reveal"]',
+		);
+		await expect(landscapeGrid).toHaveAttribute(
+			"data-motion-grid-renderer",
+			"tile-clips",
+		);
+		await expect(portraitGrid).toHaveAttribute(
+			"data-motion-grid-renderer",
+			"tile-clips",
 		);
 		await waitFor(() =>
-			expect(landscape).toHaveAttribute(
-				"data-motion-grid-clip-complete",
-				"true",
+			expect(
+				Number(landscapeGrid?.getAttribute("data-motion-grid-columns")),
+			).toBeGreaterThan(
+				Number(landscapeGrid?.getAttribute("data-motion-grid-rows")),
 			),
+		);
+		await expect(
+			Number(portraitGrid?.getAttribute("data-motion-grid-columns")),
+		).toBeGreaterThanOrEqual(
+			Number(portraitGrid?.getAttribute("data-motion-grid-rows")),
+		);
+		const firstRow = landscape.querySelectorAll<HTMLElement>(
+			'[data-motion-grid-row="0"]',
+		);
+		const secondRow = landscape.querySelectorAll<HTMLElement>(
+			'[data-motion-grid-row="1"]',
+		);
+		await expect(firstRow[0]).toHaveAttribute(
+			"data-motion-grid-direction",
+			"ltr",
+		);
+		await expect(secondRow[0]).toHaveAttribute(
+			"data-motion-grid-direction",
+			"rtl",
+		);
+		await expect(firstRow[0]).toHaveStyle({
+			"--motion-grid-tile-overlap": "1px",
+		});
+		await expect(Number(firstRow[0]?.dataset.motionGridStart)).toBeLessThan(
+			Number(firstRow[firstRow.length - 1]?.dataset.motionGridStart),
+		);
+		await expect(Number(secondRow[0]?.dataset.motionGridStart)).toBeGreaterThan(
+			Number(secondRow[secondRow.length - 1]?.dataset.motionGridStart),
+		);
+		const wideColumns = Number(landscapeGrid?.dataset.motionGridColumns);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Use narrow landscape" }),
+		);
+		await waitFor(() =>
+			expect(Number(landscapeGrid?.dataset.motionGridColumns)).toBeLessThan(
+				wideColumns,
+			),
+		);
+		await expect(
+			landscape.querySelectorAll("[data-motion-grid-tile]").length,
+		).toBeGreaterThan(0);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Play grid reveal" }),
+		);
+		await waitFor(() =>
+			expect(
+				canvasElement.querySelectorAll('[data-motion-effect="grid-reveal"]'),
+			).toHaveLength(2),
+		);
+	},
+};
+
+function GridRevealStaticFinalSurface() {
+	useEffect(() => {
+		document.documentElement.dataset.motionOverride = "off";
+		window.dispatchEvent(new PopStateEvent("popstate"));
+		return () => {
+			delete document.documentElement.dataset.motionOverride;
+			window.dispatchEvent(new PopStateEvent("popstate"));
+		};
+	}, []);
+
+	return (
+		<MotionSource.Root
+			className="relative m-8 h-[300px] max-w-3xl overflow-hidden rounded-xl"
+			data-testid="grid-static-final"
+			strategy={{ type: "boolean", active: false, timing: "grand" }}
+		>
+			<MotionEffect.GridReveal tileStyle={gridTileStyle} />
+		</MotionSource.Root>
+	);
+}
+
+export const GridRevealStaticFinal: Story = {
+	args: { children: <span>Static-final grid reveal</span> },
+	tags: ["backport-canonical"],
+	parameters: {
+		backport: {
+			schemaVersion: 1,
+			target: "averlo-next-template",
+			canonicalStoryId: "ui-motion-motion-effect--grid-reveal-static-final",
+			strategy: "copy",
+			rationale:
+				"Keep the reusable grid reveal visible as a single static image when motion is disabled.",
+			source: {
+				repository: "averloco/pearl",
+				storyId: "ui-motion-motion-effect--grid-reveal-static-final",
+				fingerprint:
+					"sha256:be619dbe2c2eb3904888331d0ec16aed8e400b30484ba004ebf03c87ace0776c",
+			},
+		},
+	},
+	render: () => <GridRevealStaticFinalSurface />,
+	play: async ({ canvas }) => {
+		const root = canvas.getByTestId("grid-static-final");
+		await waitFor(() =>
+			expect(root).toHaveAttribute("data-motion-source-mode", "instant"),
+		);
+		await waitFor(() =>
+			expect(
+				root.querySelector("[data-motion-grid-complete-image]"),
+			).toBeInTheDocument(),
+		);
+		await expect(root.querySelectorAll("[data-motion-grid-tile]")).toHaveLength(
+			0,
 		);
 	},
 };
@@ -503,6 +800,428 @@ export const GeometricMediaEffects: Story = {
 		);
 		await waitFor(() =>
 			expect(Number(getComputedStyle(scaleFade).opacity)).toBe(1),
+		);
+	},
+};
+
+function CounterpartCardFace({
+	anchorProps,
+	dir,
+	items,
+	layer,
+	title,
+}: MotionEffect.CounterpartRevealRenderProps & {
+	dir?: "ltr" | "rtl";
+	items: readonly string[];
+	title: string;
+}) {
+	const counterpart = layer === "counterpart";
+	return (
+		<Card
+			className={`h-full min-h-72 text-left ${
+				counterpart ? "border-primary/40 bg-primary/10" : ""
+			}`}
+			dir={dir}
+		>
+			<Card.Header>
+				<Card.Title as="h3">{title}</Card.Title>
+				<Card.Description>
+					The same structure is rendered in both visual treatments.
+				</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<ul className="grid gap-4">
+					{items.map((item, index) => (
+						<li className="flex items-start gap-3" key={item}>
+							<span
+								{...(index === 0 ? anchorProps : { "aria-hidden": true })}
+								className={`mt-1.5 block size-2.5 shrink-0 rounded-full ${
+									counterpart ? "bg-primary" : "bg-muted-foreground"
+								}`}
+							/>
+							<Text as="span">{item}</Text>
+						</li>
+					))}
+				</ul>
+			</Card.Content>
+		</Card>
+	);
+}
+
+const counterpartItems = [
+	"The reveal origin follows this bullet when the card changes width.",
+	"Base and counterpart layers retain identical layout geometry.",
+	"One source reverses the entire treatment without timing drift.",
+] as const;
+
+function CounterpartRevealTeachingSurface() {
+	const [active, setActive] = useState(false);
+	const [narrow, setNarrow] = useState(false);
+	return (
+		<SettingsProvider defaultMotionDisabled={false} storageKey={null}>
+			<MotionProvider expressive={0}>
+				<div className="grid min-h-screen gap-8 bg-background p-8">
+					<div className="grid gap-2">
+						<Text as="h2" variant="headingLg">
+							Anchored counterpart reveal
+						</Text>
+						<Text className="max-w-3xl" tone="muted">
+							One measured anchor and one shared progress value keep two
+							coincident visual layers synchronized in both directions.
+						</Text>
+					</div>
+					<div className="flex flex-wrap gap-3">
+						<Button
+							onClick={() => setActive((value) => !value)}
+							size="sm"
+							variant="secondary"
+						>
+							{active ? "Return to base" : "Reveal counterpart"}
+						</Button>
+						<Button
+							onClick={() => setNarrow((value) => !value)}
+							size="sm"
+							variant="secondary"
+						>
+							{narrow ? "Use wide card" : "Use narrow card"}
+						</Button>
+					</div>
+					<div className="grid items-start gap-8 lg:grid-cols-2">
+						<div className="grid gap-3">
+							<Text variant="bodyStrong">Controlled before / after</Text>
+							<MotionSource.Root
+								strategy={{ type: "boolean", active, timing: "component" }}
+							>
+								<MotionEffect.CounterpartReveal
+									className={narrow ? "w-72" : "w-full"}
+									data-testid="controlled-counterpart"
+									renderLayer={(props) => (
+										<CounterpartCardFace
+											{...props}
+											items={counterpartItems}
+											title="Reusable motion composition"
+										/>
+									)}
+								/>
+							</MotionSource.Root>
+						</div>
+						<div className="grid gap-3">
+							<Text variant="bodyStrong">Hover, focus, and RTL</Text>
+							<Link
+								className={`block ${focusRing.visibleDefault}`}
+								data-motion-owner
+								href="#counterpart-details"
+							>
+								<MotionSource.Root
+									as="span"
+									strategy={{ type: "owner-hover", timing: "component" }}
+								>
+									<MotionEffect.CounterpartReveal
+										as="span"
+										className="block"
+										data-testid="interactive-counterpart"
+										renderLayer={(props) => (
+											<CounterpartCardFace
+												{...props}
+												dir="rtl"
+												items={[
+													"تتبع نقطة الكشف اتجاه القراءة المنطقي.",
+													"تظل طبقتا البطاقة متطابقتين في البنية.",
+													"تنعكس الحركة من مصدر واحد مشترك.",
+												]}
+												title="تركيب بطاقة عام"
+											/>
+										)}
+									/>
+								</MotionSource.Root>
+							</Link>
+						</div>
+					</div>
+					<div id="counterpart-details" />
+				</div>
+			</MotionProvider>
+		</SettingsProvider>
+	);
+}
+
+function counterpartLayer(root: HTMLElement) {
+	const layer = root.querySelector<HTMLElement>(
+		'[data-motion-counterpart-layer="counterpart"]',
+	);
+	if (!layer) throw new Error("Counterpart layer was not rendered.");
+	return layer;
+}
+
+function counterpartRadius(layer: HTMLElement) {
+	const match = getComputedStyle(layer).clipPath.match(/circle\(([\d.]+)px/);
+	return Number(match?.[1] ?? Number.NaN);
+}
+
+export const CounterpartReveal: Story = {
+	args: { children: <span>Counterpart reveal</span> },
+	tags: ["backport-canonical"],
+	parameters: {
+		backport: {
+			schemaVersion: 1,
+			target: "averlo-next-template",
+			canonicalStoryId: "ui-motion-motion-effect--counterpart-reveal",
+			strategy: "adapt",
+			rationale:
+				"Adapt Pearl's product-bound metric-card overlay into a product-neutral paired-layer effect with measured anchor geometry and shared reversible progress.",
+			source: {
+				repository: "averloco/pearl",
+				storyId: "domain-marketing-metric-band--canonical-presentation",
+				fingerprint:
+					"sha256:fa351796045abdbc28caa0f61a04f1c4e07e31c3b66844ba785185771ec971ba",
+			},
+		},
+		motionComposition: {
+			effects: ["counterpart-reveal"],
+			focusHints: ["section", "page"],
+			role: "counterpart-reveal",
+			schemaVersion: 1,
+			staticPattern: "coincident-layer-card",
+			sources: ["boolean", "owner-hover"],
+			status: "approved",
+		} satisfies MotionCompositionMetadata,
+	},
+	render: () => <CounterpartRevealTeachingSurface />,
+	play: async ({ canvas }) => {
+		const controlled = canvas.getByTestId("controlled-counterpart");
+		const controlledLayer = counterpartLayer(controlled);
+		const interactive = canvas.getByTestId("interactive-counterpart");
+		const interactiveLayer = counterpartLayer(interactive);
+		const interactiveLink = canvas.getByRole("link", {
+			name: /تركيب بطاقة عام/i,
+		});
+
+		await expect(controlledLayer).toHaveAttribute("aria-hidden", "true");
+		await expect(
+			controlled.querySelectorAll("[data-motion-counterpart-anchor]"),
+		).toHaveLength(2);
+		await waitFor(() => expect(counterpartRadius(controlledLayer)).toBe(0));
+		const initialRadius = counterpartRadius(controlledLayer);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Reveal counterpart" }),
+		);
+		await waitFor(() =>
+			expect(counterpartRadius(controlledLayer)).toBeGreaterThan(
+				initialRadius + 150,
+			),
+		);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Return to base" }),
+		);
+		await waitFor(() =>
+			expect(counterpartRadius(controlledLayer)).toBeCloseTo(initialRadius, 0),
+		);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Use narrow card" }),
+		);
+		await waitFor(() =>
+			expect(controlled.getBoundingClientRect().width).toBe(288),
+		);
+		await userEvent.hover(interactiveLink);
+		await waitFor(() =>
+			expect(counterpartRadius(interactiveLayer)).toBeGreaterThan(200),
+		);
+		await userEvent.unhover(interactiveLink);
+		await waitFor(() =>
+			expect(counterpartRadius(interactiveLayer)).toBeLessThan(30),
+		);
+		await userEvent.tab();
+		await expect(interactiveLink).toHaveFocus();
+		await waitFor(() =>
+			expect(counterpartRadius(interactiveLayer)).toBeGreaterThan(200),
+		);
+	},
+};
+
+const counterpartRevealVariants = [
+	{
+		description: "Expands from the marked bullet to the farthest card edge.",
+		id: "circle",
+		reveal: { type: "circle" },
+		title: "Circle expand",
+	},
+	{
+		description: "Uses logical inline direction and follows RTL automatically.",
+		id: "swipe",
+		reveal: { axis: "inline", origin: "start", type: "swipe" },
+		title: "Logical swipe",
+	},
+	{
+		description:
+			"Reuses the alternating sequence owned by the media grid reveal.",
+		id: "grid",
+		reveal: { columns: 6, rows: 4, type: "grid" },
+		title: "Alternating grid",
+	},
+] as const satisfies readonly {
+	description: string;
+	id: string;
+	reveal: MotionEffect.CounterpartRevealStrategy;
+	title: string;
+}[];
+
+function CounterpartRevealStrategiesSurface() {
+	const [active, setActive] = useState(false);
+	return (
+		<SettingsProvider defaultMotionDisabled={false} storageKey={null}>
+			<MotionProvider expressive={0}>
+				<div className="grid min-h-screen gap-8 bg-background p-8">
+					<div className="grid gap-2">
+						<Text as="h2" variant="headingLg">
+							Counterpart reveal strategies
+						</Text>
+						<Text className="max-w-3xl" tone="muted">
+							The card composition stays unchanged while only the decorative
+							reveal mask varies.
+						</Text>
+					</div>
+					<Button
+						className="justify-self-start"
+						onClick={() => setActive((value) => !value)}
+						size="sm"
+						variant="secondary"
+					>
+						{active ? "Return all to base" : "Reveal all counterparts"}
+					</Button>
+					<MotionSource.Root
+						className="grid items-start gap-6 lg:grid-cols-3"
+						strategy={{ type: "boolean", active, timing: "grand" }}
+					>
+						{counterpartRevealVariants.map((variant) => (
+							<div className="grid gap-3" key={variant.id}>
+								<div className="grid gap-1">
+									<Text variant="bodyStrong">{variant.title}</Text>
+									<Text tone="muted" variant="support">
+										{variant.description}
+									</Text>
+								</div>
+								<MotionEffect.CounterpartReveal
+									data-testid={`counterpart-${variant.id}`}
+									renderLayer={(props) => (
+										<CounterpartCardFace
+											{...props}
+											items={counterpartItems}
+											title="Reusable motion composition"
+										/>
+									)}
+									reveal={variant.reveal}
+								/>
+							</div>
+						))}
+					</MotionSource.Root>
+				</div>
+			</MotionProvider>
+		</SettingsProvider>
+	);
+}
+
+export const CounterpartRevealStrategies: Story = {
+	args: { children: <span>Counterpart reveal strategies</span> },
+	parameters: {
+		motionComposition: {
+			effects: ["counterpart-reveal"],
+			focusHints: ["section"],
+			role: "counterpart-reveal-strategies",
+			schemaVersion: 1,
+			staticPattern: "coincident-layer-card",
+			sources: ["boolean"],
+			status: "approved",
+		} satisfies MotionCompositionMetadata,
+	},
+	render: () => <CounterpartRevealStrategiesSurface />,
+	play: async ({ canvas }) => {
+		const circle = canvas.getByTestId("counterpart-circle");
+		const swipe = canvas.getByTestId("counterpart-swipe");
+		const grid = canvas.getByTestId("counterpart-grid");
+		const circleLayer = counterpartLayer(circle);
+		const swipeLayer = counterpartLayer(swipe);
+		const gridLayer = counterpartLayer(grid);
+
+		await expect(circleLayer).toHaveAttribute(
+			"data-motion-counterpart-reveal",
+			"circle",
+		);
+		await expect(swipeLayer).toHaveAttribute(
+			"data-motion-counterpart-reveal",
+			"swipe",
+		);
+		await expect(gridLayer).toHaveAttribute(
+			"data-motion-counterpart-reveal",
+			"grid",
+		);
+		await expect(gridLayer).toHaveAttribute(
+			"data-motion-counterpart-grid-columns",
+			"6",
+		);
+		await expect(getComputedStyle(circle).overflow).toBe("visible");
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Reveal all counterparts" }),
+		);
+		await waitFor(() =>
+			expect(
+				Number(
+					getComputedStyle(grid).getPropertyValue(
+						"--motion-counterpart-progress",
+					),
+				),
+			).toBeCloseTo(1, 2),
+		);
+		await expect(getComputedStyle(circleLayer).clipPath).toContain("circle(");
+		await expect(getComputedStyle(swipeLayer).clipPath).toContain("inset(");
+		await expect(getComputedStyle(gridLayer).maskImage).not.toBe("none");
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Return all to base" }),
+		);
+		await waitFor(() =>
+			expect(
+				Number(
+					getComputedStyle(grid).getPropertyValue(
+						"--motion-counterpart-progress",
+					),
+				),
+			).toBeCloseTo(0, 2),
+		);
+	},
+};
+
+export const CounterpartRevealReducedMotion: Story = {
+	args: { children: <span>Counterpart reveal reduced motion</span> },
+	beforeEach: () => {
+		const previous = document.documentElement.dataset.motionOverride;
+		document.documentElement.dataset.motionOverride = "off";
+		return () => {
+			if (previous === undefined)
+				delete document.documentElement.dataset.motionOverride;
+			else document.documentElement.dataset.motionOverride = previous;
+		};
+	},
+	render: () => (
+		<MotionSource.Root strategy={{ type: "boolean", active: true }}>
+			<MotionEffect.CounterpartReveal
+				className="m-8 max-w-xl"
+				data-testid="reduced-counterpart"
+				renderLayer={(props) => (
+					<CounterpartCardFace
+						{...props}
+						items={counterpartItems}
+						title="Reusable motion composition"
+					/>
+				)}
+			/>
+		</MotionSource.Root>
+	),
+	play: async ({ canvas }) => {
+		const root = canvas.getByTestId("reduced-counterpart");
+		const source = root.closest<HTMLElement>("[data-motion-source]");
+		await waitFor(() =>
+			expect(source).toHaveAttribute("data-motion-source-mode", "instant"),
+		);
+		await waitFor(() =>
+			expect(counterpartRadius(counterpartLayer(root))).toBeGreaterThan(200),
 		);
 	},
 };

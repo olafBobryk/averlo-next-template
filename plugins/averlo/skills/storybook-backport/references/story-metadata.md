@@ -14,6 +14,12 @@ Backport state belongs on the individual story export. Do not put it on the file
 
 Only an approved story can initiate a template mutation. Change the source to ported only after target verification succeeds.
 
+Use `backport-rejected` when a genuinely eligible candidate was reviewed and
+deliberately excluded. If an ordinary product story was incorrectly enrolled
+without meeting the eligibility gate, remove its backport tag and metadata
+instead of retaining rejection history for something that was never a valid
+candidate.
+
 ## Source story
 
 ```ts

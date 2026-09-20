@@ -5,6 +5,8 @@
 
 let ready = false;
 const subscribers = new Set<() => void>();
+let visible = false;
+const visibleSubscribers = new Set<() => void>();
 
 export function markAppReady(): void {
 	if (ready) return;
@@ -25,5 +27,27 @@ export function subscribeAppReady(fn: () => void): () => void {
 	subscribers.add(fn);
 	return () => {
 		subscribers.delete(fn);
+	};
+}
+
+export function markAppVisible(): void {
+	if (visible) return;
+	visible = true;
+	for (const fn of visibleSubscribers) fn();
+	visibleSubscribers.clear();
+}
+
+export function isAppVisible(): boolean {
+	return visible;
+}
+
+export function subscribeAppVisible(fn: () => void): () => void {
+	if (visible) {
+		fn();
+		return () => {};
+	}
+	visibleSubscribers.add(fn);
+	return () => {
+		visibleSubscribers.delete(fn);
 	};
 }

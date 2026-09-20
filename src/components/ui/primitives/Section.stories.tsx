@@ -144,6 +144,23 @@ export const SemanticSurfaceContexts: Story = {
 };
 
 export const FullBleedCappedForeground: Story = {
+	tags: ["backport-canonical"],
+	parameters: {
+		backport: {
+			schemaVersion: 1,
+			target: "averlo-next-template",
+			canonicalStoryId: "ui-primitives-section--full-bleed-capped-foreground",
+			strategy: "adapt",
+			rationale:
+				"Backport executable evidence for default 1500px ownership with full-bleed interactive media and independently customizable vertical rhythm.",
+			source: {
+				repository: "averloco/pearl",
+				storyId: "ui-primitives-section--full-bleed-capped-foreground",
+				fingerprint:
+					"sha256:8c40075f1f8fc648b91c950dc712cc3ab3170200389354df1d44739e423c9337",
+			},
+		},
+	},
 	render: () => (
 		<div className="min-w-[1728px]">
 			<Section
@@ -178,6 +195,7 @@ export const FullBleedCappedForeground: Story = {
 		await expect(
 			Math.abs(frameRect.left - (outerRect.width - frameRect.width) / 2),
 		).toBeLessThanOrEqual(1);
+		await expect(getComputedStyle(root).paddingTop).toBe("112px");
 		await expect(
 			canvas.getByRole("button", { name: "Interactive background" }),
 		).toBeEnabled();

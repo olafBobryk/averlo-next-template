@@ -10,10 +10,13 @@ import { Button } from "../primitives/Button";
 type ScrollBordersProps = {
 	children?: React.ReactNode;
 	as?: React.ElementType;
+	axis?: "horizontal" | "vertical";
 	className?: string;
 	borderClassName?: string;
 	topBorderClassName?: string;
 	bottomBorderClassName?: string;
+	leftBorderClassName?: string;
+	rightBorderClassName?: string;
 	deps?: React.DependencyList;
 	disabled?: boolean;
 	showBackToTop?: boolean;
@@ -27,9 +30,11 @@ type ScrollBordersProps = {
 type ScrollBordersSkeletonProps = {
 	children?: React.ReactNode;
 	as?: React.ElementType;
+	axis?: "horizontal" | "vertical";
 	className?: string;
 	borderClassName?: string;
 	bottomBorderClassName?: string;
+	rightBorderClassName?: string;
 	deps?: React.DependencyList;
 	disabled?: boolean;
 } & Omit<React.ComponentPropsWithoutRef<"div">, "children" | "className">;
@@ -45,10 +50,13 @@ const ScrollBordersRoot = React.forwardRef<HTMLDivElement, ScrollBordersProps>(
 		{
 			children,
 			as,
+			axis = "vertical",
 			className,
 			borderClassName = "border-border!",
 			topBorderClassName = "border-t!",
 			bottomBorderClassName = "border-b!",
+			leftBorderClassName = "border-l!",
+			rightBorderClassName = "border-r!",
 			deps = [],
 			disabled = false,
 			showBackToTop = true,
@@ -65,33 +73,45 @@ const ScrollBordersRoot = React.forwardRef<HTMLDivElement, ScrollBordersProps>(
 			forwardedRef,
 			() => ref.current as HTMLDivElement,
 		);
-		const [showTopBorder, setShowTopBorder] = React.useState(false);
-		const [showBottomBorder, setShowBottomBorder] = React.useState(false);
+		const [showStartBorder, setShowStartBorder] = React.useState(false);
+		const [showEndBorder, setShowEndBorder] = React.useState(false);
 		const [isHovered, setIsHovered] = React.useState(false);
 		const [hasOverflow, setHasOverflow] = React.useState(false);
 
 		const updateOverflow = () => {
 			if (disabled) {
-				setShowTopBorder(false);
-				setShowBottomBorder(false);
+				setShowStartBorder(false);
+				setShowEndBorder(false);
 				setHasOverflow(false);
 				return;
 			}
 			const element = ref.current;
 			if (!element) return;
-			const canScroll = element.scrollHeight - element.clientHeight > 1;
-			const atTop = element.scrollTop <= 1;
-			const atBottom =
-				element.scrollTop + element.clientHeight >= element.scrollHeight - 1;
-			setShowTopBorder(canScroll && !atTop);
-			setShowBottomBorder(canScroll && !atBottom);
+			const scrollSize =
+				axis === "horizontal" ? element.scrollWidth : element.scrollHeight;
+			const clientSize =
+				axis === "horizontal" ? element.clientWidth : element.clientHeight;
+			const scrollPosition =
+				axis === "horizontal" ? element.scrollLeft : element.scrollTop;
+			const canScroll = scrollSize - clientSize > 1;
+			const maximumScroll = scrollSize - clientSize;
+			const isRightToLeft =
+				axis === "horizontal" && getComputedStyle(element).direction === "rtl";
+			const atStart = isRightToLeft
+				? scrollPosition <= -maximumScroll + 1
+				: scrollPosition <= 1;
+			const atEnd = isRightToLeft
+				? scrollPosition >= -1
+				: scrollPosition + clientSize >= scrollSize - 1;
+			setShowStartBorder(canScroll && !atStart);
+			setShowEndBorder(canScroll && !atEnd);
 			setHasOverflow(canScroll);
 		};
 
 		// biome-ignore lint/correctness/useExhaustiveDependencies: caller-controlled deps are intentionally spread here.
 		React.useEffect(() => {
 			updateOverflow();
-		}, [disabled, ...deps]);
+		}, [axis, disabled, ...deps]);
 
 		// biome-ignore lint/correctness/useExhaustiveDependencies: resize observation only needs the disabled gate here.
 		React.useEffect(() => {
@@ -102,7 +122,7 @@ const ScrollBordersRoot = React.forwardRef<HTMLDivElement, ScrollBordersProps>(
 			const observer = new ResizeObserver(() => updateOverflow());
 			observer.observe(element);
 			return () => observer.disconnect();
-		}, [disabled]);
+		}, [axis, disabled]);
 
 		const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
 			updateOverflow();
@@ -136,16 +156,26 @@ const ScrollBordersRoot = React.forwardRef<HTMLDivElement, ScrollBordersProps>(
 					"relative group",
 					focusRing.visibleInner,
 					className,
-					showTopBorder && topBorderClassName,
-					showBottomBorder && bottomBorderClassName,
-					(showTopBorder || showBottomBorder) && borderClassName,
+					showStartBorder &&
+						(axis === "horizontal" ? leftBorderClassName : topBorderClassName),
+					showEndBorder &&
+						(axis === "horizontal"
+							? rightBorderClassName
+							: bottomBorderClassName),
+					(showStartBorder || showEndBorder) && borderClassName,
 				)}
+				data-scroll-border-start={showStartBorder ? "true" : undefined}
+				data-scroll-border-end={showEndBorder ? "true" : undefined}
 				{...rest}
 			>
 				{children}
 				<span className="relative block h-0 max-h-0 w-full">
 					<AnimatePresence initial={false}>
-						{isHovered && !showBottomBorder && hasOverflow && showBackToTop ? (
+						{axis === "vertical" &&
+						isHovered &&
+						!showEndBorder &&
+						hasOverflow &&
+						showBackToTop ? (
 							<motion.div
 								className="absolute! bottom-0 left-1/2 -translate-x-1/2"
 								initial={{ opacity: 0, y: 0 }}
@@ -181,9 +211,11 @@ ScrollBordersRoot.displayName = "ScrollBorders";
 function ScrollBordersSkeleton({
 	children,
 	as,
+	axis = "vertical",
 	className,
 	borderClassName = "border-border!",
 	bottomBorderClassName = "border-b!",
+	rightBorderClassName = "border-r!",
 	deps = [],
 	disabled = false,
 	...rest
@@ -198,14 +230,18 @@ function ScrollBordersSkeleton({
 		}
 		const element = ref.current;
 		if (!element) return;
-		const canScroll = element.scrollHeight - element.clientHeight > 1;
+		const scrollSize =
+			axis === "horizontal" ? element.scrollWidth : element.scrollHeight;
+		const clientSize =
+			axis === "horizontal" ? element.clientWidth : element.clientHeight;
+		const canScroll = scrollSize - clientSize > 1;
 		setShowBottomBorder(canScroll);
 	};
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: caller-controlled deps are intentionally spread here.
 	React.useEffect(() => {
 		updateOverflow();
-	}, [disabled, ...deps]);
+	}, [axis, disabled, ...deps]);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: resize observation only needs the disabled gate here.
 	React.useEffect(() => {
@@ -216,7 +252,7 @@ function ScrollBordersSkeleton({
 		const observer = new ResizeObserver(() => updateOverflow());
 		observer.observe(element);
 		return () => observer.disconnect();
-	}, [disabled]);
+	}, [axis, disabled]);
 
 	const Tag = as ?? "div";
 
@@ -226,7 +262,10 @@ function ScrollBordersSkeleton({
 			className={clsx(
 				"overflow-hidden relative",
 				className,
-				showBottomBorder && bottomBorderClassName,
+				showBottomBorder &&
+					(axis === "horizontal"
+						? rightBorderClassName
+						: bottomBorderClassName),
 				showBottomBorder && borderClassName,
 			)}
 			{...rest}

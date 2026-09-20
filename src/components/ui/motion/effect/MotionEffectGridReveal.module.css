@@ -1,0 +1,51 @@
+.root {
+	border-radius: inherit;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+	position: absolute;
+}
+
+.image {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	inset: 0;
+	position: absolute;
+}
+
+.placeholder {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	inset: -16px;
+	position: absolute;
+}
+
+.touchTiles {
+	contain: paint;
+	display: grid;
+	/* Tile coordinates always describe physical image pixels, even in RTL pages. */
+	direction: ltr;
+	grid-template-columns: repeat(var(--motion-grid-columns), minmax(0, 1fr));
+	grid-template-rows: repeat(var(--motion-grid-rows), minmax(0, 1fr));
+	inset: 0;
+	position: absolute;
+	transform: translate3d(0, 0, 0);
+	will-change: transform;
+}
+
+.touchTile {
+	/* Overlap the adjacent raster layers without changing their image origin. */
+	margin: calc(0px - var(--motion-grid-tile-overlap));
+	overflow: hidden;
+	position: relative;
+	will-change: auto;
+}
+
+.touchTileImage {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	position: absolute;
+}

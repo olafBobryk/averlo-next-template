@@ -41,6 +41,30 @@ function EffectPreview() {
 	);
 }
 
+function StatRevealPreview() {
+	return (
+		<MotionSource.Root strategy={{ type: "boolean", active: true }}>
+			<MotionEffect.TextStagger
+				blurOffset="10px"
+				className="font-medium"
+				segments={[
+					{ className: "text-2xl", text: "USD ", unit: "whole" },
+					{
+						className: "text-4xl",
+						render: (text) => (
+							<MotionEffect.Number range={[0.58, 1]} text={text} />
+						),
+						text: "250",
+						unit: "whole",
+					},
+					{ className: "text-2xl", text: "k", unit: "whole" },
+				]}
+				treatment="blur"
+			/>
+		</MotionSource.Root>
+	);
+}
+
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-motion-motion-effect",
 	name: "MotionEffect.Entrance",
@@ -66,7 +90,8 @@ export const catalogContract = defineCatalogOwnerContract({
 		"MotionEffect.Scramble",
 		"MotionEffect.Number",
 		"MotionEffect.Clip",
-		"MotionEffect.GridClip",
+		"MotionEffect.CounterpartReveal",
+		"MotionEffect.GridReveal",
 		"MotionEffect.ScaleFade",
 	],
 	exclusions: [
@@ -87,12 +112,32 @@ export const catalogContract = defineCatalogOwnerContract({
 			storyId: "ui-motion-motion-effect--text-stagger-modes",
 		},
 		{
-			label: "Responsive grid-clipped media",
-			storyId: "ui-motion-motion-effect--grid-clip-media",
+			label: "Composed prefix, count-up value, and suffix reveal",
+			storyId: "ui-motion-motion-effect--stat-reveal-composition",
+		},
+		{
+			label: "Adaptive alternating image grid reveal",
+			storyId: "ui-motion-motion-effect--grid-reveal-media",
+		},
+		{
+			label: "Static-final image grid output",
+			storyId: "ui-motion-motion-effect--grid-reveal-static-final",
 		},
 		{
 			label: "Logical and radial media geometry",
 			storyId: "ui-motion-motion-effect--geometric-media-effects",
+		},
+		{
+			label: "Measured reversible counterpart layers",
+			storyId: "ui-motion-motion-effect--counterpart-reveal",
+		},
+		{
+			label: "Composable circle, swipe, and grid counterpart masks",
+			storyId: "ui-motion-motion-effect--counterpart-reveal-strategies",
+		},
+		{
+			label: "Counterpart reduced-motion final state",
+			storyId: "ui-motion-motion-effect--counterpart-reveal-reduced-motion",
 		},
 		{
 			label: "Hover and keyboard-focus text replay",
@@ -122,6 +167,14 @@ export const catalogContract = defineCatalogOwnerContract({
 			axes: [],
 			stage: "wide",
 			Render: EffectPreview,
+		},
+		{
+			id: "stat-reveal-composition",
+			name: "Statistic reveal composition",
+			baseline: {},
+			axes: [],
+			stage: "standard",
+			Render: StatRevealPreview,
 		},
 	],
 });

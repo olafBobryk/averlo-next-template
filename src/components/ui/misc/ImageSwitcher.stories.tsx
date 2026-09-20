@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, fn, userEvent } from "storybook/test";
+import { useState } from "react";
+import { expect, fireEvent, fn, userEvent, waitFor } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { ImageSwitcher } from "./ImageSwitcher";
 import { catalogContract } from "./ImageSwitcher.catalog";
@@ -49,6 +50,75 @@ export const SingleImageContract: Story = {
 		await expect(
 			canvas.getByAltText("Abstract blue portrait composition"),
 		).toBeVisible();
+		await expect(
+			canvas.queryByRole("button", { name: "Next image" }),
+		).not.toBeInTheDocument();
+	},
+};
+
+function ControlledImageSwitcher({
+	onIndexChange,
+}: {
+	onIndexChange?: (index: number) => void;
+}) {
+	const [selectedIndex, setSelectedIndex] = useState(0);
+
+	return (
+		<div className="grid max-w-2xl gap-4">
+			<fieldset className="flex flex-wrap gap-2">
+				<legend className="sr-only">Select image</legend>
+				<button
+					type="button"
+					className="rounded-full border border-border bg-surface px-4 py-2 text-sm"
+					onClick={() => setSelectedIndex(0)}
+				>
+					Portrait
+				</button>
+				<button
+					type="button"
+					className="rounded-full border border-border bg-surface px-4 py-2 text-sm"
+					onClick={() => setSelectedIndex(1)}
+				>
+					Square
+				</button>
+			</fieldset>
+			<ImageSwitcher
+				images={images}
+				intervalMs={0}
+				selectedIndex={selectedIndex}
+				showControls={false}
+				onIndexChange={onIndexChange}
+				frameClassName="h-80"
+			/>
+			<p className="text-sm text-muted-foreground">
+				Selection is owned by the parent; rapid changes remain interrupt-safe.
+			</p>
+		</div>
+	);
+}
+
+export const ControlledRapidSelection: Story = {
+	render: (args) => (
+		<ControlledImageSwitcher onIndexChange={args.onIndexChange} />
+	),
+	play: async ({ args, canvas, canvasElement }) => {
+		const portrait = canvas.getByRole("button", { name: "Portrait" });
+		const square = canvas.getByRole("button", { name: "Square" });
+		const switcher = canvasElement.querySelector(
+			"[data-image-switcher-active-index]",
+		);
+		if (!(switcher instanceof HTMLElement)) {
+			throw new Error("ImageSwitcher story root was not rendered.");
+		}
+
+		fireEvent.click(square);
+		fireEvent.click(portrait);
+		fireEvent.click(square);
+
+		await waitFor(() =>
+			expect(switcher).toHaveAttribute("data-image-switcher-active-index", "1"),
+		);
+		await expect(args.onIndexChange).not.toHaveBeenCalled();
 		await expect(
 			canvas.queryByRole("button", { name: "Next image" }),
 		).not.toBeInTheDocument();

@@ -37,14 +37,37 @@ function CatalogPreview2() {
 		) => ReturnType<typeof render>
 	)({ ...{}, ...{} } as never);
 }
+function CatalogPreview3() {
+	const items = ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6"];
+
+	return (
+		<ScrollBorders
+			axis="horizontal"
+			className="w-72 overflow-x-auto"
+			showBackToTop={false}
+		>
+			<div className="flex w-max gap-3 p-3">
+				{items.map((item) => (
+					<div
+						className="grid h-24 w-32 place-items-center rounded-lg border border-border bg-surface"
+						key={item}
+					>
+						{item}
+					</div>
+				))}
+			</div>
+		</ScrollBorders>
+	);
+}
 
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-misc-scroll-borders",
 	name: "ScrollBorders",
-	role: "Scrollable-region wrapper that exposes overflow through shared top and bottom edge treatment.",
+	role: "Scrollable-region wrapper that exposes vertical or horizontal overflow through shared edge treatment, including RTL horizontal ports.",
 	importStatement: 'import { ScrollBorders } from "@/components/ui/misc";',
 	chooseWhen: [
 		"A constrained vertical region needs consistent overflow affordances.",
+		"A horizontally scrolling region needs physical left and right overflow affordances in LTR or RTL.",
 	],
 	chooseInstead: [
 		"Use ordinary document scrolling when the region is not independently constrained.",
@@ -59,6 +82,10 @@ export const catalogContract = defineCatalogOwnerContract({
 		{
 			label: "Skeleton region ownership",
 			storyId: "ui-misc-scroll-borders--skeleton-contract",
+		},
+		{
+			label: "Horizontal RTL overflow",
+			storyId: "ui-misc-scroll-borders--horizontal-rtl-overflow",
 		},
 	],
 
@@ -80,6 +107,14 @@ export const catalogContract = defineCatalogOwnerContract({
 			axes: [],
 			stage: "standard",
 			Render: CatalogPreview2,
+		},
+		{
+			id: "horizontal-rtl-overflow",
+			name: "Horizontal overflow",
+			baseline: {},
+			axes: [],
+			stage: "standard",
+			Render: CatalogPreview3,
 		},
 	],
 });

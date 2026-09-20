@@ -385,7 +385,7 @@ export const QuoteScrollHighlight: Story = {
 	},
 	parameters: {
 		motionComposition: {
-			effects: ["entrance", "text-highlight", "grid-clip"],
+			effects: ["entrance", "text-highlight", "grid-reveal"],
 			focusHints: ["section", "page"],
 			role: "quote-scroll-highlight",
 			schemaVersion: 1,
@@ -420,13 +420,18 @@ export const QuoteScrollHighlight: Story = {
 							</MotionEffect.TextHighlight>
 						</MotionEffect.Entrance>
 					</div>
-					<MotionEffect.GridClip className="aspect-[4/5] overflow-hidden rounded-xl">
-						<div
-							aria-label="Abstract supporting media"
-							className="h-full bg-[radial-gradient(circle_at_30%_24%,var(--color-primary),transparent_28%),linear-gradient(145deg,var(--color-surface),var(--color-foreground))]"
-							role="img"
+					<div
+						aria-label="Abstract supporting media"
+						className="relative aspect-[4/5] overflow-hidden rounded-xl"
+						role="img"
+					>
+						<MotionEffect.GridReveal
+							tileStyle={{
+								backgroundImage:
+									"radial-gradient(circle at 30% 24%, var(--color-primary), transparent 28%), linear-gradient(145deg, var(--color-surface), var(--color-foreground))",
+							}}
 						/>
-					</MotionEffect.GridClip>
+					</div>
 				</MotionSource.Root>
 			</section>
 		</div>
@@ -442,7 +447,7 @@ export const QuoteScrollHighlight: Story = {
 			canvasElement.querySelector('[data-motion-effect="text-highlight"]'),
 		).not.toBeNull();
 		await expect(
-			canvasElement.querySelector('[data-motion-effect="grid-clip"]'),
+			canvasElement.querySelector('[data-motion-effect="grid-reveal"]'),
 		).not.toBeNull();
 	},
 };

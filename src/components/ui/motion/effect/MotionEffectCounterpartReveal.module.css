@@ -1,0 +1,31 @@
+.root {
+	position: relative;
+	isolation: isolate;
+}
+
+.base {
+	position: relative;
+	z-index: 0;
+	min-width: 0;
+}
+
+.counterpart {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	min-width: 0;
+	pointer-events: none;
+}
+
+.counterpart[data-motion-counterpart-reveal="circle"],
+.counterpart[data-motion-counterpart-reveal="swipe"] {
+	will-change: clip-path;
+}
+
+.counterpart[data-motion-counterpart-reveal="grid"] {
+	will-change: mask-position, mask-size;
+}
+
+.counterpart [data-motion-counterpart-anchor] {
+	opacity: var(--motion-counterpart-progress, 0);
+}

@@ -42,14 +42,27 @@ function CatalogPreview2() {
 		},
 	);
 }
+function CatalogPreview3() {
+	return createElement(
+		ImageSwitcher as unknown as ComponentType<Record<string, unknown>>,
+		{
+			images,
+			intervalMs: 0,
+			selectedIndex: 1,
+			showControls: false,
+			frameClassName: "h-72",
+		},
+	);
+}
 
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-misc-image-switcher",
 	name: "ImageSwitcher",
-	role: "Small image carousel with shared transitions, eager preloading, swipe ownership, and pagination controls.",
+	role: "Small image carousel with controlled or internal selection, interrupt-safe shared transitions, eager preloading, swipe ownership, and optional pagination controls.",
 	importStatement: 'import { ImageSwitcher } from "@/components/ui/misc";',
 	chooseWhen: [
 		"A small media set needs cyclic previous/next navigation or swipe.",
+		"A parent-owned selection needs to drive a clipped image transition without rendering duplicate controls.",
 	],
 	chooseInstead: [
 		"Use a domain gallery for thumbnails, captions, or arbitrary item navigation.",
@@ -64,6 +77,10 @@ export const catalogContract = defineCatalogOwnerContract({
 		{
 			label: "Single-image control suppression",
 			storyId: "ui-misc-image-switcher--single-image-contract",
+		},
+		{
+			label: "Controlled rapid selection",
+			storyId: "ui-misc-image-switcher--controlled-rapid-selection",
 		},
 	],
 
@@ -86,6 +103,14 @@ export const catalogContract = defineCatalogOwnerContract({
 			axes: [],
 			stage: "standard",
 			Render: CatalogPreview2,
+		},
+		{
+			id: "controlled-rapid-selection",
+			name: "Controlled selection without built-in controls",
+			baseline: {},
+			axes: [],
+			stage: "standard",
+			Render: CatalogPreview3,
 		},
 	],
 });

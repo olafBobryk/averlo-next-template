@@ -21,6 +21,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 const rows = Array.from({ length: 12 }, (_, index) => `Result ${index + 1}`);
+const columns = Array.from({ length: 8 }, (_, index) => `Item ${index + 1}`);
 export const OverflowContract: Story = {
 	args: { onScroll: fn() },
 	render: (args) => (
@@ -39,19 +40,8 @@ export const OverflowContract: Story = {
 	),
 	play: async ({ args, canvas }) => {
 		const region = canvas.getByTestId("scroll-region");
-		Object.defineProperty(region, "scrollHeight", {
-			configurable: true,
-			value: 480,
-		});
-		Object.defineProperty(region, "clientHeight", {
-			configurable: true,
-			value: 160,
-		});
-		Object.defineProperty(region, "scrollTop", {
-			configurable: true,
-			value: 40,
-			writable: true,
-		});
+		await expect(region.scrollHeight).toBeGreaterThan(region.clientHeight);
+		region.scrollTop = 40;
 		fireEvent.scroll(region);
 		await expect(args.onScroll).toHaveBeenCalledOnce();
 		await expect(region).toHaveClass("border-t!");
@@ -67,5 +57,89 @@ export const SkeletonContract: Story = {
 		await expect(
 			canvasElement.querySelector(".overflow-hidden"),
 		).toBeInTheDocument();
+	},
+};
+
+function HorizontalRegion({ direction }: { direction: "ltr" | "rtl" }) {
+	return (
+		<div className="grid gap-2">
+			<p className="text-sm font-medium">
+				{direction === "ltr" ? "Left to right" : "Right to left"}
+			</p>
+			<ScrollBorders
+				axis="horizontal"
+				dir={direction}
+				data-testid={`horizontal-${direction}`}
+				className="w-80 overflow-x-auto"
+				showBackToTop={false}
+				tabIndex={0}
+			>
+				<div className="flex w-max gap-3 p-3">
+					{columns.map((column) => (
+						<div
+							className="grid h-28 w-36 shrink-0 place-items-center rounded-lg border border-border bg-surface text-sm"
+							key={column}
+						>
+							{column}
+						</div>
+					))}
+				</div>
+			</ScrollBorders>
+		</div>
+	);
+}
+
+function NoOverflowRegion() {
+	return (
+		<div className="grid gap-2 md:col-span-2">
+			<p className="text-sm font-medium">Fits without overflow</p>
+			<ScrollBorders
+				axis="horizontal"
+				data-testid="horizontal-no-overflow"
+				className="w-80 overflow-x-auto"
+				showBackToTop={false}
+				tabIndex={0}
+			>
+				<div className="p-3 text-sm">
+					All content fits inside the scroll port.
+				</div>
+			</ScrollBorders>
+		</div>
+	);
+}
+
+export const HorizontalRtlOverflow: Story = {
+	render: () => (
+		<div className="grid max-w-3xl gap-8 md:grid-cols-2">
+			<HorizontalRegion direction="ltr" />
+			<HorizontalRegion direction="rtl" />
+			<NoOverflowRegion />
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const ltrRegion = canvas.getByTestId("horizontal-ltr");
+		const rtlRegion = canvas.getByTestId("horizontal-rtl");
+		const noOverflowRegion = canvas.getByTestId("horizontal-no-overflow");
+
+		await expect(ltrRegion.scrollWidth).toBeGreaterThan(ltrRegion.clientWidth);
+		await expect(rtlRegion.scrollWidth).toBeGreaterThan(rtlRegion.clientWidth);
+		await expect(noOverflowRegion.scrollWidth).toBeLessThanOrEqual(
+			noOverflowRegion.clientWidth,
+		);
+
+		fireEvent.scroll(ltrRegion);
+		fireEvent.scroll(rtlRegion);
+		fireEvent.scroll(noOverflowRegion);
+
+		await expect(ltrRegion).not.toHaveAttribute("data-scroll-border-start");
+		await expect(ltrRegion).toHaveAttribute("data-scroll-border-end", "true");
+		await expect(rtlRegion).toHaveAttribute("data-scroll-border-start", "true");
+		await expect(rtlRegion).not.toHaveAttribute("data-scroll-border-end");
+		await expect(noOverflowRegion).not.toHaveAttribute(
+			"data-scroll-border-start",
+		);
+		await expect(noOverflowRegion).not.toHaveAttribute(
+			"data-scroll-border-end",
+		);
 	},
 };

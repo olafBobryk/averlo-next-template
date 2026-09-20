@@ -26,6 +26,10 @@ text-motion implementations.
 - Source progress, scheduler context, participant hooks, and auto-cycle
   controller context remain private. Effects consume progress only through the
   nearest source context.
+- `CounterpartReveal` owns coincident base/counterpart geometry, decorative
+  duplicate semantics, measured anchor alignment, and reversible reveal-mask
+  selection. Callers own the two visual treatments, marked anchor, and a
+  declarative circle, swipe, or grid strategy; strategies never own content.
 - `owner-hover` resolves only the nearest `data-motion-owner` ancestor. The
   owner retains semantics, accessible naming, and visible focus treatment.
 - Animated rules compose the canonical, unlabeled `Divider` through

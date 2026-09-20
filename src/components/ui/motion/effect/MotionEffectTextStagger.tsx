@@ -2,7 +2,7 @@
 
 import type { VariantProps } from "class-variance-authority";
 import { type MotionValue, motion, useTransform } from "motion/react";
-import type { ElementType, HTMLAttributes } from "react";
+import type { ElementType, HTMLAttributes, ReactNode } from "react";
 import { textVariants } from "@/components/ui/primitives/Text";
 import { useMotionEffectProgress } from "./progress";
 
@@ -11,6 +11,7 @@ export type MotionEffectTextStaggerTreatment = "blur" | "clip";
 
 export type MotionEffectTextStaggerSegment = {
 	className?: string;
+	render?: (text: string) => ReactNode;
 	text: string;
 	unit?: MotionEffectTextStaggerUnit;
 };
@@ -46,6 +47,7 @@ export type MotionEffectTextStaggerProps = MotionEffectTextStaggerContent &
 type TextStaggerToken = {
 	className?: string;
 	reveal: boolean;
+	render?: (text: string) => ReactNode;
 	segmentIndex: number;
 	text: string;
 	unit: MotionEffectTextStaggerUnit;
@@ -79,7 +81,7 @@ function segmentWords(text: string) {
 
 function tokenizeSegment(
 	segment: Required<Pick<MotionEffectTextStaggerSegment, "text" | "unit">> &
-		Pick<MotionEffectTextStaggerSegment, "className">,
+		Pick<MotionEffectTextStaggerSegment, "className" | "render">,
 	segmentIndex: number,
 ): TextStaggerToken[] {
 	if (segment.unit === "whole") {
@@ -87,6 +89,7 @@ function tokenizeSegment(
 			{
 				className: segment.className,
 				reveal: !/^\s+$/u.test(segment.text),
+				render: segment.render,
 				segmentIndex,
 				text: segment.text,
 				unit: segment.unit,
@@ -98,6 +101,7 @@ function tokenizeSegment(
 		return segmentGraphemes(segment.text).map((text) => ({
 			className: segment.className,
 			reveal: !/^\s+$/u.test(text),
+			render: segment.render,
 			segmentIndex,
 			text,
 			unit: segment.unit,
@@ -110,6 +114,7 @@ function tokenizeSegment(
 			tokens.push({
 				className: segment.className,
 				reveal: false,
+				render: segment.render,
 				segmentIndex,
 				text,
 				unit: segment.unit,
@@ -125,6 +130,7 @@ function tokenizeSegment(
 				tokens.push({
 					className: segment.className,
 					reveal: true,
+					render: segment.render,
 					segmentIndex,
 					text,
 					unit: segment.unit,
@@ -139,6 +145,7 @@ function tokenizeSegment(
 			tokens.push({
 				className: segment.className,
 				reveal: false,
+				render: segment.render,
 				segmentIndex,
 				text,
 				unit: segment.unit,
@@ -153,6 +160,7 @@ function StaggeredToken({
 	className,
 	index,
 	progress,
+	render,
 	segmentIndex,
 	text,
 	total,
@@ -164,6 +172,7 @@ function StaggeredToken({
 	className?: string;
 	index: number;
 	progress: MotionValue<number>;
+	render?: (text: string) => ReactNode;
 	segmentIndex: number;
 	text: string;
 	total: number;
@@ -173,10 +182,12 @@ function StaggeredToken({
 	const start = total <= 1 ? 0 : (index / (total - 1)) * 0.38;
 	const end = Math.min(1, start + 0.62);
 	const opacity = useTransform(progress, [start, end], [0, 1]);
-	const y = useTransform(
+	const transform = useTransform(
 		progress,
 		[start, end],
-		treatment === "clip" ? ["105%", "0%"] : [blurOffset, "0em"],
+		treatment === "clip"
+			? ["translateY(105%)", "translateY(0%)"]
+			: [`translateY(${blurOffset})`, "translateY(0px)"],
 	);
 	const filter = useTransform(
 		progress,
@@ -205,10 +216,10 @@ function StaggeredToken({
 				style={{
 					filter: treatment === "blur" ? filter : undefined,
 					opacity,
-					y,
+					transform,
 				}}
 			>
-				{text}
+				{render?.(text) ?? text}
 			</motion.span>
 		</span>
 	);
@@ -284,6 +295,7 @@ export function MotionEffectTextStagger({
 							// biome-ignore lint/suspicious/noArrayIndexKey: text position is the visual identity.
 							key={index}
 							progress={progress}
+							render={token.render}
 							segmentIndex={token.segmentIndex}
 							text={token.text}
 							total={staggerCount}

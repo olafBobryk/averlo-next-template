@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import * as React from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
@@ -32,6 +32,7 @@ type ImageSwitcherPreloadItem = {
 export type ImageSwitcherProps = {
 	images: readonly ImageSwitcherImage[];
 	initialIndex?: number;
+	selectedIndex?: number;
 	intervalMs?: number;
 	sizes?: string;
 	className?: string;
@@ -44,6 +45,7 @@ export type ImageSwitcherProps = {
 	prevLabel?: string;
 	preserveIconDirection?: boolean;
 	enableSwipe?: boolean;
+	showControls?: boolean;
 	onIndexChange?: (index: number) => void;
 };
 
@@ -54,6 +56,19 @@ const imageSwitcherTransition = getMotionTiming("grand");
 function getWrappedImageIndex(index: number, total: number) {
 	if (total <= 0) return 0;
 	return (index + total) % total;
+}
+
+function getImageDirection(
+	currentIndex: number,
+	nextIndex: number,
+	total: number,
+): CarouselDirection {
+	const forwardDistance = getWrappedImageIndex(nextIndex - currentIndex, total);
+	const backwardDistance = getWrappedImageIndex(
+		currentIndex - nextIndex,
+		total,
+	);
+	return forwardDistance <= backwardDistance ? 1 : -1;
 }
 
 function getImageKey(image: ImageSwitcherImage) {
@@ -106,6 +121,7 @@ const fullRevealClip = {
 export function ImageSwitcher({
 	images,
 	initialIndex = 0,
+	selectedIndex,
 	intervalMs = defaultIntervalMs,
 	sizes = "100vw",
 	className,
@@ -118,6 +134,7 @@ export function ImageSwitcher({
 	prevLabel = "Previous image",
 	preserveIconDirection = false,
 	enableSwipe = true,
+	showControls = true,
 	onIndexChange,
 }: ImageSwitcherProps) {
 	const motionAllowed = useMotionAllowed(true);
@@ -127,23 +144,22 @@ export function ImageSwitcher({
 	const canSwitch = imageCount > 1;
 	const canSwipe = enableSwipe && canSwitch;
 	const pointerStartXRef = React.useRef<number | null>(null);
-	const initialWrappedIndex = getWrappedImageIndex(initialIndex, imageCount);
+	const initialWrappedIndex = getWrappedImageIndex(
+		selectedIndex ?? initialIndex,
+		imageCount,
+	);
 	const [activeIndex, setActiveIndex] = React.useState(initialWrappedIndex);
 	const [settledIndex, setSettledIndex] = React.useState(initialWrappedIndex);
-	const [incomingLayer, setIncomingLayer] =
-		React.useState<ImageSwitcherLayer | null>(null);
-	const [queuedLayer, setQueuedLayer] =
-		React.useState<ImageSwitcherLayer | null>(null);
+	const [incomingLayers, setIncomingLayers] = React.useState<
+		ImageSwitcherLayer[]
+	>([]);
 	const [loadedImageKeys, setLoadedImageKeys] = React.useState<Set<string>>(
 		() => new Set(),
 	);
 	const [timerResetAt, setTimerResetAt] = React.useState(() => Date.now());
 	const transitionKeyRef = React.useRef(0);
 	const activeIndexRef = React.useRef(activeIndex);
-	const incomingLayerRef = React.useRef<ImageSwitcherLayer | null>(null);
-	const incomingClearFrameRef = React.useRef<number | null>(null);
 	const baseImage = images[settledIndex] ?? images[0];
-	const incomingImage = incomingLayer ? images[incomingLayer.index] : null;
 	const preloadItems = React.useMemo(
 		() => getImagePreloadItems(images),
 		[images],
@@ -152,18 +168,6 @@ export function ImageSwitcher({
 	React.useEffect(() => {
 		activeIndexRef.current = activeIndex;
 	}, [activeIndex]);
-
-	React.useEffect(() => {
-		incomingLayerRef.current = incomingLayer;
-	}, [incomingLayer]);
-
-	React.useEffect(() => {
-		return () => {
-			if (incomingClearFrameRef.current !== null) {
-				window.cancelAnimationFrame(incomingClearFrameRef.current);
-			}
-		};
-	}, []);
 
 	const markImageLoaded = React.useCallback((image: ImageSwitcherImage) => {
 		const imageKey = getImageKey(image);
@@ -179,14 +183,13 @@ export function ImageSwitcher({
 		});
 	}, []);
 
-	const clearIncomingFrame = React.useCallback(() => {
-		if (incomingClearFrameRef.current === null) return;
-		window.cancelAnimationFrame(incomingClearFrameRef.current);
-		incomingClearFrameRef.current = null;
-	}, []);
-
 	const requestImage = React.useCallback(
-		(index: number, direction: CarouselDirection, resetTimer = true) => {
+		(
+			index: number,
+			direction: CarouselDirection,
+			resetTimer = true,
+			notifyChange = true,
+		) => {
 			if (imageCount <= 0) return;
 			const previousIndex = activeIndexRef.current;
 			const nextIndex = getWrappedImageIndex(index, imageCount);
@@ -198,14 +201,11 @@ export function ImageSwitcher({
 
 			activeIndexRef.current = nextIndex;
 			setActiveIndex(nextIndex);
-			onIndexChange?.(nextIndex);
+			if (notifyChange) onIndexChange?.(nextIndex);
 
 			if (!shouldAnimate) {
 				setSettledIndex(nextIndex);
-				incomingLayerRef.current = null;
-				clearIncomingFrame();
-				setIncomingLayer(null);
-				setQueuedLayer(null);
+				setIncomingLayers([]);
 				return;
 			}
 
@@ -217,16 +217,9 @@ export function ImageSwitcher({
 				key: nextTransitionKey,
 			};
 
-			if (incomingLayerRef.current) {
-				setQueuedLayer(nextLayer);
-				return;
-			}
-
-			incomingLayerRef.current = nextLayer;
-			clearIncomingFrame();
-			setIncomingLayer(nextLayer);
+			setIncomingLayers((currentLayers) => [...currentLayers, nextLayer]);
 		},
-		[clearIncomingFrame, imageCount, onIndexChange, shouldAnimate],
+		[imageCount, onIndexChange, shouldAnimate],
 	);
 
 	const requestRelativeImage = React.useCallback(
@@ -235,6 +228,20 @@ export function ImageSwitcher({
 		},
 		[requestImage],
 	);
+
+	React.useEffect(() => {
+		if (selectedIndex === undefined || imageCount <= 0) return;
+		const nextIndex = getWrappedImageIndex(selectedIndex, imageCount);
+		const currentIndex = activeIndexRef.current;
+		if (nextIndex === currentIndex) return;
+
+		requestImage(
+			nextIndex,
+			getImageDirection(currentIndex, nextIndex, imageCount),
+			false,
+			false,
+		);
+	}, [imageCount, requestImage, selectedIndex]);
 
 	React.useEffect(() => {
 		if (!canSwitch || intervalMs <= 0) return undefined;
@@ -257,16 +264,8 @@ export function ImageSwitcher({
 		if (settledIndex >= imageCount) {
 			setSettledIndex(getWrappedImageIndex(settledIndex, imageCount));
 		}
-		setIncomingLayer((currentLayer) => {
-			if (!currentLayer || currentLayer.index < imageCount) {
-				return currentLayer;
-			}
-
-			incomingLayerRef.current = null;
-			return null;
-		});
-		setQueuedLayer((currentLayer) =>
-			currentLayer && currentLayer.index >= imageCount ? null : currentLayer,
+		setIncomingLayers((currentLayers) =>
+			currentLayers.filter((layer) => layer.index < imageCount),
 		);
 	}, [activeIndex, imageCount, settledIndex]);
 
@@ -274,54 +273,19 @@ export function ImageSwitcher({
 		if (shouldAnimate) return;
 
 		setSettledIndex(activeIndexRef.current);
-		incomingLayerRef.current = null;
-		clearIncomingFrame();
-		setIncomingLayer(null);
-		setQueuedLayer(null);
-	}, [clearIncomingFrame, shouldAnimate]);
-
-	React.useEffect(() => {
-		if (!shouldAnimate || incomingLayer || !queuedLayer) return;
-
-		if (queuedLayer.index === settledIndex) {
-			setQueuedLayer(null);
-			return;
-		}
-
-		incomingLayerRef.current = queuedLayer;
-		clearIncomingFrame();
-		setIncomingLayer(queuedLayer);
-		setQueuedLayer(null);
-	}, [
-		clearIncomingFrame,
-		incomingLayer,
-		queuedLayer,
-		settledIndex,
-		shouldAnimate,
-	]);
+		setIncomingLayers([]);
+	}, [shouldAnimate]);
 
 	if (!baseImage) return null;
 
 	function completeIncomingLayer(completedKey: number) {
-		const completedLayer = incomingLayerRef.current;
+		setIncomingLayers((currentLayers) =>
+			currentLayers.filter((layer) => layer.key !== completedKey),
+		);
 
-		if (!completedLayer || completedLayer.key !== completedKey) {
-			return;
-		}
-
-		setSettledIndex(completedLayer.index);
-		clearIncomingFrame();
-		incomingClearFrameRef.current = window.requestAnimationFrame(() => {
-			incomingClearFrameRef.current = null;
-			setIncomingLayer((latestLayer) => {
-				if (!latestLayer || latestLayer.key !== completedKey) {
-					return latestLayer;
-				}
-
-				incomingLayerRef.current = null;
-				return null;
-			});
-		});
+		if (completedKey !== transitionKeyRef.current) return;
+		setSettledIndex(activeIndexRef.current);
+		setIncomingLayers([]);
 	}
 
 	function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
@@ -354,11 +318,15 @@ export function ImageSwitcher({
 	return (
 		<div className={clsx("flex w-full flex-col gap-4", className)}>
 			<motion.div
+				data-image-switcher-active-index={activeIndex}
 				className={clsx(
 					"relative h-80 w-full touch-pan-y overflow-hidden rounded-xl bg-surface",
 					frameClassName,
 				)}
 				onPointerDown={handlePointerDown}
+				onDragStartCapture={(event) => {
+					if (canSwipe) event.preventDefault();
+				}}
 				onPointerUp={handlePointerUp}
 				onPointerCancel={() => {
 					pointerStartXRef.current = null;
@@ -367,13 +335,17 @@ export function ImageSwitcher({
 				<Image
 					key={`image-switcher-base-${baseImage.src}`}
 					src={baseImage.src}
-					alt={incomingImage ? "" : baseImage.alt}
+					alt={incomingLayers.length > 0 ? "" : baseImage.alt}
 					fill
 					loading="eager"
 					placeholder={getImagePlaceholder(baseImage, loadedImageKeys)}
 					blurDataURL={baseImage.blurDataURL ?? undefined}
 					sizes={sizes}
-					className={clsx("object-cover object-center", imageClassName)}
+					className={clsx(
+						"object-cover object-center",
+						canSwipe && "pointer-events-none select-none",
+						imageClassName,
+					)}
 					draggable={false}
 					onLoad={() => markImageLoaded(baseImage)}
 				/>
@@ -398,31 +370,49 @@ export function ImageSwitcher({
 						</span>
 					))}
 				</div>
-				{incomingLayer && incomingImage ? (
-					<motion.div
-						key={incomingLayer.key}
-						className="absolute inset-0 will-change-[clip-path]"
-						initial={getRevealClip(incomingLayer.direction)}
-						animate={fullRevealClip}
-						transition={imageSwitcherTransition}
-						onAnimationComplete={() => completeIncomingLayer(incomingLayer.key)}
-					>
-						<Image
-							src={incomingImage.src}
-							alt={incomingImage.alt}
-							fill
-							loading="eager"
-							placeholder={getImagePlaceholder(incomingImage, loadedImageKeys)}
-							blurDataURL={incomingImage.blurDataURL ?? undefined}
-							sizes={sizes}
-							className={clsx("object-cover object-center", imageClassName)}
-							draggable={false}
-							onLoad={() => markImageLoaded(incomingImage)}
-						/>
-					</motion.div>
-				) : null}
+				<AnimatePresence initial={false}>
+					{incomingLayers.map((incomingLayer, layerIndex) => {
+						const incomingImage = images[incomingLayer.index];
+						if (!incomingImage) return null;
+						const isLatestLayer = layerIndex === incomingLayers.length - 1;
+
+						return (
+							<motion.div
+								key={incomingLayer.key}
+								className="absolute inset-0 will-change-[clip-path]"
+								style={{ zIndex: incomingLayer.key }}
+								initial={getRevealClip(incomingLayer.direction)}
+								animate={fullRevealClip}
+								transition={imageSwitcherTransition}
+								onAnimationComplete={() =>
+									completeIncomingLayer(incomingLayer.key)
+								}
+							>
+								<Image
+									src={incomingImage.src}
+									alt={isLatestLayer ? incomingImage.alt : ""}
+									fill
+									loading="eager"
+									placeholder={getImagePlaceholder(
+										incomingImage,
+										loadedImageKeys,
+									)}
+									blurDataURL={incomingImage.blurDataURL ?? undefined}
+									sizes={sizes}
+									className={clsx(
+										"object-cover object-center",
+										canSwipe && "pointer-events-none select-none",
+										imageClassName,
+									)}
+									draggable={false}
+									onLoad={() => markImageLoaded(incomingImage)}
+								/>
+							</motion.div>
+						);
+					})}
+				</AnimatePresence>
 			</motion.div>
-			{canSwitch ? (
+			{canSwitch && showControls ? (
 				<PaginationControls
 					buttonSize={paginationButtonSize}
 					className={controlsClassName}

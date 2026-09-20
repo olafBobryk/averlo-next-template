@@ -401,14 +401,14 @@ function run() {
 			["primitives", 10],
 			["input", 26],
 			["time", 2],
-			["misc", 18],
+			["misc", 19],
 			["overlays", 6],
 			["assistant", 2],
 			["utilities", 4],
 		]);
-		if (exportContracts.length !== 77) {
+		if (exportContracts.length !== 78) {
 			fail(
-				`canonical export must contain 77 owners, found ${exportContracts.length}`,
+				`canonical export must contain 78 owners, found ${exportContracts.length}`,
 			);
 		}
 		for (const [sectionId, expectedCount] of expectedSectionCounts) {

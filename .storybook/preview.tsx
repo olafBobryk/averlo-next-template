@@ -9,7 +9,7 @@ import { MotionProvider } from "../src/components/ui/foundations/MotionProvider"
 import { SettingsProvider } from "../src/components/ui/foundations/settingsContext";
 import { IconProvider } from "../src/components/ui/icons/iconRegistry";
 import { phosphorIconRegistry } from "../src/components/ui/icons/phosphorRegistry";
-import { markAppReady } from "../src/lib/appReadySignal";
+import { markAppReady, markAppVisible } from "../src/lib/appReadySignal";
 
 // Automated Storybook runs must not inherit the host machine's color scheme.
 // System remains available in the toolbar; Light is the deterministic baseline.
@@ -23,6 +23,7 @@ const waitForThemeSettle = () =>
 // Storybook has no application loading screen, so its preview is ready as soon
 // as the shared environment loads. Motion owners still consume the real signal.
 markAppReady();
+markAppVisible();
 
 const preview: Preview = {
 	beforeEach: () => {

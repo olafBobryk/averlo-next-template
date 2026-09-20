@@ -25,10 +25,11 @@ function CarouselPreview() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-misc-carousel",
 	name: "Carousel",
-	role: "Bounded horizontal item carousel with measured left-edge snapping, section-gutter alignment, pointer dragging, and dot pagination.",
+	role: "Bounded horizontal item carousel with direction-aware snapping, pointer and keyboard navigation, dot pagination, and an optional wide-grid presentation.",
 	importStatement: 'import { Carousel } from "@/components/ui/misc";',
 	chooseWhen: [
 		"A responsive surface needs caller-rendered items to snap against a stable left edge with direct pagination.",
+		"One semantic item collection should become a static grid once the caller-selected wide breakpoint has enough room for every card.",
 	],
 	chooseInstead: [
 		"Use ImageSwitcher for a single framed image carousel with preload and image-transition ownership.",
@@ -37,7 +38,7 @@ export const catalogContract = defineCatalogOwnerContract({
 	compounds: ["Carousel"],
 	exclusions: [
 		"Looping, autoplay, vertical tracks, centered-slide geometry, virtualized slides, or a general slider plugin API.",
-		"Desktop replacement visibility; callers own whether a different composition replaces the carousel at a breakpoint.",
+		"Different compact and wide content, ordering, or motion treatments; callers own separate compositions when the same item tree cannot serve both presentations.",
 	],
 	guarantees: [
 		{
@@ -47,6 +48,14 @@ export const catalogContract = defineCatalogOwnerContract({
 		{
 			label: "Contained presentation without a section gutter",
 			storyId: "ui-misc-carousel--without-section-gutter",
+		},
+		{
+			label: "Responsive carousel-to-grid presentation",
+			storyId: "ui-misc-carousel--responsive-grid-at-wide",
+		},
+		{
+			label: "RTL snapping and directional keyboard navigation",
+			storyId: "ui-misc-carousel--right-to-left-keyboard-navigation",
 		},
 	],
 	family: "UI",

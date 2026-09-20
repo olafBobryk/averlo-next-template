@@ -4,6 +4,14 @@ export {
 	type MotionEffectClipProps as ClipProps,
 } from "./MotionEffectClip";
 export {
+	MotionEffectCounterpartReveal as CounterpartReveal,
+	type MotionEffectCounterpartRevealAnchorProps as CounterpartRevealAnchorProps,
+	type MotionEffectCounterpartRevealLayer as CounterpartRevealLayer,
+	type MotionEffectCounterpartRevealProps as CounterpartRevealProps,
+	type MotionEffectCounterpartRevealRenderProps as CounterpartRevealRenderProps,
+	type MotionEffectCounterpartRevealStrategy as CounterpartRevealStrategy,
+} from "./MotionEffectCounterpartReveal";
+export {
 	MotionEffectDivider as Divider,
 	type MotionEffectDividerProps as DividerProps,
 } from "./MotionEffectDivider";
@@ -17,10 +25,10 @@ export {
 	type MotionEffectFrameWidthProps as FrameWidthProps,
 } from "./MotionEffectFrameWidth";
 export {
-	getGridClipDimensions,
-	MotionEffectGridClip as GridClip,
-	type MotionEffectGridClipProps as GridClipProps,
-} from "./MotionEffectGridClip";
+	getGridRevealDimensions,
+	MotionEffectGridReveal as GridReveal,
+	type MotionEffectGridRevealProps as GridRevealProps,
+} from "./MotionEffectGridReveal";
 export {
 	MotionEffectNumber as Number,
 	type MotionEffectNumberAnimation as NumberAnimation,

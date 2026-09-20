@@ -21,6 +21,7 @@ than editing or synchronizing a copy.
 3. Use `$template-backport-workflow` to classify every selected change as port, adapt, skip, or defer.
 4. Use `$agent-worktree-workflow` when source and template mutations need isolation.
 5. Invoke `$averlo:entities`, `$averlo:surfaces`, or `$averlo:skeletons` when the story changes those contracts.
+6. Invoke `$preview` for visual candidate review and visual backport evidence. Preview owns the review modes, capture procedure, artifacts, and handoff; do not duplicate those rules here.
 
 Read [references/story-metadata.md](references/story-metadata.md) before adding or changing backport metadata.
 
@@ -31,11 +32,49 @@ Read [references/story-metadata.md](references/story-metadata.md) before adding 
 
 Never scan `/`, the home directory, or an inferred broad root. Never persist a workspace registry.
 
+## Review candidates and approve a batch
+
+Opening the template worktree, running discovery, and preparing previews do not
+require candidate approval. Approval selects the exact story state that may
+move from the instance into the template; it is not permission to import every
+candidate.
+
+Apply an eligibility gate before adding or reviewing candidate metadata. A
+normal product section, branded composition, route block, instance shell,
+client asset, or product-specific story is ordinary Storybook evidence by
+default, even when it is well factored or repeated. Do not enroll it merely
+because it could be generalized. A candidate must isolate a specific reusable
+behavior and map it to an existing product-neutral template owner. If it would
+introduce a new component family or carry instance branding, product copy, or
+page composition into the template, leave it outside the lifecycle unless the
+user explicitly nominates that exact story for backport review.
+
+Before changing status or template code, present each proposed candidate in
+this order:
+
+1. Canonical story ID and source export.
+2. Change: the reusable behavior that would enter the template.
+3. Decision: port, adapt, skip, or defer, with the intended template owner.
+4. Visual impact: yes or no.
+5. Before -> after: observable behavior and appearance, including "no intended visual change" when applicable.
+6. Exclusions and minimum dependencies.
+7. Verification and the direct review surface when available.
+
+Group candidates only when they share an owner, dependency, or one coherent
+behavioral concern. Ask for approval of the exact ordered IDs in the proposed
+batch; do not substitute adjacent candidates after approval. For a visual
+candidate, invoke `$preview` before mutation to preserve the current target
+state, then invoke it again after implementation against the same story and
+comparable viewport. Non-visual candidates still require the packet, but not
+invented visual evidence.
+
 ## Instance mode
 
 1. Confirm Storybook 10.5 or newer is installed.
 2. Follow the Storybook writing workflow and use documented public component owners.
-3. Add the story-level `backport-candidate` tag and literal `parameters.backport` object. Do not mark unrelated stories.
+3. Apply the eligibility gate above. Only then add the story-level
+   `backport-candidate` tag and literal `parameters.backport` object. Do not
+   mark ordinary product sections or adjacent stories.
 4. Run the local Storybook interaction and accessibility checks. Use a direct
    Storybook preview when a visual decision needs human review.
 5. Keep the story as a candidate until a human explicitly approves it.

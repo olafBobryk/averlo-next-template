@@ -27,6 +27,11 @@ export type CarouselItem = {
 	label: string;
 };
 
+export type CarouselWideLayout = {
+	columns: 2 | 3 | 4 | 5 | 6;
+	from: "lg" | "xl" | "2xl";
+};
+
 export type CarouselProps = {
 	ariaLabel: string;
 	gutter?: "none" | "section";
@@ -34,6 +39,7 @@ export type CarouselProps = {
 	items: readonly CarouselItem[];
 	onIndexChange?: (index: number) => void;
 	paginationLabel?: string;
+	wideLayout?: CarouselWideLayout;
 };
 
 type PointerDrag = {
@@ -50,6 +56,105 @@ function clampIndex(index: number, count: number) {
 	return Math.max(0, Math.min(Math.round(index), Math.max(0, count - 1)));
 }
 
+const wideLayoutQueries: Record<CarouselWideLayout["from"], string> = {
+	lg: "(min-width: 1024px)",
+	xl: "(min-width: 1280px)",
+	"2xl": "(min-width: 1536px)",
+};
+
+const wideViewportClasses: Record<CarouselWideLayout["from"], string> = {
+	lg: "lg:ml-0 lg:w-full lg:overflow-visible lg:pb-0 lg:touch-auto",
+	xl: "xl:ml-0 xl:w-full xl:overflow-visible xl:pb-0 xl:touch-auto",
+	"2xl": "2xl:ml-0 2xl:w-full 2xl:overflow-visible 2xl:pb-0 2xl:touch-auto",
+};
+
+const wideTrackClasses: Record<CarouselWideLayout["from"], string> = {
+	lg: "lg:!w-full lg:!transform-none",
+	xl: "xl:!w-full xl:!transform-none",
+	"2xl": "2xl:!w-full 2xl:!transform-none",
+};
+
+const wideSequenceClasses: Record<CarouselWideLayout["from"], string> = {
+	lg: "lg:!grid lg:cursor-default lg:px-0",
+	xl: "xl:!grid xl:cursor-default xl:px-0",
+	"2xl": "2xl:!grid 2xl:cursor-default 2xl:px-0",
+};
+
+const wideSlideClasses: Record<CarouselWideLayout["from"], string> = {
+	lg: "lg:basis-auto",
+	xl: "xl:basis-auto",
+	"2xl": "2xl:basis-auto",
+};
+
+const widePaginationClasses: Record<CarouselWideLayout["from"], string> = {
+	lg: "lg:hidden",
+	xl: "xl:hidden",
+	"2xl": "2xl:hidden",
+};
+
+const wideColumnClasses: Record<
+	CarouselWideLayout["from"],
+	Record<CarouselWideLayout["columns"], string>
+> = {
+	lg: {
+		2: "lg:grid-cols-2",
+		3: "lg:grid-cols-3",
+		4: "lg:grid-cols-4",
+		5: "lg:grid-cols-5",
+		6: "lg:grid-cols-6",
+	},
+	xl: {
+		2: "xl:grid-cols-2",
+		3: "xl:grid-cols-3",
+		4: "xl:grid-cols-4",
+		5: "xl:grid-cols-5",
+		6: "xl:grid-cols-6",
+	},
+	"2xl": {
+		2: "2xl:grid-cols-2",
+		3: "2xl:grid-cols-3",
+		4: "2xl:grid-cols-4",
+		5: "2xl:grid-cols-5",
+		6: "2xl:grid-cols-6",
+	},
+};
+
+function getInlineAlignedSnapPoint(
+	first: { left: number; width: number },
+	slide: { left: number; width: number },
+	direction: "ltr" | "rtl",
+) {
+	return direction === "rtl"
+		? first.left + first.width - (slide.left + slide.width)
+		: first.left - slide.left;
+}
+
+function constrainWithElasticity(value: number, points: readonly number[]) {
+	const minimum = Math.min(...points);
+	const maximum = Math.max(...points);
+	if (value < minimum) return minimum + (value - minimum) * 0.14;
+	if (value > maximum) return maximum + (value - maximum) * 0.14;
+	return value;
+}
+
+function useWideLayoutActive(wideLayout: CarouselWideLayout | undefined) {
+	const [active, setActive] = useState(false);
+
+	useEffect(() => {
+		if (!wideLayout) {
+			setActive(false);
+			return undefined;
+		}
+		const media = window.matchMedia(wideLayoutQueries[wideLayout.from]);
+		const update = () => setActive(media.matches);
+		update();
+		media.addEventListener("change", update);
+		return () => media.removeEventListener("change", update);
+	}, [wideLayout]);
+
+	return active;
+}
+
 export function Carousel({
 	ariaLabel,
 	gutter = "section",
@@ -57,6 +162,7 @@ export function Carousel({
 	items,
 	onIndexChange,
 	paginationLabel = "Choose a slide",
+	wideLayout,
 }: CarouselProps) {
 	const viewportRef = useRef<HTMLElement>(null);
 	const trackRef = useRef<HTMLDivElement>(null);
@@ -64,6 +170,7 @@ export function Carousel({
 	const suppressClickRef = useRef(false);
 	const suppressClickTimerRef = useRef<number | null>(null);
 	const positionIndexRef = useRef(clampIndex(initialIndex, items.length));
+	const directionRef = useRef<"ltr" | "rtl">("ltr");
 	const dragRef = useRef<PointerDrag | null>(null);
 	const [activeIndex, setActiveIndex] = useState(positionIndexRef.current);
 	const [isDragging, setIsDragging] = useState(false);
@@ -72,6 +179,7 @@ export function Carousel({
 	const motionDisabled = useMotionDisableOverride();
 	const shouldAnimate = motionAllowed && !motionDisabled;
 	const trackX = useMotionValue(0);
+	const wideLayoutActive = useWideLayoutActive(wideLayout);
 
 	useMotionValueEvent(trackX, "change", (value) => {
 		let closestIndex = 0;
@@ -98,14 +206,24 @@ export function Carousel({
 		if (!viewport || !track) return undefined;
 
 		const measure = () => {
+			if (wideLayoutActive) {
+				trackX.jump(0);
+				return;
+			}
 			const slides = Array.from(
 				track.querySelectorAll<HTMLElement>("[data-carousel-slide]"),
 			);
 			const firstSlide = slides[0];
 			if (!firstSlide || viewport.offsetWidth === 0) return;
-			const firstOffset = firstSlide.offsetLeft;
-			const nextSnapPoints = slides.map(
-				(slide) => -(slide.offsetLeft - firstOffset),
+			const direction =
+				window.getComputedStyle(viewport).direction === "rtl" ? "rtl" : "ltr";
+			directionRef.current = direction;
+			const nextSnapPoints = slides.map((slide) =>
+				getInlineAlignedSnapPoint(
+					{ left: firstSlide.offsetLeft, width: firstSlide.offsetWidth },
+					{ left: slide.offsetLeft, width: slide.offsetWidth },
+					direction,
+				),
 			);
 			setSnapPoints(nextSnapPoints);
 			const nextIndex = clampIndex(positionIndexRef.current, slides.length);
@@ -118,7 +236,7 @@ export function Carousel({
 		resizeObserver.observe(viewport);
 		resizeObserver.observe(track);
 		return () => resizeObserver.disconnect();
-	}, [items.length, trackX]);
+	}, [items.length, trackX, wideLayoutActive]);
 
 	useEffect(
 		() => () => {
@@ -132,6 +250,7 @@ export function Carousel({
 
 	const scrollToIndex = useCallback(
 		(index: number) => {
+			if (wideLayoutActive) return;
 			const selectedIndex = clampIndex(index, items.length);
 			const slides = Array.from(
 				trackRef.current?.querySelectorAll<HTMLElement>(
@@ -142,7 +261,14 @@ export function Carousel({
 			const selectedSlide = slides[selectedIndex];
 			const target =
 				firstSlide && selectedSlide
-					? -(selectedSlide.offsetLeft - firstSlide.offsetLeft)
+					? getInlineAlignedSnapPoint(
+							{ left: firstSlide.offsetLeft, width: firstSlide.offsetWidth },
+							{
+								left: selectedSlide.offsetLeft,
+								width: selectedSlide.offsetWidth,
+							},
+							directionRef.current,
+						)
 					: snapPoints[selectedIndex];
 			if (target === undefined) return;
 			settleAnimationRef.current?.stop();
@@ -159,7 +285,14 @@ export function Carousel({
 			setActiveIndex(selectedIndex);
 			onIndexChange?.(selectedIndex);
 		},
-		[items.length, onIndexChange, shouldAnimate, snapPoints, trackX],
+		[
+			items.length,
+			onIndexChange,
+			shouldAnimate,
+			snapPoints,
+			trackX,
+			wideLayoutActive,
+		],
 	);
 
 	const settleDrag = useCallback(
@@ -219,6 +352,7 @@ export function Carousel({
 
 	const beginPointerDrag = useCallback(
 		(event: PointerEvent<HTMLElement>) => {
+			if (wideLayoutActive) return;
 			if (event.button !== 0) return;
 			settleAnimationRef.current?.stop();
 			if (suppressClickTimerRef.current !== null) {
@@ -236,7 +370,7 @@ export function Carousel({
 				velocityX: 0,
 			};
 		},
-		[trackX],
+		[trackX, wideLayoutActive],
 	);
 
 	const updatePointerDrag = useCallback(
@@ -258,14 +392,8 @@ export function Carousel({
 				pointer.velocityX * 0.55 + instantaneousVelocity * 0.45;
 			pointer.lastTime = event.timeStamp;
 			pointer.lastX = event.clientX;
-			const leftConstraint = snapPoints.at(-1) ?? 0;
 			const rawTarget = pointer.startTrackX + distance;
-			const elasticTarget =
-				rawTarget > 0
-					? rawTarget * 0.14
-					: rawTarget < leftConstraint
-						? leftConstraint + (rawTarget - leftConstraint) * 0.14
-						: rawTarget;
+			const elasticTarget = constrainWithElasticity(rawTarget, snapPoints);
 			trackX.jump(elasticTarget);
 		},
 		[snapPoints, trackX],
@@ -278,14 +406,17 @@ export function Carousel({
 			<section
 				ref={viewportRef}
 				aria-label={ariaLabel}
-				aria-roledescription="carousel"
+				aria-roledescription={wideLayoutActive ? undefined : "carousel"}
 				className={clsx(
+					focusRing.visibleDefault,
 					"overflow-hidden overscroll-x-contain pb-2.5 touch-pan-y",
 					gutter === "section" &&
 						"-ml-[var(--spacing-section-x)] w-[calc(100%+2*var(--spacing-section-x))]",
+					wideLayout && wideViewportClasses[wideLayout.from],
 				)}
 				data-carousel-dragging={isDragging ? "true" : undefined}
 				data-carousel-gutter={gutter}
+				data-carousel-presentation={wideLayoutActive ? "grid" : "carousel"}
 				onClickCapture={(event) => {
 					if (!suppressClickRef.current) return;
 					event.preventDefault();
@@ -296,10 +427,25 @@ export function Carousel({
 				onPointerDown={beginPointerDrag}
 				onPointerMove={updatePointerDrag}
 				onPointerUp={finishDrag}
+				onKeyDown={(event) => {
+					if (wideLayoutActive) return;
+					const nextKey =
+						directionRef.current === "rtl" ? "ArrowLeft" : "ArrowRight";
+					const previousKey =
+						directionRef.current === "rtl" ? "ArrowRight" : "ArrowLeft";
+					if (event.key !== nextKey && event.key !== previousKey) return;
+					event.preventDefault();
+					const delta = event.key === nextKey ? 1 : -1;
+					scrollToIndex(positionIndexRef.current + delta);
+				}}
+				tabIndex={wideLayoutActive ? undefined : 0}
 			>
 				<motion.div
 					ref={trackRef}
-					className="w-max will-change-transform"
+					className={clsx(
+						"w-max will-change-transform",
+						wideLayout && wideTrackClasses[wideLayout.from],
+					)}
 					data-carousel-track=""
 					style={{ x: trackX }}
 				>
@@ -308,13 +454,19 @@ export function Carousel({
 							"flex cursor-grab items-start gap-4 sm:gap-5",
 							isDragging && "cursor-grabbing select-none",
 							gutter === "section" && "px-[var(--spacing-section-x)]",
+							wideLayout && wideSequenceClasses[wideLayout.from],
+							wideLayout &&
+								wideColumnClasses[wideLayout.from][wideLayout.columns],
 						)}
 					>
 						{items.map((item, index) => (
 							<fieldset
 								aria-label={`${index + 1} of ${items.length}: ${item.label}`}
-								aria-roledescription="slide"
-								className="m-0 min-w-0 flex-none basis-[min(70vw,27rem)] border-0 p-0 sm:basis-[min(53.2vw,27rem)]"
+								aria-roledescription={wideLayoutActive ? undefined : "slide"}
+								className={clsx(
+									"m-0 min-w-0 flex-none basis-[min(70vw,27rem)] border-0 p-0 sm:basis-[min(53.2vw,27rem)]",
+									wideLayout && wideSlideClasses[wideLayout.from],
+								)}
 								data-carousel-slide=""
 								key={item.id}
 							>
@@ -327,7 +479,10 @@ export function Carousel({
 			{items.length > 1 ? (
 				<nav
 					aria-label={paginationLabel}
-					className="mt-6 flex items-center gap-2"
+					className={clsx(
+						"mt-6 flex items-center gap-2",
+						wideLayout && widePaginationClasses[wideLayout.from],
+					)}
 					data-carousel-pagination=""
 				>
 					{items.map((item, index) => (

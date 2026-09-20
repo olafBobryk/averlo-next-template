@@ -16,6 +16,7 @@ export {
 	Carousel,
 	type CarouselItem,
 	type CarouselProps,
+	type CarouselWideLayout,
 } from "./Carousel";
 export {
 	Chip,
