@@ -16,6 +16,7 @@ import {
 	resolveMotionTransition,
 } from "@/components/ui/foundations/motionTiming";
 import { GlobalMotionScheduler } from "@/components/ui/motion/source/scheduler/GlobalMotionScheduler";
+import { type MotionDriver, MotionDriverProvider } from "./motionDriverContext";
 
 type MotionContextValue = {
 	expressive: number;
@@ -24,9 +25,10 @@ type MotionContextValue = {
 type MotionProviderProps = {
 	children: ReactNode;
 	expressive?: number;
+	driver?: MotionDriver;
 };
 
-type MotionScopeProps = MotionProviderProps & {
+type MotionScopeProps = Omit<MotionProviderProps, "driver"> & {
 	as?: ElementType;
 	className?: string;
 };
@@ -40,6 +42,7 @@ function resolveExpressive(parent: number, expressive = 0) {
 export function MotionProvider({
 	children,
 	expressive = 0,
+	driver,
 }: MotionProviderProps) {
 	const parent = useContext(MotionContext);
 	const resolvedExpressive = resolveExpressive(parent.expressive, expressive);
@@ -68,7 +71,9 @@ export function MotionProvider({
 
 	return (
 		<MotionContext.Provider value={value}>
-			<GlobalMotionScheduler>{children}</GlobalMotionScheduler>
+			<MotionDriverProvider driver={driver}>
+				<GlobalMotionScheduler>{children}</GlobalMotionScheduler>
+			</MotionDriverProvider>
 		</MotionContext.Provider>
 	);
 }

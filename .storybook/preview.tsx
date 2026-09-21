@@ -60,7 +60,14 @@ const preview: Preview = {
 					key={appearance}
 					storageKey={null}
 				>
-					<MotionProvider>
+					<MotionProvider
+						driver={
+							context.parameters.motionDriver ?? context.globals.motionDriver
+						}
+						key={
+							context.parameters.motionDriver ?? context.globals.motionDriver
+						}
+					>
 						<IconProvider registry={phosphorIconRegistry}>
 							<div className="min-h-screen bg-background text-foreground antialiased">
 								{story}
@@ -72,6 +79,14 @@ const preview: Preview = {
 		},
 	],
 	globalTypes: {
+		motionDriver: {
+			name: "Motion driver",
+			toolbar: {
+				dynamicTitle: true,
+				icon: "play",
+				items: ["hybrid", "motion"],
+			},
+		},
 		appearance: {
 			description:
 				"Render stories through Averlo's application appearance system.",
@@ -88,6 +103,7 @@ const preview: Preview = {
 		},
 	},
 	initialGlobals: {
+		motionDriver: "hybrid",
 		appearance: DEFAULT_STORYBOOK_APPEARANCE,
 	},
 	parameters: {

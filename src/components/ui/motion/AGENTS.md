@@ -14,13 +14,17 @@ text-motion implementations.
 
 ## Structural Invariants
 
+- Application-level driver configuration and rollback are documented in
+  `docs/motion-drivers.md`. Hybrid is the default; Motion is a maintained runtime
+  fallback. Effects and product call sites must not select drivers.
 - The site-level `MotionProvider` owns the single global motion scheduler.
   Page-local or nested global schedulers are prohibited.
 - `ScrollController` owns Lenis as the optional page-scroll transport and keeps
   GSAP `ScrollTrigger` synchronized with it. Motion sources must not create a
   second scroll transport.
-- GSAP drives reveal, in-view, and scroll-linked source progress. Motion drives
-  direct interaction sources such as hover and boolean state. Effects remain
+- In hybrid mode, GSAP drives reveal, in-view, and scroll-linked source progress.
+  The Motion fallback retains its original sources and wheel transport. Motion
+  drives direct interaction sources such as hover and boolean state. Effects remain
   driver-agnostic and consume only the shared scalar progress contract.
 - `MotionSource.Sequence` enters its nearest scheduler once and owns relative
   descendant reveal-source batching.

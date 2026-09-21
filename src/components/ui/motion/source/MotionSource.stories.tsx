@@ -12,6 +12,121 @@ import type { MotionCompositionMetadata } from "../compositionMetadata";
 import * as MotionSource from "./index";
 import { catalogContract } from "./MotionSource.catalog";
 
+function DriverParityComposition() {
+	const [ready, setReady] = useState(false);
+	const [cycle, setCycle] = useState(0);
+	return (
+		<div className="mx-auto grid max-w-3xl gap-6 p-8">
+			<Button
+				onClick={() => {
+					setReady(true);
+					setCycle((value) => value + 1);
+				}}
+			>
+				{ready ? "Replay identical reveal" : "Start identical reveal"}
+			</Button>
+			<MotionSource.Sequence key={cycle} stagger={0.18}>
+				{[
+					"First shared reveal",
+					"Second shared reveal",
+					"Third shared reveal",
+				].map((label) => (
+					<MotionSource.Root
+						key={label}
+						strategy={{ type: "reveal", ready, duration: 1.2 }}
+					>
+						<MotionEffect.Entrance distance={24}>
+							<Panel padding="md">{label}</Panel>
+						</MotionEffect.Entrance>
+					</MotionSource.Root>
+				))}
+			</MotionSource.Sequence>
+			<MotionSource.Root strategy={{ type: "hover" }} asChild>
+				<button
+					type="button"
+					className={`border border-subtle p-4 ${focusRing.visibleDefault}`}
+				>
+					<MotionEffect.UnderlineText>
+						Hover or focus remains Motion
+					</MotionEffect.UnderlineText>
+				</button>
+			</MotionSource.Root>
+		</div>
+	);
+}
+
+const verifyDriverComposition: NonNullable<Story["play"]> = async ({
+	canvas,
+	canvasElement,
+	parameters,
+}) => {
+	const sources = [
+		...canvasElement.querySelectorAll('[data-motion-source-strategy="reveal"]'),
+	];
+	await waitFor(() =>
+		expect(sources[0]).toHaveAttribute("data-motion-source-mode", "animated"),
+	);
+	for (const source of sources)
+		expect(source).toHaveAttribute(
+			"data-motion-source-driver",
+			parameters.motionDriver === "motion" ? "motion" : "gsap",
+		);
+	expect(
+		canvasElement.querySelector('[data-motion-source-strategy="hover"]'),
+	).toHaveAttribute("data-motion-source-driver", "motion");
+	let effects = sources.map(
+		(source) =>
+			source.querySelector('[data-motion-effect="entrance"]') as HTMLElement,
+	);
+	await userEvent.click(
+		canvas.getByRole("button", { name: "Start identical reveal" }),
+	);
+	effects = [
+		...canvasElement.querySelectorAll(
+			'[data-motion-source-strategy="reveal"] [data-motion-effect="entrance"]',
+		),
+	] as HTMLElement[];
+	const samples: number[][] = [];
+	await new Promise<void>((resolve) => {
+		const start = performance.now();
+		const sample = () => {
+			samples.push(
+				effects.map((effect) => Number(getComputedStyle(effect).opacity)),
+			);
+			if (performance.now() - start < 2100) requestAnimationFrame(sample);
+			else resolve();
+		};
+		requestAnimationFrame(sample);
+	});
+	expect(samples.some((values) => values[0] > 0.05 && values[0] < 0.95)).toBe(
+		true,
+	);
+	const starts = effects.map((_, index) =>
+		samples.findIndex((values) => values[index] > 0.05),
+	);
+	expect(starts[0]).toBeGreaterThanOrEqual(0);
+	expect(starts[1]).toBeGreaterThan(starts[0]);
+	expect(starts[2]).toBeGreaterThan(starts[1]);
+	await waitFor(() => {
+		for (const effect of effects)
+			expect(Number(getComputedStyle(effect).opacity)).toBeGreaterThan(0.99);
+	});
+};
+
+export const HybridComposition: Story = {
+	args: { children: null, strategy: { type: "reveal" } },
+	parameters: { motionDriver: "hybrid" },
+	render: () => <DriverParityComposition />,
+	play: verifyDriverComposition,
+};
+
+export const MotionComposition: Story = {
+	args: { children: null, strategy: { type: "reveal" } },
+	parameters: { motionDriver: "motion" },
+	render: () => <DriverParityComposition />,
+	play: verifyDriverComposition,
+};
+
 function StrategyTeachingSurface() {
 	const [active, setActive] = useState(false);
 	return (
@@ -609,3 +724,8 @@ function allLinesHidden(root: Element | null) {
 		lines.every((line) => line.getAttribute("x1") === line.getAttribute("x2"))
 	);
 }
+
+export const MotionViewportReentry: Story = {
+	...RevealViewportReentry,
+	parameters: { ...RevealViewportReentry.parameters, motionDriver: "motion" },
+};

@@ -136,6 +136,8 @@ export const assemblyCoreDependencies = new Set([
 	"micromark-extension-mdx-jsx",
 	"micromark-extension-mdx-md",
 	"motion",
+	"gsap",
+	"lenis",
 	"next",
 	"next-sitemap",
 	"react",

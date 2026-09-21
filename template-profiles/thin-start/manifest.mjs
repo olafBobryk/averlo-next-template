@@ -92,6 +92,8 @@ export const thinStartProfile = {
 			"clsx",
 			"libphonenumber-js",
 			"motion",
+			"gsap",
+			"lenis",
 			"next",
 			"next-sitemap",
 			"react",

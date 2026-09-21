@@ -9,6 +9,7 @@ import {
 	useId,
 	useRef,
 } from "react";
+import { useMotionDriverReady } from "@/components/ui/foundations/motionDriverContext";
 import { useAppReady } from "@/hooks/useAppReady";
 import { MotionSchedulerContext } from "./context";
 
@@ -32,6 +33,7 @@ export function useMotionParticipant({
 	viewportAmount,
 }: UseMotionParticipantOptions) {
 	const id = useId();
+	const driverReady = useMotionDriverReady();
 	const scheduler = useContext(MotionSchedulerContext);
 	const appReady = useAppReady();
 	const inView = useInView(elementRef, {
@@ -89,9 +91,9 @@ export function useMotionParticipant({
 		: true;
 
 	useEffect(() => {
-		if (!scheduler || !participantReady) return;
+		if (!scheduler || !participantReady || !driverReady) return;
 		scheduler.markReady(id);
-	}, [id, participantReady, scheduler]);
+	}, [driverReady, id, participantReady, scheduler]);
 
 	useEffect(() => {
 		if (!scheduler || scheduler.disabled || scheduler.kind !== "global" || once)

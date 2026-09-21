@@ -44,6 +44,7 @@ function CatalogPreview3() {
 		<ScrollBorders
 			axis="horizontal"
 			className="w-72 overflow-x-auto"
+			tabIndex={0}
 			showBackToTop={false}
 		>
 			<div className="flex w-max gap-3 p-3">

@@ -159,7 +159,9 @@ export function MotionSourceSequence({
 
 	const play = useCallback(
 		async (delay: number) => {
+			const cycle = playbackCycleRef.current;
 			await waitForMotionDelay(delay);
+			if (cycle !== playbackCycleRef.current) return;
 			return new Promise<void>((resolve) => {
 				completionResolverRef.current = resolve;
 				start();
@@ -218,6 +220,7 @@ export function MotionSourceSequence({
 
 	useEffect(
 		() => () => {
+			playbackCycleRef.current += 1;
 			if (flushFrameRef.current !== null)
 				cancelAnimationFrame(flushFrameRef.current);
 			if (completionFrameRef.current !== null)
