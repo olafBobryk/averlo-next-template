@@ -33,7 +33,9 @@ the root reports `data-motion-driver` and `data-scroll-transport`.
 Lenis uses the GSAP ticker and updates ScrollTrigger. Unmounting or changing
 drivers removes the ticker/listener/lock observer and destroys the transport.
 Loading/modal inline locks stop it; releasing the lock restarts it. Native
-nested scrollers and map interactions are excluded. Reduced motion, coarse
+nested scrollers are excluded. Cooperative maps keep ordinary page wheel input
+on the selected transport; consumed gestures and Ctrl/Cmd zoom are excluded.
+Reduced motion, coarse
 pointers and disabled smooth scrolling choose native transport. Route navigation,
 hash anchors and browser-history restoration remain application-level concerns.
 Bespoke low-level Motion choreography is deliberately unchanged.

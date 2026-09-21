@@ -76,3 +76,18 @@ Pearl's broad suite remains red (296 passed / 18 failed); see its integration
 review for confirmed Motion-reproducible failures and unresolved baseline issues.
 Both production builds and the driver-specific tests pass. These local commits
 remain unpushed pending visual acceptance.
+
+## Map gesture correction (2026-09-21)
+
+The initial blanket map exclusion was incorrect for cooperative maps: it created
+a native-scroll island inside the smoothed page. Both transports now retain
+ordinary map wheel input and skip consumed gestures and Ctrl/Cmd zoom. Explicit
+native/nested-scroll exclusions remain supported.
+
+Real browser wheel input over Pearl's map produced intermediate page-scroll
+frames with both hybrid and Motion. Cmd-wheel changed map marker positions while
+page scroll stayed fixed. Shared gesture unit tests and both typechecks pass.
+
+The generated-project file list includes the gesture helper. Motion ownership
+documentation is explicitly project-owned; this historical review is template-only.
+All seven profile/content assembly combinations pass after that classification.

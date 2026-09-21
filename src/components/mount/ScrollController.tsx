@@ -13,6 +13,7 @@ import { useSettingsContext } from "@/components/ui/foundations/settingsContext"
 import { gsap, ScrollTrigger } from "@/components/ui/motion/runtime/gsap";
 import { SCROLL_CONFIG } from "@/config/scrollConfig";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
+import { shouldHandlePageScroll } from "./scrollGesture";
 
 function easeOutQuart(progress: number) {
 	return 1 - (1 - progress) ** 5;
@@ -171,12 +172,8 @@ function MotionScrollController() {
 			}
 		};
 		const handleWheel = (event: WheelEvent) => {
-			if (event.defaultPrevented || event.ctrlKey || isScrollLocked()) return;
-			if (
-				(event.target as Element | null)?.closest(
-					".mapboxgl-map, .maplibregl-map, [data-lenis-prevent]",
-				)
-			)
+			if (!shouldHandlePageScroll(event) || isScrollLocked()) return;
+			if ((event.target as Element | null)?.closest("[data-lenis-prevent]"))
 				return;
 			if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
 			const scrollableParent = getScrollableParent(
@@ -345,8 +342,9 @@ function HybridScrollController() {
 			easing: (progress) => Math.min(1, 1.001 - 2 ** (-10 * progress)),
 			smoothWheel: true,
 			allowNestedScroll: true,
-			prevent: (node) =>
-				node.matches("[data-lenis-prevent], .mapboxgl-map, .maplibregl-map"),
+			// Cooperative maps pass ordinary wheel input through to the page.
+			// Only consumed gestures / Ctrl+Cmd zoom bypass smoothing.
+			virtualScroll: ({ event }) => shouldHandlePageScroll(event),
 			touchMultiplier: SCROLL_CONFIG.lenisTouchMultiplier,
 		});
 		const updateScrollTriggers = () => ScrollTrigger.update();

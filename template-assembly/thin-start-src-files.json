@@ -49,6 +49,7 @@
 	"src/components/mount/LoadingScreenMount.tsx",
 	"src/components/mount/ModalClientMount.tsx",
 	"src/components/mount/ScrollController.tsx",
+	"src/components/mount/scrollGesture.ts",
 	"src/components/mount/ToastClientMount.tsx",
 	"src/components/ui/AGENTS.md",
 	"src/components/ui/foundations/AGENTS.md",

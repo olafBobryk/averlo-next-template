@@ -14,6 +14,7 @@ export const assemblyGeneratedPaths = new Set([
 ]);
 
 export const assemblyTemplateOnlyPaths = new Set([
+	"docs/reviews/hybrid-driver-integration.md",
 	"docs/benchmarks/history/template-intelligence-runs.jsonl",
 	"docs/benchmarks/README.md",
 	"docs/benchmarks/design-system-agent-benchmark.md",
@@ -173,6 +174,7 @@ export const assemblyCoreDevDependencies = new Set([
 ]);
 
 export const assemblyProjectDocs = new Set([
+	"docs/motion-drivers.md",
 	"docs/operations/payload-vercel-neon-blob.md",
 ]);
 
