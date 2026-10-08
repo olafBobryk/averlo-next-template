@@ -45,7 +45,6 @@ function CatalogPreview3() {
 			axis="horizontal"
 			tabIndex={0}
 			className="w-72 overflow-x-auto"
-			tabIndex={0}
 			showBackToTop={false}
 		>
 			<div className="flex w-max gap-3 p-3">

@@ -884,7 +884,7 @@ for (const contract of [
 	/data-dashboard-sidebar-body/u,
 	/data-dashboard-sidebar-footer/u,
 	/\{brand\}/u,
-	/sm:pl-\[56px\]/u,
+	/sm:pl-\[64px\]/u,
 	/lg:pl-\[240px\]/u,
 	/lg:pl-\[64px\]/u,
 	/placement="left"/u,
