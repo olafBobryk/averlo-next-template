@@ -91,12 +91,30 @@ jobs:
         env:
           RELEASE_TARBALL: ${{ steps.publication.outputs.tarball }}
         run: npm publish "$RELEASE_TARBALL" --access public --ignore-scripts
+      - name: Wait for npm registry propagation
+        env:
+          RELEASE_VERSION: ${{ steps.publication.outputs.version }}
+        run: |
+          node --input-type=module <<'NODE'
+          const version = process.env.RELEASE_VERSION;
+          for (let attempt = 0; attempt < 40; attempt++) {
+            const response = await fetch(`https://registry.npmjs.org/create-averlo/${version}?check=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache' } });
+            const latestResponse = await fetch(`https://registry.npmjs.org/create-averlo/latest?check=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache' } });
+            if (response.ok && latestResponse.ok && (await latestResponse.json()).version === version) {
+              console.log(`create-averlo@${version} is available as npm latest.`);
+              process.exit(0);
+            }
+            console.log(`Waiting for npm to expose ${version} (${attempt + 1}/40).`);
+            await new Promise(resolve => setTimeout(resolve, 15000));
+          }
+          throw new Error(`npm did not expose create-averlo@${version} within 10 minutes.`);
+          NODE
       - name: Verify public generation from the published package
         env:
           RELEASE_VERSION: ${{ steps.publication.outputs.version }}
           RELEASE_COMMIT: ${{ steps.publication.outputs.commit }}
         run: |
-          npm exec --yes --package="create-averlo@$RELEASE_VERSION" -- create-averlo "$RUNNER_TEMP/public-generator-smoke" --profile thin-start --content static --no-install | tee "$RUNNER_TEMP/public-generator-smoke.log"
+          npm exec --yes --prefer-online --package="create-averlo@$RELEASE_VERSION" -- create-averlo "$RUNNER_TEMP/public-generator-smoke" --profile thin-start --content static --no-install | tee "$RUNNER_TEMP/public-generator-smoke.log"
           grep -F -- "- template commit: $RELEASE_COMMIT" "$RUNNER_TEMP/public-generator-smoke.log"
       - name: Record the published release
         env:
