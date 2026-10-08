@@ -120,12 +120,11 @@ export function DashboardCommandTree({
 }) {
 	return (
 		<div className="grid gap-0.5" data-command-tree-level={depth}>
-			{nodes.map((node, index) => (
+			{nodes.map((node) => (
 				<DashboardCommandTreeItem
 					activeCommandId={activeCommandId}
 					depth={depth}
 					executeCommand={executeCommand}
-					isLast={index === nodes.length - 1}
 					key={node.command.id}
 					onActiveCommandChange={onActiveCommandChange}
 					treeNode={node}
@@ -139,44 +138,30 @@ function DashboardCommandTreeItem({
 	activeCommandId,
 	depth,
 	executeCommand,
-	isLast,
 	onActiveCommandChange,
 	treeNode,
 }: {
 	activeCommandId?: string;
 	depth: number;
 	executeCommand: (command: DashboardContextualCommand) => void;
-	isLast: boolean;
 	onActiveCommandChange: (commandId: string) => void;
 	treeNode: DashboardCommandTreeNode;
 }) {
 	const { command, directlyMatched } = treeNode;
 	const isActive = activeCommandId === command.id;
-	const isNested = depth > 0;
 	const rowContent = (
 		<>
 			<span
-				className={[
-					"relative z-10 mt-0.5 grid shrink-0 place-items-center rounded-lg border border-border/60 bg-muted/45 text-muted-foreground transition-colors motion-interactive",
-					isNested ? "size-7" : "size-8",
-					directlyMatched
-						? "group-hover:border-border group-hover:bg-muted group-hover:text-foreground group-focus-visible:text-foreground group-data-[active=true]:border-border group-data-[active=true]:bg-background/70 group-data-[active=true]:text-foreground"
-						: undefined,
-				]
-					.filter(Boolean)
-					.join(" ")}
-				data-command-icon-well=""
+				className="grid size-8 shrink-0 place-items-center text-muted-foreground"
+				data-command-icon-slot=""
 			>
-				<Icon
-					className={isNested ? "!size-3.5" : "!size-4"}
-					name={command.icon ?? "search"}
-				/>
+				<Icon className="!size-4" name={command.icon ?? "search"} />
 			</span>
 			<span className="grid min-w-0 gap-0.5 py-0.5">
 				<span className="block truncate font-medium text-foreground">
 					{command.label}
 				</span>
-				<span className="line-clamp-2 text-xs leading-4 text-muted-foreground">
+				<span className="line-clamp-2 whitespace-normal break-words text-xs leading-4 text-muted-foreground">
 					{command.description}
 				</span>
 			</span>
@@ -189,10 +174,9 @@ function DashboardCommandTreeItem({
 			className={getDropdownOptionClassName({
 				active: isActive,
 				selected: isActive,
-				className:
-					"group !min-h-12 !items-start !rounded-lg !px-2 !py-1.5 motion-interactive",
+				className: "group !h-auto !min-h-12 !items-center",
 			})}
-			contentClassName="gap-2.5"
+			contentClassName="w-full items-center gap-2.5"
 			data-active={isActive ? "true" : undefined}
 			data-command-result=""
 			id={getDashboardCommandOptionId(command.id)}
@@ -208,64 +192,22 @@ function DashboardCommandTreeItem({
 			{rowContent}
 		</Button>
 	) : (
-		<div className="flex min-h-12 items-start gap-2.5 rounded-lg bg-muted/35 px-2 py-1.5 text-left text-sm">
+		<div className="flex min-h-12 items-center gap-2.5 px-2.5 py-1.5 text-left text-sm">
 			{rowContent}
 		</div>
 	);
 	return (
 		<div
-			className={
-				isNested
-					? "relative grid grid-cols-[1.25rem_minmax(0,1fr)] grid-rows-[auto_auto_0.125rem]"
-					: "relative grid grid-rows-[auto_auto_0.125rem]"
-			}
+			className="grid min-w-0 gap-0.5"
 			data-command-depth={depth}
 			data-command-tree-item=""
 			role="presentation"
 		>
-			{isNested && isLast ? (
-				<div
-					aria-hidden="true"
-					className="relative col-start-1 row-start-1"
-					data-command-tree-elbow=""
-				>
-					<span
-						className="absolute left-0 top-0 h-[calc(50%+1px)] w-4 rounded-bl-md border-b border-l border-foreground/40"
-						data-command-tree-elbow-incoming=""
-					/>
-				</div>
-			) : null}
-			{isNested && !isLast ? (
-				<span
-					aria-hidden="true"
-					className="absolute -bottom-0.5 left-0 top-0 w-px bg-foreground/40"
-					data-command-tree-continuation-rail=""
-				/>
-			) : null}
-			<div
-				className={
-					isNested
-						? "relative col-start-2 row-start-1 min-w-0"
-						: "relative row-start-1 min-w-0"
-				}
-				data-command-tree-row=""
-			>
+			<div className="min-w-0" data-command-tree-row="">
 				{row}
 			</div>
 			{treeNode.children.length > 0 ? (
-				<div
-					className={
-						isNested
-							? "relative col-start-2 row-start-2 ml-[1.8125rem] min-w-0 pt-1.5"
-							: "relative row-start-2 ml-[1.9375rem] min-w-0 pt-1.5"
-					}
-					data-command-tree-branch=""
-				>
-					<span
-						aria-hidden="true"
-						className="absolute left-0 top-1 h-0.5 w-px bg-foreground/40"
-						data-command-tree-branch-rail=""
-					/>
+				<div className="ml-4 min-w-0" data-command-tree-branch="">
 					<DashboardCommandTree
 						activeCommandId={activeCommandId}
 						depth={depth + 1}
@@ -275,10 +217,6 @@ function DashboardCommandTreeItem({
 					/>
 				</div>
 			) : null}
-			<div
-				aria-hidden="true"
-				className={isNested ? "col-start-2 row-start-3" : "row-start-3"}
-			/>
 		</div>
 	);
 }

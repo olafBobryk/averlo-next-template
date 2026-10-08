@@ -11,7 +11,7 @@ export type OpenModalOptions = {
 	ariaLabel?: string;
 	cardProps?: Omit<ModalCardProps, "children">;
 	id?: string;
-	placement?: "center" | "top";
+	placement?: "center" | "top" | "left" | "fullscreen";
 	portalTargetId?: string;
 };
 

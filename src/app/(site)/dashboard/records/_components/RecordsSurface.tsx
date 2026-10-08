@@ -12,7 +12,6 @@ export function RecordsSurface({
 }) {
 	return (
 		<DashboardSection
-			description={`Organization-scoped reference entities for ${collectionProps.organizationName}.`}
 			title="Records"
 		>
 			<DashboardEntityCommands

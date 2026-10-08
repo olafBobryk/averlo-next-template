@@ -1,0 +1,65 @@
+[
+	{
+		"name": "Phosphor",
+		"variant": "Regular \u00b7 House",
+		"source": "https://github.com/phosphor-icons/core/blob/HEAD/assets/regular/house.svg",
+		"license": "MIT",
+		"svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z\"/></svg>"
+	},
+	{
+		"name": "Lucide",
+		"variant": "Outline \u00b7 House",
+		"source": "https://github.com/lucide-icons/lucide/blob/HEAD/icons/house.svg",
+		"license": "ISC",
+		"svg": "<svg\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" />\n  <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />\n</svg>\n"
+	},
+	{
+		"name": "Hugeicons",
+		"variant": "Stroke Rounded \u00b7 Home 01",
+		"source": "https://github.com/hugeicons/hugeicons/blob/HEAD/icons/home-01.svg",
+		"license": "MIT",
+		"svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M3 11.9896V14.5C3 17.7998 3 19.4497 4.02513 20.4749C5.05025 21.5 6.70017 21.5 10 21.5H14C17.2998 21.5 18.9497 21.5 19.9749 20.4749C21 19.4497 21 17.7998 21 14.5V11.9896C21 10.3083 21 9.46773 20.6441 8.74005C20.2882 8.01237 19.6247 7.49628 18.2976 6.46411L16.2976 4.90855C14.2331 3.30285 13.2009 2.5 12 2.5C10.7991 2.5 9.76689 3.30285 7.70242 4.90855L5.70241 6.46411C4.37533 7.49628 3.71179 8.01237 3.3559 8.74005C3 9.46773 3 10.3083 3 11.9896Z\" stroke=\"#141B34\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>\n"
+	},
+	{
+		"name": "Heroicons",
+		"variant": "24px Outline \u00b7 Home",
+		"source": "https://github.com/tailwindlabs/heroicons/blob/HEAD/optimized/24/outline/home.svg",
+		"license": "MIT",
+		"svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" aria-hidden=\"true\" data-slot=\"icon\">\n  <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25\"/>\n</svg>\n"
+	},
+	{
+		"name": "Tabler",
+		"variant": "Outline \u00b7 Home",
+		"source": "https://github.com/tabler/tabler-icons/blob/HEAD/icons/outline/home.svg",
+		"license": "MIT",
+		"svg": "<!--\ntags: [home, house, homepage, main, start, dashboard, building, residence, real-estate]\ncategory: Buildings\nversion: \"1.0\"\nunicode: \"eac1\"\n-->\n<svg\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M5 12l-2 0l9 -9l9 9l-2 0\" />\n  <path d=\"M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7\" />\n  <path d=\"M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6\" />\n</svg>\n"
+	},
+	{
+		"name": "Feather",
+		"variant": "Outline \u00b7 Home",
+		"source": "https://github.com/feathericons/feather/blob/HEAD/icons/home.svg",
+		"license": "MIT",
+		"svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><polyline points=\"9 22 9 12 15 12 15 22\"/></svg>"
+	},
+	{
+		"name": "Remix",
+		"variant": "Home 4 Line",
+		"source": "https://github.com/Remix-Design/RemixIcon/blob/HEAD/icons/Buildings/home-4-line.svg",
+		"license": "Remix Icon License v1.0",
+		"svg": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M19 21H5C4.44772 21 4 20.5523 4 20V11L1 11L11.3273 1.6115C11.7087 1.26475 12.2913 1.26475 12.6727 1.6115L23 11L20 11V20C20 20.5523 19.5523 21 19 21ZM13 19H18V9.15745L12 3.7029L6 9.15745V19H11V13H13V19Z\"/></svg>"
+	},
+	{
+		"name": "Bootstrap",
+		"variant": "House",
+		"source": "https://github.com/twbs/icons/blob/HEAD/icons/house.svg",
+		"license": "MIT",
+		"svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-house\" viewBox=\"0 0 16 16\">\n  <path d=\"M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z\"/>\n</svg>"
+	},
+	{
+		"name": "OpenAI",
+		"variant": "Apps SDK UI \u00b7 Home",
+		"source": "https://github.com/openai/apps-sdk-ui/blob/HEAD/src/components/Icon/svg/Home.tsx",
+		"license": "MIT",
+		"svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19.5 11.737c0-.728-.005-1.07-.038-1.298l-.044-.201a1.999 1.999 0 0 0-.238-.52l-.111-.155c-.12-.15-.276-.283-.681-.577l-.496-.354-3.7-2.612c-.933-.658-1.295-.898-1.585-1.002l-.12-.036a2 2 0 0 0-.853-.026l-.121.026c-.318.08-.64.287-1.704 1.038l-3.7 2.612c-.595.42-.871.621-1.039.78l-.138.151a2 2 0 0 0-.35.675c-.072.244-.082.528-.082 1.499v5.062l.003.727c.003.2.01.364.022.506.022.271.06.372.084.422l.083.133a1 1 0 0 0 .354.303l.049.022c.062.022.17.047.373.063.283.023.656.025 1.232.025h1.8v-3.25a3.5 3.5 0 1 1 7 0V19h1.8c.576 0 .949-.002 1.232-.025.272-.022.373-.06.422-.085l.134-.082a.998.998 0 0 0 .303-.354l.021-.05a1.47 1.47 0 0 0 .064-.372c.023-.284.024-.656.024-1.233v-5.062Zm2 5.062c0 .544.001 1.012-.03 1.396a3.22 3.22 0 0 1-.23 1.024l-.067.143a3 3 0 0 1-1.104 1.195l-.207.116c-.378.192-.771.264-1.167.296-.383.032-.852.03-1.395.03h-2.8a1 1 0 0 1-1-1v-4.25a1.5 1.5 0 0 0-3 0V20a1 1 0 0 1-1 1H6.7c-.543 0-1.012.002-1.395-.03a3.224 3.224 0 0 1-1.025-.23l-.142-.067a3 3 0 0 1-1.196-1.104l-.115-.206c-.192-.378-.264-.772-.297-1.167a9.947 9.947 0 0 1-.026-.638L2.5 16.8v-5.062c0-.85-.01-1.478.163-2.065.145-.49.383-.949.7-1.35l.149-.174c.363-.396.835-.72 1.443-1.15l3.7-2.612c.929-.655 1.604-1.152 2.372-1.344l.24-.052a4 4 0 0 1 1.707.052l.284.087c.656.233 1.275.684 2.087 1.257L19.045 7l.488.345c.457.33.82.618 1.104.978l.115.153a4 4 0 0 1 .585 1.197l.057.223c.114.525.106 1.098.106 1.842V16.8Z\" /></svg>"
+	}
+]

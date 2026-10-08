@@ -24,7 +24,7 @@ import {
 	TextInput,
 } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { surfaceHref } from "@/lib/routes";
 import { SupportStatusChip } from "../../_components/PlatformStatusChip";
@@ -148,14 +148,14 @@ export function PlatformInboxContent({
 				}
 				getRowKey={(request) => request.id}
 				header={
-					<Card.Header className="min-w-0">
-						<Card.Title className="inline-flex min-w-0 flex-wrap items-center gap-2">
+					<ContentSection.Header className="min-w-0">
+						<ContentSection.Title className="inline-flex min-w-0 flex-wrap items-center gap-2">
 							Support requests
-						</Card.Title>
-						<Card.Description className="min-w-0 break-words">
+						</ContentSection.Title>
+						<ContentSection.Description className="min-w-0 break-words">
 							Showing {visibleRequests.length} of {requests.length} support
 							requests.
-						</Card.Description>
+						</ContentSection.Description>
 						<div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-end">
 							<TextInput
 								label="Search Inbox"
@@ -170,7 +170,7 @@ export function PlatformInboxContent({
 								value={status}
 							/>
 						</div>
-					</Card.Header>
+					</ContentSection.Header>
 				}
 				id="platform-inbox"
 				rows={visibleRequests}

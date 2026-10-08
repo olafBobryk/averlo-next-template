@@ -25,7 +25,7 @@ export function DashboardSidebarItem({
 	className?: string;
 	collapsed?: boolean;
 	href: string;
-	icon?: IconName;
+	icon?: IconName | null;
 	label: string;
 	mobileExpanded?: boolean;
 	onNavigate: () => void;
@@ -33,13 +33,11 @@ export function DashboardSidebarItem({
 	return (
 		<div
 			className={clsx(
-				"group/sidebar-row relative flex w-full min-w-0 items-center gap-0.5 rounded-md transition-all motion-interactive",
+				"group/sidebar-row relative flex w-full min-w-0 items-center gap-0.5 rounded-md transition-colors motion-interactive",
 				active
-					? "bg-primary/10 text-primary"
+					? "bg-primary/10 text-primary-text hover:bg-primary/15"
 					: [
-							"text-muted-foreground hover:bg-sidebar-accent/80 hover:text-sidebar-accent-foreground",
-							mobileExpanded && "max-lg:hover:translate-x-0.5",
-							!collapsed && "lg:hover:translate-x-0.5",
+							"text-muted-foreground hover:bg-[var(--button-ghost-hover)] hover:text-sidebar-accent-foreground",
 						],
 				className,
 			)}
@@ -62,7 +60,7 @@ export function DashboardSidebarItem({
 				onClick={onNavigate}
 				title={label}
 			>
-				<Icon className="shrink-0" name={icon} size="md" />
+				{icon ? <Icon className="shrink-0" name={icon} size="md" /> : null}
 				<span
 					className={clsx(
 						"min-w-0 flex-1 truncate",
@@ -105,7 +103,7 @@ export function DashboardSidebarBranch({
 	collapsed?: boolean;
 	defaultOpen: boolean;
 	href?: string;
-	icon?: IconName;
+	icon?: IconName | null;
 	label: string;
 	mobileExpanded?: boolean;
 	onNavigate: () => void;

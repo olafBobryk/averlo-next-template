@@ -13,7 +13,7 @@ function ToolApprovalActionsRoot({
 	onDeny?: () => void;
 }) {
 	return (
-		<Card.Footer className="justify-end gap-2">
+		<Card.Footer className="justify-end gap-2 !px-0 !pb-0">
 			<Button disabled={disabled} onClick={onDeny} size="sm" variant="ghost">
 				Decline
 			</Button>
@@ -36,7 +36,7 @@ function ToolApprovalActionsSkeleton({
 	destructive?: boolean;
 }) {
 	return (
-		<Card.Footer className="justify-end gap-2">
+		<Card.Footer className="justify-end gap-2 !px-0 !pb-0">
 			<Button.Skeleton size="sm" variant="ghost">
 				Decline
 			</Button.Skeleton>

@@ -59,7 +59,7 @@ function CatalogPreview3() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-misc-copy-field",
 	name: "CopyField",
-	role: "Canonical copy-to-clipboard action with visible value, status icon, and loading parity.",
+	role: "Canonical copy-to-clipboard action with visible value, status icon, and loading parity. Uses bare chrome by default so hover stays transparent; opt into secondary for a filled action.",
 	importStatement: 'import { CopyField } from "@/components/ui/misc";',
 	chooseWhen: [
 		"A token, URL, phone number, or identifier should be copied as one action.",

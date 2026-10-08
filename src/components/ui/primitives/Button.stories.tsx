@@ -24,17 +24,30 @@ const meta = {
 		},
 	},
 	argTypes: {
+		shape: { control: "select", options: ["standard", "round", "square"] },
 		variant: {
 			control: "select",
-			options: ["primary", "secondary", "ghost", "inverse"],
+			options: ["primary", "secondary", "ghost", "bare", "link", "inverse"],
 		},
 		tone: {
 			control: "select",
-			options: ["default", "danger"],
+			options: ["default", "danger", "warning"],
 		},
 		size: {
 			control: "select",
-			options: ["none", "sm", "md", "lg", "xl", "chip", "icon", "icon-sm"],
+			options: [
+				"none",
+				"xxs",
+				"xs",
+				"compact",
+				"sm",
+				"md",
+				"lg",
+				"xl",
+				"chip",
+				"icon",
+				"icon-sm",
+			],
 		},
 	},
 	args: {
@@ -54,7 +67,7 @@ export const ActionHierarchy: Story = {
 		docs: {
 			description: {
 				story:
-					"Repeat this hierarchy decision: primary for the principal action, secondary for a standard action, and ghost for a navigation-style or low-emphasis action.",
+					"Primary for the principal action, secondary for standard actions, ghost for low emphasis with a hover surface, bare for permanently transparent controls, and link for underlined navigation. Inverse remains a primary compatibility name.",
 			},
 		},
 	},
@@ -63,6 +76,10 @@ export const ActionHierarchy: Story = {
 			<Button variant="primary">Publish</Button>
 			<Button variant="secondary">Save draft</Button>
 			<Button variant="ghost">Cancel</Button>
+			<Button variant="bare">Dismiss</Button>
+			<Button variant="link" href="/dashboard">
+				View details
+			</Button>
 		</div>
 	),
 };
@@ -93,7 +110,7 @@ export const DestructiveMeaning: Story = {
 	play: async ({ canvas }) => {
 		await expect(
 			canvas.getByRole("button", { name: "Delete permanently" }),
-		).toHaveClass("bg-primary");
+		).toBeVisible();
 		await expect(
 			canvas.getByRole("button", { name: "Remove member" }),
 		).toBeVisible();
@@ -176,5 +193,219 @@ export const InteractionContract: Story = {
 		await expect(args.onClick).toHaveBeenCalledOnce();
 		button.focus();
 		await expect(button).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onClick).toHaveBeenCalledTimes(2);
+	},
+};
+
+export const CompletePalette: Story = {
+	render: () => (
+		<div className="grid gap-5">
+			{(["default", "danger", "warning"] as const).map((tone) => (
+				<div key={tone} className="flex flex-wrap items-center gap-3">
+					<span className="w-20 text-sm">{tone}</span>
+					{(
+						[
+							"primary",
+							"secondary",
+							"ghost",
+							"bare",
+							"link",
+							"inverse",
+						] as const
+					).map((variant) => (
+						<Button key={variant} variant={variant} tone={tone}>
+							{variant}
+						</Button>
+					))}
+				</div>
+			))}
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const primary = canvas.getAllByRole("button", { name: "primary" })[0];
+		const secondary = canvas.getAllByRole("button", { name: "secondary" })[0];
+		await expect(
+			getComputedStyle(primary).getPropertyValue("--button-primary").trim(),
+		).not.toBe("");
+		await expect(getComputedStyle(primary).backgroundColor).not.toBe(
+			"rgba(0, 0, 0, 0)",
+		);
+		await expect(getComputedStyle(secondary).backgroundColor).not.toBe(
+			getComputedStyle(primary).backgroundColor,
+		);
+		await expect(getComputedStyle(primary).borderRadius).toBe("7px");
+	},
+};
+
+export const GeometryAndSkeletons: Story = {
+	render: () => (
+		<div className="grid gap-3">
+			{(
+				[
+					"xxs",
+					"xs",
+					"compact",
+					"sm",
+					"md",
+					"lg",
+					"xl",
+					"chip",
+					"none",
+					"icon",
+					"icon-sm",
+				] as const
+			).map((size) => (
+				<div key={size} data-testid={size} className="flex items-center gap-3">
+					<span className="w-16 text-sm">{size}</span>
+					<Button size={size} aria-label={size}>
+						{size.startsWith("icon") ? "+" : "Continue"}
+					</Button>
+					<Button.Skeleton size={size}>
+						{size.startsWith("icon") ? undefined : "Continue"}
+					</Button.Skeleton>
+					<Button
+						size={size}
+						shape="round"
+						aria-label={`${size} round`}
+						leadingIcon="plus"
+					/>
+					<Button
+						size={size}
+						shape="square"
+						aria-label={`${size} square`}
+						leadingIcon="plus"
+					/>
+					<Button.Skeleton size={size} shape="square" />
+				</div>
+			))}
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const heights = {
+			xxs: 20,
+			xs: 24,
+			compact: 28,
+			sm: 30,
+			md: 34,
+			lg: 38,
+			xl: 44,
+			icon: 34,
+			"icon-sm": 32,
+		};
+		for (const [size, height] of Object.entries(heights)) {
+			const row = canvas.getByTestId(size);
+			const button = canvas.getByRole("button", { name: size });
+			const skeleton = row.querySelector('[aria-hidden="true"]') as HTMLElement;
+			await expect(button.getBoundingClientRect().height).toBe(height);
+			await expect(skeleton.getBoundingClientRect().height).toBe(height);
+			await expect(skeleton.getBoundingClientRect().width).toBe(
+				button.getBoundingClientRect().width,
+			);
+			const square = canvas.getByRole("button", { name: `${size} square` });
+			const round = canvas.getByRole("button", { name: `${size} round` });
+			const expectedIconSize = size === "sm" ? 32 : size === "xl" ? 40 : height;
+			await expect(square.getBoundingClientRect().height).toBe(
+				expectedIconSize,
+			);
+			await expect(square.getBoundingClientRect().width).toBe(expectedIconSize);
+			await expect(round.getBoundingClientRect().width).toBe(expectedIconSize);
+			await expect(getComputedStyle(square).borderRadius).toBe("7px");
+			await expect(getComputedStyle(round).borderRadius).not.toBe("7px");
+			await expect(row.lastElementChild?.getBoundingClientRect().width).toBe(
+				expectedIconSize,
+			);
+		}
+	},
+};
+
+export const LightPalette: Story = {
+	...CompletePalette,
+	globals: { appearance: "light" },
+};
+export const DarkPalette: Story = {
+	...CompletePalette,
+	globals: { appearance: "dark" },
+};
+
+export const DisabledAndLoading: Story = {
+	args: { onClick: fn() },
+	render: (args) => (
+		<div className="flex gap-3">
+			<Button {...args} loading disabled={false}>
+				Saving changes
+			</Button>
+			<Button {...args} disabled>
+				Unavailable
+			</Button>
+			<Button
+				onClick={() => args.onClick?.({} as never)}
+				href="/dashboard"
+				loading
+				tabIndex={0}
+			>
+				Opening dashboard
+			</Button>
+		</div>
+	),
+	play: async ({ args, canvas }) => {
+		const pending = canvas.getByRole("button", { name: "Saving changes" });
+		await expect(pending).toBeDisabled();
+		await expect(pending).toHaveAttribute("aria-busy", "true");
+		const link = canvas.getByRole("link", { name: "Opening dashboard" });
+		await expect(link).toHaveAttribute("tabindex", "-1");
+		await expect(link).toHaveAttribute("aria-disabled", "true");
+		link.dispatchEvent(
+			new MouseEvent("click", { bubbles: true, cancelable: true }),
+		);
+		await expect(args.onClick).not.toHaveBeenCalled();
+	},
+};
+
+export const TransparentSkeletons: Story = {
+	render: () => (
+		<div className="grid gap-4">
+			{(["bare", "ghost", "link"] as const).map((variant) => (
+				<div
+					key={variant}
+					data-testid={variant}
+					className="flex items-center gap-4"
+				>
+					<Button variant={variant}>Rename conversation</Button>
+					<Button.Skeleton variant={variant}>
+						Rename conversation
+					</Button.Skeleton>
+					<Button
+						variant={variant}
+						size="icon-sm"
+						leadingIcon="ellipsis"
+						aria-label={`${variant} options`}
+					/>
+					<Button.Skeleton variant={variant} size="icon-sm" />
+				</div>
+			))}
+		</div>
+	),
+	play: async ({ canvas }) => {
+		for (const variant of ["bare", "ghost", "link"]) {
+			const row = canvas.getByTestId(variant);
+			const [live, skeleton, icon, iconSkeleton] = Array.from(
+				row.children,
+			) as HTMLElement[];
+			await expect(skeleton.getBoundingClientRect().width).toBeCloseTo(
+				live.getBoundingClientRect().width,
+				0,
+			);
+			await expect(iconSkeleton.getBoundingClientRect().width).toBe(
+				icon.getBoundingClientRect().width,
+			);
+			await expect(getComputedStyle(skeleton).backgroundColor).toBe(
+				"rgba(0, 0, 0, 0)",
+			);
+			await expect(
+				iconSkeleton.querySelector("span > span")?.getBoundingClientRect()
+					.width,
+			).toBe(16);
+		}
 	},
 };

@@ -1,6 +1,6 @@
 import type * as React from "react";
 import type { ButtonBaseProps } from "../Button";
-import type { DropdownOptionTone } from "../dropdownStyles";
+import type { DropdownDivider, DropdownOptionTone } from "../dropdownStyles";
 import type { ListboxOption } from "../Listbox";
 import type { FloatProps, SurfaceElevation } from "../surfaces";
 
@@ -80,11 +80,15 @@ export type DropdownMenuEvent =
 export type DropdownIcon = Exclude<React.ReactNode, string | number>;
 
 export type DropdownMenuOption = {
+	kind?: "action";
+	closeOnSelect?: boolean;
+	target?: React.HTMLAttributeAnchorTarget;
+	rel?: string;
 	active?: boolean;
 	className?: string;
 	disabled?: boolean;
-	dividerAfter?: boolean;
-	dividerBefore?: boolean;
+	dividerAfter?: DropdownDivider;
+	dividerBefore?: DropdownDivider;
 	href?: string;
 	id?: string;
 	label: React.ReactNode;
@@ -128,8 +132,22 @@ export type DropdownCompoundProps = Pick<
 	triggerContent?: React.ReactNode;
 };
 
+export type DropdownControlOption = {
+	kind: "control";
+	id: string;
+	ariaLabel: string;
+	content: React.ReactNode;
+	dividerBefore?: DropdownDivider;
+	dividerAfter?: DropdownDivider;
+};
+
+/** Control panels contain root-level controls and leaf actions, never submenus. */
+export type DropdownControlEntry =
+	| DropdownControlOption
+	| (Omit<DropdownMenuOption, "children"> & { children?: never });
 export type DropdownMenuProps = DropdownCompoundProps & {
-	options: DropdownMenuOption[];
+	density?: "standard" | "compact";
+	options: DropdownMenuOption[] | DropdownControlEntry[];
 };
 
 export type DropdownListboxProps<T> = DropdownCompoundProps & {

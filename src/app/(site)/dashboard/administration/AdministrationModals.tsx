@@ -10,6 +10,7 @@ import {
 	ModalTitle,
 } from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
+import { InlineError } from "@/components/ui/primitives/InlineError";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import {
 	createOrganizationInvitation,
@@ -37,6 +38,7 @@ export function InviteMemberModal({
 	const [email, setEmail] = React.useState("");
 	const [role, setRole] = React.useState<EditableRole>("member");
 	const [error, setError] = React.useState<string>();
+	const [submissionError, setSubmissionError] = React.useState<string>();
 	const [pending, setPending] = React.useState(false);
 	React.useEffect(() => {
 		onCloseDisabledChange(pending);
@@ -52,6 +54,7 @@ export function InviteMemberModal({
 		}
 		setPending(true);
 		setError(undefined);
+		setSubmissionError(undefined);
 		try {
 			await createOrganizationInvitation({ email: email.trim(), role });
 			showToast.success("Invitation added to the local outbox.");
@@ -59,7 +62,7 @@ export function InviteMemberModal({
 			onCloseDisabledChange(false);
 			onClose();
 		} catch (nextError) {
-			setError(
+			setSubmissionError(
 				nextError instanceof Error
 					? nextError.message
 					: "Unable to create invitation.",
@@ -126,6 +129,7 @@ export function InviteMemberModal({
 					}
 					value={role}
 				/>
+				<InlineError open={!!submissionError}>{submissionError}</InlineError>
 			</ModalForm>
 		</>
 	);

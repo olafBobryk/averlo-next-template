@@ -12,7 +12,7 @@ type ModalShellProps = {
 	isTopMost?: boolean;
 	layerIndex?: number;
 	onClose: () => void;
-	placement?: "center" | "top";
+	placement?: "center" | "top" | "left" | "fullscreen";
 	portalTargetId?: string;
 };
 
@@ -161,10 +161,13 @@ export function ModalShell({
 		<Portal target={portalTargetId}>
 			<div
 				className={clsx(
-					"fixed inset-0 z-50 flex justify-center overflow-hidden overscroll-contain px-4 sm:px-6",
-					placement === "top"
-						? "items-start py-[9vh]"
-						: "items-center py-4 sm:py-6",
+					"fixed inset-0 z-50 flex w-full justify-center overflow-hidden overscroll-contain",
+					placement !== "fullscreen" && "px-4 sm:px-6",
+					placement === "fullscreen"
+						? "items-stretch"
+						: placement === "top"
+							? "items-start py-[9vh]"
+							: "items-center py-4 sm:py-6",
 				)}
 				data-modal-shell=""
 				style={layerIndex ? { zIndex: layerIndex } : undefined}
@@ -178,7 +181,12 @@ export function ModalShell({
 				<div
 					aria-label={ariaLabel}
 					aria-modal="true"
-					className="relative flex max-h-[calc(100dvh-2rem)] w-full min-w-0 justify-center sm:max-h-[calc(100dvh-3rem)]"
+					className={clsx(
+						"relative flex w-full min-w-0 justify-center",
+						placement === "fullscreen"
+							? "h-dvh"
+							: "max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-3rem)]",
+					)}
 					ref={wrapperRef}
 					role="dialog"
 					tabIndex={-1}

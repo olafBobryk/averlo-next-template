@@ -1,3 +1,7 @@
+"use client";
+import { useState } from "react";
+import { Button } from "@/components/ui/primitives/Button";
+import { InlineError } from "@/components/ui/primitives/InlineError";
 import type {
 	AssistantResponseMessage,
 	AssistantToolPart,
@@ -18,46 +22,88 @@ export function AssistantMessage({
 	onToolDecision?: (part: AssistantToolPart, approved: boolean) => void;
 	streaming: boolean;
 }) {
+	const [copied, setCopied] = useState(false);
+	const tools = message.parts.filter(
+		(part): part is AssistantToolPart => part.type === "tool",
+	);
 	const hasVisibleParts = message.parts.some(
 		(part) => part.type !== "text" || part.text.length > 0,
 	);
-	if (!hasVisibleParts) return null;
-	const toolParts = message.parts.filter(
-		(part): part is AssistantToolPart => part.type === "tool",
-	);
-	let renderedToolCalls = false;
+	if (!hasVisibleParts && !message.failure) return null;
 
 	return (
 		<MessageFrame ariaLabel="Assistant">
-			<div className="max-w-2xl min-w-0">
-				{message.parts.map((part) => {
-					switch (part.type) {
-						case "text":
-							return (
-								<Response
-									key={part.id}
-									streaming={streaming}
-									text={part.text}
-								/>
-							);
-						case "file":
-							return <Attachment attachment={part.attachment} key={part.id} />;
-						case "tool":
-							if (renderedToolCalls) return null;
-							renderedToolCalls = true;
-							return (
-								<ToolCallGroup
-									disabled={decisionPending}
-									key={part.id}
-									onDecision={onToolDecision}
-									parts={toolParts}
-								/>
-							);
-					}
+			<div className="group/response w-full min-w-0">
+				{tools.length > 0 && (
+					<ToolCallGroup
+						parts={tools}
+						disabled={decisionPending}
+						onDecision={onToolDecision}
+					/>
+				)}
+				<div
+					className={tools.length > 0 ? "mt-2" : undefined}
+					data-slot="assistant-reply"
+				>
+					{message.parts.map((part) => {
+						switch (part.type) {
+							case "text":
+								return (
+									<Response
+										key={part.id}
+										streaming={streaming}
+										text={part.text}
+									/>
+								);
+							case "file":
+								return (
+									<Attachment attachment={part.attachment} key={part.id} />
+								);
+							case "tool":
+								return null;
+						}
 
-					part satisfies never;
-					return null;
-				})}
+						part satisfies never;
+						return null;
+					})}
+				</div>
+				<InlineError open={!!message.failure}>{message.failure}</InlineError>
+				{!streaming && (
+					<div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+						<Button
+							variant="bare"
+							size="none"
+							iconSize={12}
+							className="min-h-6 py-1"
+							shape="square"
+							aria-label={copied ? "Copied response" : "Copy response"}
+							leadingIcon={copied ? "check" : "copy"}
+							onClick={async () => {
+								try {
+									await navigator.clipboard.writeText(
+										message.parts
+											.flatMap((part) =>
+												part.type === "text" ? [part.text] : [],
+											)
+											.join("\n"),
+									);
+									setCopied(true);
+								} catch {
+									setCopied(false);
+								}
+							}}
+						/>
+						<time
+							className="opacity-0 motion-micro transition-opacity group-hover/response:opacity-100 group-focus-within/response:opacity-100"
+							dateTime={message.createdAt}
+						>
+							{new Date(message.createdAt).toLocaleTimeString([], {
+								hour: "2-digit",
+								minute: "2-digit",
+							})}
+						</time>
+					</div>
+				)}
 			</div>
 		</MessageFrame>
 	);

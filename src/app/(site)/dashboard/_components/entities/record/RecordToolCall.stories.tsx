@@ -134,8 +134,8 @@ export const CompletedAndLoading: Story = {
 		const frame = canvas.getAllByText("Get record")[0]?.closest("section");
 		if (!frame) throw new Error("Tool frame is missing.");
 		await expect(frame).toHaveAttribute("data-surface-role", "card");
-		await expect(frame).toHaveAttribute("data-elevation", "card");
-		await expect(frame).toHaveClass("shadow-sm");
+		await expect(frame).toHaveAttribute("data-elevation", "panel");
+		await expect(frame).toHaveClass("shadow-none");
 	},
 };
 

@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { ModalHost } from "@/components/ui/overlays/modal/ModalHost";
-import { useModal } from "@/components/ui/overlays/modal/useModal";
+import { AnimatePresence } from "motion/react";
+import { InputFrame } from "@/components/ui/primitives/InputFrame";
+import { Icon } from "@/components/ui/icons/Icon";
+import { DashboardCommandOverlay } from "./DashboardCommandOverlay";
 import type { DashboardContextualCommand } from "./DashboardCommandContracts";
 import { DashboardCommandPalette } from "./DashboardCommandPalette";
 import { catalogContract } from "./DashboardCommandPalette.catalog";
@@ -34,7 +36,7 @@ const commands: DashboardContextualCommand[] = [
 		href: "/dashboard/records?action=create",
 		icon: "database",
 		id: "action.dashboard.records.create",
-		keywords: ["new", "add"],
+		keywords: ["new", "add", "quick"],
 		label: "Create record",
 		parentId: "navigate.dashboard.records",
 	},
@@ -52,7 +54,7 @@ const commands: DashboardContextualCommand[] = [
 		href: "/dashboard/administration?action=invite",
 		icon: "users",
 		id: "action.dashboard.administration.invite",
-		keywords: ["member", "invite"],
+		keywords: ["member", "invite", "quick"],
 		label: "Invite member",
 		parentId: "navigate.dashboard.administration",
 	},
@@ -89,6 +91,14 @@ function CommandPaletteContent({
 	});
 
 	function handleInputKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+		if (event.key === "Enter") {
+			const command = filteredCommands.find(
+				(item) => item.id === effectiveActiveCommandId,
+			);
+			if (command) setExecutedCommand(command.label);
+			event.preventDefault();
+			return;
+		}
 		if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
 		event.preventDefault();
 		setActiveCommandId((currentId) =>
@@ -105,6 +115,7 @@ function CommandPaletteContent({
 	return (
 		<>
 			<DashboardCommandPalette
+				anchored
 				activeCommandId={effectiveActiveCommandId}
 				commandTree={commandTree}
 				filteredCommandCount={filteredCommands.length}
@@ -134,151 +145,88 @@ function CommandPaletteContent({
 function CommandPaletteHarness({
 	initialQuery = "",
 	textScale = 1,
+	compact = false,
+	initiallyOpen = true,
 }: {
 	initialQuery?: string;
 	textScale?: number;
+	compact?: boolean;
+	initiallyOpen?: boolean;
 }) {
-	const { closeModal, openModal } = useModal();
+	const anchor = React.useRef<HTMLDivElement>(null);
+	const [open, setOpen] = React.useState(false);
+	React.useEffect(() => setOpen(initiallyOpen), [initiallyOpen]);
 	React.useEffect(() => {
-		const id = openModal(
-			() => <CommandPaletteContent initialQuery={initialQuery} />,
-			{
-				ariaLabel: "Dashboard commands",
-				cardProps: {
-					className: "max-h-[min(620px,82vh)]",
-					maxWidth: "2xl",
-				},
-				placement: "top",
-			},
-		);
-		return () => closeModal(id);
-	}, [closeModal, initialQuery, openModal]);
+		const toggle = (event: KeyboardEvent) => {
+			if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+				event.preventDefault();
+				setOpen((current) => !current);
+			}
+		};
+		window.addEventListener("keydown", toggle);
+		return () => window.removeEventListener("keydown", toggle);
+	}, []);
+	const resolveAnchor = React.useCallback(() => anchor.current, []);
 	return (
-		<>
-			<div
-				id="modal-root"
-				style={{ "--text-scale": textScale } as React.CSSProperties}
-			/>
-			<ModalHost />
-		</>
+		<div style={{ "--text-scale": textScale } as React.CSSProperties}>
+			<div className="h-screen w-60 bg-panel p-3 pt-16">
+				<InputFrame ref={anchor} className={compact ? "!w-10" : "w-full"}>
+					<button
+						type="button"
+						aria-label="Open dashboard commands"
+						className="flex h-full w-full items-center gap-2 px-3 text-sm text-muted-foreground"
+						onClick={() => setOpen(true)}
+					>
+						<Icon className="!size-4 shrink-0" name="search" />
+						{compact ? null : "Search"}
+					</button>
+				</InputFrame>
+			</div>
+			<AnimatePresence
+				onExitComplete={() => anchor.current?.querySelector("button")?.focus()}
+			>
+				{open ? (
+					<DashboardCommandOverlay
+						resolveAnchor={resolveAnchor}
+						onClose={() => setOpen(false)}
+					>
+						<div style={{ "--text-scale": textScale } as React.CSSProperties}>
+							<CommandPaletteContent initialQuery={initialQuery} />
+						</div>
+					</DashboardCommandOverlay>
+				) : null}
+			</AnimatePresence>
+		</div>
 	);
 }
 
-async function expectHierarchyConnectorAlignment(dialog: HTMLElement) {
-	const nestedItems = Array.from(
-		dialog.querySelectorAll<HTMLElement>(
-			'[data-command-tree-item]:not([data-command-depth="0"])',
+async function expectHierarchyIndentation(dialog: HTMLElement) {
+	await expect(
+		dialog.querySelector(
+			"[data-command-icon-well], [data-command-tree-elbow], [data-command-tree-continuation-rail], [data-command-tree-branch-rail]",
 		),
+	).toBeNull();
+	const branches = Array.from(
+		dialog.querySelectorAll<HTMLElement>("[data-command-tree-branch]"),
 	);
-	await expect(nestedItems.length).toBeGreaterThan(0);
-	for (const item of nestedItems) {
-		const row = item.querySelector<HTMLElement>(
-			":scope > [data-command-tree-row]",
-		);
-		const iconWell = row?.querySelector<HTMLElement>(
-			"[data-command-icon-well]",
-		);
-		const terminalElbow = item.querySelector<HTMLElement>(
-			":scope > [data-command-tree-elbow] > [data-command-tree-elbow-incoming]",
-		);
-		const continuationRail = item.querySelector<HTMLElement>(
-			":scope > [data-command-tree-continuation-rail]",
-		);
-		const nextItem = item.nextElementSibling as HTMLElement | null;
-		await expect(row).not.toBeNull();
-		await expect(iconWell).not.toBeNull();
-		if (nextItem) {
-			await expect(continuationRail).not.toBeNull();
-			await expect(terminalElbow).toBeNull();
-			const itemRect = item.getBoundingClientRect();
-			const nextItemRect = nextItem.getBoundingClientRect();
-			const continuationRect = continuationRail?.getBoundingClientRect();
-			await expect(continuationRect?.width ?? 0).toBeGreaterThan(0.7);
-			await expect(continuationRect?.width ?? 0).toBeLessThan(1.5);
-			await expect(
-				Math.abs((continuationRect?.top ?? 0) - itemRect.top),
-			).toBeLessThan(1.5);
-			await expect(
-				Math.abs((continuationRect?.bottom ?? 0) - nextItemRect.top),
-			).toBeLessThan(1.5);
-			continue;
-		}
-
-		await expect(continuationRail).toBeNull();
-		await expect(terminalElbow).not.toBeNull();
-		const rowRect = row?.getBoundingClientRect();
-		const iconRect = iconWell?.getBoundingClientRect();
-		const elbowRect = terminalElbow?.getBoundingClientRect();
-		const iconCenter = iconRect ? iconRect.top + iconRect.height / 2 : 0;
-		await expect(iconRect?.width ?? 0).toBeGreaterThan(0);
-		await expect(elbowRect?.height ?? 0).toBeGreaterThan(0);
-		await expect(Math.abs((elbowRect?.bottom ?? 0) - iconCenter)).toBeLessThan(
-			1.5,
-		);
-		await expect(elbowRect?.width ?? 0).toBeGreaterThan(1.5);
+	await expect(branches.length).toBeGreaterThan(0);
+	for (const slot of dialog.querySelectorAll<HTMLElement>(
+		"[data-command-icon-slot]",
+	)) {
+		const icon = slot.querySelector("svg")!;
+		const a = slot.getBoundingClientRect();
+		const b = icon.getBoundingClientRect();
+		await expect(a.width).toBe(32);
 		await expect(
-			Math.abs((rowRect?.left ?? 0) - (elbowRect?.right ?? 0) - 4),
-		).toBeLessThan(1.5);
+			Math.abs(a.left + a.width / 2 - (b.left + b.width / 2)),
+		).toBeLessThan(1);
 		await expect(
-			Number.parseFloat(
-				getComputedStyle(terminalElbow as HTMLElement).borderBottomLeftRadius,
-			),
-		).toBeGreaterThan(0);
-		const terminalStroke = Number.parseFloat(
-			getComputedStyle(terminalElbow as HTMLElement).borderLeftWidth,
-		);
-		await expect(terminalStroke).toBeGreaterThan(0.7);
-		await expect(terminalStroke).toBeLessThan(1.5);
+			Math.abs(a.top + a.height / 2 - (b.top + b.height / 2)),
+		).toBeLessThan(1);
 	}
 
-	const parentItems = Array.from(
-		dialog.querySelectorAll<HTMLElement>("[data-command-tree-item]"),
-	).filter((item) => item.querySelector(":scope > [data-command-tree-branch]"));
-	await expect(parentItems.length).toBeGreaterThan(0);
-	for (const parentItem of parentItems) {
-		const parentRow = parentItem.querySelector<HTMLElement>(
-			":scope > [data-command-tree-row]",
-		);
-		const parentIcon = parentItem.querySelector<HTMLElement>(
-			":scope > [data-command-tree-row] [data-command-icon-well]",
-		);
-		const branch = parentItem.querySelector<HTMLElement>(
-			":scope > [data-command-tree-branch]",
-		);
-		const branchRail = branch?.querySelector<HTMLElement>(
-			":scope > [data-command-tree-branch-rail]",
-		);
-		const firstItem = branch?.querySelector<HTMLElement>(
-			":scope > [data-command-tree-level] > [data-command-tree-item]:first-child",
-		);
-		const firstConnector = firstItem?.querySelector<HTMLElement>(
-			":scope > [data-command-tree-continuation-rail], :scope > [data-command-tree-elbow] > [data-command-tree-elbow-incoming]",
-		);
-		await expect(parentRow).not.toBeNull();
-		await expect(parentIcon).not.toBeNull();
-		await expect(branchRail).not.toBeNull();
-		await expect(firstConnector).not.toBeNull();
-		const parentRowRect = parentRow?.getBoundingClientRect();
-		const parentIconRect = parentIcon?.getBoundingClientRect();
-		const branchRailRect = branchRail?.getBoundingClientRect();
-		const firstConnectorRect = firstConnector?.getBoundingClientRect();
-		const parentIconCenterX = parentIconRect
-			? parentIconRect.left + parentIconRect.width / 2
-			: 0;
-		await expect(
-			Math.abs((branchRailRect?.left ?? 0) - parentIconCenterX),
-		).toBeLessThan(1.5);
-		await expect(
-			Math.abs((branchRailRect?.top ?? 0) - (parentRowRect?.bottom ?? 0) - 4),
-		).toBeLessThan(1.5);
-		await expect(
-			Math.abs((firstConnectorRect?.left ?? 0) - (branchRailRect?.left ?? 0)),
-		).toBeLessThan(1.5);
-		await expect(
-			Math.abs((firstConnectorRect?.top ?? 0) - (branchRailRect?.bottom ?? 0)),
-		).toBeLessThan(1.5);
-		await expect(branchRailRect?.width ?? 0).toBeGreaterThan(0.7);
-		await expect(branchRailRect?.width ?? 0).toBeLessThan(1.5);
+	for (const branch of branches) {
+		await expect(getComputedStyle(branch).marginLeft).toBe("16px");
 	}
 }
 
@@ -289,6 +237,12 @@ const meta = {
 	tags: ["autodocs"],
 	parameters: {
 		catalogContract,
+		docs: {
+			description: {
+				component:
+					"Sidebar-anchored command search widens in place without dimming. Compact rails use the visible anchor; phones without an anchor use the top viewport inset. Command search uses plain 16px icons centered in unboxed 32px slots, two-line rows and 16px indentation per child level. Parent context remains unselectable when it does not match. Hierarchy uses spacing, never icon containers or connector lines.",
+			},
+		},
 		a11y: { test: "error" },
 		layout: "fullscreen",
 	},
@@ -305,6 +259,8 @@ export const AllCommands: Story = {
 			name: "Dashboard commands",
 		});
 		const palette = within(dialog);
+		if (palette.queryByRole("listbox"))
+			await waitFor(() => expect(palette.getByRole("listbox")).toBeVisible());
 		await waitFor(() => expect(dialog).toBeVisible());
 		const search = palette.getByRole("combobox", {
 			name: "Search dashboard commands",
@@ -315,13 +271,10 @@ export const AllCommands: Story = {
 			"aria-controls",
 			"dashboard-command-results",
 		);
-		await expect(search).toHaveAttribute(
-			"placeholder",
-			"Search pages and actions",
-		);
+		await expect(search).toHaveAttribute("placeholder", "Search");
 		await expect(
-			dialog.querySelector('[data-surface-role="card"]'),
-		).toHaveAttribute("data-elevation", "overlay");
+			dialog.querySelector('[data-surface-role="float"]'),
+		).toHaveAttribute("data-elevation", "float");
 		await expect(palette.getByText("Create record")).toBeVisible();
 		await expect(
 			palette.getByText(
@@ -334,7 +287,7 @@ export const AllCommands: Story = {
 		await expect(
 			dialog.querySelectorAll('[data-command-depth="1"]'),
 		).toHaveLength(3);
-		await expectHierarchyConnectorAlignment(dialog);
+		await expectHierarchyIndentation(dialog);
 		await userEvent.click(search);
 		await userEvent.keyboard("{ArrowDown}");
 		await waitFor(() =>
@@ -355,6 +308,8 @@ export const FilteredHierarchy: Story = {
 			name: "Dashboard commands",
 		});
 		const palette = within(dialog);
+		if (palette.queryByRole("listbox"))
+			await waitFor(() => expect(palette.getByRole("listbox")).toBeVisible());
 		await expect(
 			palette.getByRole("combobox", {
 				name: "Search dashboard commands",
@@ -400,7 +355,7 @@ export const LargeTextHierarchy: Story = {
 				name: "Search dashboard commands",
 			}),
 		).toHaveValue("member");
-		await expectHierarchyConnectorAlignment(dialog);
+		await expectHierarchyIndentation(dialog);
 	},
 };
 
@@ -412,11 +367,135 @@ export const EmptyResults: Story = {
 			name: "Dashboard commands",
 		});
 		const palette = within(dialog);
+		if (palette.queryByRole("listbox"))
+			await waitFor(() => expect(palette.getByRole("listbox")).toBeVisible());
 		await waitFor(() =>
 			expect(palette.getByText("No matching commands.")).toBeVisible(),
 		);
 		await expect(
 			palette.queryByRole("listbox", { name: "Dashboard commands" }),
 		).not.toBeInTheDocument();
+	},
+};
+
+export const ParentContext: Story = {
+	render: () => <CommandPaletteHarness initialQuery="quick" />,
+	play: async () => {
+		const dialog = await within(document.body).findByRole("dialog", {
+			name: "Dashboard commands",
+		});
+		const palette = within(dialog);
+		if (palette.queryByRole("listbox"))
+			await waitFor(() => expect(palette.getByRole("listbox")).toBeVisible());
+		await waitFor(() => expect(dialog).toBeVisible());
+		await expect(palette.getByText("Records", { exact: true })).toBeVisible();
+		await expect(
+			palette.queryByRole("option", { name: /^Records / }),
+		).toBeNull();
+		await expect(palette.getAllByRole("option")).toHaveLength(2);
+		await expectHierarchyIndentation(dialog);
+		const search = palette.getByRole("combobox");
+		await userEvent.click(search);
+		await userEvent.keyboard("{Enter}");
+		await expect(palette.getByTestId("executed-command")).toHaveTextContent(
+			"Create record",
+		);
+		await userEvent.click(
+			palette.getByRole("button", { name: "Clear search" }),
+		);
+		await expect(search).toHaveValue("");
+		await expect(search).toHaveFocus();
+		await expect(palette.getAllByRole("option")).toHaveLength(6);
+	},
+};
+
+export const AnchoredExpansion: Story = {
+	render: () => <CommandPaletteHarness initiallyOpen={false} />,
+	play: async () => {
+		const body = within(document.body);
+		const trigger = body.getByRole("button", {
+			name: "Open dashboard commands",
+		});
+		const anchor = trigger.closest('[data-slot="input-frame"]')!;
+		const before = anchor.getBoundingClientRect();
+		await userEvent.click(trigger);
+		const dialog = await body.findByRole("dialog", {
+			name: "Dashboard commands",
+		});
+		const search = within(dialog).getByRole("combobox");
+		await waitFor(() =>
+			expect(dialog.getBoundingClientRect().width).toBeCloseTo(560, 0),
+		);
+		const after = search
+			.closest('[data-slot="input-frame"]')!
+			.getBoundingClientRect();
+		await expect(Math.abs(after.left - before.left)).toBeLessThan(1);
+		await expect(Math.abs(after.top - before.top)).toBeLessThan(1);
+		await expect(after.height).toBe(before.height);
+		await userEvent.click(search);
+		await userEvent.type(search, "record");
+		await expect(search).toHaveValue("record");
+		await userEvent.keyboard("{Escape}");
+		// The field's padding and outer offset collapse together before removal.
+		await waitFor(() => {
+			const padding = Number.parseFloat(
+				getComputedStyle(
+					search.closest('[data-slot="input-frame"]')!.parentElement!,
+				).paddingTop,
+			);
+			expect(padding).toBeGreaterThan(0);
+			expect(padding).toBeLessThan(8);
+			expect(
+				Math.abs(
+					search.closest('[data-slot="input-frame"]')!.getBoundingClientRect()
+						.top - before.top,
+				),
+			).toBeLessThan(1);
+		});
+		await waitFor(() =>
+			expect(
+				body.queryByRole("dialog", { name: "Dashboard commands" }),
+			).toBeNull(),
+		);
+		await waitFor(() => expect(trigger).toHaveFocus());
+	},
+};
+export const CollapsedAnchor: Story = {
+	render: () => <CommandPaletteHarness compact />,
+	play: async () => {
+		const dialog = await within(document.body).findByRole("dialog", {
+			name: "Dashboard commands",
+		});
+		await waitFor(() =>
+			expect(dialog.getBoundingClientRect().width).toBeCloseTo(560, 0),
+		);
+		await expect(dialog.getBoundingClientRect().left).toBe(12);
+		await expect(dialog.getBoundingClientRect().top).toBe(64);
+	},
+};
+
+export const InterruptedExpansion: Story = {
+	render: () => <CommandPaletteHarness initiallyOpen={false} />,
+	play: async () => {
+		const body = within(document.body);
+		await userEvent.click(
+			body.getByRole("button", { name: "Open dashboard commands" }),
+		);
+		const dialog = await body.findByRole("dialog", {
+			name: "Dashboard commands",
+		});
+		const input = within(dialog).getByRole("combobox");
+		await userEvent.click(input);
+		await userEvent.type(input, "record");
+		await userEvent.keyboard("{Control>}k{/Control}{Control>}k{/Control}");
+		await waitFor(() =>
+			expect(
+				body.getByRole("combobox", { name: "Search dashboard commands" }),
+			).toBe(input),
+		);
+		await expect(input).toHaveValue("record");
+		await waitFor(() =>
+			expect(dialog.getBoundingClientRect().width).toBeCloseTo(560, 0),
+		);
 	},
 };

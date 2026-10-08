@@ -83,10 +83,12 @@ export function CardHeader({
 	return (
 		<div
 			className={clsx(
-				"grid auto-rows-min items-start gap-1 border-b px-4 pb-4 group-data-[size=sm]/card:px-3 group-data-[size=sm]/card:pb-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]",
-				getAccentClassName(accent, "slot", {
-					solidBackground: solidAccentBackground,
-				}),
+				"grid auto-rows-min items-start gap-1 border-b border-inherit px-4 pb-4 group-data-[size=sm]/card:px-3 group-data-[size=sm]/card:pb-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]",
+				accent === "neutral" && !solidAccentBackground
+					? "bg-[var(--card-chrome-background)] dark:bg-muted/45"
+					: getAccentClassName(accent, "slot", {
+							solidBackground: solidAccentBackground,
+						}),
 				className,
 			)}
 			data-accent={accent ?? undefined}
@@ -253,10 +255,12 @@ export function CardFooter({
 	return (
 		<div
 			className={clsx(
-				"flex items-center p-4 group-data-[size=sm]/card:p-3 group-has-data-[slot=card-content]/card:border-t",
-				getAccentClassName(accent, "slot", {
-					solidBackground: solidAccentBackground,
-				}),
+				"flex items-center border-inherit p-4 group-data-[size=sm]/card:p-3 group-has-data-[slot=card-content]/card:border-t",
+				accent === "neutral" && !solidAccentBackground
+					? "bg-[var(--card-chrome-background)] dark:bg-muted/45"
+					: getAccentClassName(accent, "slot", {
+							solidBackground: solidAccentBackground,
+						}),
 				className,
 			)}
 			data-accent={accent ?? undefined}

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { expect, userEvent, waitFor } from "storybook/test";
+import { expect, fn, userEvent, waitFor } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { Button } from "./Button";
 import { StatusMessage } from "./StatusMessage";
@@ -96,5 +96,82 @@ export const ControlledPresence: Story = {
 		await waitFor(() => {
 			expect(canvas.getByText("A controlled contextual notice.")).toBeVisible();
 		});
+	},
+};
+
+export const ActionableNotices: Story = {
+	args: { onDismiss: fn() },
+	render: (args) => (
+		<div className="grid max-w-2xl gap-3">
+			<StatusMessage
+				heading="You’re offline."
+				tone="info"
+				action={<Button size="sm">Reload</Button>}
+				descriptionOnNewLine
+			>
+				Cached content is still available.
+			</StatusMessage>
+			<StatusMessage heading="Restart required" tone="warning" {...args}>
+				Restart to apply your preferences.
+			</StatusMessage>
+			<StatusMessage
+				heading="Connection unavailable"
+				tone="danger"
+				action={<Button size="sm">Try again</Button>}
+			>
+				Your work is preserved.
+			</StatusMessage>
+			<StatusMessage heading="Ready to continue" tone="success">
+				All required settings are complete.
+			</StatusMessage>
+		</div>
+	),
+	play: async ({ args, canvas }) => {
+		await expect(canvas.getByRole("alert")).toHaveTextContent(
+			"Connection unavailable",
+		);
+		await expect(canvas.getAllByRole("status")).toHaveLength(3);
+		await expect(
+			canvas.getByRole("alert").querySelector("svg"),
+		).toBeInTheDocument();
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Dismiss notice" }),
+		);
+		await expect(args.onDismiss).toHaveBeenCalledOnce();
+		await expect(
+			canvas.getAllByRole("button", { name: "Dismiss notice" }),
+		).toHaveLength(1);
+	},
+};
+
+export const NarrowNotice: Story = {
+	render: () => (
+		<div style={{ width: 240 }}>
+			<StatusMessage
+				heading="Connection unavailable"
+				tone="danger"
+				descriptionOnNewLine
+				action={<Button size="sm">Try again</Button>}
+			>
+				The service for workspace-with-an-unusually-long-unbroken-identifier is
+				temporarily unavailable. Your changes remain saved.
+			</StatusMessage>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const alert = canvas.getByRole("alert");
+		await expect(alert.scrollWidth).toBeLessThanOrEqual(alert.clientWidth);
+	},
+};
+
+export const ExplicitRole: Story = {
+	render: () => (
+		<StatusMessage tone="danger" role="note">
+			This environment is scheduled for deletion.
+		</StatusMessage>
+	),
+	play: async ({ canvas }) => {
+		await expect(canvas.getByRole("note")).toBeVisible();
+		await expect(canvas.queryByRole("alert")).not.toBeInTheDocument();
 	},
 };

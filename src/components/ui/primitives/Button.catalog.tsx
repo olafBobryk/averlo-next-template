@@ -13,6 +13,10 @@ function CatalogPreview1() {
 			<Button variant="primary">Publish</Button>
 			<Button variant="secondary">Save draft</Button>
 			<Button variant="ghost">Cancel</Button>
+			<Button variant="bare">Dismiss</Button>
+			<Button variant="link" href="/dashboard">
+				View details
+			</Button>
 		</div>
 	);
 	return (
@@ -130,10 +134,17 @@ function CatalogPropProjection({ coordinate }: CatalogPreviewProps) {
 	return (
 		<Button
 			size={coordinate.size as ComponentProps<typeof Button>["size"]}
+			shape={coordinate.shape as ComponentProps<typeof Button>["shape"]}
+			aria-label="Continue"
 			tone={coordinate.tone as ComponentProps<typeof Button>["tone"]}
 			variant={coordinate.variant as ComponentProps<typeof Button>["variant"]}
 		>
-			Continue
+			{coordinate.shape === "round" ||
+			coordinate.shape === "square" ||
+			coordinate.size === "icon" ||
+			coordinate.size === "icon-sm"
+				? "+"
+				: "Continue"}
 		</Button>
 	);
 }
@@ -146,6 +157,10 @@ export const catalogContract = defineCatalogOwnerContract({
 		'import { Button } from "@/components/ui/primitives/Button";',
 	chooseWhen: [
 		"An action needs shared hierarchy, sizing, icons, loading, focus, or button-like link behavior.",
+		"Primary is the principal action; secondary is the default standard action; ghost gains a hover surface; bare stays transparent; link underlines navigation. Inverse is a compatibility name for primary.",
+		"Danger and warning are semantic tones independent of emphasis.",
+		"Use xxs/xs/compact for dense controls, sm/md for everyday actions, lg/xl for prominent actions. None delegates dimensions; chip is content-height; icon/icon-sm preserve icon-only callers.",
+		"Shape standard fits a label; round/square are icon-only. Radius pill explicitly requests full rounding and sm requests 7px, overriding shape corners.",
 	],
 	chooseInstead: [
 		"Use a finished input, menu, or composite when the action belongs to that higher-level owner.",
@@ -173,6 +188,11 @@ export const catalogContract = defineCatalogOwnerContract({
 			storyId: "ui-primitives-button--async-state-parity",
 		},
 		{
+			label:
+				"Transparent treatments retain geometry with content-shaped skeletons",
+			storyId: "ui-primitives-button--transparent-skeletons",
+		},
+		{
 			label: "Click and focus contract",
 			storyId: "ui-primitives-button--interaction-contract",
 		},
@@ -189,8 +209,18 @@ export const catalogContract = defineCatalogOwnerContract({
 				size: "md",
 				tone: "default",
 				variant: "secondary",
+				shape: "standard",
 			},
 			axes: [
+				{
+					id: "shape",
+					label: "Shape",
+					values: [
+						{ id: "standard", label: "Label", value: "standard" },
+						{ id: "round", label: "Round icon", value: "round" },
+						{ id: "square", label: "Square icon", value: "square" },
+					],
+				},
 				{
 					id: "variant",
 					label: "Variant",
@@ -198,6 +228,8 @@ export const catalogContract = defineCatalogOwnerContract({
 						{ id: "primary", label: "Primary", value: "primary" },
 						{ id: "secondary", label: "Secondary", value: "secondary" },
 						{ id: "ghost", label: "Ghost", value: "ghost" },
+						{ id: "bare", label: "Bare", value: "bare" },
+						{ id: "link", label: "Link", value: "link" },
 						{ id: "inverse", label: "Inverse", value: "inverse" },
 					],
 				},
@@ -207,6 +239,7 @@ export const catalogContract = defineCatalogOwnerContract({
 					values: [
 						{ id: "default", label: "Default", value: "default" },
 						{ id: "danger", label: "Danger", value: "danger" },
+						{ id: "warning", label: "Warning", value: "warning" },
 					],
 				},
 				{
@@ -214,6 +247,9 @@ export const catalogContract = defineCatalogOwnerContract({
 					label: "Size",
 					values: [
 						{ id: "none", label: "None", value: "none" },
+						{ id: "xxs", label: "Extra extra small", value: "xxs" },
+						{ id: "xs", label: "Extra small", value: "xs" },
+						{ id: "compact", label: "Compact", value: "compact" },
 						{ id: "sm", label: "Small", value: "sm" },
 						{ id: "md", label: "Medium", value: "md" },
 						{ id: "lg", label: "Large", value: "lg" },

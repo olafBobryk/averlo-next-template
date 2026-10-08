@@ -111,7 +111,7 @@ const shellSurfaceContracts = [
 		role: "marketing-header",
 	},
 	{
-		file: "src/app/(site)/dashboard/_components/layout/DashboardFrame.tsx",
+		file: "src/app/(site)/dashboard/_components/layout/DashboardWorkspaceToolbar.tsx",
 		installed: hasDashboard,
 		role: "dashboard-header",
 	},

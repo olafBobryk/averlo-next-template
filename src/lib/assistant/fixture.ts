@@ -8,6 +8,7 @@ import {
 } from "node:crypto";
 import { privateFilePolicy } from "@/lib/auth/private-files";
 import { createAssistantApprovalId } from "./approval.server";
+import { reconcileReferences } from "./composer-context";
 import {
 	type AssistantActor,
 	type AssistantAttachment,
@@ -164,6 +165,81 @@ function actorOwns(actor: AssistantActor, thread: AssistantThread) {
 }
 
 export const fixtureConversationAdapter: AssistantConversationAdapter = {
+	async replaceToolPart(actor, threadId, messageId, part) {
+		const thread = getState().threads.get(key(actor, threadId));
+		if (!thread || !actorOwns(actor, thread))
+			throw new Error("Conversation not found.");
+		const message = thread.messages.find((item) => item.id === messageId);
+		if (!message || message.role !== "assistant")
+			throw new Error("Response not found.");
+		message.parts = message.parts.map((item) =>
+			item.id === part.id ? structuredClone(part) : item,
+		);
+	},
+	async duplicateThread(actor, threadId) {
+		const original = await this.getThread(actor, threadId);
+		if (!original) throw new Error("Conversation not found.");
+		const copy = {
+			...original,
+			id: randomUUID(),
+			title: normalizeTitle(`${original.title} (copy)`),
+			pinned: false,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		};
+		copy.messages = copy.messages.map(
+			(message) =>
+				({
+					...message,
+					id: randomUUID(),
+					parts: message.parts.map((part) =>
+						part.type === "tool"
+							? {
+									...part,
+									id: randomUUID(),
+									approvalId: null,
+									...([
+										"approval-requested",
+										"approved",
+										"input-streaming",
+										"input-available",
+									].includes(part.state)
+										? {
+												state: "denied" as const,
+												error:
+													"Historical request — not copied as an actionable approval.",
+											}
+										: {}),
+								}
+							: { ...part, id: randomUUID() },
+					),
+				}) as AssistantMessage,
+		);
+		getState().threads.set(key(actor, copy.id), copy);
+		return cloneThread(copy);
+	},
+	async editMessage(actor, threadId, messageId, text, references) {
+		const thread = await this.getThread(actor, threadId);
+		const message = thread?.messages.find((item) => item.id === messageId);
+		if (!message || message.role !== "user")
+			throw new Error("User message not found.");
+		if (!text.trim() && !message.parts.some((part) => part.type === "file"))
+			throw new Error("Write a message or retain an attachment.");
+		message.contextReferences =
+			references ??
+			reconcileReferences(
+				message.parts
+					.flatMap((part) => (part.type === "text" ? [part.text] : []))
+					.join("\n"),
+				text,
+				message.contextReferences ?? [],
+			);
+		message.parts = [
+			{ id: randomUUID(), type: "text", text },
+			...message.parts.filter((part) => part.type === "file"),
+		];
+		return this.replaceMessage(actor, threadId, message);
+	},
 	async appendMessage(actor, threadId, message) {
 		const state = getState();
 		const existing = state.threads.get(key(actor, threadId));
@@ -241,6 +317,7 @@ export const fixtureConversationAdapter: AssistantConversationAdapter = {
 		const next = {
 			...existing,
 			pinned: patch.pinned ?? existing.pinned,
+			toolMode: patch.toolMode ?? existing.toolMode,
 			title:
 				patch.title === undefined
 					? existing.title

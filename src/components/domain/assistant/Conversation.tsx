@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/primitives/Button";
 
 export function Conversation({
 	children,
@@ -15,7 +14,12 @@ export function Conversation({
 	const scrollToBottom = React.useCallback(
 		(behavior: ScrollBehavior = "smooth") => {
 			viewportRef.current?.scrollTo({
-				behavior,
+				behavior:
+					window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+					document.documentElement.dataset.motion === "off" ||
+					new URLSearchParams(window.location.search).get("motion") === "off"
+						? "auto"
+						: behavior,
 				top: viewportRef.current.scrollHeight,
 			});
 		},
@@ -33,19 +37,21 @@ export function Conversation({
 			childList: true,
 			subtree: true,
 		});
-		return () => observer.disconnect();
+		const resize = new ResizeObserver(() => {
+			if (!awayFromBottom) scrollToBottom("auto");
+		});
+		resize.observe(viewport);
+		if (viewport.firstElementChild) resize.observe(viewport.firstElementChild);
+		return () => {
+			observer.disconnect();
+			resize.disconnect();
+		};
 	}, [awayFromBottom, scrollToBottom]);
 	return (
-		<div className="relative min-h-0 flex-1">
-			{header ? (
-				<div className="absolute inset-x-0 top-0 z-10">{header}</div>
-			) : null}
+		<div className="relative flex min-h-0 flex-1 flex-col">
+			{header ? <div className="z-10 shrink-0">{header}</div> : null}
 			<div
-				className={
-					header
-						? "absolute inset-0 overflow-y-auto overscroll-contain pt-20 pb-6"
-						: "absolute inset-0 overflow-y-auto overscroll-contain py-6"
-				}
+				className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-6"
 				onScroll={(event) => {
 					const node = event.currentTarget;
 					setAwayFromBottom(
@@ -54,18 +60,8 @@ export function Conversation({
 				}}
 				ref={viewportRef}
 			>
-				<div className="grid gap-7 pb-8">{children}</div>
+				<div className="grid gap-7 pb-[57px]">{children}</div>
 			</div>
-			{awayFromBottom ? (
-				<Button
-					className="absolute bottom-4 left-1/2 -translate-x-1/2 shadow-md"
-					onClick={() => scrollToBottom()}
-					size="sm"
-					variant="secondary"
-				>
-					Latest message
-				</Button>
-			) : null}
 		</div>
 	);
 }

@@ -6,7 +6,7 @@ import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirma
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
 import { Dropdown } from "@/components/ui/primitives/dropdown";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import {
 	refreshOrganizationInvitation,
 	removeOrganizationMembership,
@@ -110,7 +110,7 @@ export function PendingInvitationsTable({
 			}
 			getRowKey={(invitation) => invitation.id}
 			header={
-				<Card.Heading
+				<ContentSection.Heading
 					action={
 						<Button
 							leadingIcon="plus"
@@ -123,7 +123,6 @@ export function PendingInvitationsTable({
 						</Button>
 					}
 					description="Fixture deliveries stay local and expose a copyable invitation link."
-					leading={<Icon name="mail" size="sm" />}
 					title="Pending invitations"
 				/>
 			}
@@ -290,9 +289,8 @@ export function MembersTable({
 			]}
 			getRowKey={(member) => member.id}
 			header={
-				<Card.Heading
+				<ContentSection.Heading
 					description="Organization roles and access for active members."
-					leading={<Icon name="users" size="sm" />}
 					title="Members"
 				/>
 			}

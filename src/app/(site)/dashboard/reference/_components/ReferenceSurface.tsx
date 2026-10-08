@@ -1,6 +1,5 @@
-import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { DashboardSection } from "../../_components/layout/DashboardSection";
 import { getDashboardSurfaceById } from "../../_registry/surfaceRegistry";
 
@@ -18,18 +17,17 @@ function ReferenceContent() {
 				const surface = getDashboardSurfaceById(surfaceId);
 				if (!surface) return null;
 				return (
-					<Card key={surface.id}>
-						<Card.Heading
+					<ContentSection key={surface.id}>
+						<ContentSection.Heading
 							description={surface.description}
-							leading={<Icon name={surface.icon} size="sm" />}
 							title={surface.label}
 						/>
-						<Card.Content>
+						<ContentSection.Content>
 							<Button href={surface.href} size="sm" variant="secondary">
 								Open {surface.label.toLowerCase()}
 							</Button>
-						</Card.Content>
-					</Card>
+						</ContentSection.Content>
+					</ContentSection>
 				);
 			})}
 		</DashboardSection>

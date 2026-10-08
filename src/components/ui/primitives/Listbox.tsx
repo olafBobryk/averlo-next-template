@@ -5,16 +5,19 @@ import { CaretRight } from "@phosphor-icons/react";
 import clsx from "clsx";
 import * as React from "react";
 import { Button } from "@/components/ui/primitives/Button";
+import Divider from "@/components/ui/primitives/Divider";
 import { DropdownSurface } from "@/components/ui/primitives/dropdown/DropdownSurface";
 import {
 	type DropdownCollectionController,
 	useDropdownCollectionController,
 } from "@/components/ui/primitives/dropdown/useDropdownCollectionController";
 import {
+	type DropdownDivider,
 	type DropdownOptionTone,
 	dropdownEmptyStateClassName,
 	dropdownListClassName,
 	dropdownListWrapperClassName,
+	getDropdownDividerClassName,
 	getDropdownOptionClassName,
 } from "@/components/ui/primitives/dropdownStyles";
 import { Text } from "@/components/ui/primitives/Text";
@@ -28,9 +31,11 @@ export type ListboxOption<T> = {
 	value: T;
 	content: React.ReactNode;
 	href?: string;
+	target?: React.HTMLAttributeAnchorTarget;
+	rel?: string;
 	disabled?: boolean;
-	dividerAfter?: boolean;
-	dividerBefore?: boolean;
+	dividerAfter?: DropdownDivider;
+	dividerBefore?: DropdownDivider;
 	layout?: "default" | "presentation";
 	tone?: DropdownOptionTone;
 	selected?: boolean;
@@ -269,193 +274,210 @@ function ListboxLevel<T>({
 			<div className={dropdownEmptyStateClassName}>{resolvedEmpty}</div>
 		) : (
 			<div className={clsx(dropdownListClassName, listClassName)}>
-				{options.map((option, index) => {
-					const isActive = resolvedActiveIndex === index;
-					const isSelected = Boolean(option.selected);
-					const isDisabled = Boolean(disabled || option.disabled);
-					const children = controller.getChildren(levelPath, index);
-					const hasChildren = children.length > 0;
-					const isChildOpen = controller.isChildOpen(levelPath, index);
-					const optionId = resolvedOptionIdPrefix
-						? `${resolvedOptionIdPrefix}-${index}`
-						: undefined;
-					const childListId = hasChildren
-						? controller.getListId([...levelPath, index])
-						: undefined;
-					const resolvedOptionClassName = [optionClassName, option.className]
-						.filter(Boolean)
-						.join(" ");
-					const resolvedActiveClassName = [
-						optionActiveClassName,
-						option.activeClassName,
-					]
-						.filter(Boolean)
-						.join(" ");
-					const resolvedSelectedClassName = [
-						optionSelectedClassName,
-						option.selectedClassName,
-					]
-						.filter(Boolean)
-						.join(" ");
-					const resolvedDisabledClassName = [
-						optionDisabledClassName,
-						option.disabledClassName,
-					]
-						.filter(Boolean)
-						.join(" ");
+				{options
+					.map((option, index) => {
+						const isActive = resolvedActiveIndex === index;
+						const isSelected = Boolean(option.selected);
+						const isDisabled = Boolean(disabled || option.disabled);
+						const children = controller.getChildren(levelPath, index);
+						const hasChildren = children.length > 0;
+						const isChildOpen = controller.isChildOpen(levelPath, index);
+						const optionId = resolvedOptionIdPrefix
+							? `${resolvedOptionIdPrefix}-${index}`
+							: undefined;
+						const childListId = hasChildren
+							? controller.getListId([...levelPath, index])
+							: undefined;
+						const resolvedOptionClassName = [optionClassName, option.className]
+							.filter(Boolean)
+							.join(" ");
+						const resolvedActiveClassName = [
+							optionActiveClassName,
+							option.activeClassName,
+						]
+							.filter(Boolean)
+							.join(" ");
+						const resolvedSelectedClassName = [
+							optionSelectedClassName,
+							option.selectedClassName,
+						]
+							.filter(Boolean)
+							.join(" ");
+						const resolvedDisabledClassName = [
+							optionDisabledClassName,
+							option.disabledClassName,
+						]
+							.filter(Boolean)
+							.join(" ");
 
-					const optionClasses = getDropdownOptionClassName({
-						active: isActive,
-						selected: isSelected,
-						disabled: isDisabled,
-						dividerAfter: option.dividerAfter,
-						dividerBefore: option.dividerBefore,
-						layout: option.layout,
-						tone: option.tone,
-						className: resolvedOptionClassName,
-						activeClassName: resolvedActiveClassName,
-						selectedClassName: resolvedSelectedClassName,
-						disabledClassName: resolvedDisabledClassName,
-					});
-					const content = hasChildren ? (
-						<>
-							{option.content}
-							<span
-								aria-hidden
-								className="-mr-1 ml-auto flex shrink-0 items-center px-1 rtl:mr-auto rtl:-ml-1"
-								data-dropdown-cascade-trigger
-							>
-								<CaretRight className="rtl:rotate-180" size={14} />
-							</span>
-						</>
-					) : (
-						option.content
-					);
-					const openChildFromChevron = (target: EventTarget | null) => {
-						if (!(target instanceof Element)) return false;
-						if (!target.closest(cascadeTriggerSelector)) return false;
-						controller.openChildren(levelPath, index, { focus: false });
-						return true;
-					};
-					const sharedAriaProps =
-						hasChildren && role === "menu"
-							? {
-									"aria-controls": childListId,
-									"aria-expanded": isChildOpen,
-									"aria-haspopup": "menu" as const,
-								}
-							: {};
-
-					if (option.unwrapped) {
-						const optionKey = String(option.key ?? index);
-						const unwrappedOptionProps = {
-							...sharedAriaProps,
-							key: optionKey,
-							"data-option-index": index,
-							id: optionId,
-							"aria-disabled": isDisabled ? true : undefined,
-							className: optionClasses,
-							ref: (node: HTMLDivElement | null) =>
-								controller.registerAnchor(levelPath, index, node),
-							onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
-								const target = event.target as HTMLElement;
-								if (target.closest(interactiveDescendantSelector)) return;
-								event.preventDefault();
-							},
-							onMouseMove: () =>
-								handleOptionMouseMove(index, isDisabled, hasChildren),
-							onMouseLeave: () => {
-								if (hasChildren)
-									controller.scheduleCloseChildrenFrom(levelPath);
-							},
-							onClick: (event: React.MouseEvent<HTMLDivElement>) => {
-								if (isDisabled) {
-									event.preventDefault();
-									return;
-								}
-								if (openChildFromChevron(event.target)) {
-									event.preventDefault();
-									return;
-								}
-								const target = event.target as HTMLElement;
-								if (target.closest(interactiveDescendantSelector)) return;
-								onSelect?.(option, index, event);
-							},
-							onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
-								if (event.key !== "Enter" && event.key !== " ") return;
-								if (isDisabled) {
-									event.preventDefault();
-									return;
-								}
-								event.preventDefault();
-								onSelect?.(option, index, event);
-							},
+						const optionClasses = getDropdownOptionClassName({
+							active: isActive,
+							selected: isSelected,
+							disabled: isDisabled,
+							layout: option.layout,
+							tone: option.tone,
+							className: resolvedOptionClassName,
+							activeClassName: resolvedActiveClassName,
+							selectedClassName: resolvedSelectedClassName,
+							disabledClassName: resolvedDisabledClassName,
+						});
+						const content = hasChildren ? (
+							<>
+								{option.content}
+								<span
+									aria-hidden
+									className="-mr-1 ml-auto flex shrink-0 items-center px-1 rtl:mr-auto rtl:-ml-1"
+									data-dropdown-cascade-trigger
+								>
+									<CaretRight className="rtl:rotate-180" size={14} />
+								</span>
+							</>
+						) : (
+							option.content
+						);
+						const openChildFromChevron = (target: EventTarget | null) => {
+							if (!(target instanceof Element)) return false;
+							if (!target.closest(cascadeTriggerSelector)) return false;
+							controller.openChildren(levelPath, index, { focus: false });
+							return true;
 						};
+						const sharedAriaProps =
+							hasChildren && role === "menu"
+								? {
+										"aria-controls": childListId,
+										"aria-expanded": isChildOpen,
+										"aria-haspopup": "menu" as const,
+									}
+								: {};
 
-						if (optionRole === "menuitem") {
+						if (option.unwrapped) {
+							const optionKey = String(option.key ?? index);
+							const unwrappedOptionProps = {
+								...sharedAriaProps,
+								key: optionKey,
+								"data-option-index": index,
+								id: optionId,
+								"aria-disabled": isDisabled ? true : undefined,
+								className: optionClasses,
+								ref: (node: HTMLDivElement | null) =>
+									controller.registerAnchor(levelPath, index, node),
+								onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
+									const target = event.target as HTMLElement;
+									if (target.closest(interactiveDescendantSelector)) return;
+									event.preventDefault();
+								},
+								onMouseMove: () =>
+									handleOptionMouseMove(index, isDisabled, hasChildren),
+								onMouseLeave: () => {
+									if (hasChildren)
+										controller.scheduleCloseChildrenFrom(levelPath);
+								},
+								onClick: (event: React.MouseEvent<HTMLDivElement>) => {
+									if (isDisabled) {
+										event.preventDefault();
+										return;
+									}
+									if (openChildFromChevron(event.target)) {
+										event.preventDefault();
+										return;
+									}
+									const target = event.target as HTMLElement;
+									if (target.closest(interactiveDescendantSelector)) return;
+									onSelect?.(option, index, event);
+								},
+								onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
+									if (event.key !== "Enter" && event.key !== " ") return;
+									if (isDisabled) {
+										event.preventDefault();
+										return;
+									}
+									event.preventDefault();
+									onSelect?.(option, index, event);
+								},
+							};
+
+							if (optionRole === "menuitem") {
+								return (
+									<div {...unwrappedOptionProps} role="menuitem" tabIndex={-1}>
+										{content}
+									</div>
+								);
+							}
+
 							return (
-								<div {...unwrappedOptionProps} role="menuitem" tabIndex={-1}>
+								<div
+									{...unwrappedOptionProps}
+									role="option"
+									aria-selected={isSelected}
+									tabIndex={-1}
+								>
 									{content}
 								</div>
 							);
 						}
 
 						return (
-							<div
-								{...unwrappedOptionProps}
-								role="option"
-								aria-selected={isSelected}
+							<Button
+								{...sharedAriaProps}
+								key={option.key ?? `${index}`}
+								href={option.href}
+								target={option.target}
+								rel={option.rel}
+								data-option-index={index}
+								id={optionId}
+								role={optionRole}
+								aria-selected={optionRole === "option" ? isSelected : undefined}
+								aria-disabled={isDisabled ? true : undefined}
 								tabIndex={-1}
+								disabled={optionRole === "menuitem" ? undefined : isDisabled}
+								variant="ghost"
+								align="left"
+								contentClassName="!w-full"
+								size="md"
+								className={optionClasses}
+								ref={(node) =>
+									controller.registerAnchor(levelPath, index, node)
+								}
+								onMouseDown={(event: React.MouseEvent<HTMLElement>) => {
+									event.preventDefault();
+								}}
+								onMouseMove={() =>
+									handleOptionMouseMove(index, isDisabled, hasChildren)
+								}
+								onMouseLeave={() => {
+									if (hasChildren)
+										controller.scheduleCloseChildrenFrom(levelPath);
+								}}
+								onClick={(event: React.MouseEvent<HTMLElement>) => {
+									if (isDisabled) {
+										event.preventDefault();
+										return;
+									}
+									if (openChildFromChevron(event.target)) {
+										event.preventDefault();
+										event.stopPropagation();
+										return;
+									}
+									onSelect?.(option, index, event);
+								}}
 							>
 								{content}
-							</div>
+							</Button>
 						);
-					}
-
-					return (
-						<Button
-							{...sharedAriaProps}
-							key={option.key ?? `${index}`}
-							href={option.href}
-							data-option-index={index}
-							id={optionId}
-							role={optionRole}
-							aria-selected={optionRole === "option" ? isSelected : undefined}
-							aria-disabled={isDisabled ? true : undefined}
-							tabIndex={-1}
-							disabled={optionRole === "menuitem" ? undefined : isDisabled}
-							variant="ghost"
-							align="left"
-							size="md"
-							className={optionClasses}
-							ref={(node) => controller.registerAnchor(levelPath, index, node)}
-							onMouseDown={(event: React.MouseEvent<HTMLElement>) => {
-								event.preventDefault();
-							}}
-							onMouseMove={() =>
-								handleOptionMouseMove(index, isDisabled, hasChildren)
-							}
-							onMouseLeave={() => {
-								if (hasChildren)
-									controller.scheduleCloseChildrenFrom(levelPath);
-							}}
-							onClick={(event: React.MouseEvent<HTMLElement>) => {
-								if (isDisabled) {
-									event.preventDefault();
-									return;
-								}
-								if (openChildFromChevron(event.target)) {
-									event.preventDefault();
-									event.stopPropagation();
-									return;
-								}
-								onSelect?.(option, index, event);
-							}}
-						>
-							{content}
-						</Button>
-					);
-				})}
+					})
+					.flatMap((element, index) => {
+						const boundary =
+							options[index].dividerBefore || options[index - 1]?.dividerAfter;
+						if (!boundary || index === 0) return [element];
+						return [
+							<Divider
+								decorative={role === "listbox"}
+								key={`separator-${element.key}`}
+								className={getDropdownDividerClassName(boundary)}
+							/>,
+							element,
+						];
+					})}
 			</div>
 		);
 

@@ -4,9 +4,8 @@ import clsx from "clsx";
 import { DashboardTablePanel } from "@/app/(site)/dashboard/_components/data/DashboardTablePanel";
 import { MemberIdentity } from "@/app/(site)/dashboard/_components/entities/member/MemberIdentity";
 import { DashboardSection } from "@/app/(site)/dashboard/_components/layout/DashboardSection";
-import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 
 const rows = ["alpha", "bravo", "charlie"];
@@ -29,22 +28,20 @@ export function PlatformOverviewLoading() {
 		<div aria-busy="true" aria-label="Loading Platform" role="status">
 			<DashboardSection
 				contentClassName="grid gap-4 md:grid-cols-2"
-				description="Open internal platform support and report operations."
 				title="Platform"
 			>
 				{platformDestinations.map((destination) => (
-					<Card key={destination.label}>
-						<Card.Heading
+					<ContentSection key={destination.label}>
+						<ContentSection.Heading
 							description={destination.description}
-							leading={<Icon name={destination.icon} size="sm" />}
 							title={destination.label}
 						/>
-						<Card.Content>
+						<ContentSection.Content>
 							<Button.Skeleton size="sm" variant="secondary">
 								Open {destination.label.toLowerCase()}
 							</Button.Skeleton>
-						</Card.Content>
-					</Card>
+						</ContentSection.Content>
+					</ContentSection>
 				))}
 			</DashboardSection>
 		</div>
@@ -58,7 +55,7 @@ export function PlatformCollectionLoading({
 	title,
 }: {
 	columns: readonly { id: string; kind?: "action" | "data"; label: string }[];
-	description: string;
+	description?: string;
 	label: string;
 	title: string;
 }) {
@@ -76,18 +73,18 @@ export function PlatformCollectionLoading({
 						kind: column.kind,
 					}))}
 					header={
-						<Card.Header className="min-w-0">
-							<Card.Title className="inline-flex min-w-0 flex-wrap items-center gap-2">
+						<ContentSection.Header className="min-w-0">
+							<ContentSection.Title className="inline-flex min-w-0 flex-wrap items-center gap-2">
 								{title}
-							</Card.Title>
-							<Card.Description className="min-w-0 break-words">
+							</ContentSection.Title>
+							<ContentSection.Description className="min-w-0 break-words">
 								Showing fixture management entries.
-							</Card.Description>
+							</ContentSection.Description>
 							<div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
 								<div className="h-9 rounded-full bg-muted/80" />
 								<div className="h-9 rounded-full bg-muted/80" />
 							</div>
-						</Card.Header>
+						</ContentSection.Header>
 					}
 				>
 					{rows.map((row) => (
@@ -149,8 +146,8 @@ export function PlatformDetailLoading({
 				<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
 					<div className="grid gap-5">
 						{["Content", "Requester context"].map((cardTitle) => (
-							<Card key={cardTitle}>
-								<Card.Heading
+							<ContentSection key={cardTitle}>
+								<ContentSection.Heading
 									description={
 										<Text.Skeleton variant="support">
 											Platform management detail
@@ -162,23 +159,23 @@ export function PlatformDetailLoading({
 										</Text.Skeleton>
 									}
 								/>
-								<Card.Content className="grid gap-3">
+								<ContentSection.Content className="grid gap-3">
 									<Text.Skeleton variant="body">
 										Fixture detail content and server-resolved context
 									</Text.Skeleton>
-								</Card.Content>
-							</Card>
+								</ContentSection.Content>
+							</ContentSection>
 						))}
 					</div>
-					<Card className="self-start">
-						<Card.Heading
+					<ContentSection className="self-start">
+						<ContentSection.Heading
 							title={<Text.Skeleton variant="headingXs">Triage</Text.Skeleton>}
 						/>
-						<Card.Content className="grid gap-4">
+						<ContentSection.Content className="grid gap-4">
 							<div className="h-9 rounded-full bg-muted/80" />
 							<div className="h-28 rounded-2xl bg-muted/80" />
-						</Card.Content>
-					</Card>
+						</ContentSection.Content>
+					</ContentSection>
 				</div>
 			</DashboardSection>
 		</div>

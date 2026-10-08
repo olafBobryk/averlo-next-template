@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ModalHost } from "@/components/ui/overlays/modal/ModalHost";
-import { useModal } from "@/components/ui/overlays/modal/useModal";
+import { AnimatePresence } from "motion/react";
+import { InputFrame } from "@/components/ui/primitives/InputFrame";
+import { Icon } from "@/components/ui/icons/Icon";
+import { DashboardCommandOverlay } from "./DashboardCommandOverlay";
 import { defineCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import type { DashboardContextualCommand } from "./DashboardCommandContracts";
 import { DashboardCommandPalette } from "./DashboardCommandPalette";
@@ -104,6 +106,7 @@ function CommandPaletteContent({
 	return (
 		<>
 			<DashboardCommandPalette
+				anchored
 				activeCommandId={effectiveActiveCommandId}
 				commandTree={commandTree}
 				filteredCommandCount={filteredCommands.length}
@@ -132,35 +135,51 @@ function CommandPaletteContent({
 function CommandPaletteHarness({
 	initialQuery = "",
 	textScale = 1,
+	compact = false,
+	initiallyOpen = true,
 }: {
 	initialQuery?: string;
 	textScale?: number;
+	compact?: boolean;
+	initiallyOpen?: boolean;
 }) {
-	const { closeModal, openModal } = useModal();
-	React.useEffect(() => {
-		const id = openModal(
-			() => <CommandPaletteContent initialQuery={initialQuery} />,
-			{
-				ariaLabel: "Dashboard commands",
-				cardProps: {
-					className: "max-h-[min(620px,82vh)]",
-					maxWidth: "2xl",
-				},
-				placement: "top",
-			},
-		);
-		return () => closeModal(id);
-	}, [closeModal, initialQuery, openModal]);
+	const anchor = React.useRef<HTMLDivElement>(null);
+	const [open, setOpen] = React.useState(false);
+	React.useEffect(() => setOpen(initiallyOpen), [initiallyOpen]);
+	const resolveAnchor = React.useCallback(() => anchor.current, []);
 	return (
-		<>
-			<div
-				id="modal-root"
-				style={{ "--text-scale": textScale } as React.CSSProperties}
-			/>
-			<ModalHost />
-		</>
+		<div style={{ "--text-scale": textScale } as React.CSSProperties}>
+			<div className="h-screen w-60 bg-panel p-3 pt-16">
+				<InputFrame ref={anchor} className={compact ? "!w-10" : "w-full"}>
+					<button
+						type="button"
+						aria-label="Open dashboard commands"
+						className="flex h-full w-full items-center gap-2 px-3 text-sm text-muted-foreground"
+						onClick={() => setOpen(true)}
+					>
+						<Icon className="!size-4 shrink-0" name="search" />
+						{compact ? null : "Search"}
+					</button>
+				</InputFrame>
+			</div>
+			<AnimatePresence
+				onExitComplete={() => anchor.current?.querySelector("button")?.focus()}
+			>
+				{open ? (
+					<DashboardCommandOverlay
+						resolveAnchor={resolveAnchor}
+						onClose={() => setOpen(false)}
+					>
+						<div style={{ "--text-scale": textScale } as React.CSSProperties}>
+							<CommandPaletteContent initialQuery={initialQuery} />
+						</div>
+					</DashboardCommandOverlay>
+				) : null}
+			</AnimatePresence>
+		</div>
 	);
 }
+
 function CatalogPreview() {
 	const render = () => <CommandPaletteHarness />;
 	return (
@@ -173,18 +192,18 @@ function CatalogPreview() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "dashboard-commands-command-palette",
 	name: "Command Palette",
-	role: "Hosted dashboard command finder with contextual hierarchy, keyboard navigation, and searchable listbox semantics.",
+	role: "Sidebar-anchored dashboard command finder with plain icons, two-line rows, 16px child indentation, keyboard navigation, and searchable listbox semantics.",
 	importStatement:
 		'import { DashboardCommandPalette } from "./DashboardCommandPalette";',
 	chooseWhen: [
-		"Dashboard navigation and route-owned actions need one keyboard-searchable hierarchy in the shared modal stack.",
+		"Dashboard navigation and route-owned actions need one keyboard-searchable hierarchy in a widening search surface without dimming.",
 	],
 	chooseInstead: [
 		"Use Dropdown.Menu for a small control-local action set, or Dropdown.Listbox for persistent single selection.",
 	],
 	compounds: [],
 	exclusions: [
-		"Page-local ModalShell instances that bypass ModalHost stacking.",
+		"Centered command dialogs that move search away from its visible sidebar anchor.",
 		"Flat action lists that discard registered parent-child command relationships.",
 	],
 	guarantees: [

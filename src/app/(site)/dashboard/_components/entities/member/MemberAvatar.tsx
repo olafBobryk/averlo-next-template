@@ -10,6 +10,7 @@ function MemberAvatarRoot({
 	colorIndex,
 	imageUrl,
 	initials,
+	name,
 	size = "md",
 }: {
 	alt: string;
@@ -17,6 +18,7 @@ function MemberAvatarRoot({
 	colorIndex: number;
 	imageUrl?: string | null;
 	initials: string;
+	name?: string;
 	size?: MemberAvatarSize;
 }) {
 	return (
@@ -25,7 +27,7 @@ function MemberAvatarRoot({
 			className={className}
 			fallback={initials}
 			helperIndex={colorIndex}
-			name={alt}
+			name={name}
 			size={size}
 			src={imageUrl}
 		/>

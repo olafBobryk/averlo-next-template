@@ -2,7 +2,17 @@ import "server-only";
 
 import { type AssistantActor, assistantLimits } from "./contracts";
 
-type RunState = { active: Set<string>; starts: Map<string, number[]> };
+type RunControl = {
+	threadId: string;
+	controller: AbortController;
+	done: Promise<void>;
+	resolve: () => void;
+};
+type RunState = {
+	active: Set<string>;
+	starts: Map<string, number[]>;
+	controls?: Map<string, RunControl>;
+};
 declare global {
 	var __averloAssistantRunState: RunState | undefined;
 }
@@ -19,7 +29,10 @@ function key(actor: AssistantActor) {
 	return `${actor.organizationId}:${actor.userId}`;
 }
 
-export function startAssistantRun(actor: AssistantActor) {
+export function startAssistantRun(
+	actor: AssistantActor,
+	options?: { threadId: string; controller: AbortController },
+) {
 	const runState = state();
 	const actorKey = key(actor);
 	if (runState.active.has(actorKey)) {
@@ -41,5 +54,34 @@ export function startAssistantRun(actor: AssistantActor) {
 	starts.push(now);
 	runState.starts.set(actorKey, starts);
 	runState.active.add(actorKey);
-	return () => runState.active.delete(actorKey);
+	let control: RunControl | undefined;
+	if (options) {
+		let resolve!: () => void;
+		const done = new Promise<void>((complete) => {
+			resolve = complete;
+		});
+		control = { ...options, done, resolve };
+		runState.controls ??= new Map();
+		runState.controls.set(actorKey, control);
+	}
+	return () => {
+		runState.active.delete(actorKey);
+		if (control && runState.controls?.get(actorKey) === control) {
+			runState.controls.delete(actorKey);
+			control.resolve();
+		}
+	};
+}
+
+export async function cancelAssistantRun(
+	actor: AssistantActor,
+	threadId: string,
+) {
+	const control = state().controls?.get(key(actor));
+	if (!control || control.threadId !== threadId) return;
+	control.controller.abort();
+	await control.done;
+}
+export function hasAssistantRun(actor: AssistantActor) {
+	return state().active.has(key(actor));
 }

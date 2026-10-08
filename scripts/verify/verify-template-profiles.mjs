@@ -563,7 +563,7 @@ async function verifyAssistantCapability(templateRoot, tempRoot) {
 	);
 	for (const requiredPath of [
 		"src/app/(site)/dashboard/_components/entities/record/RecordToolCall.tsx",
-		"src/app/(site)/dashboard/assistant",
+		"src/app/(site)/dashboard/chats",
 		"src/app/api/assistant",
 		"src/components/domain/assistant",
 		"src/lib/assistant",
@@ -621,7 +621,7 @@ async function verifyAssistantCapability(templateRoot, tempRoot) {
 
 async function assertNoAssistantCapability(outputRoot) {
 	for (const forbiddenPath of [
-		"src/app/(site)/dashboard/assistant",
+		"src/app/(site)/dashboard/chats",
 		"src/app/api/assistant",
 		"src/components/domain/assistant",
 	]) {
@@ -818,7 +818,7 @@ async function assertComponentExport(outputRoot, profileCase) {
 			`${profileCase.profileId}/${profileCase.content} is missing Component Export scripts.`,
 		);
 	}
-	const expectedOwnerCount = selectedSurfaces.has("dashboard") ? 91 : 79;
+	const expectedOwnerCount = selectedSurfaces.has("dashboard") ? 95 : 82;
 	if (catalogFiles.length !== expectedOwnerCount) {
 		throw new Error(
 			`${profileCase.profileId}/${profileCase.content} expected ${expectedOwnerCount} installed catalogue owners, found ${catalogFiles.length}.`,

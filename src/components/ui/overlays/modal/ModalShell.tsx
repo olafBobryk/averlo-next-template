@@ -26,7 +26,7 @@ export type ModalShellProps = {
 	disableWhenReducedMotion?: boolean;
 	isTopMost?: boolean;
 	layerIndex?: number;
-	placement?: "center" | "top";
+	placement?: "center" | "top" | "left" | "fullscreen";
 };
 
 type ModalShellContextValue = {
@@ -322,16 +322,16 @@ export function ModalShell({
 	}, []);
 
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
-	const animateY = animate?.y ?? true;
+	const animateY = animate?.y ?? placement !== "fullscreen";
 	const animateOpacity = animate?.opacity ?? true;
-	const animateScale = animate?.scale ?? true;
+	const animateScale = animate?.scale ?? placement !== "fullscreen";
 
 	const offset = (() => {
 		switch (panelDirection) {
 			case "up":
 				return { x: 0, y: -24 };
 			case "left":
-				return { x: -24, y: 0 };
+				return { x: placement === "left" ? "-100%" : -24, y: 0 };
 			case "right":
 				return { x: 24, y: 0 };
 			default:
@@ -385,10 +385,15 @@ export function ModalShell({
 		<Portal target={portalTargetId}>
 			<div
 				className={clsx(
-					"fixed inset-0 z-80 flex w-full justify-center overflow-hidden overscroll-contain px-4 sm:px-6",
-					placement === "top"
-						? "items-start py-[9vh]"
-						: "items-center py-4 sm:py-6",
+					"fixed inset-0 z-80 flex w-full overflow-hidden overscroll-contain",
+					placement === "left" || placement === "fullscreen"
+						? "items-stretch justify-start"
+						: "justify-center px-4 sm:px-6",
+					placement === "left" || placement === "fullscreen"
+						? ""
+						: placement === "top"
+							? "items-start py-[9vh]"
+							: "items-center py-4 sm:py-6",
 				)}
 				data-modal-shell=""
 				style={layerIndex ? { zIndex: layerIndex } : undefined}
@@ -406,9 +411,26 @@ export function ModalShell({
 				/>
 
 				<motion.div
-					ref={wrapperRef}
+					ref={React.useCallback(
+						(node: HTMLDivElement | null) => {
+							wrapperRef.current = node;
+							// Portal mounts after the shell layout effect. Focus when its DOM arrives.
+							if (node && isTopMost) {
+								const [firstFocusable] = getFocusableElements(node);
+								(firstFocusable ?? node).focus({ preventScroll: true });
+							}
+						},
+						[isTopMost],
+					)}
 					key="modal-content-wrapper"
-					className="relative flex max-h-[calc(100dvh-2rem)] w-full min-w-0 justify-center will-change-transform sm:max-h-[calc(100dvh-3rem)]"
+					className={clsx(
+						"relative flex min-w-0 will-change-transform",
+						placement === "fullscreen"
+							? "h-dvh w-full"
+							: placement === "left"
+								? "h-dvh w-[min(280px,calc(100vw-48px))]"
+								: "max-h-[calc(100dvh-2rem)] w-full justify-center sm:max-h-[calc(100dvh-3rem)]",
+					)}
 					initial={panelInitial}
 					animate={panelAnimate}
 					exit={panelExit}

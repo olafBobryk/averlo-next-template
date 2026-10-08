@@ -2,6 +2,9 @@
 
 import { getDashboardSurface } from "../../_registry/surfaceRegistry";
 import { AdministrationSurfaceSkeleton } from "../../administration/_components/AdministrationSurface";
+import { AssistantNewThreadSurfaceSkeleton } from "../../chats/_components/AssistantNewThreadSurface";
+import { AssistantThreadSurfaceSkeleton } from "../../chats/[threadId]/_components/AssistantThreadSurface";
+import { AssistantConversationsSurfaceSkeleton } from "../../chats/conversations/_components/AssistantConversationsSurface";
 import { OrganizationSurfaceSkeleton } from "../../organization/_components/OrganizationSurface";
 import { OrganizationMemberSurfaceSkeleton } from "../../organization/members/[memberId]/_components/OrganizationMemberSurface";
 import { OrganizationSettingsSurfaceSkeleton } from "../../organization/settings/_components/OrganizationSettingsSurface";
@@ -21,6 +24,12 @@ import { OverviewSurfaceSkeleton } from "../OverviewSurface";
 
 export function DashboardForcedLoadingView({ pathname }: { pathname: string }) {
 	switch (getDashboardSurface(pathname)?.id) {
+		case "dashboard.chats":
+			return <AssistantNewThreadSurfaceSkeleton />;
+		case "dashboard.chats.thread":
+			return <AssistantThreadSurfaceSkeleton />;
+		case "dashboard.chats.conversations":
+			return <AssistantConversationsSurfaceSkeleton />;
 		case "dashboard.profile":
 			return <ProfileSurfaceSkeleton />;
 		case "dashboard.administration":

@@ -3,7 +3,7 @@
 import { Icon } from "@/components/ui/icons/Icon";
 import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { Card, ContentSection } from "@/components/ui/primitives/surfaces";
 import { hrefFor } from "@/lib/routes";
 import { DashboardDetailField } from "../../_components/detail/DashboardDetailField";
 import { MemberRoleChip } from "../../_components/entities/member/MemberRoleChip";
@@ -85,56 +85,57 @@ function AccountDetailsSettingsSectionRoot({
 	const rolePresentation = memberRolePresentation[membership.role];
 
 	return (
-		<Card className="scroll-mt-24" id="account-details">
-			<Card.Heading
+		<ContentSection className="scroll-mt-24" id="account-details">
+			<ContentSection.Heading
 				description="Read-only account identity and organization membership details."
-				leading={
-					<Icon className="text-muted-foreground" name="user" size="sm" />
-				}
 				title="Account details"
 			/>
-			<Card.Content>
-				<dl className="grid gap-4 sm:grid-cols-2">
-					<DashboardDetailField
-						copyLabel="Copy email address"
-						copyValue={user.email}
-						icon={<Icon name="mail" size="sm" />}
-						label="Email"
-						value={user.email || "Email unavailable"}
-					/>
-					<DashboardDetailField
-						icon={<Icon name="calendar" size="sm" />}
-						label="Joined"
-						value={joinedAtLabel}
-					/>
-					<DashboardDetailField
-						icon={<Icon name="check" size="sm" />}
-						label="Permissions"
-						truncateValue={false}
-						value={
-							<span className="flex flex-wrap gap-2">
-								{capabilities.map((capability) => (
-									<Chip key={capability}>
-										{dashboardCapabilityLabels[capability]}
-									</Chip>
-								))}
-							</span>
-						}
-					/>
-					<DashboardDetailField
-						icon={<Icon name="shield" size="sm" />}
-						label="Organization role"
-						truncateValue={false}
-						value={
-							<MemberRoleChip
-								label={rolePresentation.shortLabel}
-								tone={rolePresentation.tone}
+			<ContentSection.Content>
+				<Card>
+					<Card.Content>
+						<dl className="grid gap-4 sm:grid-cols-2">
+							<DashboardDetailField
+								copyLabel="Copy email address"
+								copyValue={user.email}
+								icon={<Icon name="mail" size="sm" />}
+								label="Email"
+								value={user.email || "Email unavailable"}
 							/>
-						}
-					/>
-				</dl>
-			</Card.Content>
-		</Card>
+							<DashboardDetailField
+								icon={<Icon name="calendar" size="sm" />}
+								label="Joined"
+								value={joinedAtLabel}
+							/>
+							<DashboardDetailField
+								icon={<Icon name="check" size="sm" />}
+								label="Permissions"
+								truncateValue={false}
+								value={
+									<span className="flex flex-wrap gap-2">
+										{capabilities.map((capability) => (
+											<Chip key={capability}>
+												{dashboardCapabilityLabels[capability]}
+											</Chip>
+										))}
+									</span>
+								}
+							/>
+							<DashboardDetailField
+								icon={<Icon name="shield" size="sm" />}
+								label="Organization role"
+								truncateValue={false}
+								value={
+									<MemberRoleChip
+										label={rolePresentation.shortLabel}
+										tone={rolePresentation.tone}
+									/>
+								}
+							/>
+						</dl>
+					</Card.Content>
+				</Card>
+			</ContentSection.Content>
+		</ContentSection>
 	);
 }
 
@@ -149,50 +150,51 @@ function AccountDetailsSettingsSectionSkeleton({
 	const rolePresentation = memberRolePresentation[membership.role];
 
 	return (
-		<Card className="scroll-mt-24" id="account-details">
-			<Card.Heading
+		<ContentSection className="scroll-mt-24" id="account-details">
+			<ContentSection.Heading
 				description="Read-only account identity and organization membership details."
-				leading={
-					<Icon className="text-muted-foreground" name="user" size="sm" />
-				}
 				title="Account details"
 			/>
-			<Card.Content>
-				<dl className="grid gap-4 sm:grid-cols-2">
-					<DashboardDetailField.Skeleton
-						copyable
-						icon={<Icon name="mail" size="sm" />}
-						label="Email"
-						value={user.email || "Email unavailable"}
-					/>
-					<DashboardDetailField.Skeleton
-						icon={<Icon name="calendar" size="sm" />}
-						label="Joined"
-						value={joinedAtLabel}
-					/>
-					<DashboardDetailField.Skeleton
-						icon={<Icon name="check" size="sm" />}
-						label="Permissions"
-						truncateValue={false}
-					>
-						<span className="flex flex-wrap gap-2">
-							{capabilities.map((capability) => (
-								<Chip.Skeleton key={capability}>
-									{dashboardCapabilityLabels[capability]}
-								</Chip.Skeleton>
-							))}
-						</span>
-					</DashboardDetailField.Skeleton>
-					<DashboardDetailField.Skeleton
-						icon={<Icon name="shield" size="sm" />}
-						label="Organization role"
-						truncateValue={false}
-					>
-						<MemberRoleChip.Skeleton label={rolePresentation.shortLabel} />
-					</DashboardDetailField.Skeleton>
-				</dl>
-			</Card.Content>
-		</Card>
+			<ContentSection.Content>
+				<Card>
+					<Card.Content>
+						<dl className="grid gap-4 sm:grid-cols-2">
+							<DashboardDetailField.Skeleton
+								copyable
+								icon={<Icon name="mail" size="sm" />}
+								label="Email"
+								value={user.email || "Email unavailable"}
+							/>
+							<DashboardDetailField.Skeleton
+								icon={<Icon name="calendar" size="sm" />}
+								label="Joined"
+								value={joinedAtLabel}
+							/>
+							<DashboardDetailField.Skeleton
+								icon={<Icon name="check" size="sm" />}
+								label="Permissions"
+								truncateValue={false}
+							>
+								<span className="flex flex-wrap gap-2">
+									{capabilities.map((capability) => (
+										<Chip.Skeleton key={capability}>
+											{dashboardCapabilityLabels[capability]}
+										</Chip.Skeleton>
+									))}
+								</span>
+							</DashboardDetailField.Skeleton>
+							<DashboardDetailField.Skeleton
+								icon={<Icon name="shield" size="sm" />}
+								label="Organization role"
+								truncateValue={false}
+							>
+								<MemberRoleChip.Skeleton label={rolePresentation.shortLabel} />
+							</DashboardDetailField.Skeleton>
+						</dl>
+					</Card.Content>
+				</Card>
+			</ContentSection.Content>
+		</ContentSection>
 	);
 }
 

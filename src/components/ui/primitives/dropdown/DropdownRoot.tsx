@@ -51,8 +51,10 @@ export function DropdownRoot({
 	autoFocusMenu = true,
 	onOpenChange,
 	collectionController,
+	keepOpenWhileFocusWithin = false,
 }: DropdownProps & {
 	collectionController?: DropdownCollectionController;
+	keepOpenWhileFocusWithin?: boolean;
 }) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
@@ -167,10 +169,21 @@ export function DropdownRoot({
 		clearHoverTimeout();
 		if (!openOnHover || isPinned) return false;
 		hoverTimeoutRef.current = window.setTimeout(() => {
+			if (
+				keepOpenWhileFocusWithin &&
+				menuRef.current?.contains(document.activeElement)
+			)
+				return;
 			setOpenState(false);
 		}, 120);
 		return true;
-	}, [clearHoverTimeout, isPinned, openOnHover, setOpenState]);
+	}, [
+		clearHoverTimeout,
+		isPinned,
+		openOnHover,
+		setOpenState,
+		keepOpenWhileFocusWithin,
+	]);
 
 	React.useEffect(() => {
 		collectionController?.connectRootHoverHandlers({
@@ -304,9 +317,7 @@ export function DropdownRoot({
 			menuRef.current &&
 			lastOpenMethodRef.current === "keyboard"
 		) {
-			const focusTarget = menuRef.current.querySelector<HTMLElement>(
-				'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])',
-			);
+			const focusTarget = getMenuFocusableElements()[0];
 			focusTarget?.focus({ preventScroll: true });
 		}
 		const handleResize = () => calculateMenuPosition();
@@ -320,7 +331,13 @@ export function DropdownRoot({
 				window.removeEventListener("scroll", handleResize, true);
 			}
 		};
-	}, [isOpen, calculateMenuPosition, autoFocusMenu, positionStrategy]);
+	}, [
+		isOpen,
+		calculateMenuPosition,
+		autoFocusMenu,
+		positionStrategy,
+		getMenuFocusableElements,
+	]);
 
 	React.useEffect(() => {
 		if (!isOpen && !isPinned) return;

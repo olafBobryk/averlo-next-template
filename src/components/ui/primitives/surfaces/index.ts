@@ -3,6 +3,7 @@ export {
 	type CardHeadingProps,
 	type CardProps,
 } from "./Card";
+export { ContentSection } from "./ContentSection";
 export { Float, type FloatProps } from "./Float";
 export { Panel, type PanelProps } from "./Panel";
 export type {

@@ -13,6 +13,10 @@ import {
 	type FilePreviewLabels,
 	type FilePreviewTag,
 } from "./FilePreview";
+import {
+	type FilePreviewHandler,
+	useFilePreviewHandler,
+} from "./previewHandler";
 
 export type FileInputPendingItem = {
 	file: File;
@@ -23,6 +27,7 @@ export type FileInputPendingItem = {
 };
 
 export type FileInputUploadedItem = {
+	resolveUrl?: (signal: AbortSignal) => Promise<string>;
 	key?: string;
 	name?: string;
 	sortPriority?: number;
@@ -42,6 +47,7 @@ export type FileInputLabels = FilePreviewLabels & {
 };
 
 export type FileInputProps = {
+	onPreview?: FilePreviewHandler;
 	accept?: string;
 	capture?: "environment" | "user";
 	className?: string;
@@ -149,6 +155,7 @@ function urlLooksLikePdf(url: string) {
 }
 
 function FileInputRoot({
+	onPreview,
 	accept = "image/*,application/pdf",
 	capture,
 	className,
@@ -169,6 +176,8 @@ function FileInputRoot({
 	resetSignal,
 	showAddControl = true,
 }: FileInputProps) {
+	const inheritedPreview = useFilePreviewHandler();
+	const previewHandler = onPreview ?? inheritedPreview;
 	const generatedId = React.useId();
 	const inputId = id ?? inputName ?? generatedId;
 	const inputRef = React.useRef<HTMLInputElement>(null);
@@ -310,6 +319,7 @@ function FileInputRoot({
 			if (!preview) return null;
 			return {
 				key: `pending:${preview.key}`,
+				file: item.file,
 				name: item.file.name,
 				sortPriority: item.sortPriority,
 				status: "pending",
@@ -373,6 +383,7 @@ function FileInputRoot({
 					<div className="flex w-max gap-3 overscroll-x-contain [-webkit-overflow-scrolling:touch]">
 						{previewItems.map((item, index) => (
 							<FilePreview
+								onPreview={previewHandler}
 								hideRemove={!isEditable}
 								index={index}
 								isDisabled={disabled}

@@ -1,13 +1,12 @@
 "use client";
 
+import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import type { AssistantThreadSummary } from "@/lib/assistant/contracts";
-import {
-	DashboardSidebarBranch,
-	DashboardSidebarItem,
-} from "./DashboardSidebarBranch";
+import { DashboardSidebarItem } from "./DashboardSidebarBranch";
+import { DashboardSidebarSection } from "./DashboardSidebarSection";
 import { DashboardSidebarThreadActionsMenu } from "./DashboardSidebarThreadActionsMenu";
 
 function isAssistantThreadSummary(
@@ -26,10 +25,8 @@ function isAssistantThreadSummary(
 export function DashboardSidebarSupplement({
 	active,
 	collapsed,
-	defaultOpen,
 	endpoint,
 	href,
-	icon,
 	label,
 	mobileExpanded,
 	onNavigate,
@@ -38,7 +35,6 @@ export function DashboardSidebarSupplement({
 }: {
 	active: boolean;
 	collapsed: boolean;
-	defaultOpen: boolean;
 	endpoint: string;
 	href: string;
 	icon?: IconName;
@@ -105,35 +101,24 @@ export function DashboardSidebarSupplement({
 		);
 	const deleteThread = (threadId: string) =>
 		setThreads((current) => current.filter((thread) => thread.id !== threadId));
-	if (visibleThreads.length === 0) {
-		return (
-			<DashboardSidebarItem
-				active={active}
-				collapsed={collapsed}
-				href={href}
-				icon={icon}
-				label={label}
-				mobileExpanded={mobileExpanded}
-				onNavigate={onNavigate}
-			/>
-		);
-	}
 
 	return (
-		<DashboardSidebarBranch
-			active={active}
-			collapsed={collapsed}
-			defaultOpen={defaultOpen}
-			href={href}
-			icon={icon}
+		<DashboardSidebarSection
 			label={label}
-			mobileExpanded={mobileExpanded}
-			onNavigate={onNavigate}
+			count={visibleThreads.length + 1}
 			storageId={storageId}
+			collapsed={collapsed}
+			mobileExpanded={mobileExpanded}
 		>
-			<div className="grid gap-1">
+			<div
+				className={clsx(
+					"grid gap-1",
+					!mobileExpanded && "max-lg:hidden",
+					collapsed && !mobileExpanded && "lg:hidden",
+				)}
+			>
 				{visibleThreads.map((thread) => {
-					const href = `/dashboard/assistant/${encodeURIComponent(thread.id)}`;
+					const href = `/dashboard/chats/${encodeURIComponent(thread.id)}`;
 					return (
 						<DashboardSidebarItem
 							active={pathname === href}
@@ -158,12 +143,21 @@ export function DashboardSidebarSupplement({
 							}
 							href={href}
 							key={thread.id}
+							icon={null}
 							label={thread.title}
 							onNavigate={onNavigate}
 						/>
 					);
 				})}
 			</div>
-		</DashboardSidebarBranch>
+			<DashboardSidebarItem
+				active={pathname === "/dashboard/chats/conversations"}
+				collapsed={collapsed}
+				href="/dashboard/chats/conversations"
+				label="All conversations"
+				mobileExpanded={mobileExpanded}
+				onNavigate={onNavigate}
+			/>
+		</DashboardSidebarSection>
 	);
 }

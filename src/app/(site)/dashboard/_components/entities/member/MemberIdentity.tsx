@@ -34,6 +34,7 @@ function MemberIdentityRoot({
 			colorIndex={presentation.avatarColorIndex}
 			imageUrl={presentation.avatarUrl}
 			initials={presentation.initials}
+			name={presentation.displayLabel}
 			size={resolvedAvatarSize}
 		/>
 	);

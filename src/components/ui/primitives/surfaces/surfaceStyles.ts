@@ -14,11 +14,11 @@ export const surfaceChromeStyles = cva("text-foreground", {
 		border: {
 			default: "border border-border",
 			none: "border-0",
-			subtle: "border border-foreground/[0.08]",
+			subtle: "border border-[var(--card-border-color)]",
 		},
 		elevation: {
 			panel: "shadow-none",
-			card: "shadow-sm",
+			card: "shadow-xs",
 			float: "shadow-md",
 			overlay: "shadow-lg",
 		},
@@ -26,7 +26,7 @@ export const surfaceChromeStyles = cva("text-foreground", {
 			none: "rounded-none",
 			float: "rounded-lg",
 			panel: "rounded-2xl",
-			card: "rounded-3xl",
+			card: "rounded-xl",
 		},
 		tone: {
 			default: "",

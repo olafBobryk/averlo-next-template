@@ -2,6 +2,7 @@ import { templateCapabilities } from "@/config/capabilities";
 import { defineRouteSurfaceRegistry } from "@/lib/surfaces/routeSurface";
 
 const dashboardRouteSurfaceDefinitions = [
+
 	{
 		family: "dashboard",
 		href: "/dashboard",
@@ -22,20 +23,20 @@ const dashboardRouteSurfaceDefinitions = [
 	},
 	{
 		family: "dashboard",
-		href: "/dashboard/assistant",
-		id: "dashboard.assistant",
+		href: "/dashboard/chats",
+		id: "dashboard.chats",
 		match: "exact",
 	},
 	{
 		family: "dashboard",
-		href: "/dashboard/assistant/conversations",
-		id: "dashboard.assistant.conversations",
+		href: "/dashboard/chats/conversations",
+		id: "dashboard.chats.conversations",
 		match: "exact",
 	},
 	{
 		family: "dashboard",
-		href: "/dashboard/assistant/[threadId]",
-		id: "dashboard.assistant.thread",
+		href: "/dashboard/chats/[threadId]",
+		id: "dashboard.chats.thread",
 		match: "pattern",
 	},
 	{
@@ -134,7 +135,7 @@ export const dashboardRouteSurfaceRegistry = defineRouteSurfaceRegistry(
 	dashboardRouteSurfaceDefinitions.filter(
 		(surface) =>
 			templateCapabilities.assistant ||
-			!surface.id.startsWith("dashboard.assistant"),
+			!surface.id.startsWith("dashboard.chats"),
 	),
 );
 

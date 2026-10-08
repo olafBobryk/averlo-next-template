@@ -30,7 +30,7 @@ import {
 	TextInput,
 } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { surfaceHref } from "@/lib/routes";
 import {
@@ -186,13 +186,13 @@ export function PlatformReportsContent({
 				}
 				getRowKey={(report) => report.id}
 				header={
-					<Card.Header className="min-w-0">
-						<Card.Title className="inline-flex min-w-0 flex-wrap items-center gap-2">
+					<ContentSection.Header className="min-w-0">
+						<ContentSection.Title className="inline-flex min-w-0 flex-wrap items-center gap-2">
 							Product reports
-						</Card.Title>
-						<Card.Description className="min-w-0 break-words">
+						</ContentSection.Title>
+						<ContentSection.Description className="min-w-0 break-words">
 							Showing {visibleReports.length} of {reports.length} reports.
-						</Card.Description>
+						</ContentSection.Description>
 						<div className="mt-3 grid gap-4 xl:grid-cols-[minmax(0,1fr)_13rem_13rem_13rem] xl:items-end">
 							<TextInput
 								label="Search reports"
@@ -219,7 +219,7 @@ export function PlatformReportsContent({
 								value={severity}
 							/>
 						</div>
-					</Card.Header>
+					</ContentSection.Header>
 				}
 				id="platform-reports"
 				rows={visibleReports}

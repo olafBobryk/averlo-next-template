@@ -1,6 +1,5 @@
-import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { DashboardSection } from "../../_components/layout/DashboardSection";
 import { SupportRequestForm } from "./SupportRequestForm";
@@ -15,20 +14,17 @@ export function SupportSurface({
 }) {
 	return (
 		<DashboardSection contentClassName="grid gap-5" title="Support">
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					action={
 						<Button href={supportMailto} leadingIcon="mail" size="sm">
 							Open email
 						</Button>
 					}
 					description="Open your email client for a direct support conversation."
-					leading={
-						<Icon className="text-muted-foreground" name="mail" size="sm" />
-					}
 					title="Email support"
 				/>
-				<Card.Content>
+				<ContentSection.Content>
 					<div className="grid gap-2">
 						<Text tone="muted" variant="support">
 							Send a message to{" "}
@@ -45,8 +41,8 @@ export function SupportSurface({
 							email.
 						</Text>
 					</div>
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 			<SupportRequestForm />
 		</DashboardSection>
 	);

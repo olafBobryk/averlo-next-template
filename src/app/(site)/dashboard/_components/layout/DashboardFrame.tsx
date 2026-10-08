@@ -1,18 +1,9 @@
 "use client";
 
-import clsx from "clsx";
-import { motion } from "motion/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import * as React from "react";
 import Logo from "@/components/branding/Logo";
-import {
-	instantTransition,
-	resolveMotionTransition,
-} from "@/components/ui/foundations/motionTiming";
-import { useModal } from "@/components/ui/overlays/modal/useModal";
-import { Button } from "@/components/ui/primitives/Button";
-import { Panel } from "@/components/ui/primitives/surfaces";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
+import { MODAL_OPEN_EVENT } from "@/lib/modal";
 import { hrefFor } from "@/lib/routes";
 import { isDashboardDebugState } from "../../_registry/debug";
 import {
@@ -25,11 +16,15 @@ import {
 } from "../commands/DashboardCommandProvider";
 import { DashboardDebugMenu } from "../debug/DashboardDebugMenu";
 import { DashboardDebugStateView } from "../debug/DashboardDebugStateView";
-import { ReportIssueModal } from "../feedback/ReportIssueModal";
 import { useDashboardAuth } from "../providers/DashboardAuthProvider";
 import { DashboardAccountMenu } from "./DashboardAccountMenu";
 import { DashboardContentShell } from "./DashboardContentShell";
-import { DashboardOrganizationSwitcher } from "./DashboardOrganizationSwitcher";
+import { DashboardFileViewer } from "./DashboardFileViewer";
+import {
+	DashboardRouteLoading,
+	DashboardShellProvider,
+	DashboardToolbarOutlet,
+} from "./DashboardShellContext";
 import { DashboardSidebarNav } from "./DashboardSidebarNav";
 import {
 	DashboardSidebarShell,
@@ -37,118 +32,6 @@ import {
 } from "./DashboardSidebarShell";
 
 const forceLoadingStorageKey = "averlo-dashboard:force-loading";
-const footerLayoutTransition = resolveMotionTransition("overlay", {
-	distance: "near",
-	intensity: "subtle",
-	surface: "flat",
-});
-
-function DashboardFooterActions({
-	collapsed,
-	currentRoute,
-	onNavigate,
-	platformAdmin,
-}: {
-	collapsed: boolean;
-	currentRoute: string;
-	onNavigate: () => void;
-	platformAdmin: boolean;
-}) {
-	const { openModal } = useModal();
-	const motionAllowed = useMotionAllowed(true);
-
-	function openReportIssue() {
-		openModal(
-			({ close, setCloseDisabled }) => (
-				<ReportIssueModal
-					currentRoute={currentRoute}
-					onClose={close}
-					onCloseDisabledChange={setCloseDisabled}
-				/>
-			),
-			{
-				ariaLabel: "Report issue",
-				cardProps: { maxWidth: "xl" },
-				id: "dashboard-report-issue",
-			},
-		);
-		onNavigate();
-	}
-
-	const actions = [
-		{
-			href: hrefFor("dashboard.support"),
-			icon: "question",
-			id: "support",
-			label: "Support",
-		},
-		{
-			icon: "flag",
-			id: "report",
-			label: "Report issue",
-			onClick: openReportIssue,
-		},
-		...(platformAdmin
-			? [
-					{
-						href: hrefFor("dashboard.platform"),
-						icon: "shield",
-						id: "platform",
-						label: "Manage platform",
-					},
-				]
-			: []),
-	] as const;
-
-	return (
-		<div
-			className={clsx(
-				"flex w-full gap-1",
-				collapsed
-					? "flex-col items-center justify-center"
-					: "flex-row flex-wrap items-center justify-start",
-			)}
-		>
-			{actions.map((action) => (
-				<motion.span
-					className="inline-flex"
-					key={action.id}
-					layout="position"
-					transition={
-						motionAllowed ? footerLayoutTransition : instantTransition
-					}
-				>
-					{"href" in action ? (
-						<Button
-							aria-label={action.label}
-							className="!text-muted-foreground hover:!text-sidebar-accent-foreground"
-							href={action.href}
-							iconSize={16}
-							leadingIcon={action.icon}
-							onClick={onNavigate}
-							size="icon"
-							title={action.label}
-							variant="ghost"
-						/>
-					) : (
-						<Button
-							aria-label={action.label}
-							className="!text-muted-foreground hover:!text-sidebar-accent-foreground"
-							iconSize={16}
-							leadingIcon={action.icon}
-							onClick={action.onClick}
-							size="icon"
-							title={action.label}
-							type="button"
-							variant="ghost"
-						/>
-					)}
-				</motion.span>
-			))}
-		</div>
-	);
-}
-
 export function DashboardFrame({
 	children,
 }: Readonly<{
@@ -159,7 +42,35 @@ export function DashboardFrame({
 	const { membership, organization, organizationChoices, user } =
 		useDashboardAuth();
 	const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
-	const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
+	const [mobileSidebarOpen, setMobileSidebarOpenState] = React.useState(false);
+	const navigationTrigger = React.useRef<HTMLElement | null>(null);
+	React.useEffect(() => {
+		// Navigation yields to hosted dialogs, including the keyboard command shortcut.
+		const closeNavigation = () => setMobileSidebarOpenState(false);
+		window.addEventListener(MODAL_OPEN_EVENT, closeNavigation);
+		return () => window.removeEventListener(MODAL_OPEN_EVENT, closeNavigation);
+	}, []);
+	const setMobileSidebarOpen = React.useCallback((open: boolean) => {
+		if (open)
+			navigationTrigger.current =
+				document.activeElement instanceof HTMLElement
+					? document.activeElement
+					: null;
+		setMobileSidebarOpenState(open);
+	}, []);
+	React.useEffect(() => {
+		if (mobileSidebarOpen || !navigationTrigger.current) return;
+		const trigger = navigationTrigger.current;
+		navigationTrigger.current = null;
+		const frame = requestAnimationFrame(() => {
+			if (
+				document.contains(trigger) &&
+				!document.querySelector('[role="dialog"]')
+			)
+				trigger.focus({ preventScroll: true });
+		});
+		return () => cancelAnimationFrame(frame);
+	}, [mobileSidebarOpen]);
 	const [forceLoading, setForceLoading] = React.useState(false);
 	const surface = getDashboardSurface(pathname);
 	const layoutWidth = surface?.layoutWidth ?? "standard";
@@ -175,9 +86,11 @@ export function DashboardFrame({
 			: debugEnabled && forceLoading
 				? "loading"
 				: null;
-	const currentRoute = `${pathname}${searchParams.size ? `?${searchParams.toString()}` : ""}`;
 	const sidebarOffsetClassNames =
 		getDashboardSidebarOffsetClassNames(sidebarCollapsed);
+	// Existing chat owns its message gate so its composer stays mounted and usable.
+	const assistantMessagesLoading =
+		debugState === "loading" && surface?.id === "dashboard.chats.thread";
 
 	React.useEffect(() => {
 		try {
@@ -192,7 +105,7 @@ export function DashboardFrame({
 	React.useEffect(() => {
 		if (!pathname) return;
 		setMobileSidebarOpen(false);
-	}, [pathname]);
+	}, [pathname, setMobileSidebarOpen]);
 
 	function handleForceLoadingChange(value: boolean) {
 		setForceLoading(value);
@@ -210,112 +123,96 @@ export function DashboardFrame({
 			capabilities={capabilities}
 			organization={organization}
 		>
-			<div className="min-h-screen bg-background text-foreground">
-				<DashboardSidebarShell
-					body={
-						<div className="grid min-w-0 grid-cols-[minmax(0,1fr)]">
-							<div className="border-b border-sidebar-border/70 px-2 pb-3 lg:px-3">
-								<DashboardOrganizationSwitcher
-									collapsed={sidebarCollapsed}
-									mobileExpanded={mobileSidebarOpen}
-									onNavigate={() => setMobileSidebarOpen(false)}
-								/>
+			<DashboardShellProvider openNavigation={() => setMobileSidebarOpen(true)}>
+				<div className="h-dvh overflow-hidden bg-surface text-foreground">
+					<DashboardSidebarShell
+						body={
+							<div className="grid min-w-0 grid-cols-[minmax(0,1fr)]">
+								<div
+									className={`px-3 ${mobileSidebarOpen ? "pt-5" : sidebarCollapsed ? "pt-0" : "pt-0 lg:pt-5"}`}
+								>
+									<DashboardCommandTrigger
+										collapsed={sidebarCollapsed}
+										mobileExpanded={mobileSidebarOpen}
+									/>
+								</div>
+								<div className="px-3 pt-3">
+									<DashboardSidebarNav
+										collapsed={sidebarCollapsed}
+										mobileExpanded={mobileSidebarOpen}
+										onNavigate={() => setMobileSidebarOpen(false)}
+									/>
+								</div>
 							</div>
-							<div className="px-2 pt-3 lg:px-3">
-								<DashboardSidebarNav
-									collapsed={sidebarCollapsed}
-									mobileExpanded={mobileSidebarOpen}
-									onNavigate={() => setMobileSidebarOpen(false)}
-								/>
-							</div>
-						</div>
-					}
-					brand={
-						<div className="flex translate-y-px items-center pl-3.5">
+						}
+						brand={
 							<Logo
-								className={clsx(
-									mobileSidebarOpen
-										? "inline-flex max-lg:-ml-1"
-										: "max-lg:!hidden",
-								)}
+								aria-label="Dashboard overview"
 								href={hrefFor("dashboard.overview")}
 								size="sm"
+								className="!h-[18px] !w-[18px]"
+								variant="mark"
 								tone="dark"
 							/>
-						</div>
-					}
-					collapsed={sidebarCollapsed}
-					footer={
-						<>
-							<div className="w-full lg:hidden">
-								<DashboardFooterActions
-									collapsed={!mobileSidebarOpen}
-									currentRoute={currentRoute}
-									onNavigate={() => setMobileSidebarOpen(false)}
-									platformAdmin={user?.platformRole === "admin"}
-								/>
-							</div>
-							<div className="w-full max-lg:hidden">
-								<DashboardFooterActions
-									collapsed={sidebarCollapsed}
-									currentRoute={currentRoute}
-									onNavigate={() => undefined}
-									platformAdmin={user?.platformRole === "admin"}
-								/>
-							</div>
-						</>
-					}
-					mobileOpen={mobileSidebarOpen}
-					onCollapsedChange={setSidebarCollapsed}
-					onMobileOpenChange={setMobileSidebarOpen}
-				/>
-				<div className={sidebarOffsetClassNames.content}>
-					<Panel
-						as="header"
-						background="page"
-						border="none"
-						className={sidebarOffsetClassNames.header}
-						data-shell-surface="dashboard-header"
-						display="block"
-						gap="none"
-						overflow="visible"
-						padding="none"
-						radius="none"
-						style={{
-							backgroundColor:
-								"color-mix(in oklab, var(--color-background) 84%, transparent)",
-						}}
-						width="auto"
-					>
-						<div className="flex min-h-14 items-center gap-2 px-3 sm:px-5">
-							<div className="flex min-w-0 flex-1 items-center justify-end">
-								<DashboardCommandTrigger />
-							</div>
-							<div className="ml-auto flex items-center gap-2">
-								<DashboardAccountMenu />
-							</div>
-						</div>
-					</Panel>
-					<DashboardContentShell
-						layoutWidth={layoutWidth}
-						overlay={
-							debugState ? (
-								<DashboardDebugStateView
-									pathname={pathname}
-									state={debugState}
-								/>
-							) : undefined
 						}
-					>
-						{children}
-					</DashboardContentShell>
+						collapsed={sidebarCollapsed}
+						footer={
+							<DashboardAccountMenu
+								collapsed={sidebarCollapsed}
+								mobileExpanded={mobileSidebarOpen}
+							/>
+						}
+						mobileOpen={mobileSidebarOpen}
+						onCollapsedChange={setSidebarCollapsed}
+						onMobileOpenChange={setMobileSidebarOpen}
+					/>
+					<div className={sidebarOffsetClassNames.content}>
+						<div
+							className="flex h-full min-w-0 flex-col sm:pr-1 sm:pb-1 lg:pr-2 lg:pb-2"
+							inert={mobileSidebarOpen || undefined}
+						>
+							<DashboardFileViewer>
+								<div className="flex h-full min-h-0 flex-col">
+									<div
+										className={
+											layoutWidth === "standard"
+												? "[&_[data-dashboard-toolbar-row]]:mx-auto [&_[data-dashboard-toolbar-row]]:max-w-6xl"
+												: undefined
+										}
+									>
+										<DashboardToolbarOutlet />
+									</div>
+									<div
+										className="min-h-0 flex-1 overflow-hidden bg-background sm:rounded-lg lg:rounded-xl"
+										data-dashboard-workspace
+									>
+										<DashboardContentShell
+											layoutWidth={layoutWidth}
+											overlay={
+												debugState && !assistantMessagesLoading ? (
+													<DashboardDebugStateView
+														pathname={pathname}
+														state={debugState}
+													/>
+												) : undefined
+											}
+										>
+											<DashboardRouteLoading value={assistantMessagesLoading}>
+												{children}
+											</DashboardRouteLoading>
+										</DashboardContentShell>
+									</div>
+								</div>
+							</DashboardFileViewer>
+						</div>
+					</div>
+					<DashboardDebugMenu
+						capabilities={capabilities}
+						forceLoading={forceLoading}
+						onForceLoadingChange={handleForceLoadingChange}
+					/>
 				</div>
-				<DashboardDebugMenu
-					capabilities={capabilities}
-					forceLoading={forceLoading}
-					onForceLoadingChange={handleForceLoadingChange}
-				/>
-			</div>
+			</DashboardShellProvider>
 		</DashboardCommandProvider>
 	);
 }

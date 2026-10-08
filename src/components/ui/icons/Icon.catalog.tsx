@@ -79,9 +79,11 @@ export const catalogContract = defineCatalogOwnerContract({
 	name: "Icon and Registry",
 	role: "Canonical named-icon renderer and provider boundary for application and library icon registries.",
 	importStatement:
-		'import { Icon } from "@/components/ui/icons/Icon";\nimport { createIconRegistry, IconProvider, useIconRegistry } from "@/components/ui/icons/iconRegistry";\nimport { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";',
+		'import { Icon } from "@/components/ui/icons/Icon";\nimport { createIconRegistry, IconProvider, useIconRegistry } from "@/components/ui/icons/iconRegistry";\nimport { openaiIconRegistry } from "@/components/ui/icons/openaiRegistry";',
 	chooseWhen: [
 		"A component needs a shared glyph, shared sizing, optional framing, or a registry extension.",
+		"The app defaults to OpenAI Apps SDK UI icons. Fixed SDK weights map regular requests to the native outline; real filled variants preserve state, with Phosphor fallback for unsupported filled glyphs, brand marks, and rich-text controls. IconProvider remains replaceable per app.",
+		"createIconRegistry(overrides, defaultWeights?) applies per-name weights. Bolt and sparkle default to fill; explicit Icon weight wins. Other names retain the adapter default. Providers must implement supported weights rather than blindly filling outline SVG paths.",
 	],
 	chooseInstead: [
 		"Use IconSwap when a control transitions between multiple icon states.",
@@ -91,7 +93,7 @@ export const catalogContract = defineCatalogOwnerContract({
 		"IconProvider",
 		"createIconRegistry",
 		"useIconRegistry",
-		"phosphorIconRegistry",
+		"openaiIconRegistry",
 	],
 	exclusions: [
 		"Direct imports from raw registry maps.",
@@ -99,6 +101,18 @@ export const catalogContract = defineCatalogOwnerContract({
 		"Inline SVG when the registry already owns the symbol.",
 	],
 	guarantees: [
+		{
+			label: "OpenAI default with stateful fills and brand fallback",
+			storyId: "ui-icons-icon--open-ai-default-and-state",
+		},
+		{
+			label: "Semantic defaults and explicit outline overrides",
+			storyId: "ui-icons-icon--semantic-fill-defaults",
+		},
+		{
+			label: "Registry-specific weight defaults",
+			storyId: "ui-icons-icon--registry-weight-override",
+		},
 		{
 			label: "Sizes, framing, and decorative semantics",
 			storyId: "ui-icons-icon--sizes-frames-and-semantics",

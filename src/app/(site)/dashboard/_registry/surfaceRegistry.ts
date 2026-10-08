@@ -75,6 +75,7 @@ type DashboardSurfaceMetadata = {
 	layoutWidth: DashboardLayoutWidth;
 	parentId?: DashboardSurfaceId;
 	sidebar: boolean;
+	sidebarOrder?: number;
 	sidebarSupplementEndpoint?: string;
 	sidebarTier: DashboardSidebarTier;
 	sourceRoots?: readonly string[];
@@ -95,6 +96,7 @@ const dashboardSurfaceMetadataRegistry = [
 		domainArea: "dashboard-core",
 		icon: "home",
 		id: "dashboard.overview",
+		sidebarOrder: 0,
 		label: "Overview",
 		layoutWidth: "standard",
 		sidebar: true,
@@ -117,6 +119,7 @@ const dashboardSurfaceMetadataRegistry = [
 		domainArea: "product",
 		icon: "database",
 		id: "dashboard.records",
+		sidebarOrder: 2,
 		label: "Records",
 		layoutWidth: "wide",
 		sidebar: true,
@@ -134,8 +137,9 @@ const dashboardSurfaceMetadataRegistry = [
 		description: "Work with the organization Assistant and its approved tools.",
 		domainArea: "assistant",
 		icon: "sparkle",
-		id: "dashboard.assistant",
-		label: "Assistant",
+		id: "dashboard.chats",
+		sidebarOrder: 1,
+		label: "Chats",
 		layoutWidth: "workspace",
 		sidebar: true,
 		sidebarSupplementEndpoint: "/api/assistant/threads",
@@ -148,7 +152,7 @@ const dashboardSurfaceMetadataRegistry = [
 		description: "Browse, pin, rename, and remove Assistant conversations.",
 		domainArea: "assistant",
 		icon: "chat",
-		id: "dashboard.assistant.conversations",
+		id: "dashboard.chats.conversations",
 		label: "Conversations",
 		layoutWidth: "standard",
 		sidebar: false,
@@ -160,10 +164,10 @@ const dashboardSurfaceMetadataRegistry = [
 		description: "Continue an Assistant conversation.",
 		domainArea: "assistant",
 		icon: "chat",
-		id: "dashboard.assistant.thread",
+		id: "dashboard.chats.thread",
 		label: "Conversation",
 		layoutWidth: "workspace",
-		parentId: "dashboard.assistant",
+		parentId: "dashboard.chats",
 		sidebar: false,
 		sidebarTier: "primary",
 	},
@@ -409,7 +413,7 @@ export const dashboardSurfaceRegistry: readonly DashboardSurface[] =
 		.filter(
 			(routeSurface) =>
 				templateCapabilities.assistant ||
-				!routeSurface.id.startsWith("dashboard.assistant"),
+				!routeSurface.id.startsWith("dashboard.chats"),
 		)
 		.map((routeSurface) => {
 			const metadata = dashboardSurfaceMetadataRegistry.find(
@@ -552,6 +556,12 @@ export function getVisibleDashboardSurfaces(
 	);
 }
 
+export const dashboardSidebarCategoryLabels = {
+	primary: "Workspace",
+	secondary: "Organization",
+	utility: "Account",
+} satisfies Record<DashboardSidebarTier, string>;
+
 export function getDashboardSidebarGroups(
 	capabilities: ReadonlySet<DashboardCapability>,
 ) {
@@ -561,8 +571,15 @@ export function getDashboardSidebarGroups(
 	return (["primary", "secondary", "utility"] as const)
 		.map((tier) => ({
 			id: tier,
+			label: dashboardSidebarCategoryLabels[tier],
 			tier,
-			surfaces: surfaces.filter((surface) => surface.sidebarTier === tier),
+			surfaces: surfaces
+				.filter((surface) => surface.sidebarTier === tier)
+				.sort(
+					(a, b) =>
+						(a.sidebarOrder ?? Number.MAX_SAFE_INTEGER) -
+						(b.sidebarOrder ?? Number.MAX_SAFE_INTEGER),
+				),
 		}))
 		.filter((group) => group.surfaces.length > 0);
 }

@@ -10,7 +10,7 @@ import { getOrganizationPresentation } from "@/app/(site)/dashboard/_lib/entitie
 import { Icon } from "@/components/ui/icons/Icon";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { Card, ContentSection } from "@/components/ui/primitives/surfaces";
 import { hrefFor } from "@/lib/routes";
 import { OrganizationEditModal } from "./OrganizationEditModal";
 
@@ -54,8 +54,8 @@ function OrganizationSettingsSectionRoot({
 
 	return (
 		<>
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					action={
 						<Button
 							leadingIcon="pencil"
@@ -68,32 +68,36 @@ function OrganizationSettingsSectionRoot({
 						</Button>
 					}
 					description="Name, slug, and picture shown across the dashboard."
-					leading={
-						<Icon className="text-muted-foreground" name="building" size="sm" />
-					}
 					title="Organization identity"
 				/>
-				<Card.Content className="grid gap-5">
-					<OrganizationIdentity avatarSize="xl" presentation={presentation} />
-					<dl className="grid gap-4 sm:grid-cols-2">
-						<DashboardDetailField
-							icon={<Icon name="building" size="sm" />}
-							label="Name"
-							value={organization.name}
-						/>
-						<DashboardDetailField
-							copyLabel="Copy organization slug"
-							copyValue={organization.slug}
-							icon={<Icon name="at" size="sm" />}
-							label="Slug"
-							value={organization.slug}
-						/>
-					</dl>
-				</Card.Content>
-			</Card>
+				<ContentSection.Content>
+					<Card>
+						<Card.Content className="grid gap-5">
+							<OrganizationIdentity
+								avatarSize="xl"
+								presentation={presentation}
+							/>
+							<dl className="grid gap-4 sm:grid-cols-2">
+								<DashboardDetailField
+									icon={<Icon name="building" size="sm" />}
+									label="Name"
+									value={organization.name}
+								/>
+								<DashboardDetailField
+									copyLabel="Copy organization slug"
+									copyValue={organization.slug}
+									icon={<Icon name="at" size="sm" />}
+									label="Slug"
+									value={organization.slug}
+								/>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					action={
 						<Button
 							href={hrefFor("dashboard.administration")}
@@ -104,37 +108,38 @@ function OrganizationSettingsSectionRoot({
 						</Button>
 					}
 					description="A quick view of members, pending invitations, and your role."
-					leading={
-						<Icon className="text-muted-foreground" name="users" size="sm" />
-					}
 					title="People and access"
 				/>
-				<Card.Content>
-					<dl className="grid gap-4 sm:grid-cols-3">
-						<DashboardDetailField
-							icon={<Icon name="users" size="sm" />}
-							label="Active members"
-							value={String(activeMemberCount)}
-						/>
-						<DashboardDetailField
-							icon={<Icon name="mail" size="sm" />}
-							label="Pending invitations"
-							value={String(pendingInvitationCount)}
-						/>
-						<DashboardDetailField
-							icon={<Icon name="shield" size="sm" />}
-							label="Your role"
-							truncateValue={false}
-							value={
-								<MemberRoleChip
-									label={rolePresentation.shortLabel}
-									tone={rolePresentation.tone}
+				<ContentSection.Content>
+					<Card>
+						<Card.Content>
+							<dl className="grid gap-4 sm:grid-cols-3">
+								<DashboardDetailField
+									icon={<Icon name="users" size="sm" />}
+									label="Active members"
+									value={String(activeMemberCount)}
 								/>
-							}
-						/>
-					</dl>
-				</Card.Content>
-			</Card>
+								<DashboardDetailField
+									icon={<Icon name="mail" size="sm" />}
+									label="Pending invitations"
+									value={String(pendingInvitationCount)}
+								/>
+								<DashboardDetailField
+									icon={<Icon name="shield" size="sm" />}
+									label="Your role"
+									truncateValue={false}
+									value={
+										<MemberRoleChip
+											label={rolePresentation.shortLabel}
+											tone={rolePresentation.tone}
+										/>
+									}
+								/>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
 		</>
 	);
 }
@@ -145,72 +150,76 @@ export function OrganizationSettingsSectionSkeleton() {
 
 	return (
 		<>
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					action={
 						<Button.Skeleton leadingIcon size="sm" variant="ghost">
 							Edit organization
 						</Button.Skeleton>
 					}
 					description="Name, slug, and picture shown across the dashboard."
-					leading={
-						<Icon className="text-muted-foreground" name="building" size="sm" />
-					}
 					title="Organization identity"
 				/>
-				<Card.Content className="grid gap-5">
-					<OrganizationIdentity.Skeleton avatarSize="xl" />
-					<dl className="grid gap-4 sm:grid-cols-2">
-						<DashboardDetailField.Skeleton
-							icon={<Icon name="building" size="sm" />}
-							label="Name"
-							value={organization.name}
-						/>
-						<DashboardDetailField.Skeleton
-							copyable
-							icon={<Icon name="at" size="sm" />}
-							label="Slug"
-							value={organization.slug}
-						/>
-					</dl>
-				</Card.Content>
-			</Card>
+				<ContentSection.Content>
+					<Card>
+						<Card.Content className="grid gap-5">
+							<OrganizationIdentity.Skeleton avatarSize="xl" />
+							<dl className="grid gap-4 sm:grid-cols-2">
+								<DashboardDetailField.Skeleton
+									icon={<Icon name="building" size="sm" />}
+									label="Name"
+									value={organization.name}
+								/>
+								<DashboardDetailField.Skeleton
+									copyable
+									icon={<Icon name="at" size="sm" />}
+									label="Slug"
+									value={organization.slug}
+								/>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					action={
 						<Button.Skeleton size="sm" variant="primary">
 							Manage access
 						</Button.Skeleton>
 					}
 					description="A quick view of members, pending invitations, and your role."
-					leading={
-						<Icon className="text-muted-foreground" name="users" size="sm" />
-					}
 					title="People and access"
 				/>
-				<Card.Content>
-					<dl className="grid gap-4 sm:grid-cols-3">
-						<DashboardDetailField.Skeleton
-							icon={<Icon name="users" size="sm" />}
-							label="Active members"
-							value="3"
-						/>
-						<DashboardDetailField.Skeleton
-							icon={<Icon name="mail" size="sm" />}
-							label="Pending invitations"
-							value="1"
-						/>
-						<DashboardDetailField.Skeleton
-							icon={<Icon name="shield" size="sm" />}
-							label="Your role"
-							truncateValue={false}
-						>
-							<MemberRoleChip.Skeleton label={rolePresentation.shortLabel} />
-						</DashboardDetailField.Skeleton>
-					</dl>
-				</Card.Content>
-			</Card>
+				<ContentSection.Content>
+					<Card>
+						<Card.Content>
+							<dl className="grid gap-4 sm:grid-cols-3">
+								<DashboardDetailField.Skeleton
+									icon={<Icon name="users" size="sm" />}
+									label="Active members"
+									value="3"
+								/>
+								<DashboardDetailField.Skeleton
+									icon={<Icon name="mail" size="sm" />}
+									label="Pending invitations"
+									value="1"
+								/>
+								<DashboardDetailField.Skeleton
+									icon={<Icon name="shield" size="sm" />}
+									label="Your role"
+									truncateValue={false}
+								>
+									<MemberRoleChip.Skeleton
+										label={rolePresentation.shortLabel}
+									/>
+								</DashboardDetailField.Skeleton>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
 		</>
 	);
 }

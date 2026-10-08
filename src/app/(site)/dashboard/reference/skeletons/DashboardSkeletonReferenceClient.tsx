@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/input";
 import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { DashboardTablePanel } from "../../_components/data/DashboardTablePanel";
 import { DashboardDetailField } from "../../_components/detail/DashboardDetailField";
@@ -116,42 +116,42 @@ export function DashboardSkeletonReferenceClient({
 			description="Side-by-side geometry review for component-owned and route-owned loading states."
 			title="Skeleton reference"
 		>
-			<Card>
-				<Card.Heading
-					description="The authentication loading boundary delegates to its field and\n\t\t\t\t\t\taction owners."
+			<ContentSection>
+				<ContentSection.Heading
+					description="The authentication loading boundary delegates to its field and action owners."
 					title="Representative route composition"
 				/>
-				<Card.Content>
+				<ContentSection.Content>
 					<div
 						className="mx-auto w-full max-w-md"
 						data-skeleton-route-composition="login"
 					>
 						<LoginLoadingView />
 					</div>
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
-					description="The left table is live and sortable; the right is a static,\n\t\t\t\t\t\tnon-interactive loading comparison with identical copy and row\n\t\t\t\t\t\tgeometry."
+			<ContentSection>
+				<ContentSection.Heading
+					description="The left table is live and sortable; the right is a static, non-interactive loading comparison with identical copy and row geometry."
 					title="Pinned-source table correspondence"
 				/>
-				<Card.Content className="grid gap-5 xl:grid-cols-2">
+				<ContentSection.Content className="grid gap-5 xl:grid-cols-2">
 					<div data-skeleton-source-normalized="table-live">
 						<NormalizedTableLive />
 					</div>
 					<div data-skeleton-source-normalized="table-skeleton">
 						<NormalizedTableSkeleton />
 					</div>
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
-					description="Live controls and their namespaced skeletons use the same field,\n\t\t\t\t\t\tinput, option, and typography geometry."
+			<ContentSection>
+				<ContentSection.Heading
+					description="Live controls and their namespaced skeletons use the same field, input, option, and typography geometry."
 					title="Input owners"
 				/>
-				<Card.Content className="grid gap-8 xl:grid-cols-2">
+				<ContentSection.Content className="grid gap-8 xl:grid-cols-2">
 					<Comparison title="EmailInput">
 						<EmailInput defaultValue="operator@averlo.local" label="Email" />
 						<EmailInput.Skeleton label="Email" value="operator@averlo.local" />
@@ -255,15 +255,15 @@ export function DashboardSkeletonReferenceClient({
 							options={preferenceOptions}
 						/>
 					</Comparison>
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					description="Avatar, identity, and detail owners reserve loaded geometry."
 					title="Presentation owners"
 				/>
-				<Card.Content className="grid gap-8 xl:grid-cols-2">
+				<ContentSection.Content className="grid gap-8 xl:grid-cols-2">
 					{member ? (
 						<Comparison title="MemberIdentity">
 							<MemberIdentity avatarSize="xl" presentation={member} />
@@ -286,8 +286,8 @@ export function DashboardSkeletonReferenceClient({
 							value="member@example.com"
 						/>
 					</Comparison>
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
 			<div className="grid gap-5 xl:grid-cols-2">
 				<RecordCollectionClient
@@ -313,35 +313,35 @@ export function DashboardSkeletonReferenceLoadingComposition() {
 			description="Side-by-side geometry review for component-owned and route-owned loading states."
 			title="Skeleton reference"
 		>
-			<Card>
-				<Card.Heading
-					description="The authentication loading boundary delegates to its field and\n\t\t\t\t\t\taction owners."
+			<ContentSection>
+				<ContentSection.Heading
+					description="The authentication loading boundary delegates to its field and action owners."
 					title="Representative route composition"
 				/>
-				<Card.Content>
+				<ContentSection.Content>
 					<div className="mx-auto w-full max-w-md">
 						<LoginLoadingView />
 					</div>
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					description="Loading keeps both comparison columns at the same geometry."
 					title="Pinned-source table correspondence"
 				/>
-				<Card.Content className="grid gap-5 xl:grid-cols-2">
+				<ContentSection.Content className="grid gap-5 xl:grid-cols-2">
 					<NormalizedTableSkeleton />
 					<NormalizedTableSkeleton />
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					description="Component-owned skeletons reserve the field and input geometry."
 					title="Input owners"
 				/>
-				<Card.Content className="grid gap-8 xl:grid-cols-2">
+				<ContentSection.Content className="grid gap-8 xl:grid-cols-2">
 					<Comparison title="EmailInput">
 						<EmailInput.Skeleton label="Email" value="operator@averlo.local" />
 						<EmailInput.Skeleton label="Email" value="operator@averlo.local" />
@@ -350,15 +350,15 @@ export function DashboardSkeletonReferenceLoadingComposition() {
 						<SelectInput.Skeleton label="Role" value="Owner" />
 						<SelectInput.Skeleton label="Role" value="Owner" />
 					</Comparison>
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					description="Identity owners preserve their own loaded geometry."
 					title="Presentation owners"
 				/>
-				<Card.Content className="grid gap-8 xl:grid-cols-2">
+				<ContentSection.Content className="grid gap-8 xl:grid-cols-2">
 					<Comparison title="MemberIdentity">
 						<MemberIdentity.Skeleton avatarSize="xl" />
 						<MemberIdentity.Skeleton avatarSize="xl" />
@@ -367,8 +367,8 @@ export function DashboardSkeletonReferenceLoadingComposition() {
 						<OrganizationIdentity.Skeleton avatarSize="xl" />
 						<OrganizationIdentity.Skeleton avatarSize="xl" />
 					</Comparison>
-				</Card.Content>
-			</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
 			<div className="grid gap-5 xl:grid-cols-2">
 				<RecordCollectionClient.Skeleton
@@ -392,7 +392,7 @@ function NormalizedTableLive() {
 			columns={normalizedTableColumns}
 			getRowKey={(row) => row.item}
 			header={
-				<Card.Heading
+				<ContentSection.Heading
 					action={
 						<Button size="sm" variant="secondary">
 							Export
@@ -400,7 +400,6 @@ function NormalizedTableLive() {
 					}
 					actionLayout="responsive"
 					description="Detailed records behind the current filters."
-					leading={<Icon name="list" size="sm" />}
 					title="Budget items"
 				/>
 			}
@@ -418,7 +417,7 @@ function NormalizedTableSkeleton() {
 				id,
 			}))}
 			header={
-				<Card.Heading
+				<ContentSection.Heading
 					action={
 						<Button.Skeleton size="sm" variant="secondary">
 							Export
@@ -426,7 +425,6 @@ function NormalizedTableSkeleton() {
 					}
 					actionLayout="responsive"
 					description="Detailed records behind the current filters."
-					leading={<Icon name="list" size="sm" />}
 					title="Budget items"
 				/>
 			}

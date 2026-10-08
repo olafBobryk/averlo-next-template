@@ -19,6 +19,7 @@ function OrganizationAvatarRoot({
 	colorIndex,
 	imageUrl,
 	initials,
+	name,
 	size = "md",
 	visual = "profile-picture",
 }: {
@@ -27,6 +28,7 @@ function OrganizationAvatarRoot({
 	colorIndex: number;
 	imageUrl?: string | null;
 	initials: string;
+	name?: string;
 	size?: OrganizationAvatarSize;
 	visual?: OrganizationIdentityVisual;
 }) {
@@ -37,7 +39,7 @@ function OrganizationAvatarRoot({
 				className={className}
 				fallback={<Icon name="building" size={iconSize[size]} />}
 				helperIndex={colorIndex}
-				name={alt}
+				name={name}
 				size={size}
 			/>
 		);
@@ -49,7 +51,7 @@ function OrganizationAvatarRoot({
 			className={className}
 			fallback={initials}
 			helperIndex={colorIndex}
-			name={alt}
+			name={name}
 			size={size}
 			src={imageUrl}
 		/>

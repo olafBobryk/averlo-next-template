@@ -104,6 +104,9 @@ const forcedLoading = readFileSync(
 	"utf8",
 );
 for (const surfaceId of [
+	"dashboard.chats",
+	"dashboard.chats.thread",
+	"dashboard.chats.conversations",
 	"dashboard.profile",
 	"dashboard.administration",
 	"dashboard.platform",

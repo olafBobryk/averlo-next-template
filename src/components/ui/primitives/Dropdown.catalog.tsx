@@ -265,7 +265,7 @@ function CatalogPreview6() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-primitives-dropdown",
 	name: "Dropdown",
-	role: "Portal-backed trigger-plus-surface family for actions, selection, and independently controlled anchored content.",
+	role: "Default action-menu triggers use the regular registry ellipsis at 15px without hover scaling. Consumers may supply an explicit triggerContent for a contextual treatment. Portal-backed menus and selection. Bare icon triggers, inset rounded rows and scroll-owned padding. dividerBefore/dividerAfter accept full for major block boundaries or inset (also true) for action groups. Separators are independent Dividers, never borders on interactive rows. Geometry: 12px outer radius, 7px row radius, 4px list padding, 34px action rows and 2px row gaps. Opt-in compact density uses 28px action and control rows. Root-level control entries share list chrome and separators, use dialog/group semantics with native Tab navigation, and keep focused controls open on pointer leave. Action-only menus retain their collection navigation. Dividers have 4px clearance on each side and a dropdown-only foreground tint at 10% opacity.",
 	importStatement:
 		'import { Dropdown } from "@/components/ui/primitives/dropdown";',
 	chooseWhen: [
@@ -281,6 +281,14 @@ export const catalogContract = defineCatalogOwnerContract({
 		"Page-local portal, dismissal, or recursive-cascade implementations.",
 	],
 	guarantees: [
+		{
+			label: "Compact custom control rows and keyboard navigation",
+			storyId: "ui-primitives-dropdown--compact-control-rows",
+		},
+		{
+			label: "Control row hover, pinning, and dismissal",
+			storyId: "ui-primitives-dropdown--control-rows-hover-and-dismissal",
+		},
 		{
 			label: "Contextual destructive action stays in the More menu",
 			storyId: "ui-primitives-dropdown--contextual-destructive-action",

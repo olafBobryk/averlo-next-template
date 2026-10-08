@@ -5,6 +5,9 @@
 Shared scalar sources, scalar visual effects, scroll velocity, cycling, and
 text-motion implementations.
 
+The `presence/` family owns controlled content insertion/removal and measured
+layout-space transitions, independent of viewport/scroll source activation.
+
 ## Public boundary
 
 - Family indexes are the external surfaces. Internals import direct owners; do

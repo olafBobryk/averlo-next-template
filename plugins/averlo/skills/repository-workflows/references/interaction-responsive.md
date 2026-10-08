@@ -2,6 +2,17 @@
 
 ## Contract
 
+Choose button emphasis separately from semantic tone using the Button owner
+contract. Reuse its shared tokens, geometry and focus treatment rather than
+restyling actions in a consumer. Typography remains owned by the existing text
+system.
+
+Use ContentPresence for conditional content entering/leaving normal layout.
+It owns measured size and optional surrounding spacing, not the trigger,
+disclosure semantics, focus management or announcements. Its controlled local
+presence is independent of viewport/scroll reveals; exact APIs belong to its
+Storybook owner.
+
 Preserve visible, token-driven focus for every interactive control. Use native
 keyboard behavior when it covers the interaction, scoped shared shortcuts for
 reusable commands, and owner-managed navigation for composite widgets. Keep

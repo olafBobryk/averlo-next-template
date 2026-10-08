@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { FileInput, type FileInputItem } from "@/components/ui/input";
+import { attachmentPreviewUrl } from "../../attachment/access";
 import { Text } from "@/components/ui/primitives/Text";
 import type { AssistantUserMessage } from "@/lib/assistant/contracts";
 
@@ -58,6 +59,7 @@ export function UserMessageAttachments({
 					type: attachment.contentType,
 					unoptimized: true,
 					url: result.url,
+					resolveUrl: attachmentPreviewUrl(attachment.id),
 				};
 			}),
 		).then((results) => {

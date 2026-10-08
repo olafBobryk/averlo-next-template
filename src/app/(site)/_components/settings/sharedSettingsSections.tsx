@@ -3,7 +3,6 @@
 import type * as React from "react";
 import type { AppearancePreference } from "@/components/ui/foundations/appearance";
 import type { useSettingsContext } from "@/components/ui/foundations/settingsContext";
-import { Icon } from "@/components/ui/icons/Icon";
 import { RadioInput, ToggleInput } from "@/components/ui/input";
 import { Card } from "@/components/ui/primitives/surfaces";
 
@@ -95,9 +94,6 @@ function AccessibilitySettingsCard({
 		<Card className="scroll-mt-24" id="accessibility">
 			<Card.Heading
 				description="Appearance, motion, scrolling, and text preferences."
-				leading={
-					<Icon className="text-muted-foreground" name="sliders" size="sm" />
-				}
 				title="Accessibility"
 			/>
 			<Card.Content className="grid gap-5">

@@ -71,6 +71,7 @@ export function DashboardTableSortController({ tableId }: { tableId: string }) {
 					);
 			}
 			body?.append(...rows);
+			table?.dispatchEvent(new Event("dashboard-table-sorted"));
 		}
 		const controller = new AbortController();
 		for (const button of buttons) {

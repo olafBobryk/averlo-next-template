@@ -52,15 +52,21 @@ assert.equal(
 	dashboardContentShellProfiles.wide.gutterClassName,
 	"Standard and wide dashboard layouts must share one gutter contract.",
 );
-assert.equal(
-	dashboardContentShellProfiles.standard.gutterClassName,
-	"px-3 sm:px-5",
+assert.equal(dashboardContentShellProfiles.standard.gutterClassName, "px-0");
+assert.match(
+	dashboardContentShellProfiles.standard.mainClassName,
+	/overflow-y-auto/u,
 );
-assert.match(dashboardContentShellProfiles.standard.mainClassName, /gap-4/u);
-assert.match(dashboardContentShellProfiles.standard.mainClassName, /pt-20/u);
-assert.match(dashboardContentShellProfiles.standard.mainClassName, /pb-6/u);
+assert.match(dashboardContentShellProfiles.standard.mainClassName, /min-h-0/u);
+assert.match(
+	dashboardContentShellProfiles.standard.mainClassName,
+	/max-w-6xl/u,
+);
 assert.equal(dashboardContentShellProfiles.workspace.gutterClassName, "px-0");
-assert.match(dashboardContentShellProfiles.workspace.mainClassName, /pt-14/u);
+assert.match(
+	dashboardContentShellProfiles.workspace.mainClassName,
+	/overflow-hidden/u,
+);
 
 for (const surface of dashboardSurfaceRegistry) {
 	assert.ok(
@@ -441,7 +447,8 @@ const commandProvider = readFileSync(
 	),
 	"utf8",
 );
-assert.ok(commandProvider.includes("return context.register"));
+assert.ok(commandProvider.includes("return register(ownerId"));
+assert.ok(commandProvider.includes("[register, ownerId]"));
 assert.ok(commandProvider.includes("next.delete(token)"));
 
 const dashboardPage = readFileSync(
@@ -496,19 +503,20 @@ assert.ok(
 	"Fixture reset must remain unavailable in production.",
 );
 assert.ok(
-	organizationSwitcher.includes("choices.length > 1") &&
+	organizationSwitcher.includes("organizationChoices.map(") &&
 		organizationSwitchPage.includes("choices.length <= 1"),
 	"Organization switching must derive from the resolved organization choices.",
 );
 assert.ok(
 	organizationSwitcher.includes(
-		'avatarSize={placement === "footer" ? "sm" : "md"}',
+		'h-8 !px-3 !text-muted-foreground hover:!text-sidebar-accent-foreground',
 	) &&
-		organizationSwitcher.includes("!size-[min(2.5rem,calc(100cqi_-_4px))]") &&
-		organizationSwitcher.match(/@container/g)?.length === 2 &&
-		organizationSwitcher.includes("max-lg:px-0") &&
-		organizationSwitcher.includes("lg:px-0"),
-	"Compact organization avatars must fit inside the navigation inset track with an md-size cap.",
+		organizationSwitcher.includes(
+			"min-w-0 flex-1 truncate text-left text-sm font-medium",
+		) &&
+		organizationSwitcher.includes('name="chevron-down"') &&
+		organizationSwitcher.includes("compact ? ("),
+	"The compact sidebar organization switcher must use a truncated text-only name and caret.",
 );
 
 assert.deepEqual(dashboardDebugStates, [

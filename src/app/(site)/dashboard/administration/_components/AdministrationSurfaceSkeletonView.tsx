@@ -1,7 +1,6 @@
-import { Icon } from "@/components/ui/icons/Icon";
 import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { DashboardTablePanelSkeleton } from "../../_components/data/DashboardTablePanel";
 import { MemberIdentitySkeleton } from "../../_components/entities/member/MemberIdentity";
@@ -32,14 +31,13 @@ function InvitationTableSkeleton() {
 				},
 			]}
 			header={
-				<Card.Heading
+				<ContentSection.Heading
 					action={
 						<Button.Skeleton leadingIcon size="sm" variant="primary">
 							Invite member
 						</Button.Skeleton>
 					}
 					description="Fixture deliveries stay local and expose a copyable invitation link."
-					leading={<Icon name="mail" size="sm" />}
 					title="Pending invitations"
 				/>
 			}
@@ -118,9 +116,8 @@ function MembersTableSkeleton() {
 				},
 			]}
 			header={
-				<Card.Heading
+				<ContentSection.Heading
 					description="Organization roles and access for active members."
-					leading={<Icon name="users" size="sm" />}
 					title="Members"
 				/>
 			}

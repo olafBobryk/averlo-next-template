@@ -43,6 +43,7 @@ function CatalogPreview3() {
 	return (
 		<ScrollBorders
 			axis="horizontal"
+			tabIndex={0}
 			className="w-72 overflow-x-auto"
 			tabIndex={0}
 			showBackToTop={false}

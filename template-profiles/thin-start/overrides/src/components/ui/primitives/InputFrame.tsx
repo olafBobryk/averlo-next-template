@@ -1,14 +1,20 @@
 import clsx from "clsx";
 import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
+import {
+	inputFrameBaseClassName,
+	inputFrameVariantStyles,
+} from "./inputFrameStyles";
 
 export const inputTextClasses =
-	"h-9 w-full min-w-0 bg-transparent px-3 py-1 text-base text-foreground outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
+	"h-[34px] w-full min-w-0 bg-transparent px-3 py-1 text-base text-foreground outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
-export type InputFrameSize = "sm";
+export type InputFrameSize = "xxs" | "xs" | "sm";
 
 type InputFrameProps = React.HTMLAttributes<HTMLDivElement> & {
 	children: React.ReactNode;
+	size?: InputFrameSize;
+	variant?: keyof typeof inputFrameVariantStyles;
 	disabled?: boolean;
 	end?: React.ReactNode;
 	error?: boolean;
@@ -19,7 +25,7 @@ type InputFrameProps = React.HTMLAttributes<HTMLDivElement> & {
 
 export type InputFrameSkeletonProps = Pick<
 	InputFrameProps,
-	"children" | "className" | "fullWidth"
+	"children" | "className" | "fullWidth" | "variant"
 > & {
 	radius?: "pill" | "textarea";
 	size?: InputFrameSize;
@@ -30,6 +36,8 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 	function InputFrame(
 		{
 			children,
+			size = "sm",
+			variant = "default",
 			className,
 			disabled = false,
 			end,
@@ -45,7 +53,10 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 			<div
 				ref={ref}
 				className={clsx(
-					"flex h-9 min-w-0 items-center rounded-3xl border border-transparent bg-input/50 text-foreground transition-[color,box-shadow,background-color] outline-none",
+					"flex items-center transition-[color,box-shadow,background-color] outline-none",
+					inputFrameBaseClassName,
+					inputFrameVariantStyles[variant],
+					size === "xxs" ? "h-6" : size === "xs" ? "h-7" : "h-[34px]",
 					(start || end) && "gap-2.5",
 					start && "pl-3",
 					end && "pr-3",
@@ -76,17 +87,19 @@ export function InputFrameSkeleton({
 	className,
 	fullWidth,
 	radius = "pill",
-	size: _size,
+	size = "sm",
 	skeletonClassName,
+	variant: _variant,
 	...rest
 }: InputFrameSkeletonProps) {
 	return (
 		<span
 			aria-hidden
 			className={clsx(
-				"relative flex h-9 min-w-0 items-center overflow-hidden rounded-3xl border border-transparent",
+				"relative flex min-w-0 items-center overflow-hidden rounded-[9px] border-0",
 				"pointer-events-none select-none bg-muted/80",
-				radius === "textarea" ? "!rounded-2xl" : "!rounded-3xl",
+				size === "xxs" ? "h-6" : size === "xs" ? "h-7" : "h-[34px]",
+				radius === "textarea" ? "!rounded-2xl" : "!rounded-[9px]",
 				fullWidth && "w-full",
 				className,
 			)}

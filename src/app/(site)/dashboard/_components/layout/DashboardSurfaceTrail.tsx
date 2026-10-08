@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/icons/Icon";
+import { Button } from "@/components/ui/primitives/Button";
 import {
 	getDashboardCapabilities,
 	getDashboardSurfaceTrail,
@@ -19,8 +19,8 @@ export function DashboardSurfaceTrail() {
 	if (trail.length === 0) return null;
 
 	return (
-		<nav aria-label="Breadcrumb" className="min-w-0">
-			<ol className="flex min-w-0 items-center gap-1 text-sm">
+		<nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2">
+			<ol className="flex min-w-0 items-center gap-1 text-sm font-medium">
 				{trail.map((item, index) => (
 					<li className="flex min-w-0 items-center gap-1" key={item.href}>
 						{index > 0 ? (
@@ -30,15 +30,20 @@ export function DashboardSurfaceTrail() {
 								size="sm"
 							/>
 						) : null}
-						<Link
-							className="truncate text-muted-foreground transition-colors motion-interactive hover:text-foreground"
+						<Button
+							variant="bare"
+							size="none"
+							className="min-w-0 truncate text-sm font-medium text-muted-foreground"
 							href={item.href}
 						>
 							{item.label}
-						</Link>
+						</Button>
 					</li>
 				))}
 			</ol>
+			<span aria-hidden="true" className="text-muted-foreground">
+				/
+			</span>
 		</nav>
 	);
 }

@@ -9,7 +9,6 @@ export function PlatformInboxSurface(
 	return (
 		<DashboardSection
 			contentClassName="grid min-w-0 gap-5"
-			description="Review fixture-only support requests submitted from authenticated dashboards."
 			title="Inbox"
 		>
 			<PlatformInboxContent {...props} />
@@ -28,7 +27,6 @@ export function PlatformInboxSurfaceSkeleton() {
 				{ id: "created", label: "Created" },
 				{ id: "actions", kind: "action", label: "Actions" },
 			]}
-			description="Review fixture-only support requests submitted from authenticated dashboards."
 			label="Loading Platform Inbox"
 			title="Inbox"
 		/>

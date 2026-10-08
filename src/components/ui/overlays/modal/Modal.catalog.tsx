@@ -106,6 +106,7 @@ export const catalogContract = defineCatalogOwnerContract({
 		'import { ModalHost } from "@/components/ui/overlays/modal/ModalHost";\nimport { ModalCard } from "@/components/ui/overlays/modal/ModalCard";\nimport { ModalShell, ModalHeader, ModalTitle, ModalDescription, ModalContent, ModalFooter, useModalSubmission } from "@/components/ui/overlays/modal/ModalShell";\nimport { useModal } from "@/components/ui/overlays/modal/useModal";',
 	chooseWhen: [
 		"A focused custom dialog must participate in the application-wide modal host.",
+		"Use placement=left with a full-height ModalCard for navigation drawers; ordinary dialogs retain center or top placement.",
 	],
 	chooseInstead: [
 		"Use ConfirmationModal for confirm-before-action flows or ImageInspectModal for image inspection.",
@@ -128,6 +129,10 @@ export const catalogContract = defineCatalogOwnerContract({
 		"Panel or nested Card surfaces inside ModalShell.",
 	],
 	guarantees: [
+		{
+			label: "Left navigation drawer placement and keyboard trap",
+			storyId: "ui-overlays-modal--left-drawer",
+		},
 		{
 			label: "Hosted focus, Escape, and focus return",
 			storyId: "ui-overlays-modal--hosted-focus-and-dismissal",

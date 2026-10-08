@@ -101,7 +101,7 @@ function CatalogPreview4() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-primitives-input-frame",
 	name: "InputFrame",
-	role: "Visual chrome and focus shell for text-like controls, static chrome reuse, and input skeletons.",
+	role: "Borderless input chrome with 9px corners, subtle fill and shadow, a 34px default height and a 28px xs toolbar size and a 24px xxs compact-row size. The muted variant uses a softer neutral fill without resting shadow; tone independently owns validation. Composer presentation uses 25px corners and the same fill and shadow. Owns focus treatment, static chrome reuse, and matching skeletons; callers own native control semantics.",
 	importStatement:
 		'import { InputFrame, inputFrameChromeClassName } from "@/components/ui/primitives/InputFrame";',
 	chooseWhen: [
@@ -114,10 +114,23 @@ export const catalogContract = defineCatalogOwnerContract({
 	compounds: ["InputFrame.Skeleton"],
 	exclusions: [
 		"Treating the frame itself as the semantic input.",
+		"Overriding frame backgrounds in search or composers; presentation changes geometry, not fill ownership.",
 		"Cataloguing inputVariants or direct skeleton implementations as owners.",
 		"Applying InputFrame focus, tone, disabled, transition, or adornment behavior to static chrome reuse.",
 	],
 	guarantees: [
+		{
+			label: "Muted chrome retains focus and validation",
+			storyId: "ui-primitives-input-frame--muted",
+		},
+		{
+			label: "Compact toolbar and skeleton geometry",
+			storyId: "ui-primitives-input-frame--compact-toolbar",
+		},
+		{
+			label: "Composer shares input chrome in light and dark",
+			storyId: "ui-primitives-input-frame--composer-chrome-parity",
+		},
 		{
 			label: "Sizes and adornments",
 			storyId: "ui-primitives-input-frame--sizes-and-adornments",

@@ -217,10 +217,11 @@ function CatalogPreview() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "domain-assistant-message",
 	name: "Message",
-	role: "Role-aware assistant conversation message renderer for text, reasoning, attachments, tools, approvals, and streaming states.",
+	role: "Role-aware assistant conversation message renderer for text, reasoning, attachments, tools, approvals, and streaming states. Each tool uses a bare disclosure with arguments and safe output. Actionable approvals appear above the composer; resolved outcomes remain in history.",
 	importStatement:
 		'import * as Assistant from "@/components/domain/assistant";',
 	chooseWhen: [
+		"Attachments delegate to the dashboard FileViewer host when present, resolving fresh authorized access on open and retry; standalone messages retain FileInput inspection.",
 		"Persisted or streaming assistant-thread content must render with the correct user, assistant, attachment, and tool-part treatment.",
 	],
 	chooseInstead: [
@@ -232,6 +233,10 @@ export const catalogContract = defineCatalogOwnerContract({
 		"Generic status feedback unrelated to an assistant conversation turn.",
 	],
 	guarantees: [
+		{
+			label: "Source request/result envelope and bounded tool output",
+			storyId: "domain-assistant-message--source-tool-envelope",
+		},
 		{
 			label: "Role Presentation",
 			storyId: "domain-assistant-message--role-presentation",

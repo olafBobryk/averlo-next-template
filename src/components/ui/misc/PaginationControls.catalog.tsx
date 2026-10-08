@@ -68,6 +68,11 @@ export const catalogContract = defineCatalogOwnerContract({
 			label: "Loading geometry",
 			storyId: "ui-misc-pagination-controls--skeleton-parity",
 		},
+		{
+			label:
+				"Compact table skeleton preserves ghost treatment and caption sizing",
+			storyId: "ui-misc-pagination-controls--table-skeleton-parity",
+		},
 	],
 
 	family: "UI",

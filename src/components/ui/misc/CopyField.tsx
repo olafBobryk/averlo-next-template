@@ -51,7 +51,7 @@ function CopyFieldRoot({
 	onClick,
 	loading,
 	disabled,
-	buttonVariant = "secondary",
+	buttonVariant = "bare",
 	buttonSize = "md",
 	textVariant = "body",
 	textTone,
@@ -126,7 +126,7 @@ function CopyFieldRoot({
 
 function CopyFieldSkeleton({
 	placeholder = "example.com/referral=123456",
-	buttonVariant = "secondary",
+	buttonVariant = "bare",
 	buttonSize = "md",
 	textVariant = "body",
 	textTone,

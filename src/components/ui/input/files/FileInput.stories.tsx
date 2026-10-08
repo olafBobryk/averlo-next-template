@@ -167,5 +167,131 @@ export const AdaptivePreviewActions: Story = {
 				canvas.getByRole("button", { name: "Remove dark.png" }),
 			).toHaveAttribute("data-preview-shade", "dark"),
 		);
+		const brightAction = canvas.getByRole("button", {
+			name: "Remove bright.png",
+		});
+		const darkAction = canvas.getByRole("button", { name: "Remove dark.png" });
+		await waitFor(() =>
+			expect(getComputedStyle(brightAction).color).toBe("rgb(0, 0, 0)"),
+		);
+		await waitFor(() =>
+			expect(getComputedStyle(darkAction).color).toBe("rgb(255, 255, 255)"),
+		);
+		for (const action of [brightAction, darkAction]) {
+			await expect(getComputedStyle(action).backgroundColor).toBe(
+				"rgba(0, 0, 0, 0)",
+			);
+		}
+	},
+};
+
+export const PreviewDelegation: Story = {
+	render: () => (
+		<FileInput
+			mode="read"
+			label="Files"
+			items={[
+				{
+					status: "uploaded",
+					name: "Brief.pdf",
+					type: "application/pdf",
+					url: "/test/file-viewer.pdf",
+				},
+			]}
+			onItemsChange={() => {}}
+			onPreview={previewFile}
+		/>
+	),
+	play: async ({ canvas }) => {
+		previewFile.mockClear();
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Open Brief.pdf" }),
+		);
+		await expect(previewFile).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "Brief.pdf", type: "application/pdf" }),
+		);
+	},
+};
+const previewFile = fn();
+
+export const CompactChatAttachments: Story = {
+	render: () => (
+		<div className="grid w-80 max-w-full gap-4">
+			<FileInput
+				label={null}
+				items={[
+					{
+						status: "uploaded",
+						name: "project-bob-client-brief-2026-06-26.pdf",
+						type: "application/pdf",
+						url: "/test/file-viewer.pdf",
+					},
+				]}
+				onItemsChange={() => {}}
+				onPreview={previewFile}
+				showAddControl={false}
+			/>
+			<FileInput.Skeleton count={1} label={null} mode="read" />
+		</div>
+	),
+	play: async ({ canvas }) => {
+		previewFile.mockClear();
+		const name = "project-bob-client-brief-2026-06-26.pdf";
+		const open = canvas.getByRole("button", { name: `Open ${name}` });
+		const card = open.closest('[data-slot="card"]');
+		if (!(card instanceof HTMLElement))
+			throw new Error("Attachment card missing");
+		const bounds = card.getBoundingClientRect();
+		await expect(bounds.width).toBeLessThan(190);
+		await expect(Math.abs(bounds.width / bounds.height - 16 / 9)).toBeLessThan(
+			0.02,
+		);
+		const close = canvas.getByRole("button", { name: `Remove ${name}` });
+		await expect(getComputedStyle(close).backgroundColor).toBe(
+			"rgba(0, 0, 0, 0)",
+		);
+		await waitFor(
+			() => expect(close).toHaveAttribute("data-preview-shade", "light"),
+			{ timeout: 20000 },
+		);
+		await waitFor(() =>
+			expect(getComputedStyle(close).color).toBe("rgb(0, 0, 0)"),
+		);
+		await userEvent.click(open);
+		await expect(previewFile).toHaveBeenCalledWith(
+			expect.objectContaining({ name }),
+		);
+	},
+};
+
+export const PdfCardPreview: Story = {
+	render: () => (
+		<FileInput
+			label="Document"
+			mode="read"
+			items={[
+				{
+					key: "pdf",
+					status: "uploaded",
+					name: "Project brief.pdf",
+					type: "application/pdf",
+					url: "/test/file-viewer.pdf",
+				},
+			]}
+			onItemsChange={() => {}}
+		/>
+	),
+	play: async ({ canvas }) => {
+		const preview = await canvas.findByRole(
+			"img",
+			{ name: "Project brief.pdf, first page" },
+			{ timeout: 20000 },
+		);
+		await waitFor(() => expect(preview).toBeVisible(), { timeout: 20000 });
+		await expect(preview.closest('[data-slot="card"]')).toHaveAttribute(
+			"data-surface-role",
+			"card",
+		);
+		await expect(canvas.getByText("Project brief.pdf")).toBeVisible();
 	},
 };

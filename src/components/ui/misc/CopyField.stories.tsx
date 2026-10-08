@@ -27,6 +27,10 @@ export const CopyContract: Story = {
 			name: /averlo.example\/invite/i,
 		});
 		button.focus();
+		await userEvent.hover(button);
+		await expect(getComputedStyle(button).backgroundColor).toBe(
+			"rgba(0, 0, 0, 0)",
+		);
 		await expect(button).toHaveFocus();
 		await userEvent.click(button);
 		await expect(args.onCopy).toHaveBeenCalledWith("averlo.example/invite");

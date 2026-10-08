@@ -17,6 +17,7 @@ export default async function AssistantThreadPage({
 	if (!thread) notFound();
 	return (
 		<AssistantThreadSurface
+			key={thread.id}
 			canWrite={capabilities.has("records.write")}
 			fixtureEnabled={capabilities.has("debug.use")}
 			initialThread={thread}

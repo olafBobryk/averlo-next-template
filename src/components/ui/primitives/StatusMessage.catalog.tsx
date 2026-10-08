@@ -24,14 +24,28 @@ function ControlledPresenceExample() {
 function CatalogPreview1() {
 	const render = () => (
 		<div className="grid gap-3">
-			<StatusMessage tone="info">
+			<StatusMessage tone="info" heading="Shared workspace">
 				This workspace is visible to invited members.
 			</StatusMessage>
-			<StatusMessage tone="success">
+			<StatusMessage
+				tone="success"
+				heading="Ready to continue"
+				descriptionOnNewLine
+			>
 				Security settings are complete.
 			</StatusMessage>
-			<StatusMessage tone="warning">Billing details need review.</StatusMessage>
-			<StatusMessage tone="danger">
+			<StatusMessage
+				tone="warning"
+				heading="Review required"
+				onDismiss={() => undefined}
+			>
+				Billing details need review.
+			</StatusMessage>
+			<StatusMessage
+				tone="danger"
+				heading="Deletion scheduled"
+				action={<Button size="sm">Review</Button>}
+			>
 				This environment is scheduled for deletion.
 			</StatusMessage>
 		</div>
@@ -54,14 +68,16 @@ function CatalogPreview2() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-primitives-status-message",
 	name: "StatusMessage",
-	role: "Persistent contextual notice independent of the latest user action.",
+	role: "Persistent context or an operational notice while surrounding content remains usable.",
 	importStatement:
 		'import { StatusMessage } from "@/components/ui/primitives/StatusMessage";',
 	chooseWhen: [
 		"Context remains relevant until its surrounding condition changes or the user proceeds.",
+		"Use heading and decorative icon for recognition, action for local recovery, and onDismiss only when the notice can safely be dismissed.",
+		"Descriptions share the heading line by default; descriptionOnNewLine places them below. Danger announces an alert, other tones a status; role can be explicitly overridden.",
 	],
 	chooseInstead: [
-		"Use Field for validation, toast for transient action outcomes, and state components for whole-region failure or emptiness.",
+		"Use Field for validation, InlineError for a small local action failure, toast for transient action outcomes, and state components for whole-region failure or emptiness.",
 	],
 	compounds: ["StatusMessage.Presence"],
 	exclusions: [
@@ -69,6 +85,18 @@ export const catalogContract = defineCatalogOwnerContract({
 		"A second parent gap around StatusMessage.Presence's owned spacing.",
 	],
 	guarantees: [
+		{
+			label: "Heading, action, dismissal, description layout and announcements",
+			storyId: "ui-primitives-status-message--actionable-notices",
+		},
+		{
+			label: "Long text and narrow layouts",
+			storyId: "ui-primitives-status-message--narrow-notice",
+		},
+		{
+			label: "Explicit announcement role override",
+			storyId: "ui-primitives-status-message--explicit-role",
+		},
 		{
 			label: "Semantic contextual tones",
 			storyId: "ui-primitives-status-message--semantic-tones",

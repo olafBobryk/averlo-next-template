@@ -5,10 +5,12 @@ export const devToolSurfaces = {
 			"src/lib/component-catalog",
 			"scripts/generate-component-catalog.mjs",
 			"scripts/verify/verify-component-sweep.ts",
+			"scripts/verify/verify-storybook-catalog.ts",
 		],
 		packageScripts: [
 			"catalog:generate",
 			"catalog:check",
+			"verify:storybook-catalog",
 			"verify:component-sweep",
 		],
 	},

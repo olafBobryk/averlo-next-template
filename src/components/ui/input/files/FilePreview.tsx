@@ -10,8 +10,11 @@ import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { useConfirmationModal } from "@/components/ui/overlays/modal/useConfirmationModal";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
+import { Card } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { FileInspectModal } from "./FileInspectModal";
+import { PdfThumbnail } from "./PdfThumbnail";
+import type { FilePreviewHandler } from "./previewHandler";
 
 export type FilePreviewTag = {
 	label: React.ReactNode;
@@ -30,6 +33,7 @@ export type FilePreviewLabels = {
 };
 
 type PendingItem = {
+	file?: Blob;
 	key: string;
 	status: "pending";
 	type: string; // e.g. "image/png"
@@ -40,6 +44,7 @@ type PendingItem = {
 };
 
 type UploadedItem = {
+	resolveUrl?: (signal: AbortSignal) => Promise<string>;
 	key: string;
 	status: "uploaded";
 	url: string; // uploaded url
@@ -55,6 +60,7 @@ export type FilePreviewItem = PendingItem | UploadedItem;
 type PreviewShade = "dark" | "light";
 
 type Props = {
+	onPreview?: FilePreviewHandler;
 	item: FilePreviewItem;
 	index: number;
 
@@ -82,13 +88,14 @@ type Props = {
 };
 
 function FilePreviewRoot({
+	onPreview,
 	item,
 	index,
 	urlLooksLikeImage,
 	urlLooksLikePdf,
 	isDisabled = false,
 	hideRemove = false,
-	previewHeight,
+	previewHeight = 105,
 	onRemovePending,
 	onRemoveUploaded,
 	labels,
@@ -109,17 +116,31 @@ function FilePreviewRoot({
 		shade: PreviewShade;
 		url: string;
 	} | null>(null);
-	const previewShade = isPdf
-		? "light"
-		: sampledPreview?.url === item.url
-			? sampledPreview.shade
-			: undefined;
+	const previewShade =
+		sampledPreview?.url === item.url ? sampledPreview.shade : undefined;
+	const handlePreviewLoad = React.useCallback(
+		(source: HTMLImageElement | HTMLCanvasElement) => {
+			const shade = sampleMedianShade(source);
+			if (shade) setSampledPreview({ shade, url: item.url });
+		},
+		[item.url],
+	);
 	const name = "name" in item && item.name ? item.name : nameFromUrl(item.url);
 	const fileTypeLabel = isPdf
 		? (labels?.pdf ?? "PDF")
 		: (labels?.file ?? "File");
 
 	const handleOpenFile = React.useCallback(() => {
+		if (onPreview) {
+			onPreview({
+				name,
+				type: fileType,
+				url: item.url,
+				file: "file" in item ? item.file : undefined,
+				resolveUrl: "resolveUrl" in item ? item.resolveUrl : undefined,
+			});
+			return;
+		}
 		openModal(
 			({ close }) => (
 				<FileInspectModal
@@ -134,7 +155,7 @@ function FilePreviewRoot({
 				cardProps: { maxWidth: "4xl" },
 			},
 		);
-	}, [isPdf, item.url, name, openModal]);
+	}, [isPdf, item, name, openModal, onPreview, fileType]);
 
 	return (
 		<motion.div
@@ -144,141 +165,141 @@ function FilePreviewRoot({
 			animate={{ opacity: 1, y: 0, scale: 1 }}
 			exit={{ opacity: 0, y: -6, scale: 0.98 }}
 			transition={resolveMotionTransition("interaction")}
-			style={
-				previewHeight !== undefined ? { height: previewHeight } : undefined
-			}
-			className={[
-				"relative w-auto aspect-video h-[105px] bg-background/10 border-border border overflow-hidden rounded-md flex items-center justify-center shrink-0",
-				className,
-			].join(" ")}
+			style={{ height: previewHeight, width: (previewHeight * 16) / 9 }}
+			className={["relative min-w-0 aspect-video shrink-0", className].join(
+				" ",
+			)}
 		>
-			{isImage ? (
-				<InspectableImage
-					src={item.url}
-					alt={`file-${index}`}
-					disabled={isDisabled}
-					unoptimized={item.status === "uploaded" && item.unoptimized}
-					width={182}
-					height={105}
-					className="w-full h-full!"
-					onLoad={(event) => {
-						const shade = sampleMedianShade(event.currentTarget);
-						if (shade) setSampledPreview({ shade, url: item.url });
-					}}
-				/>
-			) : isPdf ? (
-				<div className="relative h-full w-full">
-					<div className="h-full w-full overflow-hidden rounded-[3px] bg-white shadow-[inset_0_0_0_1px_rgba(25,27,37,0.12)]">
-						<object
-							data={pdfPreviewUrl(item.url)}
-							type="application/pdf"
-							className="pointer-events-none h-full w-full"
-							title={`${name} preview`}
-						>
-							<div className="flex h-full min-w-0 flex-col items-center justify-center gap-1 px-2 text-center">
-								<Text as="span" variant="bodyStrong" className="block text-xs">
-									{fileTypeLabel}
-								</Text>
-								<Text
-									as="span"
-									variant="caption"
-									tone="muted"
-									className="block max-w-full whitespace-normal break-words text-3xs"
-								>
-									{name}
-								</Text>
-							</div>
-						</object>
-					</div>
+			<Card padding="none" gap="none" className="relative h-full w-full">
+				{isImage && onPreview ? (
 					<Button
+						aria-label={`Open ${name}`}
+						variant="bare"
+						size="none"
+						className="h-full w-full"
+						contentClassName="h-full w-full"
+						disabled={isDisabled}
+						onClick={handleOpenFile}
+					>
+						{/* biome-ignore lint/performance/noImgElement: Local file previews must preserve original pixels and blob URLs. */}
+						<img
+							src={item.url}
+							alt={name}
+							className="h-full w-full object-cover"
+							onLoad={(event) => handlePreviewLoad(event.currentTarget)}
+						/>
+					</Button>
+				) : isImage ? (
+					<InspectableImage
+						src={item.url}
+						alt={`file-${index}`}
+						disabled={isDisabled}
+						unoptimized={item.status === "uploaded" && item.unoptimized}
+						width={182}
+						height={105}
+						className="w-full h-full!"
+						onLoad={(event) => handlePreviewLoad(event.currentTarget)}
+					/>
+				) : isPdf ? (
+					<div className="relative h-full w-full">
+						<PdfThumbnail
+							item={item}
+							name={name}
+							onPreviewLoad={handlePreviewLoad}
+						/>
+						<Button
+							variant="bare"
+							size="none"
+							align="center"
+							className="absolute! inset-0! z-10 h-full! w-full! !rounded-md"
+							aria-label={`Open ${name}`}
+							disabled={isDisabled}
+							onClick={handleOpenFile}
+						/>
+					</div>
+				) : (
+					<Button
+						aria-label={`Open ${name}`}
 						variant="ghost"
 						size="none"
 						align="center"
-						className="absolute! inset-0! z-10 h-full! w-full! !rounded-md"
-						aria-label={`Open ${name}`}
+						className="h-full w-full !rounded-md p-2 text-sm font-medium"
+						contentClassName="min-w-0 flex-col gap-1 whitespace-normal"
 						disabled={isDisabled}
 						onClick={handleOpenFile}
-					/>
-				</div>
-			) : (
-				<Button
-					aria-label={`Open ${name}`}
-					variant="ghost"
-					size="none"
-					align="center"
-					className="h-full w-full !rounded-md p-2 text-sm font-medium"
-					contentClassName="min-w-0 flex-col gap-1 whitespace-normal"
-					disabled={isDisabled}
-					onClick={handleOpenFile}
-				>
-					<Text as="span" variant="bodyStrong" className="block text-xs">
-						{fileTypeLabel}
-					</Text>
-					<Text
-						as="span"
-						variant="caption"
-						tone="muted"
-						className="block max-w-full break-words text-3xs"
 					>
-						{name}
-					</Text>
-				</Button>
-			)}
+						<Text as="span" variant="bodyStrong" className="block text-xs">
+							{fileTypeLabel}
+						</Text>
+						<Text
+							as="span"
+							variant="caption"
+							tone="muted"
+							className="block max-w-full break-words text-3xs"
+						>
+							{name}
+						</Text>
+					</Button>
+				)}
 
-			<div className="absolute top-2 left-2 z-20 flex max-w-[125px] flex-wrap gap-1.5">
-				<Chip
-					tone={isPending ? "warning" : "success"}
-					className="px-2 py-1 text-3xs font-medium leading-none backdrop-blur-sm"
-				>
-					{isPending
-						? (labels?.pending ?? "Pending")
-						: (labels?.uploaded ?? "Uploaded")}
-				</Chip>
-				{item.tag ? (
-					<Chip
-						tone={item.tag.tone ?? "neutral"}
-						className="max-w-full px-2 py-1 text-3xs font-medium leading-none backdrop-blur-sm"
-					>
-						<span className="min-w-0 truncate">{item.tag.label}</span>
-					</Chip>
-				) : null}
-			</div>
-
-			{!hideRemove ? (
-				<Button
-					aria-label={`Remove ${name}`}
-					variant="secondary"
-					size="icon-sm"
-					trailingIcon="cross"
-					data-preview-shade={previewShade}
+				<div
 					className={clsx(
-						"absolute! top-2! right-2 z-20",
-						previewShade === "light" &&
-							"!bg-black !text-white hover:!bg-black/80",
-						previewShade === "dark" &&
-							"!bg-white !text-black hover:!bg-white/80",
+						"absolute top-2 left-2 z-20 flex max-w-[125px] flex-wrap gap-1.5",
+						isPdf && !isPending && !item.tag && "sr-only",
 					)}
-					onClick={(e) => {
-						e.stopPropagation();
-						if (isPending) {
-							onRemovePending(item.url);
-							return;
-						}
-						openConfirmation({
-							title: labels?.removeTitle ?? "Remove file",
-							description:
-								labels?.removeDescription ??
-								"This file will be removed from the upload list.",
-							warning:
-								labels?.removeWarning ??
-								"This file will be lost forever, are you sure?",
-							confirmLabel: labels?.removeConfirmLabel ?? "Remove",
-							onConfirm: () => onRemoveUploaded(item.url),
-						});
-					}}
-					disabled={isDisabled}
-				/>
-			) : null}
+				>
+					<Chip
+						tone={isPending ? "warning" : "success"}
+						className="px-2 py-1 text-3xs font-medium leading-none backdrop-blur-sm"
+					>
+						{isPending
+							? (labels?.pending ?? "Pending")
+							: (labels?.uploaded ?? "Uploaded")}
+					</Chip>
+					{item.tag ? (
+						<Chip
+							tone={item.tag.tone ?? "neutral"}
+							className="max-w-full px-2 py-1 text-3xs font-medium leading-none backdrop-blur-sm"
+						>
+							<span className="min-w-0 truncate">{item.tag.label}</span>
+						</Chip>
+					) : null}
+				</div>
+
+				{!hideRemove ? (
+					<Button
+						aria-label={`Remove ${name}`}
+						variant="ghost"
+						size="icon-sm"
+						trailingIcon="cross"
+						data-preview-shade={previewShade}
+						className={clsx(
+							"absolute! top-2! right-2 z-20",
+							previewShade === "light" && "!text-black hover:!bg-black/10",
+							previewShade === "dark" && "!text-white hover:!bg-white/10",
+						)}
+						onClick={(e) => {
+							e.stopPropagation();
+							if (isPending) {
+								onRemovePending(item.url);
+								return;
+							}
+							openConfirmation({
+								title: labels?.removeTitle ?? "Remove file",
+								description:
+									labels?.removeDescription ??
+									"This file will be removed from the upload list.",
+								warning:
+									labels?.removeWarning ??
+									"This file will be lost forever, are you sure?",
+								confirmLabel: labels?.removeConfirmLabel ?? "Remove",
+								onConfirm: () => onRemoveUploaded(item.url),
+							});
+						}}
+						disabled={isDisabled}
+					/>
+				) : null}
+			</Card>
 		</motion.div>
 	);
 }
@@ -289,8 +310,8 @@ function FilePreviewSkeleton({
 }: Pick<Props, "className" | "previewHeight">) {
 	return (
 		<Skeleton
-			className={clsx("aspect-video w-auto shrink-0 rounded-md", className)}
-			style={{ height: previewHeight }}
+			className={clsx("aspect-video w-auto shrink-0 rounded-xl", className)}
+			style={{ height: previewHeight, width: (previewHeight * 16) / 9 }}
 		/>
 	);
 }
@@ -298,11 +319,6 @@ function FilePreviewSkeleton({
 export const FilePreview = Object.assign(FilePreviewRoot, {
 	Skeleton: FilePreviewSkeleton,
 });
-
-function pdfPreviewUrl(url: string) {
-	const [baseUrl] = url.split("#");
-	return `${baseUrl}#page=1&view=Fit&zoom=page-fit&toolbar=0&navpanes=0&scrollbar=0`;
-}
 
 function nameFromUrl(url: string) {
 	try {
@@ -314,7 +330,9 @@ function nameFromUrl(url: string) {
 	}
 }
 
-function sampleMedianShade(image: HTMLImageElement): PreviewShade | undefined {
+function sampleMedianShade(
+	image: HTMLImageElement | HTMLCanvasElement,
+): PreviewShade | undefined {
 	try {
 		const canvas = document.createElement("canvas");
 		canvas.width = 16;

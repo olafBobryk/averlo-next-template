@@ -3,6 +3,8 @@ import { Button, type ButtonProps } from "@/components/ui/primitives/Button";
 import { Text, type TextProps } from "@/components/ui/primitives/Text";
 
 type PaginationControlsProps = {
+	countFormat?: "fraction" | "pages";
+	ariaLabel?: string;
 	current: number;
 	total: number;
 	onPrev: () => void;
@@ -20,6 +22,8 @@ type PaginationControlsProps = {
 };
 
 function PaginationControlsRoot({
+	countFormat = "fraction",
+	ariaLabel = "Pages",
 	current,
 	total,
 	onPrev,
@@ -38,10 +42,14 @@ function PaginationControlsRoot({
 	const iconClassName = preserveIconDirection ? "rtl:-scale-x-100" : undefined;
 
 	return (
-		<div className={`flex items-center gap-[15px] ${className ?? ""}`}>
+		<nav
+			aria-label={ariaLabel}
+			className={`flex items-center ${countFormat === "pages" ? "gap-0" : "gap-[15px]"} ${className ?? ""}`}
+		>
 			<Button
 				variant={variant}
 				size={buttonSize}
+				shape="square"
 				onClick={onPrev}
 				aria-label={prevLabel}
 				disabled={disablePrev}
@@ -50,39 +58,61 @@ function PaginationControlsRoot({
 			</Button>
 			<Text
 				variant={textVariant}
-				className={`font-mono ${textClassName ?? ""}`}
+				className={`${countFormat === "pages" ? "whitespace-nowrap px-1 tabular-nums" : "font-mono"} ${textClassName ?? ""}`}
 			>
-				{current}/{total}
+				{countFormat === "pages"
+					? `${current} of ${total}`
+					: `${current}/${total}`}
 			</Text>
 			<Button
 				variant={variant}
 				size={buttonSize}
+				shape="square"
 				onClick={onNext}
 				aria-label={nextLabel}
 				disabled={disableNext}
 			>
 				<Icon name="caret-right" className={iconClassName} />
 			</Button>
-		</div>
+		</nav>
 	);
 }
 
 function PaginationControlsSkeleton({
+	countFormat = "fraction",
 	buttonSize = "icon-sm",
 	className,
 	current = 1,
 	total = 10,
-}: Pick<PaginationControlsProps, "buttonSize" | "className"> & {
+	variant = "secondary",
+	textVariant = "body",
+	textClassName,
+}: Pick<
+	PaginationControlsProps,
+	| "buttonSize"
+	| "className"
+	| "countFormat"
+	| "variant"
+	| "textVariant"
+	| "textClassName"
+> & {
 	current?: number;
 	total?: number;
 }) {
 	return (
-		<div className={`flex items-center gap-[15px] ${className ?? ""}`}>
-			<Button.Skeleton size={buttonSize} variant="secondary" />
-			<Text.Skeleton className="font-mono">
-				{current}/{total}
+		<div
+			className={`flex items-center ${countFormat === "pages" ? "gap-0" : "gap-[15px]"} ${className ?? ""}`}
+		>
+			<Button.Skeleton size={buttonSize} shape="square" variant={variant} />
+			<Text.Skeleton
+				variant={textVariant}
+				className={`${countFormat === "pages" ? "whitespace-nowrap px-1 tabular-nums" : "font-mono"} ${textClassName ?? ""}`}
+			>
+				{countFormat === "pages"
+					? `${current} of ${total}`
+					: `${current}/${total}`}
 			</Text.Skeleton>
-			<Button.Skeleton size={buttonSize} variant="secondary" />
+			<Button.Skeleton size={buttonSize} shape="square" variant={variant} />
 		</div>
 	);
 }

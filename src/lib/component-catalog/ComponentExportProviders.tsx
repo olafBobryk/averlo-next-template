@@ -5,7 +5,7 @@ import FormValidationClientMount from "@/components/mount/FormValidationClientMo
 import { MotionProvider } from "@/components/ui/foundations/MotionProvider";
 import { SettingsProvider } from "@/components/ui/foundations/settingsContext";
 import { IconProvider } from "@/components/ui/icons/iconRegistry";
-import { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";
+import { openaiIconRegistry } from "@/components/ui/icons/openaiRegistry";
 import { markAppReady } from "@/lib/appReadySignal";
 
 export function ComponentExportProviders({
@@ -25,7 +25,7 @@ export function ComponentExportProviders({
 			storageKey={null}
 		>
 			<MotionProvider expressive={0}>
-				<IconProvider registry={phosphorIconRegistry}>
+				<IconProvider registry={openaiIconRegistry}>
 					{children}
 					<FormValidationClientMount />
 				</IconProvider>

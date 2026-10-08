@@ -3,6 +3,10 @@
 import clsx from "clsx";
 import * as React from "react";
 import Portal from "@/components/ui/overlays/Portal";
+import {
+	dropdownChromeClassName,
+	dropdownElevationClassName,
+} from "../dropdownStyles";
 import { Float } from "../surfaces";
 import { COLLISION_PADDING } from "./constants";
 import { resolveAnchoredDropdownPosition } from "./positioning";
@@ -42,14 +46,17 @@ export function DropdownSurface({
 	const [positionStyle, setPositionStyle] =
 		React.useState<React.CSSProperties>();
 
-	const setPanelNode = React.useCallback(
-		(node: HTMLDivElement | null) => {
-			panelRef.current = node;
-			setMountedPanelNode(node);
-			assignRef(ref, node);
-		},
-		[ref],
-	);
+	const setPanelNode = React.useCallback((node: HTMLDivElement | null) => {
+		panelRef.current = node;
+		setMountedPanelNode(node);
+	}, []);
+
+	// A cascade can pass a new registration callback on each render. Forward it
+	// separately so that ref changes never detach and remeasure the panel.
+	React.useLayoutEffect(() => {
+		assignRef(ref, mountedPanelNode);
+		return () => assignRef(ref, null);
+	}, [ref, mountedPanelNode]);
 
 	const calculateFixedPosition = React.useCallback(() => {
 		const anchor = anchorRef?.current;
@@ -58,12 +65,27 @@ export function DropdownSurface({
 
 		const anchorRect = anchor.getBoundingClientRect();
 		const panelRect = panel.getBoundingClientRect();
+		const firstOption = panel.querySelector<HTMLElement>(
+			'[role="menuitem"], [role="option"]',
+		);
+		const contentInset = firstOption
+			? firstOption.getBoundingClientRect().top - panelRect.top
+			: 0;
+		const alignedAnchorRect =
+			side === "left" || side === "right"
+				? new DOMRect(
+						anchorRect.x,
+						anchorRect.y - contentInset,
+						anchorRect.width,
+						anchorRect.height + contentInset * 2,
+					)
+				: anchorRect;
 		const explicitWidth = matchAnchorWidth ? anchorRect.width : undefined;
 		const measuredWidth = explicitWidth ?? panelRect.width;
 		const measuredHeight = panel.scrollHeight || panelRect.height;
 		const position = resolveAnchoredDropdownPosition({
 			align,
-			anchorRect,
+			anchorRect: alignedAnchorRect,
 			collisionPadding,
 			explicitWidth,
 			measuredHeight,
@@ -122,6 +144,8 @@ export function DropdownSurface({
 		<Float
 			className={clsx(
 				"dropdown-panel-enter z-50 min-w-48",
+				dropdownChromeClassName,
+				elevation === "float" && dropdownElevationClassName,
 				positionStrategy === "fixed" ? "fixed" : "absolute mt-2",
 				className,
 			)}
@@ -132,6 +156,10 @@ export function DropdownSurface({
 			style={resolvedStyle}
 			width={width}
 			{...props}
+			onAnimationEnd={(event) => {
+				if (positionStrategy === "fixed") calculateFixedPosition();
+				props.onAnimationEnd?.(event);
+			}}
 		/>
 	);
 

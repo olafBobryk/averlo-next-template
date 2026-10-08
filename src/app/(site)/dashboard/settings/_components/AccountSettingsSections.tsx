@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/overlays/modal/ModalShell";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { Card, ContentSection } from "@/components/ui/primitives/surfaces";
 import { requestPasswordRecovery } from "@/lib/api/auth";
 import { showToast } from "@/lib/feedback";
 import { hrefFor } from "@/lib/routes";
@@ -39,47 +39,50 @@ function SecuritySettingsSectionRoot({
 	);
 
 	return (
-		<Card className="scroll-mt-24" id="security-sign-in">
-			<Card.Heading
+		<ContentSection className="scroll-mt-24" id="security-sign-in">
+			<ContentSection.Heading
 				action={<DashboardSignOutButton />}
 				description="Password, recovery, identity, and session status for this account."
-				leading={
-					<Icon className="text-muted-foreground" name="lock" size="sm" />
-				}
 				title="Security and sign-in"
 			/>
-			<Card.Content>
-				<dl className="grid">
-					<SignInMethodRow
-						action={
-							authMethods["password-recovery"].available ? (
-								<PasswordRecoveryModalButton email={user.email} />
-							) : null
-						}
-						icon={<Icon name="lock" size="sm" />}
-						label="Password"
-						value={passwordEnabled ? "Enabled" : "Unavailable"}
-					/>
-					<SignInMethodRow
-						icon={<Icon name="mail" size="sm" />}
-						label="Magic link"
-						value={
-							authMethods["magic-link-sign-in"].available
-								? "Available"
-								: "Unavailable"
-						}
-					/>
-					{externalIdentities.map((identity) => (
-						<SignInMethodRow
-							icon={<Icon name="link" size="sm" />}
-							key={identity.id}
-							label={identity.provider}
-							value={identity.verified ? "Connected" : "Verification required"}
-						/>
-					))}
-				</dl>
-			</Card.Content>
-		</Card>
+			<ContentSection.Content>
+				<Card>
+					<Card.Content>
+						<dl className="grid">
+							<SignInMethodRow
+								action={
+									authMethods["password-recovery"].available ? (
+										<PasswordRecoveryModalButton email={user.email} />
+									) : null
+								}
+								icon={<Icon name="lock" size="sm" />}
+								label="Password"
+								value={passwordEnabled ? "Enabled" : "Unavailable"}
+							/>
+							<SignInMethodRow
+								icon={<Icon name="mail" size="sm" />}
+								label="Magic link"
+								value={
+									authMethods["magic-link-sign-in"].available
+										? "Available"
+										: "Unavailable"
+								}
+							/>
+							{externalIdentities.map((identity) => (
+								<SignInMethodRow
+									icon={<Icon name="link" size="sm" />}
+									key={identity.id}
+									label={identity.provider}
+									value={
+										identity.verified ? "Connected" : "Verification required"
+									}
+								/>
+							))}
+						</dl>
+					</Card.Content>
+				</Card>
+			</ContentSection.Content>
+		</ContentSection>
 	);
 }
 
@@ -97,47 +100,50 @@ function SecuritySettingsSectionSkeleton({
 	);
 
 	return (
-		<Card className="scroll-mt-24" id="security-sign-in">
-			<Card.Heading
+		<ContentSection className="scroll-mt-24" id="security-sign-in">
+			<ContentSection.Heading
 				action={<DashboardSignOutButton />}
 				description="Password, recovery, identity, and session status for this account."
-				leading={
-					<Icon className="text-muted-foreground" name="lock" size="sm" />
-				}
 				title="Security and sign-in"
 			/>
-			<Card.Content>
-				<dl className="grid">
-					<SignInMethodRowSkeleton
-						action={
-							authMethods["password-recovery"].available ? (
-								<PasswordRecoveryModalButton email={user.email} />
-							) : null
-						}
-						icon={<Icon name="lock" size="sm" />}
-						label="Password"
-						value={passwordEnabled ? "Enabled" : "Unavailable"}
-					/>
-					<SignInMethodRowSkeleton
-						icon={<Icon name="mail" size="sm" />}
-						label="Magic link"
-						value={
-							authMethods["magic-link-sign-in"].available
-								? "Available"
-								: "Unavailable"
-						}
-					/>
-					{externalIdentities.map((identity) => (
-						<SignInMethodRowSkeleton
-							icon={<Icon name="link" size="sm" />}
-							key={identity.id}
-							label={identity.provider}
-							value={identity.verified ? "Connected" : "Verification required"}
-						/>
-					))}
-				</dl>
-			</Card.Content>
-		</Card>
+			<ContentSection.Content>
+				<Card>
+					<Card.Content>
+						<dl className="grid">
+							<SignInMethodRowSkeleton
+								action={
+									authMethods["password-recovery"].available ? (
+										<PasswordRecoveryModalButton email={user.email} />
+									) : null
+								}
+								icon={<Icon name="lock" size="sm" />}
+								label="Password"
+								value={passwordEnabled ? "Enabled" : "Unavailable"}
+							/>
+							<SignInMethodRowSkeleton
+								icon={<Icon name="mail" size="sm" />}
+								label="Magic link"
+								value={
+									authMethods["magic-link-sign-in"].available
+										? "Available"
+										: "Unavailable"
+								}
+							/>
+							{externalIdentities.map((identity) => (
+								<SignInMethodRowSkeleton
+									icon={<Icon name="link" size="sm" />}
+									key={identity.id}
+									label={identity.provider}
+									value={
+										identity.verified ? "Connected" : "Verification required"
+									}
+								/>
+							))}
+						</dl>
+					</Card.Content>
+				</Card>
+			</ContentSection.Content>
+		</ContentSection>
 	);
 }
 

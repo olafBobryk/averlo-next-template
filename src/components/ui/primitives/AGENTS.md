@@ -24,3 +24,7 @@
   pieces from a consumer.
 - `className` extensions are additive: they must not remove required semantics,
   focus behavior, slot identity, or structural selectors.
+- Button visual recipes are private shared implementation used by canonical
+  and thin-start renderers. Do not fork their tokens or geometry in an override.
+- Feedback presence composes the motion presence family; feedback owners must
+  not introduce a second layout measurement or animation implementation.

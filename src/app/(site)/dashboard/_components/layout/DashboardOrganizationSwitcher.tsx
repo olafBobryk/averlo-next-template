@@ -9,6 +9,7 @@ import {
 	getOrganizationPresentation,
 	type OrganizationPresentation,
 } from "@/app/(site)/dashboard/_lib/entities/organization/presentation";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Dropdown } from "@/components/ui/primitives/dropdown";
 import { selectOrganization } from "@/lib/api/auth";
 import { showToast } from "@/lib/feedback/toast";
@@ -24,11 +25,13 @@ export function DashboardOrganizationSwitcher({
 	mobileExpanded,
 	onNavigate,
 	placement = "body",
+	compact = false,
 }: {
 	collapsed: boolean;
 	mobileExpanded: boolean;
 	onNavigate: () => void;
 	placement?: "body" | "footer";
+	compact?: boolean;
 }) {
 	const router = useRouter();
 	const { membership, organization, organizationChoices } = useDashboardAuth();
@@ -46,7 +49,6 @@ export function DashboardOrganizationSwitcher({
 			),
 		}),
 	);
-	const canSwitch = choices.length > 1;
 	async function handleOrganizationSelect(organizationId: string) {
 		if (
 			organizationId === organization.id ||
@@ -81,7 +83,7 @@ export function DashboardOrganizationSwitcher({
 	function renderIdentity() {
 		return (
 			<OrganizationIdentity
-				avatarSize={placement === "footer" ? "sm" : "md"}
+				avatarSize={compact || placement === "footer" ? "sm" : "md"}
 				avatarClassName={clsx(
 					!mobileExpanded &&
 						"max-lg:!size-[min(2.5rem,calc(100cqi_-_4px))] max-lg:group-focus-visible:ring-3 max-lg:group-focus-visible:ring-ring/30",
@@ -90,34 +92,20 @@ export function DashboardOrganizationSwitcher({
 				)}
 				className={clsx(
 					"w-full",
+					compact && "!gap-2",
+
 					!mobileExpanded && "max-lg:w-auto",
 					collapsed && "lg:w-auto",
 				)}
 				presentation={currentPresentation}
 				textClassName={clsx(
 					"text-left",
+
 					mobileExpanded ? "max-lg:grid" : "max-lg:hidden",
 					collapsed ? "lg:hidden" : "lg:grid",
 				)}
-				variant="default"
+				variant={compact ? "actor" : "default"}
 			/>
-		);
-	}
-
-	if (!canSwitch) {
-		return (
-			<div
-				className={clsx(
-					"@container flex min-w-0 items-center px-2",
-					placement === "footer" ? "h-10" : "h-11",
-					!mobileExpanded && "max-lg:px-0",
-					collapsed && "lg:px-0",
-					mobileExpanded ? "max-lg:justify-start" : "max-lg:justify-center",
-					collapsed ? "lg:justify-center" : "lg:justify-start",
-				)}
-			>
-				{renderIdentity()}
-			</div>
 		);
 	}
 
@@ -148,20 +136,38 @@ export function DashboardOrganizationSwitcher({
 			triggerButtonProps={{
 				className: clsx(
 					"@container w-full min-w-0 overflow-hidden px-2",
-					placement === "footer" ? "h-10" : "h-12",
+					compact
+						? "h-8 !px-3 !text-muted-foreground hover:!text-sidebar-accent-foreground"
+						: placement === "footer"
+							? "h-10"
+							: "h-12",
 					mobileExpanded
 						? "max-lg:justify-start"
 						: "max-lg:justify-center max-lg:px-0 max-lg:focus-visible:border-transparent max-lg:focus-visible:ring-0 max-lg:aria-expanded:!bg-transparent max-lg:aria-expanded:hover:!bg-transparent",
 					collapsed
 						? "lg:justify-center lg:px-0 lg:focus-visible:border-transparent lg:focus-visible:ring-0 lg:aria-expanded:!bg-transparent lg:aria-expanded:hover:!bg-transparent"
 						: "lg:justify-start",
-					"!border-transparent !bg-transparent hover:!bg-transparent aria-expanded:!bg-sidebar-accent/80 aria-expanded:!text-sidebar-accent-foreground aria-expanded:hover:!bg-sidebar-accent/80",
+					"!border-transparent hover:!bg-[var(--button-ghost-hover)] aria-expanded:!bg-[var(--button-ghost-hover)] aria-expanded:!text-sidebar-accent-foreground",
 				),
 				radius: "sm",
 				size: "none",
-				variant: "secondary",
+				variant: "ghost",
+				contentClassName: "w-full min-w-0 justify-between gap-2",
 			}}
-			triggerContent={renderIdentity()}
+			triggerContent={
+				<>
+					{compact ? (
+						<span className="min-w-0 flex-1 truncate text-left text-sm font-medium">
+							{currentPresentation.displayLabel}
+						</span>
+					) : (
+						renderIdentity()
+					)}
+					<span className="flex size-6 shrink-0 items-center justify-center">
+						<Icon name="chevron-down" size="md" />
+					</span>
+				</>
+			}
 		/>
 	);
 }

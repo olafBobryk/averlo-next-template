@@ -42,9 +42,20 @@ export const FallbackContract: Story = {
 				size="md"
 			/>
 			<ProfilePicture.Skeleton size="xl" />
+			<div style={{ "--ui-surface-color": "var(--card)", backgroundColor: "var(--card)" } as React.CSSProperties}>
+				<ProfilePicture name="Template Operator" fallback="T" size="sm" />
+			</div>
+			<div style={{ "--ui-surface-color": "var(--popover)", backgroundColor: "var(--popover)" } as React.CSSProperties}>
+				<ProfilePicture name="Template Operator" fallback="TO" size="xl" helperIndex={7} />
+			</div>
 		</div>
 	),
 	play: async ({ canvas, canvasElement }) => {
+		const matchingAvatars = canvas.getAllByRole("img", { name: "Template Operator profile picture" });
+		await expect(matchingAvatars[0].parentElement!.dataset.helperIndex)
+			.toBe(matchingAvatars[1].parentElement!.dataset.helperIndex);
+		await expect(getComputedStyle(matchingAvatars[0].parentElement!).backgroundColor)
+			.not.toBe(getComputedStyle(matchingAvatars[1].parentElement!).backgroundColor);
 		await expect(
 			canvas.getByRole("img", { name: "Ada Lovelace profile picture" }),
 		).toBeVisible();

@@ -1,3 +1,4 @@
+import type { IconName } from "@/components/ui/icons/Icon";
 import { templateCapabilities } from "@/config/capabilities";
 import type { StaticAppSurfaceId } from "@/lib/routes";
 
@@ -5,7 +6,7 @@ export const marketingPageSlugs = ["home", "document"] as const;
 
 export type MarketingPageSlug = (typeof marketingPageSlugs)[number];
 
-export type HeaderIconName = "close" | "menu" | "search" | "dot";
+export type HeaderIconName = IconName;
 
 export type MarketingLink =
 	| {

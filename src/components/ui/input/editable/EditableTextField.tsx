@@ -208,7 +208,7 @@ function EditableTextFieldRoot({
 				size="none"
 				trailingIcon="pencil"
 				type="button"
-				variant="ghost"
+				variant="bare"
 			>
 				{displayContent}
 			</Button>
@@ -227,7 +227,7 @@ function EditableTextFieldRoot({
 				size="none"
 				trailingIcon="pencil"
 				type="button"
-				variant="ghost"
+				variant="bare"
 			>
 				{displayContent}
 			</Button>
@@ -265,7 +265,7 @@ function EditableTextFieldRoot({
 									loading={saving}
 									size="icon-sm"
 									type="submit"
-									variant="ghost"
+									variant="bare"
 								/>
 								<Button
 									aria-label={cancelAriaLabel}
@@ -274,7 +274,7 @@ function EditableTextFieldRoot({
 									onClick={cancelEditing}
 									size="icon-sm"
 									type="button"
-									variant="ghost"
+									variant="bare"
 								/>
 							</div>
 						}
@@ -354,7 +354,7 @@ function EditableTextFieldSkeleton({
 					textClassName="truncate"
 					textVariant="body"
 					trailingIcon
-					variant="ghost"
+					variant="bare"
 				>
 					{value}
 				</Button.Skeleton>

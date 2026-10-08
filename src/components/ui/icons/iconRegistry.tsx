@@ -44,8 +44,14 @@ const createLocalRegistry = (): IconRegistry => {
 
 const localIconRegistry = createLocalRegistry();
 
+const semanticDefaultWeights: Partial<Record<IconName, IconWeight>> = {
+	bolt: "fill",
+	sparkle: "fill",
+};
+
 export const createIconRegistry = (
 	overrides: Partial<IconRegistry>,
+	defaultWeights: Partial<Record<IconName, IconWeight>> = {},
 ): IconRegistry => {
 	const merged: Record<
 		string,
@@ -56,7 +62,18 @@ export const createIconRegistry = (
 	};
 
 	return Object.fromEntries(
-		Object.entries(merged).filter(([, value]) => Boolean(value)),
+		Object.entries(merged)
+			.filter(([, value]) => Boolean(value))
+			.map(([name, Component]) => {
+				const defaultWeight =
+					defaultWeights[name] ?? semanticDefaultWeights[name];
+				if (!Component || !defaultWeight) return [name, Component];
+				const WithDefaultWeight = (props: IconRenderProps) => (
+					<Component {...props} weight={props.weight ?? defaultWeight} />
+				);
+				WithDefaultWeight.displayName = `IconDefault(${name})`;
+				return [name, WithDefaultWeight];
+			}),
 	) as IconRegistry;
 };
 

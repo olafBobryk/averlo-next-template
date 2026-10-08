@@ -1,10 +1,9 @@
 "use client";
 
 import { defineCatalogOwnerContract } from "@/lib/component-catalog/contract";
-import { Icon } from "../../icons/Icon";
 import { Button } from "../Button";
 import { Text } from "../Text";
-import { Card, Float, Panel } from ".";
+import { Card, ContentSection, Float, Panel } from ".";
 
 function CatalogPreview1() {
 	const render = () => (
@@ -15,10 +14,11 @@ function CatalogPreview1() {
 		>
 			<div className="grid gap-2">
 				<Text as="h2" variant="headingSm">
-					Page → Panel → Card → Float
+					Page, Panel, Card, and Float
 				</Text>
 				<Text tone="muted" variant="support">
-					A shadcn-aligned shadow ladder: none, none, sm, then md.
+					Quiet shell, soft page canvas, lifted cards, and brighter floating
+					chrome.
 				</Text>
 			</div>
 			<div className="grid items-stretch gap-4 lg:grid-cols-4">
@@ -35,13 +35,13 @@ function CatalogPreview1() {
 				<Panel aria-label="Panel level" padding="sm">
 					<Text variant="bodyStrong">Panel</Text>
 					<Text tone="muted" variant="support">
-						Broad grouping · shadow-none
+						Quiet shell / grouping · shadow-none
 					</Text>
 				</Panel>
 				<Card aria-label="Card level">
 					<Card.Header>
 						<Card.Title>Card</Card.Title>
-						<Card.Description>Structured unit · shadow-sm</Card.Description>
+						<Card.Description>Structured unit · shadow-xs</Card.Description>
 					</Card.Header>
 					<Card.Content>
 						Card elevation stays independent of slots.
@@ -198,8 +198,8 @@ function CatalogPreview7() {
 		<div className="grid overflow-hidden border border-border">
 			<Panel
 				as="header"
-				aria-label="Page-backed header chrome"
-				background="page"
+				aria-label="Surface-backed header chrome"
+				background="panel"
 				border="none"
 				className="border-b border-border"
 				display="flex"
@@ -250,10 +250,7 @@ function CatalogPreview8() {
 					</Button>
 				}
 				actionLayout="responsive"
-				description="A reusable route-level heading built from Card slots."
-				leading={
-					<Icon className="text-muted-foreground" name="users" size="sm" />
-				}
+				description="The identity and context of this self-contained item."
 				title="People and access"
 			/>
 			<Card.Content>Three members currently have access.</Card.Content>
@@ -266,21 +263,57 @@ function CatalogPreview8() {
 	)({ ...{}, ...{} } as never);
 }
 
+function ContentHierarchyPreview() {
+	return (
+		<ContentSection>
+			<ContentSection.Heading
+				title="Organization identity"
+				description="Keep the heading outside one card containing the related properties."
+			/>
+			<ContentSection.Content>
+				<Card>
+					<Card.Content>
+						<dl className="grid gap-4 sm:grid-cols-2">
+							<div>
+								<dt>Name</dt>
+								<dd>Demo organization</dd>
+							</div>
+							<div>
+								<dt>Slug</dt>
+								<dd>demo</dd>
+							</div>
+						</dl>
+					</Card.Content>
+				</Card>
+			</ContentSection.Content>
+		</ContentSection>
+	);
+}
+
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-primitives-surfaces",
 	name: "Surfaces",
-	role: "Semantic Page, Panel, Card, Float, and elevation system for grouped, structured, and temporarily raised content.",
+	role: "Page hierarchy with unboxed ContentSection groups, persistent Panel chrome, self-contained Cards, and temporary Floats.",
 	importStatement:
-		'import { Card, Float, Panel, type CardHeadingProps, type CardProps, type FloatProps, type PanelProps, type SurfaceBackground, type SurfaceElevation, type SurfaceRadius } from "@/components/ui/primitives/surfaces";',
+		'import { Card, ContentSection, Float, Panel, type CardHeadingProps, type CardProps, type FloatProps, type PanelProps, type SurfaceBackground, type SurfaceElevation, type SurfaceRadius } from "@/components/ui/primitives/surfaces";',
 	chooseWhen: [
-		"Use Panel for broad generic grouping, Card for structured header/content/action/footer content, and Float for behavior-free temporary chrome.",
-		"Use Card.Heading for the repeated route-level title, description, leading visual, and optional action composition; use the lower Card slots when a header owns additional content.",
+		"Paper aliases the soft page canvas. Panels use a quieter neutral fill; cards lift grouped content; floats have the brightest fill. Inputs and buttons share the same restrained neutral family. Default cards retain shadow-xs elevation and 14px corners.",
+		"Use text-only ContentSection headings for page hierarchy, with descriptions, actions, and grouped content on the canvas. Do not add decorative heading icons. Place one Card beneath the heading for a cohesive property or control group; plain prose and layout remain unboxed.",
+		"Use Panel for persistent application chrome, Card for related properties/controls or a self-contained record, result, or preview, and Float for temporary chrome with a distinct raised fill. Modals retain Card fill at overlay elevation. Neutral card headers and footers use a subtle shared chrome fill and matching card-border divider in light mode; table labels and page counts use dedicated readable chrome ink. Card.Header is optional: use it for item identity, never repeat the external section heading.",
 		"Use SurfaceBackground, SurfaceRadius, and SurfaceElevation when another owner needs to forward the shared semantic chrome contract.",
 	],
 	chooseInstead: [
 		"Use Section for page flow, a complete overlay owner for portal and interaction behavior, and existing controls or status components for their narrower semantics.",
 	],
 	compounds: [
+		"ContentSection",
+		"ContentSection.Heading",
+		"ContentSection.Header",
+		"ContentSection.Title",
+		"ContentSection.Description",
+		"ContentSection.Action",
+		"ContentSection.Content",
+		"ContentSection.Footer",
 		"Panel",
 		"Card",
 		"Card.Header",
@@ -294,10 +327,19 @@ export const catalogContract = defineCatalogOwnerContract({
 	],
 	exclusions: [
 		"A Page React component; Page is the application canvas.",
+		"A card per property or nested cards used only for spacing; removing all property-group cards in the name of reducing card usage.",
 		"Portal, focus, positioning, dismissal, or modal behavior inside Float.",
 		"Generic numeric radius and shadow sizes outside the semantic surface vocabulary.",
 	],
 	guarantees: [
+		{
+			label: "External headings with cohesive property cards",
+			storyId: "ui-primitives-surfaces--content-hierarchy",
+		},
+		{
+			label: "Dark surface separation",
+			storyId: "ui-primitives-surfaces--dark-elevation-ladder",
+		},
 		{
 			label: "Elevation ladder",
 			storyId: "ui-primitives-surfaces--elevation-ladder",
@@ -336,6 +378,14 @@ export const catalogContract = defineCatalogOwnerContract({
 	group: "Primitives",
 	sweepSpan: "full",
 	previewTargets: [
+		{
+			id: "content-hierarchy",
+			name: "Content hierarchy",
+			baseline: {},
+			axes: [],
+			stage: "standard",
+			Render: ContentHierarchyPreview,
+		},
 		{
 			id: "elevation-ladder",
 			name: "Elevation ladder",

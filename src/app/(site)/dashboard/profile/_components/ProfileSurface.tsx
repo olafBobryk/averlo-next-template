@@ -1,7 +1,7 @@
 import { Icon } from "@/components/ui/icons/Icon";
 import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { Card, ContentSection } from "@/components/ui/primitives/surfaces";
 import { hrefFor } from "@/lib/routes";
 import { DashboardDetailField } from "../../_components/detail/DashboardDetailField";
 import { AccountIdentity } from "../../_components/entities/account/AccountIdentity";
@@ -38,70 +38,72 @@ export function ProfileSurface({
 			contentClassName="grid gap-5"
 			title="Profile"
 		>
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					description="The profile shown across the application."
-					leading={
-						<Icon className="text-muted-foreground" name="user" size="sm" />
-					}
 					title="Account identity"
 				/>
-				<Card.Content className="grid gap-5">
-					<AccountIdentity avatarSize="xl" presentation={presentation} />
-					<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
-						<DashboardDetailField
-							copyLabel="Copy email address"
-							copyValue={presentation.emailLabel}
-							icon={<Icon name="mail" size="sm" />}
-							label="Email"
-							value={presentation.emailLabel}
-						/>
-						<DashboardDetailField
-							icon={<Icon name="calendar" size="sm" />}
-							label="Joined"
-							value={presentation.joinedAtLabel}
-						/>
-					</dl>
-				</Card.Content>
-			</Card>
-			<Card>
-				<Card.Heading
+				<ContentSection.Content>
+					<Card>
+						<Card.Content className="grid gap-5">
+							<AccountIdentity avatarSize="xl" presentation={presentation} />
+							<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
+								<DashboardDetailField
+									copyLabel="Copy email address"
+									copyValue={presentation.emailLabel}
+									icon={<Icon name="mail" size="sm" />}
+									label="Email"
+									value={presentation.emailLabel}
+								/>
+								<DashboardDetailField
+									icon={<Icon name="calendar" size="sm" />}
+									label="Joined"
+									value={presentation.joinedAtLabel}
+								/>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
+			<ContentSection>
+				<ContentSection.Heading
 					description="Access resolved for the active organization."
-					leading={
-						<Icon className="text-muted-foreground" name="shield" size="sm" />
-					}
 					title="Organization access"
 				/>
-				<Card.Content>
-					<dl className="grid gap-4 sm:grid-cols-2">
-						<DashboardDetailField
-							icon={<Icon name="building" size="sm" />}
-							label="Organization"
-							value={presentation.organizationLabel}
-						/>
-						<DashboardDetailField
-							icon={<Icon name="shield" size="sm" />}
-							label="Organization role"
-							value={<Chip color={role.tone}>{role.shortLabel}</Chip>}
-						/>
-						<DashboardDetailField
-							className="sm:col-span-2"
-							icon={<Icon name="check" size="sm" />}
-							label="Permissions"
-							truncateValue={false}
-							value={
-								<span className="flex flex-wrap gap-2">
-									{capabilities.map((capability) => (
-										<Chip color="muted" key={capability}>
-											{dashboardCapabilityLabels[capability]}
-										</Chip>
-									))}
-								</span>
-							}
-						/>
-					</dl>
-				</Card.Content>
-			</Card>
+				<ContentSection.Content>
+					<Card>
+						<Card.Content>
+							<dl className="grid gap-4 sm:grid-cols-2">
+								<DashboardDetailField
+									icon={<Icon name="building" size="sm" />}
+									label="Organization"
+									value={presentation.organizationLabel}
+								/>
+								<DashboardDetailField
+									icon={<Icon name="shield" size="sm" />}
+									label="Organization role"
+									value={<Chip color={role.tone}>{role.shortLabel}</Chip>}
+								/>
+								<DashboardDetailField
+									className="sm:col-span-2"
+									icon={<Icon name="check" size="sm" />}
+									label="Permissions"
+									truncateValue={false}
+									value={
+										<span className="flex flex-wrap gap-2">
+											{capabilities.map((capability) => (
+												<Chip color="muted" key={capability}>
+													{dashboardCapabilityLabels[capability]}
+												</Chip>
+											))}
+										</span>
+									}
+								/>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
 			<DashboardFooterNote>
 				Profile edits remain in{" "}
 				<DashboardFooterNoteLink href={hrefFor("dashboard.settings")}>

@@ -100,6 +100,20 @@ export const DisabledAndSkeletonParity: Story = {
 			<InputFrame.Skeleton fullWidth>Loading value</InputFrame.Skeleton>
 		</div>
 	),
+	play: async ({ canvasElement }) => {
+		const live = canvasElement.querySelector('[data-slot="input-frame"]')!;
+		const skeleton = canvasElement.querySelector(
+			'[data-slot="input-frame-skeleton"]',
+		)!;
+		await expect(live.getBoundingClientRect().height).toBe(34);
+		await expect(skeleton.getBoundingClientRect().height).toBe(
+			live.getBoundingClientRect().height,
+		);
+		await expect(getComputedStyle(live).borderRadius).toBe("9px");
+		await expect(getComputedStyle(skeleton).borderRadius).toBe(
+			getComputedStyle(live).borderRadius,
+		);
+	},
 };
 
 export const StaticChromeReuse: Story = {
@@ -118,3 +132,196 @@ export const StaticChromeReuse: Story = {
 		await expect(canvas.queryByRole("textbox")).toBeNull();
 	},
 };
+
+export const ComposerChromeParity: Story = {
+	render: () => (
+		<div className="grid max-w-lg gap-6">
+			<InputFrame fullWidth data-testid="standard-frame">
+				<input
+					aria-label="Standard input"
+					className={inputVariants()}
+					placeholder="Standard input"
+				/>
+			</InputFrame>
+			<InputFrame
+				fullWidth
+				presentation="composer"
+				className="h-auto"
+				data-testid="composer-frame"
+			>
+				<textarea
+					aria-label="Composer input"
+					className="w-full resize-none bg-transparent p-4 outline-none"
+					placeholder="Composer input"
+					rows={3}
+				/>
+			</InputFrame>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const standard = getComputedStyle(canvas.getByTestId("standard-frame"));
+		const composer = getComputedStyle(canvas.getByTestId("composer-frame"));
+		await expect(composer.backgroundColor).toBe(standard.backgroundColor);
+		await expect(composer.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+		await expect(composer.boxShadow).toBe(standard.boxShadow);
+		await expect(standard.borderRadius).toBe("9px");
+		await expect(composer.borderRadius).toBe("25px");
+	},
+};
+export const DarkComposerChromeParity: Story = {
+	...ComposerChromeParity,
+	globals: { appearance: "dark" },
+};
+
+/** Compact toolbar controls retain the same frame and focus treatment. */
+export const CompactToolbar: Story = {
+	render: () => (
+		<div className="flex items-center gap-3">
+			<InputFrame size="xs" className="w-10" data-testid="compact-frame">
+				<input
+					aria-label="Page number"
+					defaultValue="1"
+					className={clsx(inputVariants({ size: "xs" }), "text-center")}
+				/>
+			</InputFrame>
+			<InputFrame.Skeleton
+				size="xs"
+				className="w-10"
+				data-testid="compact-skeleton"
+			>
+				1
+			</InputFrame.Skeleton>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const field = canvas.getByRole("textbox", { name: "Page number" });
+		await userEvent.click(field);
+		await expect(field).toHaveFocus();
+		await expect(
+			canvas.getByTestId("compact-frame").getBoundingClientRect().height,
+		).toBe(28);
+		await expect(
+			canvas.getByTestId("compact-skeleton").getBoundingClientRect().height,
+		).toBe(28);
+	},
+};
+
+export const CompactRow: Story = {
+	render: () => (
+		<div className="flex h-7 items-center gap-3">
+			<InputFrame size="xxs" className="w-10" data-testid="row-frame">
+				<input
+					aria-label="Compact page number"
+					defaultValue="1"
+					className={clsx(inputVariants({ size: "xxs" }), "text-center")}
+				/>
+			</InputFrame>
+			<InputFrame.Skeleton
+				size="xxs"
+				className="w-10"
+				data-testid="row-skeleton"
+			>
+				1
+			</InputFrame.Skeleton>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		await userEvent.click(
+			canvas.getByRole("textbox", { name: "Compact page number" }),
+		);
+		await expect(
+			canvas.getByRole("textbox", { name: "Compact page number" }),
+		).toHaveFocus();
+		await expect(
+			canvas.getByTestId("row-frame").getBoundingClientRect().height,
+		).toBeCloseTo(24, 1);
+		await expect(
+			canvas.getByTestId("row-skeleton").getBoundingClientRect().height,
+		).toBeCloseTo(24, 1);
+	},
+};
+
+export const Muted: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'Use variant="muted" for secondary controls within toolbars or dropdowns: a soft neutral fill without resting shadow. It composes with every size and validation tone. The default variant remains unchanged.',
+			},
+		},
+	},
+	render: () => (
+		<div className="grid max-w-xs gap-4 rounded-xl bg-float p-4">
+			<InputFrame size="xxs" className="w-10" data-testid="default-frame">
+				<input
+					aria-label="Default page"
+					defaultValue="1"
+					className={inputVariants({ size: "xxs" })}
+				/>
+			</InputFrame>
+			<InputFrame
+				variant="muted"
+				size="xxs"
+				className="w-10"
+				data-testid="muted-frame"
+			>
+				<input
+					aria-label="Muted page"
+					defaultValue="1"
+					className={inputVariants({ size: "xxs" })}
+				/>
+			</InputFrame>
+			<InputFrame variant="muted" tone="error" data-testid="muted-error">
+				<input
+					aria-label="Invalid muted value"
+					aria-invalid="true"
+					defaultValue="Invalid value"
+					className={inputVariants()}
+				/>
+			</InputFrame>
+			<InputFrame.Skeleton
+				variant="muted"
+				size="xxs"
+				className="w-10"
+				data-testid="muted-skeleton"
+			>
+				1
+			</InputFrame.Skeleton>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const frame = canvas.getByTestId("muted-frame");
+		const restShadow = getComputedStyle(frame).boxShadow;
+		await expect(getComputedStyle(frame).backgroundColor).not.toBe(
+			getComputedStyle(canvas.getByTestId("default-frame")).backgroundColor,
+		);
+		await expect(restShadow).not.toBe(
+			getComputedStyle(canvas.getByTestId("default-frame")).boxShadow,
+		);
+		await expect(frame.getBoundingClientRect().height).toBe(24);
+		await expect(
+			canvas.getByTestId("muted-skeleton").getBoundingClientRect().height,
+		).toBe(24);
+		await expect(canvas.getByTestId("muted-skeleton")).not.toHaveAttribute(
+			"variant",
+		);
+		await userEvent.click(canvas.getByRole("textbox", { name: "Muted page" }));
+		await expect(
+			canvas.getByRole("textbox", { name: "Muted page" }),
+		).toHaveFocus();
+		await expect(
+			getComputedStyle(frame).getPropertyValue("--tw-ring-shadow"),
+		).toContain("3px");
+		await expect(canvas.getByTestId("muted-error")).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+		await expect(
+			getComputedStyle(canvas.getByTestId("muted-error")).getPropertyValue(
+				"--tw-ring-shadow",
+			),
+		).toContain("3px");
+	},
+};
+
+export const MutedDark: Story = { ...Muted, globals: { theme: "dark" } };

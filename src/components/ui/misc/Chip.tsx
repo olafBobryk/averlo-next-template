@@ -4,6 +4,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { HELPER_PALETTE_SIZE } from "@/components/ui/foundations/helperPalette";
 import { createSurfaceTint } from "@/components/ui/foundations/surfaceTint";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
@@ -62,8 +63,6 @@ export type ChipSkeletonProps = {
 	contentClassName?: string;
 };
 
-const HELPER_PALETTE_SIZE = 8;
-
 const chipColorTokenValues: Record<string, string> = {
 	berry: "var(--app-berry)",
 	danger: "var(--danger)",
@@ -91,10 +90,10 @@ const chipToneBackgroundRecipes: Partial<
 	Record<ChipTone, ChipBackgroundRecipe>
 > = {
 	neutral: {
-		activePercentage: 12,
-		hoverPercentage: 8,
+		activePercentage: 18,
+		hoverPercentage: 14,
 		tint: "var(--foreground)",
-		tintPercentage: 5,
+		tintPercentage: 10,
 	},
 	primary: {
 		activePercentage: 20,
@@ -121,10 +120,10 @@ const chipToneBackgroundRecipes: Partial<
 		tintPercentage: 10,
 	},
 	helper: {
-		activePercentage: 24,
-		hoverPercentage: 18,
+		activePercentage: 20,
+		hoverPercentage: 15,
 		tint: "var(--chip-accent)",
-		tintPercentage: 12,
+		tintPercentage: 10,
 	},
 };
 
@@ -154,12 +153,13 @@ function createChipBackgroundStyle(recipe?: ChipBackgroundRecipe): ChipStyle {
 
 const toneClasses: Record<ChipTone, string> = {
 	plain: "bg-transparent text-foreground",
-	neutral: "bg-[var(--chip-background)] text-foreground/80",
+	neutral: "bg-[var(--chip-background)] text-foreground",
 	primary: "bg-[var(--chip-background)] text-primary-text",
 	success: "bg-[var(--chip-background)] text-success-text",
 	warning: "bg-[var(--chip-background)] text-warning",
 	danger: "bg-[var(--chip-background)] text-danger-text",
-	helper: "bg-[var(--chip-background)] text-foreground",
+	helper:
+		"bg-[var(--chip-background)] text-[var(--chip-color)]",
 };
 
 const interactiveToneClasses: Record<ChipTone, string> = {
@@ -331,6 +331,7 @@ const ChipRoot = React.forwardRef<HTMLElement, ChipProps>(function Chip(
 		tone === "helper"
 			? {
 					"--chip-accent": `var(--color-helper-${normalizeHelperIndex(helperIndex)})`,
+					"--chip-color": `var(--color-helper-text-${normalizeHelperIndex(helperIndex)})`,
 				}
 			: undefined;
 	const resolvedColor = resolveChipColor(color);

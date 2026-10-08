@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/overlays/modal/ModalShell";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
+import { InlineError } from "@/components/ui/primitives/InlineError";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
 import { showToast } from "@/lib/feedback/toast";
 import { hrefFor } from "@/lib/routes";
@@ -118,7 +119,7 @@ function RecordDetailActionsSkeleton({
 			<Button.Skeleton size="sm" variant="secondary">
 				Edit record
 			</Button.Skeleton>
-			<Button.Skeleton size="icon-sm" variant="secondary" />
+			<Button.Skeleton size="icon-sm" variant="bare" />
 		</div>
 	);
 }
@@ -148,12 +149,14 @@ function RecordEditForm({
 		record.status,
 	);
 	const [error, setError] = React.useState<string>();
+	const [submissionError, setSubmissionError] = React.useState<string>();
 	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		if (!beginSubmission()) return;
 		setError(undefined);
+		setSubmissionError(undefined);
 		let shouldEndSubmission = true;
 		try {
 			const result = await updateReferenceRecordAction(
@@ -163,16 +166,18 @@ function RecordEditForm({
 			);
 			if (!result.ok) {
 				setError(result.fieldErrors?.title);
-				showToast.error(result.message, { title: "Save failed" });
+				setSubmissionError(
+					result.fieldErrors?.title ? undefined : result.message,
+				);
 				return;
 			}
 			showToast.success(result.message);
 			shouldEndSubmission = false;
 			onSaved();
 		} catch {
-			showToast.error("The record could not be saved. Try again.", {
-				title: "Save failed",
-			});
+			setSubmissionError(
+				"The record could not be saved. Your changes are still here. Try again.",
+			);
 		} finally {
 			if (shouldEndSubmission) endSubmission();
 		}
@@ -231,6 +236,7 @@ function RecordEditForm({
 						This save will fail intentionally.
 					</StatusMessage>
 				) : null}
+				<InlineError open={!!submissionError}>{submissionError}</InlineError>
 			</ModalForm>
 		</>
 	);

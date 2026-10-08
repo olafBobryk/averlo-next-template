@@ -1,6 +1,8 @@
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import type { DashboardLayoutWidth } from "../../_registry/surfaceRegistry";
+import { DashboardScrollRestoration } from "./DashboardScrollRestoration";
+import { DashboardToolbarVisibility } from "./DashboardShellContext";
 
 type DashboardContentShellProfile = {
 	bodyClassName: string;
@@ -9,26 +11,26 @@ type DashboardContentShellProfile = {
 	mainClassName: string;
 };
 
-const dashboardPageGutterClassName = "px-3 sm:px-5";
+const dashboardPageGutterClassName = "px-0";
 
 export const dashboardContentShellProfiles = {
 	standard: {
 		bodyClassName: "",
-		contentClassName: "min-h-[calc(100svh-6.5rem)]",
+		contentClassName: "min-h-full",
 		gutterClassName: dashboardPageGutterClassName,
-		mainClassName: "mx-auto max-w-6xl gap-4 pb-6 pt-20",
+		mainClassName: "min-h-0 overflow-y-auto [&_.dashboard-page-body]:max-w-6xl",
 	},
 	wide: {
 		bodyClassName: "",
-		contentClassName: "min-h-[calc(100svh-6.5rem)]",
+		contentClassName: "min-h-full",
 		gutterClassName: dashboardPageGutterClassName,
-		mainClassName: "min-w-0 gap-4 pb-6 pt-20",
+		mainClassName: "min-h-0 overflow-y-auto",
 	},
 	workspace: {
 		bodyClassName: "h-full",
 		contentClassName: "min-h-0 flex-1",
 		gutterClassName: "px-0",
-		mainClassName: "h-svh min-h-0 overflow-hidden pb-0 pt-14",
+		mainClassName: "min-h-0 overflow-hidden",
 	},
 } as const satisfies Record<DashboardLayoutWidth, DashboardContentShellProfile>;
 
@@ -45,7 +47,7 @@ export function DashboardContentShell({
 	return (
 		<main
 			className={clsx(
-				"flex w-full flex-col",
+				"flex h-full w-full flex-col bg-background outline-none",
 				profile.mainClassName,
 				profile.gutterClassName,
 			)}
@@ -53,6 +55,7 @@ export function DashboardContentShell({
 			id="dashboard-main"
 			tabIndex={-1}
 		>
+			<DashboardScrollRestoration enabled={layoutWidth !== "workspace"} />
 			<div className={clsx("relative min-w-0", profile.contentClassName)}>
 				<div
 					aria-hidden={overlay ? true : undefined}
@@ -62,7 +65,9 @@ export function DashboardContentShell({
 						overlay && "invisible pointer-events-none",
 					)}
 				>
-					{children}
+					<DashboardToolbarVisibility visible={!overlay}>
+						{children}
+					</DashboardToolbarVisibility>
 				</div>
 				{overlay ? (
 					<div className="absolute inset-0 bg-background">{overlay}</div>

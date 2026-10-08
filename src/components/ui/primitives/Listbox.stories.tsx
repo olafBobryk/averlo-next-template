@@ -80,22 +80,19 @@ export const SelectionAndSemanticStates: Story = {
 		).toHaveAttribute("aria-selected", "true");
 		await expect(
 			canvas.getByRole("option", { name: "Alpha workspace" }),
-		).toHaveClass(
-			"focus-visible:ring-inset",
-			"first:focus-visible:rounded-t-md",
-		);
+		).toHaveClass("focus-visible:ring-inset", "!rounded-[7px]");
 		await expect(
 			canvas.getByRole("option", { name: /Presentation row/ }),
-		).toHaveClass("last:focus-visible:rounded-b-md");
+		).toHaveClass("!rounded-[7px]");
 		await expect(
 			canvas.getByRole("option", { name: "Archived workspace" }),
 		).toHaveAttribute("aria-disabled", "true");
 		await expect(
 			canvas.getByRole("option", { name: "Needs review" }),
-		).toHaveClass("!text-warning", "!border-t");
+		).toHaveClass("!text-[var(--button-warning-text)]");
 		await expect(
 			canvas.getByRole("option", { name: "Remove access" }),
-		).toHaveClass("!text-danger-text");
+		).toHaveClass("!text-[var(--button-danger-text)]");
 		await userEvent.click(canvas.getByRole("option", { name: "Needs review" }));
 		await expect(semanticSelect).toHaveBeenCalledWith(
 			expect.objectContaining({ value: "warning" }),

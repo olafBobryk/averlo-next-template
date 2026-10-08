@@ -115,6 +115,13 @@ const createNextConfig = (phase: string): NextConfig => ({
 	...(getDevAllowedOrigins(phase).length > 0
 		? { allowedDevOrigins: getDevAllowedOrigins(phase) }
 		: {}),
+	async redirects() {
+		return [{
+			source: "/dashboard/assistant/:path*",
+			destination: "/dashboard/chats/:path*",
+			permanent: true,
+		}];
+	},
 	images: {
 		remotePatterns: [
 			{

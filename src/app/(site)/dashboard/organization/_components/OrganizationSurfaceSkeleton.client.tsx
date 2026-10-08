@@ -3,7 +3,7 @@
 import { Icon } from "@/components/ui/icons/Icon";
 import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { Card, ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { hrefFor } from "@/lib/routes";
 import { DashboardDetailField } from "../../_components/detail/DashboardDetailField";
@@ -34,47 +34,44 @@ export function OrganizationSurfaceSkeletonClient() {
 				contentClassName="grid gap-5"
 				title="Organization"
 			>
-				<Card>
-					<Card.Heading
+				<ContentSection>
+					<ContentSection.Heading
 						description="The active organization for this dashboard session."
-						leading={
-							<Icon
-								className="text-muted-foreground"
-								name="building"
-								size="sm"
-							/>
-						}
 						title="Organization identity"
 					/>
-					<Card.Content className="grid gap-5">
-						<OrganizationIdentity.Skeleton avatarSize="xl" />
-						<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
-							<DashboardDetailField.Skeleton
-								icon={<Icon name="building" size="sm" />}
-								label="Name"
-								value="Demo organization"
-							/>
-							<DashboardDetailField.Skeleton
-								copyable
-								icon={<Icon name="at" size="sm" />}
-								label="Slug"
-								value="demo"
-							/>
-							<DashboardDetailField.Skeleton
-								icon={<Icon name="shield" size="sm" />}
-								label="Your role"
-								truncateValue={false}
-							>
-								<Chip.Skeleton>Owner</Chip.Skeleton>
-							</DashboardDetailField.Skeleton>
-							<DashboardDetailField.Skeleton
-								icon={<Icon name="users" size="sm" />}
-								label="Organization mode"
-								value="Multi-organization"
-							/>
-						</dl>
-					</Card.Content>
-				</Card>
+					<ContentSection.Content>
+						<Card>
+							<Card.Content className="grid gap-5">
+								<OrganizationIdentity.Skeleton avatarSize="xl" />
+								<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
+									<DashboardDetailField.Skeleton
+										icon={<Icon name="building" size="sm" />}
+										label="Name"
+										value="Demo organization"
+									/>
+									<DashboardDetailField.Skeleton
+										copyable
+										icon={<Icon name="at" size="sm" />}
+										label="Slug"
+										value="demo"
+									/>
+									<DashboardDetailField.Skeleton
+										icon={<Icon name="shield" size="sm" />}
+										label="Your role"
+										truncateValue={false}
+									>
+										<Chip.Skeleton>Owner</Chip.Skeleton>
+									</DashboardDetailField.Skeleton>
+									<DashboardDetailField.Skeleton
+										icon={<Icon name="users" size="sm" />}
+										label="Organization mode"
+										value="Multi-organization"
+									/>
+								</dl>
+							</Card.Content>
+						</Card>
+					</ContentSection.Content>
+				</ContentSection>
 				<Text as="p" className="w-full text-sm leading-6" tone="muted">
 					Looking for something specific and cannot find it?{" "}
 					<Button

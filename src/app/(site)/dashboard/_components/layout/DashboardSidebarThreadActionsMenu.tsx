@@ -9,6 +9,7 @@ import {
 	Dropdown,
 	type DropdownMenuOption,
 } from "@/components/ui/primitives/dropdown";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import type { AssistantThreadSummary } from "@/lib/assistant/contracts";
 import { showToast } from "@/lib/feedback";
 
@@ -26,6 +27,8 @@ export function DashboardSidebarThreadActionsMenu({
 	const router = useRouter();
 	const { openConfirmation } = useConfirmationModal();
 	const [pending, setPending] = React.useState(false);
+	const [open, setOpen] = React.useState(false);
+	const motionAllowed = useMotionAllowed(true);
 
 	async function togglePinned() {
 		if (pending) return;
@@ -82,7 +85,7 @@ export function DashboardSidebarThreadActionsMenu({
 					}
 					onDelete(thread.id);
 					window.dispatchEvent(new Event("assistant:threads-changed"));
-					if (active) router.push("/dashboard/assistant");
+					if (active) router.push("/dashboard/chats");
 					showToast.success("Conversation deleted.");
 					return true;
 				} catch (error) {
@@ -127,19 +130,35 @@ export function DashboardSidebarThreadActionsMenu({
 	];
 
 	return (
-		<Dropdown.Menu
-			align="end"
-			ariaLabel={`Manage ${thread.title}`}
-			options={options}
-			positionStrategy="fixed"
-			triggerButtonProps={{
-				className: clsx(
-					"shrink-0 text-inherit",
-					active ? "opacity-100" : "opacity-55 hover:opacity-100",
-				),
-				size: "none",
-				variant: "ghost",
-			}}
-		/>
+		<span
+			className={clsx(
+				"flex shrink-0 overflow-hidden transition-[width,opacity] motion-interactive w-0 opacity-0 group-hover/sidebar-row:w-5 group-hover/sidebar-row:opacity-100 group-focus-within/sidebar-row:w-5 group-focus-within/sidebar-row:opacity-100 [@media(hover:none)]:w-5 [@media(hover:none)]:opacity-100",
+				(open || pending) && "!w-5 !opacity-100",
+			)}
+		>
+			<Dropdown.Menu
+				align="end"
+				ariaLabel={`Manage ${thread.title}`}
+				onOpenChange={setOpen}
+				options={options}
+				positionStrategy="fixed"
+				triggerContent={
+					<Icon
+						name="ellipsis-vertical"
+						size="md"
+						className={
+							motionAllowed
+								? "group-hover:scale-[1.02] transition-transform motion-interactive"
+								: undefined
+						}
+					/>
+				}
+				triggerButtonProps={{
+					className: "shrink-0 size-5 text-inherit",
+					size: "none",
+					variant: "ghost",
+				}}
+			/>
+		</span>
 	);
 }

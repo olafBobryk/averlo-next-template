@@ -1,5 +1,8 @@
 import { resolveAssistantActor } from "@/lib/assistant/access.server";
-import { verifyAssistantApprovalId } from "@/lib/assistant/approval.server";
+import {
+	claimAssistantApproval,
+	verifyAssistantApprovalId,
+} from "@/lib/assistant/approval.server";
 import { executeRecordTool } from "@/lib/assistant/records.server";
 import {
 	assistantAdapters,
@@ -13,6 +16,8 @@ export async function POST(request: Request) {
 	const body = (await request.json().catch(() => null)) as {
 		approvalId?: unknown;
 		approved?: unknown;
+		decision?: unknown;
+		toolMode?: unknown;
 		messageId?: unknown;
 		partId?: unknown;
 		threadId?: unknown;
@@ -23,7 +28,10 @@ export async function POST(request: Request) {
 		typeof body.messageId !== "string" ||
 		typeof body.partId !== "string" ||
 		typeof body.approvalId !== "string" ||
-		typeof body.approved !== "boolean"
+		!(
+			["allow_once", "always_allow", "deny"].includes(String(body.decision)) ||
+			typeof body.approved === "boolean"
+		)
 	) {
 		return Response.json(
 			{ error: "Invalid approval response." },
@@ -65,12 +73,33 @@ export async function POST(request: Request) {
 			{ status: 400 },
 		);
 	}
-	if (!body.approved) {
+	const decision = body.decision ?? (body.approved ? "allow_once" : "deny");
+	if (
+		decision !== "deny" &&
+		(!access.capabilities.has("records.write") ||
+			body.toolMode !== "read_write" ||
+			(thread.toolMode !== undefined && thread.toolMode !== "read_write"))
+	) {
+		return Response.json(
+			{ error: "Record writing is not currently allowed." },
+			{ status: 403 },
+		);
+	}
+	if (!claimAssistantApproval(body.approvalId))
+		return Response.json(
+			{
+				error:
+					"This approval has already been claimed. Refresh the conversation.",
+			},
+			{ status: 409 },
+		);
+	if (decision === "deny") {
 		part.state = "denied";
-		await assistantAdapters.conversations.replaceMessage(
+		await assistantAdapters.conversations.replaceToolPart(
 			access.actor,
 			thread.id,
-			message,
+			message.id,
+			part,
 		);
 		return Response.json({ part });
 	}
@@ -81,6 +110,11 @@ export async function POST(request: Request) {
 		);
 	}
 	try {
+		if (decision === "always_allow")
+			await assistantAdapters.permissions.update(access.actor, "records", {
+				actionIds: [part.name],
+				permission: "allow",
+			});
 		part.state = "approved";
 		part.output = await executeRecordTool(part.name, part.input, {
 			canWrite: true,
@@ -91,10 +125,11 @@ export async function POST(request: Request) {
 		part.error = error instanceof Error ? error.message : "Record tool failed.";
 		part.state = "error";
 	}
-	await assistantAdapters.conversations.replaceMessage(
+	await assistantAdapters.conversations.replaceToolPart(
 		access.actor,
 		thread.id,
-		message,
+		message.id,
+		part,
 	);
 	return Response.json({ part });
 }

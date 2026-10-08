@@ -55,7 +55,7 @@ function CatalogPreview2() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-misc-profile-picture",
 	name: "ProfilePicture",
-	role: "Canonical avatar image, text or child fallback, loading placeholder, and overlapping group owner.",
+	role: "Canonical avatar image, text or child fallback, loading placeholder, and overlapping group owner. The normalized full name owns fallback color regardless of size, initials or surrounding surface. helperIndex applies only when name is absent. Fallbacks share the default static identity-chip tint and semantic color set plus violet. Tint follows Surface, Card and Float ownership; identity implies no status or pressed state.",
 	importStatement:
 		'import { ProfilePicture, ProfilePictureStack } from "@/components/ui/misc";',
 	chooseWhen: ["A person or entity needs stable shared avatar geometry."],

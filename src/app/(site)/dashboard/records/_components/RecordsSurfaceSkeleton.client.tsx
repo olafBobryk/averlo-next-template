@@ -12,7 +12,6 @@ export function RecordsSurfaceSkeletonClient() {
 	return (
 		<DashboardLoadingStatus label="Loading records">
 			<DashboardSection
-				description={`Organization-scoped reference entities for ${organization.name}.`}
 				title="Records"
 			>
 				<RecordCollectionClient.Skeleton

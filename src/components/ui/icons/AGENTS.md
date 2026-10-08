@@ -6,7 +6,7 @@ This folder owns named icon rendering and registry composition.
 
 ## Dependency and runtime boundaries
 
-- `Icon` and registry providers are client boundaries. Raw custom and Phosphor
+- `Icon` and registry providers are client boundaries. Raw custom, OpenAI, and Phosphor
   registry maps are implementation inputs, not independent public owners.
 - `createIconRegistry` merges local icons with provider overrides; consumers do
   not bypass `IconProvider` to read or mutate the raw maps.
@@ -22,3 +22,7 @@ This folder owns named icon rendering and registry composition.
 - Reusable SVGs enter the registry rather than being duplicated in feature JSX.
   Inline JSX SVG attributes use React camelCase names.
 - Missing-icon diagnostics remain development-only and deduplicated by name.
+
+- The application, Storybook, and export providers default to openaiIconRegistry.
+  Keep Phosphor for unsupported symbols and preserve explicit fill state.
+  Do not import SDK CSS or replace Averlo surface/typography tokens for icons.

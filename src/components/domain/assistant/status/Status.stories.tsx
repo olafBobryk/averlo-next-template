@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect } from "storybook/test";
 import * as Assistant from "@/components/domain/assistant";
 import { IconProvider } from "@/components/ui/icons/iconRegistry";
-import { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";
+import { openaiIconRegistry } from "@/components/ui/icons/openaiRegistry";
 import { catalogContract } from "./Status.catalog";
 
 const meta = {
@@ -12,7 +12,7 @@ const meta = {
 	tags: ["autodocs"],
 	decorators: [
 		(Story) => (
-			<IconProvider registry={phosphorIconRegistry}>
+			<IconProvider registry={openaiIconRegistry}>
 				<Story />
 			</IconProvider>
 		),

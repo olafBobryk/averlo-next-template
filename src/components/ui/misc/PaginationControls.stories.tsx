@@ -50,3 +50,51 @@ export const SkeletonParity: Story = {
 		await expect(canvas.getAllByText("1/5")).toHaveLength(2);
 	},
 };
+
+export const TablePages: Story = {
+	args: {
+		countFormat: "pages",
+		variant: "ghost",
+		textVariant: "caption",
+		prevLabel: "Previous page",
+		nextLabel: "Next page",
+	},
+	play: async ({ canvas, args }) => {
+		await expect(
+			canvas.getByRole("navigation", { name: "Pages" }),
+		).toBeVisible();
+		await expect(canvas.getByText("2 of 5")).toBeVisible();
+		await userEvent.click(canvas.getByRole("button", { name: "Next page" }));
+		await expect(args.onNext).toHaveBeenCalledOnce();
+	},
+};
+
+export const TableSkeletonParity: Story = {
+	render: () => (
+		<div className="grid gap-4">
+			<PaginationControls
+				current={1}
+				total={1}
+				countFormat="pages"
+				buttonSize="compact"
+				variant="ghost"
+				textVariant="caption"
+				onPrev={fn()}
+				onNext={fn()}
+				disablePrev
+				disableNext
+			/>
+			<PaginationControls.Skeleton
+				current={1}
+				total={1}
+				countFormat="pages"
+				buttonSize="compact"
+				variant="ghost"
+				textVariant="caption"
+			/>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		await expect(canvas.getAllByText("1 of 1")).toHaveLength(2);
+	},
+};

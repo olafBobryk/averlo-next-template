@@ -8,7 +8,60 @@ import {
 import type { AssistantToolState } from "../../src/lib/assistant/contracts";
 import { createAssistantToolInputEvents } from "../../src/lib/assistant/tool-input-stream.server";
 
+import {
+	normalizeToolResult,
+	resolveToolPresentation,
+} from "../../src/lib/assistant/tool-presentation";
+
 const root = process.cwd();
+const genericResult = normalizeToolResult({
+	status: "success",
+	value: {
+		content: [
+			{ type: "text", text: "Actual output" },
+			{
+				type: "text",
+				text: "Internal",
+				annotations: { audience: ["assistant"] },
+			},
+			{ type: "unknown", text: "Unsupported" },
+		],
+		isError: false,
+	},
+});
+assert.equal(genericResult.status, "success");
+if (genericResult.status === "success") {
+	assert.equal(genericResult.value.content.length, 2);
+	assert.equal(genericResult.value.content[0].type, "text");
+	assert.deepEqual(genericResult.value.content[1].annotations?.audience, [
+		"assistant",
+	]);
+}
+assert.deepEqual(
+	normalizeToolResult({ status: "error", error: "Unavailable" }),
+	{ status: "error", error: "Unavailable" },
+);
+const presented = resolveToolPresentation({
+	id: "call",
+	type: "tool",
+	name: "record_get",
+	input: { id: "record" },
+	output: {
+		content: [{ type: "text", text: "Resolved output" }],
+		isError: false,
+	},
+	state: "completed",
+	approvalId: null,
+	error: null,
+});
+assert.equal(presented.request.toolCall.status, "success");
+assert.deepEqual(presented.response?.toolResult, {
+	status: "success",
+	value: {
+		content: [{ type: "text", text: "Resolved output" }],
+		isError: false,
+	},
+});
 
 const toolInputEvents = createAssistantToolInputEvents({
 	input: { id: "launch-brief", title: "Updated launch brief" },
@@ -29,10 +82,10 @@ assert.equal(
 	JSON.stringify({ id: "launch-brief", title: "Updated launch brief" }),
 );
 const required = [
-	"src/app/(site)/dashboard/assistant/page.tsx",
-	"src/app/(site)/dashboard/assistant/_components/AssistantNewThreadSurface.tsx",
-	"src/app/(site)/dashboard/assistant/[threadId]/page.tsx",
-	"src/app/(site)/dashboard/assistant/conversations/page.tsx",
+	"src/app/(site)/dashboard/chats/page.tsx",
+	"src/app/(site)/dashboard/chats/_components/AssistantNewThreadSurface.tsx",
+	"src/app/(site)/dashboard/chats/[threadId]/page.tsx",
+	"src/app/(site)/dashboard/chats/conversations/page.tsx",
 	"src/app/api/assistant/chat/route.ts",
 	"src/app/api/assistant/files/route.ts",
 	"src/app/api/assistant/tools/route.ts",
@@ -68,13 +121,13 @@ for (const path of required) {
 }
 
 const assistantEntryPage = readFileSync(
-	resolve(root, "src/app/(site)/dashboard/assistant/page.tsx"),
+	resolve(root, "src/app/(site)/dashboard/chats/page.tsx"),
 	"utf8",
 );
 const assistantNewThreadSurface = readFileSync(
 	resolve(
 		root,
-		"src/app/(site)/dashboard/assistant/_components/AssistantNewThreadSurface.tsx",
+		"src/app/(site)/dashboard/chats/_components/AssistantNewThreadSurface.tsx",
 	),
 	"utf8",
 );
@@ -136,7 +189,7 @@ assert.match(imageInspectModal, /unoptimized=\{unoptimized\}/u);
 assert.match(composer, /ariaLabel="Add context"/u);
 assert.match(composer, /label: "Attach files"/u);
 assert.match(composer, /triggerContent=\{<Icon name="plus" \/>\}/u);
-assert.doesNotMatch(composer, /aria-label="Attach files"/u);
+assert.match(composer, /aria-label="Attach files"/u);
 for (const permissionLabel of ["No tools", "Read only", "Read & edit"]) {
 	assert.match(composer, new RegExp(permissionLabel, "u"));
 }
@@ -148,10 +201,11 @@ assert.match(composer, /<Dropdown\.Listbox/u);
 assert.match(composer, /selected: mode === value/u);
 assert.match(composer, /tone: mode === "read_write" \? "warning"/u);
 assert.match(composer, /value === "read_write" \? "!text-warning"/u);
-assert.match(composer, /variant: "ghost"/u);
+assert.match(composer, /variant: "bare"/u);
 assert.match(composer, /<Icon name=\{option\.icon\} size="sm" \/>/u);
 assert.match(composer, /triggerContent=\{<Icon name=\{current\.icon\} \/>\}/u);
-assert.match(composer, /activeIndex=\{busy \? 1 : 0\}/u);
+assert.match(composer, /Queue message/u);
+assert.match(composer, /isComposing/u);
 assert.match(composer, /fixtureScenarioPresentation/u);
 assert.match(composer, /Fixture: \$\{fixture\.label\}/u);
 for (const fixtureLabel of [
@@ -228,8 +282,8 @@ assert.match(codexHarness, /codexToolFollowUp/u);
 assert.match(codexHarness, /Math\.max\(700, delayMs \* 8\)/u);
 assert.match(codexHarness, /activeHarnessRuns >= 1/u);
 assert.match(codexHarness, /executeRecordTool/u);
-assert.match(composer, /aria-label=\{busy \? "Stop" : "Send message"\}/u);
-assert.match(composer, /onClick=\{busy \? onStop : submit\}/u);
+assert.match(composer, /"Stop"[\s\S]*"Queue message"[\s\S]*"Send message"/u);
+assert.match(composer, /onStop\s*:\s*submit/u);
 assert.match(composer, /<Icon name="arrow-up"/u);
 assert.match(composer, /variant="primary"/u);
 assert.doesNotMatch(composer, /variant="secondary">\s*Stop/u);
@@ -306,8 +360,8 @@ const userMessageSource = readFileSync(
 	"utf8",
 );
 assert.match(userMessageSource, /AssistantUserMessage/u);
-assert.match(userMessageSource, /case "text"/u);
-assert.match(userMessageSource, /case "file"/u);
+assert.match(userMessageSource, /part.type === "text"/u);
+assert.match(userMessageSource, /onEdit/u);
 assert.match(userMessageSource, /<UserMessageAttachments/u);
 assert.doesNotMatch(userMessageSource, /<Attachment/u);
 assert.doesNotMatch(userMessageSource, /ToolCall|<Response/u);
@@ -341,8 +395,8 @@ assert.match(assistantMessageSource, /case "tool"/u);
 assert.match(assistantMessageSource, /<Response/u);
 assert.match(assistantMessageSource, /<Attachment/u);
 assert.match(assistantMessageSource, /<ToolCallGroup/u);
-assert.match(assistantMessageSource, /renderedToolCalls/u);
-assert.match(assistantMessageSource, /part is AssistantToolPart/u);
+assert.match(assistantMessageSource, /parts=\{tools\}/u);
+assert.doesNotMatch(assistantMessageSource, /renderedToolCalls/u);
 
 const toolCallGroupSource = readFileSync(
 	resolve(
@@ -351,19 +405,9 @@ const toolCallGroupSource = readFileSync(
 	),
 	"utf8",
 );
-for (const contract of [
-	/<Accordion/u,
-	/<ToolCall/u,
-	/hasActionableApproval/u,
-	/setOpen\(true\)/u,
-	/Record tools/u,
-	/Approval required/u,
-	/"input-available": "Running"/u,
-	/"input-streaming": "Pending"/u,
-	/variant="caption"/u,
-]) {
-	assert.match(toolCallGroupSource, contract);
-}
+assert.match(toolCallGroupSource, /<ToolCall/u);
+assert.match(toolCallGroupSource, /<Accordion/u);
+assert.match(toolCallGroupSource, /<Divider decorative/u);
 
 const assistantResponseSource = readFileSync(
 	resolve(
@@ -377,13 +421,17 @@ assert.match(assistantResponseSource, /<Markdown\.Render/u);
 assert.match(assistantResponseSource, /density="compact"/u);
 assert.match(assistantResponseSource, /streaming=\{streaming\}/u);
 assert.match(assistantResponseSource, /variant="result"/u);
-assert.doesNotMatch(assistantResponseSource, /streamdown|className=/u);
+assert.doesNotMatch(assistantResponseSource, /streamdown/u);
 
 const toolCallSource = readFileSync(
 	resolve(
 		root,
 		"src/components/domain/assistant/message/assistant/tool-call/ToolCall.tsx",
 	),
+	"utf8",
+);
+const toolPresentationSource = readFileSync(
+	resolve(root, "src/lib/assistant/tool-presentation.ts"),
 	"utf8",
 );
 for (const tool of [
@@ -394,9 +442,14 @@ for (const tool of [
 	"record_archive",
 	"record_delete",
 ]) {
-	assert.match(toolCallSource, new RegExp(`case "${tool}"`, "u"));
+	assert.match(toolPresentationSource, new RegExp(`${tool}:`, "u"));
 }
-assert.match(toolCallSource, /part\.name satisfies never/u);
+assert.match(
+	toolPresentationSource,
+	/satisfies Record<AssistantToolPart\["name"\], string>/u,
+);
+assert.match(toolCallSource, /<ToolArguments/u);
+assert.doesNotMatch(toolCallSource, /<RecordToolCall/u);
 assert.doesNotMatch(toolCallSource, /as RecordTool(?:Name|State)|registry/iu);
 
 const toolFrameSource = readFileSync(
@@ -481,13 +534,10 @@ for (const contract of [
 	assert.match(recordToolProposalSource, contract);
 }
 assert.doesNotMatch(recordToolProposalSource, /<Card/u);
-for (const contract of [
-	/api\/assistant\/presentation\/record-tool/u,
-	/useRecordProposalPreview/u,
-	/proposalPreview=\{proposal\.preview\}/u,
-]) {
-	assert.match(toolCallSource, contract);
-}
+assert.doesNotMatch(
+	toolCallSource,
+	/useRecordProposalPreview|<RecordToolCall/u,
+);
 
 const markdownRendererSource = readFileSync(
 	resolve(root, "src/components/composites/markdown/MarkdownRenderer.tsx"),
@@ -535,8 +585,11 @@ const conversationSource = readFileSync(
 	"utf8",
 );
 assert.match(conversationSource, /header\?: React\.ReactNode/u);
-assert.match(conversationSource, /absolute inset-x-0 top-0 z-10/u);
-assert.match(conversationSource, /pt-20 pb-6/u);
+assert.match(conversationSource, /z-10 shrink-0/u);
+assert.match(
+	conversationSource,
+	/min-h-0 flex-1 overflow-y-auto overscroll-contain py-6/u,
+);
 
 const privateFiles = readFileSync(
 	resolve(root, "src/lib/auth/private-files.ts"),
@@ -697,7 +750,7 @@ assert.match(assistantRuntime, /maxRetries:\s*1/u);
 const conversationsSurface = readFileSync(
 	resolve(
 		root,
-		"src/app/(site)/dashboard/assistant/conversations/_components/AssistantConversationsSurface.tsx",
+		"src/app/(site)/dashboard/chats/conversations/_components/AssistantConversationsSurface.tsx",
 	),
 	"utf8",
 );
@@ -722,10 +775,11 @@ assert.match(sidebarSupplement, /recentThreads/u);
 assert.match(sidebarSupplement, /\.slice\(0, 5\)/u);
 assert.match(sidebarSupplement, /DashboardSidebarThreadActionsMenu/u);
 assert.match(sidebarSupplement, /Pinned conversation/u);
-assert.match(sidebarSupplement, /visibleThreads\.length === 0/u);
+assert.match(sidebarSupplement, /count=\{visibleThreads\.length \+ 1\}/u);
 assert.match(sidebarSupplement, /<DashboardSidebarItem/u);
-assert.match(sidebarSupplement, /<DashboardSidebarBranch/u);
-assert.doesNotMatch(sidebarSupplement, /label="All conversations"/u);
+assert.match(sidebarSupplement, /<DashboardSidebarSection/u);
+assert.doesNotMatch(sidebarSupplement, /label="New chat"/u);
+assert.match(sidebarSupplement, /label="All conversations"/u);
 assert.doesNotMatch(
 	sidebarSupplement,
 	/parseSupplementGroup|variant="section"/u,
@@ -740,10 +794,11 @@ const sidebarNav = readFileSync(
 );
 assert.match(sidebarNav, /data-sidebar-tier="assistant"/u);
 assert.match(sidebarNav, /const assistantSurfaces = group\.surfaces\.filter/u);
-assert.match(sidebarNav, /const regularSurfaces = group\.surfaces\.filter/u);
+assert.match(sidebarNav, /const regularSurfaces = group\.surfaces;/u);
+assert.match(sidebarNav, /"New chat"/u);
 assert.match(sidebarNav, /DashboardSidebarItem/u);
 assert.match(sidebarNav, /<DashboardSidebarSupplement/u);
-assert.match(sidebarNav, /label="All conversations"/u);
+assert.match(sidebarNav, /<DashboardSidebarSection/u);
 assert.doesNotMatch(sidebarNav, /DashboardSidebarSurfaceBranch/u);
 assert.doesNotMatch(sidebarNav, /<DashboardSidebarBranch/u);
 assert.doesNotMatch(
@@ -774,7 +829,7 @@ for (const contract of [
 const assistantThreadSurface = readFileSync(
 	resolve(
 		root,
-		"src/app/(site)/dashboard/assistant/[threadId]/_components/AssistantThreadSurface.tsx",
+		"src/app/(site)/dashboard/chats/[threadId]/_components/AssistantThreadSurface.tsx",
 	),
 	"utf8",
 );
@@ -828,11 +883,11 @@ for (const contract of [
 	/data-dashboard-sidebar-header/u,
 	/data-dashboard-sidebar-body/u,
 	/data-dashboard-sidebar-footer/u,
-	/mobileOpen \|\| !collapsed \? brand : null/u,
-	/"pl-\[56px\] lg:pl-\[72px\]"/u,
-	/"pl-\[56px\] lg:pl-\[240px\]"/u,
-	/"left-\[56px\] lg:left-\[72px\]"/u,
-	/"left-\[56px\] lg:left-\[240px\]"/u,
+	/\{brand\}/u,
+	/sm:pl-\[56px\]/u,
+	/lg:pl-\[240px\]/u,
+	/lg:pl-\[64px\]/u,
+	/placement="left"/u,
 ]) {
 	assert.match(sidebarShell, contract);
 }
@@ -848,18 +903,8 @@ assert.match(dashboardFrame, /<DashboardSidebarShell/u);
 assert.match(dashboardFrame, /getDashboardSidebarOffsetClassNames/u);
 assert.doesNotMatch(dashboardFrame, /placement="footer"/u);
 assert.match(dashboardFrame, /<DashboardAccountMenu/u);
-assert.match(dashboardFrame, /DashboardFooterActions/u);
-assert.match(dashboardFrame, /flex-col items-center justify-center/u);
-assert.match(dashboardFrame, /flex-row flex-wrap items-center justify-start/u);
-assert.match(dashboardFrame, /iconSize=\{16\}/u);
-assert.match(dashboardFrame, /grid-cols-\[minmax\(0,1fr\)\]/u);
-assert.match(dashboardFrame, /className="w-full lg:hidden"/u);
-assert.match(dashboardFrame, /className="w-full max-lg:hidden"/u);
-assert.match(dashboardFrame, /hrefFor\("dashboard\.support"\)/u);
-assert.match(dashboardFrame, /hrefFor\("dashboard\.platform"\)/u);
-assert.doesNotMatch(dashboardFrame, /<aside\b/u);
-assert.doesNotMatch(dashboardFrame, /id="dashboard-sidebar"/u);
-
+assert.match(dashboardFrame, /DashboardToolbarOutlet/u);
+assert.doesNotMatch(dashboardFrame, /DashboardFooterActions/u);
 const accountMenu = readFileSync(
 	resolve(
 		root,
@@ -867,9 +912,13 @@ const accountMenu = readFileSync(
 	),
 	"utf8",
 );
-for (const action of ["Support", "Report issue", "Manage platform"]) {
-	assert.doesNotMatch(accountMenu, new RegExp(action, "u"));
-}
+assert.match(accountMenu, /ReportIssueModal/u);
+assert.match(accountMenu, /label: "Support"/u);
+assert.match(accountMenu, /label: "Manage platform"/u);
+assert.match(sidebarShell, /<Divider/u);
+assert.match(accountMenu, /hrefFor\("dashboard\.platform"\)/u);
+assert.doesNotMatch(dashboardFrame, /<aside\b/u);
+assert.doesNotMatch(dashboardFrame, /id="dashboard-sidebar"/u);
 
 const assistantThreadsRoute = readFileSync(
 	resolve(root, "src/app/api/assistant/threads/route.ts"),

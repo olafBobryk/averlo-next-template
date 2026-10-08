@@ -42,9 +42,6 @@ export function AuthScreen({
 		<Card className="w-full">
 			<Card.Heading
 				description={description}
-				leading={
-					<Icon className="text-muted-foreground" name={icon} size="sm" />
-				}
 				title={title}
 				titleAs="h1"
 			/>

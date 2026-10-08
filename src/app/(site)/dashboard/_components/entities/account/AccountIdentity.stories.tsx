@@ -42,7 +42,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					"Account-owned identity presentation. Default includes email; actor is the compact name-only form.",
+					"Account-owned identity presentation. Default includes email; actor is the compact name-only form. An explicit secondaryLabel uses the same identity text slot for workspace context.",
 			},
 		},
 	},
@@ -74,6 +74,26 @@ export const VariantsAndSizes: Story = {
 					))}
 				</section>
 			))}
+		</div>
+	),
+};
+
+export const FooterWorkspaceContext: Story = {
+	args: {
+		presentation,
+		variant: "actor",
+		avatarSize: "md",
+		secondaryLabel: presentation.organizationLabel,
+	},
+	render: (args) => (
+		<div className="grid max-w-60 gap-4">
+			<AccountIdentity {...args} />
+			<AccountIdentity.Skeleton
+				variant="actor"
+				avatarSize="md"
+				displayLabel={presentation.displayLabel}
+				secondaryLabel={presentation.organizationLabel}
+			/>
 		</div>
 	),
 };

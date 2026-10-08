@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/overlays/modal/ModalShell";
 import { useModal } from "@/components/ui/overlays/modal/useModal";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { Card, ContentSection } from "@/components/ui/primitives/surfaces";
 import type { SessionUser } from "@/lib/api/auth";
 import { showToast } from "@/lib/feedback";
 import { AccountIdentity } from "../../_components/entities/account/AccountIdentity";
@@ -66,8 +66,8 @@ function ProfileSettingsSectionRoot() {
 	}
 
 	return (
-		<Card className="scroll-mt-24" id="profile">
-			<Card.Heading
+		<ContentSection className="scroll-mt-24" id="profile">
+			<ContentSection.Heading
 				action={
 					<Button
 						leadingIcon="pencil"
@@ -80,15 +80,19 @@ function ProfileSettingsSectionRoot() {
 					</Button>
 				}
 				description="Profile settings"
-				leading={
-					<Icon className="text-muted-foreground" name="user" size="sm" />
-				}
 				title="Profile"
 			/>
-			<Card.Content>
-				<AccountIdentity avatarSize="xl" presentation={accountPresentation} />
-			</Card.Content>
-		</Card>
+			<ContentSection.Content>
+				<Card>
+					<Card.Content>
+						<AccountIdentity
+							avatarSize="xl"
+							presentation={accountPresentation}
+						/>
+					</Card.Content>
+				</Card>
+			</ContentSection.Content>
+		</ContentSection>
 	);
 }
 
@@ -102,27 +106,28 @@ function ProfileSettingsSectionSkeleton() {
 	});
 
 	return (
-		<Card className="scroll-mt-24" id="profile">
-			<Card.Heading
+		<ContentSection className="scroll-mt-24" id="profile">
+			<ContentSection.Heading
 				action={
 					<Button.Skeleton leadingIcon size="sm" variant="ghost">
 						Edit profile
 					</Button.Skeleton>
 				}
 				description="Profile settings"
-				leading={
-					<Icon className="text-muted-foreground" name="user" size="sm" />
-				}
 				title="Profile"
 			/>
-			<Card.Content>
-				<AccountIdentity.Skeleton
-					avatarSize="xl"
-					displayLabel={accountPresentation.displayLabel}
-					emailLabel={accountPresentation.emailLabel}
-				/>
-			</Card.Content>
-		</Card>
+			<ContentSection.Content>
+				<Card>
+					<Card.Content>
+						<AccountIdentity.Skeleton
+							avatarSize="xl"
+							displayLabel={accountPresentation.displayLabel}
+							emailLabel={accountPresentation.emailLabel}
+						/>
+					</Card.Content>
+				</Card>
+			</ContentSection.Content>
+		</ContentSection>
 	);
 }
 

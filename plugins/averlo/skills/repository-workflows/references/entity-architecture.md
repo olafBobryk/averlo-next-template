@@ -71,3 +71,8 @@ Read only the entity verticals and consumers in scope:
   sufficient.
 - Verify optimistic rollback, authorization at execution time, selector
   behavior, repeated presentation reuse, and live/skeleton owner parity.
+
+Contained collection tables use `DashboardTablePanel` pagination (`pageSize`)
+when all authorized rows are loaded. Keep its footer and pager with the shared
+table, mirror loading geometry, and keep overview “View more” excerpts separate.
+The Dashboard/Data/Card table Storybook owner documents behavior and examples.

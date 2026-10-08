@@ -29,13 +29,17 @@
   when their card overflows, and a final `kind: "action"` column is always
   visible and sticky. Set a higher `responsivePriority` only when a call site
   needs a later optional column to survive longer than the positional default.
-- When a table needs its own header, compose it with the shared `Card.Header`
+- When a table needs its own header, compose it with the shared `ContentSection.Header`
   slots. If the owning dashboard section already supplies all title, context,
-  and actions, omit the table header; `DashboardTablePanel` removes its card top
-  padding so the column header begins at the card edge. Do not pass a null or
+  and actions, omit the table header; the table body owns its own containment
+  and the section heading stays outside it. Do not pass a null or
   empty placeholder header. Keep table-level search, filters, summaries, and
   actions in a real caller-owned header rather than adding table-specific
   toolbar props or a second Card.
 - A table supports at most one action column, and it must be the final column.
   Mirror `kind` and `responsivePriority` in `DashboardTablePanel.Skeleton` so
   live and loading layouts hide columns in the same order.
+- For a fully loaded collection, set `pageSize` on `DashboardTablePanel` and its
+  skeleton. The shared table owns pagination and sorts the complete collection
+  before paging. Overview excerpts may instead use `viewMoreHref`; do not combine
+  the two. Remote pagination needs an explicit data contract, not a guessed total.

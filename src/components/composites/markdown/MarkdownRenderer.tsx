@@ -119,7 +119,7 @@ function createMarkdownComponents(
 			return (
 				<a
 					className={clsx(
-						"font-medium text-primary underline decoration-primary/35 underline-offset-4 transition-colors motion-interactive hover:text-primary-hover hover:decoration-primary/70",
+						"font-medium text-[var(--link-foreground)] underline decoration-current underline-offset-4 transition-colors motion-interactive hover:decoration-current",
 						focusRing.visibleDefault,
 					)}
 					href={href}

@@ -7,19 +7,26 @@ import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 
-export const inputFrameChromeClassName =
-	"min-w-0 rounded-3xl border border-transparent bg-input/50 text-foreground";
+import {
+	inputFrameBaseClassName,
+	inputFrameVariantStyles,
+} from "./inputFrameStyles";
+
+export { inputFrameChromeClassName } from "./inputFrameStyles";
 
 const inputFrameVariants = cva(
-	`flex items-stretch gap-2.5 transition-[color,box-shadow,background-color] outline-none ${inputFrameChromeClassName}`,
+	`flex items-stretch gap-2.5 transition-[color,box-shadow,background-color] outline-none ${inputFrameBaseClassName}`,
 	{
 		variants: {
+			variant: inputFrameVariantStyles,
 			presentation: {
 				default: "",
-				composer: "!rounded-2xl !bg-input/50",
+				composer: "!rounded-[25px]",
 			},
 			size: {
-				sm: "h-9",
+				xxs: "h-6",
+				xs: "h-7",
+				sm: "h-[34px]",
 				md: "min-h-[40px]",
 				lg: "min-h-[48px]",
 			},
@@ -36,6 +43,7 @@ const inputFrameVariants = cva(
 			},
 		},
 		defaultVariants: {
+			variant: "default",
 			presentation: "default",
 			size: "sm",
 			tone: "default",
@@ -44,30 +52,40 @@ const inputFrameVariants = cva(
 );
 
 export const inputPaddingXClasses = {
+	xxs: "px-1.5",
+	xs: "px-2",
 	sm: "px-3",
 	md: "px-[15px]",
 	lg: "px-4",
 } as const;
 
 const inputPaddingYClasses = {
+	xxs: "py-0",
+	xs: "py-0.5",
 	sm: "py-1",
 	md: "py-2.5",
 	lg: "py-3",
 } as const;
 
 const inputFrameStartPaddingClasses = {
+	xxs: "pl-1.5",
+	xs: "pl-2",
 	sm: "pl-3",
 	md: "pl-[15px]",
 	lg: "pl-4",
 } as const;
 
 const inputFrameEndPaddingClasses = {
+	xxs: "pr-1.5",
+	xs: "pr-2",
 	sm: "pr-3",
 	md: "pr-[15px]",
 	lg: "pr-4",
 } as const;
 
 const inputSizeClasses = {
+	xxs: `${inputPaddingXClasses.xxs} ${inputPaddingYClasses.xxs} text-sm`,
+	xs: `${inputPaddingXClasses.xs} ${inputPaddingYClasses.xs} text-sm`,
 	sm: `${inputPaddingXClasses.sm} ${inputPaddingYClasses.sm} text-base md:text-sm`,
 	md: `${inputPaddingXClasses.md} ${inputPaddingYClasses.md} text-sm`,
 	lg: `${inputPaddingXClasses.lg} ${inputPaddingYClasses.lg} text-base`,
@@ -119,6 +137,7 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 			className,
 			contentClassName,
 			presentation,
+			variant,
 			size,
 			tone,
 			fullWidth,
@@ -129,6 +148,7 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 	) {
 		const wrapperClass = clsx(
 			inputFrameVariants({
+				variant,
 				size,
 				tone,
 				fullWidth: fullWidth ? true : undefined,
@@ -181,18 +201,21 @@ export function InputFrameSkeleton({
 	skeletonClassName,
 	start: _start,
 	presentation,
+	variant,
 	...rest
 }: InputFrameSkeletonProps) {
 	return (
 		<Skeleton
 			className={clsx(
 				inputFrameVariants({
+					variant,
 					size,
 					fullWidth: fullWidth ? true : undefined,
 					presentation,
 				}),
-				"pointer-events-none select-none border-transparent !bg-muted/80 shadow-none",
-				radius === "textarea" ? "!rounded-2xl" : "!rounded-3xl",
+				"pointer-events-none select-none border-transparent !bg-muted/80 !shadow-none",
+				presentation !== "composer" &&
+					(radius === "textarea" ? "!rounded-2xl" : "!rounded-[9px]"),
 				className,
 			)}
 			data-slot="input-frame-skeleton"
@@ -201,6 +224,8 @@ export function InputFrameSkeleton({
 			{children ? (
 				<span
 					className={clsx(
+						size === "xxs" && "mx-1.5 text-sm",
+						size === "xs" && "mx-2 text-sm",
 						size === "sm" && "mx-3 text-base md:text-sm",
 						size === "md" && "mx-[15px] text-sm",
 						size === "lg" && "mx-4 text-base",

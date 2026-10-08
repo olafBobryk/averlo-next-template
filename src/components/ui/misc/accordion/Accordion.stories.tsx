@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, fn, userEvent } from "storybook/test";
+import { expect, fn, userEvent, waitFor } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { Accordion } from "./Accordion";
 import { catalogContract } from "./Accordion.catalog";
@@ -119,5 +119,34 @@ export const CompactRowFamily: Story = {
 				.getByText("Skeleton without a trailing icon")
 				.closest('[aria-hidden="true"]'),
 		).toHaveAttribute("aria-hidden", "true");
+	},
+};
+
+export const SoftDisclosureEdge: Story = {
+	args: {
+		title: "Tool details",
+		children: (
+			<div className="h-40 rounded-xl bg-card p-4">
+				Output stays unclipped when settled.
+			</div>
+		),
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const trigger = canvas.getByRole("button", { name: "Tool details" });
+		await userEvent.click(trigger);
+		const panel = canvasElement.querySelector<HTMLElement>(
+			`[id="${trigger.getAttribute("aria-controls")}"]`,
+		);
+		if (!panel) throw new Error("Missing disclosure panel");
+		await expect(panel.style.maskImage).toContain("linear-gradient");
+		await waitFor(() =>
+			expect(getComputedStyle(panel).overflow).toBe("visible"),
+		);
+		await userEvent.click(trigger);
+		await expect(panel).toHaveAttribute("inert");
+		await userEvent.click(trigger);
+		await waitFor(() =>
+			expect(getComputedStyle(panel).overflow).toBe("visible"),
+		);
 	},
 };

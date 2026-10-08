@@ -9,6 +9,8 @@ import { DropdownRoot } from "./DropdownRoot";
 import { DropdownSurface } from "./DropdownSurface";
 
 export type {
+	DropdownControlEntry,
+	DropdownControlOption,
 	DropdownListboxProps,
 	DropdownMenuOption,
 	DropdownMenuProps,

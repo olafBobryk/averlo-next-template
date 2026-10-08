@@ -68,6 +68,7 @@ export {
 	type SelectOption,
 } from "./selection/SelectInput";
 export { EmailInput } from "./text/EmailInput";
+export { FilePreviewProvider, type FilePreviewHandler, type FilePreviewRequest } from "./files/previewHandler";
 export { PasswordInput } from "./text/PasswordInput";
 export {
 	type CountryOption,

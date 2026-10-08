@@ -85,7 +85,9 @@ export const thinStartProfile = {
 			"verify:dev-server-shutdown",
 		],
 		coreDependencies: [
+			"pdfjs-dist",
 			"@phosphor-icons/react",
+			"@openai/apps-sdk-ui",
 			"@radix-ui/react-slot",
 			"@tanstack/react-hotkeys",
 			"class-variance-authority",
@@ -147,6 +149,7 @@ export const thinStartProfile = {
 		"src/components/ui/icons/customRegistry.tsx",
 		"src/components/ui/icons/iconRegistry.tsx",
 		"src/components/ui/icons/phosphorRegistry.tsx",
+		"src/components/ui/icons/openaiRegistry.tsx",
 		"src/lib/marketing-content/sections/homeHero/HomeHeroPreviewCollage.tsx",
 	],
 	overrides: overrideFiles.map((target) => ({
@@ -155,8 +158,11 @@ export const thinStartProfile = {
 	})),
 	apiReview: {
 		allowedUiImports: [
+			"@/components/ui/icons/Icon",
 			"@/components/ui/misc",
 			"@/components/ui/misc/Skeleton",
+			"@/components/ui/misc/state/ErrorState",
+			"@/components/ui/input/files/previewHandler",
 			"@/components/ui/input",
 			"@/components/ui/input/InputSkeleton",
 			"@/components/ui/primitives/Button",
@@ -167,6 +173,8 @@ export const thinStartProfile = {
 			"@/components/ui/primitives/Field",
 			"@/components/ui/primitives/InputFrame",
 			"@/components/ui/primitives/StatusMessage",
+			"@/components/ui/primitives/InlineError",
+			"@/components/ui/motion/presence",
 			"@/components/ui/primitives/dropdown",
 			"@/components/ui/primitives/dropdownStyles",
 			"@/components/ui/input/choice/ChoiceField",
@@ -174,6 +182,9 @@ export const thinStartProfile = {
 			"@/components/ui/time/DateIndicator",
 		],
 		allowedUiPrefixes: [
+			"@/components/ui/icons/iconRegistry",
+			"@/components/ui/icons/customRegistry",
+			"@/components/ui/primitives/dropdown/",
 			"@/components/ui/foundations/",
 			"@/components/ui/motion/auto-cycle",
 			"@/components/ui/motion/effect",
@@ -188,7 +199,11 @@ export const thinStartProfile = {
 			"@/components/ui/icons/",
 			"@/components/ui/time/",
 		],
-		compatibilityMarkerExemptions: ["src/proxy.ts"],
+		compatibilityMarkerExemptions: [
+			"src/proxy.ts",
+			// The canonical registry preserves fill requests across icon providers.
+			"src/components/ui/icons/openaiRegistry.tsx",
+		],
 	},
 	verification: {
 		requiredFiles: [

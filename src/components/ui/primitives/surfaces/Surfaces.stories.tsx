@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
-import { Icon } from "../../icons/Icon";
 import { Button } from "../Button";
 import { Text } from "../Text";
-import { Card, Float, Panel } from ".";
+import { Card, ContentSection, Float, Panel } from ".";
 import { catalogContract } from "./Surfaces.catalog";
 
 const meta = {
@@ -13,6 +12,7 @@ const meta = {
 	title: "UI/Primitives/Surfaces",
 	component: Panel,
 	subcomponents: {
+		ContentSection,
 		Panel,
 		Card,
 		"Card.Header": Card.Header,
@@ -40,6 +40,101 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+export const ContentHierarchy: Story = {
+	render: () => (
+		<div className="grid max-w-3xl gap-8">
+			<ContentSection aria-label="Organization identity section">
+				<ContentSection.Heading
+					title="Organization identity"
+					description="Name and identity shown across the workspace."
+					action={<Button variant="bare">Edit organization</Button>}
+				/>
+				<ContentSection.Content>
+					<Card aria-label="Organization properties">
+						<Card.Content>
+							<dl className="grid gap-4 sm:grid-cols-2">
+								<div>
+									<dt>Name</dt>
+									<dd>Demo organization</dd>
+								</div>
+								<div>
+									<dt>Slug</dt>
+									<dd>demo</dd>
+								</div>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
+			<ContentSection aria-label="People and access section">
+				<ContentSection.Heading
+					title="People and access"
+					description="Membership and access for this workspace."
+					action={<Button>Manage access</Button>}
+				/>
+				<ContentSection.Content>
+					<Card aria-label="Access properties">
+						<Card.Content>
+							<dl className="grid gap-4 sm:grid-cols-3">
+								<div>
+									<dt>Active members</dt>
+									<dd>3</dd>
+								</div>
+								<div>
+									<dt>Pending invitations</dt>
+									<dd>1</dd>
+								</div>
+								<div>
+									<dt>Your role</dt>
+									<dd>Owner</dd>
+								</div>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
+			<Text tone="muted">
+				Contact your workspace owner if you need a different role.
+			</Text>
+		</div>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		await expect(
+			canvasElement.querySelectorAll('[data-slot="card"]'),
+		).toHaveLength(2);
+		for (const title of ["Organization identity", "People and access"]) {
+			const section = canvas
+				.getByRole("heading", { name: title })
+				.closest('[data-slot="content-section"]');
+			if (!section) throw new Error("Missing section");
+			await expect(
+				canvas
+					.getByRole("heading", { name: title })
+					.closest('[data-slot="card"]'),
+			).toBeNull();
+			await expect(section.querySelectorAll('[data-slot="card"]')).toHaveLength(
+				1,
+			);
+			await expect(
+				section.querySelector('[data-slot="card-header"]'),
+			).toBeNull();
+			for (const property of section.querySelectorAll<HTMLElement>("dt, dd")) {
+				await expect(
+					section.querySelector('[data-slot="card"]'),
+				).toContainElement(property);
+			}
+		}
+		await expect(
+			canvasElement.querySelector('[data-slot="card"] [data-slot="card"]'),
+		).toBeNull();
+		await expect(
+			canvas
+				.getByText("Contact your workspace owner if you need a different role.")
+				.closest('[data-slot="card"]'),
+		).toBeNull();
+	},
+};
+
 export const ElevationLadder: Story = {
 	render: () => (
 		<section
@@ -49,10 +144,11 @@ export const ElevationLadder: Story = {
 		>
 			<div className="grid gap-2">
 				<Text as="h2" variant="headingSm">
-					Page → Panel → Card → Float
+					Page, Panel, Card, and Float
 				</Text>
 				<Text tone="muted" variant="support">
-					A shadcn-aligned shadow ladder: none, none, sm, then md.
+					Quiet shell, soft page canvas, lifted cards, and brighter floating
+					chrome.
 				</Text>
 			</div>
 			<div className="grid items-stretch gap-4 lg:grid-cols-4">
@@ -69,13 +165,13 @@ export const ElevationLadder: Story = {
 				<Panel aria-label="Panel level" padding="sm">
 					<Text variant="bodyStrong">Panel</Text>
 					<Text tone="muted" variant="support">
-						Broad grouping · shadow-none
+						Quiet shell / grouping · shadow-none
 					</Text>
 				</Panel>
 				<Card aria-label="Card level">
 					<Card.Header>
 						<Card.Title>Card</Card.Title>
-						<Card.Description>Structured unit · shadow-sm</Card.Description>
+						<Card.Description>Structured unit · shadow-xs</Card.Description>
 					</Card.Header>
 					<Card.Content>
 						Card elevation stays independent of slots.
@@ -127,15 +223,55 @@ export const ElevationLadder: Story = {
 		await expect(panel).toHaveClass("shadow-none");
 		const card = canvas.getByLabelText("Card level");
 		await expect(card).toHaveAttribute("data-elevation", "card");
-		await expect(card).toHaveClass("shadow-sm");
+		await expect(card).toHaveClass("shadow-xs");
+		await expect(getComputedStyle(card).borderRadius).toBe("14px");
+		await expect(getComputedStyle(panel).backgroundColor).not.toBe(
+			getComputedStyle(page).backgroundColor,
+		);
+		const dark = Boolean(page.closest(".dark"));
+		await expect(getComputedStyle(card).backgroundColor).not.toBe(
+			getComputedStyle(panel).backgroundColor,
+		);
 		const float = canvas.getByLabelText("Float level");
 		await expect(float).toHaveAttribute("data-elevation", "float");
 		await expect(float).toHaveClass("shadow-md");
+		await expect(getComputedStyle(float).backgroundColor).not.toBe(
+			getComputedStyle(card).backgroundColor,
+		);
+		// Fill hierarchy must survive theme changes without relying on shadows.
+		const luminance = (element: HTMLElement) => {
+			const channels =
+				getComputedStyle(element).backgroundColor.match(/[\d.]+/g);
+			if (!channels || channels.length < 3)
+				throw new Error("Missing surface fill");
+			const [r, g, b] = channels.slice(0, 3).map((value) => {
+				const channel = Number(value) / 255;
+				return channel <= 0.04045
+					? channel / 12.92
+					: ((channel + 0.055) / 1.055) ** 2.4;
+			});
+			return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+		};
+		if (dark) {
+			await expect(luminance(page)).toBeLessThan(luminance(card));
+		} else {
+			await expect(luminance(panel)).toBeLessThan(luminance(card));
+			await expect(luminance(card)).toBeLessThan(luminance(page));
+		}
+		await expect(luminance(card)).toBeLessThan(luminance(float));
 		const overlay = canvas.getByLabelText("Overlay level");
 		await expect(overlay).toHaveAttribute("data-surface-role", "card");
 		await expect(overlay).toHaveAttribute("data-elevation", "overlay");
 		await expect(overlay).toHaveClass("shadow-lg");
+		await expect(getComputedStyle(overlay).backgroundColor).toBe(
+			getComputedStyle(card).backgroundColor,
+		);
 	},
+};
+
+export const DarkElevationLadder: Story = {
+	...ElevationLadder,
+	globals: { appearance: "dark" },
 };
 
 export const StructureAndElevation: Story = {
@@ -195,8 +331,8 @@ export const PersistentShellChrome: Story = {
 		<div className="grid overflow-hidden border border-border">
 			<Panel
 				as="header"
-				aria-label="Page-backed header chrome"
-				background="page"
+				aria-label="Surface-backed header chrome"
+				background="panel"
 				border="none"
 				className="border-b border-border"
 				display="flex"
@@ -233,7 +369,7 @@ export const PersistentShellChrome: Story = {
 	),
 	play: async ({ canvas }) => {
 		for (const name of [
-			"Page-backed header chrome",
+			"Surface-backed header chrome",
 			"Panel-backed sidebar chrome",
 		]) {
 			const surface = canvas.getByLabelText(name);
@@ -247,7 +383,7 @@ export const PersistentShellChrome: Story = {
 export const StructuredCard: Story = {
 	render: () => (
 		<Card aria-label="Workspace access card" className="max-w-xl">
-			<Card.Header>
+			<Card.Header accent="neutral">
 				<Card.Title>Workspace access</Card.Title>
 				<Card.Description>Manage who can open this project.</Card.Description>
 				<Card.Action>
@@ -255,7 +391,7 @@ export const StructuredCard: Story = {
 				</Card.Action>
 			</Card.Header>
 			<Card.Content>Three members currently have access.</Card.Content>
-			<Card.Footer>
+			<Card.Footer accent="neutral">
 				<Button variant="primary">Save changes</Button>
 			</Card.Footer>
 		</Card>
@@ -263,6 +399,16 @@ export const StructuredCard: Story = {
 	play: async ({ canvas }) => {
 		const card = canvas.getByLabelText("Workspace access card");
 		const content = card.querySelector('[data-slot="card-content"]');
+		const header = card.querySelector('[data-slot="card-header"]');
+		const matchingFooter = card.querySelector('[data-slot="card-footer"]');
+		if (!header || !matchingFooter) throw new Error("Missing card chrome");
+		await expect(getComputedStyle(header).borderBottomColor).toBe(
+			getComputedStyle(card).borderTopColor,
+		);
+		await expect(getComputedStyle(matchingFooter).borderTopColor).toBe(
+			getComputedStyle(card).borderTopColor,
+		);
+
 		const footer = card.querySelector('[data-slot="card-footer"]');
 		const headerAction = card.querySelector('[data-slot="card-action"]');
 		const invite = canvas.getByRole("button", { name: "Invite" });
@@ -284,10 +430,7 @@ export const ReusableCardHeading: Story = {
 					</Button>
 				}
 				actionLayout="responsive"
-				description="A reusable route-level heading built from Card slots."
-				leading={
-					<Icon className="text-muted-foreground" name="users" size="sm" />
-				}
+				description="The identity and context of this self-contained item."
 				title="People and access"
 			/>
 			<Card.Content>Three members currently have access.</Card.Content>
@@ -306,7 +449,7 @@ export const ReusableCardHeading: Story = {
 		).toHaveTextContent("People and access");
 		await expect(
 			heading?.querySelector('[data-slot="card-description"]'),
-		).toHaveTextContent("A reusable route-level heading");
+		).toHaveTextContent("The identity and context");
 		const action = heading?.querySelector('[data-slot="card-action"]');
 		await expect(action).toContainElement(
 			canvas.getByRole("button", { name: "Invite member" }),

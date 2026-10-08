@@ -1,5 +1,5 @@
+import { Text } from "@/components/ui/primitives/Text";
 import { DashboardPageHeader } from "./DashboardPageHeader";
-import { DashboardSurfaceTrail } from "./DashboardSurfaceTrail";
 
 export function DashboardSection({
 	actions,
@@ -18,18 +18,23 @@ export function DashboardSection({
 }) {
 	return (
 		<section
-			className={["grid min-w-0 gap-4", className].filter(Boolean).join(" ")}
+			className={["min-w-0", className].filter(Boolean).join(" ")}
+			data-dashboard-section
 		>
-			<DashboardSurfaceTrail />
-			{title ? (
-				<DashboardPageHeader
-					action={actions}
-					description={description}
-					title={title}
-				/>
-			) : null}
-			<div className={["min-w-0", contentClassName].filter(Boolean).join(" ")}>
-				{children}
+			{title ? <DashboardPageHeader action={actions} title={title} /> : null}
+			<div className="dashboard-page-body mx-auto w-full min-w-0 px-3 py-5 sm:px-5 sm:py-6">
+				{description ? (
+					<div className="mb-5">
+						<Text tone="muted" variant="support">
+							{description}
+						</Text>
+					</div>
+				) : null}
+				<div
+					className={["min-w-0", contentClassName].filter(Boolean).join(" ")}
+				>
+					{children}
+				</div>
 			</div>
 		</section>
 	);

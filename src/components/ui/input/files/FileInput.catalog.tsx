@@ -68,7 +68,7 @@ function CatalogPreview2() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-input-file-input",
 	name: "FileInput",
-	role: "Controlled generic-file field for selection, preview, inspection, editable or read-only presentation, and inline rejection feedback.",
+	role: "Controlled generic-file field for selection, preview, inspection, editable or read-only presentation, and inline rejection feedback. onPreview delegates inspection; a FilePreviewProvider supplies the default handler for a subtree. An explicit callback wins. Without either, existing inspection remains available. Uploaded items may resolve fresh URLs through resolveUrl(signal). Preview tiles use Card surfaces. PDFs render a first-page canvas with a filename and readable loading/failure fallback, never a browser PDF plug-in.",
 	importStatement: 'import { FileInput } from "@/components/ui/input";',
 	chooseWhen: [
 		"A form owns pending and uploaded files as one controlled list.",
@@ -81,6 +81,14 @@ export const catalogContract = defineCatalogOwnerContract({
 		"FilePreview, FileInspectModal, upload transport, persistence, and server-side validation.",
 	],
 	guarantees: [
+		{
+			label: "Bounded attachment tiles and adaptive ghost removal",
+			storyId: "ui-input-file-input--compact-chat-attachments",
+		},
+		{
+			label: "PDF first-page card preview",
+			storyId: "ui-input-file-input--pdf-card-preview",
+		},
 		{
 			label: "Controlled accepted/rejected file selection",
 			storyId: "ui-input-file-input--selection-contract",

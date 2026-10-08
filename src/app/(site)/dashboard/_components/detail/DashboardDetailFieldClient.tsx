@@ -61,7 +61,7 @@ export function DashboardDetailFieldClient({
 						href={href}
 						onClick={onClick}
 						size="none"
-						variant="ghost"
+						variant="bare"
 					>
 						{value}
 					</Button>
@@ -74,7 +74,7 @@ export function DashboardDetailFieldClient({
 						disabled={disabled}
 						onClick={onClick ?? handleCopy}
 						size="none"
-						variant="ghost"
+						variant="bare"
 					>
 						<span className="inline-flex min-w-0 items-center gap-2">
 							<span className="truncate">{value}</span>

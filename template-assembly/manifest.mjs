@@ -20,7 +20,6 @@ export const assemblyTemplateOnlyPaths = new Set([
 	"docs/benchmarks/design-system-agent-benchmark.md",
 	"docs/benchmarks/design-system-agent-benchmark-runs.jsonl",
 	"docs/benchmarks/design-system-agent-benchmark-runs.md",
-	"public/template-services/repository-footprint.png",
 	"scripts/create-template-profile.mjs",
 	"scripts/dev-thin.mjs",
 	"scripts/generate-repository-footprint.mjs",
@@ -125,8 +124,10 @@ export const assemblyCoreScripts = new Set([
 ]);
 
 export const assemblyCoreDependencies = new Set([
+	"pdfjs-dist",
 	"@mdxeditor/editor",
 	"@phosphor-icons/react",
+	"@openai/apps-sdk-ui",
 	"@radix-ui/react-slot",
 	"@tanstack/react-hotkeys",
 	"class-variance-authority",

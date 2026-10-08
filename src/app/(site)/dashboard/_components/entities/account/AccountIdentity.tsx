@@ -9,11 +9,15 @@ function AccountIdentityRoot({
 	avatarSize,
 	className,
 	presentation,
+	secondaryLabel,
+	textClassName,
 	variant = "default",
 }: {
 	avatarSize?: AccountIdentityAvatarSize;
 	className?: string;
 	presentation: AccountPresentation;
+	secondaryLabel?: string;
+	textClassName?: string;
 	variant?: AccountIdentityVariant;
 }) {
 	const actor = variant === "actor";
@@ -34,7 +38,10 @@ function AccountIdentityRoot({
 			className={className}
 			primaryAs="span"
 			primaryLabel={presentation.displayLabel}
-			secondaryLabel={actor ? undefined : presentation.emailLabel}
+			secondaryLabel={
+				secondaryLabel ?? (actor ? undefined : presentation.emailLabel)
+			}
+			textClassName={textClassName}
 			variant={variant}
 		/>
 	);
@@ -44,11 +51,15 @@ export function AccountIdentitySkeleton({
 	avatarSize,
 	displayLabel = "Example account",
 	emailLabel = "account@example.com",
+	secondaryLabel,
+	textClassName,
 	variant = "default",
 }: {
 	avatarSize?: AccountIdentityAvatarSize;
 	displayLabel?: string;
 	emailLabel?: string;
+	secondaryLabel?: string;
+	textClassName?: string;
 	variant?: AccountIdentityVariant;
 }) {
 	const actor = variant === "actor";
@@ -59,7 +70,8 @@ export function AccountIdentitySkeleton({
 			avatarSize={resolvedAvatarSize}
 			primaryAs="span"
 			primaryLabel={displayLabel}
-			secondaryLabel={actor ? undefined : emailLabel}
+			secondaryLabel={secondaryLabel ?? (actor ? undefined : emailLabel)}
+			textClassName={textClassName}
 			variant={variant}
 		/>
 	);

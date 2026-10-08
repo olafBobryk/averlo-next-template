@@ -193,12 +193,12 @@ function InteractiveSurfaceHitbox({
 			>
 				<Button
 					type="button"
-					variant="ghost"
+					variant="bare"
 					size="none"
 					align="left"
 					radius="sm"
 					aria-label={`Show ${service.title} details for ${surfaceNames.join(" and ")}`}
-					className="!block w-full !whitespace-normal !rounded-lg !border-0 !bg-transparent p-0 hover:!opacity-100 active:!translate-y-0"
+					className="!block w-full !whitespace-normal !rounded-lg !border-0 p-0 hover:!opacity-100 active:!opacity-100"
 					contentClassName="!block w-full"
 					data-service-id={service.id}
 					data-surface-hitbox={surfaceIds.join(",")}

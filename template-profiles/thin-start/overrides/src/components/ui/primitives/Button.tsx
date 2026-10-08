@@ -3,21 +3,22 @@
 import clsx from "clsx";
 import Link from "next/link";
 import * as React from "react";
-import { focusRing } from "@/components/ui/foundations/focus";
+import {
+	type ButtonShape,
+	type ButtonSize,
+	type ButtonTone,
+	type ButtonVariant,
+	buttonContentGap,
+	buttonGeometry,
+	buttonStyles,
+} from "./buttonStyles";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "inverse";
-
-export type ButtonTone = "default" | "danger";
-
-export type ButtonSize =
-	| "none"
-	| "sm"
-	| "md"
-	| "lg"
-	| "xl"
-	| "chip"
-	| "icon"
-	| "icon-sm";
+export type {
+	ButtonShape,
+	ButtonSize,
+	ButtonTone,
+	ButtonVariant,
+} from "./buttonStyles";
 
 export type ButtonBaseProps = {
 	align?: "left" | "center" | "between";
@@ -31,6 +32,7 @@ export type ButtonBaseProps = {
 	loading?: boolean;
 	radius?: "pill" | "sm";
 	size?: ButtonSize;
+	shape?: ButtonShape;
 	tone?: ButtonTone;
 	trailingIcon?: React.ReactNode;
 	variant?: ButtonVariant;
@@ -49,84 +51,16 @@ type AnchorElementProps = Omit<
 export type ButtonProps = ButtonBaseProps &
 	(ButtonElementProps | AnchorElementProps);
 
-const sizeClasses: Record<ButtonSize, string> = {
-	none: "",
-	lg: "h-11 px-6 text-sm font-semibold",
-	xl: "h-12 px-7 text-base font-semibold",
-	md: "h-9 px-3 text-sm font-medium",
-	sm: "h-8 px-2.5 text-xs font-medium",
-	chip: "h-auto px-2 py-1 text-xs font-medium",
-	icon: "size-9 p-0 text-sm font-medium",
-	"icon-sm": "size-8 p-0 text-sm font-medium",
-};
-
-const variantClasses: Record<ButtonVariant, string> = {
-	primary:
-		"border border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-	secondary:
-		"border border-transparent bg-input/50 text-foreground hover:bg-input/70",
-	ghost:
-		"border border-transparent !bg-transparent hover:!bg-transparent active:!bg-transparent text-foreground hover:opacity-70 active:opacity-60",
-	inverse:
-		"border border-transparent bg-foreground text-background hover:bg-foreground/90",
-};
-
-function getContentSizeClassName(size: ButtonSize) {
-	switch (size) {
-		case "none":
-		case "icon":
-		case "icon-sm":
-			return undefined;
-		case "chip":
-			return "gap-1";
-		case "sm":
-		case "md":
-			return "gap-1.5";
-		case "lg":
-			return "gap-2";
-		case "xl":
-			return "gap-2.5";
-	}
-}
-
-function getButtonClassName({
-	align = "center",
-	className,
-	disabled,
-	radius = "pill",
-	size = "md",
-	tone = "default",
-	variant = "secondary",
-}: Pick<
-	ButtonBaseProps,
-	"align" | "className" | "disabled" | "radius" | "size" | "tone" | "variant"
->) {
-	return clsx(
-		"group relative inline-flex shrink-0 items-center whitespace-nowrap border bg-clip-padding transition-all motion-interactive select-none",
-		focusRing.visibleDefault,
-		"cursor-pointer active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-		sizeClasses[size ?? "md"],
-		variantClasses[variant ?? "secondary"],
-		tone === "danger" &&
-			"!text-danger focus-visible:!border-danger/40 focus-visible:!ring-danger/20",
-		tone === "danger" &&
-			(variant === "secondary"
-				? "!bg-danger/10 hover:!bg-danger/20"
-				: variant === "ghost"
-					? "!bg-transparent"
-					: "!bg-danger/20 hover:!bg-danger/30"),
-		radius === "sm" ? "rounded-md" : "rounded-4xl",
-		align === "left" && "justify-start text-left",
-		align === "center" && "justify-center text-center",
-		align === "between" && "justify-between text-left",
-		disabled && "cursor-not-allowed",
-		className,
-	);
-}
-
 type ButtonSkeletonProps = Pick<
 	ButtonBaseProps,
-	"align" | "children" | "className" | "radius" | "size" | "tone" | "variant"
+	| "align"
+	| "children"
+	| "className"
+	| "radius"
+	| "size"
+	| "shape"
+	| "tone"
+	| "variant"
 > & { fullWidth?: boolean };
 
 function ButtonSkeleton({
@@ -136,19 +70,29 @@ function ButtonSkeleton({
 	fullWidth,
 	radius,
 	size,
+	shape,
 	variant,
 }: ButtonSkeletonProps) {
 	const resolvedSize = size ?? "md";
-	const resolvedRadius = radius === "sm" ? "!rounded-[6px]" : "!rounded-full";
-	const resolvedSurface =
-		variant === "primary" ? "!bg-primary/20" : "!bg-muted/80";
+	const resolvedRadius =
+		radius === "pill" || (!radius && shape === "round")
+			? "!rounded-full"
+			: "!rounded-[var(--button-radius)]";
+	const transparent =
+		variant === "bare" || variant === "ghost" || variant === "link";
+	const iconOnly =
+		size === "icon" ||
+		size === "icon-sm" ||
+		shape === "round" ||
+		shape === "square";
+	const resolvedSurface = transparent ? "bg-transparent" : "bg-muted/80";
 
 	return (
 		<span
 			aria-hidden
 			className={clsx(
-				"relative inline-flex shrink-0 items-center overflow-hidden whitespace-nowrap border border-transparent",
-				sizeClasses[resolvedSize],
+				"relative inline-flex shrink-0 items-center overflow-hidden whitespace-nowrap border-0",
+				buttonGeometry({ size: resolvedSize, shape, radius, align }),
 				align === "left" && "justify-start text-left",
 				(align === undefined || align === "center") &&
 					"justify-center text-center",
@@ -160,14 +104,24 @@ function ButtonSkeleton({
 				resolvedSurface,
 			)}
 		>
-			<span className="contents pointer-events-none select-none opacity-0 [&_*]:pointer-events-none [&_*]:select-none [&_*]:opacity-0">
-				<span
-					className={clsx(
-						"inline-flex min-w-0 items-center justify-center",
-						getContentSizeClassName(resolvedSize),
-					)}
-				>
-					{children}
+			<span className="relative inline-flex items-center justify-center">
+				{transparent ? (
+					<span
+						className={clsx(
+							"absolute top-1/2 -translate-y-1/2 rounded-md bg-muted/80",
+							iconOnly ? "size-4" : "inset-x-0 h-[0.8em]",
+						)}
+					/>
+				) : null}
+				<span className={clsx("invisible", iconOnly && "size-4")}>
+					<span
+						className={clsx(
+							"inline-flex min-w-0 items-center justify-center",
+							buttonContentGap(resolvedSize),
+						)}
+					>
+						{iconOnly ? null : children}
+					</span>
 				</span>
 			</span>
 		</span>
@@ -187,6 +141,7 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 		loading = false,
 		radius,
 		size = "md",
+		shape,
 		tone = "default",
 		trailingIcon,
 		type,
@@ -196,21 +151,16 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 	ref,
 ) {
 	const isDisabled = disabled || loading;
-	const resolvedClassName = getButtonClassName({
-		align,
+	const resolvedClassName = clsx(
+		buttonStyles({ align, radius, size, shape, tone, variant }),
 		className,
-		disabled: isDisabled,
-		radius,
-		size,
-		tone,
-		variant,
-	});
+	);
 	const content = (
 		<>
 			<span
 				className={clsx(
 					"inline-flex max-w-full items-center transition-opacity motion-micro",
-					getContentSizeClassName(size),
+					buttonContentGap(size),
 					loading && "opacity-0",
 					contentClassName,
 				)}
@@ -226,7 +176,7 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 					loading && "opacity-100",
 				)}
 			>
-				<span className="size-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
+				<span className="size-4 motion-reduce:animate-none animate-spin rounded-full border-2 border-current border-r-transparent" />
 			</span>
 		</>
 	);
@@ -234,13 +184,25 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 	if (href) {
 		return (
 			<Link
+				{...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+				onClick={(event) => {
+					if (isDisabled) {
+						event.preventDefault();
+						event.stopPropagation();
+						return;
+					}
+					(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>).onClick?.(
+						event,
+					);
+				}}
 				ref={ref as React.Ref<HTMLAnchorElement>}
 				href={href}
 				aria-disabled={isDisabled || undefined}
 				className={resolvedClassName}
 				data-loading={loading || undefined}
+				aria-busy={loading || undefined}
+				data-disabled={isDisabled || undefined}
 				tabIndex={isDisabled || !focusable ? -1 : undefined}
-				{...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
 			>
 				{content}
 			</Link>
@@ -249,6 +211,7 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 
 	return (
 		<button
+			{...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
 			ref={ref as React.Ref<HTMLButtonElement>}
 			type={
 				(type as React.ButtonHTMLAttributes<HTMLButtonElement>["type"]) ??
@@ -257,8 +220,9 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 			disabled={isDisabled}
 			className={resolvedClassName}
 			data-loading={loading || undefined}
+			aria-busy={loading || undefined}
+			data-disabled={isDisabled || undefined}
 			tabIndex={!focusable ? -1 : undefined}
-			{...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
 		>
 			{content}
 		</button>

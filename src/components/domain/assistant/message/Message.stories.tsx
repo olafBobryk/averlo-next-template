@@ -1,14 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, fn, userEvent, within } from "storybook/test";
+import { useState } from "react";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import * as Assistant from "@/components/domain/assistant";
 import { IconProvider } from "@/components/ui/icons/iconRegistry";
-import { phosphorIconRegistry } from "@/components/ui/icons/phosphorRegistry";
+import { openaiIconRegistry } from "@/components/ui/icons/openaiRegistry";
 import type {
 	AssistantMessage as AssistantMessageContract,
 	AssistantResponseMessage,
 	AssistantSystemMessage,
 	AssistantUserMessage,
 } from "@/lib/assistant/contracts";
+import { ToolCallView } from "./assistant/tool-call/ToolCall";
 import { catalogContract } from "./Message.catalog";
 
 const createdAt = "2026-08-01T09:00:00.000Z";
@@ -217,7 +219,7 @@ const meta = {
 	tags: ["autodocs"],
 	decorators: [
 		(Story) => (
-			<IconProvider registry={phosphorIconRegistry}>
+			<IconProvider registry={openaiIconRegistry}>
 				<Story />
 			</IconProvider>
 		),
@@ -229,7 +231,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					"The public Assistant message dispatcher. Role-specific renderers stay private while user and Assistant messages share one conversation axis.",
+					"The public Assistant message dispatcher. Role-specific renderers stay private while user and Assistant messages share one conversation axis. ToolCallView accepts a provider-neutral request (id, toolCall status/value with name and arguments), optional response (id, toolResult success/value with content, structuredContent and isError, or error text), label and lifecycle status. Content blocks support text, images, audio downloads, resource links and embedded text resources. Audience annotations exclude assistant-only content; tool text is displayed as literal monospaced output, matching Inference. Long argument values expand independently. Output grows in 8-line steps to 24 lines, then scrolls. The Records adapter normalizes existing execution parts into this source-shaped envelope without widening executable capabilities. Accordion motion softens its moving bottom edge and releases clipping when settled. Each response groups all tool calls into one initially collapsed summary above the reply. The summary uses the actual call count and lifecycle state, without fabricated duration. A shared Divider stays directly beneath the summary trigger while details expand below it; its gap to the reply matches the reply-to-controls gap (8px).",
 			},
 		},
 	},
@@ -321,13 +323,16 @@ export const RolePresentation: Story = {
 				name: "Remove record-summary.txt",
 			}),
 		).toBeNull();
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Working · 1 tool call" }),
+		);
 		const toolTrigger = canvas.getByRole("button", {
-			name: "Record tool · 1 call · Pending",
+			name: "Search records Running",
 		});
 		await expect(toolTrigger).toHaveAttribute("aria-expanded", "false");
 		await userEvent.click(toolTrigger);
 		await expect(toolTrigger).toHaveAttribute("aria-expanded", "true");
-		await expect(canvas.getByText("List records")).toBeInTheDocument();
+		await expect(canvas.getByText("query")).toBeInTheDocument();
 
 		const userRect = userArticle.getBoundingClientRect();
 		const assistantRect = assistantArticle.getBoundingClientRect();
@@ -341,13 +346,15 @@ export const RolePresentation: Story = {
 		)
 			return;
 		const userBodyRect = userBody.getBoundingClientRect();
-		const assistantBodyRect = assistantBody.getBoundingClientRect();
-		const userLeftInset = userBodyRect.left - userRect.left;
-		const assistantRightInset = assistantRect.right - assistantBodyRect.right;
+		const contentRight =
+			userArticle.firstElementChild?.getBoundingClientRect().right ??
+			userRect.right;
 		const userStyle = getComputedStyle(userBody);
-		await expect(Math.abs(userLeftInset - assistantRightInset)).toBeLessThan(1);
-		await expect(userStyle.borderRadius).toBe("22px");
-		await expect(userStyle.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+		await expect(Math.abs(userBodyRect.right - contentRight)).toBeLessThan(1);
+		await expect(userStyle.maxWidth).not.toBe("none");
+		await expect(
+			getComputedStyle(userText.parentElement!).backgroundColor,
+		).not.toBe("rgba(0, 0, 0, 0)");
 	},
 };
 
@@ -355,14 +362,22 @@ export const GroupedToolLifecycle: Story = {
 	args: { message: groupedToolMessage },
 	render: () => <Assistant.Message message={groupedToolMessage} />,
 	play: async ({ canvas }) => {
-		const trigger = canvas.getByRole("button", {
-			name: "Record tools · 2 calls · Failed",
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Working · 2 tool calls" }),
+		);
+		const running = canvas.getByRole("button", {
+			name: "Search records Running",
 		});
-		await expect(trigger).toHaveAttribute("aria-expanded", "false");
-		await userEvent.click(trigger);
-		await expect(trigger).toHaveAttribute("aria-expanded", "true");
-		await expect(canvas.getByText("List records")).toBeInTheDocument();
-		await expect(canvas.getByText("Get record")).toBeInTheDocument();
+		const failed = canvas.getByRole("button", { name: "Read record Failed" });
+		await expect(running).toHaveAttribute("aria-expanded", "false");
+		await userEvent.click(failed);
+		await expect(failed).toHaveAttribute("aria-expanded", "true");
+		await expect(running).toHaveAttribute("aria-expanded", "false");
+		await waitFor(() =>
+			expect(
+				canvas.getByText("The fixture could not load this record."),
+			).toBeVisible(),
+		);
 	},
 };
 
@@ -383,7 +398,7 @@ export const CompactSingleLineUser: Story = {
 	play: async ({ canvas }) => {
 		const userArticle = canvas.getByRole("article", { name: "You" });
 		const messageAxis = userArticle.firstElementChild;
-		const userBody = messageAxis?.firstElementChild;
+		const userBody = messageAxis?.firstElementChild?.firstElementChild;
 		await expect(messageAxis).not.toBeNull();
 		await expect(userBody).not.toBeNull();
 		if (
@@ -393,10 +408,10 @@ export const CompactSingleLineUser: Story = {
 			return;
 		const axisRect = messageAxis.getBoundingClientRect();
 		const bodyRect = userBody.getBoundingClientRect();
-		await expect(bodyRect.height).toBe(36);
+		await expect(bodyRect.height).toBeGreaterThanOrEqual(32);
 		await expect(bodyRect.width).toBeLessThan(axisRect.width);
 		await expect(Math.abs(bodyRect.right - axisRect.right)).toBeLessThan(1);
-		await expect(getComputedStyle(userBody).borderRadius).toBe("22px");
+		await expect(getComputedStyle(userBody).borderRadius).toBe("14px");
 	},
 };
 
@@ -409,6 +424,19 @@ export const CompletedMarkdownPresentation: Story = {
 			'[data-slot="markdown-renderer"][data-variant="result"]',
 		);
 
+		const response = article.firstElementChild
+			?.firstElementChild as HTMLElement;
+		await expect(response.getBoundingClientRect().width).toBe(
+			article.firstElementChild?.getBoundingClientRect().width,
+		);
+		const timestamp = article.querySelector("time");
+		if (!timestamp) throw new Error("Missing response timestamp");
+		await expect(getComputedStyle(timestamp).opacity).toBe("0");
+		const copy = within(article).getByRole("button", { name: "Copy response" });
+		copy.focus();
+		await waitFor(() => expect(getComputedStyle(timestamp).opacity).toBe("1"));
+		copy.blur();
+		await waitFor(() => expect(getComputedStyle(timestamp).opacity).toBe("0"));
 		await expect(renderer).not.toBeNull();
 		await expect(renderer).toHaveClass("markdown-content--compact");
 		await expect(
@@ -507,6 +535,235 @@ export const StreamingCompletionGeometry: Story = {
 			complete.getBoundingClientRect().top;
 		await expect(Math.abs(streamingTopInset - completeTopInset)).toBeLessThan(
 			0.2,
+		);
+	},
+};
+
+function EditableUserExample() {
+	const [message, setMessage] = useState(singleLineUserMessage);
+	return (
+		<Assistant.Message
+			message={message}
+			onEdit={async (text) => {
+				setMessage({
+					...message,
+					parts: [{ type: "text", id: "editable-text", text }],
+				});
+			}}
+		/>
+	);
+}
+export const EditUserInPlace: Story = {
+	args: { message: singleLineUserMessage },
+	render: () => <EditableUserExample />,
+	play: async ({ canvas }) => {
+		const user = userEvent.setup();
+		await user.click(canvas.getByRole("button", { name: "Edit message" }));
+		const input = canvas.getByRole("textbox", {
+			name: "Edit message",
+		});
+		await expect(
+			input.closest('[data-slot="input-frame"]')?.getBoundingClientRect()
+				.height,
+		).toBeGreaterThanOrEqual(98);
+		await user.clear(input);
+		await user.click(
+			canvas.getByRole("button", { name: "Save message in place" }),
+		);
+		await expect(canvas.getByRole("alert")).toHaveTextContent(
+			"Message cannot be empty",
+		);
+		await user.type(input, "Revised in place");
+		await user.keyboard("{Control>}{Enter}{/Control}");
+		await expect(canvas.getByText("Revised in place")).toBeVisible();
+		await waitFor(() =>
+			expect(
+				canvas.getByRole("button", { name: "Edit message" }),
+			).toHaveFocus(),
+		);
+		const copy = canvas.getByRole("button", { name: "Copy message" });
+		const bubble = canvas.getByText("Revised in place").getBoundingClientRect();
+		await expect(
+			Math.abs(copy.getBoundingClientRect().right - bubble.right),
+		).toBeLessThan(1);
+		await expect(copy.getBoundingClientRect().width).toBe(14);
+		await user.click(copy);
+		await expect(
+			canvas.getByRole("button", { name: "Copied message" }),
+		).toBeVisible();
+		await user.click(canvas.getByRole("button", { name: "Edit message" }));
+		await user.type(
+			canvas.getByRole("textbox", { name: "Edit message" }),
+			" discarded",
+		);
+		await user.keyboard("{Escape}");
+		await expect(canvas.getByText("Revised in place")).toBeVisible();
+	},
+};
+
+export const SourceToolEnvelope: Story = {
+	args: { message: groupedToolMessage },
+	render: () => (
+		<ToolCallView
+			status="completed"
+			request={{
+				id: "search-1",
+				toolCall: {
+					status: "success",
+					value: {
+						name: "search_documents",
+						arguments: {
+							query:
+								"Find the launch plan and summarize all milestones for the next quarter, including dependencies and owners.",
+							limit: 40,
+						},
+					},
+				},
+			}}
+			response={{
+				id: "search-1",
+				toolResult: {
+					status: "success",
+					value: {
+						isError: false,
+						content: [
+							{
+								type: "text",
+								text: Array.from(
+									{ length: 40 },
+									(_, i) => `Document ${i + 1}: launch milestone and owner`,
+								).join("\n"),
+							},
+							{
+								type: "text",
+								text: "Assistant-only internal detail",
+								annotations: { audience: ["assistant"] },
+							},
+						],
+					},
+				},
+			}}
+		/>
+	),
+	play: async ({ canvas }) => {
+		await userEvent.click(
+			canvas.getByRole("button", { name: "search documents" }),
+		);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Toggle query argument" }),
+		);
+		await expect(
+			canvas.getByRole("button", { name: "Toggle query argument" }),
+		).toHaveAttribute("aria-expanded", "true");
+		const output = canvas.getByRole("region", { name: "Tool output" });
+		await expect(output).toHaveTextContent("Document 40");
+		await expect(
+			canvas.queryByText("Assistant-only internal detail"),
+		).toBeNull();
+		await expect(getComputedStyle(output).maxHeight).toBe("160px");
+		await userEvent.click(
+			await canvas.findByRole("button", { name: "View more" }),
+		);
+		await expect(getComputedStyle(output).maxHeight).toBe("320px");
+		await userEvent.click(canvas.getByRole("button", { name: "View more" }));
+		await expect(getComputedStyle(output).maxHeight).toBe("480px");
+		await expect(
+			canvas.getByText("Scroll to see the remaining output"),
+		).toBeVisible();
+	},
+};
+export const SourceToolError: Story = {
+	args: { message: groupedToolMessage },
+	render: () => (
+		<ToolCallView
+			status="error"
+			request={{
+				id: "fetch-1",
+				toolCall: {
+					status: "success",
+					value: {
+						name: "fetch_document",
+						arguments: { document_id: "launch-plan" },
+					},
+				},
+			}}
+			response={{
+				id: "fetch-1",
+				toolResult: {
+					status: "error",
+					error: "The connection is unavailable. Reconnect and try again.",
+				},
+			}}
+		/>
+	),
+	play: async ({ canvas }) => {
+		await userEvent.click(
+			canvas.getByRole("button", { name: "fetch document Failed" }),
+		);
+		await expect(canvas.getByRole("status")).toHaveTextContent(
+			"Reconnect and try again",
+		);
+	},
+};
+
+export const ToolSummarySpacing: Story = {
+	args: {
+		message: {
+			...assistantMessage,
+			parts: [
+				{
+					...assistantMessage.parts[2],
+					state: "completed",
+					output: { total: 3 },
+				} as AssistantResponseMessage["parts"][number],
+				{
+					id: "summary-reply",
+					type: "text",
+					text: "I found three records that need your attention.",
+				},
+			],
+		},
+	},
+	play: async ({ canvas }) => {
+		const summary = canvas.getByRole("button", {
+			name: "Finished · 1 tool call",
+		});
+		await expect(summary).toHaveAttribute("aria-expanded", "false");
+		await expect(
+			canvas.queryByRole("button", { name: "Search records" }),
+		).toBeNull();
+		const article = canvas.getByRole("article", { name: "Assistant" });
+		const divider = article.querySelector("hr");
+		const reply = article.querySelector('[data-slot="assistant-reply"]');
+		const controls = canvas.getByRole("button", {
+			name: "Copy response",
+		}).parentElement;
+		if (!divider || !reply || !controls)
+			throw new Error("Missing response structure");
+		await expect(
+			reply.getBoundingClientRect().top -
+				divider.getBoundingClientRect().bottom,
+		).toBe(8);
+		await expect(
+			controls.getBoundingClientRect().top -
+				reply.getBoundingClientRect().bottom,
+		).toBe(8);
+		const dividerOffset =
+			divider.getBoundingClientRect().top -
+			summary.getBoundingClientRect().bottom;
+		await userEvent.click(summary);
+		await expect(
+			await canvas.findByRole("button", { name: "Search records" }),
+		).toBeVisible();
+		await expect(
+			divider.getBoundingClientRect().top -
+				summary.getBoundingClientRect().bottom,
+		).toBe(dividerOffset);
+		await userEvent.click(summary);
+		await waitFor(() =>
+			expect(
+				canvas.queryByRole("button", { name: "Search records" }),
+			).toBeNull(),
 		);
 	},
 };

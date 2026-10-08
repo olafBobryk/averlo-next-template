@@ -66,6 +66,8 @@ const getMatchRank = (
 };
 
 const contentPaddingBySize: Record<NonNullable<InputFrameSize>, string> = {
+	xxs: "px-1.5 py-[3.5px]",
+	xs: "px-2 py-[5.5px]",
 	sm: "px-3 py-[8.5px]",
 	md: "px-[15px] py-[11.5px]",
 	lg: "px-4 py-[12.5px]",

@@ -27,7 +27,7 @@ import {
 	TextAreaInput,
 } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { showToast } from "@/lib/feedback";
 import { hrefFor } from "@/lib/routes";
@@ -107,19 +107,19 @@ export function PlatformReportDetailContent({
 		>
 			<div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
 				<div className="grid min-w-0 gap-5">
-					<Card>
-						<Card.Header>
-							<Card.Title>Feedback</Card.Title>
-							<Card.Description>
+					<ContentSection>
+						<ContentSection.Header>
+							<ContentSection.Title>Feedback</ContentSection.Title>
+							<ContentSection.Description>
 								{feedbackCategoryPresentation[report.category]} from{" "}
 								{report.currentRoute}
-							</Card.Description>
-							<Card.Action className="flex flex-wrap gap-2">
+							</ContentSection.Description>
+							<ContentSection.Action className="flex flex-wrap gap-2">
 								<FeedbackSeverityChip severity={report.severity} />
 								<FeedbackStatusChip status={report.status} />
-							</Card.Action>
-						</Card.Header>
-						<Card.Content className="grid gap-5">
+							</ContentSection.Action>
+						</ContentSection.Header>
+						<ContentSection.Content className="grid gap-5">
 							<Text className="whitespace-pre-wrap break-words" variant="body">
 								{report.description}
 							</Text>
@@ -145,14 +145,14 @@ export function PlatformReportDetailContent({
 									value={formatPlatformDate(report.updatedAt)}
 								/>
 							</dl>
-						</Card.Content>
-					</Card>
-					<Card>
-						<Card.Heading
+						</ContentSection.Content>
+					</ContentSection>
+					<ContentSection>
+						<ContentSection.Heading
 							description="Identity and organization facts are resolved server-side."
 							title="Reporter context"
 						/>
-						<Card.Content>
+						<ContentSection.Content>
 							<dl className="grid gap-5 sm:grid-cols-2">
 								<DashboardDetailField
 									label="Reporter"
@@ -177,15 +177,19 @@ export function PlatformReportDetailContent({
 									}
 								/>
 							</dl>
-						</Card.Content>
-					</Card>
+						</ContentSection.Content>
+					</ContentSection>
 				</div>
-				<Card as="form" className="self-start" onSubmit={handleSubmit}>
-					<Card.Heading
+				<ContentSection
+					as="form"
+					className="self-start"
+					onSubmit={handleSubmit}
+				>
+					<ContentSection.Heading
 						description="Adding a note to a new report automatically marks it Triaged."
 						title="Report triage"
 					/>
-					<Card.Content className="grid gap-4">
+					<ContentSection.Content className="grid gap-4">
 						<SelectInput
 							disabled={isSubmitting}
 							label="Status"
@@ -201,8 +205,8 @@ export function PlatformReportDetailContent({
 							rows={7}
 							value={triageNote}
 						/>
-					</Card.Content>
-					<Card.Footer className="justify-end">
+					</ContentSection.Content>
+					<ContentSection.Footer className="justify-end">
 						<Button
 							disabled={isSubmitting}
 							loading={isSubmitting}
@@ -210,8 +214,8 @@ export function PlatformReportDetailContent({
 						>
 							Save triage
 						</Button>
-					</Card.Footer>
-				</Card>
+					</ContentSection.Footer>
+				</ContentSection>
 			</div>
 		</DashboardSection>
 	);

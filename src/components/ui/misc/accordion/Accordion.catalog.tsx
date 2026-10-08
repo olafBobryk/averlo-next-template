@@ -114,6 +114,10 @@ export const catalogContract = defineCatalogOwnerContract({
 	],
 	guarantees: [
 		{
+			label: "Soft moving edge and unclipped settled content",
+			storyId: "ui-misc-accordion--soft-disclosure-edge",
+		},
+		{
 			label: "Disclosure semantics and callbacks",
 			storyId: "ui-misc-accordion--disclosure-contract",
 		},

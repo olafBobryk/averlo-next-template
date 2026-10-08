@@ -12,6 +12,7 @@ export const Response = memo(function AssistantResponse({
 }) {
 	return (
 		<Markdown.Render
+			className="[&>:first-child]:!mt-0 [&>:last-child]:!mb-0 [&>.markdown-streaming-engine>:first-child]:!mt-0 [&>.markdown-streaming-engine>:last-child]:!mb-0"
 			density="compact"
 			markdown={text}
 			streaming={streaming}

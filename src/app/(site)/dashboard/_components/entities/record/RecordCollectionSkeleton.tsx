@@ -1,6 +1,5 @@
-import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import {
 	recordColumnDefinitions,
@@ -58,6 +57,7 @@ export function RecordCollectionClientSkeleton({
 	return (
 		<div className="grid gap-4">
 			<DashboardTablePanel.Skeleton
+				pageSize={10}
 				columns={[
 					{ header: columns[0].label, id: columns[0].id },
 					{ header: "Owner", id: "owner" },
@@ -71,7 +71,7 @@ export function RecordCollectionClientSkeleton({
 					},
 				]}
 				header={
-					<Card.Heading
+					<ContentSection.Heading
 						action={
 							canWrite ? (
 								<Button.Skeleton size="sm" variant="secondary">
@@ -80,15 +80,7 @@ export function RecordCollectionClientSkeleton({
 							) : null
 						}
 						actionLayout="responsive"
-						description={
-							<>
-								Organization-scoped fixtures for {organizationName}. Sort any
-								presentation-owned column.
-							</>
-						}
-						leading={
-							<Icon name={recordPresentationDefinition.icon} size="sm" />
-						}
+						description={<>Records for {organizationName}.</>}
 						title={recordPresentationDefinition.nouns.plural}
 					/>
 				}
@@ -170,7 +162,7 @@ export function RecordCollectionClientSkeleton({
 							data-dashboard-table-kind="action"
 							data-dashboard-table-required="true"
 						>
-							<Button.Skeleton size="icon-sm" variant="secondary" />
+							<Button.Skeleton size="icon-sm" variant="bare" />
 						</td>
 					</tr>
 				))}

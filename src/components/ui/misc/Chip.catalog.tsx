@@ -54,7 +54,7 @@ function CatalogPreview2() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-misc-chip",
 	name: "Chip",
-	role: "Compact static, linked, or button-like label and status surface.",
+	role: "Compact static, linked, or button-like label and status surface. Neutral pills use full foreground contrast; identity pills and profile initials share primary, success, warning, danger and violet with default static tints and readable ink. Identity colors convey no status.",
 	importStatement: 'import { Chip } from "@/components/ui/misc";',
 	chooseWhen: [
 		"A compact source, status, filter, or token-like action needs shared surface-aware chrome.",

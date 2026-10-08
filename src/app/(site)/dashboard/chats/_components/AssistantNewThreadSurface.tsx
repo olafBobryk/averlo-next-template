@@ -3,15 +3,19 @@
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { ErrorState } from "@/components/ui/misc/state/ErrorState";
-import { AssistantThreadSurfaceSkeleton } from "../[threadId]/_components/AssistantThreadSurface";
+import { useDashboardToolbarVisible } from "../../_components/layout/DashboardShellContext";
+import { AssistantWorkspaceLoading } from "./AssistantWorkspaceLoading";
+import { useAssistantComposerDraft } from "./useAssistantComposerDraft";
 
 export function AssistantNewThreadSurface() {
 	const router = useRouter();
+	const visible = useDashboardToolbarVisible();
+	const { transferTo } = useAssistantComposerDraft("new");
 	const requestRef = React.useRef<Promise<string> | null>(null);
 	const [error, setError] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
-		if (error) return;
+		if (error || !visible) return;
 		let active = true;
 		requestRef.current ??= fetch("/api/assistant/threads", {
 			body: JSON.stringify({}),
@@ -31,7 +35,8 @@ export function AssistantNewThreadSurface() {
 		void requestRef.current
 			.then((threadId) => {
 				if (!active) return;
-				router.replace(`/dashboard/assistant/${encodeURIComponent(threadId)}`);
+				transferTo(threadId);
+				router.replace(`/dashboard/chats/${encodeURIComponent(threadId)}`);
 			})
 			.catch((caughtError: unknown) => {
 				if (!active) return;
@@ -45,7 +50,7 @@ export function AssistantNewThreadSurface() {
 		return () => {
 			active = false;
 		};
-	}, [error, router]);
+	}, [error, router, visible, transferTo]);
 
 	if (error) {
 		return (
@@ -68,5 +73,12 @@ export function AssistantNewThreadSurface() {
 }
 
 export function AssistantNewThreadSurfaceSkeleton() {
-	return <AssistantThreadSurfaceSkeleton />;
+	const { text, setText } = useAssistantComposerDraft("new");
+	return (
+		<AssistantWorkspaceLoading
+			variant="new"
+			draft={text}
+			onDraftChange={setText}
+		/>
+	);
 }

@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/primitives/InputFrame";
 
 const textareaSizeClasses: Record<InputFrameSize, string> = {
+	xxs: "min-h-12 px-1.5 py-0.5 text-sm",
+	xs: "min-h-14 px-2 py-1 text-sm",
 	sm: "h-20 min-h-9 px-3 py-2 text-base md:text-sm",
 	md: "min-h-[88px] px-[15px] py-2.5 text-sm",
 	lg: "min-h-[88px] px-4 py-3 text-base",

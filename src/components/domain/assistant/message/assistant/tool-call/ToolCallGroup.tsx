@@ -1,114 +1,76 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { Icon } from "@/components/ui/icons/Icon";
 import { Accordion } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
-import { Text } from "@/components/ui/primitives/Text";
-import type {
-	AssistantToolPart,
-	AssistantToolState,
-} from "@/lib/assistant/contracts";
+import Divider from "@/components/ui/primitives/Divider";
+import type { AssistantToolPart } from "@/lib/assistant/contracts";
 import { ToolCall } from "./ToolCall";
 
-const statePriority: readonly AssistantToolState[] = [
-	"approval-requested",
-	"error",
-	"denied",
-	"input-available",
-	"input-streaming",
-	"approved",
-	"completed",
-];
-
-const stateLabels = {
-	"approval-requested": "Approval required",
-	approved: "Approved",
-	completed: "Completed",
-	denied: "Declined",
-	error: "Failed",
-	"input-available": "Running",
-	"input-streaming": "Pending",
-} satisfies Record<AssistantToolState, string>;
-
-function getGroupState(parts: readonly AssistantToolPart[]) {
-	for (const state of statePriority) {
-		if (parts.some((part) => part.state === state)) return state;
-	}
-	return "completed";
-}
-
 export function ToolCallGroup({
+	parts,
 	disabled,
 	onDecision,
-	parts,
 }: {
+	parts: AssistantToolPart[];
 	disabled?: boolean;
 	onDecision?: (part: AssistantToolPart, approved: boolean) => void;
-	parts: AssistantToolPart[];
 }) {
-	const hasActionableApproval = parts.some(
-		(part) => part.state === "approval-requested" && part.approvalId !== null,
-	);
-	const [open, setOpen] = React.useState(hasActionableApproval);
-	const previousActionableApproval = React.useRef(hasActionableApproval);
-
-	React.useEffect(() => {
-		if (hasActionableApproval && !previousActionableApproval.current)
-			setOpen(true);
-		previousActionableApproval.current = hasActionableApproval;
-	}, [hasActionableApproval]);
-
-	const countLabel = parts.length === 1 ? "call" : "calls";
-	const title = parts.length === 1 ? "Record tool" : "Record tools";
-	const stateLabel = stateLabels[getGroupState(parts)];
-
+	const [open, setOpen] = useState(false);
+	const count = `${parts.length} tool ${parts.length === 1 ? "call" : "calls"}`;
+	const state = parts.some((part) => part.state === "approval-requested")
+		? "Needs approval"
+		: parts.some((part) =>
+					["input-streaming", "input-available", "approved"].includes(
+						part.state,
+					),
+				)
+			? "Working"
+			: parts.some((part) => part.state === "error")
+				? "Finished with errors"
+				: parts.every((part) => part.state === "denied")
+					? "Not run"
+					: "Finished";
 	return (
-		<Accordion
-			className="my-3"
-			contentClassName="px-px pb-3 pt-4"
-			onOpenChange={setOpen}
-			open={open}
-			renderTrigger={(triggerProps) => (
-				<Button
-					align="left"
-					className="text-muted-foreground"
-					size="none"
-					{...triggerProps}
-					trailingIcon={
-						<Icon
-							aria-hidden
-							className={`transition-transform motion-micro ${triggerProps["aria-expanded"] ? "rotate-180" : ""}`}
-							name="chevron-down"
-							size="sm"
-						/>
-					}
-					variant="ghost"
-				>
-					<Text
-						as="span"
-						className="min-w-0 truncate font-medium"
-						variant="caption"
-					>
-						{title}{" "}
-						<span className="font-normal opacity-65">
-							· {parts.length} {countLabel} · {stateLabel}
-						</span>
-					</Text>
-				</Button>
-			)}
-			title={title}
-		>
-			<div className="grid gap-6">
+		<div className="min-w-0" data-slot="tool-call-summary">
+			<Accordion
+				title={`${state} · ${count}`}
+				open={open}
+				onOpenChange={setOpen}
+				contentClassName="!px-0 !py-0"
+				renderTrigger={(props) => (
+					<>
+						<Button
+							{...props}
+							variant="bare"
+							size="none"
+							align="left"
+							className="py-2 text-sm text-muted-foreground"
+							contentClassName="gap-1.5"
+						>
+							{state} · {count}
+							<Icon
+								name="caret-right"
+								size="sm"
+								className={`motion-micro transition-transform ${open ? "rotate-90" : ""}`}
+							/>
+						</Button>
+						<Divider decorative />
+					</>
+				)}
+			>
 				{parts.map((part) => (
 					<ToolCall
-						disabled={disabled}
 						key={part.id}
-						onDecision={(approved) => onDecision?.(part, approved)}
 						part={part}
+						disabled={disabled}
+						onDecision={
+							onDecision ? (approved) => onDecision(part, approved) : undefined
+						}
 					/>
 				))}
-			</div>
-		</Accordion>
+			</Accordion>
+		</div>
 	);
 }

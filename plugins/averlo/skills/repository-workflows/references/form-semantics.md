@@ -30,6 +30,8 @@ contract.
 - Allow a raw native control only inside an approved reusable owner, or a newly
   authorized reusable owner with an explicit ownership reason.
 - Do not replace inline field validation with a toast or generic status banner.
+- InlineError describes a local operational failure, not an invalid field
+  value. Keep value validation and accessible relationships with the field.
 - Do not sever labels, errors, required state, or accessible descriptions from
   the actual form control.
 - Do not deep-import input implementation files from an external consumer.

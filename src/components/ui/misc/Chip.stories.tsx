@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fn, userEvent } from "storybook/test";
+import { HELPER_COLOR_INDICES } from "@/components/ui/foundations/helperPalette";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { Chip } from "./Chip";
 import { catalogContract } from "./Chip.catalog";
+import { ProfilePicture } from "./ProfilePicture";
 
 const meta = {
 	id: "ui-misc-chip",
@@ -78,5 +80,37 @@ export const TonesAndSkeleton: Story = {
 			.getByText("Loading chip")
 			.closest('[aria-hidden="true"]');
 		await expect(skeleton).toHaveAttribute("aria-hidden", "true");
+	},
+};
+
+export const IdentityContrast: Story = {
+	args: { children: "Identity" },
+	render: () => (
+		<div className="grid gap-4">
+			<Chip tone="neutral">Draft</Chip>
+			{HELPER_COLOR_INDICES.map((index) => (
+				<div
+					key={index}
+					className="flex items-center gap-3"
+					data-testid={`helper-${index}`}
+				>
+					<Chip tone="helper" helperIndex={index}>
+						Identity
+					</Chip>
+					<ProfilePicture fallback="AB" helperIndex={index} />
+				</div>
+			))}
+		</div>
+	),
+	play: async ({ canvas }) => {
+		for (const index of HELPER_COLOR_INDICES) {
+			const row = canvas.getByTestId(`helper-${index}`);
+			const pill = row.children[0];
+			const avatar = row.querySelector('[role="img"]');
+			if (!avatar?.parentElement) throw new Error("Missing identity avatar");
+			await expect(
+				getComputedStyle(avatar.parentElement).backgroundColor,
+			).toBe(getComputedStyle(pill).backgroundColor);
+		}
 	},
 };

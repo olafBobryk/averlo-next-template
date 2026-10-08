@@ -142,7 +142,7 @@ function DashboardPropertyListSkeleton({
 			<DashboardPropertyListRows>
 				{items.map((item) => (
 					<DashboardPropertyRow
-						action={<Button.Skeleton size="icon-sm" variant="secondary" />}
+						action={<Button.Skeleton size="icon-sm" variant="bare" />}
 						icon={item.icon}
 						key={item.id}
 						label={item.label}

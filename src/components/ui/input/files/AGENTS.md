@@ -16,6 +16,8 @@ This folder owns controlled file selection and profile-picture fields.
 
 ## Structural invariants
 
+- FileInput preview callbacks and FilePreviewProvider delegate inspection to a caller-owned host. Keep the callback contract in this family and the viewer in composites; inputs must not import composites or dashboard code.
+
 - Keep the native file input synchronized with controlled visual state.
 - Object URLs are revoked when pending files are replaced or the component
   unmounts.

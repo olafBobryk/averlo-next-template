@@ -79,6 +79,10 @@ export const catalogContract = defineCatalogOwnerContract({
 			label: "Variants And Sizes",
 			storyId: "dashboard-entity-account-identity--variants-and-sizes",
 		},
+		{
+			label: "Footer Workspace Context",
+			storyId: "dashboard-entity-account-identity--footer-workspace-context",
+		},
 	],
 	family: "Dashboard",
 	group: "Entities / Account",

@@ -1,7 +1,7 @@
 import { Icon } from "@/components/ui/icons/Icon";
 import { Chip } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { Card, ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import type { MembershipRole } from "@/lib/auth/contracts";
 import { hrefFor } from "@/lib/routes";
@@ -78,82 +78,84 @@ export function OrganizationMemberSurface({
 				commands={[getMemberCommand(presentation)]}
 				ownerId={`dashboard.member.${member.id}`}
 			/>
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					description="Access information visible to organization members."
-					leading={
-						<Icon className="text-muted-foreground" name="user" size="sm" />
-					}
 					title="Member details"
 				/>
-				<Card.Content className="grid gap-5">
-					<MemberIdentity avatarSize="xl" presentation={presentation} />
-					<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
-						<DashboardDetailField
-							copyValue={presentation.emailLabel}
-							icon={
-								<Icon
-									name={memberFieldDefinitions[1].icon ?? "mail"}
-									size="sm"
+				<ContentSection.Content>
+					<Card>
+						<Card.Content className="grid gap-5">
+							<MemberIdentity avatarSize="xl" presentation={presentation} />
+							<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
+								<DashboardDetailField
+									copyValue={presentation.emailLabel}
+									icon={
+										<Icon
+											name={memberFieldDefinitions[1].icon ?? "mail"}
+											size="sm"
+										/>
+									}
+									label={memberFieldDefinitions[1].label}
+									value={presentation.emailLabel}
 								/>
-							}
-							label={memberFieldDefinitions[1].label}
-							value={presentation.emailLabel}
-						/>
-						<DashboardDetailField
-							icon={
-								<Icon
-									name={memberFieldDefinitions[3].icon ?? "calendar"}
-									size="sm"
+								<DashboardDetailField
+									icon={
+										<Icon
+											name={memberFieldDefinitions[3].icon ?? "calendar"}
+											size="sm"
+										/>
+									}
+									label={memberFieldDefinitions[3].label}
+									value={presentation.joinedAtLabel}
 								/>
-							}
-							label={memberFieldDefinitions[3].label}
-							value={presentation.joinedAtLabel}
-						/>
-					</dl>
-				</Card.Content>
-			</Card>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
-			<Card>
-				<Card.Heading
+			<ContentSection>
+				<ContentSection.Heading
 					description="Organization access assigned to this member."
-					leading={
-						<Icon className="text-muted-foreground" name="shield" size="sm" />
-					}
 					title="Role and permissions"
 				/>
-				<Card.Content className="grid gap-5">
-					<dl className="grid gap-4 sm:grid-cols-2">
-						<DashboardDetailField
-							icon={<Icon name="shield" size="sm" />}
-							label="Organization role"
-							value={
-								<MemberRoleChip
-									label={presentation.role.shortLabel}
-									tone={sourceRoleTone[member.role]}
+				<ContentSection.Content>
+					<Card>
+						<Card.Content className="grid gap-5">
+							<dl className="grid gap-4 sm:grid-cols-2">
+								<DashboardDetailField
+									icon={<Icon name="shield" size="sm" />}
+									label="Organization role"
+									value={
+										<MemberRoleChip
+											label={presentation.role.shortLabel}
+											tone={sourceRoleTone[member.role]}
+										/>
+									}
 								/>
-							}
-						/>
-						<DashboardDetailField
-							icon={<Icon name="check" size="sm" />}
-							label="Permissions"
-							truncateValue={false}
-							value={
-								<span className="flex flex-wrap gap-2">
-									{permissionsByRole[member.role].map((permission) => {
-										const item = permissionPresentation[permission];
-										return (
-											<Chip color={item.color} key={permission}>
-												{item.label}
-											</Chip>
-										);
-									})}
-								</span>
-							}
-						/>
-					</dl>
-				</Card.Content>
-			</Card>
+								<DashboardDetailField
+									icon={<Icon name="check" size="sm" />}
+									label="Permissions"
+									truncateValue={false}
+									value={
+										<span className="flex flex-wrap gap-2">
+											{permissionsByRole[member.role].map((permission) => {
+												const item = permissionPresentation[permission];
+												return (
+													<Chip color={item.color} key={permission}>
+														{item.label}
+													</Chip>
+												);
+											})}
+										</span>
+									}
+								/>
+							</dl>
+						</Card.Content>
+					</Card>
+				</ContentSection.Content>
+			</ContentSection>
 
 			<Text as="p" className="w-full text-sm leading-6" tone="muted">
 				Looking for something specific and cannot find it?{" "}
@@ -196,73 +198,75 @@ export function OrganizationMemberSurfaceSkeleton() {
 					</Text.Skeleton>
 				}
 			>
-				<Card>
-					<Card.Heading
+				<ContentSection>
+					<ContentSection.Heading
 						description="Access information visible to organization members."
-						leading={
-							<Icon className="text-muted-foreground" name="user" size="sm" />
-						}
 						title="Member details"
 					/>
-					<Card.Content className="grid gap-5">
-						<MemberIdentitySkeleton avatarSize="xl" />
-						<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
-							<DashboardDetailFieldSkeleton
-								copyable
-								icon={
-									<Icon
-										name={memberFieldDefinitions[1].icon ?? "mail"}
-										size="sm"
+					<ContentSection.Content>
+						<Card>
+							<Card.Content className="grid gap-5">
+								<MemberIdentitySkeleton avatarSize="xl" />
+								<dl className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
+									<DashboardDetailFieldSkeleton
+										copyable
+										icon={
+											<Icon
+												name={memberFieldDefinitions[1].icon ?? "mail"}
+												size="sm"
+											/>
+										}
+										label={memberFieldDefinitions[1].label}
+										value="member@example.com"
 									/>
-								}
-								label={memberFieldDefinitions[1].label}
-								value="member@example.com"
-							/>
-							<DashboardDetailFieldSkeleton
-								icon={
-									<Icon
-										name={memberFieldDefinitions[3].icon ?? "calendar"}
-										size="sm"
+									<DashboardDetailFieldSkeleton
+										icon={
+											<Icon
+												name={memberFieldDefinitions[3].icon ?? "calendar"}
+												size="sm"
+											/>
+										}
+										label={memberFieldDefinitions[3].label}
+										value="20 Jul 2026"
 									/>
-								}
-								label={memberFieldDefinitions[3].label}
-								value="20 Jul 2026"
-							/>
-						</dl>
-					</Card.Content>
-				</Card>
-				<Card>
-					<Card.Heading
+								</dl>
+							</Card.Content>
+						</Card>
+					</ContentSection.Content>
+				</ContentSection>
+				<ContentSection>
+					<ContentSection.Heading
 						description="Organization access assigned to this member."
-						leading={
-							<Icon className="text-muted-foreground" name="shield" size="sm" />
-						}
 						title="Role and permissions"
 					/>
-					<Card.Content className="grid gap-5">
-						<dl className="grid gap-4 sm:grid-cols-2">
-							<DashboardDetailFieldSkeleton
-								icon={<Icon name="shield" size="sm" />}
-								label="Organization role"
-								truncateValue={false}
-							>
-								<MemberRoleChipSkeleton />
-							</DashboardDetailFieldSkeleton>
-							<DashboardDetailFieldSkeleton
-								icon={<Icon name="check" size="sm" />}
-								label="Permissions"
-								truncateValue={false}
-							>
-								<span className="flex flex-wrap gap-2">
-									<Chip.Skeleton>Profiles</Chip.Skeleton>
-									<Chip.Skeleton>Invites</Chip.Skeleton>
-									<Chip.Skeleton>Access</Chip.Skeleton>
-									<Chip.Skeleton>Ownership</Chip.Skeleton>
-								</span>
-							</DashboardDetailFieldSkeleton>
-						</dl>
-					</Card.Content>
-				</Card>
+					<ContentSection.Content>
+						<Card>
+							<Card.Content className="grid gap-5">
+								<dl className="grid gap-4 sm:grid-cols-2">
+									<DashboardDetailFieldSkeleton
+										icon={<Icon name="shield" size="sm" />}
+										label="Organization role"
+										truncateValue={false}
+									>
+										<MemberRoleChipSkeleton />
+									</DashboardDetailFieldSkeleton>
+									<DashboardDetailFieldSkeleton
+										icon={<Icon name="check" size="sm" />}
+										label="Permissions"
+										truncateValue={false}
+									>
+										<span className="flex flex-wrap gap-2">
+											<Chip.Skeleton>Profiles</Chip.Skeleton>
+											<Chip.Skeleton>Invites</Chip.Skeleton>
+											<Chip.Skeleton>Access</Chip.Skeleton>
+											<Chip.Skeleton>Ownership</Chip.Skeleton>
+										</span>
+									</DashboardDetailFieldSkeleton>
+								</dl>
+							</Card.Content>
+						</Card>
+					</ContentSection.Content>
+				</ContentSection>
 				<Text as="p" className="w-full text-sm leading-6" tone="muted">
 					Looking for something specific and cannot find it?{" "}
 					<Button

@@ -18,8 +18,9 @@ import {
 	Dropdown,
 	type DropdownMenuOption,
 } from "@/components/ui/primitives/dropdown";
+import { InlineError } from "@/components/ui/primitives/InlineError";
 import { StatusMessage } from "@/components/ui/primitives/StatusMessage";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { showToast } from "@/lib/feedback/toast";
 import { surfaceHref } from "@/lib/routes";
@@ -70,6 +71,7 @@ export function RecordCollectionClientRoot({
 				</div>
 			) : null}
 			<DashboardTablePanel
+				pageSize={10}
 				columns={[
 					{
 						header: columns[0].label,
@@ -187,7 +189,7 @@ export function RecordCollectionClientRoot({
 				}
 				getRowKey={(record) => record.id}
 				header={
-					<Card.Heading
+					<ContentSection.Heading
 						action={
 							canWrite ? (
 								<RecordCreateButton
@@ -201,15 +203,7 @@ export function RecordCollectionClientRoot({
 							) : null
 						}
 						actionLayout="responsive"
-						description={
-							<>
-								Organization-scoped fixtures for {organizationName}. Sort any
-								presentation-owned column.
-							</>
-						}
-						leading={
-							<Icon name={recordPresentationDefinition.icon} size="sm" />
-						}
+						description={<>Records for {organizationName}.</>}
 						title={recordPresentationDefinition.nouns.plural}
 					/>
 				}
@@ -349,6 +343,7 @@ function RecordCreateForm({
 	);
 	const [review, setReview] = React.useState<string[]>([]);
 	const [error, setError] = React.useState<string>();
+	const [submissionError, setSubmissionError] = React.useState<string>();
 	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -359,6 +354,7 @@ function RecordCreateForm({
 		}
 		if (!beginSubmission()) return;
 		setError(undefined);
+		setSubmissionError(undefined);
 		let shouldEndSubmission = true;
 		try {
 			const result = await createReferenceRecordAction(
@@ -371,16 +367,18 @@ function RecordCreateForm({
 			);
 			if (!result.ok) {
 				setError(result.fieldErrors?.title);
-				showToast.error(result.message, { title: "Creation failed" });
+				setSubmissionError(
+					result.fieldErrors?.title ? undefined : result.message,
+				);
 				return;
 			}
 			showToast.success(result.message);
 			shouldEndSubmission = false;
 			onCreated(result.record);
 		} catch {
-			showToast.error("The record could not be created. Try again.", {
-				title: "Creation failed",
-			});
+			setSubmissionError(
+				"The record could not be created. Your changes are still here. Try again.",
+			);
 		} finally {
 			if (shouldEndSubmission) endSubmission();
 		}
@@ -436,6 +434,7 @@ function RecordCreateForm({
 						This save will fail intentionally.
 					</StatusMessage>
 				) : null}
+				<InlineError open={!!submissionError}>{submissionError}</InlineError>
 			</ModalForm>
 		</>
 	);

@@ -46,6 +46,14 @@ export const catalogContract = defineCatalogOwnerContract({
 	],
 	guarantees: [
 		{
+			label: "Light surface contrast matrix",
+			storyId: "ui-foundations-surface-tint--light-color-pass",
+		},
+		{
+			label: "Dark surface contrast matrix",
+			storyId: "ui-foundations-surface-tint--dark-color-pass",
+		},
+		{
 			label: "Stable color-mix recipe",
 			storyId: "ui-foundations-surface-tint--stable-recipe",
 		},

@@ -12,9 +12,12 @@ import { useDropdownCollectionController } from "./useDropdownCollectionControll
 type DropdownCollectionProps<T> = DropdownCompoundProps & {
 	defaultOpenOnHover: boolean;
 	defaultTriggerSize: "icon-sm" | "md";
-	defaultTriggerVariant: "ghost" | "secondary";
+	defaultTriggerVariant: "bare" | "secondary";
 	emptyState?: React.ReactNode;
-	onSelectOption: (option: ListboxOption<T>, event: DropdownMenuEvent) => void;
+	onSelectOption: (
+		option: ListboxOption<T>,
+		event: DropdownMenuEvent,
+	) => undefined | boolean;
 	optionRole?: "option" | "menuitem";
 	options: ListboxOption<T>[];
 	role: "listbox" | "menu";
@@ -114,11 +117,6 @@ export function DropdownCollection<T>({
 			renderTrigger={(trigger) => (
 				<Button
 					{...triggerButtonProps}
-					aria-activedescendant={
-						trigger.isOpen && activeIndex >= 0
-							? `${listId}-option-${activeIndex}`
-							: undefined
-					}
 					aria-controls={trigger.isOpen ? listId : undefined}
 					aria-expanded={trigger.isOpen}
 					aria-haspopup={role}
@@ -159,8 +157,7 @@ export function DropdownCollection<T>({
 							event.preventDefault();
 							return;
 						}
-						onSelectOption(option, event);
-						close();
+						if (onSelectOption(option, event) !== false) close();
 					}}
 					optionActiveClassName={optionActiveClassName}
 					optionClassName={optionClassName}

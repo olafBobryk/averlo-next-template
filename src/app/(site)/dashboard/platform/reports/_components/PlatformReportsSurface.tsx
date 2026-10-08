@@ -9,7 +9,6 @@ export function PlatformReportsSurface(
 	return (
 		<DashboardSection
 			contentClassName="grid min-w-0 gap-5"
-			description="Triage structured product feedback with its captured dashboard context."
 			title="Reports"
 		>
 			<PlatformReportsContent {...props} />
@@ -29,7 +28,6 @@ export function PlatformReportsSurfaceSkeleton() {
 				{ id: "created", label: "Created" },
 				{ id: "actions", kind: "action", label: "Actions" },
 			]}
-			description="Triage structured product feedback with its captured dashboard context."
 			label="Loading Platform Reports"
 			title="Reports"
 		/>

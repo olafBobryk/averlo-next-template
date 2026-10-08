@@ -8,7 +8,7 @@ import {
 import { MotionProvider } from "../src/components/ui/foundations/MotionProvider";
 import { SettingsProvider } from "../src/components/ui/foundations/settingsContext";
 import { IconProvider } from "../src/components/ui/icons/iconRegistry";
-import { phosphorIconRegistry } from "../src/components/ui/icons/phosphorRegistry";
+import { openaiIconRegistry } from "../src/components/ui/icons/openaiRegistry";
 import { markAppReady, markAppVisible } from "../src/lib/appReadySignal";
 
 // Automated Storybook runs must not inherit the host machine's color scheme.
@@ -68,7 +68,7 @@ const preview: Preview = {
 							context.parameters.motionDriver ?? context.globals.motionDriver
 						}
 					>
-						<IconProvider registry={phosphorIconRegistry}>
+						<IconProvider registry={openaiIconRegistry}>
 							<div className="min-h-screen bg-background text-foreground antialiased">
 								{story}
 							</div>

@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import * as React from "react";
+import { HELPER_PALETTE_SIZE } from "@/components/ui/foundations/helperPalette";
 import { Chip } from "@/components/ui/misc/Chip";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
 
@@ -14,10 +15,13 @@ const sizeMap = {
 	"2xl": { px: 96, className: "size-24 text-2xl" },
 } as const;
 
-const HELPER_PALETTE_SIZE = 8;
-
 function getAvatarHelperIndex(value: string) {
-	return value.charCodeAt(0) % HELPER_PALETTE_SIZE;
+	let hash = 2_166_136_261;
+	for (const character of value.trim().normalize("NFC").toLowerCase()) {
+		hash ^= character.codePointAt(0) ?? 0;
+		hash = Math.imul(hash, 16_777_619);
+	}
+	return (hash >>> 0) % HELPER_PALETTE_SIZE;
 }
 
 export type ProfilePictureSize = keyof typeof sizeMap;
@@ -62,8 +66,9 @@ function ProfilePictureRoot({
 		alt ??
 		(normalizedName ? `${normalizedName} profile picture` : "Profile picture");
 	const showImage = src && !imgError;
-	const resolvedHelperIndex =
-		helperIndex ?? getAvatarHelperIndex(fallbackLabel || initial);
+	const resolvedHelperIndex = normalizedName
+		? getAvatarHelperIndex(normalizedName)
+		: (helperIndex ?? getAvatarHelperIndex(fallbackLabel || initial));
 	const isLocalPreviewSource =
 		src?.startsWith("data:") || src?.startsWith("blob:");
 

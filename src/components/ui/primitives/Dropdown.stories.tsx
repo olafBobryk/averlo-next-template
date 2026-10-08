@@ -10,6 +10,7 @@ import {
 	type DropdownMenuProps,
 	type DropdownSurfaceProps,
 } from "./dropdown";
+import { InputFrame } from "./InputFrame";
 
 function DropdownMenuContract(props: DropdownMenuProps) {
 	return <Dropdown.Menu {...props} />;
@@ -50,6 +51,72 @@ const meta = {
 } satisfies Meta;
 
 export default meta;
+
+export const DividerHierarchy: Story = {
+	render: () => (
+		<Dropdown.Menu
+			ariaLabel="Divider hierarchy"
+			openOnHover={false}
+			menuWidth={300}
+			options={[
+				{
+					id: "identity",
+					label: "Demo organization",
+					layout: "presentation",
+					dividerAfter: "full",
+				},
+				...Array.from({ length: 10 }, (_, index) => ({
+					id: `action-${index}`,
+					label: `Action ${index + 1}`,
+				})),
+				{ id: "remove", label: "Remove access", tone: "danger" },
+			]}
+		/>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Divider hierarchy" }),
+		);
+		const body = within(canvasElement.ownerDocument.body);
+		const menu = await body.findByRole("menu", { name: "Divider hierarchy" });
+		const separators = within(menu).getAllByRole("separator");
+		await expect(separators).toHaveLength(2);
+		await expect(separators[0].getBoundingClientRect().width).toBeGreaterThan(
+			separators[1].getBoundingClientRect().width,
+		);
+		const first = within(menu).getByRole("menuitem", { name: "Action 1" });
+		const second = within(menu).getByRole("menuitem", { name: "Action 2" });
+		await expect(getComputedStyle(first).borderRadius).toBe("7px");
+		await expect(first.getBoundingClientRect().height).toBeCloseTo(34, 1);
+		await expect(
+			second.getBoundingClientRect().top - first.getBoundingClientRect().bottom,
+		).toBeCloseTo(2, 1);
+		for (const separator of separators) {
+			const previous = separator.previousElementSibling!;
+			const next = separator.nextElementSibling!;
+			await expect(
+				separator.getBoundingClientRect().top -
+					previous.getBoundingClientRect().bottom,
+			).toBeCloseTo(4, 1);
+			await expect(
+				next.getBoundingClientRect().top -
+					separator.getBoundingClientRect().bottom,
+			).toBeCloseTo(4, 1);
+			await expect(separator.getBoundingClientRect().height).toBeCloseTo(1, 1);
+		}
+		const last = within(menu).getByRole("menuitem", { name: "Remove access" });
+		await expect(getComputedStyle(last).borderTopWidth).toBe("0px");
+		menu.focus();
+		await userEvent.keyboard("{End}");
+		await expect(menu).toHaveAttribute("aria-activedescendant", last.id);
+		const scroller = menu;
+		scroller.scrollTop = scroller.scrollHeight;
+		await expect(
+			scroller.getBoundingClientRect().bottom -
+				last.getBoundingClientRect().bottom,
+		).toBeCloseTo(4, 1);
+	},
+};
 type Story = StoryObj;
 
 const editProject = fn();
@@ -113,6 +180,15 @@ export const ContextualDestructiveAction: Story = {
 			body.queryByRole("menuitem", { name: "Remove access" }),
 		).not.toBeInTheDocument();
 		const trigger = canvas.getByRole("button", { name: "Manage Avery Chen" });
+		const icon = trigger.querySelector("svg");
+		if (!icon) throw new Error("Menu ellipsis missing");
+		const iconWidth = icon.getBoundingClientRect().width;
+		await expect(iconWidth).toBeCloseTo(15, 1);
+		await userEvent.hover(trigger);
+		await expect(icon.getBoundingClientRect().width).toBeCloseTo(iconWidth, 1);
+		await expect(getComputedStyle(trigger).backgroundColor).toBe(
+			"rgba(0, 0, 0, 0)",
+		);
 		trigger.focus();
 		await expect(trigger).toHaveFocus();
 		await userEvent.keyboard("{Enter}");
@@ -122,7 +198,8 @@ export const ContextualDestructiveAction: Story = {
 			"Remove access",
 		]);
 		const removeItem = body.getByRole("menuitem", { name: "Remove access" });
-		await expect(removeItem).toHaveClass("!text-danger-text");
+		await expect(removeItem).toHaveClass("!text-[var(--button-danger-text)]");
+		await expect(getComputedStyle(removeItem).borderRadius).toBe("7px");
 		await userEvent.click(removeItem);
 		await expect(removeMemberAccess).toHaveBeenCalledOnce();
 	},
@@ -251,10 +328,10 @@ export const MenuFactoriesSemanticOrderingAndComposition: Story = {
 		).toHaveClass("font-medium");
 		await expect(
 			body.getByRole("menuitem", { name: "Review action" }),
-		).toHaveClass("!text-warning", "!border-t");
+		).toHaveClass("!text-[var(--button-warning-text)]");
 		await expect(
 			body.getByRole("menuitem", { name: "Delete permanently" }),
-		).toHaveClass("!text-danger-text");
+		).toHaveClass("!text-[var(--button-danger-text)]");
 		await userEvent.click(body.getByRole("menuitem", { name: "Edit" }));
 		await expect(
 			body.getByRole("menu", { name: "Factory actions" }),
@@ -403,15 +480,38 @@ export const RecursiveMenu: Story = {
 		await expect(rootMenu.closest(".fixed")).not.toBeNull();
 		await expect(body.getByRole("menuitem", { name: "Share" })).toHaveClass(
 			"focus-visible:ring-inset",
-			"first:focus-visible:rounded-t-md",
+			"!rounded-[7px]",
 		);
 		await expect(body.getByRole("menuitem", { name: "Duplicate" })).toHaveClass(
-			"last:focus-visible:rounded-b-md",
+			"!rounded-[7px]",
 		);
+		for (const name of ["Share", "Disabled branch"]) {
+			const row = body.getByRole("menuitem", { name });
+			const caret = row.querySelector("[data-dropdown-cascade-trigger]");
+			await expect(caret).not.toBeNull();
+			await expect(
+				Math.abs(
+					row.getBoundingClientRect().right -
+						caret!.getBoundingClientRect().right +
+						Number.parseFloat(getComputedStyle(caret!).paddingRight) -
+						Number.parseFloat(getComputedStyle(row).paddingRight),
+				),
+			).toBeLessThan(1);
+		}
 		rootMenu.focus();
 		await userEvent.keyboard("{ArrowDown}{ArrowRight}");
 		await waitFor(() => expect(body.getAllByRole("menu")).toHaveLength(2));
 		await waitFor(() => expect(body.getByText("Copy link")).toBeVisible());
+		await waitFor(() => {
+			const parent = body.getByRole("menuitem", { name: "Share" });
+			const child = body.getByRole("menuitem", { name: "Copy link" });
+			expect(
+				Math.abs(
+					parent.getBoundingClientRect().top -
+						child.getBoundingClientRect().top,
+				),
+			).toBeLessThan(1);
+		});
 		await userEvent.keyboard("{ArrowRight}");
 		await waitFor(() => expect(body.getAllByRole("menu")).toHaveLength(3));
 		await waitFor(() => expect(body.getByText("Public link")).toBeVisible());
@@ -481,5 +581,222 @@ export const RecursivePointerOwnership: Story = {
 		await expect(
 			canvas.getByRole("button", { name: "Pointer cascade" }),
 		).toHaveFocus();
+	},
+};
+
+function CompactControlsExample() {
+	const [page, setPage] = useState(1);
+	return (
+		<div className="flex items-center gap-4">
+			<Button>Before controls</Button>
+			<Dropdown.Menu
+				ariaLabel="Preview controls"
+				density="compact"
+				menuWidth={240}
+				options={[
+					{
+						kind: "control",
+						id: "page",
+						ariaLabel: "Page navigation",
+						content: (
+							<>
+								<span>Page</span>
+								<div className="flex items-center gap-1">
+									<Button
+										variant="ghost"
+										size="xs"
+										shape="square"
+										leadingIcon="caret-left"
+										aria-label="Previous page"
+										disabled={page === 1}
+										onClick={() => setPage(page - 1)}
+									/>
+									<InputFrame size="xxs" variant="muted" className="w-10">
+										<input
+											type="number"
+											aria-label="Page"
+											min={1}
+											max={3}
+											value={page}
+											onChange={(e) =>
+												setPage(
+													Math.max(1, Math.min(3, Number(e.target.value))),
+												)
+											}
+											className="h-full w-full min-w-0 bg-transparent text-center text-sm outline-none"
+										/>
+									</InputFrame>
+									<Button
+										variant="ghost"
+										size="xs"
+										shape="square"
+										leadingIcon="caret-right"
+										aria-label="Next page"
+										disabled={page === 3}
+										onClick={() => setPage(page + 1)}
+									/>
+								</div>
+							</>
+						),
+						dividerAfter: "inset",
+					},
+					{
+						id: "reset",
+						label: "Reset page",
+						closeOnSelect: false,
+						onSelect: () => setPage(1),
+					},
+					{ id: "done", label: "Done", dividerBefore: "full" },
+				]}
+			/>
+			<Button>After controls</Button>
+		</div>
+	);
+}
+
+export const CompactControlRows: Story = {
+	render: () => <CompactControlsExample />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'Dropdown.Menu accepts root-level kind: "control" entries with id, ariaLabel, content, and dividerBefore/dividerAfter. Mixed panels use dialog/group semantics and native Tab navigation. Actions retain their shared row styles; closeOnSelect: false keeps repeated adjustments open. density="compact" makes rows 28px; the default remains 34px. Compose muted xxs InputFrame and xs ghost buttons for 24px controls within the 28px rows for matching geometry. Controls are never nested in menuitems, and control panels accept only leaf actions, not submenus.',
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const body = within(canvasElement.ownerDocument.body);
+		const trigger = canvas.getByRole("button", { name: "Preview controls" });
+		trigger.focus();
+		await userEvent.keyboard("{ArrowDown}");
+		const panel = await body.findByRole("dialog", { name: "Preview controls" });
+		const controls = within(panel);
+		await expect(
+			controls.getByRole("spinbutton", { name: "Page" }),
+		).toHaveFocus();
+		await expect(controls.queryByRole("menuitem")).not.toBeInTheDocument();
+		for (const row of [
+			...controls.getAllByRole("group"),
+			...controls.getAllByRole("button"),
+		]) {
+			await expect(row.getBoundingClientRect().height).toBeCloseTo(
+				row.closest("fieldset") && row.tagName !== "FIELDSET" ? 24 : 28,
+				1,
+			);
+		}
+		const dividers = controls.getAllByRole("separator");
+		await expect(dividers).toHaveLength(2);
+		for (const divider of dividers) {
+			await expect(divider.getBoundingClientRect().height).toBeCloseTo(1, 1);
+			await expect(getComputedStyle(divider).borderTopWidth).toBe("0px");
+			await expect(
+				divider.getBoundingClientRect().top -
+					(divider.previousElementSibling?.getBoundingClientRect().bottom ?? 0),
+			).toBeCloseTo(4, 1);
+		}
+		await expect(dividers[1].getBoundingClientRect().width).toBeGreaterThan(
+			dividers[0].getBoundingClientRect().width,
+		);
+		await userEvent.tab();
+		await expect(
+			controls.getByRole("button", { name: "Next page" }),
+		).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(
+			controls.getByRole("spinbutton", { name: "Page" }),
+		).toHaveValue(2);
+		await userEvent.click(controls.getByRole("button", { name: "Reset page" }));
+		await expect(
+			controls.getByRole("spinbutton", { name: "Page" }),
+		).toHaveValue(1);
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(panel).not.toBeInTheDocument());
+		await expect(trigger).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await body.findByRole("dialog", { name: "Preview controls" });
+		await userEvent.tab({ shift: true });
+		await expect(
+			canvas.getByRole("button", { name: "Before controls" }),
+		).toHaveFocus();
+		trigger.focus();
+		await userEvent.keyboard("{Enter}");
+		const reopened = within(
+			await body.findByRole("dialog", { name: "Preview controls" }),
+		);
+		reopened.getByRole("button", { name: "Done" }).focus();
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "After controls" }),
+		).toHaveFocus();
+	},
+};
+
+export const ControlRowsHoverAndDismissal: Story = {
+	render: () => <CompactControlsExample />,
+	play: async ({ canvas, canvasElement }) => {
+		const body = within(canvasElement.ownerDocument.body);
+		const trigger = canvas.getByRole("button", { name: "Preview controls" });
+		await userEvent.hover(trigger);
+		const panel = await body.findByRole("dialog", { name: "Preview controls" });
+		await userEvent.hover(panel);
+		const input = within(panel).getByRole("spinbutton", { name: "Page" });
+		await userEvent.click(input);
+		await userEvent.unhover(panel);
+		// Exercise the existing 120ms hover-close timer while focus remains inside.
+		await new Promise((resolve) => setTimeout(resolve, 180));
+		await expect(panel).toBeVisible();
+		await userEvent.click(
+			canvas.getByRole("button", { name: "After controls" }),
+		);
+		await waitFor(() => expect(panel).not.toBeInTheDocument());
+		await userEvent.hover(trigger);
+		const hoverPanel = await body.findByRole("dialog", {
+			name: "Preview controls",
+		});
+		await userEvent.unhover(trigger);
+		await waitFor(() => expect(hoverPanel).not.toBeInTheDocument());
+		await userEvent.click(trigger);
+		const pinnedPanel = await body.findByRole("dialog", {
+			name: "Preview controls",
+		});
+		await userEvent.unhover(trigger);
+		await new Promise((resolve) => setTimeout(resolve, 180));
+		await expect(pinnedPanel).toBeVisible();
+		await userEvent.click(
+			within(pinnedPanel).getByRole("button", { name: "Done" }),
+		);
+		await waitFor(() => expect(pinnedPanel).not.toBeInTheDocument());
+		await expect(trigger).toHaveFocus();
+	},
+};
+
+export const CompactControlRowsDark: Story = {
+	...CompactControlRows,
+	globals: { theme: "dark" },
+};
+export const CompactActions: Story = {
+	render: () => (
+		<Dropdown.Menu
+			ariaLabel="Compact actions"
+			density="compact"
+			openOnHover={false}
+			options={[{ label: "Fit", closeOnSelect: false }, { label: "Close" }]}
+		/>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const trigger = canvas.getByRole("button", { name: "Compact actions" });
+		await userEvent.click(trigger);
+		const menu = await within(canvasElement.ownerDocument.body).findByRole(
+			"menu",
+			{ name: "Compact actions" },
+		);
+		for (const item of within(menu).getAllByRole("menuitem"))
+			await expect(item.getBoundingClientRect().height).toBeCloseTo(28, 1);
+		await userEvent.click(within(menu).getByRole("menuitem", { name: "Fit" }));
+		await expect(menu).toBeVisible();
+		await userEvent.click(
+			within(menu).getByRole("menuitem", { name: "Close" }),
+		);
+		await waitFor(() => expect(menu).not.toBeInTheDocument());
 	},
 };

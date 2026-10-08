@@ -103,11 +103,13 @@ type AssistantMessageBase = {
 };
 
 export type AssistantUserMessage = AssistantMessageBase & {
+	contextReferences?: AssistantContextReference[];
 	parts: Array<AssistantTextPart | AssistantFilePart>;
 	role: "user";
 };
 
 export type AssistantResponseMessage = AssistantMessageBase & {
+	failure?: string;
 	parts: AssistantPart[];
 	role: "assistant";
 };
@@ -125,6 +127,7 @@ export type AssistantMessage =
 export type AssistantRole = AssistantMessage["role"];
 
 export type AssistantThread = {
+	toolMode?: AssistantToolMode;
 	createdAt: string;
 	id: string;
 	messages: AssistantMessage[];
@@ -142,11 +145,29 @@ export type AssistantThreadSummary = Omit<AssistantThread, "messages"> & {
 export type AssistantActor = { organizationId: string; userId: string };
 
 export type AssistantThreadPatch = {
+	toolMode?: AssistantToolMode;
 	pinned?: boolean;
 	title?: string;
 };
 
 export interface AssistantConversationAdapter {
+	replaceToolPart(
+		actor: AssistantActor,
+		threadId: string,
+		messageId: string,
+		part: AssistantToolPart,
+	): Promise<void>;
+	duplicateThread(
+		actor: AssistantActor,
+		threadId: string,
+	): Promise<AssistantThread>;
+	editMessage(
+		actor: AssistantActor,
+		threadId: string,
+		messageId: string,
+		text: string,
+		references?: AssistantContextReference[],
+	): Promise<AssistantThread>;
 	appendMessage(
 		actor: AssistantActor,
 		threadId: string,
@@ -202,6 +223,8 @@ export function isAssistantFixtureScenario(
 }
 
 export type AssistantAdapters = {
+	context: AssistantContextAdapter;
+	permissions: AssistantPermissionAdapter;
 	conversations: AssistantConversationAdapter;
 	files: AssistantFileAdapter;
 	runtime: AssistantRuntimeAdapter;
@@ -222,4 +245,52 @@ export function isAssistantToolName(
 
 export function isAssistantWriteTool(name: AssistantToolName) {
 	return !["records_list", "record_get"].includes(name);
+}
+
+export type AssistantApprovalDecision = "allow_once" | "always_allow" | "deny";
+export type AssistantPermission = "ask" | "allow";
+export interface AssistantPermissionAdapter {
+	update(
+		actor: AssistantActor,
+		scope: string,
+		change: {
+			actionIds: string[];
+			permission: AssistantPermission;
+		},
+	): Promise<void>;
+	allows(
+		actor: AssistantActor,
+		scope: string,
+		actionId: string,
+	): Promise<boolean>;
+}
+
+export type AssistantContextKind = "record" | "connection" | "file";
+export type AssistantContextItem = {
+	kind: AssistantContextKind;
+	id: string;
+	label: string;
+	description: string;
+};
+export type AssistantContextReference = {
+	kind: AssistantContextKind;
+	id: string;
+	text: string;
+	start: number;
+	end: number;
+};
+export type AssistantContextScope = {
+	actor: AssistantActor;
+	capabilities: ReadonlySet<string>;
+	fileIds: string[];
+};
+export interface AssistantContextAdapter {
+	search(
+		scope: AssistantContextScope,
+		query: string,
+	): Promise<AssistantContextItem[]>;
+	resolve(
+		scope: AssistantContextScope,
+		reference: AssistantContextReference,
+	): Promise<{ text: string; attachment?: AssistantAttachment }>;
 }

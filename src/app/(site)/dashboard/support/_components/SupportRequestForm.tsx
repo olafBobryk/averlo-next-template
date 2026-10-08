@@ -9,7 +9,8 @@ import {
 	TextInput,
 } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import { InlineError } from "@/components/ui/primitives/InlineError";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { showToast } from "@/lib/feedback";
 import { OrganizationAvatar } from "../../_components/entities/organization/OrganizationAvatar";
@@ -28,6 +29,7 @@ export function SupportRequestForm() {
 	const [message, setMessage] = React.useState("");
 	const [subjectError, setSubjectError] = React.useState<string>();
 	const [messageError, setMessageError] = React.useState<string>();
+	const [submissionError, setSubmissionError] = React.useState<string>();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
 	React.useEffect(() => {
@@ -79,29 +81,29 @@ export function SupportRequestForm() {
 
 		const formData = new FormData(event.currentTarget);
 		setIsSubmitting(true);
+		setSubmissionError(undefined);
 		try {
-			const result = await showToast.promise(submitSupportRequest(formData), {
-				loading: "Saving support request...",
-				success: "Support request saved.",
-				error: "Unable to save support request.",
-			});
+			const result = await submitSupportRequest(formData);
+			showToast.success("Support request saved.");
 			setSubject("");
 			setMessage("");
 			showToast.info(result.message, { title: "Demo fixture" });
 		} catch {
-			// The shared promise toast reports the server error.
+			setSubmissionError(
+				"Unable to save your request. Your message is still here. Try submitting again.",
+			);
 		} finally {
 			setIsSubmitting(false);
 		}
 	}
 
 	return (
-		<Card as="form" onSubmit={handleSubmit}>
-			<Card.Heading
+		<ContentSection as="form" onSubmit={handleSubmit}>
+			<ContentSection.Heading
 				description="Save a fixture-only request for the platform team to review."
 				title="Contact support"
 			/>
-			<Card.Content className="grid gap-5">
+			<ContentSection.Content className="grid gap-5">
 				<SpamProtectionFields />
 				<input
 					name="membershipId"
@@ -155,11 +157,12 @@ export function SupportRequestForm() {
 					rows={6}
 					value={message}
 				/>
-			</Card.Content>
-			<Card.Footer className="justify-between gap-3">
+			</ContentSection.Content>
+			<ContentSection.Footer className="justify-between gap-3">
 				<Text tone="muted" variant="caption">
 					Demo only · no email or external write is performed.
 				</Text>
+				<InlineError open={!!submissionError}>{submissionError}</InlineError>
 				<Button
 					disabled={isSubmitting}
 					loading={isSubmitting}
@@ -169,7 +172,7 @@ export function SupportRequestForm() {
 				>
 					Send request
 				</Button>
-			</Card.Footer>
-		</Card>
+			</ContentSection.Footer>
+		</ContentSection>
 	);
 }

@@ -50,10 +50,14 @@ function ToolPresentationFrameRoot<TItem>({
 	return (
 		<Card
 			as="section"
-			className="min-w-0"
+			className="min-w-0 gap-2"
+			elevation="panel"
+			padding="xs"
+			gap="none"
+			size="sm"
 			data-assistant-tool={presentation.toolName}
 		>
-			<Card.Header>
+			<Card.Header className="!border-b-0 !px-0 !pb-0">
 				<Card.Title
 					as="div"
 					className="inline-flex min-w-0 flex-wrap items-center gap-2"
@@ -63,7 +67,9 @@ function ToolPresentationFrameRoot<TItem>({
 				</Card.Title>
 				<Card.Description>{presentation.description}</Card.Description>
 			</Card.Header>
-			{content ? <Card.Content>{content}</Card.Content> : null}
+			{content ? (
+				<Card.Content className="!px-0">{content}</Card.Content>
+			) : null}
 			{presentation.state === "approval-requested" ? (
 				<ToolApprovalActions
 					destructive={presentation.destructive}
@@ -94,8 +100,15 @@ function ToolPresentationFrameSkeleton({
 	stateLabel = "Completed",
 }: ToolPresentationFrameSkeletonProps) {
 	return (
-		<Card as="section" className="min-w-0">
-			<Card.Header>
+		<Card
+			as="section"
+			className="min-w-0 gap-2"
+			elevation="panel"
+			padding="xs"
+			gap="none"
+			size="sm"
+		>
+			<Card.Header className="!border-b-0 !px-0 !pb-0">
 				<Card.Title
 					as="div"
 					className="inline-flex min-w-0 flex-wrap items-center gap-2"
@@ -115,7 +128,7 @@ function ToolPresentationFrameSkeleton({
 				</Card.Description>
 			</Card.Header>
 			{itemSkeleton ? (
-				<Card.Content>
+				<Card.Content className="!px-0">
 					<div className="grid gap-3">{itemSkeleton}</div>
 				</Card.Content>
 			) : null}

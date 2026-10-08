@@ -2,8 +2,11 @@ import clsx from "clsx";
 import Link from "next/link";
 import { type Key, type ReactNode, useId } from "react";
 import { Icon } from "@/components/ui/icons/Icon";
+import { PaginationControls } from "@/components/ui/misc/PaginationControls";
 import { Button } from "@/components/ui/primitives/Button";
-import { Card } from "@/components/ui/primitives/surfaces";
+import Divider from "@/components/ui/primitives/Divider";
+import { ContentSection } from "@/components/ui/primitives/surfaces";
+import { DashboardTablePagination } from "./DashboardTablePagination";
 import { DashboardTableResponsiveController } from "./DashboardTableResponsiveController";
 import { DashboardTableSortController } from "./DashboardTableSortController";
 
@@ -52,6 +55,8 @@ type DashboardTablePanelProps<Row> = {
 	header?: ReactNode;
 	id?: string;
 	rows: readonly Row[];
+	/** Paginate a fully loaded collection. Omit for overview excerpts. */
+	pageSize?: number;
 	viewMoreHref?: string;
 	viewMoreLabel?: ReactNode;
 };
@@ -66,24 +71,28 @@ function DashboardTablePanelRoot<Row>({
 	header,
 	id,
 	rows,
+	pageSize,
 	viewMoreHref,
 	viewMoreLabel = "View more",
 }: DashboardTablePanelProps<Row>) {
 	assertActionColumnContract(columns);
+	if (pageSize !== undefined && (!Number.isInteger(pageSize) || pageSize < 1))
+		throw new Error("Table pageSize must be a positive integer.");
+	if (pageSize && viewMoreHref)
+		throw new Error("Choose pagination or View more for a table.");
 	const generatedId = useId();
 	const tableId = id ? `${id}-table` : generatedId;
 	const firstLinkColumn = columns.findIndex(
 		(column) => column.kind !== "action" && column.rowLink !== false,
 	);
 	return (
-		<Card
-			className={clsx("min-w-0 !gap-0 !pb-0", !header && "!pt-0", className)}
-			id={id}
-			overflow="visible"
-		>
+		<ContentSection className={clsx("min-w-0", className)} id={id}>
 			{header}
-			<Card.Content
-				className={rows.length > 0 ? "min-w-0 !px-0" : "min-w-0 py-4"}
+			<ContentSection.Content
+				className={clsx(
+					"min-w-0 overflow-hidden rounded-xl border border-[var(--card-border-color)] bg-card",
+					rows.length === 0 && !pageSize && "p-4",
+				)}
 			>
 				{rows.length > 0 ? (
 					<div
@@ -93,11 +102,11 @@ function DashboardTablePanelRoot<Row>({
 						<DashboardTableResponsiveController tableId={tableId} />
 						<DashboardTableSortController tableId={tableId} />
 						<table
-							className="w-full border-separate border-spacing-0 text-sm [&_tbody_tr:last-child_td]:border-b-0"
+							className="w-full border-separate border-spacing-0 text-sm [&_tbody_tr:last-child_td]:border-b-0 [&_tr[data-page-last=true]_td]:border-b-0 [&_tr[hidden]]:hidden"
 							id={tableId}
 						>
 							<thead>
-								<tr className="bg-muted/50 text-left text-xs text-muted-foreground">
+								<tr className="bg-[var(--card-chrome-background)] text-left text-xs text-[var(--card-chrome-foreground)]">
 									{columns.map((column, columnIndex) => {
 										const isAction = column.kind === "action";
 										const isRequired = columnIndex === 0 || isAction;
@@ -106,11 +115,11 @@ function DashboardTablePanelRoot<Row>({
 											<th
 												aria-sort={isSortable ? "none" : undefined}
 												className={clsx(
-													"border-b border-border/70 px-4 py-2.5 font-medium whitespace-nowrap",
+													"border-b border-[var(--card-border-color)] px-4 py-2.5 font-medium whitespace-nowrap",
 													(column.align === "right" || isAction) &&
 														"text-right",
 													isAction &&
-														"sticky right-0 z-10 w-px bg-[color-mix(in_oklab,var(--color-muted)_50%,var(--color-card))]",
+														"sticky right-0 z-10 w-px bg-[var(--card-chrome-background)]",
 													column.headerClassName,
 												)}
 												data-dashboard-table-column-index={columnIndex}
@@ -128,7 +137,7 @@ function DashboardTablePanelRoot<Row>({
 													<Button
 														align="left"
 														className={clsx(
-															"-mx-1.5 -my-1 border-0 px-1.5 py-1 text-muted-foreground transition-colors motion-interactive hover:text-foreground",
+															"-mx-1.5 -my-1 border-0 px-1.5 py-1 !text-[var(--card-chrome-foreground)] transition-colors motion-interactive hover:text-foreground",
 															(column.align === "right" || isAction) &&
 																"ml-auto",
 														)}
@@ -186,12 +195,14 @@ function DashboardTablePanelRoot<Row>({
 												return (
 													<td
 														className={clsx(
-															"border-b border-border/70 text-muted-foreground transition-colors group-hover/table-row:bg-muted/55 group-focus-within/table-row:bg-muted/55",
+															"border-b border-[var(--card-border-color)] text-muted-foreground transition-colors group-hover/table-row:bg-muted/55 group-focus-within/table-row:bg-muted/55",
 															linked
 																? "p-0"
 																: clsx(
 																		"px-4 py-3",
-																		context.isLastBodyRow && "pb-4",
+																		context.isLastBodyRow &&
+																			!pageSize &&
+																			"pb-4",
 																	),
 															columnIndex === 0
 																? "min-w-0 overflow-hidden"
@@ -221,7 +232,7 @@ function DashboardTablePanelRoot<Row>({
 																}
 																className={clsx(
 																	"block px-4 py-3 text-current outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/30",
-																	context.isLastBodyRow && "pb-4",
+																	context.isLastBodyRow && !pageSize && "pb-4",
 																)}
 																href={href}
 																tabIndex={
@@ -244,7 +255,7 @@ function DashboardTablePanelRoot<Row>({
 							</tbody>
 						</table>
 						{viewMoreHref ? (
-							<div className="flex justify-center border-t border-border/70 p-3">
+							<div className="flex justify-center border-t border-[var(--card-border-color)] p-3">
 								<Button href={viewMoreHref} size="sm" variant="secondary">
 									{viewMoreLabel}
 								</Button>
@@ -252,10 +263,17 @@ function DashboardTablePanelRoot<Row>({
 						) : null}
 					</div>
 				) : (
-					emptyState
+					<div className={pageSize ? "p-4" : undefined}>{emptyState}</div>
 				)}
-			</Card.Content>
-		</Card>
+				{pageSize ? (
+					<DashboardTablePagination
+						tableId={tableId}
+						pageSize={pageSize}
+						rowCount={rows.length}
+					/>
+				) : null}
+			</ContentSection.Content>
+		</ContentSection>
 	);
 }
 
@@ -273,6 +291,7 @@ type DashboardTablePanelSkeletonProps = {
 	header?: ReactNode;
 	id?: string;
 	viewMoreLabel?: ReactNode;
+	pageSize?: number;
 };
 
 export function DashboardTablePanelSkeleton({
@@ -282,39 +301,42 @@ export function DashboardTablePanelSkeleton({
 	header,
 	id,
 	viewMoreLabel,
+	pageSize,
 }: DashboardTablePanelSkeletonProps) {
 	assertActionColumnContract(columns);
 	const generatedId = useId();
 	const tableId = id ? `${id}-skeleton-table` : generatedId;
 	return (
-		<Card
-			className={clsx("min-w-0 !gap-0 !pb-0", !header && "!pt-0", className)}
+		<ContentSection
+			className={clsx("min-w-0", className)}
 			id={id ? `${id}-skeleton` : undefined}
-			overflow="visible"
 		>
 			{header}
-			<Card.Content className="min-w-0 !px-0">
+			<ContentSection.Content className="min-w-0 overflow-hidden rounded-xl border border-[var(--card-border-color)] bg-card">
 				<div
 					className="relative max-w-full overflow-x-auto"
 					data-dashboard-table-scroll=""
 				>
 					<DashboardTableResponsiveController tableId={tableId} />
 					<table
-						className="w-full border-separate border-spacing-0 text-sm [&_tbody_tr:last-child_td]:border-b-0 [&_tbody_tr:last-child_td]:pb-4"
+						className={clsx(
+							"w-full border-separate border-spacing-0 text-sm [&_tbody_tr:last-child_td]:border-b-0",
+							!pageSize && "[&_tbody_tr:last-child_td]:pb-4",
+						)}
 						id={tableId}
 					>
 						<thead>
-							<tr className="bg-muted/50 text-left text-xs text-muted-foreground">
+							<tr className="bg-[var(--card-chrome-background)] text-left text-xs text-[var(--card-chrome-foreground)]">
 								{columns.map((column, columnIndex) => {
 									return (
 										<th
 											className={clsx(
-												"border-b border-border/70 px-4 py-2.5 font-medium whitespace-nowrap",
+												"border-b border-[var(--card-border-color)] px-4 py-2.5 font-medium whitespace-nowrap",
 												(column.align === "right" ||
 													column.kind === "action") &&
 													"text-right",
 												column.kind === "action" &&
-													"sticky right-0 z-10 w-px bg-[color-mix(in_oklab,var(--color-muted)_50%,var(--color-card))]",
+													"sticky right-0 z-10 w-px bg-[var(--card-chrome-background)]",
 												column.headerClassName,
 											)}
 											data-dashboard-table-column-index={columnIndex}
@@ -336,15 +358,30 @@ export function DashboardTablePanelSkeleton({
 						<tbody>{children}</tbody>
 					</table>
 					{viewMoreLabel ? (
-						<div className="flex justify-center border-t border-border/70 p-3">
+						<div className="flex justify-center border-t border-[var(--card-border-color)] p-3">
 							<Button.Skeleton size="sm" variant="secondary">
 								{viewMoreLabel}
 							</Button.Skeleton>
 						</div>
 					) : null}
 				</div>
-			</Card.Content>
-		</Card>
+				{pageSize ? (
+					<>
+						<Divider decorative className="!bg-[var(--card-border-color)]" />
+						<div className="flex items-center justify-end bg-[var(--card-chrome-background)] px-4 py-1">
+							<PaginationControls.Skeleton
+								variant="ghost"
+								textVariant="caption"
+								countFormat="pages"
+								buttonSize="compact"
+								current={1}
+								total={1}
+							/>
+						</div>
+					</>
+				) : null}
+			</ContentSection.Content>
+		</ContentSection>
 	);
 }
 
