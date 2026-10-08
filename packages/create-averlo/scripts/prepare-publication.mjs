@@ -76,12 +76,33 @@ async function main() {
 		!previousMetadata.sourceDirty
 	) {
 		if (process.env.GITHUB_OUTPUT)
-			await fs.appendFile(process.env.GITHUB_OUTPUT, "skipped=true\n");
+			await fs.appendFile(
+				process.env.GITHUB_OUTPUT,
+				`skipped=true\nversion=${published.version}\ncommit=${commit}\n`,
+			);
 		console.log(`npm latest already uses ${commit}; no release needed.`);
 		await fs.rm(temporaryRoot, { recursive: true, force: true });
 		return;
 	}
-	const version = nextPatchVersion(published.version);
+	const sourceManifest = JSON.parse(
+		await fs.readFile(path.join(packageRoot, "package.json"), "utf8"),
+	);
+	const parts = (version) => {
+		nextPatchVersion(version);
+		return version.split(".").map(BigInt);
+	};
+	const sourceParts = parts(sourceManifest.version);
+	const latestParts = parts(published.version);
+	const sourceIsNewer = sourceParts.some(
+		(value, index) =>
+			value > latestParts[index] &&
+			sourceParts
+				.slice(0, index)
+				.every((part, prior) => part === latestParts[prior]),
+	);
+	const version = nextPatchVersion(
+		sourceIsNewer ? sourceManifest.version : published.version,
+	);
 	const [sourcePack] = JSON.parse(
 		run("npm", [
 			"pack",

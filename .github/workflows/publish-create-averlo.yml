@@ -78,6 +78,14 @@ jobs:
       - name: Verify packed initializer and installed project
         if: steps.publication.outputs.skipped != 'true'
         run: npm run verify:create-averlo -- --integration
+      - name: Verify the exact publication archive
+        if: steps.publication.outputs.skipped != 'true'
+        env:
+          RELEASE_TARBALL: ${{ steps.publication.outputs.tarball }}
+          RELEASE_COMMIT: ${{ steps.publication.outputs.commit }}
+        run: |
+          npm exec --yes --package="$RELEASE_TARBALL" -- create-averlo "$RUNNER_TEMP/staged-generator-smoke" --profile thin-start --content static --no-install | tee "$RUNNER_TEMP/staged-generator-smoke.log"
+          grep -F -- "- template commit: $RELEASE_COMMIT" "$RUNNER_TEMP/staged-generator-smoke.log"
       - name: Publish the verified patch through npm trusted publishing
         if: steps.publication.outputs.skipped != 'true'
         env:
