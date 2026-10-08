@@ -32,8 +32,26 @@ GitHub workflow for the project that will own it.
 
 ## Publishing
 
-The first `0.1.0` release must be published manually from a clean pushed commit
-with npm 2FA. After it exists, configure npm trusted publishing for
-`olafBobryk/averlo-next-template` and the workflow filename
-`publish-create-averlo.yml`. Later `create-averlo-v*` GitHub releases publish
-through OIDC without a long-lived npm token.
+Every push to `main` runs `publish-create-averlo.yml`. It prepares the next npm
+patch version from a clean committed template, verifies all profiles and an
+installed generated project, publishes through npm trusted publishing, checks
+public project creation, and records a GitHub release. Publishing is serialized;
+queued pushes use the newest `main`. A rerun skips publishing when npm already
+points to that commit. `workflow_dispatch` provides a manual retry.
+
+Package versions are assigned in a disposable publication directory. The source
+checkout stays clean, the pinned template commit remains fetchable, and release
+version changes do not create a commit/publish loop. The published npm version
+can therefore be newer than the source package manifest.
+
+Configure the npm trusted publisher for `olafBobryk/averlo-next-template`, workflow
+`publish-create-averlo.yml`, with publishing allowed. No long-lived npm token is
+required. A failed workflow means npm remains on the previous released template;
+check Actions rather than waiting for propagation.
+
+Explicit `create-averlo-v*` GitHub releases still support manually chosen package
+versions matching the committed manifest. Use `npx create-averlo@latest` to request
+the latest published generator, or pin an exact version for reproducibility.
+
+Generated projects are independent snapshots; publishing a newer generator does
+not update existing projects. Local uncommitted template changes are not released.

@@ -1,16 +1,23 @@
 name: Publish create-averlo
 
 on:
+  push:
+    branches: [main]
+  workflow_dispatch:
   release:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
+
+concurrency:
+  group: publish-create-averlo
+  cancel-in-progress: false
 
 jobs:
   publish:
-    if: startsWith(github.event.release.tag_name, 'create-averlo-v')
+    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'create-averlo-v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -29,6 +36,10 @@ jobs:
       - name: Verify release version
         run: npm run check:release-version -- "${{ github.event.release.tag_name }}"
         working-directory: packages/create-averlo
+      - name: Configure generated-project Git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Verify template profiles
         run: npm run verify:profiles
       - name: Verify packed initializer
@@ -36,3 +47,54 @@ jobs:
       - name: Publish create-averlo
         run: npm publish --access public
         working-directory: packages/create-averlo
+
+  propagate:
+    if: github.event_name != 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Coalesce queued pushes into the newest committed template.
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Prepare the next pinned patch release
+        id: publication
+        run: node packages/create-averlo/scripts/prepare-publication.mjs
+      - name: Install template dependencies
+        if: steps.publication.outputs.skipped != 'true'
+        run: npm ci
+      - name: Configure generated-project Git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Verify template profiles
+        if: steps.publication.outputs.skipped != 'true'
+        run: npm run verify:profiles
+      - name: Verify packed initializer and installed project
+        if: steps.publication.outputs.skipped != 'true'
+        run: npm run verify:create-averlo -- --integration
+      - name: Publish the verified patch through npm trusted publishing
+        if: steps.publication.outputs.skipped != 'true'
+        env:
+          RELEASE_TARBALL: ${{ steps.publication.outputs.tarball }}
+        run: npm publish "$RELEASE_TARBALL" --access public --ignore-scripts
+      - name: Verify public generation from the published package
+        env:
+          RELEASE_VERSION: ${{ steps.publication.outputs.version }}
+          RELEASE_COMMIT: ${{ steps.publication.outputs.commit }}
+        run: |
+          npm exec --yes --package="create-averlo@$RELEASE_VERSION" -- create-averlo "$RUNNER_TEMP/public-generator-smoke" --profile thin-start --content static --no-install | tee "$RUNNER_TEMP/public-generator-smoke.log"
+          grep -F -- "- template commit: $RELEASE_COMMIT" "$RUNNER_TEMP/public-generator-smoke.log"
+      - name: Record the published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.publication.outputs.version }}
+          RELEASE_COMMIT: ${{ steps.publication.outputs.commit }}
+        run: |
+          gh release view "create-averlo-v$RELEASE_VERSION" >/dev/null 2>&1 || gh release create "create-averlo-v$RELEASE_VERSION" --target "$RELEASE_COMMIT" --title "create-averlo $RELEASE_VERSION" --notes "Automatically published from template commit $RELEASE_COMMIT. Public generation was verified against the npm package."
+          echo "Published create-averlo@$RELEASE_VERSION from $RELEASE_COMMIT" >> "$GITHUB_STEP_SUMMARY"
