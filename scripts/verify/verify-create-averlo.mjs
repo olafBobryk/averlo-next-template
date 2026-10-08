@@ -306,7 +306,13 @@ async function main() {
 				: "create-averlo package verification passed.",
 		);
 	} finally {
-		await fs.rm(resolvedTemp, { force: true, recursive: true });
+		// Git background maintenance can briefly keep the disposable .git tree busy.
+		await fs.rm(resolvedTemp, {
+			force: true,
+			recursive: true,
+			maxRetries: 10,
+			retryDelay: 200,
+		});
 	}
 }
 
