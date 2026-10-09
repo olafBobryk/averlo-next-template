@@ -218,6 +218,17 @@ export default function HomeHeroLibrary({
 						},
 						...heroSpecimens.map((specimen) => ({ ...specimen, priority: 0 })),
 					]
+						.filter(
+							(specimen) =>
+								specimen.priority === 0 ||
+								services.some((service) =>
+									service.surfaceIds.some((id) =>
+										specimen.id === "hero-skills"
+											? id === "skillsPack"
+											: ["assembly", "thinStart", "fullStart"].includes(id),
+									),
+								),
+						)
 						.sort((a, b) => a.name.localeCompare(b.name))
 						.map(({ id, width, priority, Render }) => (
 							<div
