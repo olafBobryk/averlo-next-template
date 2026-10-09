@@ -5,7 +5,6 @@ import {
 	type SiteMenuGroup,
 	type SiteNavLink,
 } from "@/app/(site)/_components/layout/siteLayout";
-import { templateCapabilities } from "@/config/capabilities";
 import { getMarketingSiteLinks, publicSocialLinks } from "./links";
 import type {
 	DocumentMarketingPageDocument,
@@ -59,24 +58,17 @@ export const fallbackHomePage: HomeMarketingPageDocument = {
 			},
 			services: [
 				{
-					id: "demo",
-					title: "Component Export",
-					description:
-						"Browse live primitives, states, and skeletons before composing them into a product.",
-					surfaceIds: ["demo", "demoPrimitives"],
-				},
-				{
 					id: "assembly",
 					title: "Assembly",
 					description:
-						"Select a profile and content capability, preview the plan, then materialize a verified project.",
+						"Choose a profile and content source, then assemble an independent project.",
 					surfaceIds: ["assembly"],
 				},
 				{
 					id: "skills-pack",
 					title: "Averlo skills pack",
 					description:
-						"Use focused workflows for visual parity, static composition, motion composition, and complete page composition.",
+						"Compose, compare, refine, and animate with focused agent workflows.",
 					surfaceIds: ["skillsPack"],
 				},
 				{
@@ -84,12 +76,7 @@ export const fallbackHomePage: HomeMarketingPageDocument = {
 					title: "Thin start",
 					description:
 						"Keep the canonical visual core in a minimal, independently verifiable workspace.",
-					surfaceIds: [
-						"thinStart",
-						...(templateCapabilities.repositoryFootprint
-							? (["repositoryFootprint"] as const)
-							: []),
-					],
+					surfaceIds: ["thinStart"],
 				},
 				{
 					id: "full-start",

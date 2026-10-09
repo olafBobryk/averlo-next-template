@@ -1,6 +1,10 @@
 export const applicationSurfaces = {
 	assistant: {
 		ownedPaths: [
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview13.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview18.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview19.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview20.tsx",
 			"src/app/(site)/dashboard/_components/entities/record/RecordToolCall.catalog.tsx",
 			"src/app/(site)/dashboard/_components/entities/record/RecordToolCall.stories.tsx",
 			"src/app/(site)/dashboard/_components/entities/record/RecordToolCall.tsx",
@@ -31,6 +35,19 @@ export const applicationSurfaces = {
 	},
 	dashboard: {
 		ownedPaths: [
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview1.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview2.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview3.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview4.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview5.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview6.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview7.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview8.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview9.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview10.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview11.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview12.tsx",
+			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview14.tsx",
 			"src/config/surfaces/auth.ts",
 			"src/config/surfaces/dashboard.ts",
 			"scripts/verify/verify-auth-organization.ts",

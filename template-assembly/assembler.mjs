@@ -411,6 +411,37 @@ async function writeCentralFiles(
 			marketingSurfaceRegistry,
 		]);
 	}
+	// A generated profile illustrates only the component families it installs.
+	// The canonical hero keeps all 99; omitted dashboard/assistant families must
+	// not pull those surfaces back into a reduced project through preview imports.
+	const heroManifestPath =
+		"src/lib/marketing-content/sections/homeHero/heroSpecimens.tsx";
+	const heroManifestDestination = path.join(destinationRoot, heroManifestPath);
+	if (await pathExists(heroManifestDestination)) {
+		let heroManifest = await fs.readFile(heroManifestDestination, "utf8");
+		for (const match of heroManifest.matchAll(
+			/import (HeroPreview\d+) from "(\.\/previews\/[^"\n]+)";/g,
+		)) {
+			if (
+				await pathExists(
+					path.resolve(
+						path.dirname(heroManifestDestination),
+						`${match[2]}.tsx`,
+					),
+				)
+			)
+				continue;
+			heroManifest = heroManifest.replace(match[0], "");
+			heroManifest = heroManifest.replace(
+				new RegExp(
+					`[\\t ]*\\{[^{}]*\\bRender: ${match[1]}\\b[^{}]*\\},?\\n?`,
+					"g",
+				),
+				"",
+			);
+		}
+		targets.push([heroManifestPath, heroManifest]);
+	}
 	const nextConfig = renderNextConfigFile(state);
 	const tsconfig = renderTsconfigFile(state);
 	targets.push([
