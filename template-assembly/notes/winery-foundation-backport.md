@@ -32,3 +32,11 @@ below before delivery.
 - Production build and exact pushed-commit verification remain mandatory gates
   in the production-ship workflow. Automatic initializer publication owns the
   subsequent npm patch release.
+# Publication follow-up
+
+The initial color release was published as create-averlo 0.1.7, but its final
+hosted generation check encountered npm ETARGET after the version/latest
+endpoints had propagated. Retry only ETARGET with a fresh installer cache;
+retain immediate failure for generator errors and an exact template-commit
+assertion after successful generation.
+

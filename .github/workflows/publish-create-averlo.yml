@@ -120,8 +120,21 @@ jobs:
           RELEASE_VERSION: ${{ steps.publication.outputs.version }}
           RELEASE_COMMIT: ${{ steps.publication.outputs.commit }}
         run: |
-          npm exec --yes --prefer-online --package="create-averlo@$RELEASE_VERSION" -- create-averlo "$RUNNER_TEMP/public-generator-smoke" --profile thin-start --content static --no-install | tee "$RUNNER_TEMP/public-generator-smoke.log"
-          grep -F -- "- template commit: $RELEASE_COMMIT" "$RUNNER_TEMP/public-generator-smoke.log"
+          set -o pipefail
+          log="$RUNNER_TEMP/public-generator-smoke.log"
+          for attempt in {1..20}; do
+            if npm exec --yes --prefer-online --cache="$RUNNER_TEMP/public-generator-npm-cache-$attempt" --package="create-averlo@$RELEASE_VERSION" -- create-averlo "$RUNNER_TEMP/public-generator-smoke" --profile thin-start --content static --no-install 2>&1 | tee "$log"; then
+              grep -F -- "- template commit: $RELEASE_COMMIT" "$log"
+              break
+            fi
+            # npm's install metadata can lag its version/latest endpoints.
+            # Retry only version propagation; generator failures stay failures.
+            if ! grep -Eq 'npm (error|ERR!) code ETARGET' "$log" || [ "$attempt" -eq 20 ]; then
+              exit 1
+            fi
+            echo "Waiting for npm install metadata ($attempt/20)."
+            sleep 15
+          done
       - name: Record the published release
         env:
           GH_TOKEN: ${{ github.token }}
