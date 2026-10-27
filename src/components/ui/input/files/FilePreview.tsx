@@ -228,6 +228,7 @@ function FilePreviewRoot({
 						disabled={isDisabled}
 						onClick={handleOpenFile}
 					>
+						<span className="sr-only">Open </span>
 						<Text as="span" variant="bodyStrong" className="block text-xs">
 							{fileTypeLabel}
 						</Text>

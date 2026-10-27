@@ -1,8 +1,8 @@
 "use client";
 
-import { CaretDown } from "@phosphor-icons/react";
 import clsx from "clsx";
 import * as React from "react";
+import { Icon } from "@/components/ui/icons/Icon";
 import {
 	InputSkeleton,
 	type InputSkeletonProps,
@@ -170,13 +170,14 @@ function DateRangeInputRoot({
 						>
 							{selectedValue ? formatDisplayRange(selectedValue) : emptyLabel}
 						</span>
-						<CaretDown
+						<Icon
+							name="chevron-down"
 							aria-hidden
 							className={clsx(
 								"shrink-0 text-muted-foreground transition-transform motion-micro",
 								open && "rotate-180",
 							)}
-							size={16}
+							style={{ width: 16, height: 16 }}
 						/>
 					</button>
 				</InputFrame>

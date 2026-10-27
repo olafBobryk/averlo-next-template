@@ -161,6 +161,10 @@ export const catalogContract = defineCatalogOwnerContract({
 		"Danger and warning are semantic tones independent of emphasis.",
 		"Use xxs/xs/compact for dense controls, sm/md for everyday actions, lg/xl for prominent actions. None delegates dimensions; chip is content-height; icon/icon-sm preserve icon-only callers.",
 		"Shape standard fits a label; round/square are icon-only. Radius pill explicitly requests full rounding and sm requests 7px, overriding shape corners.",
+		"Emphasis and semantic tone are independent. Shared owner tokens supply geometry and visible focus; typography follows the shared Text system. Existing primary/secondary/ghost/bare teaching describes this API, not an automatic application-wide variant selection policy.",
+		"Bare stays transparent at rest, hover and active while retaining independently chosen geometry. For text aligned to a content edge, use size=none with explicit vertical spacing and no horizontal padding; align the visible icon/content box rather than a larger centered button box. Preserve nonoverlapping targets and focus, and never globally shrink controls.",
+		"Review visible content edges, button-box edges and visual spacing separately. Filled toolbar/form controls may align by their boxes and preserve surface inset; edge utilities align visible content. Include existing padded ghost boxes in perceived spacing rather than adding a full gap again. Bare icons need explicit gaps; filled controls need a visible gap. Mixed groups keep usable targets on one baseline and compare both edges at rest, hover and focus without overlapping hit areas.",
+		"Group by task before hierarchy: primary communicates progression, secondary a distinct alternative, ghost a quiet hover surface, and bare inline utility. Do not prioritize a variant over the group's baseline, alignment, semantic purpose or usable control geometry.",
 	],
 	chooseInstead: [
 		"Use a finished input, menu, or composite when the action belongs to that higher-level owner.",

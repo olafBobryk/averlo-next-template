@@ -11,9 +11,7 @@ export function RecordsSurface({
 	commands: ComponentProps<typeof DashboardEntityCommands>["commands"];
 }) {
 	return (
-		<DashboardSection
-			title="Records"
-		>
+		<DashboardSection title="Records">
 			<DashboardEntityCommands
 				commands={commands}
 				ownerId="dashboard.records.entities"

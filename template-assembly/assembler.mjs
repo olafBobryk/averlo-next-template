@@ -10,6 +10,7 @@ import {
 	assemblyCoreRoots,
 	assemblyCoreScripts,
 	assemblyGeneratedPaths,
+	assemblyOpenSpecSkillPaths,
 	assemblyProjectDocs,
 	assemblyTemplateOnlyDevDependencies,
 	assemblyTemplateOnlyPaths,
@@ -138,7 +139,10 @@ async function buildCopyPlan(sourceRoot, profile, selectedSurfaces) {
 			omitted.push({ path: relativePath, reason: "template-only" });
 			continue;
 		}
-		if (withinAny(relativePath, assemblyTemplateOnlyRoots)) {
+		if (
+			withinAny(relativePath, assemblyTemplateOnlyRoots) &&
+			!assemblyOpenSpecSkillPaths.has(relativePath)
+		) {
 			omitted.push({ path: relativePath, reason: "template-only" });
 			continue;
 		}
@@ -442,6 +446,32 @@ async function writeCentralFiles(
 		}
 		targets.push([heroManifestPath, heroManifest]);
 	}
+	// Loading views follow the same positive surface selection as their routes.
+	const loadingViewPath =
+		"src/app/(site)/dashboard/_components/debug/DashboardForcedLoadingView.tsx";
+	const loadingViewDestination = path.join(destinationRoot, loadingViewPath);
+	if (await pathExists(loadingViewDestination)) {
+		let loadingView = await fs.readFile(loadingViewDestination, "utf8");
+		for (const match of loadingView.matchAll(
+			/import \{ (\w+SurfaceSkeleton) \} from "(\.\.\/[^"\n]+)";/g,
+		)) {
+			if (
+				await pathExists(
+					path.resolve(path.dirname(loadingViewDestination), `${match[2]}.tsx`),
+				)
+			)
+				continue;
+			loadingView = loadingView.replace(match[0], "");
+			loadingView = loadingView.replace(
+				new RegExp(
+					`\\t\\tcase "[^"]+":\\n\\t\\t\\treturn <${match[1]} />;\\n`,
+					"g",
+				),
+				"",
+			);
+		}
+		targets.push([loadingViewPath, loadingView]);
+	}
 	const nextConfig = renderNextConfigFile(state);
 	const tsconfig = renderTsconfigFile(state);
 	targets.push([
@@ -466,11 +496,60 @@ async function writeCentralFiles(
 }
 
 async function writeProjectDocs(
+	sourceRoot,
 	destinationRoot,
 	profile,
 	content,
 	projectName,
 ) {
+	const menu = await fs.readFile(path.join(sourceRoot, "WORKFLOWS.md"), "utf8");
+	const installedEntries = [];
+	for (const line of menu.split(/\r?\n/u).filter(Boolean)) {
+		const entry = /^- \[([^\]]+)\]\(([^)]+)\)$/u.exec(line);
+		if (!entry)
+			throw new Error("WORKFLOWS must contain names-only procedure links.");
+		const target = entry[2].split("#", 1)[0];
+		if (await pathExists(path.resolve(destinationRoot, target)))
+			installedEntries.push(line);
+	}
+	await fs.writeFile(
+		path.join(destinationRoot, "WORKFLOWS.md"),
+		`${installedEntries.join("\n")}\n`,
+	);
+	await fs.mkdir(path.join(destinationRoot, "openspec"), { recursive: true });
+	await fs.writeFile(
+		path.join(destinationRoot, "openspec/config.yaml"),
+		[
+			"schema: spec-driven",
+			"context: |",
+			"  Read PRODUCT.md and applicable AGENTS.md for this project's intent and policy.",
+			"  This is an independent product project. Maintained contracts under",
+			"  openspec/specs/app/ are project-owned copies; change them through stock",
+			"  OpenSpec operations as the product evolves. Start with the changed surface,",
+			"  then relevant shared dependencies and existing product contracts. app/shared/",
+			"  groups frontend, cross-client/server data-lifecycle and service behavior.",
+			"  Marketing and dashboard contracts apply only to installed uses. Folder location",
+			"  never installs a feature. Reserve openspec/specs/product/ for this project's",
+			"  real business requirements; do not invent a placeholder specification.",
+			"  Product rules refine generic contracts; incompatible obligations require an",
+			"  explicit spec change rather than silent precedence.",
+			"  The installed profile receipt identifies selected features, not product requirements.",
+			"  Forms own submissions, loading owns reads, and actions own non-form changes.",
+			"  Nearest AGENTS owns structure; Storybook owns component APIs and defaults;",
+			"  canonical procedures own execution and evidence. Use Preview for local servers.",
+			"  Installed examples remain accurately described until deliberately replaced.",
+			"  Real persistence and delivery use their authorized configured boundaries.",
+			"operations:",
+			"  apply:",
+			"    guidance:",
+			"      - Run applicable form and loading verification against a verified Preview URL when those behaviors change.",
+			"      - Preserve unrelated work and use stock operations without custom routing skills or schemas.",
+			"  archive:",
+			"    guidance:",
+			"      - Record actual verification evidence and any remaining gaps before archiving.",
+			"",
+		].join("\n"),
+	);
 	const profileLabel = profile.id;
 	const projectLabel = projectName ?? `${profileLabel} project`;
 	await fs.writeFile(
@@ -538,9 +617,13 @@ async function writeProjectDocs(
 			"",
 			"## Averlo Plugin Pack",
 			"",
-			"- Treat the installed Averlo plugin pack as an optional repository workflow layer. Use `$averlo:repository-workflows` when the user explicitly invokes it or an already-selected operational Averlo workflow requires it. Its absence from the current skill catalogue does not block ordinary implementation or implementation review; proceed from `AGENTS.md`, owner evidence, and existing repository verifiers.",
-			"- After the router is selected, do not separately invoke overlapping Averlo design-system, skeleton, entity, or surface skills for the same change unit. `$averlo:compose` owns native source-backed composition and measured human review passes. `$averlo:systemize-composition` explicitly owns later shared design-system decisions, `$averlo:animate` explicitly owns motion, and `$averlo:visual-parity` supplies subordinate evidence. A source-backed composition must not call Figma or edit product code until Compose is loaded; systemization and animation must not begin without their explicit workflows.",
-			"- Root and nearest `AGENTS.md` files own structural policy. Existing verifier commands own deterministic policy.",
+			"- Use stock OpenSpec discovery for applicable project-owned maintained behavior in `openspec/specs/app/`; normal implementation needs no repository routing skill. Read only the contracts for the changed scope. Missing required contracts are scope gaps to resolve explicitly.",
+			"- Optional operational workflows keep their explicit boundaries. `$averlo:compose` owns native source-backed composition and measured human review passes. `$averlo:systemize-composition` explicitly owns later shared design-system decisions, `$averlo:animate` explicitly owns motion, and `$averlo:visual-parity` supplies subordinate evidence. A source-backed composition must not call Figma or edit product code until Compose is loaded; systemization and animation must not begin without their explicit workflows.",
+			"- Start with the changed surface, then relevant `app/shared/` dependencies and existing `product/` business contracts. Shared data-lifecycle covers client/server behavior together; folder location never installs a feature. `openspec/specs/product/` is reserved for this project's real business requirements; no placeholder spec is generated. Product rules refine generic contracts; incompatible obligations require an explicit spec change.",
+			"- This project owns its `app/` contracts and OpenSpec configuration. Template-only contracts and history are excluded; installed examples may be deliberately replaced with real configured persistence and delivery.",
+			"- Nearest `AGENTS.md` owns structure and dependency direction; Storybook owns supported component APIs/defaults. Canonical procedures own execution and evidence, linked by the names-only `WORKFLOWS.md` menu. Existing verifiers own deterministic policy. Inherited contracts are independent copies, not evidence that optional features or providers are installed.",
+			"- Complete-form behavior is owned by `openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md`. Use standard OpenSpec operations for contract changes and `docs/testing/forms.md` for verification. These files and the stock Codex skills are independent project-owned copies.",
+			"- Initial and region loading behavior is owned by `openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md`; use `docs/testing/loading.md` for verification. The data-lifecycle family groups independent read/presentation and submission contracts without duplicate parent rules.",
 			"",
 			"## Development and Review Isolation",
 			"",
@@ -551,13 +634,13 @@ async function writeProjectDocs(
 			"",
 			"- The dashboard is the application implementation area.",
 			"- Marketing is the public-site implementation area.",
-			"- `.template-profile.json` determines which areas exist. Use the matching repository workflow and nearest `AGENTS.md` for their structure.",
+			"- `.template-profile.json` determines which areas exist. Use the applicable maintained contracts and nearest `AGENTS.md` for their structure.",
 			"- Resolve provider-specific records and metadata in server-side resolvers or adapters before data reaches the frontend contract.",
 			"- In a marketing-capable project, run `npm run verify:marketing` for the composed section, shell, and media contract; use its focused child commands only for diagnosis.",
 			"",
 			"## Design System",
 			"",
-			"- For UI work, follow the nearest `AGENTS.md`, Storybook owner evidence, and existing repository verifiers rather than treating this file as a component catalogue or API reference. When `$averlo:repository-workflows` is explicitly invoked, also follow the concern contracts it selects.",
+			"- For UI work, follow the nearest `AGENTS.md`, Storybook owner evidence, and existing repository verifiers rather than treating this file as a component catalogue or API reference. Find the highest complete supported owner before composing lower-level parts.",
 			"",
 		].join("\n"),
 	);
@@ -603,7 +686,13 @@ export async function assembleTemplateProfile({
 		projectName,
 		deferLockfile,
 	});
-	await writeProjectDocs(destinationRoot, profile, content, projectName);
+	await writeProjectDocs(
+		sourceRoot,
+		destinationRoot,
+		profile,
+		content,
+		projectName,
+	);
 	return {
 		includedFiles: plan.included.length,
 		omittedFiles: plan.omitted.length,

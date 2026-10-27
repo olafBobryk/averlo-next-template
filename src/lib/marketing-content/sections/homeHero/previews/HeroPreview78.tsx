@@ -4,11 +4,7 @@ import { useState } from "react";
 import { ContentPresence } from "@/components/ui/motion/presence/index";
 import { Button } from "@/components/ui/primitives/Button";
 
-function PresenceExample({
-	axis = "y",
-}: {
-	axis?: "x" | "y";
-}) {
+function PresenceExample({ axis = "y" }: { axis?: "x" | "y" }) {
 	const [open, setOpen] = useState(true);
 	const [expanded, setExpanded] = useState(false);
 	return (

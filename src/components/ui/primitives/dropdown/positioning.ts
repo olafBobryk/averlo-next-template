@@ -168,6 +168,15 @@ export function resolveAnchoredDropdownPosition({
 
 	let viewportLeft =
 		align === "end" ? anchorRect.right - measuredWidth : anchorRect.left;
+	// Try the opposite anchor edge before shifting away from the trigger.
+	if (
+		align === "start" &&
+		viewportLeft + measuredWidth > window.innerWidth - collisionPadding
+	) {
+		viewportLeft = anchorRect.right - measuredWidth;
+	} else if (align === "end" && viewportLeft < collisionPadding) {
+		viewportLeft = anchorRect.left;
+	}
 	const maxLeft = Math.max(
 		collisionPadding,
 		window.innerWidth - measuredWidth - collisionPadding,

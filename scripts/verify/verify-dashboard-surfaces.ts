@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
-import { dashboardContentShellProfiles } from "../../src/app/(site)/dashboard/_components/layout/DashboardContentShell";
+import { dashboardContentShellProfiles } from "../../src/app/(site)/dashboard/_components/layout/dashboardContentShellProfiles";
 import { isOrganizationInvitationPending } from "../../src/app/(site)/dashboard/_lib/entities/invitation/presentation";
 import {
 	dashboardDebugStates,
@@ -509,7 +509,7 @@ assert.ok(
 );
 assert.ok(
 	organizationSwitcher.includes(
-		'h-8 !px-3 !text-muted-foreground hover:!text-sidebar-accent-foreground',
+		"h-8 !px-3 !text-muted-foreground hover:!text-sidebar-accent-foreground",
 	) &&
 		organizationSwitcher.includes(
 			"min-w-0 flex-1 truncate text-left text-sm font-medium",

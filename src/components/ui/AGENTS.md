@@ -17,6 +17,7 @@
 ## Authority
 
 - Storybook owner contracts define public UI support and observable behavior.
-  The nearest `AGENTS.md` defines internal topology and prohibitions. Selected
-  repository workflows and verifiers define implementation and deterministic
-  policy.
+  The nearest `AGENTS.md` defines internal topology and prohibitions. Maintained
+  OpenSpec capabilities define cross-surface behavior; existing verifiers define
+  deterministic policy. Follow [component verification](../../../docs/testing/component-contracts.md)
+  without treating implementation exports as supported public API.

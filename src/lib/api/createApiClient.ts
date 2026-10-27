@@ -41,7 +41,8 @@ export type ApiClientOptions = {
 const parseJson = async (response: Response) => {
 	try {
 		return await response.json();
-	} catch {
+	} catch (error) {
+		if (!(error instanceof SyntaxError)) throw error;
 		return null;
 	}
 };

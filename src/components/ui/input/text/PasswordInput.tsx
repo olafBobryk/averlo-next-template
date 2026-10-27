@@ -201,7 +201,7 @@ function PasswordInputRoot({
 						<div className="flex items-center gap-2.5">
 							{copyButton}
 							<Button
-								variant="ghost"
+								variant="bare"
 								size="icon-sm"
 								align="center"
 								onClick={() => setIsVisible((v) => !v)}
@@ -213,7 +213,6 @@ function PasswordInputRoot({
 									"!p-1 !rounded-[8px] max-w-fit max-h-fit ",
 									"text-foreground/80 hover:text-foreground",
 									"transition-all motion-micro",
-									"hover:bg-[#020202]/[0.05] active:bg-[#020202]/[0.08] cursor-pointer",
 								]
 									.filter(Boolean)
 									.join(" ")}

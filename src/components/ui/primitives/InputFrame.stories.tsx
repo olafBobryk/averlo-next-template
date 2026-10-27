@@ -241,12 +241,12 @@ export const CompactRow: Story = {
 	},
 };
 
-export const Muted: Story = {
+export const Strong: Story = {
 	parameters: {
 		docs: {
 			description: {
 				story:
-					'Use variant="muted" for secondary controls within toolbars or dropdowns: a soft neutral fill without resting shadow. It composes with every size and validation tone. The default variant remains unchanged.',
+					'The default frame is soft and shadowless in light mode and retains its established dark appearance. Use variant="strong" when a control needs a heavier fill and resting outline. Both variants retain focus, validation, and geometry.',
 			},
 		},
 	},
@@ -260,37 +260,37 @@ export const Muted: Story = {
 				/>
 			</InputFrame>
 			<InputFrame
-				variant="muted"
+				variant="strong"
 				size="xxs"
 				className="w-10"
-				data-testid="muted-frame"
+				data-testid="strong-frame"
 			>
 				<input
-					aria-label="Muted page"
+					aria-label="Strong page"
 					defaultValue="1"
 					className={inputVariants({ size: "xxs" })}
 				/>
 			</InputFrame>
-			<InputFrame variant="muted" tone="error" data-testid="muted-error">
+			<InputFrame variant="strong" tone="error" data-testid="strong-error">
 				<input
-					aria-label="Invalid muted value"
+					aria-label="Invalid strong value"
 					aria-invalid="true"
 					defaultValue="Invalid value"
 					className={inputVariants()}
 				/>
 			</InputFrame>
 			<InputFrame.Skeleton
-				variant="muted"
+				variant="strong"
 				size="xxs"
 				className="w-10"
-				data-testid="muted-skeleton"
+				data-testid="strong-skeleton"
 			>
 				1
 			</InputFrame.Skeleton>
 		</div>
 	),
 	play: async ({ canvas }) => {
-		const frame = canvas.getByTestId("muted-frame");
+		const frame = canvas.getByTestId("strong-frame");
 		const restShadow = getComputedStyle(frame).boxShadow;
 		await expect(getComputedStyle(frame).backgroundColor).not.toBe(
 			getComputedStyle(canvas.getByTestId("default-frame")).backgroundColor,
@@ -300,28 +300,28 @@ export const Muted: Story = {
 		);
 		await expect(frame.getBoundingClientRect().height).toBe(24);
 		await expect(
-			canvas.getByTestId("muted-skeleton").getBoundingClientRect().height,
+			canvas.getByTestId("strong-skeleton").getBoundingClientRect().height,
 		).toBe(24);
-		await expect(canvas.getByTestId("muted-skeleton")).not.toHaveAttribute(
+		await expect(canvas.getByTestId("strong-skeleton")).not.toHaveAttribute(
 			"variant",
 		);
-		await userEvent.click(canvas.getByRole("textbox", { name: "Muted page" }));
+		await userEvent.click(canvas.getByRole("textbox", { name: "Strong page" }));
 		await expect(
-			canvas.getByRole("textbox", { name: "Muted page" }),
+			canvas.getByRole("textbox", { name: "Strong page" }),
 		).toHaveFocus();
 		await expect(
 			getComputedStyle(frame).getPropertyValue("--tw-ring-shadow"),
 		).toContain("3px");
-		await expect(canvas.getByTestId("muted-error")).toHaveAttribute(
+		await expect(canvas.getByTestId("strong-error")).toHaveAttribute(
 			"aria-invalid",
 			"true",
 		);
 		await expect(
-			getComputedStyle(canvas.getByTestId("muted-error")).getPropertyValue(
+			getComputedStyle(canvas.getByTestId("strong-error")).getPropertyValue(
 				"--tw-ring-shadow",
 			),
 		).toContain("3px");
 	},
 };
 
-export const MutedDark: Story = { ...Muted, globals: { theme: "dark" } };
+export const StrongDark: Story = { ...Strong, globals: { theme: "dark" } };

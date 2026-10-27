@@ -1,0 +1,834 @@
+{
+	"purpose": "Change-local audited source identity; not a runtime schema or discovery index. Reconcile sections to migration-map destinations before retirement.",
+	"sources": [
+		{
+			"path": "plugins/averlo/skills/repository-workflows/SKILL.md",
+			"lineCount": 106,
+			"sha256": "401498c8ee8b0f71b3721149b00e13c733c26c0d1a6603323230bf739ffa5980",
+			"sections": [
+				{
+					"heading": "# Averlo \u00b7 Repository Workflows",
+					"startLine": 6,
+					"endLine": 11,
+					"sha256": "10a254a71d5e43b379ad460e096326e830e1ed2afe192197e11b9dd7e1c18f2b"
+				},
+				{
+					"heading": "## Route the work",
+					"startLine": 12,
+					"endLine": 29,
+					"sha256": "7c0b0ab6585b0a1de1ffbba2a2e5af31302fb2b0900ede40fc18b8b6b262b0d2"
+				},
+				{
+					"heading": "## Orient through selected concerns",
+					"startLine": 30,
+					"endLine": 54,
+					"sha256": "de99292fd03cb17afa3b6bd00c38f0f499a096199702544c47eaf046766d3dde"
+				},
+				{
+					"heading": "## Apply repository-mode overlays",
+					"startLine": 55,
+					"endLine": 70,
+					"sha256": "6be0cd478eee2ef317996a4e68684ee6d03869f677734dc3fdf53f15d4f17e0b"
+				},
+				{
+					"heading": "## Preserve routing boundaries",
+					"startLine": 71,
+					"endLine": 106,
+					"sha256": "0c17b852326700bab35bb194e31120d66e1c92f0ec7727cfa4b90afc6559595b"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/action-lifecycle.md",
+			"lineCount": 117,
+			"sha256": "325e7e14e2ab84540b996f8d85afd41e14f02c32a029ecbd01e105911afdd129",
+			"sections": [
+				{
+					"heading": "# Action lifecycle",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "fe2034095c18e2e885976b79f4428350a43df78cdd4b9f70d2032ae223ff1404"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 63,
+					"sha256": "8286fd90a97f1ed019c0a239abc37225b185ea903506cf5a4a2253481c0b6b8f"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 64,
+					"endLine": 76,
+					"sha256": "0e4f809714d74f1b201c15dab6a679e9ea235795abbdbfc43e8ac972c3a9dcb2"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 77,
+					"endLine": 91,
+					"sha256": "43621c496acb2b35965d2ec83323d60044abbd15d3499cd70729abad929134db"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 92,
+					"endLine": 109,
+					"sha256": "0d7a7ebd75a31466ac372140cd7ee8424fc0e11ef4b68a6ca4c364ae8fa6d7a3"
+				},
+				{
+					"heading": "## Coverage checks",
+					"startLine": 110,
+					"endLine": 117,
+					"sha256": "382b273e9eef982ee4a2db0b48a163d59b987de2b9e866821ba06b7957bf289f"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/api-transport.md",
+			"lineCount": 53,
+			"sha256": "7fe6a79302c15fefcd6e6cccb97fe4469da507e5800fa74444c39afc5c79aa0f",
+			"sections": [
+				{
+					"heading": "# API transport",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "814c209f386eb48fffb4132cc911f2e3b46d7f36cc8dfe8f3c1ac62349bc2e1e"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 21,
+					"sha256": "f9fa45036ee6605942172923e9778da7d865184a1ed51d37a2dfd42e12eed31f"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 22,
+					"endLine": 32,
+					"sha256": "b8107d35286e3663f2984714592b1cb728d3d084a4098e532fc9852817a2ffd6"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 33,
+					"endLine": 43,
+					"sha256": "1e110ba51ddf3db1ddc108d2ad02e722143fe6db474a77d2b668f55a4e493c58"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 44,
+					"endLine": 53,
+					"sha256": "1fc7073d9ee266052ee196d2cef2892c36a754f5866c5c66a1d9cd2b553b096e"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/auth-organization.md",
+			"lineCount": 60,
+			"sha256": "4e726fd197efe18d5a3b420c3780c40c3e2140cd3b4ef5feb446caf3b8d69e10",
+			"sections": [
+				{
+					"heading": "# Auth and organization architecture",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "965a94e159c0611d36aa9a4d93eb1513bd61edba02c9d92d7d094e037c360ee6"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 30,
+					"sha256": "1951cee19834e6a7ed1fe2c5e2489cd4b7ebc77905be4c9070d8f78473ac0932"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 31,
+					"endLine": 41,
+					"sha256": "a8a120fb7ad34a63e70b6ffc7510847d4c106053dcf89f4d126c1882586634c6"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 42,
+					"endLine": 52,
+					"sha256": "ce771c9ebcc69470bd1d36f90d787c4dfeb5fc75074976caba693606b9180957"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 53,
+					"endLine": 60,
+					"sha256": "1476f958b1e73b4f42af9e95903ef27e0dbbfbc411e9005b252a6679c62b5baa"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/catalogue-contracts.md",
+			"lineCount": 72,
+			"sha256": "a411939232e643b597d5a33b182387b9a773717d13f7634a93c10f409840390a",
+			"sections": [
+				{
+					"heading": "# Catalogue contracts",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "ae4e081c5be9f108813eba9de9d783901f8da1ac54b15ca6c27b4611195af14d"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 32,
+					"sha256": "139bf0b8aa6330ada06e405bcb423d661bf18beb4961763f384f02fbf4103087"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 33,
+					"endLine": 45,
+					"sha256": "c68e94f6cf72aa1e6b5a6785a9513cce9800096d07a6eb4bd8f71a7a805b80eb"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 46,
+					"endLine": 62,
+					"sha256": "023e71a701a590d5076b7add1f932c35f8982be57be7dd27da3d85ce56122129"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 63,
+					"endLine": 72,
+					"sha256": "1889f22b8168b1d3777823e130ea57d3681afa04e885be9bca812afbc58e142c"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/contact-delivery.md",
+			"lineCount": 67,
+			"sha256": "4c7e1b2531ff177f9d8581a64da6baa0a5583c086e998aa88b729593dfa5a328",
+			"sections": [
+				{
+					"heading": "# Contact delivery",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "a545a2fab880e1134346cb10541a94258b51ac9056a046f40a18b93cc91ac461"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 30,
+					"sha256": "cc87c578cabe3865f3e4dc81095029b8c50b3862396fd4099987bcb444741d4a"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 31,
+					"endLine": 42,
+					"sha256": "3c7abb0cdcb0aef836bc201c7482ef21c49fc6db35253f75512caf117e042076"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 43,
+					"endLine": 56,
+					"sha256": "0a062a9950b95d0596a537b5e9a33b9d6b7015baec4fd4f9abce6994022e2350"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 57,
+					"endLine": 67,
+					"sha256": "333c6fe736bcf78253e5c6c219ca9a85d274edecc553e5314a6fe88d050de6ce"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/content-sources.md",
+			"lineCount": 77,
+			"sha256": "6940a798e9c60503ab4272ddfaa000449b80421ac53896f3d27560e0b6b24b1c",
+			"sections": [
+				{
+					"heading": "# Content-source architecture",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "390483d76dbea68f2c01e5e3d189c2a36176612b7c55d788e273e944e526245c"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 35,
+					"sha256": "cc8ad381988b592fefa4927b08747ae03005fd2d8d4d26298394743fb918b3b2"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 36,
+					"endLine": 48,
+					"sha256": "be87d7f9edd3475acee78988bf578cd66767f611907bba50b6a27d74d7a7317a"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 49,
+					"endLine": 63,
+					"sha256": "869141709e42c22985c01b5ff02675f6bec87a95498236980ed31d8d955f0cbd"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 64,
+					"endLine": 77,
+					"sha256": "69f75b49f12586e696f36918f02dbccafdd62857c2bd79676e191eb1b2287edf"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/entity-architecture.md",
+			"lineCount": 78,
+			"sha256": "374147e4ee5c5c866f7dcdd67ce33f5ad1d064681bc9aa29ba285562ad49798b",
+			"sections": [
+				{
+					"heading": "# Entity architecture",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "10d7704d33318288f922a347c1c663fa4fb62939ae37db0ec540b0881c449fbb"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 33,
+					"sha256": "206e9e16f2ccbcb42bf27550c7f20f072d57e1c28374cb53318819994f9db727"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 34,
+					"endLine": 46,
+					"sha256": "23aeefb9c187d70d424f3d5b9cbc06b521312fd37006e8d6e776c3e37cd3bacf"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 47,
+					"endLine": 64,
+					"sha256": "2efa1c67e03a286bda0269bd258be35aaef06f2e24044939b5f2d84f04538e2b"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 65,
+					"endLine": 78,
+					"sha256": "ea3439bbb920b304760b91e72e63f75c0794f9bc9415f34e4f825fa08eaf7eb8"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/form-protection.md",
+			"lineCount": 69,
+			"sha256": "f23b230b9fc1736fad17dec6b508b24bcef0a53e6cc2a962265b320394fbad36",
+			"sections": [
+				{
+					"heading": "# Form protection",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "9d526e9e671ed2b79dc242821173fb743167cfc8f511c4f06a51067a9e3fa421"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 31,
+					"sha256": "0de347fc432d623f0c00cb0c901531140cf65d409ef1fdb9e0ed1536235d36dd"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 32,
+					"endLine": 44,
+					"sha256": "ffa04e097063a64fb22eedb08362265966e0ba47d9d8210fedb1769444848837"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 45,
+					"endLine": 58,
+					"sha256": "a5cdbb80f5eb4c283b440885ce09a16bb9ff1b55cb99d3e20b015e209d1d90be"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 59,
+					"endLine": 69,
+					"sha256": "268aa929cd6713176de4be4ed63b47fea93ee5b3eaad9f58865f44ca405ff80c"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/form-semantics.md",
+			"lineCount": 49,
+			"sha256": "13f1a3fe2576999529d7d4347a23c931b8046045dcd3df870fa6c542bce5a1b5",
+			"sections": [
+				{
+					"heading": "# Form semantics",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "a24b92fc7be5a446ad6162377fd6ad09786b724f68e66f5c1895720867837cfc"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 20,
+					"sha256": "a7ff8906f51918f2d005126a4670bef5f03aeef4851983a97fde81a287f08760"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 21,
+					"endLine": 28,
+					"sha256": "eb6acfe6ebcd3cb2789a30aece9e1d5d4c54114b2acbb78fd4418f22e1ead161"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 29,
+					"endLine": 42,
+					"sha256": "4bd2a0267772c60bbfd7e6d0bd7572fc5906bb686129a851a96f3724ffede15b"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 43,
+					"endLine": 49,
+					"sha256": "28c92b3b6818e1448dcdfacb11d6780fd258a4cae7db77f1ff0f04befc103b0b"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/interaction-responsive.md",
+			"lineCount": 89,
+			"sha256": "78bc6e289455213e03d6ea449d47789aa883bdb352c5b6d054d1c73c43540065",
+			"sections": [
+				{
+					"heading": "# Interaction and responsive behavior",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "7b3a9d5275a787c0607d9498343d690a5316eda24aa6fd1b498398cd815c8096"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 44,
+					"sha256": "6f7f5d702e46c10df9cec6be0aa2100dc64bd0c9855c8e5885ee0285f9d1ee7d"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 45,
+					"endLine": 59,
+					"sha256": "cb297e74a39204f04ddc022faa64516d2877716f25ba881aefc8dc02c907beda"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 60,
+					"endLine": 76,
+					"sha256": "a35f8107b7c3f8a42799ea9bc85b5f68e97daee0e611f1bf986e09251f5ced2d"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 77,
+					"endLine": 89,
+					"sha256": "115126983a5e99ece00f2a48055305049a45658a8c6920dbad2f1675146b30e6"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/loading-parity.md",
+			"lineCount": 55,
+			"sha256": "e0816ef31abca68a803573b9bba78fca9cd6251e56da9962a854cad008426781",
+			"sections": [
+				{
+					"heading": "# Loading parity",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "c36aa96390e085fbf697458bad31e8a3a47c3f6a5e6cdfae13132afa1cba659c"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 11,
+					"sha256": "913b858022d5376faca5501f08fc161c46a22bf26180c3f936a8b468795507e6"
+				},
+				{
+					"heading": "## Owner selection and review",
+					"startLine": 12,
+					"endLine": 23,
+					"sha256": "2839cc8ad2d994152a7e024f2813815e7e8f0690a4b11d961169df6180827dc2"
+				},
+				{
+					"heading": "## Structural boundaries",
+					"startLine": 24,
+					"endLine": 29,
+					"sha256": "9b1d14979589da5739879072d7520ad16e6685165c1f9fdef05645d6c9a57353"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 30,
+					"endLine": 43,
+					"sha256": "9f4853432ec7bc4eca78557edf09869f9c79739899062ebe1138189d17c562fa"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 44,
+					"endLine": 55,
+					"sha256": "b701113f6b02957abe51e496c517620b8e26fd5443c145979161fba82e0c97ee"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/marketing-architecture.md",
+			"lineCount": 87,
+			"sha256": "68371ef966b53242931e0f35dac4b0b3c32d67c5451b0f2169dd49a7376d23f1",
+			"sections": [
+				{
+					"heading": "# Marketing architecture",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "c8866c92731894c5b53163a4fb92d429a242f79cf262ce360e9b7cedb14de4f9"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 44,
+					"sha256": "54aac0a1788ec2842072c32e14922fae9fadabcbac6646cea83b282829d31601"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 45,
+					"endLine": 63,
+					"sha256": "99d6f0af3793dd8af7f205d75a9aa51ed60e55a088d4730198bc0878fb8c7a1b"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 64,
+					"endLine": 74,
+					"sha256": "bb16e17601b4a679079e4fb10b559bb06bcf2ad190115da17162e20d47b8a968"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 75,
+					"endLine": 87,
+					"sha256": "72a096bc3ffa8f2e049fb35d36e1b4f2e18fd6b513aabc2c59d39dc9d0f6fd93"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/media-delivery.md",
+			"lineCount": 77,
+			"sha256": "27daa6ed0470f129510822e27bd7c1378d1b5c50c55a94252286b538569fc030",
+			"sections": [
+				{
+					"heading": "# Media delivery",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "c19a55c8af7831a225f28de382f8605049f715f71b393ec89ffe4f7243e97e32"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 36,
+					"sha256": "b142c35e43742b025bc71e0b12348fa20fd6fcb646210b9d3cb3f398e2d503f7"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 37,
+					"endLine": 53,
+					"sha256": "49ee2a101eac693aad7025af8f1b26e330668b93edba0edd083a932e3bbc043d"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 54,
+					"endLine": 65,
+					"sha256": "4fccb5c7e6bf4df5ddc8f35941fde17f6c622dc54bf0a5b859f563aaf5314327"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 66,
+					"endLine": 77,
+					"sha256": "d4f64530dada37d42ff769eba5f324486eb742a4242d32bbadc84cd6e212bdb5"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/owner-discovery.md",
+			"lineCount": 96,
+			"sha256": "50768168b13d0e464f8e0b578d7c56681a61fec1dfc895d2ddddaa47d6a26d33",
+			"sections": [
+				{
+					"heading": "# Owner discovery",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "95b6ef69f42c871db36e6a24081490e6e03dd36df0d246633851b5c5d0598ead"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 47,
+					"sha256": "687ac06fb52183f1987bbaf171e85a3bc297715edc8f777a1b67343fec48dd3b"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 48,
+					"endLine": 67,
+					"sha256": "f433f210dc0adc3934a2a70a2360c4ee8f7759f1753183f6eec479f4b171eef6"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 68,
+					"endLine": 81,
+					"sha256": "c2e4db6bac0879cdf2ee96526d75190479638d181536085d5b758780ffba7e87"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 82,
+					"endLine": 96,
+					"sha256": "5ee734c2122f2aa8807e2edc185ba3a28f833bf0c0e1bf6e5590f6b9681cfc6a"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/performance-measurement.md",
+			"lineCount": 53,
+			"sha256": "9d04cb562f07ccf13b85cdfbaa695bcd1f84f29211053aa14c65700459fc1861",
+			"sections": [
+				{
+					"heading": "# Performance measurement",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "d655c38c6bf86842ba6082d7ae09aa79b975fa31ab53109990a5492915fc289d"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 21,
+					"sha256": "4bd100f20282ac7c8cd172b6daff7d1d941527b73030a98ace1c86ba111d94e6"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 22,
+					"endLine": 33,
+					"sha256": "9443a355bb7f5888684d2b2638c24ba175621642ef40e0f7b9bdf12e50f4bbba"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 34,
+					"endLine": 45,
+					"sha256": "4af1e4d376e96051dbd2fe04d337ab10f99b40b7cbe5fca4d5f512a23f2c4e60"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 46,
+					"endLine": 53,
+					"sha256": "4b728e2f473a6733095117a24d836b8fd548171476ac086923fae972f25aa846"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/route-architecture.md",
+			"lineCount": 74,
+			"sha256": "fefdd3cb5280951a8c5f4a97585af512d008d5b735f663fc0b12016edd33c8db",
+			"sections": [
+				{
+					"heading": "# Route architecture",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "054db34dbb0cb2b943d64dcfdfbf218a8a37b3f41e398968cc4f946293598b84"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 37,
+					"sha256": "51cfaaec246963c27f82e55f90185d94568a1b501fef767c9ae38f6d174923cb"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 38,
+					"endLine": 49,
+					"sha256": "573dae116e179ce622adfb81ccac5dfb436ba99f12f7c6f3e6d925178c424b67"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 50,
+					"endLine": 64,
+					"sha256": "359f581b185eb5ef1d53450a760610087bab14ca115e37883a69c8672bcf1a21"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 65,
+					"endLine": 74,
+					"sha256": "01d2f14bea3d59cbca30ca20fa4e8972078a0a86fb15f3bcc0c323e5af40f1bb"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/route-metadata.md",
+			"lineCount": 73,
+			"sha256": "53b2d6a9e067eb429b90d0f98d9c45ee7229d2fbf7a6c8833750e1f733e4c5d2",
+			"sections": [
+				{
+					"heading": "# Route metadata",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "0aa2a61a2f8954b89eba182a061d0f4902f4b922fe723f461ece70f8095e95e0"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 31,
+					"sha256": "f4edda4efeb46d1526f1669f9839a4f60f7852e98f77a2d9ceb89881ec7f01b0"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 32,
+					"endLine": 43,
+					"sha256": "5915ec1deb63f6df8145063b6ee10cec343c8a03cde83f5e8c98c455b2a04b9f"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 44,
+					"endLine": 62,
+					"sha256": "42065bbd3bfee555453bb38e97e5eac0f11fba595ace0f944f0d31f340b6266d"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 63,
+					"endLine": 73,
+					"sha256": "13af6e4a447bcb7c0ad3e8f220990dbdcb029234640a1fddec7787e152694d78"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/section-construction.md",
+			"lineCount": 128,
+			"sha256": "0ce4ec8d871f07e518e98aef58f79204d292cd8ed033c2d4718e83f5c3a8f377",
+			"sections": [
+				{
+					"heading": "# Section construction",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "f1f205114bc0ae0af72116e653e83ac9fd51ce14a5c326bb45a331f1e3c2340e"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 67,
+					"sha256": "f0328667469954d4f73f42cfb83e14ca5565675fe24278684b1b8baeb76894f5"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 68,
+					"endLine": 89,
+					"sha256": "5ccfa6fcd0d33691a7b1390dfda302bd5578f25638997cf9b4443516487179a4"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 90,
+					"endLine": 103,
+					"sha256": "8ec8304c0f75bb25567455d90a0c47a39892e5c37ea9c70e14cb13d2bfefbe19"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 104,
+					"endLine": 128,
+					"sha256": "6abb3d31cc276dea3b4c8b95f12a0789c7556ddb27a8b8f4b899d05196ebd686"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/template-propagation.md",
+			"lineCount": 55,
+			"sha256": "c36574e5207ff81056862bab10d6fc745f26eff65f36848dfea74e577094cc69",
+			"sections": [
+				{
+					"heading": "# Template propagation",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "917c4cdd7aaefee3743acfdb6a1c61c372fedf57b7487cf2bae048bf5e3b16c8"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 20,
+					"sha256": "53f7d92aece8ae04ea5153fce9d2554513f6a243c032b83fe4d62aad28788e87"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 21,
+					"endLine": 32,
+					"sha256": "4be334cf0681c0dda399e4e5334b8d196fdd5b0e92b9121c6ea5ac3201861b31"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 33,
+					"endLine": 45,
+					"sha256": "597b4d496150873df1d0bf4ddfd5e9d41f0b605ced60b92b830192c7b1c23668"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 46,
+					"endLine": 55,
+					"sha256": "2dcab3aa68c78fccfe83b8f490066f8ad6b8fc7b168b406798c52b4488c64acd"
+				}
+			]
+		},
+		{
+			"path": "plugins/averlo/skills/repository-workflows/references/visual-composition.md",
+			"lineCount": 176,
+			"sha256": "44ec9aee4d6ace2ef62d50e9d77238b23473ef147a1ddbf00c708944cd808139",
+			"sections": [
+				{
+					"heading": "# Visual composition",
+					"startLine": 1,
+					"endLine": 2,
+					"sha256": "fabdafc6d77f315ed9caa22f0044793782e9ff49ee8f5679a67abd8d13a611a0"
+				},
+				{
+					"heading": "## Contract",
+					"startLine": 3,
+					"endLine": 46,
+					"sha256": "d6eae4fa8a9db4e3366413294d0718ded47cffe14e277add9825c5ab24ba06bf"
+				},
+				{
+					"heading": "## Hard boundaries",
+					"startLine": 47,
+					"endLine": 67,
+					"sha256": "e2884c8d9fa8eb15a2bdda7509929a5245c8941fe9ff7132c2bb06dab3a16a30"
+				},
+				{
+					"heading": "## Repository context",
+					"startLine": 68,
+					"endLine": 78,
+					"sha256": "3e40970bd333d9d142dba8ec10cd77b2212554bb93fb2f6883ac70bef9852477"
+				},
+				{
+					"heading": "## Verification",
+					"startLine": 79,
+					"endLine": 89,
+					"sha256": "0601394e4c260d71e32b94b03bc8e6226ada6644771e526e2472d19539c375d9"
+				},
+				{
+					"heading": "## Dashboard shell",
+					"startLine": 90,
+					"endLine": 111,
+					"sha256": "ed4956abbe62f6d07b354387a0840c0c31091b11cfa8dfbcce1d9943d54e4786"
+				},
+				{
+					"heading": "## Edge-aligned actions",
+					"startLine": 112,
+					"endLine": 121,
+					"sha256": "960fb19b1ae54b7d8dafee5bb87531b07ee6601159a93c820b51d563d2ec96fe"
+				},
+				{
+					"heading": "### Vocabulary for review and mixed action groups",
+					"startLine": 122,
+					"endLine": 154,
+					"sha256": "d4ccb963049010a534a50ea6d47e64b7ea2ca35381df88d3fbaba5e478508847"
+				},
+				{
+					"heading": "### Page alignment and copy",
+					"startLine": 155,
+					"endLine": 164,
+					"sha256": "fe1a7dff8fa0c1cdb712be1cc8b852bac10549a7ab3f8226f9de36747a21347d"
+				},
+				{
+					"heading": "## Color roles across surfaces",
+					"startLine": 165,
+					"endLine": 176,
+					"sha256": "7ec8e788a0e53f6bc43d62a495918c20824ba19caef7637060d065d06f0c5e3d"
+				}
+			]
+		}
+	],
+	"unchangedMaintainedSpecs": [
+		{
+			"path": "openspec/specs/data-lifecycle/form-behavior/spec.md",
+			"sha256": "63ae2d30dd5eaa827662e1f08d1e3d531486e2592f4fd2fc2b4b4f42053cc380"
+		},
+		{
+			"path": "openspec/specs/data-lifecycle/loading-state-behavior/spec.md",
+			"sha256": "09f07f93aee2a337933eab1402e63fd66b15e6b256b8f2a05cd5e1b3112b340c"
+		}
+	]
+}

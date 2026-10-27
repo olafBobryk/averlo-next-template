@@ -19,3 +19,9 @@ Implementation owners for `StateIndicator`, `ErrorState`, and `IdleState`.
   shared `Text` primitives.
 - The base root retains `data-slot="state-indicator"` and `data-variant` for
   composition, testing, and styling ownership.
+- Select an existing complete state/live/skeleton owner before generic loading
+  pieces. A generic state is appropriate only when no complete owner applies or
+  within an approved reusable extension. Report a missing boundary before adding
+  an approximate feature-local state tree. Known static context stays live and
+  loading placeholders remain non-interactive; [loading verification](../../../../../docs/testing/loading.md)
+  and the maintained loading capability own observable read-state behavior.

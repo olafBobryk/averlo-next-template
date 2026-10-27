@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import type * as React from "react";
+import styles from "./Skeleton.module.css";
 
 const skeletonStyles = cva("relative overflow-hidden bg-muted/80", {
 	defaultVariants: {
@@ -27,6 +28,8 @@ export type SkeletonProps = React.HTMLAttributes<HTMLDivElement> & {
 	as?: "div" | "span";
 	children?: React.ReactNode;
 	radius?: SkeletonRadius;
+	/** Shimmers by default; use static to opt out. Reduced motion disables shimmer. */
+	animation?: "static" | "shimmer";
 };
 
 export function Skeleton({
@@ -34,12 +37,18 @@ export function Skeleton({
 	className,
 	children,
 	radius,
+	animation = "shimmer",
 	style,
 	...rest
 }: SkeletonProps) {
 	return (
 		<Component
-			className={clsx(skeletonStyles({ radius }), className)}
+			className={clsx(
+				skeletonStyles({ radius }),
+				animation === "shimmer" && styles.shimmer,
+				className,
+			)}
+			data-skeleton-variant={animation}
 			aria-hidden={rest["aria-hidden"] ?? true}
 			style={{ ...style, textOverflow: "clip" }}
 			{...rest}

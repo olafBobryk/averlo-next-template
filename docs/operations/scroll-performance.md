@@ -151,3 +151,35 @@ needs scroll-performance measurement, add it intentionally after activation.
 - The score loop resets discarded candidate commits in its disposable
   autoresearch worktree back to the accepted baseline. Do not run candidate
   scoring from a worktree that contains uncommitted or unrelated work.
+
+## Assessment boundaries
+
+Start with the actual existing page and an accepted baseline, not the template's
+historical benchmark fixture. This procedure authorizes measurement only, not a
+redesign, new page structure, internal benchmark route or unrelated optimization.
+Use the production-like local build and the smallest declared mutable product
+source scope responsible for the measured cost.
+
+Read the selected route/component owners and the existing measure, record,
+setup-autoresearch and score scripts only as applicable. The committed example
+JSONL is schema reference; prior template scores are not evidence for an instance.
+Keep the harness, scorer, schema, accepted baseline and runtime plumbing read-only
+throughout a candidate loop. Change only declared product sources in its clean
+disposable worktree; never score dirty or unrelated work. A smaller viewport,
+shorter page or reduced scroll distance cannot count as a win. Review geometry
+changes as visual/layout changes before returning to performance scoring.
+
+## Verification and report
+
+Run `npm run verify:scroll-performance` after changing this measurement process.
+Measure and record the actual baseline before changing a candidate. Retain only
+a candidate passing the primary metric, paired non-regression guards, declared
+source-scope checks and independent confirm block described above. Recheck the
+affected route's interactions and visible layout to distinguish reduced work from
+changed behavior. Do not run a performance benchmark merely for ordinary motion,
+responsive or visual implementation work.
+
+The handoff records target path, viewport and geometry, accepted baseline,
+candidate keep/reject outcome, primary and paired metrics, confirm result,
+declared mutable scope and links to raw measurement/report evidence. Report
+uncertain or failed gates as such rather than inferring a production improvement.

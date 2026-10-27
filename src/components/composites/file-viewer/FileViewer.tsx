@@ -162,7 +162,7 @@ function Viewer({ source, onClose }: FileViewerProps) {
 	const pageInput = (small = false) => (
 		<InputFrame
 			size={small ? "xxs" : "xs"}
-			variant={small ? "muted" : "default"}
+			variant="default"
 			className="w-10 shrink-0"
 		>
 			<input

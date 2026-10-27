@@ -99,6 +99,13 @@ async function assertGeneratedProject(targetRoot, { installed }) {
 	}
 	for (const requiredPath of [
 		"PRODUCT.md",
+		"openspec/config.yaml",
+		"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md",
+		"openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md",
+		"openspec/specs/app/shared/frontend/content/media-delivery/spec.md",
+		"openspec/specs/app/marketing/content-sources/source-resolution/spec.md",
+		"openspec/specs/app/marketing/metadata/public-document-metadata/spec.md",
+		"scripts/verify/forms/contact.mjs",
 		"docs/README.md",
 		"package-lock.json",
 		"src/app/(site)/(marketing)/internal/testing/page.tsx",
@@ -108,6 +115,14 @@ async function assertGeneratedProject(targetRoot, { installed }) {
 		}
 	}
 	for (const retiredPath of [
+		"openspec/changes",
+		"openspec/specs/template",
+		"openspec/specs/product",
+		"openspec/specs/app/dashboard",
+		"openspec/specs/app/data-lifecycle",
+		"openspec/specs/app/content",
+		"scripts/verify/forms/login.mjs",
+		"scripts/verify/forms/support.mjs",
 		"docs/project/README.md",
 		"docs/project/source/README.md",
 		"src/app/(site)/(dev)/internal/dictionary",
@@ -119,6 +134,21 @@ async function assertGeneratedProject(targetRoot, { installed }) {
 			throw new Error(`Generated project retained ${retiredPath}.`);
 		}
 	}
+	const config = await fs.readFile(
+		path.join(targetRoot, "openspec/config.yaml"),
+		"utf8",
+	);
+	if (
+		!config.includes("independent product project") ||
+		!config.includes("cross-client/server data-lifecycle") ||
+		!config.includes("Reserve openspec/specs/product/") ||
+		/in the template repository|Contact and support fixtures never send email/iu.test(
+			config,
+		)
+	)
+		throw new Error(
+			"Created project lost scoped project-owned OpenSpec guidance.",
+		);
 	if ((await exists(path.join(targetRoot, "node_modules"))) !== installed) {
 		throw new Error(
 			`Generated dependency installation state does not match installed=${installed}.`,

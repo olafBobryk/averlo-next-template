@@ -5,15 +5,9 @@ import path from "node:path";
 import test from "node:test";
 import { collectSkillReferenceErrors } from "./verify-skill-references.mjs";
 
-const workflowRows = Array.from(
-	{ length: 14 },
-	(_, index) =>
-		`| Workflow ${index + 1} | Signal | [owner](references/owner.md) |`,
-).join("\n");
-
 async function createFixture({ context, extraSkillText = "", scripts = {} }) {
 	const root = await fs.mkdtemp(path.join(os.tmpdir(), "skill-references-"));
-	const router = path.join(root, "plugins/averlo/skills/repository-workflows");
+	const router = path.join(root, "plugins/averlo/skills/example-operation");
 	await fs.mkdir(path.join(router, "references"), { recursive: true });
 	await fs.mkdir(path.join(root, "src/components/ui/input/text"), {
 		recursive: true,
@@ -32,7 +26,7 @@ async function createFixture({ context, extraSkillText = "", scripts = {} }) {
 	);
 	await fs.writeFile(
 		path.join(router, "SKILL.md"),
-		`# Skill\n\n## Route the work\n\nRoute first.\n\n## Orient through selected concerns\n\n| Entry workflow | Signal | Concern |\n| --- | --- | --- |\n${workflowRows}\n\n## Apply repository-mode overlays\n\n${extraSkillText}\n`,
+		`# Skill\n\n[owner](references/owner.md)\n\n${extraSkillText}\n`,
 	);
 	await fs.writeFile(
 		path.join(router, "references/owner.md"),
@@ -86,13 +80,17 @@ test("reports an unknown npm script", async () => {
 	);
 });
 
-test("rejects retired guide and compatibility-skill sources in the router", async () => {
+test("validates a standalone operational skill without a repository router", async () => {
 	const root = await createFixture({
-		context:
-			"- `docs/guides/components/forms-and-submission.md`\n- `docs/skills/legacy/design-system/SKILL.md`",
+		context: "- `references/owner.md`\n- `src/components/AGENTS.md`",
 	});
+	assert.deepEqual(collectSkillReferenceErrors(root), []);
+});
+
+test("rejects missing skill-local references independently of other skills", async () => {
+	const root = await createFixture({ context: "- `references/missing.md`" });
 	assert.match(
 		collectSkillReferenceErrors(root).join("\n"),
-		/retired router source/u,
+		/missing repository path/u,
 	);
 });

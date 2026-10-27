@@ -1,12 +1,19 @@
 // components/ui/icons/iconRegistry.tsx
 "use client";
 
-import type { IconWeight } from "@phosphor-icons/react";
 import * as React from "react";
 import {
 	type CustomIconName,
 	customRegistry,
 } from "@/components/ui/icons/customRegistry";
+
+export type IconWeight =
+	| "thin"
+	| "light"
+	| "regular"
+	| "bold"
+	| "fill"
+	| "duotone";
 
 export type IconRenderProps = {
 	className?: string;
@@ -18,29 +25,35 @@ export type IconRenderProps = {
 export type IconName = CustomIconName | (string & {});
 export type IconRegistry = Record<string, React.ComponentType<IconRenderProps>>;
 
-const createLocalRegistry = (): IconRegistry => {
-	const entries = (Object.keys(customRegistry) as CustomIconName[]).map(
-		(name) => {
-			const LocalIcon: React.FC<IconRenderProps> = ({ className }) => {
-				const icon = customRegistry[name];
-				if (React.isValidElement<{ className?: string }>(icon)) {
-					const mergedClassName = [icon.props.className, className]
-						.filter(Boolean)
-						.join(" ");
-					return React.cloneElement(
-						icon as React.ReactElement<{ className?: string }>,
-						{ className: mergedClassName },
-					);
-				}
-				return icon;
-			};
-			LocalIcon.displayName = `LocalIcon(${name})`;
-			return [name, LocalIcon] as const;
-		},
-	);
+function renderLocalIcon(name: CustomIconName, { className }: IconRenderProps) {
+	const icon = customRegistry[name];
+	if (React.isValidElement<{ className?: string }>(icon)) {
+		return React.cloneElement(icon, {
+			className: [icon.props.className, className].filter(Boolean).join(" "),
+		});
+	}
+	return icon;
+}
 
-	return Object.fromEntries(entries) as IconRegistry;
-};
+function renderWeightedIcon(
+	Component: React.ComponentType<IconRenderProps>,
+	defaultWeight: IconWeight,
+	props: IconRenderProps,
+) {
+	return <Component {...props} weight={props.weight ?? defaultWeight} />;
+}
+
+const createLocalRegistry = (): IconRegistry =>
+	Object.fromEntries(
+		(Object.keys(customRegistry) as CustomIconName[]).map((name) => {
+			const LocalIcon: React.FC<IconRenderProps> = renderLocalIcon.bind(
+				null,
+				name,
+			);
+			LocalIcon.displayName = `LocalIcon(${name})`;
+			return [name, LocalIcon];
+		}),
+	);
 
 const localIconRegistry = createLocalRegistry();
 
@@ -68,9 +81,8 @@ export const createIconRegistry = (
 				const defaultWeight =
 					defaultWeights[name] ?? semanticDefaultWeights[name];
 				if (!Component || !defaultWeight) return [name, Component];
-				const WithDefaultWeight = (props: IconRenderProps) => (
-					<Component {...props} weight={props.weight ?? defaultWeight} />
-				);
+				const WithDefaultWeight: React.FC<IconRenderProps> =
+					renderWeightedIcon.bind(null, Component, defaultWeight);
 				WithDefaultWeight.displayName = `IconDefault(${name})`;
 				return [name, WithDefaultWeight];
 			}),

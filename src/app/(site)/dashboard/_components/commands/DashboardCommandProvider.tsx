@@ -5,18 +5,17 @@ import { AnimatePresence } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
-import { MODAL_OPEN_EVENT } from "@/lib/modal";
-import { DashboardCommandOverlay } from "./DashboardCommandOverlay";
 import { Button } from "@/components/ui/primitives/Button";
 import { InputFrame } from "@/components/ui/primitives/InputFrame";
 import type { Organization } from "@/lib/auth/contracts";
+import { MODAL_OPEN_EVENT } from "@/lib/modal";
 import {
 	type DashboardCapability,
 	getDashboardNavigationCommands,
 	hasDashboardCapability,
 } from "../../_registry/surfaceRegistry";
-
 import type { DashboardContextualCommand } from "./DashboardCommandContracts";
+import { DashboardCommandOverlay } from "./DashboardCommandOverlay";
 import { DashboardCommandPalette } from "./DashboardCommandPalette";
 import {
 	buildDashboardCommandTree,
@@ -145,7 +144,7 @@ export function DashboardCommandProvider({
 	);
 	const openCommands = React.useCallback(
 		(anchor?: HTMLElement) => {
-            if (afterClose.current) return;
+			if (afterClose.current) return;
 			source.current = anchor ?? resolveAnchor();
 			restore.current =
 				document.activeElement instanceof HTMLElement
@@ -390,12 +389,12 @@ export function DashboardCommandTrigger({
 				aria-haspopup="dialog"
 				aria-expanded={context.active}
 				className={clsx(
-					"!h-8 w-full !rounded-md !text-muted-foreground hover:!bg-sidebar-accent/80 hover:!text-sidebar-accent-foreground",
-					mobileExpanded ? "!hidden" : collapsed ? "inline-flex" : "lg:!hidden",
+					"mx-auto !rounded-md !text-muted-foreground hover:!text-sidebar-accent-foreground",
+					mobileExpanded ? "!hidden" : collapsed ? "!flex" : "!flex lg:!hidden",
 					context.active && "opacity-0",
 				)}
 				onClick={() => context.open(rail.current ?? undefined)}
-				size="none"
+				size="icon-sm"
 				variant="ghost"
 			>
 				<Icon size="md" name="search" />

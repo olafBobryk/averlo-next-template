@@ -46,6 +46,7 @@ import {
 	DotsHorizontal,
 	DotsVertical,
 	ExitLogout,
+	Expand,
 	ExternalLink,
 	Eye,
 	EyeClosed,
@@ -67,6 +68,7 @@ import {
 	Pencil,
 	Pin,
 	PinFilled,
+	Play,
 	Plus,
 	QuestionMarkCircle,
 	Quote,
@@ -82,6 +84,7 @@ import {
 	StarFilled,
 	Stop,
 	Storage,
+	TableCellsFilled,
 	Text,
 	Trash,
 	Undo,
@@ -96,29 +99,19 @@ import {
 	type IconRegistry,
 	type IconRenderProps,
 } from "./iconRegistry";
-import { phosphorIconRegistry } from "./phosphorRegistry";
 
 type SdkIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 // SDK glyphs have fixed optical weights. Select real filled variants where
-// supplied; preserve legacy fill requests through the fallback for other names.
+// supplied; symbols without a filled SDK variant retain their native outline.
 function adapt(
 	name: string,
 	Outline: SdkIcon,
 	Filled?: SdkIcon,
 ): ComponentType<IconRenderProps> {
 	const Adapter = ({ weight, title, ...props }: IconRenderProps) => {
-		const Glyph =
-			weight === "fill"
-				? (Filled ?? phosphorIconRegistry[name] ?? Outline)
-				: Outline;
-		return (
-			<Glyph
-				{...props}
-				{...(weight === "fill" && !Filled ? { weight } : {})}
-				aria-hidden={props["aria-hidden"] ?? true}
-			/>
-		);
+		const Glyph = weight === "fill" ? (Filled ?? Outline) : Outline;
+		return <Glyph {...props} aria-hidden={props["aria-hidden"] ?? true} />;
 	};
 	Adapter.displayName = `OpenAIIcon(${name})`;
 	return Adapter;
@@ -142,6 +135,10 @@ function BoltIcon({ weight, className, title, ...props }: IconRenderProps) {
 
 const openaiOverrides: Partial<IconRegistry> = {
 	bolt: BoltIcon,
+	send: adapt("send", ArrowUp),
+	expand: adapt("expand", Expand),
+	play: adapt("play", Play),
+	table: adapt("table", TableCellsFilled),
 	archive: adapt("archive", Archive),
 	at: adapt("at", AtSign),
 	code: adapt("code", Code),
@@ -207,9 +204,5 @@ const openaiOverrides: Partial<IconRegistry> = {
 	"add-image": adapt("add-image", ImageSquare),
 };
 
-// Brand marks, spinner, send, and rich-text glyphs without a matching SDK symbol remain
-// explicit Phosphor fallbacks. Keep this provider interchangeable per app.
-export const openaiIconRegistry = createIconRegistry({
-	...phosphorIconRegistry,
-	...openaiOverrides,
-});
+// Local brand and editor glyphs are merged by createIconRegistry.
+export const openaiIconRegistry = createIconRegistry(openaiOverrides);

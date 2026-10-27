@@ -2,10 +2,10 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: trigger wrapper behavior is delegated through render props and nested controls */
 "use client";
 
-import { CaretDown } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
+import { Icon } from "@/components/ui/icons/Icon";
 import Portal from "@/components/ui/overlays/Portal";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { getDropdownSurfaceClassName } from "../dropdownStyles";
@@ -19,11 +19,12 @@ import type { DropdownCollectionController } from "./useDropdownCollectionContro
 
 const DEFAULT_CHEVRON_ICON = ({ isOpen }: { isOpen: boolean }) => {
 	return (
-		<CaretDown
+		<Icon
+			name="chevron-down"
 			aria-hidden
 			data-is-open={isOpen}
 			className="data-[is-open=true]:rotate-180 transition-transform motion-micro"
-			size={15}
+			style={{ width: 15, height: 15 }}
 		/>
 	);
 };
@@ -265,8 +266,7 @@ export function DropdownRoot({
 			explicitWidth ?? (menuWidth === "trigger" ? rect.width : menuMinWidth);
 		const measuredWidth =
 			explicitWidth ??
-			menuRef.current?.getBoundingClientRect().width ??
-			resolvedMinWidth;
+			Math.max(menuRef.current?.offsetWidth ?? 0, resolvedMinWidth ?? 0);
 		const measuredHeight =
 			menuRef.current?.scrollHeight ??
 			menuRef.current?.getBoundingClientRect().height ??
@@ -321,11 +321,15 @@ export function DropdownRoot({
 			focusTarget?.focus({ preventScroll: true });
 		}
 		const handleResize = () => calculateMenuPosition();
+		const observer = new ResizeObserver(handleResize);
+		if (menuRef.current) observer.observe(menuRef.current);
+		if (rootRef.current) observer.observe(rootRef.current);
 		window.addEventListener("resize", handleResize);
 		if (positionStrategy === "fixed") {
 			window.addEventListener("scroll", handleResize, true);
 		}
 		return () => {
+			observer.disconnect();
 			window.removeEventListener("resize", handleResize);
 			if (positionStrategy === "fixed") {
 				window.removeEventListener("scroll", handleResize, true);

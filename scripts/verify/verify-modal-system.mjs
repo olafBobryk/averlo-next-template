@@ -18,6 +18,9 @@ const commandSurface = readIfPresent(
 const commandPalette = readIfPresent(
 	"src/app/(site)/dashboard/_components/commands/DashboardCommandPalette.tsx",
 );
+const commandOverlay = readIfPresent(
+	"src/app/(site)/dashboard/_components/commands/DashboardCommandOverlay.tsx",
+);
 const confirmation = read(
 	"src/components/ui/overlays/modal/ConfirmationModal.tsx",
 );
@@ -63,12 +66,18 @@ for (const removedEscapeHatch of [
 }
 
 if (commandSurface) {
-	assert.match(
-		commandSurface,
-		/const \{ closeModal, openModal \} = useModal\(\)/,
-	);
-	assert.match(commandSurface, /openModal\([\s\S]*?<DashboardCommandSession/);
-	assert.match(commandSurface, /cardProps: \{[\s\S]*?maxWidth: "2xl"/);
+	assert.match(commandSurface, /<DashboardCommandOverlay/);
+	assert.match(commandSurface, /afterClose\.current = \(\) =>/);
+	assert.match(commandSurface, /onExitComplete=/);
+	assert.match(commandSurface, /registrations/);
+}
+if (commandOverlay) {
+	assert.match(commandOverlay, /<Portal>/);
+	assert.match(commandOverlay, /<Float/);
+	assert.match(commandOverlay, /measureCommandAnchor/);
+	assert.match(commandOverlay, /event\.key === "Escape"/);
+	assert.match(commandOverlay, /event\.key === "Tab"/);
+	assert.match(commandOverlay, /onPointerDown=/);
 }
 if (commandPalette) {
 	assert.doesNotMatch(commandPalette, /<ModalShell|<ModalCard/);

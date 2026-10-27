@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Button } from "@/components/ui/primitives/Button";
 import { Section } from "@/components/ui/primitives/Section";
 import { Panel } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
 import { createStaticMarketingPageMetadata } from "@/lib/metadata";
+import { ContactForm } from "./_components/ContactForm";
 
 export const metadata: Metadata =
 	createStaticMarketingPageMetadata("marketing.contact");
@@ -17,21 +17,14 @@ export default function ContactPage() {
 						Contact
 					</Text>
 					<Text as="p" variant="body" tone="muted">
-						Replace this starter contact path with the channel and form your
-						project needs.
+						Try the template’s contact form with sample details.
 					</Text>
 				</div>
 				<Panel display="flex" gap="sm" padding="md">
 					<Text as="h2" variant="headingSm">
-						Start a conversation
+						Contact form demo
 					</Text>
-					<Text as="p" variant="support" tone="muted">
-						The thin profile keeps this route intentionally simple and ready for
-						a project-specific form or provider adapter.
-					</Text>
-					<div>
-						<Button href="mailto:hello@example.com">Email us</Button>
-					</div>
+					<ContactForm />
 				</Panel>
 			</div>
 		</Section>

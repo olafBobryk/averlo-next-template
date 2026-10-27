@@ -287,6 +287,7 @@ type DashboardTablePanelSkeletonProps = {
 		id: string;
 		kind?: "action" | "data";
 		responsivePriority?: number;
+		sortable?: boolean;
 	}[];
 	header?: ReactNode;
 	id?: string;
@@ -349,7 +350,28 @@ export function DashboardTablePanelSkeleton({
 											}
 											key={column.id}
 										>
-											{column.header}
+											{column.kind !== "action" && column.sortable !== false ? (
+												<span
+													className={clsx(
+														"-mx-1.5 -my-1 inline-flex items-center gap-2 px-1.5 py-1",
+														column.align === "right" && "ml-auto",
+													)}
+												>
+													<span className="truncate">{column.header}</span>
+													<span
+														aria-hidden="true"
+														className="inline-grid size-3 shrink-0 place-items-center"
+													>
+														<Icon
+															className="text-muted-foreground"
+															name="minus"
+															size="sm"
+														/>
+													</span>
+												</span>
+											) : (
+												column.header
+											)}
 										</th>
 									);
 								})}

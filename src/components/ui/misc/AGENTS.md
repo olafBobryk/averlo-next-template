@@ -17,6 +17,8 @@ and utility components that are neither complete inputs nor overlays.
 
 ## Structural Invariants
 
+- Chip owns label capitalization through its shared `capitalize` utility; callers
+  pass original labels without repeating casing styles or changing stored values.
 - Component-specific skeletons preserve the live owner’s outer DOM, wrapper
   layout, spacing, and breakpoint structure while replacing content nodes.
   Skeleton trees remain non-interactive.

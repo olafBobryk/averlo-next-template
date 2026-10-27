@@ -38,7 +38,8 @@ export default async function SignInOptionsPage({
 			<Button
 				className="w-full"
 				href={withSafeContinuation(hrefFor("auth.login"), next)}
-				variant="ghost"
+				size="none"
+				variant="bare"
 			>
 				Use password
 			</Button>

@@ -2,7 +2,6 @@ import { templateCapabilities } from "@/config/capabilities";
 import { defineRouteSurfaceRegistry } from "@/lib/surfaces/routeSurface";
 
 const dashboardRouteSurfaceDefinitions = [
-
 	{
 		family: "dashboard",
 		href: "/dashboard",

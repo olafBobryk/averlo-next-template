@@ -1,0 +1,62 @@
+schema: spec-driven
+context: |
+  Read PRODUCT.md and applicable AGENTS.md for intent and structural policy.
+  This canonical Averlo foundation uses three contract roots: template/ for
+  canonical assembly/demonstrations; app/ for reusable shared and surface behavior;
+  product/ for real business requirements independently authored by a project.
+  app/shared groups frontend, services and complete cross-client/server data
+  lifecycles; app/marketing and app/dashboard own their surface-specific policy.
+  Discover with openspec list --specs, then openspec show <capability-id> --type spec.
+  Read the changed surface, relevant shared dependencies and existing product
+  contracts only; folders do not imply sibling loading or feature installation.
+  Read template contracts only for actual canonical template/demo/assembly work.
+  Generated projects receive explicitly selected independent app copies, never
+  template contracts/history or invented product specifications. Propagate selected
+  specs, tests, scripts and instructions through established assembly ownership.
+  Business rules refine compatible generic contracts; conflicts require explicit
+  spec changes rather than silent precedence. Demo reset/no-delivery/non-durability
+  does not constrain authorized real services in independent products.
+  Forms own submissions, loading owns reads, actions own non-form changes.
+  Nearest AGENTS owns structure; Storybook owns component APIs/defaults; canonical
+  procedures own execution/evidence. Use Preview for local servers. Contact/support
+  fixtures never send email. Never use live customer data. Keep stock integration;
+  add no routing index, implicit skill or custom schema.
+operations:
+  apply:
+    guidance:
+      - Run verify:forms for changed forms and verify:loading for changed loading behavior against a verified local Preview URL.
+      - Preserve unrelated work; do not introduce custom routing skills or schemas.
+  archive:
+    guidance:
+      - Record actual verification evidence and any remaining gaps before archiving.
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

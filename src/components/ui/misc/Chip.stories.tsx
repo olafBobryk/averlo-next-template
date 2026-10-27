@@ -108,9 +108,9 @@ export const IdentityContrast: Story = {
 			const pill = row.children[0];
 			const avatar = row.querySelector('[role="img"]');
 			if (!avatar?.parentElement) throw new Error("Missing identity avatar");
-			await expect(
-				getComputedStyle(avatar.parentElement).backgroundColor,
-			).toBe(getComputedStyle(pill).backgroundColor);
+			await expect(getComputedStyle(avatar.parentElement).backgroundColor).toBe(
+				getComputedStyle(pill).backgroundColor,
+			);
 		}
 	},
 };

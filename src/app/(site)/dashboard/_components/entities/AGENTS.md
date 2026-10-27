@@ -2,6 +2,10 @@
 
 - Renderers receive resolved domain facts or presentation view models and never
   fetch sessions, organizations, capabilities, or persistence themselves.
+- Serializable facts and mutation inputs belong to domain modules; React-free,
+  fetch-free presentation factories own labels, fields, columns, URLs, variants
+  and semantic commands. Routes/adapters own authorization again at execution.
+  Global account identity is distinct from organization membership.
 - Import the entity-owned presentation factory directly. Do not add a global
   renderer or presentation registry.
 - Loading states belong to their live component as `Component.Skeleton`, must
@@ -43,3 +47,13 @@
   skeleton. The shared table owns pagination and sorts the complete collection
   before paging. Overview excerpts may instead use `viewMoreHref`; do not combine
   the two. Remote pagination needs an explicit data contract, not a guessed total.
+
+## Verification boundary
+
+Follow [entity verification](../../../../../../docs/testing/entities.md), which
+links the authoritative entity/action/loading/access capabilities. Review the
+selected vertical's domain, factory, renderer, adapter and owner story together;
+do not add unused entity surfaces or imply disconnected tool execution. Fixture
+reset and external-write isolation remain domain responsibilities. Detail deletion
+uses replacement navigation once; preserving a failed confirmation also preserves
+input, selection and the last durable state.

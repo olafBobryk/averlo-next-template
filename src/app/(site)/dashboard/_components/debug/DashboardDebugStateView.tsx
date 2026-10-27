@@ -7,9 +7,11 @@ import { DashboardForcedLoadingView } from "./DashboardForcedLoadingView";
 export function DashboardDebugStateView({
 	pathname,
 	state,
+	onRetry,
 }: {
 	pathname: string;
 	state: DashboardDebugState;
+	onRetry: () => void;
 }) {
 	if (state === "loading")
 		return <DashboardForcedLoadingView pathname={pathname} />;
@@ -24,7 +26,11 @@ export function DashboardDebugStateView({
 	if (state === "error") {
 		return (
 			<DashboardStatusFrame
-				action={<Button variant="secondary">Try again</Button>}
+				action={
+					<Button onClick={onRetry} variant="secondary">
+						Try again
+					</Button>
+				}
 				description="The deterministic debug mode is showing the route error treatment."
 				title="Something went wrong"
 			/>

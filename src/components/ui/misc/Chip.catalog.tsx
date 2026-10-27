@@ -68,6 +68,11 @@ export const catalogContract = defineCatalogOwnerContract({
 	],
 	guarantees: [
 		{
+			label:
+				"Labels capitalize through shared styling without changing their values",
+			storyId: "ui-misc-chip--tones-and-skeleton",
+		},
+		{
 			label: "Static, link, and button semantics",
 			storyId: "ui-misc-chip--semantic-modes",
 		},

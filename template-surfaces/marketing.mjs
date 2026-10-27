@@ -1,6 +1,16 @@
 export const marketingSurface = {
 	marketing: {
 		ownedPaths: [
+			"openspec/specs/app/marketing/content-sources/source-resolution/spec.md",
+			"openspec/specs/app/marketing/metadata/public-document-metadata/spec.md",
+			"openspec/specs/app/marketing/composition/marketing-composition/spec.md",
+			"openspec/specs/app/shared/services/delivery/contact-delivery/spec.md",
+			"docs/testing/content-sources.md",
+			"docs/testing/marketing-composition.md",
+			"docs/testing/contact-delivery.md",
+			"src/app/api/contact",
+			"src/lib/forms/contact.test.ts",
+			"scripts/verify/forms/contact.mjs",
 			"scripts/verify/verify-marketing.mjs",
 			"scripts/verify/verify-marketing-media-policy.mjs",
 			"scripts/verify/verify-marketing-media-policy.test.mjs",

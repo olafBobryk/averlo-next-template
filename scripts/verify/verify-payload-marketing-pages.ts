@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import {
 	fallbackDocumentPage,
 	fallbackHomePage,
@@ -10,6 +12,13 @@ import {
 import { getConfiguredMarketingPage } from "@/payload/marketingPageSource";
 
 async function main() {
+	const adapterSource = readFileSync(
+		resolve(process.cwd(), "src/payload/marketingPageSource.ts"),
+		"utf8",
+	);
+	assert.match(adapterSource, /draft:\s*false/);
+	assert.match(adapterSource, /if\s*\(!page\)/);
+	assert.match(adapterSource, /no published marketing page/);
 	let fallbackReadCalled = false;
 	assert.strictEqual(
 		await getConfiguredMarketingPage("home", {
@@ -87,6 +96,26 @@ async function main() {
 		fallbackHomePage,
 	);
 
+	await assert.rejects(
+		getConfiguredMarketingPage("home", {
+			configured: true,
+			mode: "payload",
+			readPayload: async () => {
+				throw new Error(
+					"Payload has no published marketing page for slug home.",
+				);
+			},
+		}),
+		/no published marketing page/,
+	);
+	await assert.rejects(
+		getConfiguredMarketingPage("home", {
+			configured: true,
+			mode: "payload",
+			readPayload: async () => undefined,
+		}),
+		/requires an object at marketingPage/,
+	);
 	await assert.rejects(
 		getConfiguredMarketingPage("home", {
 			configured: false,

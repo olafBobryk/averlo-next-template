@@ -1,16 +1,25 @@
 #!/usr/bin/env node
 
+import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 import process from "node:process";
-import { assertPackageOwnership } from "../../template-assembly/assembler.mjs";
+import {
+	assembleTemplateProfile,
+	assertPackageOwnership,
+} from "../../template-assembly/assembler.mjs";
+import {
+	assemblyCoreSpecPaths,
+	assemblyOpenSpecSkillPaths,
+} from "../../template-assembly/manifest.mjs";
 import {
 	getProfileVerificationCommands,
 	templateProfiles,
 } from "../../template-profiles/index.mjs";
+import { templateSurfaces } from "../../template-surfaces/index.mjs";
 
 const PROFILE_CASES = [
 	{ profileId: "full", content: "payload-ready" },
@@ -442,8 +451,13 @@ async function assertGeneratedDocumentation(outputRoot, profileCase) {
 		}
 	}
 	for (const requiredPolicy of [
-		"optional repository workflow layer",
-		"Its absence from the current skill catalogue does not block ordinary implementation",
+		"stock OpenSpec discovery",
+		"project-owned maintained behavior in `openspec/specs/app/`",
+		"This project owns its `app/` contracts and OpenSpec configuration",
+		"Nearest `AGENTS.md` owns structure and dependency direction",
+		"Storybook owns supported component APIs/defaults",
+		"names-only `WORKFLOWS.md` menu",
+		"independent copies",
 		"A source-backed composition must not call Figma or edit product code",
 		"$averlo:compose",
 		"$averlo:systemize-composition",
@@ -519,8 +533,13 @@ async function assertCanonicalAgentContract(templateRoot) {
 		}
 	}
 	for (const requiredPolicy of [
-		"optional repository workflow layer",
-		"Its absence from the current skill catalogue does not block ordinary implementation",
+		"`openspec list --specs`",
+		"`openspec show <capability-id> --type spec`",
+		"normal stock change lifecycle",
+		"Generated projects receive explicitly selected independent app copies",
+		"Nearest `AGENTS.md` owns source topology, dependency direction",
+		"Storybook owner contracts own supported component APIs and defaults",
+		"`WORKFLOWS.md` is their names-only menu",
 		"A source-backed composition must not call Figma or edit product code",
 		"$averlo:compose",
 		"$averlo:systemize-composition",
@@ -577,12 +596,7 @@ async function verifyAssistantCapability(templateRoot, tempRoot) {
 	const selectedPackage = await readJson(
 		path.join(selectedRoot, "package.json"),
 	);
-	for (const dependency of [
-		"@ai-sdk/openai",
-		"@ai-sdk/react",
-		"ai",
-		"streamdown",
-	]) {
+	for (const dependency of ["@ai-sdk/openai", "ai", "streamdown"]) {
 		if (!selectedPackage.dependencies?.[dependency]) {
 			throw new Error(
 				`Selected Assistant capability is missing ${dependency}.`,
@@ -646,7 +660,7 @@ async function assertNoAssistantCapability(outputRoot) {
 		}
 	}
 	const pkg = await readJson(path.join(outputRoot, "package.json"));
-	for (const dependency of ["@ai-sdk/openai", "@ai-sdk/react", "ai"]) {
+	for (const dependency of ["@ai-sdk/openai", "ai"]) {
 		if (pkg.dependencies?.[dependency] !== undefined) {
 			throw new Error(
 				`Default project unexpectedly contains Assistant dependency: ${dependency}`,
@@ -668,6 +682,205 @@ async function assertNoAssistantCapability(outputRoot) {
 	}
 }
 
+async function assertProjectOpenSpecConfig(outputRoot) {
+	const relativePath = "openspec/config.yaml";
+	const configPath = path.join(outputRoot, relativePath);
+	const config = await fs.readFile(configPath, "utf8");
+	if (
+		!/^schema: spec-driven$/mu.test(config) ||
+		!/^context: \|$/mu.test(config) ||
+		!config.includes("independent product project") ||
+		!config.includes("openspec/specs/app/") ||
+		!config.includes("project-owned copies") ||
+		!config.includes("existing product contracts") ||
+		!config.includes("cross-client/server data-lifecycle") ||
+		!config.includes("Reserve openspec/specs/product/") ||
+		!config.includes("never installs a feature") ||
+		!/^operations:$/mu.test(config) ||
+		[...config.matchAll(/^([^\s#][^:]*):/gmu)].some(
+			(match) => !["schema", "context", "operations"].includes(match[1]),
+		) ||
+		/in the template repository|propagate applicable|Contact and support fixtures never send email|template\/(?:demo-behavior|project-assembly)/iu.test(
+			config,
+		)
+	)
+		throw new Error(
+			"Generated OpenSpec config retains template policy or lacks project ownership.",
+		);
+	const sourcePath = path.resolve(relativePath);
+	const [sourceConfig, sourceStat, outputStat] = await Promise.all([
+		fs.readFile(sourcePath, "utf8"),
+		fs.stat(sourcePath),
+		fs.stat(configPath),
+	]);
+	if (
+		config === sourceConfig ||
+		(sourceStat.dev === outputStat.dev && sourceStat.ino === outputStat.ino)
+	)
+		throw new Error(
+			"Generated OpenSpec config must be an independent project-owned configuration.",
+		);
+}
+
+function isScopedAppCapability(capability) {
+	return /^app\/(?:shared\/(?:data-lifecycle|frontend\/(?:components|interaction|navigation|content)|services\/(?:identity|files|delivery|transport))|marketing\/(?:composition|content-sources|metadata)|dashboard\/navigation)\/[a-z][a-z0-9-]*$/u.test(
+		capability,
+	);
+}
+
+async function assertAppCapabilityReferences(outputRoot, file) {
+	const text = await fs.readFile(file, "utf8");
+	for (const match of text.matchAll(
+		/(?<![a-z0-9-/])((?:app|template|product|content|data-lifecycle|delivery|domain|experience|identity|integration|interaction|navigation|ui-system)(?:\/[a-z][a-z0-9-]*)+)(?![a-z0-9-/])/gu,
+	)) {
+		if (!isScopedAppCapability(match[1]))
+			throw new Error(
+				`Generated capability has a legacy, non-app or unsupported-scope dependency: ${match[1]}`,
+			);
+		if (
+			!(await pathExists(
+				path.join(outputRoot, "openspec/specs", match[1], "spec.md"),
+			))
+		)
+			throw new Error(`Generated capability dependency missing: ${match[1]}`);
+	}
+}
+
+async function assertBehaviorContracts(outputRoot, surfaces) {
+	await assertProjectOpenSpecConfig(outputRoot);
+	const expected = new Set(assemblyCoreSpecPaths);
+	for (const surface of surfaces) {
+		for (const owned of templateSurfaces[surface]?.ownedPaths ?? []) {
+			if (owned.startsWith("openspec/specs/")) expected.add(owned);
+		}
+	}
+	const files = [];
+	async function visit(directory) {
+		if (!(await pathExists(directory))) return;
+		for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
+			const target = path.join(directory, entry.name);
+			if (entry.isDirectory()) await visit(target);
+			else files.push(target);
+		}
+	}
+	if (await pathExists(path.join(outputRoot, "openspec/changes")))
+		throw new Error("Generated OpenSpec history must remain excluded.");
+	for (const namespace of ["template", "product"]) {
+		if (await pathExists(path.join(outputRoot, "openspec/specs", namespace)))
+			throw new Error(
+				"Generated specs retain template, product, legacy or unsupported namespaces.",
+			);
+	}
+	await visit(path.join(outputRoot, "openspec/specs"));
+	const actual = new Set(files.map((file) => path.relative(outputRoot, file)));
+	if (
+		[...actual].some(
+			(file) =>
+				!file.endsWith("/spec.md") ||
+				!isScopedAppCapability(
+					file.slice("openspec/specs/".length, -"/spec.md".length),
+				),
+		)
+	)
+		throw new Error(
+			"Generated specs retain template, product, legacy or unsupported namespaces.",
+		);
+	const expectedCount =
+		13 +
+		(surfaces.has("dashboard") ? 3 : 0) +
+		(surfaces.has("marketing") ? 4 : 0);
+	if (expected.size !== expectedCount)
+		throw new Error(
+			`Explicit selected capability count differs: expected ${expectedCount}, got ${expected.size}`,
+		);
+	for (const [capability, shouldExist] of [
+		["app/shared/frontend/content/media-delivery", true],
+		[
+			"app/marketing/content-sources/source-resolution",
+			surfaces.has("marketing"),
+		],
+		[
+			"app/marketing/metadata/public-document-metadata",
+			surfaces.has("marketing"),
+		],
+		["app/dashboard/navigation/route-enrichment", surfaces.has("dashboard")],
+		[
+			"app/shared/frontend/content/entity-presentation",
+			surfaces.has("dashboard"),
+		],
+		[
+			"app/shared/services/files/private-file-access",
+			surfaces.has("dashboard"),
+		],
+		[
+			"app/shared/services/delivery/contact-delivery",
+			surfaces.has("marketing"),
+		],
+	]) {
+		if (expected.has(`openspec/specs/${capability}/spec.md`) !== shouldExist)
+			throw new Error(
+				`Explicit capability surface ownership differs: ${capability}`,
+			);
+	}
+	if (
+		actual.size !== expected.size ||
+		[...expected].some((file) => !actual.has(file))
+	)
+		throw new Error(
+			`Generated behavioral capability ownership mismatch: ${[...actual].join(", ")}`,
+		);
+	for (const relativePath of [...expected, ...assemblyOpenSpecSkillPaths]) {
+		const sourcePath = path.resolve(relativePath);
+		const outputPath = path.join(outputRoot, relativePath);
+		if (
+			(await fs.readFile(sourcePath, "utf8")) !==
+			(await fs.readFile(outputPath, "utf8"))
+		)
+			throw new Error(
+				`Generated independent contract differs: ${relativePath}`,
+			);
+		const [sourceStat, outputStat] = await Promise.all([
+			fs.stat(sourcePath),
+			fs.stat(outputPath),
+		]);
+		if (sourceStat.dev === outputStat.dev && sourceStat.ino === outputStat.ino)
+			throw new Error(
+				`Generated contract shares its source inode: ${relativePath}`,
+			);
+	}
+	await visit(path.join(outputRoot, "docs/testing"));
+	files.push(path.join(outputRoot, "WORKFLOWS.md"));
+	for (const file of files) {
+		const text = await fs.readFile(file, "utf8");
+		for (const match of text.matchAll(
+			/\[[^\]]+\]\((<[^>]+>|(?:[^()]|\([^()]*\))*)\)/gu,
+		)) {
+			const target = decodeURI(
+				match[1].replace(/^<|>$/gu, "").split("#", 1)[0],
+			);
+			if (!target || /^[a-z][a-z0-9+.-]*:/iu.test(target)) continue;
+			if (!(await pathExists(path.resolve(path.dirname(file), target))))
+				throw new Error(
+					`Generated policy has a missing link: ${path.relative(outputRoot, file)} -> ${target}`,
+				);
+		}
+		if (file.endsWith("spec.md"))
+			await assertAppCapabilityReferences(outputRoot, file);
+	}
+	const agentText = await fs.readFile(
+		path.join(outputRoot, "AGENTS.md"),
+		"utf8",
+	);
+	if (
+		/repository-workflows|template\/(?:(?:assembly|demonstrations)\/)?(?:project-assembly|demo-behavior)|openspec\/specs\/(?!app\/|product\/)/u.test(
+			agentText,
+		)
+	)
+		throw new Error(
+			"Generated instructions retain retired or generator-only guidance.",
+		);
+}
+
 async function assertStorybook(outputRoot, profileCase) {
 	for (const requiredPath of [
 		".storybook/main.ts",
@@ -684,12 +897,71 @@ async function assertStorybook(outputRoot, profileCase) {
 			);
 		}
 	}
-	for (const forbiddenPath of [".agents", "plugins"]) {
+	for (const forbiddenPath of [
+		".agents/plugins",
+		"plugins",
+		"openspec/changes",
+		"openspec/specs/template",
+	]) {
 		if (await pathExists(path.join(outputRoot, forbiddenPath))) {
 			throw new Error(
 				`${profileCase.profileId}/${profileCase.content} contains template plugin source: ${forbiddenPath}`,
 			);
 		}
+	}
+	for (const requiredPath of [
+		...assemblyOpenSpecSkillPaths,
+		"openspec/config.yaml",
+		"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md",
+		"openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md",
+		"docs/testing/forms.md",
+		"docs/testing/loading.md",
+		"WORKFLOWS.md",
+		"scripts/verify/verify-forms.mjs",
+		"scripts/verify/verify-loading.mjs",
+		"scripts/verify/forms/shared.mjs",
+	]) {
+		if (!(await pathExists(path.join(outputRoot, requiredPath))))
+			throw new Error(
+				`Generated project is missing form/OpenSpec ownership: ${requiredPath}`,
+			);
+	}
+	const stockSkills = await fs.readdir(path.join(outputRoot, ".agents/skills"));
+	if (
+		stockSkills.length !== 6 ||
+		stockSkills.some(
+			(name) =>
+				!assemblyOpenSpecSkillPaths.has(`.agents/skills/${name}/SKILL.md`),
+		)
+	)
+		throw new Error(
+			"Generated project must retain only the six stock OpenSpec skills.",
+		);
+	const surfaces = new Set(
+		templateProfiles[profileCase.profileId].assembly.surfaces,
+	);
+	await assertBehaviorContracts(outputRoot, surfaces);
+	if (
+		(await pathExists(path.join(outputRoot, "openspec/specs/form-behavior"))) ||
+		(await pathExists(path.join(outputRoot, "scripts/verify/loading"))) !==
+			surfaces.has("dashboard")
+	)
+		throw new Error(
+			`Loading capability ownership mismatch: ${profileCase.profileId}`,
+		);
+	for (const [name, surface] of [
+		["login", "dashboard"],
+		["support", "dashboard"],
+		["contact", "marketing"],
+	]) {
+		if (
+			(await pathExists(
+				path.join(outputRoot, `scripts/verify/forms/${name}.mjs`),
+			)) !== surfaces.has(surface)
+		)
+			throw new Error(
+				`Form test ownership mismatch: ${profileCase.profileId}/${name}`,
+			);
 	}
 	const sourceFiles = await collectTypeScriptFiles(
 		path.join(outputRoot, "src"),
@@ -929,6 +1201,177 @@ function assertThrows(action, expectedMessage) {
 	throw new Error(`Expected failure containing: ${expectedMessage}`);
 }
 
+async function verifyContractGuards(templateRoot, tempRoot) {
+	const outputRoot = path.join(tempRoot, "full-payload-ready-assemble-1");
+	const otherRoot = path.join(tempRoot, "thin-start-static-assemble-1");
+	const surfaces = new Set(templateProfiles.full.assembly.surfaces);
+	const relativeSpec =
+		"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md";
+	const sourcePath = path.join(templateRoot, relativeSpec);
+	const outputPath = path.join(outputRoot, relativeSpec);
+	const otherPath = path.join(otherRoot, relativeSpec);
+	const sourceBefore = await fs.readFile(sourcePath, "utf8");
+	const outputBefore = await fs.readFile(outputPath, "utf8");
+	const otherBefore = await fs.readFile(otherPath, "utf8");
+	const backup = path.join(tempRoot, "contract-guard-backup.md");
+	try {
+		await fs.rename(outputPath, backup);
+		await assert.rejects(
+			assertBehaviorContracts(outputRoot, surfaces),
+			/capability ownership mismatch/u,
+		);
+	} finally {
+		await fs.rename(backup, outputPath);
+	}
+	for (const reference of [
+		"app/shared/services/identity/missing-contract",
+		"app/shared/frontend/content/missing-deep-contract",
+		"template/demonstrations/demo-behavior",
+		"product/orders/order-fulfillment",
+		"app/data-lifecycle/form-behavior",
+		"app/shared/unknown/missing-contract",
+		"data-lifecycle/form-behavior",
+	]) {
+		try {
+			await fs.appendFile(outputPath, `\nDependency: ${reference}.\n`);
+			await assert.rejects(
+				assertAppCapabilityReferences(outputRoot, outputPath),
+				/dependency missing|legacy, non-app or unsupported-scope dependency/u,
+			);
+			await fs.writeFile(
+				outputPath,
+				`${outputBefore}\nDependency: \`${reference}\`.\n`,
+			);
+			await assert.rejects(
+				assertAppCapabilityReferences(outputRoot, outputPath),
+				/dependency missing|legacy, non-app or unsupported-scope dependency/u,
+			);
+		} finally {
+			await fs.writeFile(outputPath, outputBefore);
+		}
+	}
+	for (const namespace of [
+		"template/demonstrations",
+		"product",
+		"data-lifecycle",
+		"app/data-lifecycle",
+	]) {
+		const leakedPath = path.join(
+			outputRoot,
+			"openspec/specs",
+			namespace,
+			"leaked/spec.md",
+		);
+		try {
+			await fs.mkdir(path.dirname(leakedPath), { recursive: true });
+			await fs.writeFile(leakedPath, "Forbidden generated namespace.\n");
+			await assert.rejects(
+				assertBehaviorContracts(outputRoot, surfaces),
+				/template, product, legacy or unsupported namespaces/u,
+			);
+		} finally {
+			const cleanupNamespace = namespace.startsWith("app/")
+				? namespace
+				: namespace.split("/", 1)[0];
+			await fs.rm(path.join(outputRoot, "openspec/specs", cleanupNamespace), {
+				recursive: true,
+				force: true,
+			});
+		}
+	}
+	const historyPath = path.join(
+		outputRoot,
+		"openspec/changes/invented-history",
+	);
+	try {
+		await fs.mkdir(historyPath, { recursive: true });
+		await fs.writeFile(
+			path.join(historyPath, "proposal.md"),
+			"History leakage.\n",
+		);
+		await assert.rejects(
+			assertBehaviorContracts(outputRoot, surfaces),
+			/history must remain excluded/u,
+		);
+	} finally {
+		await fs.rm(path.join(outputRoot, "openspec/changes"), {
+			recursive: true,
+			force: true,
+		});
+	}
+	const configPath = path.join(outputRoot, "openspec/config.yaml");
+	const configBefore = await fs.readFile(configPath, "utf8");
+	const otherConfigPath = path.join(otherRoot, "openspec/config.yaml");
+	const otherConfigBefore = await fs.readFile(otherConfigPath, "utf8");
+	const sourceConfigPath = path.join(templateRoot, "openspec/config.yaml");
+	const sourceConfigBefore = await fs.readFile(sourceConfigPath, "utf8");
+	try {
+		await fs.appendFile(configPath, "# Independent project edit.\n");
+		assert.equal(
+			await fs.readFile(sourceConfigPath, "utf8"),
+			sourceConfigBefore,
+		);
+		assert.equal(await fs.readFile(otherConfigPath, "utf8"), otherConfigBefore);
+		await assertProjectOpenSpecConfig(outputRoot);
+		await fs.writeFile(configPath, sourceConfigBefore);
+		await assert.rejects(
+			assertProjectOpenSpecConfig(outputRoot),
+			/config.*(?:template policy|independent project-owned)/u,
+		);
+	} finally {
+		await fs.writeFile(configPath, configBefore);
+	}
+	const procedurePath = path.join(outputRoot, "docs/testing/forms.md");
+	const procedureBefore = await fs.readFile(procedurePath, "utf8");
+	try {
+		await fs.appendFile(
+			procedurePath,
+			"\n[Missing evidence](./does-not-exist.md)\n",
+		);
+		await assert.rejects(
+			assertBehaviorContracts(outputRoot, surfaces),
+			/Generated policy has a missing link/u,
+		);
+	} finally {
+		await fs.writeFile(procedurePath, procedureBefore);
+	}
+	try {
+		await fs.appendFile(outputPath, "\nIndependent generated-project edit.\n");
+		assert.equal(
+			await fs.readFile(sourcePath, "utf8"),
+			sourceBefore,
+			"Editing a generated contract mutated the template.",
+		);
+		assert.equal(
+			await fs.readFile(otherPath, "utf8"),
+			otherBefore,
+			"Editing one project mutated another project's contract.",
+		);
+		await assert.rejects(
+			assertBehaviorContracts(outputRoot, surfaces),
+			/Generated independent contract differs/u,
+		);
+	} finally {
+		await fs.writeFile(outputPath, outputBefore);
+	}
+	try {
+		await fs.unlink(outputPath);
+		await fs.link(sourcePath, outputPath);
+		await assert.rejects(
+			assertBehaviorContracts(outputRoot, surfaces),
+			/shares its source inode/u,
+		);
+	} finally {
+		// Unlink before restoring bytes so a failed hardlink check cannot alter source.
+		await fs.rm(outputPath, { force: true });
+		await fs.writeFile(outputPath, outputBefore);
+	}
+	await assertBehaviorContracts(outputRoot, surfaces);
+	console.log(
+		"Scoped app omission, deep dependencies, legacy/template/history/product exclusion, broken-link, project-config and independent-copy guards passed.",
+	);
+}
+
 async function verifyOwnershipGuards(templateRoot, tempRoot) {
 	assertThrows(
 		() => assertPackageOwnership({ scripts: { "unknown:script": "true" } }),
@@ -975,6 +1418,33 @@ async function verifyOwnershipGuards(templateRoot, tempRoot) {
 		await fs.rm(sentinelPath, { force: true });
 		await fs.rm(outputRoot, { recursive: true, force: true });
 	}
+	const previousMarketing = templateSurfaces.marketing.ownedPaths;
+	const previousDashboard = templateSurfaces.dashboard.ownedPaths;
+	const conflictingPath =
+		"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md";
+	try {
+		templateSurfaces.marketing.ownedPaths = [
+			...previousMarketing,
+			conflictingPath,
+		];
+		templateSurfaces.dashboard.ownedPaths = [
+			...previousDashboard,
+			conflictingPath,
+		];
+		await assert.rejects(
+			assembleTemplateProfile({
+				sourceRoot: templateRoot,
+				destinationRoot: path.join(tempRoot, "conflicting-contract-owners"),
+				profile: templateProfiles.full,
+				content: "static",
+			}),
+			/Assembly ownership collision/u,
+		);
+	} finally {
+		templateSurfaces.marketing.ownedPaths = previousMarketing;
+		templateSurfaces.dashboard.ownedPaths = previousDashboard;
+	}
+
 	console.log("Assembly ownership guards passed.");
 }
 
@@ -1183,6 +1653,7 @@ async function main() {
 			}
 		}
 
+		await verifyContractGuards(templateRoot, tempRoot);
 		await verifyCreationSafety(templateRoot, tempRoot);
 		await verifyOwnershipGuards(templateRoot, tempRoot);
 		await verifyAssistantCapability(templateRoot, tempRoot);

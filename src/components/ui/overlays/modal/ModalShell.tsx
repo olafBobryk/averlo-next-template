@@ -204,6 +204,7 @@ export function ModalShell({
 }: ModalShellProps) {
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
 	const previousActiveElementRef = useRef<HTMLElement | null>(null);
+	const lastFocusedElementRef = useRef<HTMLElement | null>(null);
 	const submissionRef = useRef(false);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -278,18 +279,22 @@ export function ModalShell({
 				? document.activeElement
 				: null;
 
-		const wrapper = wrapperRef.current;
-		if (wrapper && isTopMost) {
-			const [firstFocusable] = getFocusableElements(wrapper);
-			(firstFocusable ?? wrapper).focus({ preventScroll: true });
-		}
-
 		return () => {
 			const previous = previousActiveElementRef.current;
 			if (previous && document.contains(previous)) {
 				previous.focus({ preventScroll: true });
 			}
 		};
+	}, []);
+
+	useLayoutEffect(() => {
+		const wrapper = wrapperRef.current;
+		if (!isTopMost || !wrapper) return;
+		const previous = lastFocusedElementRef.current;
+		(previous?.isConnected && wrapper.contains(previous)
+			? previous
+			: (getFocusableElements(wrapper)[0] ?? wrapper)
+		).focus({ preventScroll: true });
 	}, [isTopMost]);
 
 	useEffect(() => {
@@ -417,7 +422,11 @@ export function ModalShell({
 							// Portal mounts after the shell layout effect. Focus when its DOM arrives.
 							if (node && isTopMost) {
 								const [firstFocusable] = getFocusableElements(node);
-								(firstFocusable ?? node).focus({ preventScroll: true });
+								const previous = lastFocusedElementRef.current;
+								(previous?.isConnected && node.contains(previous)
+									? previous
+									: (firstFocusable ?? node)
+								).focus({ preventScroll: true });
 							}
 						},
 						[isTopMost],
@@ -438,6 +447,9 @@ export function ModalShell({
 					aria-modal="true"
 					role="dialog"
 					aria-label={ariaLabel}
+					onFocusCapture={(event) => {
+						lastFocusedElementRef.current = event.target as HTMLElement;
+					}}
 					tabIndex={-1}
 					onClick={(event) => {
 						if (event.target === event.currentTarget) requestClose();

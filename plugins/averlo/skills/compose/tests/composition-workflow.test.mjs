@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
@@ -7,6 +9,10 @@ const skillsRoot = path.resolve(process.cwd(), "plugins/averlo/skills");
 
 async function readSkill(name, relativePath = "SKILL.md") {
 	return fs.readFile(path.join(skillsRoot, name, relativePath), "utf8");
+}
+
+async function readRepository(relativePath) {
+	return fs.readFile(path.resolve(process.cwd(), relativePath), "utf8");
 }
 
 async function assertMissingSkill(name) {
@@ -94,33 +100,271 @@ test("Compose has no hook-driven section continuation", async () => {
 	assert.doesNotMatch(manifest, /"hooks"/u);
 });
 
-test("owning workflows load explicit-only subordinate contracts from sibling resources", async () => {
+test("owning workflows load Visual Parity and target-owned contracts", async () => {
 	for (const owner of ["compose", "systemize-composition", "animate"]) {
-		const source = await readSkill(owner);
-		assert.match(
-			source,
-			/\[Repository Workflows\]\(\.\.\/repository-workflows\/SKILL\.md\)/u,
-		);
+		const source = (await readSkill(owner)).replace(/\s+/gu, " ");
 		assert.match(
 			source,
 			/\[Visual Parity\]\(\.\.\/visual-parity\/SKILL\.md\)/u,
 		);
+		assert.match(source, /linked `SKILL\.md` completely/u);
+		assert.match(source, /omitted from the active catalogue/u);
 		assert.match(
 			source,
-			/explicit-only skill\s+is omitted from the active skill\s+catalogue/u,
+			/(?:not authorize|does not\s+authorize) a substitute/u,
 		);
-		assert.match(source, /Catalogue omission alone is not a\s+blocker/u);
-		assert.match(source, /never authorizes a\s+substitute\s+workflow/u);
+		assert.match(source, /target\s+repository(?:\s+root|:)/u);
+		assert.match(
+			source,
+			/never\s+(?:from\s+)?(?:the\s+)?plugin\s+installation/u,
+		);
+		assert.match(source, /missing\s+required contract/u);
+		assert.match(
+			source,
+			/(?:do not invent|rather than inventing) equivalent policy/u,
+		);
+		assert.doesNotMatch(source, /repository-workflows/u);
+	}
+});
+
+test("packaged workflows discover scoped app contracts in an independent target and reject missing contracts", async () => {
+	const temporary = await fs.mkdtemp(
+		path.join(os.tmpdir(), "averlo-contract-resolution-"),
+	);
+	const workflowCapabilities = {
+		compose: ["app/marketing/composition/marketing-composition"],
+		"systemize-composition": [
+			"app/shared/frontend/components/component-contracts",
+		],
+		animate: [
+			"app/shared/frontend/interaction/responsive-and-motion",
+			"app/shared/frontend/interaction/keyboard-and-overlays",
+		],
+		"contact-form": [
+			"app/shared/data-lifecycle/form-behavior",
+			"app/shared/services/delivery/submission-protection",
+			"app/shared/services/delivery/contact-delivery",
+			"app/shared/services/transport/api-transport",
+		],
+	};
+	// Historical IDs are negative fixtures, not an alternate discovery table.
+	const legacyFixtureIds = {
+		"app/marketing/composition/marketing-composition":
+			"app/content/marketing-composition",
+		"app/shared/frontend/components/component-contracts":
+			"app/ui-system/component-contracts",
+		"app/shared/frontend/interaction/responsive-and-motion":
+			"app/interaction/responsive-and-motion",
+		"app/shared/frontend/interaction/keyboard-and-overlays":
+			"app/interaction/keyboard-and-overlays",
+		"app/shared/data-lifecycle/form-behavior":
+			"app/data-lifecycle/form-behavior",
+		"app/shared/services/delivery/submission-protection":
+			"app/delivery/submission-protection",
+		"app/shared/services/delivery/contact-delivery":
+			"app/delivery/contact-delivery",
+		"app/shared/services/transport/api-transport":
+			"app/integration/api-transport",
+	};
+	try {
+		const pluginRoot = path.join(temporary, "plugin-installation", "skills");
+		const targetRoot = path.join(temporary, "independent-project");
+		const capabilities = [
+			...new Set(Object.values(workflowCapabilities).flat()),
+		];
+		for (const capability of capabilities) {
+			const relativeSpec = `openspec/specs/${capability}/spec.md`;
+			await fs.mkdir(path.join(targetRoot, path.dirname(relativeSpec)), {
+				recursive: true,
+			});
+			await fs.copyFile(
+				path.resolve(relativeSpec),
+				path.join(targetRoot, relativeSpec),
+			);
+		}
+		await fs.writeFile(
+			path.join(targetRoot, "openspec/config.yaml"),
+			"schema: spec-driven\n",
+		);
+		await fs.writeFile(
+			path.join(targetRoot, ".template-profile.json"),
+			JSON.stringify({ schemaVersion: 2 }),
+		);
+		for (const owner of [
+			...Object.keys(workflowCapabilities),
+			"visual-parity",
+		]) {
+			await fs.cp(path.join(skillsRoot, owner), path.join(pluginRoot, owner), {
+				recursive: true,
+			});
+		}
+		for (const [owner, required] of Object.entries(workflowCapabilities)) {
+			const packaged = await fs.readFile(
+				path.join(pluginRoot, owner, "SKILL.md"),
+				"utf8",
+			);
+			assert.match(packaged, /target\s+repository(?:'s|\s+root|:)/u);
+			assert.match(
+				packaged,
+				/missing\s+(?:required|contract)|required missing/u,
+			);
+			assert.match(packaged, /openspec list --specs/u);
+			assert.match(packaged, /openspec show /u);
+			assert.doesNotMatch(packaged, /repository-workflows/u);
+			for (const capability of required)
+				assert.ok(
+					packaged.includes(capability),
+					`${owner} discovers ${capability}`,
+				);
+		}
+		const run = (args) =>
+			spawnSync("openspec", args, {
+				cwd: targetRoot,
+				encoding: "utf8",
+				env: { ...process.env, OPENSPEC_TELEMETRY: "0" },
+			});
+		const listed = run(["list", "--specs", "--json"]);
+		assert.ifError(listed.error);
+		assert.equal(listed.status, 0, listed.stderr);
+		assert.deepEqual(
+			JSON.parse(listed.stdout)
+				.specs.map(({ id }) => id)
+				.sort(),
+			capabilities.toSorted(),
+		);
+		for (const capability of capabilities) {
+			const relativeSpec = `openspec/specs/${capability}/spec.md`;
+			await assert.rejects(fs.access(path.join(pluginRoot, relativeSpec)), {
+				code: "ENOENT",
+			});
+			const show = () => run(["show", capability, "--type", "spec", "--json"]);
+			const found = show();
+			assert.ifError(found.error);
+			assert.equal(found.status, 0, found.stderr);
+			assert.equal(JSON.parse(found.stdout).id, capability);
+			// Plugin and legacy target decoys cannot satisfy a missing scoped app contract.
+			await fs.mkdir(path.join(pluginRoot, path.dirname(relativeSpec)), {
+				recursive: true,
+			});
+			await fs.copyFile(
+				path.join(targetRoot, relativeSpec),
+				path.join(pluginRoot, relativeSpec),
+			);
+			await fs.writeFile(
+				path.join(pluginRoot, "openspec/config.yaml"),
+				"schema: spec-driven\n",
+			);
+			for (const legacyId of [
+				legacyFixtureIds[capability],
+				legacyFixtureIds[capability].replace(/^app\//u, ""),
+			]) {
+				const legacySpec = `openspec/specs/${legacyId}/spec.md`;
+				await fs.mkdir(path.join(targetRoot, path.dirname(legacySpec)), {
+					recursive: true,
+				});
+				await fs.copyFile(
+					path.join(targetRoot, relativeSpec),
+					path.join(targetRoot, legacySpec),
+				);
+			}
+			await fs.unlink(path.join(targetRoot, relativeSpec));
+			const missing = show();
+			assert.ifError(missing.error);
+			assert.notEqual(
+				missing.status,
+				0,
+				`Missing ${capability} must not fall back to plugin or legacy policy.`,
+			);
+			assert.match(
+				`${missing.stderr}\n${missing.stdout}`,
+				/unknown|not found|no spec/i,
+			);
+		}
+	} finally {
+		await fs.rm(temporary, { recursive: true, force: true });
+	}
+});
+
+test("shared route guidance keeps optional surfaces conditional without inventing product policy", async () => {
+	const temporary = await fs.mkdtemp(
+		path.join(os.tmpdir(), "averlo-shared-contracts-"),
+	);
+	try {
+		const sharedIds = [
+			"app/shared/frontend/navigation/route-identity",
+			"app/shared/frontend/navigation/document-metadata",
+		];
+		for (const id of sharedIds) {
+			const relative = `openspec/specs/${id}/spec.md`;
+			await fs.mkdir(path.join(temporary, path.dirname(relative)), {
+				recursive: true,
+			});
+			await fs.copyFile(path.resolve(relative), path.join(temporary, relative));
+		}
+		await fs.writeFile(
+			path.join(temporary, "openspec/config.yaml"),
+			"schema: spec-driven\n",
+		);
+		const run = (args) =>
+			spawnSync("openspec", args, {
+				cwd: temporary,
+				encoding: "utf8",
+				env: { ...process.env, OPENSPEC_TELEMETRY: "0" },
+			});
+		const listed = run(["list", "--specs", "--json"]);
+		assert.ifError(listed.error);
+		assert.equal(listed.status, 0, listed.stderr);
+		assert.deepEqual(
+			JSON.parse(listed.stdout)
+				.specs.map(({ id }) => id)
+				.sort(),
+			sharedIds.toSorted(),
+		);
+		for (const id of sharedIds) {
+			const shown = run(["show", id, "--type", "spec", "--json"]);
+			assert.ifError(shown.error);
+			assert.equal(shown.status, 0, shown.stderr);
+			assert.equal(JSON.parse(shown.stdout).id, id);
+		}
+		const procedure = await readRepository(
+			"docs/testing/routes-and-metadata.md",
+		);
+		assert.match(procedure, /For installed dashboard enrichment/u);
+		assert.match(procedure, /For installed public marketing/u);
+		for (const id of [
+			"app/dashboard/navigation/route-enrichment",
+			"app/marketing/metadata/public-document-metadata",
+		]) {
+			assert.ok(procedure.includes(`\`${id}\``));
+			assert.ok(
+				!procedure.includes(`openspec/specs/${id}/spec.md`),
+				"Optional scopes must not become dangling file links in the shared procedure.",
+			);
+			const missing = run(["show", id, "--type", "spec", "--json"]);
+			assert.ifError(missing.error);
+			assert.notEqual(missing.status, 0);
+		}
+		for (const absent of [
+			"product",
+			"template",
+			"app/marketing",
+			"app/dashboard",
+		]) {
+			await assert.rejects(
+				fs.access(path.join(temporary, "openspec/specs", absent)),
+				{ code: "ENOENT" },
+			);
+		}
+	} finally {
+		await fs.rm(temporary, { recursive: true, force: true });
 	}
 });
 
 test("Compose owns section-scoped native review without shared-owner mutation", async () => {
 	const compose = await readSkill("compose");
 
-	assert.match(
-		compose,
-		/Invoke the linked `\$averlo:repository-workflows` once/u,
-	);
+	assert.match(compose, /stock OpenSpec discovery/u);
+	assert.match(compose, /app\/marketing\/composition\/marketing-composition/u);
 	assert.match(
 		compose,
 		/Invoke the linked `\$averlo:visual-parity` in `frame`/u,
@@ -765,47 +1009,59 @@ test("Animate requires an accepted static target and keeps its endpoint exact", 
 	assert.match(animate, /current native static Target/u);
 	assert.match(animate, /Preserve the accepted motion-off endpoint exactly/u);
 	assert.match(animate, /linked `\$averlo:visual-parity`/u);
-	assert.match(animate, /linked `\$averlo:repository-workflows` once/u);
+	assert.match(
+		animate,
+		/app\/shared\/frontend\/interaction\/responsive-and-motion/u,
+	);
+	assert.match(animate, /canonical interaction verification procedure/u);
 	assert.doesNotMatch(animate, /active plane|handoff state/iu);
 });
 
-test("section construction is conditionally routed and remains repository-owned", async () => {
-	const [router, concern, compose] = await Promise.all([
-		readSkill("repository-workflows"),
-		readSkill("repository-workflows", "references/section-construction.md"),
+test("section construction belongs to marketing owners and scoped source procedures", async () => {
+	const [owner, intake, focus, compose] = await Promise.all([
+		readRepository("src/lib/marketing-content/AGENTS.md"),
+		readSkill("compose", "references/source-intake.md"),
+		readSkill("visual-parity", "references/focus-packet.md"),
 		readSkill("compose"),
 	]);
-
-	assert.match(router, /add \[section construction\]/u);
-	assert.match(
-		router,
-		/whenever the requested change creates or restructures a public marketing page/u,
-	);
-	assert.match(
-		router,
-		/cannot avoid the concern by choosing a\s+route-local page/u,
-	);
-	assert.match(router, /a shell-only change,\s+copy-only content edit/iu);
 	for (const required of [
 		"MarketingPageDocument",
 		"renderMarketingSections",
 		"Section.Background",
 		"Storybook contract",
-		"one registered renderer",
-		"Tailwind-first",
-		"repository media concern",
-		"one independently reviewable semantic/source section",
-		"separate source or parity cases",
-		"a header, or a footer",
-		"shell case and shell selector",
-		"Do not count or describe a shell case as a content block",
-		"exactly one shared `Section` root",
-	]) {
-		assert.ok(concern.includes(required), `missing section rule: ${required}`);
-	}
-	assert.match(concern, /stable case\s+ID/u);
-	assert.match(concern, /meaningful source-neutral content or\s+media fields/u);
-	assert.match(compose, /Section construction is mandatory/u);
+		"one named renderer",
+		"Tailwind",
+		"media",
+		"independently reviewable semantic/source section",
+		"exactly one shared `Section`",
+		"meaningful source-neutral content/media",
+		"generated",
+	])
+		assert.ok(owner.includes(required), `missing structural rule: ${required}`);
+	assert.match(owner, /headers, footers, multiple independent source cases/u);
+	assert.match(
+		owner,
+		/sections\/\*\*\/<blockType>\/<PascalBlockType>Section\.tsx/u,
+	);
+	assert.match(
+		intake,
+		/stable case ID, source-neutral block type, registered renderer and Target/u,
+	);
+	assert.match(intake, /shell case with a shell selector/u);
+	assert.match(
+		intake,
+		/never a\s+content block, registered renderer or shared `Section` root/u,
+	);
+	assert.match(intake, /separate source or parity cases/u);
+	assert.match(intake, /Pause when source evidence/u);
+	assert.match(
+		focus,
+		/Only content cases contribute to\s+registered-renderer counts/u,
+	);
+	assert.match(
+		compose,
+		/always follows `app\/marketing\/composition\/marketing-composition`/u,
+	);
 	assert.doesNotMatch(compose, /Section\.Background|renderMarketingSections/u);
 });
 
@@ -839,7 +1095,7 @@ test("route and marketing verifiers reject implementation-shape bypasses", async
 test("Compose calibrates font faces and requires exact exported vector identity", async () => {
 	const [intake, media] = await Promise.all([
 		readSkill("compose", "references/source-intake.md"),
-		readSkill("repository-workflows", "references/media-delivery.md"),
+		readRepository("src/lib/marketing-content/AGENTS.md"),
 	]);
 
 	assert.match(intake, /Figma weight labels/u);
@@ -852,12 +1108,12 @@ test("Compose calibrates font faces and requires exact exported vector identity"
 	assert.match(intake, /Disable font synthesis/u);
 	assert.match(intake, /export that exact logo or mark as SVG/u);
 	assert.match(intake, /never redraw it, replace it with text or a glyph/u);
-	assert.match(media, /Commit exact SVG marks and icons/u);
+	assert.match(media, /Keep exact SVG assets as vectors/u);
 });
 
 test("marketing media policy is composed, deterministic, and narrowly exemptable", async () => {
 	const [media, verifier, surface] = await Promise.all([
-		readSkill("repository-workflows", "references/media-delivery.md"),
+		readRepository("src/lib/marketing-content/AGENTS.md"),
 		fs.readFile(
 			path.resolve(
 				process.cwd(),
@@ -890,7 +1146,7 @@ test("composition review preserves the excluded header and types every authority
 	const [compose, focusPacket, marketing] = await Promise.all([
 		readSkill("compose"),
 		readSkill("visual-parity", "references/focus-packet.md"),
-		readSkill("repository-workflows", "references/marketing-architecture.md"),
+		readRepository("src/app/(site)/(marketing)/_components/AGENTS.md"),
 	]);
 
 	assert.match(compose, /header remains unchanged in\s+the shared shell/u);
@@ -918,9 +1174,12 @@ test("composition review preserves the excluded header and types every authority
 	assert.match(compose, /evidenced footer shell cases/u);
 	assert.match(compose, /accumulated page is a\s+comparison gate/u);
 	assert.match(focusPacket, /never for the untouched whole frame/u);
-	assert.match(marketing, /content-plus-footer composition frame/u);
-	assert.match(marketing, /approved header is immutable and always excluded/u);
-	assert.match(marketing, /never route CSS/u);
+	assert.match(marketing, /content-plus-footer composition\s+frames/u);
+	assert.match(
+		marketing,
+		/approved header is immutable and excluded from source\s+parity/u,
+	);
+	assert.match(marketing, /never\s+route CSS/u);
 });
 
 test("Compose uses one identity-verified capability-complete Figma connector", async () => {
@@ -949,12 +1208,12 @@ test("Compose uses one identity-verified capability-complete Figma connector", a
 test("Systemize reviews accepted local renderer boundaries without redefining Compose success", async () => {
 	const [compose, sections, systemize] = await Promise.all([
 		readSkill("compose"),
-		readSkill("repository-workflows", "references/section-construction.md"),
+		readSkill("compose", "references/source-intake.md"),
 		readSkill("systemize-composition"),
 	]);
 
 	assert.match(compose, /support one honest comparison case/u);
-	assert.match(sections, /human-reviewed Systemize Composition question/u);
+	assert.match(sections, /human-reviewed\s+Systemize Composition decision/u);
 	assert.match(
 		systemize,
 		/renderer or section-boundary split\/merge as `medium` by default/u,

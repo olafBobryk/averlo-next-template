@@ -4,7 +4,13 @@ import { Button } from "@/components/ui/primitives/Button";
 import { defineCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { ContentPresence } from "./index";
 
-export function PresenceExample({ axis = "y" }: { axis?: "x" | "y" }) {
+export function PresenceExample({
+	axis = "y",
+	durationMs,
+}: {
+	axis?: "x" | "y";
+	durationMs?: number;
+}) {
 	const [open, setOpen] = useState(true);
 	const [expanded, setExpanded] = useState(false);
 	return (
@@ -26,9 +32,9 @@ export function PresenceExample({ axis = "y" }: { axis?: "x" | "y" }) {
 					id={`presence-${axis}`}
 					open={open}
 					axis={axis}
+					durationMs={durationMs}
 					gapBefore="0.75rem"
 					gapAfter="0.75rem"
-					offsetY={4}
 				>
 					<div className="rounded-lg bg-muted p-3">
 						<p>Additional options</p>
@@ -52,6 +58,7 @@ export const catalogContract = defineCatalogOwnerContract({
 		'import { ContentPresence } from "@/components/ui/motion/presence";',
 	chooseWhen: [
 		"A conditional region enters or leaves normal flow, vertically or horizontally.",
+		"Shares Accordion’s continuous spring reveal and soft 16px moving edge; content stays opaque throughout.",
 		"Use zero gaps by default; let this owner animate any requested before/after spacing.",
 	],
 	chooseInstead: [

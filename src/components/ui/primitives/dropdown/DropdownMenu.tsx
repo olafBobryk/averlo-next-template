@@ -1,11 +1,5 @@
 "use client";
 
-import {
-	ArrowSquareOut,
-	PencilSimpleIcon,
-	Trash,
-	Warning,
-} from "@phosphor-icons/react";
 import clsx from "clsx";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
@@ -223,7 +217,9 @@ export const dropdownMenuOptions = {
 			disabled,
 			id: "delete",
 			label,
-			leadingIcon: <Trash aria-hidden size={12} />,
+			leadingIcon: (
+				<Icon name="trash" aria-hidden style={{ width: 12, height: 12 }} />
+			),
 			onSelect,
 			tone: "danger",
 		};
@@ -239,7 +235,9 @@ export const dropdownMenuOptions = {
 			disabled,
 			id: "edit",
 			label: "Edit",
-			leadingIcon: <PencilSimpleIcon aria-hidden size={12} />,
+			leadingIcon: (
+				<Icon name="pencil" aria-hidden style={{ width: 12, height: 12 }} />
+			),
 			onSelect,
 		};
 	},
@@ -254,7 +252,13 @@ export const dropdownMenuOptions = {
 			href,
 			id: "open",
 			label: "Open",
-			leadingIcon: leadingIcon ?? <ArrowSquareOut aria-hidden size={12} />,
+			leadingIcon: leadingIcon ?? (
+				<Icon
+					name="external-link"
+					aria-hidden
+					style={{ width: 12, height: 12 }}
+				/>
+			),
 		};
 	},
 	warning({
@@ -270,7 +274,9 @@ export const dropdownMenuOptions = {
 			disabled,
 			id: "warning",
 			label,
-			leadingIcon: <Warning aria-hidden size={12} />,
+			leadingIcon: (
+				<Icon name="warning" aria-hidden style={{ width: 12, height: 12 }} />
+			),
 			onSelect,
 			tone: "warning",
 		};

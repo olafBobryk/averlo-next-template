@@ -1,6 +1,6 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
 import {
 	ModalContent,
 	ModalDescription,
@@ -10,12 +10,15 @@ import {
 	useModalSubmission,
 } from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
+import { InlineError } from "@/components/ui/primitives/InlineError";
 import { Text } from "@/components/ui/primitives/Text";
 
 export type ConfirmationModalDetail = {
 	description: string;
 	label: string;
 };
+
+export type ConfirmationModalFailure = { ok: false; message: string };
 
 type ConfirmationModalProps = {
 	confirmLabel: string;
@@ -37,23 +40,42 @@ export function ConfirmationModal({
 	description,
 	details,
 	onClose,
+	onCloseDisabledChange,
 	onConfirm,
 	title,
 	warning,
 }: ConfirmationModalProps) {
 	const { beginSubmission, endSubmission, isSubmitting } = useModalSubmission();
+	const [error, setError] = React.useState<string | null>(null);
 
 	async function handleConfirm() {
 		if (!beginSubmission()) return;
+		onCloseDisabledChange?.(true);
+		setError(null);
 		let shouldEndSubmission = true;
 		try {
 			const shouldClose = await onConfirm();
-			if (shouldClose !== false) {
+			if (
+				typeof shouldClose === "object" &&
+				shouldClose !== null &&
+				"ok" in shouldClose &&
+				shouldClose.ok === false &&
+				"message" in shouldClose &&
+				typeof shouldClose.message === "string"
+			) {
+				setError(shouldClose.message);
+			} else if (shouldClose !== false) {
+				onCloseDisabledChange?.(false);
 				onClose();
 				shouldEndSubmission = false;
 			}
+		} catch {
+			setError("This action could not be completed. Try again.");
 		} finally {
-			if (shouldEndSubmission) endSubmission();
+			if (shouldEndSubmission) {
+				endSubmission();
+				onCloseDisabledChange?.(false);
+			}
 		}
 	}
 
@@ -70,7 +92,7 @@ export function ConfirmationModal({
 				<ModalTitle>{title}</ModalTitle>
 				<ModalDescription>{description}</ModalDescription>
 			</ModalHeader>
-			{details?.length || warning ? (
+			{details?.length || warning || error ? (
 				<ModalContent className="grid gap-4">
 					{details?.length ? (
 						<dl className="grid">
@@ -90,6 +112,7 @@ export function ConfirmationModal({
 						</dl>
 					) : null}
 					{warning ? <Text className="text-danger">{warning}</Text> : null}
+					{error ? <InlineError>{error}</InlineError> : null}
 				</ModalContent>
 			) : null}
 			<ModalFooter>

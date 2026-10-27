@@ -108,22 +108,30 @@ export function DashboardSidebarShell({
 					aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
 					aria-expanded={mobileOpen}
 					aria-haspopup={mobileOpen ? undefined : "dialog"}
-					className="shrink-0 lg:hidden"
+					className={clsx(
+						"shrink-0 lg:hidden",
+						!mobileOpen &&
+							"mx-auto !rounded-md !text-muted-foreground hover:!text-sidebar-accent-foreground",
+					)}
 					leadingIcon={mobileOpen ? "close" : "menu"}
-					iconSize={15}
+					iconSize={mobileOpen ? 15 : 16}
 					onClick={() => onMobileOpenChange(!mobileOpen)}
-					size="xs"
+					size={mobileOpen ? "xs" : "icon-sm"}
 					shape="square"
 					variant="ghost"
 				/>
 				<Button
 					aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
 					aria-expanded={!collapsed}
-					className="shrink-0 max-lg:hidden"
+					className={clsx(
+						"shrink-0 max-lg:hidden",
+						collapsed &&
+							"mx-auto !rounded-md !text-muted-foreground hover:!text-sidebar-accent-foreground",
+					)}
 					leadingIcon={collapsed ? "menu" : "sidebar-collapse"}
-					iconSize={15}
+					iconSize={collapsed ? 16 : 15}
 					onClick={() => onCollapsedChange(!collapsed)}
-					size="xs"
+					size={collapsed ? "icon-sm" : "xs"}
 					shape="square"
 					variant="ghost"
 				/>

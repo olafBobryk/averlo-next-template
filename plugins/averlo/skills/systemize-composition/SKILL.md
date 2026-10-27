@@ -19,13 +19,12 @@ recipe a fidelity constraint. Accepted source evidence should move matching
 roles toward their central instance owners while previously systemized product
 work remains protected.
 
-Systemize Composition packages [Repository Workflows](../repository-workflows/SKILL.md)
-and [Visual Parity](../visual-parity/SKILL.md) as mandatory subordinate
-contracts. Read each linked `SKILL.md` completely when its workflow first
-applies, even when that explicit-only skill is omitted from the active skill
-catalogue. Catalogue omission alone is not a blocker and never authorizes a
-substitute workflow. Load their routed references progressively instead of
-duplicating their contracts here.
+Systemize Composition packages [Visual Parity](../visual-parity/SKILL.md) as
+a mandatory subordinate workflow. Read its linked `SKILL.md` completely when
+it first applies even if omitted from the active catalogue; omission does not
+authorize a substitute. Resolve canonical repository contracts and procedures
+from the target repository root, never the plugin installation. Report a
+missing required contract as a scope gap rather than inventing equivalent policy.
 
 ## Inspect the accepted composition
 
@@ -77,10 +76,17 @@ duplicating their contracts here.
    axes; tokens and defaults; shell and footer presentation; and temporary
    wrappers or renderer boundaries. Write `none` plus the inspected evidence
    when a domain has no candidate; a compressed or catch-all row is incomplete.
-4. Invoke the linked `$averlo:repository-workflows` once for the complete
-   change unit. Select every applicable UI ownership, catalogue, composition,
-   marketing/shell, media, route, and interaction workflow and load their
-   concern union once.
+4. Read root/nearest AGENTS and use stock OpenSpec discovery: run
+   `openspec list --specs`, then `openspec show app/shared/frontend/components/component-contracts --type spec`
+   for the target's component contract. Read only additional content, hierarchy,
+   navigation and interaction behavior actually changed. Inspect complete Storybook owner
+   contracts and current consumers before changing a public axis. Canonical
+   procedures own verification; this does not alter the confidence and human
+   decision boundaries in this workflow.
+   Include relevant existing product requirements without inventing business
+   specs or loading ambient siblings. Conflicting shared obligations require an
+   explicit spec change rather than silent product precedence. Generated instances
+   do not inherit canonical template policy.
 
 ## Inventory and route ownership
 

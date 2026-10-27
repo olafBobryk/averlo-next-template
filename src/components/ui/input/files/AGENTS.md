@@ -11,7 +11,7 @@ This folder owns controlled file selection and profile-picture fields.
 - FileInput owns client-side form state and presentation only. Upload transport,
   persistence, progress, server deletion, and authoritative validation remain
   outside this family.
-- The editable file rail ends with the shared dashed add tile. Read mode reuses
+- The editable file rail ends with the shared Card-backed add tile with a solid border. Read mode reuses
   the same preview topology without add/remove controls.
 
 ## Structural invariants

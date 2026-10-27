@@ -1,0 +1,28 @@
+{
+	"relocations": {
+		"app/content/marketing-composition": "app/marketing/composition/marketing-composition",
+		"app/content/media-delivery": "app/shared/frontend/content/media-delivery",
+		"app/content/source-resolution": "app/marketing/content-sources/source-resolution",
+		"app/data-lifecycle/action-behavior": "app/shared/data-lifecycle/action-behavior",
+		"app/data-lifecycle/form-behavior": "app/shared/data-lifecycle/form-behavior",
+		"app/data-lifecycle/loading-state-behavior": "app/shared/data-lifecycle/loading-state-behavior",
+		"app/delivery/contact-delivery": "app/shared/services/delivery/contact-delivery",
+		"app/delivery/submission-protection": "app/shared/services/delivery/submission-protection",
+		"app/domain/entity-presentation": "app/shared/frontend/content/entity-presentation",
+		"app/experience/content-hierarchy": "app/shared/frontend/content/content-hierarchy",
+		"app/identity/access-and-membership": "app/shared/services/identity/access-and-membership",
+		"app/identity/private-file-access": "app/shared/services/files/private-file-access",
+		"app/integration/api-transport": "app/shared/services/transport/api-transport",
+		"app/interaction/keyboard-and-overlays": "app/shared/frontend/interaction/keyboard-and-overlays",
+		"app/interaction/responsive-and-motion": "app/shared/frontend/interaction/responsive-and-motion",
+		"app/navigation/document-metadata": "app/shared/frontend/navigation/document-metadata",
+		"app/navigation/route-identity": "app/shared/frontend/navigation/route-identity",
+		"app/ui-system/component-contracts": "app/shared/frontend/components/component-contracts",
+		"template/demo-behavior": "template/demonstrations/demo-behavior",
+		"template/project-assembly": "template/assembly/project-assembly"
+	},
+	"extractions": {
+		"app/marketing/metadata/public-document-metadata": "Public title policy and authoritative body/metadata consistency extracted from document-metadata.",
+		"app/dashboard/navigation/route-enrichment": "Dashboard enrichment preserves shared canonical destination identities."
+	}
+}

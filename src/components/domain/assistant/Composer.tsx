@@ -22,6 +22,7 @@ import type {
 } from "@/lib/assistant/contracts";
 import { attachmentPreviewUrl } from "./attachment/access";
 import { type ContextSearch, useComposerPicker } from "./ComposerPicker";
+import { pastedTextFile, shouldAttachPastedText } from "./pasted-text";
 
 const fixtureScenarioPresentation: Array<{
 	icon: IconName;
@@ -179,6 +180,10 @@ export function Composer({
 	draftValue,
 	onDraftChange,
 	pausedQueue,
+	uploadItems = [],
+	attachmentOrder = [],
+	onRetryUpload,
+	onRemoveUpload,
 	attachments,
 	busy,
 	canWrite,
@@ -203,6 +208,10 @@ export function Composer({
 	draftValue?: string;
 	onDraftChange?: (value: string) => void;
 	pausedQueue?: { blocked?: boolean; onResume: () => void };
+	uploadItems?: { id: string; name: string; error?: string }[];
+	attachmentOrder?: string[];
+	onRetryUpload?: (id: string) => void;
+	onRemoveUpload?: (id: string) => void;
 	attachments: AssistantStagedAttachment[];
 	busy: boolean;
 	canWrite: boolean;
@@ -237,12 +246,26 @@ export function Composer({
 		setReferences(reconcileReferences(text, value, references));
 		rawSetText(value);
 	};
+	const [pasted, setPasted] = React.useState<{ name: string; text: string }[]>(
+		[],
+	);
 	const [commandError, setCommandError] = React.useState("");
 	const [commandPending, setCommandPending] = React.useState(false);
 	const commandLock = React.useRef(false);
 	const stopAvailable = busy && !text.trim() && !attachments.length;
 	const resume = !!pausedQueue && !busy && !text.trim() && !attachments.length;
 	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+	const previousAttachments = React.useRef(attachments);
+	React.useEffect(() => {
+		const removed = previousAttachments.current.filter(
+			(a) => !attachments.some((next) => next.id === a.id),
+		);
+		if (removed.length)
+			setPasted((old) =>
+				old.filter((p) => !removed.some((a) => a.filename === p.name)),
+			);
+		previousAttachments.current = attachments;
+	}, [attachments]);
 	React.useLayoutEffect(() => {
 		const element = textareaRef.current;
 		if (!element || element.value !== text) return;
@@ -345,10 +368,55 @@ export function Composer({
 					presentation="composer"
 				>
 					{picker.view}
-					{attachments.length > 0 ? (
+					{pasted.map((paste) => (
+						<div
+							key={paste.name}
+							className="flex items-center justify-between gap-2 px-2 text-xs text-muted-foreground"
+							role="status"
+						>
+							<span>{"Pasted text attached as a file"}</span>
+							<Button
+								variant="bare"
+								size="sm"
+								onClick={() => {
+									const attachment = attachments.find(
+										(a) => a.filename === paste.name,
+									);
+									if (attachment) onRemoveAttachment(attachment);
+									const uploading = uploadItems.find(
+										(item) => item.name === paste.name,
+									);
+									if (uploading) onRemoveUpload?.(uploading.id);
+									setText(text + (text ? "\n\n" : "") + paste.text);
+									setPasted((old) => old.filter((item) => item !== paste));
+									textareaRef.current?.focus();
+								}}
+							>
+								{"Restore into message"}
+							</Button>
+						</div>
+					))}
+					{attachments.length > 0 || uploadItems.length > 0 ? (
 						<FileInput
 							className="px-1 pt-1"
-							items={fileItems}
+							items={[
+								...fileItems,
+								...uploadItems.map((item) => ({
+									key: item.id,
+									name: item.name,
+									status: "uploaded" as const,
+									url: "",
+									uploadState: item.error
+										? ("failed" as const)
+										: ("uploading" as const),
+									uploadError: item.error,
+									onRetry: () => onRetryUpload?.(item.id),
+								})),
+							].sort((a, b) => {
+								const ai = attachmentOrder.indexOf(a.key || ""),
+									bi = attachmentOrder.indexOf(b.key || "");
+								return (ai < 0 ? -1 : ai) - (bi < 0 ? -1 : bi);
+							})}
 							label={null}
 							onItemsChange={(nextItems) => {
 								const retainedIds = new Set(
@@ -356,6 +424,8 @@ export function Composer({
 										item.status === "uploaded" && item.key ? [item.key] : [],
 									),
 								);
+								for (const item of uploadItems)
+									if (!retainedIds.has(item.id)) onRemoveUpload?.(item.id);
 								for (const attachment of attachments) {
 									if (!retainedIds.has(attachment.id)) {
 										onRemoveAttachment(attachment);
@@ -365,6 +435,7 @@ export function Composer({
 							showAddControl={false}
 						/>
 					) : null}
+
 					<textarea
 						{...picker.aria}
 						aria-label="Message Assistant"
@@ -414,8 +485,25 @@ export function Composer({
 						onPaste={(event) => {
 							const files = Array.from(event.clipboardData.files);
 							if (files.length) {
+								if (!disabled && !attachmentsDisabled) {
+									event.preventDefault();
+									onAddFiles(files);
+								}
+								return;
+							}
+							const content = event.clipboardData.getData("text/plain");
+							if (
+								!disabled &&
+								!attachmentsDisabled &&
+								shouldAttachPastedText(content)
+							) {
+								const file = pastedTextFile(content);
 								event.preventDefault();
-								if (!disabled && !attachmentsDisabled) onAddFiles(files);
+								setPasted((old) => [
+									...old,
+									{ name: file.name, text: content },
+								]);
+								onAddFiles([file]);
 							}
 						}}
 						rows={1}

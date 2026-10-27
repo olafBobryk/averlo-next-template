@@ -17,7 +17,11 @@ import { OrganizationAvatar } from "../../_components/entities/organization/Orga
 import { useDashboardAuth } from "../../_components/providers/DashboardAuthProvider";
 import { toOrganizationEntity } from "../../_lib/entities/organization/domain";
 import { getOrganizationPresentation } from "../../_lib/entities/organization/presentation";
-import { submitSupportRequest } from "../../_lib/platform/api.client";
+import {
+	SupportSubmissionError,
+	submitSupportRequest,
+} from "../../_lib/platform/api.client";
+import { getSupportFieldErrors } from "../../_lib/platform/support-validation";
 
 export function SupportRequestForm() {
 	const { membership, organizationChoices, user } = useDashboardAuth();
@@ -31,6 +35,7 @@ export function SupportRequestForm() {
 	const [messageError, setMessageError] = React.useState<string>();
 	const [submissionError, setSubmissionError] = React.useState<string>();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	const submissionRef = React.useRef(false);
 
 	React.useEffect(() => {
 		setSelectedOrganizationMembershipId(membership.id);
@@ -64,41 +69,44 @@ export function SupportRequestForm() {
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (isSubmitting) return;
-		const nextSubject = subject.trim();
-		const nextMessage = message.trim();
-		const nextSubjectError =
-			nextSubject.length < 2 || nextSubject.length > 120
-				? "Enter a subject between 2 and 120 characters."
-				: undefined;
-		const nextMessageError =
-			nextMessage.length < 10 || nextMessage.length > 4_000
-				? "Enter a message between 10 and 4,000 characters."
-				: undefined;
+		if (submissionRef.current) return;
+		const { subject: nextSubjectError, message: nextMessageError } =
+			getSupportFieldErrors(subject, message);
 		setSubjectError(nextSubjectError);
 		setMessageError(nextMessageError);
 		if (nextSubjectError || nextMessageError) return;
 
 		const formData = new FormData(event.currentTarget);
+		submissionRef.current = true;
 		setIsSubmitting(true);
 		setSubmissionError(undefined);
 		try {
 			const result = await submitSupportRequest(formData);
-			showToast.success("Support request saved.");
+			showToast.success(result.message);
 			setSubject("");
 			setMessage("");
-			showToast.info(result.message, { title: "Demo fixture" });
-		} catch {
+		} catch (error) {
+			if (error instanceof SupportSubmissionError && error.fieldErrors) {
+				setSubjectError(error.fieldErrors.subject);
+				setMessageError(error.fieldErrors.message);
+				return;
+			}
 			setSubmissionError(
 				"Unable to save your request. Your message is still here. Try submitting again.",
 			);
 		} finally {
+			submissionRef.current = false;
 			setIsSubmitting(false);
 		}
 	}
 
 	return (
-		<ContentSection as="form" onSubmit={handleSubmit}>
+		<ContentSection
+			as="form"
+			aria-label="Contact support"
+			noValidate
+			onSubmit={handleSubmit}
+		>
 			<ContentSection.Heading
 				description="Save a fixture-only request for the platform team to review."
 				title="Contact support"
@@ -164,6 +172,7 @@ export function SupportRequestForm() {
 				</Text>
 				<InlineError open={!!submissionError}>{submissionError}</InlineError>
 				<Button
+					aria-label="Send request"
 					disabled={isSubmitting}
 					loading={isSubmitting}
 					trailingIcon="arrow-right"

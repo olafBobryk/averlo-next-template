@@ -12,24 +12,32 @@ the same invocation. Composition may organize local implementation, but
 it does not decide or mutate shared design-system owners.
 `$averlo:systemize-composition` owns that later decision boundary.
 
-Compose packages two mandatory subordinate contracts as sibling plugin
-resources: [Repository Workflows](../repository-workflows/SKILL.md) and
-[Visual Parity](../visual-parity/SKILL.md). Read each linked `SKILL.md`
-completely when its workflow first applies, even when that explicit-only skill
-is omitted from the active skill catalogue. Catalogue omission alone is not a
-blocker and never authorizes a substitute workflow. Load their routed
-references progressively; do not copy their contracts into Compose.
+Compose packages [Visual Parity](../visual-parity/SKILL.md) as a mandatory
+subordinate workflow. Read its linked `SKILL.md` completely when it first
+applies, even when omitted from the active catalogue. Catalogue omission does
+not authorize a substitute. Behavior contracts belong to the target repository:
+resolve `openspec/specs/` and procedure paths from its root, never the plugin
+installation. Use stock OpenSpec discovery: run `openspec list --specs`, then
+`openspec show app/marketing/composition/marketing-composition --type spec` for public marketing
+composition and `openspec show <app-capability> --type spec` for other changed
+scope. Report a missing required contract as a scope gap; do not invent equivalent
+policy.
+Select only the changed surface's contracts, relevant `app/shared/` dependencies
+and existing `product/` requirements. Do not invent product specs, load ambient
+siblings or silently override conflicting generic rules; change the contract
+explicitly when necessary. Generated instances do not inherit template policy.
 
 ## Establish the source and repository boundary
 
 1. Require a schema-v2 `.template-profile.json` receipt. Read
    [source intake](references/source-intake.md) when the source is Figma or when
    fonts, constituent assets, or external provenance must be resolved.
-2. Invoke the linked `$averlo:repository-workflows` once for each genuine
-   change unit. Select every applicable route, marketing/shell, composition,
-   media, content, loading, and interaction workflow, then load the union of
-   concerns once. Section construction is mandatory when creating or
-   restructuring a public marketing page or source section.
+2. Read root and nearest AGENTS, then the target repository's applicable
+   maintained content, navigation, interaction and lifecycle contracts. Public
+   marketing page/section work always follows `app/marketing/composition/marketing-composition`
+   and the marketing-content structural owner before choosing an implementation
+   shape. Obtain exact component APIs from Storybook. Use the canonical
+   verification procedures linked by WORKFLOWS; do not load unrelated contracts.
 3. Inspect the complete source focus and current Target before product edits.
    Classify source authority by region. The existing Target header is immutable:
    preserve it and always exclude source-header pixels. Do not propose, plan,
@@ -90,7 +98,7 @@ implemented; it must not become a whole-page implementation escape hatch.
 For every active case:
 
 1. Reload this skill, `.codex/visual-parity/<task>/focus.md`, the active matrix
-   row, and only the repository references routed for the case.
+   row, and only the canonical contracts applicable to the case.
 2. Load the Figma `figma-use` and `figma-design-to-code` instructions when first
    required. Call `get_design_context` with the active section frame's exact
    file key and node ID. A call on the page frame, containing page, accumulated

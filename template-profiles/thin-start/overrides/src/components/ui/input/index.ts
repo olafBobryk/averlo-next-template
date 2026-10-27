@@ -18,4 +18,7 @@ export {
 	type SelectInputProps,
 	type SelectOption,
 } from "./selection/SelectInput";
+export { EmailInput } from "./text/EmailInput";
+export { SpamProtectionFields } from "./text/SpamProtectionFields";
+export { TextAreaInput } from "./text/TextAreaInput";
 export { TextInput } from "./text/TextInput";

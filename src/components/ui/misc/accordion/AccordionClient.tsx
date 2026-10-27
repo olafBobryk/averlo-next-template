@@ -1,18 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import {
-	AnimatePresence,
-	animate,
-	motion,
-	useIsPresent,
-	useMotionValue,
-	useTransform,
-} from "motion/react";
 import * as React from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
+import { DisclosurePresence } from "@/components/ui/motion/presence/DisclosurePresence";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/surfaces";
 import { Text } from "@/components/ui/primitives/Text";
@@ -43,9 +35,7 @@ type DisclosureState = {
 	contentId: string;
 	disabled: boolean;
 	handleToggle: () => void;
-	isContentOverflowVisible: boolean;
 	isOpen: boolean;
-	setIsContentOverflowVisible: React.Dispatch<React.SetStateAction<boolean>>;
 	shouldAnimate: boolean;
 	titleId: string;
 };
@@ -78,12 +68,6 @@ function useDisclosureState({
 	const motionDisabled = useMotionDisableOverride();
 	const shouldAnimate =
 		motionAllowed && !motionDisabled && forceReducedMotion !== true;
-	const [isContentOverflowVisible, setIsContentOverflowVisible] =
-		React.useState(() => Boolean(open ?? defaultOpen));
-
-	React.useEffect(() => {
-		if (!isOpen || !shouldAnimate) setIsContentOverflowVisible(isOpen);
-	}, [isOpen, shouldAnimate]);
 
 	function handleToggle() {
 		if (disabled) return;
@@ -96,96 +80,10 @@ function useDisclosureState({
 		contentId,
 		disabled,
 		handleToggle,
-		isContentOverflowVisible,
 		isOpen,
-		setIsContentOverflowVisible,
 		shouldAnimate,
 		titleId,
 	};
-}
-
-function AnimatedDisclosurePanel({
-	children,
-	className,
-	includeId,
-	state,
-}: {
-	children: React.ReactNode;
-	className?: string;
-	includeId: boolean;
-	state: DisclosureState;
-}) {
-	const isPresent = useIsPresent();
-	const contentRef = React.useRef<HTMLDivElement>(null);
-	const panelRef = React.useRef<HTMLDivElement>(null);
-	const heightRef = React.useRef(0);
-	const [contentHeight, setContentHeight] = React.useState(0);
-	const maskAlpha = useMotionValue(0);
-	const maskImage = useTransform(
-		maskAlpha,
-		(alpha) =>
-			`linear-gradient(to bottom, #000 0%, #000 calc(100% - 16px), rgba(0, 0, 0, ${alpha}) 100%)`,
-	);
-	const overflowVisible = isPresent && state.isContentOverflowVisible;
-	const setIsContentOverflowVisible = state.setIsContentOverflowVisible;
-
-	React.useLayoutEffect(() => {
-		if (!isPresent) return;
-		const content = contentRef.current;
-		if (!content) return;
-		const measure = () => {
-			const nextHeight = content.getBoundingClientRect().height;
-			if (Math.abs(heightRef.current - nextHeight) < 0.5) return;
-			heightRef.current = nextHeight;
-			setIsContentOverflowVisible(false);
-			setContentHeight(nextHeight);
-		};
-		measure();
-		if (typeof ResizeObserver === "undefined") return;
-		const observer = new ResizeObserver(measure);
-		observer.observe(content);
-		return () => observer.disconnect();
-	}, [isPresent, setIsContentOverflowVisible]);
-
-	React.useEffect(() => {
-		const animation = animate(
-			maskAlpha,
-			isPresent && state.isOpen ? 1 : 0,
-			spring.disclosure,
-		);
-		return () => animation.stop();
-	}, [isPresent, maskAlpha, state.isOpen]);
-
-	return (
-		<motion.div
-			animate={{ height: contentHeight }}
-			className="overflow-hidden"
-			aria-hidden={!isPresent || undefined}
-			inert={!isPresent || undefined}
-			exit={{ height: 0 }}
-			id={includeId ? state.contentId : undefined}
-			initial={{ height: 0 }}
-			ref={panelRef}
-			style={{ maskImage, overflow: overflowVisible ? "visible" : "hidden" }}
-			onAnimationComplete={() => {
-				if (
-					isPresent &&
-					state.isOpen &&
-					Math.abs(
-						(panelRef.current?.getBoundingClientRect().height ?? 0) -
-							contentHeight,
-					) < 1
-				) {
-					state.setIsContentOverflowVisible(true);
-				}
-			}}
-			transition={spring.disclosure}
-		>
-			<div ref={contentRef} className={clsx("flow-root", className)}>
-				{children}
-			</div>
-		</motion.div>
-	);
 }
 
 function CollapsibleRegion({
@@ -199,30 +97,16 @@ function CollapsibleRegion({
 	includeId?: boolean;
 	state: DisclosureState;
 }) {
-	if (state.shouldAnimate) {
-		return (
-			<AnimatePresence initial={false}>
-				{state.isOpen ? (
-					<AnimatedDisclosurePanel
-						className={className}
-						includeId={includeId}
-						state={state}
-					>
-						{children}
-					</AnimatedDisclosurePanel>
-				) : null}
-			</AnimatePresence>
-		);
-	}
-
-	return state.isOpen ? (
-		<div
-			className={clsx("!overflow-visible", className)}
+	return (
+		<DisclosurePresence
+			open={state.isOpen}
+			animate={state.shouldAnimate}
 			id={includeId ? state.contentId : undefined}
+			contentClassName={className}
 		>
 			{children}
-		</div>
-	) : null;
+		</DisclosurePresence>
+	);
 }
 
 export function AccordionClient({

@@ -11,6 +11,12 @@ const historicalRunsPath =
 const repositoryFootprintHistoryPath =
 	"src/app/(site)/(marketing)/repository-footprint/_data/repository-footprint.json";
 const retiredServiceName = "serena";
+// Match service tokens, including connector names, rather than incidental
+// substrings in third-party identifiers such as PDF.js Hebrew glyph names.
+const retiredServiceToken = new RegExp(
+	`(^|[^a-z0-9])${retiredServiceName}([^a-z0-9]|$)`,
+	"i",
+);
 
 const output = execFileSync(
 	"rg",
@@ -89,7 +95,7 @@ for (const relativePath of paths) {
 		continue;
 	}
 
-	if (content.toLowerCase().includes(retiredServiceName)) {
+	if (retiredServiceToken.test(content)) {
 		violations.push(`content: ${relativePath}`);
 	}
 }

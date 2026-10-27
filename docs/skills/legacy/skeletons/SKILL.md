@@ -59,7 +59,8 @@ direction when the owning component lacks a skeleton.
   such as `text-sm`, `font-medium`, a custom line height, or `Text` with
   `variant={null}`/`tone={null}`, the skeleton should carry the equivalent raw
   classes or null variant/tone so loading does not resize on swap.
-- Keep this project's soft static skeleton treatment. Do not introduce shimmer.
+- Use the shared `Skeleton` owner's animation default and preserve its
+  reduced-motion behavior; do not add page-local animation recipes.
 - Mirror the live component's layout, spacing, breakpoint behavior, height, and
   radius. For repeated or composite surfaces, also compare each visible child
   slot and always-present default control (such as footer actions or add rows),

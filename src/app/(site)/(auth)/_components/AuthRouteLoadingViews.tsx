@@ -1,11 +1,18 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { OrganizationSelectionCard } from "@/app/(site)/_components/organization/OrganizationSelectionCard";
 import { DashboardDetailField } from "@/app/(site)/dashboard/_components/detail/DashboardDetailField";
 import { Icon } from "@/components/ui/icons/Icon";
 import { EmailInput, PasswordInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
+import {
+	getSafeContinuationPath,
+	withSafeContinuation,
+} from "@/lib/auth/continuation";
+import { hrefFor } from "@/lib/routes";
 import { AuthScreen } from "./AuthScreen";
 import { PasswordRecoveryRequestForm } from "./PasswordRecoveryRequestForm";
 import { PasswordResetForm } from "./PasswordResetForm";
@@ -24,11 +31,53 @@ function AuthLoadingFrame({
 	title: React.ReactNode;
 }) {
 	return (
-		<div aria-busy="true" aria-label={label} role="status">
-			<AuthScreen description={description} icon={icon} title={title}>
-				{children}
-			</AuthScreen>
-		</div>
+		<>
+			<span className="sr-only" role="status">
+				{label}
+			</span>
+			<div aria-busy="true" data-loading-region={label}>
+				<AuthScreen description={description} icon={icon} title={title}>
+					{children}
+				</AuthScreen>
+			</div>
+		</>
+	);
+}
+
+type AuthLoadingLinkProps = Pick<
+	React.ComponentProps<typeof Button>,
+	"className" | "size" | "variant" | "textVariant"
+> & {
+	children: React.ReactNode;
+	route: "auth.login" | "auth.forgot-password" | "auth.sign-in-options";
+};
+
+function AuthLoadingLink(props: AuthLoadingLinkProps) {
+	const { route, children, ...presentation } = props;
+	return (
+		<Suspense
+			fallback={
+				<Button {...presentation} href={hrefFor(route)}>
+					{children}
+				</Button>
+			}
+		>
+			<AuthLoadingContinuationLink {...props} />
+		</Suspense>
+	);
+}
+
+function AuthLoadingContinuationLink({
+	children,
+	route,
+	...props
+}: AuthLoadingLinkProps) {
+	const searchParams = useSearchParams();
+	const next = getSafeContinuationPath(searchParams.get("next") ?? undefined);
+	return (
+		<Button {...props} href={withSafeContinuation(hrefFor(route), next)}>
+			{children}
+		</Button>
 	);
 }
 
@@ -49,14 +98,15 @@ export function LoginLoadingView() {
 				<PasswordInput.Skeleton
 					label="Password"
 					labelAction={
-						<Button.Skeleton
+						<AuthLoadingLink
 							className="text-muted-foreground"
 							size="none"
 							textVariant="caption"
-							variant="ghost"
+							variant="bare"
+							route="auth.forgot-password"
 						>
 							Forgot password?
-						</Button.Skeleton>
+						</AuthLoadingLink>
 					}
 					required
 					value="demo-password"
@@ -69,9 +119,14 @@ export function LoginLoadingView() {
 			<Button.Skeleton className="w-full" variant="secondary">
 				Enter demo organization
 			</Button.Skeleton>
-			<Button.Skeleton className="w-full" variant="ghost">
+			<AuthLoadingLink
+				className="w-full"
+				route="auth.sign-in-options"
+				size="none"
+				variant="bare"
+			>
 				Use magic link
-			</Button.Skeleton>
+			</AuthLoadingLink>
 		</AuthLoadingFrame>
 	);
 }
@@ -90,9 +145,14 @@ export function SignInOptionsLoadingView() {
 					Request magic link
 				</Button.Skeleton>
 			</div>
-			<Button.Skeleton className="w-full" variant="ghost">
+			<AuthLoadingLink
+				className="w-full"
+				route="auth.login"
+				size="none"
+				variant="bare"
+			>
 				Use password
-			</Button.Skeleton>
+			</AuthLoadingLink>
 		</AuthLoadingFrame>
 	);
 }
@@ -106,9 +166,9 @@ export function ForgotPasswordLoadingView() {
 			title="Reset your password"
 		>
 			<PasswordRecoveryRequestForm.Skeleton />
-			<Button.Skeleton className="w-full" variant="ghost">
+			<AuthLoadingLink className="w-full" route="auth.login" variant="ghost">
 				Return to sign in
-			</Button.Skeleton>
+			</AuthLoadingLink>
 		</AuthLoadingFrame>
 	);
 }
@@ -183,9 +243,9 @@ export function InvitationLoadingView() {
 				<Button.Skeleton className="w-full" variant="primary">
 					Accept invitation
 				</Button.Skeleton>
-				<Button.Skeleton className="w-full" variant="ghost">
+				<AuthLoadingLink className="w-full" route="auth.login" variant="ghost">
 					Return to sign in
-				</Button.Skeleton>
+				</AuthLoadingLink>
 			</div>
 		</AuthLoadingFrame>
 	);
@@ -193,15 +253,19 @@ export function InvitationLoadingView() {
 
 export function SelectOrganizationLoadingView() {
 	return (
-		<div
-			aria-busy="true"
-			aria-label="Loading organization selection"
-			role="status"
-		>
-			<OrganizationSelectionCard.Skeleton
-				description="Choose an organization to continue."
-				headingIcon="building"
-			/>
-		</div>
+		<>
+			<span className="sr-only" role="status">
+				Loading organization selection
+			</span>
+			<div
+				aria-busy="true"
+				data-loading-region="Loading organization selection"
+			>
+				<OrganizationSelectionCard.Skeleton
+					description="Choose an organization to continue."
+					headingIcon="building"
+				/>
+			</div>
+		</>
 	);
 }

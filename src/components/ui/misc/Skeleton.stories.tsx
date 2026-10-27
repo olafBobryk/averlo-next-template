@@ -54,3 +54,35 @@ export const RadiusScale: Story = {
 		await expect(canvas.getByTestId("radius-none")).toHaveClass("rounded-none");
 	},
 };
+export const ShimmerBlock: Story = {
+	render: () => (
+		<Skeleton radius="lg" className="h-44 w-80" data-testid="shimmer-block" />
+	),
+	play: async ({ canvas }) => {
+		const block = canvas.getByTestId("shimmer-block");
+		await expect(block).toHaveAttribute("data-skeleton-variant", "shimmer");
+		await expect(block.children).toHaveLength(0);
+		const after = getComputedStyle(block, "::after");
+		if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+			await expect(after.animationName).toBe("none");
+			await expect(after.display).toBe("none");
+		} else {
+			await expect(after.animationName).not.toBe("none");
+		}
+	},
+};
+export const StaticOptOut: Story = {
+	render: () => (
+		<Skeleton
+			animation="static"
+			radius="lg"
+			className="h-44 w-80"
+			data-testid="static-block"
+		/>
+	),
+	play: async ({ canvas }) => {
+		const block = canvas.getByTestId("static-block");
+		await expect(block).toHaveAttribute("data-skeleton-variant", "static");
+		await expect(getComputedStyle(block, "::after").animationName).toBe("none");
+	},
+};

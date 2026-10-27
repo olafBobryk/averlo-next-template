@@ -27,13 +27,17 @@ const modalHostBaseLayerIndex = 80;
 
 export function ModalHost() {
 	const [modals, setModals] = useState<ActiveModal[]>([]);
+	const closeLocks = useRef(new Set<string>());
 	const scopeId = usePortalScopeId();
 
 	const removeModal = useCallback((id: string) => {
+		closeLocks.current.delete(id);
 		setModals((prev) => prev.filter((modal) => modal.id !== id));
 	}, []);
 	const setModalCloseDisabled = useCallback(
 		(id: string, closeDisabled: boolean) => {
+			if (closeDisabled) closeLocks.current.add(id);
+			else closeLocks.current.delete(id);
 			setModals((current) =>
 				current.map((modal) =>
 					modal.id === id ? { ...modal, closeDisabled } : modal,
@@ -60,10 +64,13 @@ export function ModalHost() {
 
 		const handleClose = (event: Event) => {
 			const { id } = (event as CustomEvent<{ id: string }>).detail;
-			removeModal(id);
+			if (!closeLocks.current.has(id)) removeModal(id);
 		};
 
-		const handleCloseAll = () => setModals([]);
+		const handleCloseAll = () =>
+			setModals((current) =>
+				current.filter((modal) => closeLocks.current.has(modal.id)),
+			);
 
 		window.addEventListener(MODAL_OPEN_EVENT, handleOpen as EventListener);
 		window.addEventListener(MODAL_CLOSE_EVENT, handleClose as EventListener);

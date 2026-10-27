@@ -25,7 +25,6 @@ const overrideFiles = [
 	"src/components/ui/overlays/toast/ToastHost.tsx",
 	"src/components/ui/primitives/Button.tsx",
 	"src/components/ui/primitives/Field.tsx",
-	"src/components/ui/primitives/InputFrame.tsx",
 	"src/components/ui/primitives/Text.tsx",
 	"src/lib/api/index.ts",
 	"src/lib/feedback/toast.ts",
@@ -48,6 +47,8 @@ export const thinStartProfile = {
 	},
 	assembly: {
 		coreScripts: [
+			"verify:forms",
+			"verify:loading",
 			"build-storybook",
 			"build",
 			"design-system:evidence",
@@ -86,10 +87,8 @@ export const thinStartProfile = {
 		],
 		coreDependencies: [
 			"pdfjs-dist",
-			"@phosphor-icons/react",
 			"@openai/apps-sdk-ui",
 			"@radix-ui/react-slot",
-			"@tanstack/react-hotkeys",
 			"class-variance-authority",
 			"clsx",
 			"libphonenumber-js",
@@ -101,7 +100,6 @@ export const thinStartProfile = {
 			"react",
 			"react-dom",
 			"react-markdown",
-			"react-phone-number-input",
 			"remark-gfm",
 			"sonner",
 			"streamdown",
@@ -139,6 +137,7 @@ export const thinStartProfile = {
 	},
 	overridesRoot: "template-profiles/thin-start/overrides",
 	sharedFiles: [
+		"src/components/ui/primitives/InputFrame.tsx",
 		"src/components/ui/primitives/surfaces/AGENTS.md",
 		"src/components/ui/primitives/surfaces/Panel.tsx",
 		"src/components/ui/primitives/surfaces/Card.tsx",
@@ -148,7 +147,6 @@ export const thinStartProfile = {
 		"src/components/ui/misc/Skeleton.tsx",
 		"src/components/ui/icons/customRegistry.tsx",
 		"src/components/ui/icons/iconRegistry.tsx",
-		"src/components/ui/icons/phosphorRegistry.tsx",
 		"src/components/ui/icons/openaiRegistry.tsx",
 		"src/lib/marketing-content/sections/homeHero/HomeHeroPreviewCollage.tsx",
 	],
@@ -158,6 +156,8 @@ export const thinStartProfile = {
 	})),
 	apiReview: {
 		allowedUiImports: [
+			"@/components/ui/helpers/IconSwap",
+			"@/components/ui/helpers/useCopyAction",
 			"@/components/ui/icons/Icon",
 			"@/components/ui/misc",
 			"@/components/ui/misc/Skeleton",

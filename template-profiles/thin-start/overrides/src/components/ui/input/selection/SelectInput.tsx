@@ -55,7 +55,7 @@ function SelectInputRoot<T extends string = string>({
 			error={error}
 			className={className}
 		>
-			<InputFrame error={Boolean(error)}>
+			<InputFrame tone={error ? "error" : "default"}>
 				<select
 					id={inputId}
 					value={value}

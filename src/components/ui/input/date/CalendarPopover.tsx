@@ -1,10 +1,10 @@
 /** biome-ignore-all lint/a11y/useSemanticElements: the calendar follows the WAI-ARIA roving-focus button grid pattern */
 "use client";
 
-import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import clsx from "clsx";
 import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import {
 	Dropdown,
@@ -334,7 +334,11 @@ export function CalendarPopover({
 							}
 							type="button"
 						>
-							<CaretLeft aria-hidden size={16} />
+							<Icon
+								name="caret-left"
+								aria-hidden
+								style={{ width: 16, height: 16 }}
+							/>
 						</button>
 						<div className="flex min-w-0 items-center gap-1">
 							<Dropdown.Listbox
@@ -382,7 +386,11 @@ export function CalendarPopover({
 							}
 							type="button"
 						>
-							<CaretRight aria-hidden size={16} />
+							<Icon
+								name="caret-right"
+								aria-hidden
+								style={{ width: 16, height: 16 }}
+							/>
 						</button>
 					</div>
 				</Card.Header>

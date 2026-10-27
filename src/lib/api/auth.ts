@@ -52,10 +52,17 @@ export class AuthApiError extends Error {
 }
 
 async function readJson<T>(response: Response): Promise<T> {
-	const body = (await response.json()) as T & {
-		code?: string;
-		message?: string;
-	};
+	let parsed: unknown;
+	try {
+		parsed = await response.json();
+	} catch (error) {
+		if (!(error instanceof SyntaxError)) throw error;
+		throw new AuthApiError("The authentication response could not be read.");
+	}
+	if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+		throw new AuthApiError("The authentication response could not be read.");
+	}
+	const body = parsed as T & { code?: string; message?: string };
 	if (!response.ok) {
 		throw new AuthApiError(
 			body.message ?? "The authentication request failed.",

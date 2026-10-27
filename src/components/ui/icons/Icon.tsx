@@ -1,8 +1,8 @@
 "use client";
 
-import type { IconWeight } from "@phosphor-icons/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
+import type { IconWeight } from "@/components/ui/icons/iconRegistry";
 import {
 	type IconName,
 	useIconRegistry,

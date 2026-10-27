@@ -53,10 +53,7 @@ export function useEntityDeletionOption({
 						const result = await deleteEntity();
 						if (!result.ok) {
 							onRollback?.();
-							showToast.error(result.message, {
-								title: "Deletion failed",
-							});
-							return false;
+							return { ok: false, message: result.message };
 						}
 						showToast.success(result.message, { title: "Deleted" });
 						onDeleted?.();
@@ -72,11 +69,10 @@ export function useEntityDeletionOption({
 						return true;
 					} catch {
 						onRollback?.();
-						showToast.error(
-							`${definition.entityTypeLabel} could not be deleted.`,
-							{ title: "Deletion failed" },
-						);
-						return false;
+						return {
+							ok: false,
+							message: `${definition.entityTypeLabel} could not be deleted.`,
+						};
 					}
 				},
 				title: `Delete ${definition.entityLabel}?`,

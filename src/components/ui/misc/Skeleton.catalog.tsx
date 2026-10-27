@@ -58,6 +58,14 @@ export const catalogContract = defineCatalogOwnerContract({
 			storyId: "ui-misc-skeleton--non-interactive-contract",
 		},
 		{ label: "Owned radius scale", storyId: "ui-misc-skeleton--radius-scale" },
+		{
+			label: "Default shimmer respects reduced motion",
+			storyId: "ui-misc-skeleton--shimmer-block",
+		},
+		{
+			label: "Explicit static opt-out",
+			storyId: "ui-misc-skeleton--static-opt-out",
+		},
 	],
 
 	family: "UI",

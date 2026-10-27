@@ -183,8 +183,8 @@ export const HomePackComparison: Story = {
 			<h1 className="text-2xl font-semibold">One home, nine icon families</h1>
 			<p className="mt-2 mb-7 text-sm text-muted-foreground">
 				Original upstream geometry and stroke weights. Compare at actual UI
-				sizes, then in a 16px navigation row. Phosphor is the current app
-				default.
+				sizes, then in a 16px navigation row. OpenAI is the current app default;
+				these saved samples do not install additional icon packs.
 			</p>
 			<div className="overflow-x-auto">
 				<table className="w-full min-w-[660px] text-left text-sm">
@@ -289,5 +289,46 @@ export const OpenAIDefaultAndState: Story = {
 		await expect(
 			canvas.getByTestId("sdk-home").querySelector("svg"),
 		).not.toHaveAttribute("weight");
+	},
+};
+
+export const LocalGlyphCoverage: Story = {
+	render: () => (
+		<div className="grid grid-cols-4 gap-4 p-6">
+			{[
+				"bold",
+				"heading",
+				"italic",
+				"underline",
+				"strikethrough",
+				"list-bulleted",
+				"list-checks",
+				"list-numbered",
+				"drag-handle",
+				"spinner",
+				"send",
+				"expand",
+				"play",
+				"table",
+				"github",
+				"instagram",
+				"linked-in",
+				"meta",
+				"x",
+				"youtube",
+				"tiktok",
+				"discord",
+			].map((name) => (
+				<div key={name} className="flex items-center gap-2">
+					<Icon name={name} data-testid={`local-${name}`} size="md" />
+					<span>{name}</span>
+				</div>
+			))}
+		</div>
+	),
+	play: async ({ canvas }) => {
+		for (const icon of canvas.getAllByTestId(/^local-/)) {
+			await expect(icon.querySelector("svg")).toBeInTheDocument();
+		}
 	},
 };

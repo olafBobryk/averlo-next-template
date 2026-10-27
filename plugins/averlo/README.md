@@ -1,22 +1,64 @@
 # Averlo Codex plugin
 
-## Primary implementation router
+## Repository contracts and operational workflows
 
-Use `$averlo:repository-workflows` as the primary router for implementation and
-implementation review inside Averlo repositories. Governing repository
-instructions may require this explicit-only skill without enabling global
-implicit invocation. Its route workflows also own browser metadata ordering,
-indexability, canonical identity, and provider-backed page metadata routing.
+Maintained behavior belongs to the target repository's `openspec/specs/`,
+discovered through standard OpenSpec operations. Nearest AGENTS owns structural
+policy, Storybook owns supported component APIs/defaults, and canonical
+procedures linked through WORKFLOWS own execution and verification. Resolve
+repository paths from that repository's root, never from this plugin installation.
 
-After it selects the applicable workflows and concern contracts, do not invoke
-the overlapping design-system, skeleton, entity, or surface skills again for
-the same change unit. `$averlo:compose` owns native source-backed realization
+Run `openspec list --specs`, then `openspec show <capability-id> --type spec`
+for the changed surface, its relevant `app/shared/` dependencies and existing
+`product/` business requirements. App shared frontend, services and complete
+data-lifecycle contracts remain distinct from marketing/dashboard policy.
+Template assembly/demonstration contracts apply only to actual canonical work
+and are excluded from generated projects. Do not invent product specs, load
+ambient siblings or infer feature installation from folders. Business rules
+cannot silently override a conflicting shared obligation; change it explicitly.
+
+`$averlo:compose` owns native source-backed realization
 and measured human review passes. `$averlo:systemize-composition` explicitly
 owns deterministic established-owner replacement plus confidence-routed
 ambiguous shared design-system decisions, `$averlo:animate`
 explicitly owns motion, and `$averlo:visual-parity` supplies reproducible
-evidence to all three. These operational workflows may invoke the router and
-Figma skills as subordinate steps.
+evidence to all three. These operational workflows may invoke Figma skills as
+subordinate steps; their explicit approval and source-authority boundaries remain.
+
+## Shared action and feedback guidance
+
+Conditional-content behavior is covered by the target repository's maintained
+interaction contracts. Feedback ownership follows its independent form, action
+and loading capabilities under `openspec/specs/app/shared/data-lifecycle/`.
+Use the current repository's Button, ContentPresence, StatusMessage and
+InlineError Storybook contracts for supported APIs and examples. These owners
+also travel through the template's selected generated-project profiles.
+
+Use bare treatment for disclosure arrows, contextual ellipsis triggers, and
+copy controls that stay transparent on hover. InputFrame and Dropdown own the
+compact input chrome and inset menu styling; keep their APIs and examples in
+their Storybook owners. Assistant tools sit inside one collapsible summary above each reply, with a divider anchored directly beneath its trigger, above the expanding details, and equal spacing around the reply when collapsed. Expanding it reveals one quiet disclosure per call, with arguments and actual safe
+output. Use actual call counts and states; show elapsed time only when the runtime supplies it. Tool presentation follows Inference’s request/result envelope with typed content blocks, expandable argument properties and bounded output disclosure; executable tools still pass through the runtime allowlist and authorization. Keep approval decisions above the composer. Approval content is a domain-neutral title and description: callers explain the action, target and consequences; tool arguments remain in the tool disclosure. Do not couple the approval box to Record fields. Allow once is primary and Deny is bare. Group the heading and description tightly, then separate the actions. Only the clicked action button shows loading; lock its conflicting siblings without spinners or a detached loading label (see the maintained action-behavior contract). Keep the session queue attached beneath it: a tinted shell extends 40px under the composer, with uniform header-height rows and a horizontal six-dot drag-handle reveal, always-visible right actions, and disclosure/reorder motion. A right-side pencil removes the item from the queue and transfers its text/files into the composer for resending. Preserve an existing unsent draft as a queue item. Resume belongs on the empty composer send control as Play; never add a separate Resume control to the queue. Never expand a queue row into an inline editor. Do not flatten it into uncontained text. User bubbles fit their content; timestamp and edit/copy controls share a row aligned to the bubble text inset, revealed on hover or keyboard focus. Editing updates the existing message and retains attachments. The composer’s / and @ pickers follow the source’s anchored Float layout. Keep generic commands limited to /help and /new until a project supplies working domain commands. Context search and execution-time resolution belong to the actor-scoped adapter; references retain stable identities through drafts, queues and edits and never grant tool permission. Preserve source authorization and identify simulated providers. Detailed contracts and behavior tests belong to the Assistant Storybook owners.
+Queue operations and remembered tool permissions must affect subsequent runs. One active submission, confirmed cancellation,
+server approval claiming and execution deduplication are required. Permission grants
+never override authorization or current tool mode. Duplicating history must not revive
+approvals. Detailed APIs and states belong in the Assistant Controls and
+Message Storybook owners. Reference permissions last across chats and
+reloads until the reference server resets; queues are conversation-scoped browser-session
+state, never durable storage.
+
+Prefer ContentSection for page hierarchy: headings, descriptions, and actions
+remain on the canvas. Group each cohesive set of properties or controls in one
+Card beneath its heading; organization settings has two sections and two property
+cards. Avoid both a card per field and removing useful group boundaries. Card
+headers are optional and identify an item, without repeating the section title.
+Float uses a distinct raised fill; modals keep Card fill at overlay elevation.
+Composer and ordinary inputs share InputFrame fill and shadow; presentation may
+change geometry, not fork their background. Sidebar category labels come from
+dashboard registry metadata. Dropdown separation uses independent Dividers:
+full width between major content blocks, inset between action groups; never
+put a separator border on an interactive row. For mixed controls and actions, use Dropdown.Menu custom control entries so spacing, dividers, hover opening, and focus remain system-owned; do not rebuild its list in a consumer. Pair compact rows with muted xxs InputFrame and xs ghost buttons when individual controls need a hover background. See the Surfaces and Dropdown
+Storybook owners for the supported APIs.
 
 ## Shared action and feedback guidance
 

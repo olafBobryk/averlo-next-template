@@ -3,10 +3,10 @@
 import clsx from "clsx";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
-import { Skeleton } from "@/components/ui/misc/Skeleton";
 import { IdleState } from "@/components/ui/misc/state/IdleState";
 import { Button } from "@/components/ui/primitives/Button";
 import { Field } from "@/components/ui/primitives/Field";
+import { Card } from "@/components/ui/primitives/surfaces";
 import {
 	FilePreview,
 	type FilePreviewItem,
@@ -27,6 +27,9 @@ export type FileInputPendingItem = {
 };
 
 export type FileInputUploadedItem = {
+	uploadState?: "uploading" | "failed";
+	uploadError?: string;
+	onRetry?: () => void;
 	resolveUrl?: (signal: AbortSignal) => Promise<string>;
 	key?: string;
 	name?: string;
@@ -381,62 +384,118 @@ function FileInputRoot({
 					onDrop={handleDrop}
 				>
 					<div className="flex w-max gap-3 overscroll-x-contain [-webkit-overflow-scrolling:touch]">
-						{previewItems.map((item, index) => (
-							<FilePreview
-								onPreview={previewHandler}
-								hideRemove={!isEditable}
-								index={index}
-								isDisabled={disabled}
-								item={item}
-								key={item.key}
-								labels={labels}
-								onRemovePending={(url) => {
-									const preview = pendingPreviews.find(
-										(entry) => entry.url === url,
-									);
-									if (!preview) return;
-									onItemsChange(
-										items.filter((candidate) => candidate !== preview.item),
-									);
-								}}
-								onRemoveUploaded={(url) => {
-									const uploadedItem = items.find(
-										(candidate, candidateIndex) =>
-											candidate.status === "uploaded" &&
-											uploadedItemKey(candidate, candidateIndex) === item.key &&
-											candidate.url === url,
-									);
-									if (!uploadedItem) return;
-									onItemsChange(
-										items.filter((candidate) => candidate !== uploadedItem),
-									);
-								}}
-								previewHeight={previewHeight}
-								urlLooksLikeImage={urlLooksLikeImage}
-								urlLooksLikePdf={urlLooksLikePdf}
-							/>
-						))}
+						{previewItems.map((item, index) => {
+							const original = items.find(
+								(f, i) =>
+									f.status === "uploaded" && uploadedItemKey(f, i) === item.key,
+							);
+							if (original?.status === "uploaded" && original.uploadState)
+								return (
+									<div
+										key={item.key}
+										className="relative shrink-0"
+										aria-busy={original.uploadState === "uploading"}
+									>
+										{original.uploadState === "uploading" ? (
+											<>
+												<FilePreview.Skeleton previewHeight={previewHeight} />
+												<span className="absolute inset-x-2 bottom-2 truncate text-xs">
+													{original.name}
+												</span>
+											</>
+										) : (
+											<div
+												className="w-44 rounded-xl border border-border bg-card p-3"
+												style={{ minHeight: previewHeight }}
+											>
+												<p className="truncate text-sm">{original.name}</p>
+												<p className="text-xs">{original.uploadError}</p>
+												<Button
+													variant="secondary"
+													size="sm"
+													onClick={original.onRetry}
+												>
+													Retry
+												</Button>
+											</div>
+										)}
+										<div className="absolute right-1 top-1">
+											<Button
+												variant="secondary"
+												size="icon-sm"
+												leadingIcon="cross"
+												aria-label={`Remove ${original.name}`}
+												onClick={() =>
+													onItemsChange(items.filter((f) => f !== original))
+												}
+											/>
+										</div>
+									</div>
+								);
+							return (
+								<FilePreview
+									onPreview={previewHandler}
+									hideRemove={!isEditable}
+									index={index}
+									isDisabled={disabled}
+									item={item}
+									key={item.key}
+									labels={labels}
+									onRemovePending={(url) => {
+										const preview = pendingPreviews.find(
+											(entry) => entry.url === url,
+										);
+										if (!preview) return;
+										onItemsChange(
+											items.filter((candidate) => candidate !== preview.item),
+										);
+									}}
+									onRemoveUploaded={(url) => {
+										const uploadedItem = items.find(
+											(candidate, candidateIndex) =>
+												candidate.status === "uploaded" &&
+												uploadedItemKey(candidate, candidateIndex) ===
+													item.key &&
+												candidate.url === url,
+										);
+										if (!uploadedItem) return;
+										onItemsChange(
+											items.filter((candidate) => candidate !== uploadedItem),
+										);
+									}}
+									previewHeight={previewHeight}
+									urlLooksLikeImage={urlLooksLikeImage}
+									urlLooksLikePdf={urlLooksLikePdf}
+								/>
+							);
+						})}
 						{showAdd ? (
-							<Button
-								aria-label={
-									typeof labels?.add === "string" ? labels.add : "Add file"
-								}
-								className={clsx(
-									"aspect-video shrink-0 rounded-md! border border-dashed border-border!",
-									isDragging &&
-										"border-primary! bg-primary/5 text-primary-text",
-								)}
-								contentClassName="h-full w-full flex-col gap-2"
-								disabled={disabled}
-								onClick={() => inputRef.current?.click()}
-								size="none"
+							<Card
+								interactive={!disabled}
+								padding="none"
+								className="aspect-video shrink-0 border-solid"
 								style={{ height: previewHeight }}
-								type="button"
-								variant="ghost"
 							>
-								<Icon name="plus" size="sm" />
-								<span>{labels?.add ?? "Add file"}</span>
-							</Button>
+								<Button
+									aria-label={
+										typeof labels?.add === "string" ? labels.add : "Add file"
+									}
+									className={clsx(
+										"h-full w-full",
+										isDragging && "bg-primary/5 text-primary-text",
+									)}
+									contentClassName="h-full w-full flex-col gap-2"
+									disabled={disabled}
+									onClick={() => inputRef.current?.click()}
+									size="none"
+									textVariant="support"
+									type="button"
+									variant="bare"
+								>
+									<Icon name="plus" size="sm" />
+									<span>{labels?.add ?? "Add file"}</span>
+								</Button>
+							</Card>
 						) : null}
 					</div>
 				</fieldset>
@@ -470,10 +529,22 @@ function FileInputSkeleton({
 					),
 				)}
 				{mode === "edit" ? (
-					<Skeleton
-						className="aspect-video shrink-0 rounded-md"
+					<Card
+						padding="none"
+						className="aspect-video shrink-0"
 						style={{ height: previewHeight }}
-					/>
+					>
+						<Button.Skeleton
+							size="none"
+							textVariant="support"
+							variant="ghost"
+							className="h-full w-full"
+							textClassName="flex h-full w-full flex-col items-center justify-center gap-2"
+						>
+							<Icon name="plus" size="sm" />
+							<span>Add file</span>
+						</Button.Skeleton>
+					</Card>
 				) : null}
 			</div>
 		</Field>

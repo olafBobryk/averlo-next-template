@@ -5,6 +5,32 @@ pinned authority and capture scope; `verify` replaces only the current
 measurement block after the Target capture. Store it at
 `.codex/visual-parity/<task>/focus.md`.
 
+## Decomposition and authority boundaries
+
+Before product edits, enumerate hierarchy, bounds, top-level heading contexts,
+full-bleed backgrounds and vertical-rhythm changes. Record content cases, shell
+cases, excluded regions and accumulated gates separately. Each independently
+reviewable content landmark maps to one stable case ID, source-neutral block
+type, registered renderer and Target selector. Only content cases contribute to
+registered-renderer counts. A footer maps to a shell owner/selector, with no
+block-type, registered-renderer or shared `Section`-root obligation. Excluded
+headers belong in neither inventory; accumulated gates are comparison-only.
+
+Separate source/parity cases remain separate despite shared themes or continuous
+backgrounds. Pause on an ambiguous source split. Coherent landmarks may share a
+case only when source hierarchy, semantic heading context, interaction and review
+boundary support it; a later maintainability split is an explicit human-reviewed
+Systemize decision, not an automatic Compose defect. Never turn an accumulated
+page gate into a renderer.
+
+Under Compose, retain the approved header unchanged in production and exclude it
+from both comparison boundaries. Source requests cannot retheme or replace that
+header; redesign is separately scoped non-Compose work. Footers stay with shared
+shell owners. Exact identity assets do not authorize nested shared-owner changes.
+Confirm stable section ID/block-type/label attributes, one shared `Section` root
+per content renderer and isolation from adjacent pixels. Use semantic stable
+selectors rather than generated classes or visible copy.
+
 ```markdown
 Phase: frame | verify
 Workflow owner: compose | systemize-composition | animate | direct-review

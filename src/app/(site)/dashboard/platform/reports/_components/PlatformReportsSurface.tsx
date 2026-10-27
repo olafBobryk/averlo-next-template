@@ -7,10 +7,7 @@ export function PlatformReportsSurface(
 	props: ComponentProps<typeof PlatformReportsContent>,
 ) {
 	return (
-		<DashboardSection
-			contentClassName="grid min-w-0 gap-5"
-			title="Reports"
-		>
+		<DashboardSection contentClassName="grid min-w-0 gap-5" title="Reports">
 			<PlatformReportsContent {...props} />
 		</DashboardSection>
 	);

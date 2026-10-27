@@ -15,6 +15,7 @@ import {
 	signInWithFixturePassword,
 } from "@/lib/auth/server";
 import { hrefFor, surfaceHref } from "@/lib/routes";
+import { getLoginFieldErrors, type LoginResult } from "./_lib/login";
 
 function readFormString(formData: FormData, name: string) {
 	const value = formData.get(name);
@@ -42,12 +43,20 @@ function redirectAfterSignIn(
 	redirect(next);
 }
 
-export async function signInAction(formData: FormData) {
+export async function signInAction(
+	_previous: LoginResult,
+	formData: FormData,
+): Promise<LoginResult> {
 	const next = getSafeContinuationPath(readFormString(formData, "next"));
+	const email = readFormString(formData, "email");
+	const rawPassword = formData.get("password");
+	const password = typeof rawPassword === "string" ? rawPassword : "";
+	const fieldErrors = getLoginFieldErrors(email, password);
+	if (fieldErrors.email || fieldErrors.password) return { fieldErrors };
 	try {
 		const resolution = await signInWithFixturePassword({
-			email: readFormString(formData, "email"),
-			password: readFormString(formData, "password"),
+			email,
+			password,
 		});
 		redirectAfterSignIn(resolution, next);
 	} catch (error) {
@@ -55,7 +64,7 @@ export async function signInAction(formData: FormData) {
 			throw error;
 		}
 		const publicError = toPublicAuthError(error);
-		redirect(authRedirect(hrefFor("auth.login"), next, publicError.code));
+		return { message: publicError.message };
 	}
 }
 

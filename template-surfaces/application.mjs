@@ -1,6 +1,7 @@
 export const applicationSurfaces = {
 	assistant: {
 		ownedPaths: [
+			"docs/pasted-text-attachments.md",
 			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview13.tsx",
 			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview18.tsx",
 			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview19.tsx",
@@ -11,8 +12,8 @@ export const applicationSurfaces = {
 			"src/app/(site)/dashboard/chats",
 			"src/lib/assistant/permissions.server.ts",
 			"src/lib/assistant/tool-presentation.ts",
- "src/lib/assistant/composer-context.ts",
- "src/lib/assistant/context.server.ts",
+			"src/lib/assistant/composer-context.ts",
+			"src/lib/assistant/context.server.ts",
 			"src/app/api/assistant",
 			"src/components/domain/assistant",
 			"src/lib/assistant/access.server.ts",
@@ -30,11 +31,20 @@ export const applicationSurfaces = {
 			"scripts/verify/assistant-runtime-cases.ts",
 			"scripts/verify/assistant-route-test-adapters.ts",
 		],
-		packageDependencies: ["@ai-sdk/openai", "@ai-sdk/react", "ai"],
+		packageDependencies: ["@ai-sdk/openai", "ai"],
 		packageScripts: ["verify:assistant"],
 	},
 	dashboard: {
 		ownedPaths: [
+			"openspec/specs/app/dashboard/navigation/route-enrichment/spec.md",
+			"openspec/specs/app/shared/services/files/private-file-access/spec.md",
+			"openspec/specs/app/shared/frontend/content/entity-presentation/spec.md",
+			"docs/testing/identity.md",
+			"src/lib/api/auth.test.ts",
+			"docs/testing/entities.md",
+			"scripts/verify/loading",
+			"scripts/verify/forms/login.mjs",
+			"scripts/verify/forms/support.mjs",
 			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview1.tsx",
 			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview2.tsx",
 			"src/lib/marketing-content/sections/homeHero/previews/HeroPreview3.tsx",

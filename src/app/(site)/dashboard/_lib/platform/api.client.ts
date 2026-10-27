@@ -30,7 +30,23 @@ export async function submitSupportRequest(formData: FormData) {
 		credentials: "same-origin",
 		method: "POST",
 	});
-	return readJson<{ message: string; request?: SupportRequest }>(response);
+	const body = (await response.json()) as {
+		message: string;
+		request?: SupportRequest;
+		fieldErrors?: { subject?: string; message?: string };
+	};
+	if (!response.ok)
+		throw new SupportSubmissionError(body.message, body.fieldErrors);
+	return body;
+}
+
+export class SupportSubmissionError extends Error {
+	constructor(
+		message: string,
+		readonly fieldErrors?: { subject?: string; message?: string },
+	) {
+		super(message);
+	}
 }
 
 export async function submitProductReport(input: {

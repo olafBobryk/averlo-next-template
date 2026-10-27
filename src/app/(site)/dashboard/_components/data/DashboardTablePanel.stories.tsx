@@ -29,7 +29,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					"Standard contained collection table. Set pageSize for a fully loaded collection: sorting covers all rows and returns to page one; removals clamp the current page. The footer shares the column-header surface, stays outside horizontal scrolling, and uses a compact previous / current of total / next pager. Mirror pageSize in Skeleton. Omit it for overview excerpts with View more. This client pagination does not fetch remote pages or infer provider totals.",
+					"Standard contained collection table. Set pageSize for a fully loaded collection: sorting covers all rows and returns to page one; removals clamp the current page. The footer shares the column-header surface, stays outside horizontal scrolling, and uses a compact previous / current of total / next pager. Mirror pageSize, sortable and responsivePriority in Skeleton so inert header affordances reserve the same responsive geometry. Omit pagination for overview excerpts with View more. This client pagination does not fetch remote pages or infer provider totals.",
 			},
 		},
 	},
@@ -39,7 +39,10 @@ type Story = StoryObj<typeof meta>;
 export const Pagination: Story = {
 	render: () => (
 		<DashboardTablePanel
-			columns={[...columns, { id: "actions", header: "Actions", kind: "action", render: () => "—" }]}
+			columns={[
+				...columns,
+				{ id: "actions", header: "Actions", kind: "action", render: () => "—" },
+			]}
 			rows={rows}
 			getRowKey={(row) => row}
 			pageSize={5}
@@ -55,18 +58,28 @@ export const Pagination: Story = {
 		const stickyHeader = canvas.getByRole("columnheader", { name: "Actions" });
 		const tableFrame = header.closest("table")?.parentElement?.parentElement;
 		const footerDivider = footer.querySelector("hr");
-		if (!tableFrame || !footerDivider) throw new Error("Missing table frame or divider");
+		if (!tableFrame || !footerDivider)
+			throw new Error("Missing table frame or divider");
 		const outlineColor = getComputedStyle(tableFrame).borderTopColor;
-		await expect(getComputedStyle(stickyHeader).borderBottomColor).toBe(outlineColor);
-		await expect(getComputedStyle(footerDivider).backgroundColor).toBe(outlineColor);
+		await expect(getComputedStyle(stickyHeader).borderBottomColor).toBe(
+			outlineColor,
+		);
+		await expect(getComputedStyle(footerDivider).backgroundColor).toBe(
+			outlineColor,
+		);
 
-		await expect(getComputedStyle(stickyHeader).backgroundColor)
-			.toBe(getComputedStyle(header).backgroundColor);
+		await expect(getComputedStyle(stickyHeader).backgroundColor).toBe(
+			getComputedStyle(header).backgroundColor,
+		);
 		const headerLabel = canvas.getByRole("button", { name: "Name" });
 		const pageCount = canvas.getByText("1 of 3");
 		const footerFill = footer.lastElementChild as HTMLElement;
-		await expect(measureRenderedContrast(headerLabel, header as HTMLElement).text).toBeGreaterThanOrEqual(4.5);
-		await expect(measureRenderedContrast(pageCount, footerFill).text).toBeGreaterThanOrEqual(4.5);
+		await expect(
+			measureRenderedContrast(headerLabel, header as HTMLElement).text,
+		).toBeGreaterThanOrEqual(4.5);
+		await expect(
+			measureRenderedContrast(pageCount, footerFill).text,
+		).toBeGreaterThanOrEqual(4.5);
 
 		await expect(
 			Math.abs(
@@ -151,10 +164,26 @@ export const Empty: Story = {
 };
 export const Skeleton: Story = {
 	render: () => (
-		<DashboardTablePanel.Skeleton columns={columns} pageSize={5}>
+		<DashboardTablePanel.Skeleton
+			columns={[
+				...columns,
+				{ id: "status", header: "Status", sortable: false },
+			]}
+			pageSize={5}
+		>
 			<tr>
 				<td className="px-4 py-3">Loading records…</td>
+				<td className="px-4 py-3">Loading status…</td>
 			</tr>
 		</DashboardTablePanel.Skeleton>
 	),
+	play: async ({ canvas }) => {
+		await expect(
+			canvas.getByRole("columnheader", { name: "Name" }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole("columnheader", { name: "Status" }),
+		).toBeVisible();
+		await expect(canvas.queryAllByRole("button")).toHaveLength(0);
+	},
 };

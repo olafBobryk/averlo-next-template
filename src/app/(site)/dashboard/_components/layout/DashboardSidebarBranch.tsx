@@ -40,6 +40,8 @@ export function DashboardSidebarItem({
 							"text-muted-foreground hover:bg-[var(--button-ghost-hover)] hover:text-sidebar-accent-foreground",
 						],
 				className,
+				!mobileExpanded && "max-lg:mx-auto max-lg:w-8",
+				collapsed && "lg:mx-auto lg:w-8",
 			)}
 			data-sidebar-active-row={active ? "true" : undefined}
 		>

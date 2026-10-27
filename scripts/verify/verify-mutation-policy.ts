@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = process.cwd();
@@ -12,21 +12,45 @@ function assertIncludes(source: string, needle: string, label: string) {
 	assert.ok(source.includes(needle), `Missing ${label}: ${needle}`);
 }
 
-const fullShell = read("src/components/ui/overlays/modal/ModalShell.tsx");
-const thinShell = read(
-	"template-profiles/thin-start/overrides/src/components/ui/overlays/modal/ModalShell.tsx",
-);
-const fullConfirmation = read(
-	"src/components/ui/overlays/modal/ConfirmationModal.tsx",
-);
-const thinConfirmation = read(
-	"template-profiles/thin-start/overrides/src/components/ui/overlays/modal/ConfirmationModal.tsx",
-);
+// A generated receipt wins even if a project retains the template package name.
+const generated = existsSync(resolve(root, ".template-profile.json"));
+const isDirectory = (name: string) => {
+	const location = resolve(root, name);
+	return existsSync(location) && statSync(location).isDirectory();
+};
+const canonicalTemplate =
+	!generated &&
+	JSON.parse(read("package.json")).name === "averlo-next-template" &&
+	isDirectory("template-assembly") &&
+	isDirectory("template-profiles");
+const shells: [string, string][] = [
+	[
+		"installed modal shell",
+		read("src/components/ui/overlays/modal/ModalShell.tsx"),
+	],
+];
+const confirmations: [string, string][] = [
+	[
+		"installed confirmation",
+		read("src/components/ui/overlays/modal/ConfirmationModal.tsx"),
+	],
+];
+if (canonicalTemplate) {
+	shells.push([
+		"thin override modal shell",
+		read(
+			"template-profiles/thin-start/overrides/src/components/ui/overlays/modal/ModalShell.tsx",
+		),
+	]);
+	confirmations.push([
+		"thin override confirmation",
+		read(
+			"template-profiles/thin-start/overrides/src/components/ui/overlays/modal/ConfirmationModal.tsx",
+		),
+	]);
+}
 
-for (const [label, source] of [
-	["full modal shell", fullShell],
-	["thin modal shell", thinShell],
-] as const) {
+for (const [label, source] of shells) {
 	for (const contract of [
 		"export function useModalSubmission()",
 		"submissionRef",
@@ -40,15 +64,15 @@ for (const [label, source] of [
 	}
 }
 
-for (const [label, source] of [
-	["full confirmation", fullConfirmation],
-	["thin confirmation", thinConfirmation],
-] as const) {
+for (const [label, source] of confirmations) {
 	for (const contract of [
 		"useModalSubmission",
 		"if (!beginSubmission()) return",
 		"shouldEndSubmission = false",
-		"if (shouldEndSubmission) endSubmission()",
+		"if (shouldEndSubmission)",
+		"onCloseDisabledChange?.(true)",
+		"onCloseDisabledChange?.(false)",
+		"<InlineError>{error}</InlineError>",
 	]) {
 		assertIncludes(source, contract, `${label} pending handoff`);
 	}
@@ -82,43 +106,61 @@ assertIncludes(
 	"confirmation aria label",
 );
 
-for (const relativePath of [
-	"src/app/(site)/dashboard/_components/entities/record/RecordCollectionImplementation.tsx",
-	"src/app/(site)/dashboard/_components/entities/record/RecordDetailActions.tsx",
-	"src/app/(site)/dashboard/_components/detail/DashboardMarkdownEditorModalButton.tsx",
-	"src/components/composites/markdown/MarkdownEditor.tsx",
-]) {
-	const source = read(relativePath);
-	assertIncludes(source, "useModalSubmission", `${relativePath} adoption`);
-	assertIncludes(
-		source,
-		"if (!beginSubmission()) return",
-		`${relativePath} guard`,
+const dashboardInstalled = isDirectory("src/app/(site)/dashboard");
+if (generated) {
+	const receipt = JSON.parse(read(".template-profile.json"));
+	assert.equal(
+		dashboardInstalled,
+		receipt.assembly.surfaces.includes("dashboard"),
+		"Mutation adoption checks must match installed dashboard surfaces",
 	);
 }
 
-const collection = read(
-	"src/app/(site)/dashboard/_components/entities/record/RecordCollectionImplementation.tsx",
-);
-assertIncludes(
-	collection,
-	'completion: { type: "refresh" }',
-	"collection deletion completion",
-);
+if (dashboardInstalled) {
+	for (const relativePath of [
+		"src/app/(site)/dashboard/_components/entities/record/RecordCollectionImplementation.tsx",
+		"src/app/(site)/dashboard/_components/entities/record/RecordDetailActions.tsx",
+		"src/app/(site)/dashboard/_components/detail/DashboardMarkdownEditorModalButton.tsx",
+		"src/components/composites/markdown/MarkdownEditor.tsx",
+	]) {
+		const source = read(relativePath);
+		assertIncludes(source, "useModalSubmission", `${relativePath} adoption`);
+		assertIncludes(
+			source,
+			"if (!beginSubmission()) return",
+			`${relativePath} guard`,
+		);
+	}
 
-const detail = read(
-	"src/app/(site)/dashboard/_components/entities/record/RecordDetailActions.tsx",
-);
-assertIncludes(detail, 'type: "navigate"', "detail deletion navigation");
-assertIncludes(detail, "replace: true", "detail replacement navigation");
-assert.ok(
-	!detail.includes('router.push("/dashboard/records")'),
-	"Detail deletion must not own a second navigation path.",
-);
+	const collection = read(
+		"src/app/(site)/dashboard/_components/entities/record/RecordCollectionImplementation.tsx",
+	);
+	assertIncludes(
+		collection,
+		'completion: { type: "refresh" }',
+		"collection deletion completion",
+	);
 
-const referenceRecords = read(
-	"src/app/(site)/dashboard/_lib/fixtures/reference-records.core.ts",
-);
-assertIncludes(referenceRecords, "fieldErrors?", "structured record errors");
+	const detail = read(
+		"src/app/(site)/dashboard/_components/entities/record/RecordDetailActions.tsx",
+	);
+	assertIncludes(detail, 'type: "navigate"', "detail deletion navigation");
+	assertIncludes(detail, "replace: true", "detail replacement navigation");
+	assert.ok(
+		!detail.includes('router.push("/dashboard/records")'),
+		"Detail deletion must not own a second navigation path.",
+	);
 
-console.log("Full/thin modal mutation policy verification passed.");
+	const referenceRecords = read(
+		"src/app/(site)/dashboard/_lib/fixtures/reference-records.core.ts",
+	);
+	assertIncludes(referenceRecords, "fieldErrors?", "structured record errors");
+} else {
+	console.log(
+		"Dashboard mutation adoption intentionally omitted: dashboard is not installed.",
+	);
+}
+
+console.log(
+	`Installed modal mutation policy passed; template overrides ${canonicalTemplate ? "verified" : "not applicable"}.`,
+);

@@ -13,6 +13,20 @@ documents into lightweight page, layout, and section props.
 The canonical template also publishes `/repository-footprint`, a commit-history
 snapshot of its authored repository size. Generated projects do not include it.
 
+Maintained OpenSpec contracts distinguish canonical `template/` assembly/demos,
+reusable `app/` behavior and independently authored `product/` business rules.
+App contracts group shared frontend, services and complete data lifecycles,
+with marketing/dashboard policy scoped to those surfaces. Applicable template
+and app contracts both govern this repository; generated projects receive only
+explicitly selected independent app copies and may author real product contracts.
+No placeholder product specs are generated. Discover capabilities with
+`openspec list --specs`, then `openspec show <capability-id> --type spec` for the
+changed surface, relevant shared dependencies and existing product rules.
+Conflicting obligations require an explicit spec change; folder location does
+not silently override policy or install features. Nearest `AGENTS.md`, Storybook
+and the procedures linked by [WORKFLOWS](WORKFLOWS.md) retain their structural,
+API and execution roles.
+
 ## Instant Setup
 
 Template repository: [github.com/olafBobryk/averlo-next-template](https://github.com/olafBobryk/averlo-next-template)

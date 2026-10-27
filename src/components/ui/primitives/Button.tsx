@@ -353,7 +353,10 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 					)}
 				</span>
 				{loadingState !== undefined && (
-					<span className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity motion-micro pointer-events-none group-data-[loading=true]:opacity-100">
+					<span
+						aria-hidden="true"
+						className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity motion-micro pointer-events-none group-data-[loading=true]:opacity-100"
+					>
 						<Loader />
 					</span>
 				)}

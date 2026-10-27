@@ -28,3 +28,12 @@
   and thin-start renderers. Do not fork their tokens or geometry in an override.
 - Feedback presence composes the motion presence family; feedback owners must
   not introduce a second layout measurement or animation implementation.
+- Composite keyboard navigation and scoped shared shortcuts stay with their
+  owner. Consumers must not override visible focus globally, install duplicate
+  global shortcut listeners or fork composite keyboard behavior. InputFrame owns
+  composer fill and shadow exactly as ordinary input/search; composers vary
+  geometry, not the shared neutral chrome.
+
+- InputFrame defaults to soft, shadowless chrome in light mode; dark default chrome remains unchanged. Use `strong` for a heavier frame. The former `muted` variant is retired; soft consumers use `default`.
+
+- Dropdown positioning measures at least its configured minimum width, observes size changes, and tries the opposite anchor edge before clamping to the viewport.

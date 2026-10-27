@@ -20,7 +20,7 @@ const cardStyles = cva("", {
 });
 
 export type CardProps<T extends ElementType = "div"> = PanelProps<T> &
-	VariantProps<typeof cardStyles>;
+	VariantProps<typeof cardStyles> & { interactive?: boolean };
 
 export function Card<T extends ElementType = "div">({
 	background = "card",
@@ -29,6 +29,7 @@ export function Card<T extends ElementType = "div">({
 	display = "flex",
 	elevation = "card",
 	gap,
+	interactive = false,
 	overflow = "hidden",
 	padding,
 	radius = "card",
@@ -46,6 +47,8 @@ export function Card<T extends ElementType = "div">({
 			border={border}
 			className={clsx(
 				"group/card text-sm",
+				interactive &&
+					"transition-colors motion-micro hover:bg-[color-mix(in_srgb,var(--card)_98%,var(--foreground))]",
 				usesStructuredSpacing && cardStyles({ size: resolvedSize }),
 				usesDefaultGap &&
 					(resolvedSize === "sm"

@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
 import { AnimatePresence } from "motion/react";
-import { InputFrame } from "@/components/ui/primitives/InputFrame";
+import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
-import { DashboardCommandOverlay } from "./DashboardCommandOverlay";
+import { InputFrame } from "@/components/ui/primitives/InputFrame";
 import { defineCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import type { DashboardContextualCommand } from "./DashboardCommandContracts";
+import { DashboardCommandOverlay } from "./DashboardCommandOverlay";
 import { DashboardCommandPalette } from "./DashboardCommandPalette";
 import {
 	buildDashboardCommandTree,

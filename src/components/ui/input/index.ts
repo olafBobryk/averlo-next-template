@@ -44,6 +44,11 @@ export {
 	ProfilePictureInput,
 	type ProfilePictureInputProps,
 } from "./files/ProfilePictureInput";
+export {
+	type FilePreviewHandler,
+	FilePreviewProvider,
+	type FilePreviewRequest,
+} from "./files/previewHandler";
 export { NumberInput } from "./numeric/NumberInput";
 export { SliderInput } from "./numeric/SliderInput";
 export { UnitNumberInput } from "./numeric/UnitNumberInput";
@@ -68,7 +73,6 @@ export {
 	type SelectOption,
 } from "./selection/SelectInput";
 export { EmailInput } from "./text/EmailInput";
-export { FilePreviewProvider, type FilePreviewHandler, type FilePreviewRequest } from "./files/previewHandler";
 export { PasswordInput } from "./text/PasswordInput";
 export {
 	type CountryOption,

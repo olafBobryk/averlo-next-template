@@ -82,7 +82,7 @@ export const catalogContract = defineCatalogOwnerContract({
 		'import { Icon } from "@/components/ui/icons/Icon";\nimport { createIconRegistry, IconProvider, useIconRegistry } from "@/components/ui/icons/iconRegistry";\nimport { openaiIconRegistry } from "@/components/ui/icons/openaiRegistry";',
 	chooseWhen: [
 		"A component needs a shared glyph, shared sizing, optional framing, or a registry extension.",
-		"The app defaults to OpenAI Apps SDK UI icons. Fixed SDK weights map regular requests to the native outline; real filled variants preserve state, with Phosphor fallback for unsupported filled glyphs, brand marks, and rich-text controls. IconProvider remains replaceable per app.",
+		"The app defaults to OpenAI Apps SDK UI icons. Fixed SDK weights map regular requests to the native outline; real filled variants preserve state, with local SVGs for brand marks and rich-text controls. Symbols without a native filled variant retain their outline. IconProvider remains replaceable per app.",
 		"createIconRegistry(overrides, defaultWeights?) applies per-name weights. Bolt and sparkle default to fill; explicit Icon weight wins. Other names retain the adapter default. Providers must implement supported weights rather than blindly filling outline SVG paths.",
 	],
 	chooseInstead: [

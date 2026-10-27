@@ -8,13 +8,12 @@ description: Apply or review coherent motion for a human-accepted static section
 Direct a reviewed static surface as a readable sequence, not a collection of
 entrance wrappers. Preserve the accepted motion-off endpoint exactly.
 
-Animate packages [Repository Workflows](../repository-workflows/SKILL.md) and
-[Visual Parity](../visual-parity/SKILL.md) as mandatory subordinate contracts.
-Read each linked `SKILL.md` completely when its workflow first applies, even
-when that explicit-only skill is omitted from the active skill catalogue.
-Catalogue omission alone is not a blocker and never authorizes a substitute
-workflow. Load their routed references progressively instead of duplicating
-their contracts here.
+Animate packages [Visual Parity](../visual-parity/SKILL.md) as a mandatory
+subordinate workflow. Read its linked `SKILL.md` completely when it first
+applies even if omitted from the active catalogue; omission does not authorize
+a substitute. Resolve repository contracts and procedures from the target
+repository root, never from the plugin installation. Report a missing required
+contract as a scope gap rather than inventing equivalent policy.
 
 ## Start from the accepted static target
 
@@ -25,9 +24,16 @@ their contracts here.
 2. Use the linked `$averlo:visual-parity` to verify motion-off, reduced-motion,
    and settled motion-on endpoints against the accepted static capture. These
    comparisons prove endpoints, not intermediate frames.
-3. Invoke the linked `$averlo:repository-workflows` once before implementation.
-   Select Interaction plus every actual composition, shell, catalogue, route,
-   or performance concern affected by the motion.
+3. Read root/nearest AGENTS and use stock OpenSpec discovery: run
+   `openspec list --specs`, then `openspec show app/shared/frontend/interaction/responsive-and-motion --type spec`
+   and `openspec show app/shared/frontend/interaction/keyboard-and-overlays --type spec` for the
+   target's contracts, plus only other behavior actually changed. Use Storybook for APIs
+   and the canonical interaction verification procedure. Measured scroll work
+   follows `docs/operations/scroll-performance.md`; ordinary animation does not
+   trigger that measurement workflow.
+   Include existing product requirements only when relevant; do not load ambient
+   siblings, invent business specs or silently override shared rules. Any conflict
+   requires an explicit contract change, and template policy is not inherited.
 
 ## Direct the movement
 

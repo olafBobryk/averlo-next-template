@@ -1,13 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { AnimatePresence } from "motion/react";
 import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { AnimatePresence } from "motion/react";
-import { InputFrame } from "@/components/ui/primitives/InputFrame";
 import { Icon } from "@/components/ui/icons/Icon";
-import { DashboardCommandOverlay } from "./DashboardCommandOverlay";
+import { Button } from "@/components/ui/primitives/Button";
+import { InputFrame } from "@/components/ui/primitives/InputFrame";
 import type { DashboardContextualCommand } from "./DashboardCommandContracts";
+import { DashboardCommandOverlay } from "./DashboardCommandOverlay";
 import { DashboardCommandPalette } from "./DashboardCommandPalette";
 import { catalogContract } from "./DashboardCommandPalette.catalog";
+import {
+	DashboardCommandProvider,
+	DashboardCommandTrigger,
+	useDashboardCommands,
+} from "./DashboardCommandProvider";
 import {
 	buildDashboardCommandTree,
 	dashboardCommandMatches,
@@ -497,5 +503,91 @@ export const InterruptedExpansion: Story = {
 		await waitFor(() =>
 			expect(dialog.getBoundingClientRect().width).toBeCloseTo(560, 0),
 		);
+	},
+};
+
+function RegisteredCommand({ onRun }: { onRun: () => void }) {
+	useDashboardCommands("records", [
+		{
+			id: "action.records.review",
+			label: "Review active record",
+			description: "Review this record in place.",
+			run: onRun,
+		},
+	]);
+	return null;
+}
+function ProviderHarness() {
+	const [registered, setRegistered] = React.useState(true);
+	const [result, setResult] = React.useState("Not executed");
+	return (
+		<DashboardCommandProvider
+			canSwitchOrganizations={false}
+			capabilities={new Set()}
+			organization={{
+				id: "org-demo",
+				name: "Product sandbox",
+				slug: "product-sandbox",
+				mode: "multi",
+			}}
+		>
+			<div className="grid w-80 gap-4 p-8">
+				<DashboardCommandTrigger mobileExpanded />
+				<Button onClick={() => setRegistered(false)}>
+					Leave active record
+				</Button>
+				<output>{result}</output>
+			</div>
+			{registered && (
+				<RegisteredCommand
+					onRun={() =>
+						setResult(
+							document.querySelector(
+								'[role="dialog"][aria-label="Dashboard commands"]:not([inert]):not([aria-hidden="true"])',
+							)
+								? "Executed before close"
+								: "Executed after close",
+						)
+					}
+				/>
+			)}
+		</DashboardCommandProvider>
+	);
+}
+export const ProviderCompletionAndCleanup: Story = {
+	parameters: { nextjs: { appDirectory: true } },
+	render: () => <ProviderHarness />,
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		const trigger = canvas.getByRole("button", {
+			name: "Open dashboard commands",
+		});
+		await userEvent.click(trigger);
+		let dialog = await body.findByRole("dialog", {
+			name: "Dashboard commands",
+		});
+		let input = within(dialog).getByRole("combobox", {
+			name: "Search dashboard commands",
+		});
+		await userEvent.type(input, "Review active record");
+		await userEvent.keyboard("{Enter}{Enter}");
+		await waitFor(() =>
+			expect(canvas.getByText("Executed after close")).toBeInTheDocument(),
+		);
+		await expect(dialog).not.toBeInTheDocument();
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Leave active record" }),
+		);
+		await userEvent.click(trigger);
+		dialog = await body.findByRole("dialog", { name: "Dashboard commands" });
+		input = within(dialog).getByRole("combobox", {
+			name: "Search dashboard commands",
+		});
+		await userEvent.type(input, "Review active record");
+		await expect(
+			within(dialog).queryByText("Review active record", { exact: true }),
+		).not.toBeInTheDocument();
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(dialog).not.toBeInTheDocument());
 	},
 };

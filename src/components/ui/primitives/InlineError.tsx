@@ -2,8 +2,8 @@
 
 import clsx from "clsx";
 import type { ReactNode } from "react";
-import { Card } from "./surfaces";
 import { ContentPresence } from "@/components/ui/motion/presence";
+import { Card } from "./surfaces";
 
 export type InlineErrorProps = {
 	open?: boolean;

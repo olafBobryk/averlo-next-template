@@ -38,7 +38,7 @@ function TextInputRoot({
 			error={error}
 			className={className}
 		>
-			<InputFrame error={Boolean(error)}>
+			<InputFrame tone={error ? "error" : "default"}>
 				<input
 					id={inputId}
 					className={inputTextClasses}

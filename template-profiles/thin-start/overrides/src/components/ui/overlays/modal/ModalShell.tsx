@@ -76,6 +76,7 @@ export function ModalShell({
 }: ModalShellProps) {
 	const wrapperRef = React.useRef<HTMLDivElement | null>(null);
 	const previousActiveElementRef = React.useRef<HTMLElement | null>(null);
+	const lastFocusedElementRef = React.useRef<HTMLElement | null>(null);
 	const submissionRef = React.useRef(false);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -130,11 +131,19 @@ export function ModalShell({
 			document.activeElement instanceof HTMLElement
 				? document.activeElement
 				: null;
+		return () => {
+			if (previousActiveElementRef.current?.isConnected)
+				previousActiveElementRef.current.focus();
+		};
+	}, []);
+	React.useLayoutEffect(() => {
 		const wrapper = wrapperRef.current;
-		if (wrapper && isTopMost) {
-			(getFocusableElements(wrapper)[0] ?? wrapper).focus();
-		}
-		return () => previousActiveElementRef.current?.focus();
+		if (!isTopMost || !wrapper) return;
+		const previous = lastFocusedElementRef.current;
+		(previous?.isConnected && wrapper.contains(previous)
+			? previous
+			: (getFocusableElements(wrapper)[0] ?? wrapper)
+		).focus();
 	}, [isTopMost]);
 
 	React.useEffect(() => {
@@ -187,7 +196,22 @@ export function ModalShell({
 							? "h-dvh"
 							: "max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-3rem)]",
 					)}
-					ref={wrapperRef}
+					ref={React.useCallback(
+						(node: HTMLDivElement | null) => {
+							wrapperRef.current = node;
+							if (node && isTopMost) {
+								const previous = lastFocusedElementRef.current;
+								(previous?.isConnected && node.contains(previous)
+									? previous
+									: (getFocusableElements(node)[0] ?? node)
+								).focus();
+							}
+						},
+						[isTopMost],
+					)}
+					onFocusCapture={(event) => {
+						lastFocusedElementRef.current = event.target as HTMLElement;
+					}}
 					role="dialog"
 					tabIndex={-1}
 				>

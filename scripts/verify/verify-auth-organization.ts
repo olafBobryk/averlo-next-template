@@ -28,7 +28,10 @@ import {
 	updateFixtureOrganization,
 	validateFixturePasswordRecoveryToken,
 } from "../../src/lib/auth/fixture";
-import { privateFilePolicy } from "../../src/lib/auth/private-files";
+import {
+	privateFilePolicy,
+	privateFileProvider,
+} from "../../src/lib/auth/private-files";
 
 function expectCode(action: () => unknown, code: string) {
 	assert.throws(action, (error) => {
@@ -517,5 +520,13 @@ expectCode(
 );
 assert.ok(privateFilePolicy.signedAccessLifetimeSeconds <= 5 * 60);
 assert.ok(privateFilePolicy.maxBytes > 0);
+assert.equal(privateFileProvider.configured, false);
+if (!privateFileProvider.configured) {
+	assert.equal(
+		privateFileProvider.reason,
+		"No private-file provider is installed in the template.",
+	);
+	assert.equal("adapter" in privateFileProvider, false);
+}
 
 console.log("Auth and organization fixture verification passed.");

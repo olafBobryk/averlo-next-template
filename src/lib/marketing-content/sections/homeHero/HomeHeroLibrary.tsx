@@ -2,6 +2,7 @@
 
 import {
 	Component,
+	createElement,
 	type ReactNode,
 	useLayoutEffect,
 	useRef,
@@ -203,20 +204,22 @@ export default function HomeHeroLibrary({
 							name: "Skills pack",
 							width: 420,
 							priority: 2,
-							Render: () => (
-								<HomeHeroChoices services={services} kind="skills" />
-							),
+							content: <HomeHeroChoices services={services} kind="skills" />,
 						},
 						{
 							id: "hero-installation",
 							name: "Starting point",
 							width: 420,
 							priority: 1,
-							Render: () => (
+							content: (
 								<HomeHeroChoices services={services} kind="installation" />
 							),
 						},
-						...heroSpecimens.map((specimen) => ({ ...specimen, priority: 0 })),
+						...heroSpecimens.map((specimen) => ({
+							...specimen,
+							priority: 0,
+							content: createElement(specimen.Render),
+						})),
 					]
 						.filter(
 							(specimen) =>
@@ -230,7 +233,7 @@ export default function HomeHeroLibrary({
 								),
 						)
 						.sort((a, b) => a.name.localeCompare(b.name))
-						.map(({ id, width, priority, Render }) => (
+						.map(({ id, width, priority, content }) => (
 							<div
 								key={id}
 								data-hero-specimen={id}
@@ -247,9 +250,7 @@ export default function HomeHeroLibrary({
 										className="relative isolate"
 										style={{ transform: "translateZ(0)" }}
 									>
-										<SpecimenBoundary>
-											<Render />
-										</SpecimenBoundary>
+										<SpecimenBoundary>{content}</SpecimenBoundary>
 									</PortalScope>
 								</div>
 							</div>

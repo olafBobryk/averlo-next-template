@@ -158,8 +158,7 @@ const toneClasses: Record<ChipTone, string> = {
 	success: "bg-[var(--chip-background)] text-success-text",
 	warning: "bg-[var(--chip-background)] text-warning",
 	danger: "bg-[var(--chip-background)] text-danger-text",
-	helper:
-		"bg-[var(--chip-background)] text-[var(--chip-color)]",
+	helper: "bg-[var(--chip-background)] text-[var(--chip-color)]",
 };
 
 const interactiveToneClasses: Record<ChipTone, string> = {
@@ -209,7 +208,7 @@ function chipClassName(
 	isInteractive = false,
 ) {
 	return clsx(
-		"inline-flex min-w-0 max-w-full items-center justify-center rounded-full border border-transparent",
+		"inline-flex min-w-0 max-w-full items-center justify-center rounded-full border border-transparent capitalize",
 		size === "sm" ? "gap-1.5 px-2 py-1" : "gap-0 p-0",
 		customColor === "muted"
 			? "bg-[var(--chip-background)] text-muted-foreground"
@@ -233,7 +232,7 @@ function chipClassName(
 
 function chipSkeletonClassName(className?: string) {
 	return clsx(
-		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 border px-2 py-1",
+		"inline-flex min-w-0 max-w-full items-center justify-center gap-1.5 border px-2 py-1 capitalize",
 		"pointer-events-none border-transparent !bg-muted/80",
 		className,
 	);

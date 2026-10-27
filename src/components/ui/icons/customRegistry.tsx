@@ -1,7 +1,68 @@
+/*! GitHub mark: Primer Octicons (https://github.com/primer/octicons)
+MIT License
+
+Copyright (c) 2026 GitHub Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 // components/ui/icons/customRegistry.tsx
 import type { ReactNode } from "react";
 
+const localStrokeIcon = (path: string) => (
+	<svg
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.8"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		aria-hidden="true"
+	>
+		<path d={path} />
+	</svg>
+);
+
 export const customRegistry = {
+	github: (
+		<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+			<path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656" />
+		</svg>
+	),
+	bold: localStrokeIcon("M7 4h6a4 4 0 0 1 0 8H7V4Zm0 8h7a4 4 0 0 1 0 8H7v-8Z"),
+	heading: localStrokeIcon("M5 4v16M19 4v16M5 12h14"),
+	italic: localStrokeIcon("M10 4h9M5 20h9M15 4 9 20"),
+	underline: localStrokeIcon("M6 4v7a6 6 0 0 0 12 0V4M4 21h16"),
+	strikethrough: localStrokeIcon(
+		"M17 7c-1-2-3-3-5-3-3 0-5 1-5 4 0 2 2 3 5 4s5 2 5 4c0 3-2 4-5 4-2 0-4-1-5-3M3 12h18",
+	),
+	"list-bulleted": localStrokeIcon(
+		"M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1",
+	),
+	"list-checks": localStrokeIcon(
+		"M10 5h11M10 12h11M10 19h11M2 5l2 2 3-4M2 12l2 2 3-4M2 19l2 2 3-4",
+	),
+	"list-numbered": localStrokeIcon(
+		"M10 5h11M10 12h11M10 19h11M3 3h1v4M3 10c3-2 4 1 1 3l-1 1h3M3 17h3l-2 2c3 0 3 3-1 2",
+	),
+	"drag-handle": localStrokeIcon(
+		"M8 5h.01M16 5h.01M8 12h.01M16 12h.01M8 19h.01M16 19h.01",
+	),
 	"arrow-right": (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"

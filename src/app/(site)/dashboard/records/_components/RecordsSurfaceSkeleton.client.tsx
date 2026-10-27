@@ -11,9 +11,7 @@ export function RecordsSurfaceSkeletonClient() {
 	const capabilities = getDashboardCapabilities(membership.role);
 	return (
 		<DashboardLoadingStatus label="Loading records">
-			<DashboardSection
-				title="Records"
-			>
+			<DashboardSection title="Records">
 				<RecordCollectionClient.Skeleton
 					canWrite={capabilities.has("records.write")}
 					organizationName={organization.name}

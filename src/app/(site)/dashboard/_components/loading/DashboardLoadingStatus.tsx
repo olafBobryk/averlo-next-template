@@ -8,8 +8,13 @@ export function DashboardLoadingStatus({
 	label: string;
 }) {
 	return (
-		<div aria-busy="true" aria-label={label} role="status">
-			{children}
-		</div>
+		<>
+			<span className="sr-only" role="status">
+				{label}
+			</span>
+			<div aria-busy="true" data-loading-region={label}>
+				{children}
+			</div>
+		</>
 	);
 }

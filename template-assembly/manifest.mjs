@@ -2,6 +2,8 @@ export const assemblyGeneratedPaths = new Set([
 	"AGENTS.md",
 	"PRODUCT.md",
 	"README.md",
+	"WORKFLOWS.md",
+	"openspec/config.yaml",
 	"docs/README.md",
 	"next.config.ts",
 	"package-lock.json",
@@ -14,6 +16,12 @@ export const assemblyGeneratedPaths = new Set([
 ]);
 
 export const assemblyTemplateOnlyPaths = new Set([
+	"openspec/specs/.gitkeep",
+	"docs/operations/project-assembly.md",
+	"docs/development/skeleton-generation-shimmer-20261010.md",
+	"docs/operations/chip-capitalization-backport.md",
+	"docs/operations/disclosure-alignment-backport.md",
+	"docs/operations/dependency-audit-2026-10-08.md",
 	"docs/reviews/hybrid-driver-integration.md",
 	"docs/benchmarks/history/template-intelligence-runs.jsonl",
 	"docs/benchmarks/README.md",
@@ -33,8 +41,20 @@ export const assemblyTemplateOnlyPaths = new Set([
 	".github/workflows/update-repository-footprint.yml",
 ]);
 
+// Only these stock integration files may escape the template-only .agents root.
+export const assemblyOpenSpecSkillPaths = new Set([
+	".agents/skills/openspec-explore/SKILL.md",
+	".agents/skills/openspec-propose/SKILL.md",
+	".agents/skills/openspec-apply-change/SKILL.md",
+	".agents/skills/openspec-update-change/SKILL.md",
+	".agents/skills/openspec-sync-specs/SKILL.md",
+	".agents/skills/openspec-archive-change/SKILL.md",
+]);
+
 export const assemblyTemplateOnlyRoots = [
 	".agents",
+	"openspec/changes",
+	"openspec/specs/template",
 	"docs/skills",
 	"plugins",
 	"packages",
@@ -44,7 +64,26 @@ export const assemblyTemplateOnlyRoots = [
 	"src/app/(site)/(marketing)/repository-footprint",
 ];
 
+// Shared behavioral dependencies apply to installed uses; they do not install features.
+export const assemblyCoreSpecPaths = new Set([
+	"openspec/specs/app/shared/data-lifecycle/action-behavior/spec.md",
+	"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md",
+	"openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md",
+	"openspec/specs/app/shared/frontend/interaction/keyboard-and-overlays/spec.md",
+	"openspec/specs/app/shared/frontend/interaction/responsive-and-motion/spec.md",
+	"openspec/specs/app/shared/frontend/content/content-hierarchy/spec.md",
+	"openspec/specs/app/shared/frontend/components/component-contracts/spec.md",
+	"openspec/specs/app/shared/services/transport/api-transport/spec.md",
+	"openspec/specs/app/shared/services/delivery/submission-protection/spec.md",
+	"openspec/specs/app/shared/frontend/navigation/route-identity/spec.md",
+	"openspec/specs/app/shared/frontend/navigation/document-metadata/spec.md",
+	"openspec/specs/app/shared/services/identity/access-and-membership/spec.md",
+	"openspec/specs/app/shared/frontend/content/media-delivery/spec.md",
+]);
+
 export const assemblyCoreRoots = [
+	...assemblyOpenSpecSkillPaths,
+	...assemblyCoreSpecPaths,
 	".env.example",
 	".gitignore",
 	".storybook",
@@ -79,6 +118,8 @@ export const assemblyTemplateOnlyScripts = new Set([
 export const assemblyTemplateOnlyDevDependencies = new Set(["js-tiktoken"]);
 
 export const assemblyCoreScripts = new Set([
+	"verify:forms",
+	"verify:loading",
 	"dev",
 	"dev:local",
 	"preview:tunnel",
@@ -126,10 +167,8 @@ export const assemblyCoreScripts = new Set([
 export const assemblyCoreDependencies = new Set([
 	"pdfjs-dist",
 	"@mdxeditor/editor",
-	"@phosphor-icons/react",
 	"@openai/apps-sdk-ui",
 	"@radix-ui/react-slot",
-	"@tanstack/react-hotkeys",
 	"class-variance-authority",
 	"clsx",
 	"libphonenumber-js",
@@ -145,7 +184,6 @@ export const assemblyCoreDependencies = new Set([
 	"react",
 	"react-dom",
 	"react-markdown",
-	"react-phone-number-input",
 	"remark-gfm",
 	"sonner",
 	"streamdown",
@@ -175,6 +213,13 @@ export const assemblyCoreDevDependencies = new Set([
 ]);
 
 export const assemblyProjectDocs = new Set([
+	"docs/testing/forms.md",
+	"docs/testing/loading.md",
+	"docs/testing/actions.md",
+	"docs/testing/interactions.md",
+	"docs/testing/api-transport.md",
+	"docs/testing/component-contracts.md",
+	"docs/testing/routes-and-metadata.md",
 	"docs/motion-drivers.md",
 	"docs/operations/payload-vercel-neon-blob.md",
 ]);

@@ -101,7 +101,7 @@ function CatalogPreview4() {
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-primitives-input-frame",
 	name: "InputFrame",
-	role: "Borderless input chrome with 9px corners, subtle fill and shadow, a 34px default height and a 28px xs toolbar size and a 24px xxs compact-row size. The muted variant uses a softer neutral fill without resting shadow; tone independently owns validation. Composer presentation uses 25px corners and the same fill and shadow. Owns focus treatment, static chrome reuse, and matching skeletons; callers own native control semantics.",
+	role: "Borderless input chrome with 9px corners, subtle fill and shadow, a 34px default height and a 28px xs toolbar size and a 24px xxs compact-row size. The default is soft and shadowless in light mode and retains its established dark appearance. The strong variant provides heavier fill and resting outline; tone independently owns validation. Composer presentation uses 25px corners and the same fill and shadow. Owns focus treatment, static chrome reuse, and matching skeletons; callers own native control semantics.",
 	importStatement:
 		'import { InputFrame, inputFrameChromeClassName } from "@/components/ui/primitives/InputFrame";',
 	chooseWhen: [
@@ -120,8 +120,8 @@ export const catalogContract = defineCatalogOwnerContract({
 	],
 	guarantees: [
 		{
-			label: "Muted chrome retains focus and validation",
-			storyId: "ui-primitives-input-frame--muted",
+			label: "Strong chrome retains focus and validation",
+			storyId: "ui-primitives-input-frame--strong",
 		},
 		{
 			label: "Compact toolbar and skeleton geometry",

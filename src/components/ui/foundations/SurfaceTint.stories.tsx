@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect } from "storybook/test";
-import { HELPER_COLOR_INDICES, HELPER_COLOR_NAMES } from "@/components/ui/foundations/helperPalette";
+import {
+	HELPER_COLOR_INDICES,
+	HELPER_COLOR_NAMES,
+} from "@/components/ui/foundations/helperPalette";
 import { Chip } from "@/components/ui/misc/Chip";
 import { ProfilePicture } from "@/components/ui/misc/ProfilePicture";
 import Divider from "@/components/ui/primitives/Divider";

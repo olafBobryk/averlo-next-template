@@ -59,7 +59,9 @@ function Heading({
 					</Text>
 				) : null}
 			</div>
-			{action ? <div className="ml-auto shrink-0 self-end sm:self-start">{action}</div> : null}
+			{action ? (
+				<div className="ml-auto shrink-0 self-end sm:self-start">{action}</div>
+			) : null}
 		</header>
 	);
 }

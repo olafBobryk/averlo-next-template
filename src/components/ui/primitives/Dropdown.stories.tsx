@@ -611,7 +611,7 @@ function CompactControlsExample() {
 										disabled={page === 1}
 										onClick={() => setPage(page - 1)}
 									/>
-									<InputFrame size="xxs" variant="muted" className="w-10">
+									<InputFrame size="xxs" variant="default" className="w-10">
 										<input
 											type="number"
 											aria-label="Page"
@@ -798,5 +798,38 @@ export const CompactActions: Story = {
 			within(menu).getByRole("menuitem", { name: "Close" }),
 		);
 		await waitFor(() => expect(menu).not.toBeInTheDocument());
+	},
+};
+
+export const ScreenEdgeAlignment: Story = {
+	render: () => (
+		<div style={{ position: "fixed", top: 24, right: 24 }}>
+			<Dropdown.Menu
+				ariaLabel="Edge actions"
+				align="start"
+				menuMinWidth={220}
+				openOnHover={false}
+				options={[
+					{ id: "folder", label: "Folder", onSelect: fn() },
+					{ id: "file", label: "File", onSelect: fn() },
+				]}
+			/>
+		</div>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const trigger = canvas.getByRole("button", { name: "Edge actions" });
+		await userEvent.click(trigger);
+		await waitFor(() => {
+			const panel = canvasElement.ownerDocument.querySelector(
+				'[data-slot="float"]',
+			) as HTMLElement;
+			expect(panel).toBeTruthy();
+			const rect = panel.getBoundingClientRect();
+			expect(rect.width).toBeGreaterThanOrEqual(220);
+			expect(rect.right).toBeLessThanOrEqual(window.innerWidth - 8);
+			expect(
+				Math.abs(rect.right - trigger.getBoundingClientRect().right),
+			).toBeLessThan(2);
+		});
 	},
 };

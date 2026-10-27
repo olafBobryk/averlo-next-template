@@ -7,10 +7,7 @@ export function PlatformInboxSurface(
 	props: ComponentProps<typeof PlatformInboxContent>,
 ) {
 	return (
-		<DashboardSection
-			contentClassName="grid min-w-0 gap-5"
-			title="Inbox"
-		>
+		<DashboardSection contentClassName="grid min-w-0 gap-5" title="Inbox">
 			<PlatformInboxContent {...props} />
 		</DashboardSection>
 	);

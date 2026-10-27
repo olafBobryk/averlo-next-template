@@ -1,6 +1,9 @@
 "use client";
 
-import { LoginLoadingView } from "@/app/(site)/(auth)/_components/AuthRouteLoadingViews";
+import {
+	LoginLoadingView,
+	SignInOptionsLoadingView,
+} from "@/app/(site)/(auth)/_components/AuthRouteLoadingViews";
 import { Icon } from "@/components/ui/icons/Icon";
 import {
 	DateInput,
@@ -130,10 +133,24 @@ export function DashboardSkeletonReferenceClient({
 					</div>
 				</ContentSection.Content>
 			</ContentSection>
+			<ContentSection>
+				<ContentSection.Heading
+					title="Alternate authentication loading"
+					description="Known method navigation stays usable while the authentication region loads."
+				/>
+				<ContentSection.Content>
+					<div
+						className="mx-auto w-full max-w-md"
+						data-skeleton-route-composition="sign-in-options"
+					>
+						<SignInOptionsLoadingView />
+					</div>
+				</ContentSection.Content>
+			</ContentSection>
 
 			<ContentSection>
 				<ContentSection.Heading
-					description="The left table is live and sortable; the right is a static, non-interactive loading comparison with identical copy and row geometry."
+					description="The left table is live and sortable; the right is a non-interactive loading comparison with identical copy and row geometry."
 					title="Pinned-source table correspondence"
 				/>
 				<ContentSection.Content className="grid gap-5 xl:grid-cols-2">
@@ -411,11 +428,14 @@ function NormalizedTableLive() {
 function NormalizedTableSkeleton() {
 	return (
 		<DashboardTablePanel.Skeleton
-			columns={normalizedTableColumns.map(({ align, header, id }) => ({
-				align,
-				header,
-				id,
-			}))}
+			columns={normalizedTableColumns.map(
+				({ align, header, id, sortable }) => ({
+					align,
+					header,
+					id,
+					sortable,
+				}),
+			)}
 			header={
 				<ContentSection.Heading
 					action={

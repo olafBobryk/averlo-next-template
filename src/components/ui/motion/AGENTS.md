@@ -7,6 +7,11 @@ text-motion implementations.
 
 The `presence/` family owns controlled content insertion/removal and measured
 layout-space transitions, independent of viewport/scroll source activation.
+Its private `DisclosurePresence` implementation is shared by `ContentPresence`
+and Accordion: measured spring dimensions, continuous opaque content, a 16px
+soft clipping edge during movement, and unmasked visible overflow after settling.
+When motion is disabled, omit the mask entirely, including during closing.
+Keep that lifecycle in this owner; consumers must not add sequential fades.
 
 ## Public boundary
 
@@ -51,3 +56,22 @@ layout-space transitions, independent of viewport/scroll source activation.
   outside the scalar source/effect system.
 - Implementations resolve timing and spring behavior through foundation owners;
   do not introduce hardcoded page-local timing systems.
+
+## Responsive and interaction boundaries
+
+- Use CSS for lightweight layout, styling and visibility. A client breakpoint
+  branch is justified only to avoid hidden expensive observers, runtime, media,
+  canvas or duplicated decorative DOM; never gate primary copy, headings,
+  navigation, essential controls or accessibility on that decision.
+- Sources own activation and overall progress; effects own visual mapping and
+  internal phasing. No page-local reveal observers, reset logic, schedulers or
+  timing families. Reduced, motion-off and fallback paths remain readable and
+  keyboard operable before animation completes.
+- ContentPresence owns measured normal-flow insertion/removal and optional gap,
+  independent of viewport reveal. It does not own disclosure triggers, focus or
+  announcements. Interaction wrappers preserve the real owner and never create
+  duplicate focus stops. Keep JSX SVG attributes camelCase.
+- Memoization requires correctness or measured performance benefit, not routine
+  decoration. [Interaction verification](../../../../docs/testing/interactions.md)
+  covers supported resize/interruption/re-entry and compact states; load measured
+  scroll procedures only when performance is actually being measured.

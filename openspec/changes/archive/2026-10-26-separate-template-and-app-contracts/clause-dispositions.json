@@ -1,0 +1,308 @@
+[
+	{
+		"source": "content/marketing-composition",
+		"destination": "app/content/marketing-composition",
+		"sourceRequirements": [
+			"Ordered semantic page content",
+			"Shared shell and navigation",
+			"Stable semantic review boundaries",
+			"Source fidelity and later reuse are distinct decisions"
+		],
+		"appRequirements": [
+			"Ordered semantic page content",
+			"Shared shell and navigation",
+			"Stable semantic review boundaries",
+			"Source fidelity and later reuse are distinct decisions"
+		]
+	},
+	{
+		"source": "content/media-delivery",
+		"destination": "app/content/media-delivery",
+		"sourceRequirements": [
+			"Durable constituent assets",
+			"Source-neutral image delivery",
+			"Alternative text follows purpose",
+			"Delivery cost follows evidence"
+		],
+		"appRequirements": [
+			"Durable constituent assets",
+			"Source-neutral image delivery",
+			"Alternative text follows purpose",
+			"Delivery cost follows evidence"
+		]
+	},
+	{
+		"source": "content/source-resolution",
+		"destination": "app/content/source-resolution",
+		"sourceRequirements": [
+			"Explicit source modes",
+			"One normalized frontend contract",
+			"Preserve recovery data until verified activation",
+			"Authoritative failure is not silent fallback"
+		],
+		"appRequirements": [
+			"Explicit source modes",
+			"One normalized frontend contract",
+			"Preserve recovery data until verified activation",
+			"Authoritative failure is not silent fallback"
+		]
+	},
+	{
+		"source": "data-lifecycle/action-behavior",
+		"destination": "app/data-lifecycle/action-behavior",
+		"sourceRequirements": [
+			"One pending action owner",
+			"Feedback follows ownership and lifetime",
+			"Outcome channels remain specific",
+			"Destructive intent and reversible optimism",
+			"Single completion navigation",
+			"Active send cancellation remains available"
+		],
+		"appRequirements": [
+			"One pending action owner",
+			"Feedback follows ownership and lifetime",
+			"Outcome channels remain specific",
+			"Destructive intent and reversible optimism",
+			"Single completion navigation",
+			"Active send cancellation remains available"
+		]
+	},
+	{
+		"source": "data-lifecycle/form-behavior",
+		"destination": "app/data-lifecycle/form-behavior",
+		"sourceRequirements": [
+			"Accessible field feedback",
+			"Native keyboard submission",
+			"Single pending submission",
+			"Server authority",
+			"Recoverable submission failure",
+			"Explicit success behavior",
+			"Authentication form recovery",
+			"Guarded synthetic contact boundary",
+			"Independent profile inheritance"
+		],
+		"appRequirements": [
+			"Accessible field feedback",
+			"Native keyboard submission",
+			"Single pending submission",
+			"Server authority",
+			"Recoverable submission failure",
+			"Explicit success behavior",
+			"Authentication form recovery"
+		]
+	},
+	{
+		"source": "data-lifecycle/loading-state-behavior",
+		"destination": "app/data-lifecycle/loading-state-behavior",
+		"sourceRequirements": [
+			"Preserve independent known content",
+			"Dependency-scoped loading",
+			"Live and loading layout parity",
+			"Inert visual placeholders",
+			"Readable reduced-motion loading",
+			"Distinct region outcomes and recovery",
+			"Distinguish reading from submission",
+			"Independent loading contract inheritance"
+		],
+		"appRequirements": [
+			"Preserve independent known content",
+			"Dependency-scoped loading",
+			"Live and loading layout parity",
+			"Inert visual placeholders",
+			"Readable reduced-motion loading",
+			"Distinct region outcomes and recovery",
+			"Distinguish reading from submission"
+		]
+	},
+	{
+		"source": "delivery/contact-delivery",
+		"destination": "app/delivery/contact-delivery",
+		"sourceRequirements": [
+			"Delivery is explicitly configured and server-owned",
+			"Recipient-independent message content",
+			"Truthful private delivery outcomes"
+		],
+		"appRequirements": [
+			"Delivery is explicitly configured and server-owned",
+			"Recipient-independent message content",
+			"Truthful private delivery outcomes"
+		]
+	},
+	{
+		"source": "delivery/submission-protection",
+		"destination": "app/delivery/submission-protection",
+		"sourceRequirements": [
+			"Apply guards at exposed boundaries",
+			"Honeypot responses remain neutral",
+			"Server-owned attachment validation",
+			"Policy-owned throttling and private diagnostics"
+		],
+		"appRequirements": [
+			"Apply guards at exposed boundaries",
+			"Honeypot responses remain neutral",
+			"Server-owned attachment validation",
+			"Policy-owned throttling and private diagnostics"
+		]
+	},
+	{
+		"source": "domain/entity-presentation",
+		"destination": "app/domain/entity-presentation",
+		"sourceRequirements": [
+			"One consistent presentation vocabulary",
+			"Authorized recoverable lifecycle",
+			"Resettable external-write-free fixtures",
+			"Collection pagination and overview continuation differ",
+			"Tool presentation corresponds to execution"
+		],
+		"appRequirements": [
+			"One consistent presentation vocabulary",
+			"Authorized recoverable lifecycle",
+			"Collection pagination and overview continuation differ",
+			"Tool presentation corresponds to execution"
+		]
+	},
+	{
+		"source": "experience/content-hierarchy",
+		"destination": "app/experience/content-hierarchy",
+		"sourceRequirements": [
+			"Coherent grouping and surface meaning",
+			"Context is useful and not duplicated",
+			"Shared alignment preserves usable controls",
+			"Semantic color and identity remain legible"
+		],
+		"appRequirements": [
+			"Coherent grouping and surface meaning",
+			"Context is useful and not duplicated",
+			"Shared alignment preserves usable controls",
+			"Semantic color and identity remain legible"
+		]
+	},
+	{
+		"source": "identity/access-and-membership",
+		"destination": "app/identity/access-and-membership",
+		"sourceRequirements": [
+			"Server authorization at every protected boundary",
+			"Access denial remains usable",
+			"Safe continuations and explicit authentication methods",
+			"Invitation acceptance is deliberate and bounded",
+			"Retain a verified sign-in identity"
+		],
+		"appRequirements": [
+			"Server authorization at every protected boundary",
+			"Access denial remains usable",
+			"Safe continuations and explicit authentication methods",
+			"Invitation acceptance is deliberate and bounded",
+			"Retain a verified sign-in identity"
+		]
+	},
+	{
+		"source": "identity/private-file-access",
+		"destination": "app/identity/private-file-access",
+		"sourceRequirements": [
+			"Authorize file lifecycle boundaries",
+			"Opaque references and bounded access",
+			"Explicit replacement and cleanup"
+		],
+		"appRequirements": [
+			"Authorize file lifecycle boundaries",
+			"Opaque references and bounded access",
+			"Explicit replacement and cleanup"
+		]
+	},
+	{
+		"source": "integration/api-transport",
+		"destination": "app/integration/api-transport",
+		"sourceRequirements": [
+			"Consistent request outcomes",
+			"Replaceable transport with identical behavior",
+			"Secrets and feedback remain with their owners"
+		],
+		"appRequirements": [
+			"Consistent request outcomes",
+			"Replaceable transport with identical behavior",
+			"Secrets and feedback remain with their owners"
+		]
+	},
+	{
+		"source": "interaction/keyboard-and-overlays",
+		"destination": "app/interaction/keyboard-and-overlays",
+		"sourceRequirements": [
+			"Accessible control ownership",
+			"Focus entry and return",
+			"Consistent pending dismissal lock",
+			"Blocking and anchored interaction roles"
+		],
+		"appRequirements": [
+			"Accessible control ownership",
+			"Focus entry and return",
+			"Consistent pending dismissal lock",
+			"Blocking and anchored interaction roles"
+		]
+	},
+	{
+		"source": "interaction/responsive-and-motion",
+		"destination": "app/interaction/responsive-and-motion",
+		"sourceRequirements": [
+			"Essential content survives responsive rendering",
+			"Expensive hidden branches are bounded",
+			"Motion does not gate agency",
+			"Motion has coherent ownership"
+		],
+		"appRequirements": [
+			"Essential content survives responsive rendering",
+			"Expensive hidden branches are bounded",
+			"Motion does not gate agency",
+			"Motion has coherent ownership"
+		]
+	},
+	{
+		"source": "navigation/document-metadata",
+		"destination": "app/navigation/document-metadata",
+		"sourceRequirements": [
+			"Family title and indexing policy",
+			"Canonical destination consistency",
+			"Metadata and body share authoritative content",
+			"App identity is centrally derived"
+		],
+		"appRequirements": [
+			"Family title and indexing policy",
+			"Canonical destination consistency",
+			"Metadata and body share authoritative content",
+			"App identity is centrally derived"
+		]
+	},
+	{
+		"source": "navigation/route-identity",
+		"destination": "app/navigation/route-identity",
+		"sourceRequirements": [
+			"Canonical installed destinations",
+			"Semantic ancestry and consistent vocabulary",
+			"Contextual actions follow the active surface",
+			"Route enrichment preserves identity"
+		],
+		"appRequirements": [
+			"Canonical installed destinations",
+			"Semantic ancestry and consistent vocabulary",
+			"Contextual actions follow the active surface",
+			"Route enrichment preserves identity"
+		]
+	},
+	{
+		"source": "ui-system/component-contracts",
+		"destination": "app/ui-system/component-contracts",
+		"sourceRequirements": [
+			"Discoverable supported owner contract",
+			"Complete and neutral variant teaching",
+			"Faithful public projections",
+			"Native semantics remain mounted",
+			"Stable public identity"
+		],
+		"appRequirements": [
+			"Discoverable supported owner contract",
+			"Complete and neutral variant teaching",
+			"Faithful public projections",
+			"Native semantics remain mounted",
+			"Stable public identity"
+		]
+	}
+]

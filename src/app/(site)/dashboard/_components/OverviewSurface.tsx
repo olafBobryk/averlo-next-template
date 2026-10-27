@@ -9,10 +9,7 @@ const referenceSurface = getDashboardSurfaceById("dashboard.reference");
 
 function OverviewContent({ showReference }: { showReference: boolean }) {
 	return (
-		<DashboardSection
-			contentClassName="grid gap-4"
-			title="Overview"
-		>
+		<DashboardSection contentClassName="grid gap-4" title="Overview">
 			<OverviewCard
 				description="Review members, roles, and organization administration."
 				href={hrefFor("dashboard.organization")}

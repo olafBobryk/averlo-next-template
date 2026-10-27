@@ -168,7 +168,11 @@
 	color: var(--link-foreground);
 	font-weight: 500;
 	text-decoration: underline;
-	text-decoration-color: color-mix(in oklch, var(--link-foreground), transparent 35%);
+	text-decoration-color: color-mix(
+		in oklch,
+		var(--link-foreground),
+		transparent 35%
+	);
 	text-underline-offset: 0.25rem;
 }
 

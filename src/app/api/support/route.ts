@@ -5,6 +5,7 @@ import {
 	requireResolvedDashboardSession,
 } from "@/app/(site)/dashboard/_lib/platform/access.server";
 import { createSupportRequest } from "@/app/(site)/dashboard/_lib/platform/fixtures.server";
+import { getSupportFieldErrors } from "@/app/(site)/dashboard/_lib/platform/support-validation";
 import { applicationAdapters } from "@/lib/auth/server";
 import {
 	buildCooldownCookie,
@@ -35,7 +36,15 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const formData = await request.formData();
+	let formData: FormData;
+	try {
+		formData = await request.formData();
+	} catch {
+		return NextResponse.json(
+			{ message: "Invalid form submission." },
+			{ status: 400 },
+		);
+	}
 	const cookieStore = await cookies();
 	const guard = validateSubmissionGuards({
 		cookieStore,
@@ -75,14 +84,23 @@ export async function POST(request: Request) {
 		if (!organization) {
 			throw new Error("The selected organization is no longer available.");
 		}
+		const subject = readText(formData, "subject");
+		const message = readText(formData, "message");
+		const fieldErrors = getSupportFieldErrors(subject, message);
+		if (fieldErrors.subject || fieldErrors.message) {
+			return NextResponse.json(
+				{ message: "Check the highlighted fields.", fieldErrors },
+				{ status: 400 },
+			);
+		}
 		const supportRequest = createSupportRequest({
 			actor: getPlatformActorSnapshot({
 				membership,
 				organization,
 				user: resolution.user,
 			}),
-			message: readText(formData, "message"),
-			subject: readText(formData, "subject"),
+			message,
+			subject,
 		});
 		const response = NextResponse.json({
 			message: "Support request saved to the demo Platform Inbox.",

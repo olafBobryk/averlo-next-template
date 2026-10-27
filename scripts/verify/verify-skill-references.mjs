@@ -8,6 +8,8 @@ const REPOSITORY_PATH_PREFIXES = [
 	".storybook/",
 	"AGENTS.md",
 	"docs/",
+	"openspec/",
+	"WORKFLOWS.md",
 	"package.json",
 	"payload.config.ts",
 	"plugins/",
@@ -24,15 +26,6 @@ const WALK_EXCLUDED_DIRECTORIES = new Set([
 	".thin-start",
 	"node_modules",
 ]);
-const RETIRED_ROUTER_SOURCES = [
-	"docs/guides/auth-organization-adapters.md",
-	"docs/guides/components/",
-	"docs/skills/legacy/design-system/",
-	"docs/skills/legacy/design-system-parity-port/",
-	"docs/skills/legacy/entities/",
-	"docs/skills/legacy/skeletons/",
-	"docs/skills/legacy/surfaces/",
-];
 
 function walk(targetPath) {
 	if (!fs.existsSync(targetPath)) return [];
@@ -85,11 +78,15 @@ function isRepositoryPath(value) {
 	);
 }
 
-function validatePath(root, value, allRepositoryPaths) {
+function validatePath(root, value, allRepositoryPaths, markdownPath) {
 	if (value.startsWith("references/")) {
-		return fs.existsSync(
-			path.join(root, "plugins/averlo/skills/repository-workflows", value),
-		);
+		let owner = path.dirname(markdownPath);
+		while (owner.startsWith(path.join(root, "plugins/averlo/skills"))) {
+			if (fs.existsSync(path.join(owner, "SKILL.md")))
+				return fs.existsSync(path.join(owner, value));
+			owner = path.dirname(owner);
+		}
+		return false;
 	}
 	if (!isRepositoryPath(value)) return true;
 	if (!value.includes("*")) return fs.existsSync(path.join(root, value));
@@ -101,7 +98,6 @@ export function collectSkillReferenceErrors(root) {
 	const errors = [];
 	const skillsRoot = path.join(root, "plugins/averlo/skills");
 	if (!fs.existsSync(skillsRoot)) return errors;
-	const routerRoot = path.join(skillsRoot, "repository-workflows");
 	const packageJson = JSON.parse(
 		fs.readFileSync(path.join(root, "package.json")),
 	);
@@ -130,63 +126,23 @@ export function collectSkillReferenceErrors(root) {
 				errors.push(`${relativeMarkdownPath}: unknown npm script ${match[1]}`);
 			}
 		}
-	}
-
-	const concernFiles = walk(path.join(routerRoot, "references")).filter(
-		(entry) => entry.endsWith(".md"),
-	);
-	for (const concernPath of concernFiles) {
-		const content = fs.readFileSync(concernPath, "utf8");
 		const repositoryContext = extractSection(content, "## Repository context");
-		const relativeConcernPath = path.relative(root, concernPath);
 		const proseWithoutCode = repositoryContext.replace(/`[^`\n]+`/gu, "");
 		for (const match of proseWithoutCode.matchAll(
-			/(?:^|\s)((?:\.storybook|docs|plugins|references|scripts|src|template-(?:assembly|profiles|surfaces))\/[\w@./*()_-]+)/gu,
+			/(?:^|\s)((?:\.storybook|docs|openspec|plugins|references|scripts|src|template-(?:assembly|profiles|surfaces))\/[\w@./*()_-]+)/gu,
 		)) {
 			errors.push(
-				`${relativeConcernPath}: repository path must be backticked ${match[1]}`,
+				`${relativeMarkdownPath}: repository path must be backticked ${match[1]}`,
 			);
 		}
 		for (const match of repositoryContext.matchAll(/`([^`\n]+)`/gu)) {
 			const target = match[1];
-			if (!validatePath(root, target, allRepositoryPaths)) {
+			if (!validatePath(root, target, allRepositoryPaths, markdownPath)) {
 				errors.push(
-					`${relativeConcernPath}: missing repository path ${target}`,
+					`${relativeMarkdownPath}: missing repository path ${target}`,
 				);
 			}
 		}
-	}
-
-	for (const routerPath of [
-		path.join(routerRoot, "SKILL.md"),
-		...concernFiles,
-	]) {
-		const content = fs.readFileSync(routerPath, "utf8");
-		for (const retiredSource of RETIRED_ROUTER_SOURCES) {
-			if (content.includes(retiredSource)) {
-				errors.push(
-					`${path.relative(root, routerPath)}: retired router source ${retiredSource}`,
-				);
-			}
-		}
-	}
-
-	const routerContent = fs.readFileSync(
-		path.join(routerRoot, "SKILL.md"),
-		"utf8",
-	);
-	const routingSection = extractSection(
-		routerContent,
-		"## Orient through selected concerns",
-	);
-	const workflowRows = routingSection
-		.split(/\r?\n/u)
-		.filter((line) => /^\| [^:-]/u.test(line))
-		.slice(1);
-	if (workflowRows.length !== 14) {
-		errors.push(
-			`repository-workflows: expected 14 workflow rows, found ${workflowRows.length}`,
-		);
 	}
 
 	return errors;
@@ -196,7 +152,7 @@ export function run(root = process.cwd()) {
 	const errors = collectSkillReferenceErrors(root);
 	if (errors.length > 0) throw new Error(errors.join("\n"));
 	console.log(
-		"Skill reference verification passed: local Markdown links, repository context paths, npm scripts, and 14 repository workflows resolve.",
+		"Skill reference verification passed: local Markdown links, skill-local references, repository context paths and npm scripts resolve.",
 	);
 }
 

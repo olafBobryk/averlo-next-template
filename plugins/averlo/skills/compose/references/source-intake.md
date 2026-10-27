@@ -3,6 +3,39 @@
 Read this reference when Compose uses Figma or depends on external fonts,
 constituent assets, or durable source provenance.
 
+## Source decomposition before product edits
+
+Enumerate source hierarchy, bounds, top-level heading contexts, full-bleed
+backgrounds, vertical-rhythm changes and intended comparison boundaries before
+assigning owners. Separate content cases, shell cases, excluded regions and
+accumulated comparison gates. Map each independently reviewable content landmark
+to one stable case ID, source-neutral block type, registered renderer and Target
+selector. An evidenced footer is a shell case with a shell selector, never a
+content block, registered renderer or shared `Section` root. Excluded headers
+belong in neither inventory; accumulated gates are comparison-only.
+
+Keep landmarks with separate source or parity cases as separate blocks/renderers,
+even with continuous backgrounds or matching themes. Pause when source evidence
+does not permit an unambiguous split. Coherent landmarks may share one case and
+renderer when source hierarchy, heading context, interaction and intended review
+boundary support it. A possible later maintainability split is a human-reviewed
+Systemize Composition decision, not a Compose failure or reason to invent cases.
+Never register the accumulated page as a section.
+
+Apply the target repository's marketing-content and shell AGENTS plus the
+`app/marketing/composition/marketing-composition` contract. Source-backed multi-section pages use
+the installed route family, document and registered renderer boundary even when
+their visual recipe remains local. Each renderer owns one logical source section
+and exactly one shared `Section` root, background/frame from its current owner
+contract; visible content comes from meaningful source-neutral fields. Keep
+temporary fidelity recipes local until an explicit shared-owner decision.
+
+Compose keeps the approved header immutable and excludes it from source parity
+without removing it from production. Header redesign requires separately scoped
+non-Compose work. Implement evidenced footers through the existing shared footer,
+and keep shell review states in SiteShell/Preview infrastructure, never route
+CSS. Exact local identity assets do not authorize changes to nested shared owners.
+
 ## Figma authority and isolation
 
 1. Select the configured primary official Figma connector for the whole change.
@@ -58,8 +91,8 @@ constituent assets, or durable source provenance.
    because the expected bytes are present. Disable font synthesis for the
    calibrated scope and pause when no supplied face can reproduce an
    authoritative role.
-4. Retain exact constituent asset bytes and follow the repository workflow's
-   media-delivery concern. When the authority contains existing vector identity
+4. Retain exact constituent asset bytes and follow the target repository's
+   `app/shared/frontend/content/media-delivery` spec and marketing-content AGENTS. When the authority contains existing vector identity
    artwork, export that exact logo or mark as SVG and commit it as a constituent
    asset, or reuse an identical existing asset. Preserve its geometry and
    `viewBox`; never redraw it, replace it with text or a glyph, or accept a

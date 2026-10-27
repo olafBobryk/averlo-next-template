@@ -10,7 +10,9 @@ import {
 import { appSurfaceRegistry, internalRoutes } from "../../src/config/surfaces";
 import {
 	assertRouteSurfaceRegistry,
+	matchesRouteSurface,
 	type RouteSurfaceBase,
+	resolveRouteSurfaceHref,
 } from "../../src/lib/surfaces/routeSurface";
 
 const root = process.cwd();
@@ -50,6 +52,45 @@ function collectPages(directory: string) {
 
 async function main() {
 	assertRouteSurfaceRegistry(routeSurfaces);
+	const detail = {
+		family: "dashboard",
+		href: "/dashboard/records/[recordId]",
+		id: "dashboard.record",
+		match: "pattern",
+	} as const;
+	assert.equal(
+		resolveRouteSurfaceHref(
+			detail,
+			{ recordId: "a/b ?" },
+			{
+				hash: "activity",
+				search: { empty: null, page: 2 },
+			},
+		),
+		"/dashboard/records/a%2Fb%20%3F?page=2#activity",
+	);
+	assert.equal(
+		matchesRouteSurface("/dashboard/records/one?view=detail#top", detail),
+		true,
+	);
+	assert.equal(
+		matchesRouteSurface("/dashboard/records/one/nested", detail),
+		false,
+	);
+	assert.equal(matchesRouteSurface("/dashboard/records", detail), false);
+	assert.equal(
+		matchesRouteSurface("/contact?utm_source=test", {
+			family: "marketing",
+			href: "/contact",
+			id: "marketing.contact",
+			match: "exact",
+		}),
+		true,
+	);
+	assert.throws(
+		() => resolveRouteSurfaceHref(detail, {} as { recordId: string }),
+		/Missing route parameter recordId/,
+	);
 
 	const siteLayoutSource = readFileSync(
 		resolve(appRoot, "(site)/_components/layout/siteLayout.ts"),

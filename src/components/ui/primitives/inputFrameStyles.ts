@@ -5,7 +5,8 @@ export const inputFrameBaseClassName =
 export const inputFrameVariantStyles = {
 	default:
 		"bg-[var(--input-frame-background)] shadow-[var(--input-frame-shadow)]",
-	muted: "bg-foreground/5 shadow-none",
+	strong:
+		"bg-[var(--input-frame-strong-background)] shadow-[var(--input-frame-strong-shadow)]",
 } as const;
 
 /** Default chrome for non-interactive surfaces that deliberately share input styling. */

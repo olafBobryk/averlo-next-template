@@ -190,9 +190,9 @@
 	--paper: var(--background);
 	--paper-foreground: var(--foreground);
 	--card: #eeeeeb;
-	--card-chrome-background: color-mix(in srgb,var(--muted) 30%,var(--card));
+	--card-chrome-background: color-mix(in srgb, var(--muted) 30%, var(--card));
 	--card-chrome-foreground: #42423d;
-	--card-border-color: color-mix(in srgb,var(--foreground) 8%,transparent);
+	--card-border-color: color-mix(in srgb, var(--foreground) 8%, transparent);
 	--card-foreground: var(--foreground);
 	--surface: #e4e4df;
 	--popover: #ffffff;
@@ -227,8 +227,14 @@
 	--danger-text: #981a24;
 	--border: #d5d5cd;
 	--input: #bebeb4;
-	--input-frame-background: #d7d7d0;
-	--input-frame-shadow:
+	--input-frame-background: color-mix(
+		in srgb,
+		var(--foreground) 5%,
+		transparent
+	);
+	--input-frame-shadow: none;
+	--input-frame-strong-background: #d7d7d0;
+	--input-frame-strong-shadow:
 		inset 0 0 0 1px rgb(36 36 34 / 12%), 0 1px 2px rgb(24 24 22 / 6%);
 	--dropdown-shadow:
 		0 8px 32px rgb(24 24 22 / 12%), 0 2px 6px rgb(24 24 22 / 4%);
@@ -291,7 +297,11 @@
 	--color-warning-rgb: 114 76 0;
 	/* One shared color set for semantic tones and decorative identity. */
 	--color-violet: #9333ea;
-	--color-violet-text: color-mix(in srgb,var(--color-violet) 55%,var(--foreground));
+	--color-violet-text: color-mix(
+		in srgb,
+		var(--color-violet) 55%,
+		var(--foreground)
+	);
 	--color-helper-0: var(--primary);
 	--color-helper-1: var(--success);
 	--color-helper-2: var(--warning);
@@ -339,7 +349,7 @@
 	--paper: var(--background);
 	--paper-foreground: var(--foreground);
 	--card: #222221;
-	--card-chrome-background: color-mix(in srgb,var(--muted) 50%,var(--card));
+	--card-chrome-background: color-mix(in srgb, var(--muted) 50%, var(--card));
 	--card-chrome-foreground: var(--muted-foreground);
 	--card-foreground: var(--foreground);
 	--surface: #151514;
@@ -361,6 +371,9 @@
 	--border: #333330;
 	--input: #484843;
 	--input-frame-background: #292927;
+	--input-frame-strong-background: #363632;
+	--input-frame-strong-shadow:
+		inset 0 0 0 1px rgb(255 255 255 / 12%), 0 1px 2px rgb(0 0 0 / 14%);
 	--input-frame-shadow: 0 1px 2px rgb(0 0 0 / 14%);
 	--dropdown-shadow: 0 8px 32px rgb(0 0 0 / 28%), 0 2px 6px rgb(0 0 0 / 12%);
 	--ring: #92928a;
@@ -410,7 +423,11 @@
 	--warning: #d9aa51;
 	--warning-foreground: #e5bb69;
 
-	--color-violet-text: color-mix(in srgb,var(--color-violet) 20%,var(--foreground));
+	--color-violet-text: color-mix(
+		in srgb,
+		var(--color-violet) 20%,
+		var(--foreground)
+	);
 
 	--color-primary-rgb: 49 95 215;
 	--color-primary-hover-rgb: 47 90 209;

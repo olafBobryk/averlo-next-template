@@ -1,9 +1,9 @@
 "use client";
 
-import type { IconWeight } from "@phosphor-icons/react";
 import clsx from "clsx";
 import type * as React from "react";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
+import type { IconWeight } from "@/components/ui/icons/iconRegistry";
 import { Button } from "@/components/ui/primitives/Button";
 
 export type SocialIconName =

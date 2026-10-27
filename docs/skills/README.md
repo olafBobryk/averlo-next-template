@@ -1,10 +1,10 @@
 # Skill inventory
 
-`plugins/averlo/skills/` is the published Averlo plugin surface. Keep it small:
+`plugins/averlo/skills/` is the source for the Averlo plugin surface. Keep it small:
 only active, default workflows belong there.
 
 Its active surface is `compose`, `systemize-composition`, `animate`,
-`visual-parity`, `repository-workflows`, `storybook-backport`, `create-project`,
+`visual-parity`, `storybook-backport`, `create-project`,
 `publish-project`, `contact-form`, and `figma-storybook-export`.
 
 ## Legacy imports
@@ -16,11 +16,11 @@ new work.
 
 | Legacy skill | Active replacement | Import only when |
 | --- | --- | --- |
-| `design-system` | `$averlo:repository-workflows` | A project instruction or established process explicitly requires its owner-evidence command. |
+| `design-system` | Nearest component AGENTS and Storybook owner contracts | A project instruction or established process explicitly requires its owner-evidence command. |
 | `design-system-parity-port` | `$averlo:compose` + `$averlo:systemize-composition` + `$averlo:visual-parity` | A project explicitly needs its legacy frozen-renderer, bridge-gate port procedure. |
-| `entities` | `$averlo:repository-workflows` → Entities | A project still uses its broader legacy entity-contract process. |
-| `skeletons` | `$averlo:repository-workflows` → Loading | The project explicitly relies on its loading-state migration guidance. |
-| `surfaces` | `$averlo:repository-workflows` → Route surfaces | The project explicitly relies on its legacy route-registry procedure. |
+| `entities` | [Entity presentation](../../openspec/specs/app/shared/frontend/content/entity-presentation/spec.md) and nearest entity AGENTS | A project still uses its broader legacy entity-contract process. |
+| `skeletons` | [Loading behavior](../../openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md) and Storybook owners | The project explicitly relies on its loading-state migration guidance. |
+| `surfaces` | [Route identity](../../openspec/specs/app/shared/frontend/navigation/route-identity/spec.md) and route-family AGENTS | The project explicitly relies on its legacy route-registry procedure. |
 
 Install a specific archived skill into Codex, pinned to the template revision
 being used by the project:
@@ -39,3 +39,9 @@ back to `plugins/averlo/skills/` only after it is again a supported default.
 
 The installer registers a manually imported legacy skill by its own name (for
 example, `$design-system`), not the plugin-qualified `$averlo:design-system`.
+
+The former `repository-workflows` router has been retired from this source tree.
+References inside archived legacy skills describe their historical companion set,
+valid only with a matching historical revision; they do not govern current work.
+Use the current repository's canonical contracts for new implementation. Source
+retirement does not update published plugins or installed caches automatically.

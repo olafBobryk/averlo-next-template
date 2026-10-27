@@ -1,9 +1,9 @@
 // components/ui/primitives/Listbox.tsx
 "use client";
 
-import { CaretRight } from "@phosphor-icons/react";
 import clsx from "clsx";
 import * as React from "react";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { DropdownSurface } from "@/components/ui/primitives/dropdown/DropdownSurface";
@@ -329,7 +329,11 @@ function ListboxLevel<T>({
 									className="-mr-1 ml-auto flex shrink-0 items-center px-1 rtl:mr-auto rtl:-ml-1"
 									data-dropdown-cascade-trigger
 								>
-									<CaretRight className="rtl:rotate-180" size={14} />
+									<Icon
+										name="caret-right"
+										className="rtl:rotate-180"
+										style={{ width: 14, height: 14 }}
+									/>
 								</span>
 							</>
 						) : (

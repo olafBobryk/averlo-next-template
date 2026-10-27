@@ -33,7 +33,7 @@ const source = readFileSync(
 for (const contract of [
 	"onOptimisticDelete?.()",
 	"onRollback?.()",
-	"return false",
+	"ok: false",
 	"details: definition.impacts",
 	"warning: definition.warning",
 	"EntityDeletionCompletion",
@@ -50,6 +50,10 @@ for (const contract of [
 assert.ok(
 	(source.match(/onRollback\?\.\(\)/g) ?? []).length >= 2,
 	"Returned and thrown deletion failures must both roll back optimistic state.",
+);
+assert.ok(
+	!source.includes("showToast.error"),
+	"Recoverable deletion failure stays inside its confirmation.",
 );
 
 const detailActions = readFileSync(

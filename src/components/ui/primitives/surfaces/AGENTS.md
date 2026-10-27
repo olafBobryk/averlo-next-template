@@ -28,5 +28,15 @@
   public facade or give it a separate Storybook identity.
 - Surface primitives must not own portal, focus, dismissal, positioning, or
   modal behavior.
+- Semantic section-background owners provide context and selective descendant
+  styling, not Panel/Card/Float radius, elevation, fill or slot ownership. Stable
+  layout/reveal-position wrappers may retain transparent borders; do not remove
+  them without geometry proof. Gradient borders keep outer border and inner fill
+  as separate wrappers with aligned radii.
+- Semantic accents use the closed shared surface contract. Feature code must not
+  imitate internal slots, inspection attributes, recipes or tokens to reconstruct
+  a surface; inspection helpers remain private.
 
 Content-section headings use text alone. Do not add decorative leading icons in application sections, loading states, catalogue previews, or Storybook examples. Use heading text and spacing to establish hierarchy.
+
+- Card owns opt-in `interactive` hover fill. Use a bare semantic control inside an interactive Card so button hover backgrounds do not stack. Disable Card interaction styling when the control is disabled.

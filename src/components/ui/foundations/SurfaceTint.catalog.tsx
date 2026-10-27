@@ -36,6 +36,8 @@ export const catalogContract = defineCatalogOwnerContract({
 		'import { createSurfaceTint } from "@/components/ui/foundations/surfaceTint";',
 	chooseWhen: [
 		"A library owner needs a reusable tint mixed against its surface token.",
+		"Semantic foreground tokens are ink and accent tokens are fills. Review the actual composited foreground/background pair after tinting on Surface, Card and Float, in light/dark and interactive states: normal text needs 4.5:1; large text, meaningful graphics and control boundaries need 3:1 where applicable. Soft decorative fills are not text or meaningful-graphic contrast targets.",
+		"Name-based avatars use stable full-name-derived primary/success/warning/danger/violet tints with readable initials; the default static tint does not communicate status or a held-down interaction.",
 	],
 	chooseInstead: [
 		"Use Panel or Card semantic backgrounds when an existing surface variant already fits.",

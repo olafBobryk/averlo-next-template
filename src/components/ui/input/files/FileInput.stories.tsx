@@ -44,6 +44,8 @@ export const SelectionContract: Story = {
 	render: () => <FileInputExample />,
 	play: async ({ canvas, canvasElement }) => {
 		onFilesRejected.mockClear();
+		const add = canvas.getByRole("button", { name: "Add file" });
+		await expect(add.closest('[data-slot="card"]')).not.toBeNull();
 		const input = canvasElement.querySelector('input[type="file"]');
 		if (!(input instanceof HTMLInputElement))
 			throw new Error("File input missing");

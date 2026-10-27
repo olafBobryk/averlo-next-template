@@ -40,11 +40,7 @@ export function AuthScreen({
 	const status = getMessage(message);
 	return (
 		<Card className="w-full">
-			<Card.Heading
-				description={description}
-				title={title}
-				titleAs="h1"
-			/>
+			<Card.Heading description={description} title={title} titleAs="h1" />
 			<Card.Content className="grid gap-4">
 				{status ? (
 					<StatusMessage tone={status.tone}>{status.text}</StatusMessage>

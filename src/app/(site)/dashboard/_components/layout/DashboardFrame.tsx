@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import Logo from "@/components/branding/Logo";
 import { MODAL_OPEN_EVENT } from "@/lib/modal";
@@ -38,6 +38,7 @@ export function DashboardFrame({
 	children: React.ReactNode;
 }>) {
 	const pathname = usePathname();
+	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { membership, organization, organizationChoices, user } =
 		useDashboardAuth();
@@ -117,6 +118,17 @@ export function DashboardFrame({
 		}
 	}
 
+	function retryDebugState() {
+		handleForceLoadingChange(false);
+		const params = new URLSearchParams(searchParams.toString());
+		if (params.has("debug-state")) {
+			params.delete("debug-state");
+			router.replace(`${pathname}${params.size ? `?${params}` : ""}`);
+		} else {
+			router.refresh();
+		}
+	}
+
 	return (
 		<DashboardCommandProvider
 			canSwitchOrganizations={organizationChoices.length > 1}
@@ -192,6 +204,7 @@ export function DashboardFrame({
 												debugState && !assistantMessagesLoading ? (
 													<DashboardDebugStateView
 														pathname={pathname}
+														onRetry={retryDebugState}
 														state={debugState}
 													/>
 												) : undefined

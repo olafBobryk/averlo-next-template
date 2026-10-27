@@ -255,3 +255,88 @@ export const Fullscreen: Story = {
 		await waitFor(() => expect(dialog).not.toBeInTheDocument());
 	},
 };
+
+function NestedHarness() {
+	const { openModal } = useModal();
+	return (
+		<>
+			<div id="modal-root" />
+			<ModalHost />
+			<Button
+				onClick={() =>
+					openModal(
+						({ close }) => (
+							<>
+								<ModalHeader>
+									<ModalTitle>Parent dialog</ModalTitle>
+								</ModalHeader>
+								<ModalContent>
+									<Button
+										onClick={() =>
+											openModal(
+												() => (
+													<>
+														<ModalHeader>
+															<ModalTitle>Child dialog</ModalTitle>
+														</ModalHeader>
+														<ModalContent>
+															Child controls remain in the top layer.
+														</ModalContent>
+													</>
+												),
+												{ ariaLabel: "Child dialog" },
+											)
+										}
+									>
+										Open child
+									</Button>
+								</ModalContent>
+								<ModalFooter>
+									<Button onClick={close}>Done</Button>
+								</ModalFooter>
+							</>
+						),
+						{ ariaLabel: "Parent dialog" },
+					)
+				}
+			>
+				Open parent
+			</Button>
+		</>
+	);
+}
+
+export const NestedFocusAndScroll: Story = {
+	render: () => (
+		<div className="p-8">
+			<NestedHarness />
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const previousOverflow = document.body.style.overflow;
+		const trigger = canvas.getByRole("button", { name: "Open parent" });
+		await userEvent.click(trigger);
+		const body = within(document.body);
+		const parent = await body.findByRole("dialog", { name: "Parent dialog" });
+		const childTrigger = within(parent).getByRole("button", {
+			name: "Open child",
+		});
+		await userEvent.click(childTrigger);
+		const child = await body.findByRole("dialog", { name: "Child dialog" });
+		await expect(
+			within(child).getByRole("button", { name: "Close modal" }),
+		).toHaveFocus();
+		await expect(document.body.style.overflow).toBe("hidden");
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(child).not.toBeInTheDocument());
+		await expect(parent).toBeInTheDocument();
+		await expect(childTrigger).toHaveFocus();
+		await expect(document.body.style.overflow).toBe("hidden");
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(parent).not.toBeInTheDocument());
+		await expect(trigger).toHaveFocus();
+		await waitFor(() =>
+			expect(document.body.style.overflow).toBe(previousOverflow),
+		);
+	},
+};

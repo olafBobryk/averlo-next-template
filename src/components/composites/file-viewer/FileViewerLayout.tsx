@@ -71,6 +71,7 @@ export function FileViewerLayout({
 				data-file-viewer-layout
 			>
 				<div
+					data-conversation-pane
 					className={`min-h-0 min-w-0 flex-1 ${entry && !narrow ? "[&_[data-dashboard-workspace]]:rounded-r-none!" : ""}`}
 				>
 					{children}

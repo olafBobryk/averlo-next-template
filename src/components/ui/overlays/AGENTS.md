@@ -19,3 +19,8 @@ This folder owns shared portal-backed overlay infrastructure.
   than creating parallel stacks.
 - Overlay owners define focus entry, top-most behavior, dismissal, and focus
   restoration where their interaction requires it.
+- Keep anchored nonblocking Dropdown navigation separate from focused blocking
+  Modal behavior. A visual surface is not a focus, scroll or dismissal system.
+  Do not compose a new portal stack when a documented specialized owner exists.
+  Use [interaction verification](../../../../docs/testing/interactions.md) for
+  keyboard names, nesting, focus return, pending locks and scroll restoration.
