@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "cf96bf6ca1f8bf34b1c30f04eb24a37f71a8de5d",
+	"head": "209bafb684e711fb3ef80bb6ca1c0b6ad6aa2200",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -2567,6 +2567,15 @@
 			"lines": 151215,
 			"textBytes": 5191722,
 			"tokens": 1270945
+		},
+		{
+			"date": "2026-10-27",
+			"hash": "209bafb684e711fb3ef80bb6ca1c0b6ad6aa2200",
+			"subject": "Port Winery foundation colors to the shared template",
+			"files": 1445,
+			"lines": 151259,
+			"textBytes": 5194095,
+			"tokens": 1271478
 		}
 	],
 	"version": 1
