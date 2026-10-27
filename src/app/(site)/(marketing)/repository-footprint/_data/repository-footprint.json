@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "e1b1d046bdbe9d29692bbb7fcedb7e4ed9038d09",
+	"head": "cf96bf6ca1f8bf34b1c30f04eb24a37f71a8de5d",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -2405,6 +2405,168 @@
 			"lines": 116828,
 			"textBytes": 3469317,
 			"tokens": 884064
+		},
+		{
+			"date": "2026-09-10",
+			"hash": "64a7615741e680ddef44cecabb8dd676a9b19c1b",
+			"subject": "chore: update repository footprint after origin merge",
+			"files": 1061,
+			"lines": 116828,
+			"textBytes": 3469317,
+			"tokens": 884064
+		},
+		{
+			"date": "2026-09-10",
+			"hash": "bbd439b929f73014a6599e8eaf30baa7c4e1b358",
+			"subject": "chore: satisfy repository lint policy",
+			"files": 1061,
+			"lines": 116963,
+			"textBytes": 3469387,
+			"tokens": 884203
+		},
+		{
+			"date": "2026-09-20",
+			"hash": "c928a66265578054e696722c53aa31e0413c2a29",
+			"subject": "Backport reusable Pearl interaction patterns",
+			"files": 1066,
+			"lines": 119052,
+			"textBytes": 3531657,
+			"tokens": 900586
+		},
+		{
+			"date": "2026-09-20",
+			"hash": "f8296dfaecbf502aca85918796a73b1c91596ea3",
+			"subject": "Require explicit backport story targets",
+			"files": 1066,
+			"lines": 119086,
+			"textBytes": 3532870,
+			"tokens": 900875
+		},
+		{
+			"date": "2026-09-20",
+			"hash": "8d6b9c91d06a8529aeec54c619f75cd25cea0829",
+			"subject": "Prototype Lenis and GSAP motion drivers",
+			"files": 1068,
+			"lines": 119184,
+			"textBytes": 3535932,
+			"tokens": 901794
+		},
+		{
+			"date": "2026-09-21",
+			"hash": "16c57a44b05ec381c9f7dcb5f314879be7dd6b42",
+			"subject": "Make hybrid motion default with maintained Motion fallback",
+			"files": 1080,
+			"lines": 120419,
+			"textBytes": 3576480,
+			"tokens": 911724
+		},
+		{
+			"date": "2026-09-21",
+			"hash": "2a2f2451d26be0249664f7a6600b56ce95ad09ae",
+			"subject": "Preserve smooth scrolling across cooperative map surfaces",
+			"files": 1082,
+			"lines": 120461,
+			"textBytes": 3578460,
+			"tokens": 912120
+		},
+		{
+			"date": "2026-10-08",
+			"hash": "4ef341db20c77997e89dc80cbe4ab808464d01c2",
+			"subject": "Refine template design system, dashboard, and Assistant controls",
+			"files": 1139,
+			"lines": 132930,
+			"textBytes": 3988572,
+			"tokens": 1016161
+		},
+		{
+			"date": "2026-10-08",
+			"hash": "1a6faf0bfb8544b956d13ba3cdb128efbdf2a8a8",
+			"subject": "Resolve integration checks for dashboard and motion updates",
+			"files": 1139,
+			"lines": 132929,
+			"textBytes": 3988556,
+			"tokens": 1016155
+		},
+		{
+			"date": "2026-10-08",
+			"hash": "1c6cb334e6ad1e8f9b1daaabb7534907da98e901",
+			"subject": "Release create-averlo 0.1.1",
+			"files": 1139,
+			"lines": 132929,
+			"textBytes": 3988556,
+			"tokens": 1016155
+		},
+		{
+			"date": "2026-10-08",
+			"hash": "e9907ecb1373c766bbc853bc062ab9a5d78d97b3",
+			"subject": "Automatically propagate committed template updates to npm",
+			"files": 1141,
+			"lines": 133219,
+			"textBytes": 3999167,
+			"tokens": 1018792
+		},
+		{
+			"date": "2026-10-08",
+			"hash": "a4c074fe5c12b186bdf95825a6d2e6c9d4a0bf58",
+			"subject": "Verify staged release and preserve retry metadata",
+			"files": 1141,
+			"lines": 133248,
+			"textBytes": 4000357,
+			"tokens": 1019084
+		},
+		{
+			"date": "2026-10-08",
+			"hash": "825ab11330e3df88fa3ee5153e22e5bd44e010f3",
+			"subject": "Wait for npm processing before verifying public generation",
+			"files": 1141,
+			"lines": 133266,
+			"textBytes": 4001512,
+			"tokens": 1019345
+		},
+		{
+			"date": "2026-10-08",
+			"hash": "d75302b9d547ff62c67958ebb0586d4c74175c6d",
+			"subject": "Retry disposal of generated-project Git directories",
+			"files": 1141,
+			"lines": 133272,
+			"textBytes": 4001640,
+			"tokens": 1019383
+		},
+		{
+			"date": "2026-10-09",
+			"hash": "4ddb5661bb1f63ff35ef0f87dab8d5d534984006",
+			"subject": "Replace hero collage with the packed native component collection",
+			"files": 1245,
+			"lines": 136932,
+			"textBytes": 4103996,
+			"tokens": 1046023
+		},
+		{
+			"date": "2026-10-09",
+			"hash": "d24187532aeb799e4b5daf5c2ffdc6d49540d48c",
+			"subject": "Add a collection-only social share image",
+			"files": 1246,
+			"lines": 136960,
+			"textBytes": 4104757,
+			"tokens": 1046215
+		},
+		{
+			"date": "2026-10-27",
+			"hash": "61d0860e21ed7d1d782946e5e12bcdfcc230951f",
+			"subject": "Publish current template with upstream initializer and preserved local improvements",
+			"files": 1444,
+			"lines": 151209,
+			"textBytes": 5191328,
+			"tokens": 1270855
+		},
+		{
+			"date": "2026-10-27",
+			"hash": "cf96bf6ca1f8bf34b1c30f04eb24a37f71a8de5d",
+			"subject": "Align release verification temporary storage and CI runtime",
+			"files": 1444,
+			"lines": 151215,
+			"textBytes": 5191722,
+			"tokens": 1270945
 		}
 	],
 	"version": 1
