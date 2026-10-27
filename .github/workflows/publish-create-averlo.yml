@@ -36,6 +36,10 @@ jobs:
       - name: Verify release version
         run: npm run check:release-version -- "${{ github.event.release.tag_name }}"
         working-directory: packages/create-averlo
+      # The profile matrix tests inode independence using a hard link, so its
+      # disposable files must share the workspace disk on hosted Linux runners.
+      - name: Keep verification files on the workspace disk
+        run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Configure generated-project Git identity
         run: |
           git config --global user.name "github-actions[bot]"
@@ -68,6 +72,8 @@ jobs:
       - name: Install template dependencies
         if: steps.publication.outputs.skipped != 'true'
         run: npm ci
+      - name: Keep verification files on the workspace disk
+        run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Configure generated-project Git identity
         run: |
           git config --global user.name "github-actions[bot]"
