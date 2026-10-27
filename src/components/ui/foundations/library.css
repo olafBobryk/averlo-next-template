@@ -189,7 +189,7 @@
 	--ink-foreground: var(--background);
 	--paper: var(--background);
 	--paper-foreground: var(--foreground);
-	--card: #eeeeeb;
+	--card: #fcfcfb;
 	--card-chrome-background: color-mix(in srgb, var(--muted) 30%, var(--card));
 	--card-chrome-foreground: #42423d;
 	--card-border-color: color-mix(in srgb, var(--foreground) 8%, transparent);
@@ -199,14 +199,22 @@
 	--popover-foreground: var(--foreground);
 	--primary: #315fd7;
 	--link-foreground: var(--primary-text);
-	--button-primary: #242422;
-	--button-primary-foreground: #fcfcfb;
+	--button-primary: var(--primary);
+	--button-primary-foreground: var(--primary-foreground);
 	--button-foreground: var(--foreground);
-	--button-secondary: #e6e6e2;
-	--button-secondary-hover: #ddddd8;
+	--button-secondary: color-mix(in srgb, var(--foreground) 14%, var(--card));
+	--button-secondary-hover: color-mix(
+		in srgb,
+		var(--foreground) 19%,
+		var(--card)
+	);
 	--button-secondary-shadow: 0 1px 2px rgb(24 24 22 / 8%);
 	--button-ghost-hover: rgb(36 36 34 / 6%);
-	--button-danger: #cf2331;
+	--button-danger: #b4535c;
+	--inline-error-card-background: #b4535c;
+	--inline-error-card-foreground: #ffffff;
+	--status-message-success-background: #287a45;
+	--status-message-warning-background: #9e6b00;
 	--button-danger-text: var(--danger-text);
 	--button-warning: #9e6b00;
 	--button-warning-text: var(--warning-foreground);
@@ -222,7 +230,7 @@
 	--muted-foreground: #5c5c56;
 	--accent: #e6e6e2;
 	--accent-foreground: var(--foreground);
-	--destructive: #cf2331;
+	--destructive: #b4535c;
 	--danger: var(--destructive);
 	--danger-text: #981a24;
 	--border: #d5d5cd;
@@ -292,7 +300,7 @@
 	--color-primary-foreground-rgb: 255 255 255;
 	--color-foreground-rgb: 36 36 34;
 	--color-background-rgb: 243 243 240;
-	--color-danger-rgb: 207 35 49;
+	--color-danger-rgb: 180 83 92;
 	--color-success-rgb: 39 148 81;
 	--color-warning-rgb: 114 76 0;
 	/* One shared color set for semantic tones and decorative identity. */
@@ -327,14 +335,16 @@
 }
 
 .dark {
-	--button-primary: #eeeeec;
-	--button-primary-foreground: #242422;
+	--button-primary: var(--primary);
+	--button-primary-foreground: var(--primary-foreground);
 	--button-foreground: var(--foreground);
 	--button-secondary: #30302d;
 	--button-secondary-hover: #3a3a36;
 	--button-secondary-shadow: 0 1px 2px rgb(0 0 0 / 18%);
 	--button-ghost-hover: rgb(238 238 236 / 7%);
 	--button-danger: #df1f35;
+	--inline-error-card-background: var(--card);
+	--inline-error-card-foreground: var(--button-danger-text);
 	--button-danger-text: #ff8179;
 	--button-warning: #febc2e;
 	--button-warning-text: #febc2e;

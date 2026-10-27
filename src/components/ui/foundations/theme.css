@@ -175,7 +175,7 @@
 	--muted-foreground: #5c5c56;
 	--accent: #e6e6e2;
 	--accent-foreground: var(--foreground);
-	--destructive: #cf2331;
+	--destructive: #b4535c;
 	--danger: var(--destructive);
 	--danger-text: #981a24;
 	--border: #d5d5cd;
@@ -234,7 +234,7 @@
 	--color-primary-foreground-rgb: 255 255 255;
 	--color-foreground-rgb: 36 36 34;
 	--color-background-rgb: 243 243 240;
-	--color-danger-rgb: 207 35 49;
+	--color-danger-rgb: 180 83 92;
 	--color-success-rgb: 39 148 81;
 	--color-warning-rgb: 114 76 0;
 	/* One shared color set for semantic tones and decorative identity. */
