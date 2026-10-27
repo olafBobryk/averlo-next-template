@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "209bafb684e711fb3ef80bb6ca1c0b6ad6aa2200",
+	"head": "0d5d71aa2062711edf2db06b5f000a3054639e87",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -2576,6 +2576,15 @@
 			"lines": 151259,
 			"textBytes": 5194095,
 			"tokens": 1271478
+		},
+		{
+			"date": "2026-10-27",
+			"hash": "0d5d71aa2062711edf2db06b5f000a3054639e87",
+			"subject": "Retry npm propagation before verifying published generation",
+			"files": 1445,
+			"lines": 151280,
+			"textBytes": 5195014,
+			"tokens": 1271682
 		}
 	],
 	"version": 1
