@@ -93,7 +93,6 @@
 	"src/components/ui/input/choice/MultiselectInput.tsx",
 	"src/components/ui/input/choice/RadioInput.tsx",
 	"src/components/ui/input/choice/ToggleInput.tsx",
-	"src/components/ui/input/color/AGENTS.md",
 	"src/components/ui/input/date/AGENTS.md",
 	"src/components/ui/input/date/CalendarPopover.tsx",
 	"src/components/ui/input/date/DateInput.tsx",

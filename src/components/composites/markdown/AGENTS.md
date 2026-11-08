@@ -1,37 +1,34 @@
 # Folder: `src/components/composites/markdown`
 
-## Ownership
-
-This folder owns reusable Markdown rendering, authoring, loading, and modal-form
+This folder owns reusable Markdown rendering, authoring, loading and modal-form
 composition.
+
+## Read
+
+- `specs/platform/design-system/usage/spec.md` for what Markdown may and may not
+  expose; Storybook stories for the `Markdown` API.
 
 ## Public and profile boundary
 
-- The namespace facade remains `src/components/composites/markdown/index.ts`;
-  family internals import direct owners and do not create a runtime namespace.
-- Full start exposes editing and rendering. Thin start remains renderer-only and
-  must not include MDXEditor, editor CSS, or modal authoring composition.
+- The namespace facade is `src/components/composites/markdown/index.ts`; family
+  internals import direct owners and do not create a runtime namespace.
+- Full start exposes editing and rendering: `Markdown.Editor`, its MDXEditor
+  dependency, editor CSS and modal editing composition are full-start-only.
+- Thin start exports only `Markdown.Render`. If `Markdown.Render` imports a
+  design-system helper, the thin-start API review must explicitly allow it.
 
-## Invariants
+## Structure
 
-- Keep markdown output grounded in design-system primitives.
-- ReactMarkdown owns completed rendering. Streamdown is a private parser used only when `Markdown.Render streaming` needs incomplete-Markdown recovery. Both engines must consume the same component map, remark transforms, density, wrapper, and semantic variant.
-- Keep Streamdown controls, icons, caret, animations, optional plugins, component types, and package classes out of the public API and visible output. Do not import its animation stylesheet. `Markdown.Render` remains presentation-authoritative and thin-profile compatible.
-- Keep renderer and editor authored content on the shared `.markdown-content` contract.
-- Renderer task markup stays noninteractive and does not change Lexical-owned
-  editor DOM. Task-list styling must not suppress ordinary mixed-list markers.
-- Tables own their local overflow; never force a universal minimum width or
-  move table overflow to the entire editor canvas.
-- Keep custom directives self-contained and generic.
-- Validate directive props before passing them into design-system components.
-- Do not expose arbitrary `className`, JSX, HTML passthrough, data registries, or product-specific card directives through markdown.
-- Underline is the sole allowlisted HTML-shaped exception: the editor stores it as paired `<u>...</u>` tags and `Markdown.Render` transforms only exact paired tags. Do not enable general raw HTML parsing to support it.
-- Keep visible editor controls on the application icon and interaction systems;
-  package-owned toolbar, menu, and link-dialog UI is not an acceptable shortcut.
-- Source mode remains inside the editor and responsive toolbar collapse remains
-  measurement-driven; neither may create a second editor or repair surface.
-- Keep `Markdown.Render` thin-start compatible; if it imports a design-system helper, make sure the thin-start API review explicitly allows that helper.
-- Keep `Markdown.Editor`, its MDXEditor dependency, editor CSS, and modal editing composition full-start-only. The thin profile must export only `Markdown.Render`.
-- `Markdown.Editor.Skeleton` preserves the live editor's density-owned minimum
-  toolbar and content topology without predicting document-driven expansion.
-- Mention rendering remains presentation-only: route/adapters resolve entity data, and the renderer/editor must not fetch.
+- ReactMarkdown owns completed rendering. Streamdown is a private parser used
+  only by `Markdown.Render streaming`; both engines consume the same component
+  map, remark transforms, density, wrapper and semantic variant.
+- Streamdown controls, icons, caret, animations, plugins, component types and
+  package classes stay out of the public API; do not import its animation
+  stylesheet.
+- Renderer and editor authored content share the `.markdown-content` contract.
+- Custom directives stay self-contained and generic, and validate their props
+  before passing them to design-system components.
+- Source mode lives inside the editor; neither it nor toolbar collapse may create
+  a second editor or repair surface.
+- Mention rendering is presentation-only: routes/adapters resolve entity data;
+  the renderer and editor never fetch.

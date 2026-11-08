@@ -1,22 +1,16 @@
 # Folder: `src/components/ui/time`
 
-## Ownership
+Shared relative-time and timezone-aware calendar-date presentation.
 
-This folder owns shared relative-time and timezone-aware calendar-date
-presentation.
-
-## Dependency and runtime boundaries
+## Structure
 
 - Time presentation depends on the `Text` primitive for typography and must not
   depend on feature or route code.
 - `DateAgo` is a client component because it schedules relative-time refreshes;
-  it must clear its interval on unmount.
+  it clears its interval on unmount.
 - `DateIndicator` stays server-safe and resolves formatting through the shared
   application timezone boundary.
-
-## Structural invariants
-
-- Date parsing, relative-time thresholds, ordinal formatting, and timezone
-  resolution remain centralized in these owners.
-- Skeleton members continue to delegate to `Text.Skeleton`; they do not become
-  separate component identities.
+- Date parsing, relative-time thresholds, ordinal formatting and timezone
+  resolution stay centralized in these owners.
+- Skeleton members delegate to `Text.Skeleton`; they are not separate component
+  identities.

@@ -24,10 +24,10 @@ contract as a scope gap rather than inventing equivalent policy.
 2. Use the linked `$averlo:visual-parity` to verify motion-off, reduced-motion,
    and settled motion-on endpoints against the accepted static capture. These
    comparisons prove endpoints, not intermediate frames.
-3. Read root/nearest AGENTS and use stock OpenSpec discovery: run
-   `openspec list --specs`, then `openspec show app/shared/frontend/interaction/responsive-and-motion --type spec`
-   and `openspec show app/shared/frontend/interaction/keyboard-and-overlays --type spec` for the
-   target's contracts, plus only other behavior actually changed. Use Storybook for APIs
+3. Read root/nearest AGENTS and use Spec Kit discovery: read the target's
+   `specs/README.md`, then `specs/platform/design-system/motion/spec.md`,
+   `specs/platform/design-system/families/presence/spec.md` and
+   `specs/platform/design-system/families/overlays/spec.md` for its contracts, plus only other behavior actually changed. Use Storybook for APIs
    and the canonical interaction verification procedure. Measured scroll work
    follows `docs/operations/scroll-performance.md`; ordinary animation does not
    trigger that measurement workflow.

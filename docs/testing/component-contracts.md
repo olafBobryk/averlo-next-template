@@ -1,7 +1,7 @@
 # Verify component contracts
 
-[Component contracts](../../openspec/specs/app/shared/frontend/components/component-contracts/spec.md)
-and [content hierarchy](../../openspec/specs/app/shared/frontend/content/content-hierarchy/spec.md)
+[Component contracts](../../specs/platform/design-system/usage/spec.md)
+and [content hierarchy](../../specs/platform/content/hierarchy/spec.md)
 own shared behavior. [Component policy](../../src/components/AGENTS.md), nearest
 AGENTS and [Catalog Rules](../../.storybook/CatalogRules.mdx) own discovery,
 topology and catalogue structure. Colocated app-safe owner contracts and stories
@@ -9,18 +9,10 @@ own supported imports, API/variants, exclusions, examples and guarantees. There
 is no parallel owner index; Storybook navigation and callable documentation are
 the catalogue.
 
-Discover current capabilities with `openspec list --specs`, then read only the
-relevant identity with `openspec show <capability-id> --type spec`. Select the
-changed surface, relevant `app/shared/` dependencies and existing `product/`
-business requirements; do not load ambient siblings. Shared frontend owns
-component/interaction/presentation rules, shared services own service boundaries,
-and shared data-lifecycle keeps each complete read/submission/action lifecycle
-across client and server. Surface-specific policy stays with marketing/dashboard.
-Generated projects own selected independent app copies and author product specs
-only for real business requirements. A product rule cannot silently override a
-conflicting shared obligation; change the relevant specification explicitly.
-Only actual canonical template work reads its separate template demo/assembly
-contracts. Folder placement neither installs a feature nor creates inheritance.
+Find the owning spec in `specs/README.md` and read only the specs for the
+changed surface and its shared dependencies (and any existing `specs/product/`
+rules); do not load ambient siblings. Changing a rule follows the
+[write-spec workflow](../../.specify/workflows/write-spec/README.md).
 
 ## Discovery and owner review
 

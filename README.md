@@ -13,19 +13,14 @@ documents into lightweight page, layout, and section props.
 The canonical template also publishes `/repository-footprint`, a commit-history
 snapshot of its authored repository size. Generated projects do not include it.
 
-Maintained OpenSpec contracts distinguish canonical `template/` assembly/demos,
-reusable `app/` behavior and independently authored `product/` business rules.
-App contracts group shared frontend, services and complete data lifecycles,
-with marketing/dashboard policy scoped to those surfaces. Applicable template
-and app contracts both govern this repository; generated projects receive only
-explicitly selected independent app copies and may author real product contracts.
-No placeholder product specs are generated. Discover capabilities with
-`openspec list --specs`, then `openspec show <capability-id> --type spec` for the
-changed surface, relevant shared dependencies and existing product rules.
-Conflicting obligations require an explicit spec change; folder location does
-not silently override policy or install features. Nearest `AGENTS.md`, Storybook
-and the procedures linked by [WORKFLOWS](WORKFLOWS.md) retain their structural,
-API and execution roles.
+Behaviour lives in [Spec Kit](https://github.com/github/spec-kit) specs mapped by
+`specs/README.md`: reusable `specs/platform/` contracts, canonical-only
+`specs/template/` assembly and demo contracts, and `specs/product/`, which a
+generated project fills with its real business rules. The constitution
+(`.specify/memory/constitution.md`) and the workflows in `.specify/workflows/`
+(menu: [WORKFLOWS](WORKFLOWS.md)) define how work is specified, built, reviewed
+and released; [docs/development/workflow.md](docs/development/workflow.md) walks
+through one change end to end. Nearest `AGENTS.md` files hold structure only.
 
 ## Instant Setup
 
@@ -35,6 +30,7 @@ Create a clean project directly from a published profile initializer:
 
 ```sh
 npx create-averlo my-project --profile thin-start --content static
+npx create-averlo verify my-project --profile thin-start --content static
 ```
 
 The command installs dependencies by default and initializes a local `main`
@@ -176,8 +172,13 @@ measured or optimized against real page-scroll evidence; see
 
 ```text
 .
-|-- AGENTS.md               Agent and repository boundaries
+|-- AGENTS.md               Agent entry point and repository structure
 |-- PRODUCT.md              Product purpose, audience, and boundaries
+|-- WORKFLOWS.md            Names-only menu of procedures
+|-- .specify/               Spec Kit constitution, templates, and workflows
+|-- specs/                  Living behaviour specs (platform, template, product)
+|-- docs/development/       Development workflow walkthrough and Next.js defaults
+|-- docs/testing/           Verification procedures per behaviour area
 |-- docs/benchmarks/        Template-assessment systems and historical evidence
 |-- docs/operations/        External-service and measurement runbooks
 |-- scripts/                Creation, development, and verification tooling
@@ -215,5 +216,6 @@ Vercel Blob for `BLOB_READ_WRITE_TOKEN`, and a project-specific
 
 - [Payload on Vercel with Neon and Blob](docs/operations/payload-vercel-neon-blob.md)
 - [Scroll-performance workflow](docs/operations/scroll-performance.md)
-- [Published and legacy skill inventory](docs/skills/README.md)
+- [Development workflow](docs/development/workflow.md)
+- [Averlo plugin skills](plugins/averlo/README.md)
 - [Benchmarks](docs/benchmarks/README.md)

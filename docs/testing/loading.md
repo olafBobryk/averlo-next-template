@@ -1,6 +1,6 @@
 # Verify loading behavior
 
-The maintained contract is [loading-state-behavior](../../openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md). Its sibling [form-behavior](../../openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md) owns submission pending states and recovery. Component APIs and structural policy remain with Storybook and nearest `AGENTS.md`.
+The maintained contract is [loading-state-behavior](../../specs/platform/data/loading/spec.md). Its sibling [form-behavior](../../specs/platform/data/forms/spec.md) owns submission pending states and recovery. Component APIs and structural policy remain with Storybook and nearest `AGENTS.md`.
 
 ## Run loading verification
 

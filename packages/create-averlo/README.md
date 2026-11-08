@@ -30,6 +30,20 @@ directory and profile explicitly.
 Generated repositories have no remote. Add one later with the normal Git or
 GitHub workflow for the project that will own it.
 
+## Verify a created project
+
+```text
+create-averlo verify <project-directory> [--profile <id>] [--content <mode>] [--no-install]
+```
+
+Checks the package name against the directory, the schema-2
+`.template-profile.json` (and the given profile/content), `PRODUCT.md`,
+`AGENTS.md`, `docs/README.md`, `.specify/memory/constitution.md` and
+`specs/README.md`, the absence of `openspec/` and `specs/template/`, the
+lockfile and dependency state (`--no-install` expects no `node_modules`), and
+git (`main`, one commit, clean, no remote). It exits non-zero and lists every
+mismatch. Name a project folder literally called `verify` as `./verify`.
+
 ## Publishing
 
 Every push to `main` runs `publish-create-averlo.yml`. It prepares the next npm

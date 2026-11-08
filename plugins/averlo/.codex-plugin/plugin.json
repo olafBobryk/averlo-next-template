@@ -11,9 +11,7 @@
 	"keywords": [
 		"averlo",
 		"nextjs",
-		"entities",
-		"surfaces",
-		"skeletons",
+		"spec-kit",
 		"design-system",
 		"figma",
 		"storybook",
@@ -27,14 +25,13 @@
 	"interface": {
 		"displayName": "Averlo",
 		"shortDescription": "Build with Averlo contracts",
-		"longDescription": "Averlo packages repository workflows for native source-backed composition, measured visual-parity review, replacement-routed design-system systemization, explicit animation, entity UI, application surface registries, Storybook evidence, deterministic Figma exports, and reviewed backports.",
+		"longDescription": "Averlo packages repository workflows for native source-backed composition, measured visual-parity review, replacement-routed design-system systemization, explicit animation, Storybook evidence, deterministic Figma exports, and pointers to the template's Spec Kit workflows for creating, publishing and backporting projects.",
 		"developerName": "Olaf Bobryk",
 		"category": "Developer Tools",
 		"capabilities": ["Write"],
 		"websiteURL": "https://averlo-next-template.vercel.app",
 		"defaultPrompt": [
-			"Audit this entity UI against Averlo",
-			"Review this route surface registry",
+			"Create a new Averlo project",
 			"Backport approved Storybook stories into the Averlo template",
 			"Compose this source-backed surface for measured human review",
 			"Systemize this accepted composition while explaining its visual effects",

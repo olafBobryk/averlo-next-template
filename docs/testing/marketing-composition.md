@@ -1,7 +1,7 @@
 # Verify marketing composition and media
 
-Behavior belongs to [marketing composition](../../openspec/specs/app/marketing/composition/marketing-composition/spec.md)
-and [media delivery](../../openspec/specs/app/shared/frontend/content/media-delivery/spec.md).
+Behavior belongs to [marketing composition](../../specs/platform/surfaces/marketing/composition/spec.md)
+and [media delivery](../../specs/platform/content/media/spec.md).
 [Marketing-content AGENTS](../../src/lib/marketing-content/AGENTS.md) owns exact
 route/document/renderer/media topology; shell adapters follow their nearest AGENTS.
 Storybook owns the shared `Section` root, background, frame and supported API.

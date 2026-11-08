@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -127,78 +126,78 @@ test("owning workflows load Visual Parity and target-owned contracts", async () 
 	}
 });
 
-test("packaged workflows discover scoped app contracts in an independent target and reject missing contracts", async () => {
+// Spec Kit discovery is path-based: a workflow reads the target repository's
+// `specs/README.md` map and owner spec files. Resolution must use the target
+// root and never fall back to the plugin installation or a retired layout.
+async function resolveSpec(root, specPath) {
+	const absolute = path.join(root, specPath, "spec.md");
+	await fs.access(absolute);
+	return absolute;
+}
+
+test("packaged workflows discover scoped platform specs in an independent target and reject missing specs", async () => {
 	const temporary = await fs.mkdtemp(
 		path.join(os.tmpdir(), "averlo-contract-resolution-"),
 	);
-	const workflowCapabilities = {
-		compose: ["app/marketing/composition/marketing-composition"],
-		"systemize-composition": [
-			"app/shared/frontend/components/component-contracts",
-		],
+	const workflowSpecs = {
+		compose: ["specs/platform/surfaces/marketing/composition"],
+		"systemize-composition": ["specs/platform/design-system/usage"],
 		animate: [
-			"app/shared/frontend/interaction/responsive-and-motion",
-			"app/shared/frontend/interaction/keyboard-and-overlays",
+			"specs/platform/design-system/motion",
+			"specs/platform/design-system/families/presence",
+			"specs/platform/design-system/families/overlays",
 		],
 		"contact-form": [
-			"app/shared/data-lifecycle/form-behavior",
-			"app/shared/services/delivery/submission-protection",
-			"app/shared/services/delivery/contact-delivery",
-			"app/shared/services/transport/api-transport",
+			"specs/platform/data/forms",
+			"specs/platform/services/delivery",
+			"specs/platform/services/transport",
 		],
 	};
-	// Historical IDs are negative fixtures, not an alternate discovery table.
-	const legacyFixtureIds = {
-		"app/marketing/composition/marketing-composition":
-			"app/content/marketing-composition",
-		"app/shared/frontend/components/component-contracts":
-			"app/ui-system/component-contracts",
-		"app/shared/frontend/interaction/responsive-and-motion":
-			"app/interaction/responsive-and-motion",
-		"app/shared/frontend/interaction/keyboard-and-overlays":
-			"app/interaction/keyboard-and-overlays",
-		"app/shared/data-lifecycle/form-behavior":
-			"app/data-lifecycle/form-behavior",
-		"app/shared/services/delivery/submission-protection":
-			"app/delivery/submission-protection",
-		"app/shared/services/delivery/contact-delivery":
-			"app/delivery/contact-delivery",
-		"app/shared/services/transport/api-transport":
-			"app/integration/api-transport",
+	// Retired OpenSpec locations are negative fixtures, not alternate discovery.
+	const legacyFixturePaths = {
+		"specs/platform/surfaces/marketing/composition":
+			"openspec/specs/app/marketing/composition/marketing-composition",
+		"specs/platform/design-system/usage":
+			"openspec/specs/app/shared/frontend/components/component-contracts",
+		"specs/platform/design-system/motion":
+			"openspec/specs/app/shared/frontend/interaction/responsive-and-motion",
+		"specs/platform/design-system/families/presence":
+			"openspec/specs/app/shared/frontend/interaction/responsive-and-motion",
+		"specs/platform/design-system/families/overlays":
+			"openspec/specs/app/shared/frontend/interaction/keyboard-and-overlays",
+		"specs/platform/data/forms":
+			"openspec/specs/app/shared/data-lifecycle/form-behavior",
+		"specs/platform/services/delivery":
+			"openspec/specs/app/shared/services/delivery/contact-delivery",
+		"specs/platform/services/transport":
+			"openspec/specs/app/shared/services/transport/api-transport",
 	};
 	try {
 		const pluginRoot = path.join(temporary, "plugin-installation", "skills");
 		const targetRoot = path.join(temporary, "independent-project");
-		const capabilities = [
-			...new Set(Object.values(workflowCapabilities).flat()),
-		];
-		for (const capability of capabilities) {
-			const relativeSpec = `openspec/specs/${capability}/spec.md`;
-			await fs.mkdir(path.join(targetRoot, path.dirname(relativeSpec)), {
+		const specPaths = [...new Set(Object.values(workflowSpecs).flat())];
+		for (const specPath of [...specPaths, "specs/README.md"]) {
+			const relative = specPath.endsWith(".md")
+				? specPath
+				: `${specPath}/spec.md`;
+			await fs.mkdir(path.join(targetRoot, path.dirname(relative)), {
 				recursive: true,
 			});
 			await fs.copyFile(
-				path.resolve(relativeSpec),
-				path.join(targetRoot, relativeSpec),
+				path.resolve(relative),
+				path.join(targetRoot, relative),
 			);
 		}
-		await fs.writeFile(
-			path.join(targetRoot, "openspec/config.yaml"),
-			"schema: spec-driven\n",
-		);
 		await fs.writeFile(
 			path.join(targetRoot, ".template-profile.json"),
 			JSON.stringify({ schemaVersion: 2 }),
 		);
-		for (const owner of [
-			...Object.keys(workflowCapabilities),
-			"visual-parity",
-		]) {
+		for (const owner of [...Object.keys(workflowSpecs), "visual-parity"]) {
 			await fs.cp(path.join(skillsRoot, owner), path.join(pluginRoot, owner), {
 				recursive: true,
 			});
 		}
-		for (const [owner, required] of Object.entries(workflowCapabilities)) {
+		for (const [owner, required] of Object.entries(workflowSpecs)) {
 			const packaged = await fs.readFile(
 				path.join(pluginRoot, owner, "SKILL.md"),
 				"utf8",
@@ -208,76 +207,39 @@ test("packaged workflows discover scoped app contracts in an independent target 
 				packaged,
 				/missing\s+(?:required|contract)|required missing/u,
 			);
-			assert.match(packaged, /openspec list --specs/u);
-			assert.match(packaged, /openspec show /u);
-			assert.doesNotMatch(packaged, /repository-workflows/u);
-			for (const capability of required)
+			assert.match(packaged, /`specs\/README\.md`/u);
+			assert.doesNotMatch(packaged, /openspec|repository-workflows/iu);
+			for (const specPath of required)
 				assert.ok(
-					packaged.includes(capability),
-					`${owner} discovers ${capability}`,
+					packaged.includes(specPath),
+					`${owner} discovers ${specPath}`,
 				);
 		}
-		const run = (args) =>
-			spawnSync("openspec", args, {
-				cwd: targetRoot,
-				encoding: "utf8",
-				env: { ...process.env, OPENSPEC_TELEMETRY: "0" },
-			});
-		const listed = run(["list", "--specs", "--json"]);
-		assert.ifError(listed.error);
-		assert.equal(listed.status, 0, listed.stderr);
-		assert.deepEqual(
-			JSON.parse(listed.stdout)
-				.specs.map(({ id }) => id)
-				.sort(),
-			capabilities.toSorted(),
-		);
-		for (const capability of capabilities) {
-			const relativeSpec = `openspec/specs/${capability}/spec.md`;
-			await assert.rejects(fs.access(path.join(pluginRoot, relativeSpec)), {
+		for (const specPath of specPaths) {
+			assert.equal(
+				await resolveSpec(targetRoot, specPath),
+				path.join(targetRoot, specPath, "spec.md"),
+			);
+			await assert.rejects(resolveSpec(pluginRoot, specPath), {
 				code: "ENOENT",
 			});
-			const show = () => run(["show", capability, "--type", "spec", "--json"]);
-			const found = show();
-			assert.ifError(found.error);
-			assert.equal(found.status, 0, found.stderr);
-			assert.equal(JSON.parse(found.stdout).id, capability);
-			// Plugin and legacy target decoys cannot satisfy a missing scoped app contract.
-			await fs.mkdir(path.join(pluginRoot, path.dirname(relativeSpec)), {
-				recursive: true,
-			});
+			// Plugin and legacy decoys cannot satisfy a missing target spec.
+			await fs.mkdir(path.join(pluginRoot, specPath), { recursive: true });
 			await fs.copyFile(
-				path.join(targetRoot, relativeSpec),
-				path.join(pluginRoot, relativeSpec),
+				path.join(targetRoot, specPath, "spec.md"),
+				path.join(pluginRoot, specPath, "spec.md"),
 			);
-			await fs.writeFile(
-				path.join(pluginRoot, "openspec/config.yaml"),
-				"schema: spec-driven\n",
+			const legacy = path.join(targetRoot, legacyFixturePaths[specPath]);
+			await fs.mkdir(legacy, { recursive: true });
+			await fs.copyFile(
+				path.join(targetRoot, specPath, "spec.md"),
+				path.join(legacy, "spec.md"),
 			);
-			for (const legacyId of [
-				legacyFixtureIds[capability],
-				legacyFixtureIds[capability].replace(/^app\//u, ""),
-			]) {
-				const legacySpec = `openspec/specs/${legacyId}/spec.md`;
-				await fs.mkdir(path.join(targetRoot, path.dirname(legacySpec)), {
-					recursive: true,
-				});
-				await fs.copyFile(
-					path.join(targetRoot, relativeSpec),
-					path.join(targetRoot, legacySpec),
-				);
-			}
-			await fs.unlink(path.join(targetRoot, relativeSpec));
-			const missing = show();
-			assert.ifError(missing.error);
-			assert.notEqual(
-				missing.status,
-				0,
-				`Missing ${capability} must not fall back to plugin or legacy policy.`,
-			);
-			assert.match(
-				`${missing.stderr}\n${missing.stdout}`,
-				/unknown|not found|no spec/i,
+			await fs.unlink(path.join(targetRoot, specPath, "spec.md"));
+			await assert.rejects(
+				resolveSpec(targetRoot, specPath),
+				{ code: "ENOENT" },
+				`Missing ${specPath} must not fall back to plugin or legacy policy.`,
 			);
 		}
 	} finally {
@@ -286,85 +248,34 @@ test("packaged workflows discover scoped app contracts in an independent target 
 });
 
 test("shared route guidance keeps optional surfaces conditional without inventing product policy", async () => {
-	const temporary = await fs.mkdtemp(
-		path.join(os.tmpdir(), "averlo-shared-contracts-"),
-	);
-	try {
-		const sharedIds = [
-			"app/shared/frontend/navigation/route-identity",
-			"app/shared/frontend/navigation/document-metadata",
-		];
-		for (const id of sharedIds) {
-			const relative = `openspec/specs/${id}/spec.md`;
-			await fs.mkdir(path.join(temporary, path.dirname(relative)), {
-				recursive: true,
-			});
-			await fs.copyFile(path.resolve(relative), path.join(temporary, relative));
-		}
-		await fs.writeFile(
-			path.join(temporary, "openspec/config.yaml"),
-			"schema: spec-driven\n",
-		);
-		const run = (args) =>
-			spawnSync("openspec", args, {
-				cwd: temporary,
-				encoding: "utf8",
-				env: { ...process.env, OPENSPEC_TELEMETRY: "0" },
-			});
-		const listed = run(["list", "--specs", "--json"]);
-		assert.ifError(listed.error);
-		assert.equal(listed.status, 0, listed.stderr);
-		assert.deepEqual(
-			JSON.parse(listed.stdout)
-				.specs.map(({ id }) => id)
-				.sort(),
-			sharedIds.toSorted(),
-		);
-		for (const id of sharedIds) {
-			const shown = run(["show", id, "--type", "spec", "--json"]);
-			assert.ifError(shown.error);
-			assert.equal(shown.status, 0, shown.stderr);
-			assert.equal(JSON.parse(shown.stdout).id, id);
-		}
-		const procedure = await readRepository(
-			"docs/testing/routes-and-metadata.md",
-		);
-		assert.match(procedure, /For installed dashboard enrichment/u);
-		assert.match(procedure, /For installed public marketing/u);
-		for (const id of [
-			"app/dashboard/navigation/route-enrichment",
-			"app/marketing/metadata/public-document-metadata",
-		]) {
-			assert.ok(procedure.includes(`\`${id}\``));
-			assert.ok(
-				!procedure.includes(`openspec/specs/${id}/spec.md`),
-				"Optional scopes must not become dangling file links in the shared procedure.",
-			);
-			const missing = run(["show", id, "--type", "spec", "--json"]);
-			assert.ifError(missing.error);
-			assert.notEqual(missing.status, 0);
-		}
-		for (const absent of [
-			"product",
-			"template",
-			"app/marketing",
-			"app/dashboard",
-		]) {
-			await assert.rejects(
-				fs.access(path.join(temporary, "openspec/specs", absent)),
-				{ code: "ENOENT" },
-			);
-		}
-	} finally {
-		await fs.rm(temporary, { recursive: true, force: true });
+	const procedure = await readRepository("docs/testing/routes-and-metadata.md");
+	assert.match(procedure, /For installed dashboard enrichment/u);
+	assert.match(procedure, /For installed public marketing/u);
+	for (const shared of [
+		"specs/platform/navigation/routes/spec.md",
+		"specs/platform/navigation/metadata/spec.md",
+	]) {
+		assert.ok(procedure.includes(`../../${shared}`), `links ${shared}`);
+		await fs.access(path.resolve(shared));
 	}
+	for (const optional of [
+		"specs/platform/surfaces/dashboard/navigation",
+		"specs/platform/surfaces/marketing/metadata",
+	]) {
+		assert.ok(procedure.includes(`\`${optional}\``));
+		assert.ok(
+			!procedure.includes(`../../${optional}/spec.md`),
+			"Optional scopes must not become dangling file links in the shared procedure.",
+		);
+	}
+	assert.doesNotMatch(procedure, /openspec|specs\/template|specs\/product\//iu);
 });
 
 test("Compose owns section-scoped native review without shared-owner mutation", async () => {
 	const compose = await readSkill("compose");
 
-	assert.match(compose, /stock OpenSpec discovery/u);
-	assert.match(compose, /app\/marketing\/composition\/marketing-composition/u);
+	assert.match(compose, /Spec Kit discovery/u);
+	assert.match(compose, /specs\/platform\/surfaces\/marketing\/composition/u);
 	assert.match(
 		compose,
 		/Invoke the linked `\$averlo:visual-parity` in `frame`/u,

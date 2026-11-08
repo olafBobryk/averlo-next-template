@@ -16,14 +16,13 @@ Compose packages [Visual Parity](../visual-parity/SKILL.md) as a mandatory
 subordinate workflow. Read its linked `SKILL.md` completely when it first
 applies, even when omitted from the active catalogue. Catalogue omission does
 not authorize a substitute. Behavior contracts belong to the target repository:
-resolve `openspec/specs/` and procedure paths from its root, never the plugin
-installation. Use stock OpenSpec discovery: run `openspec list --specs`, then
-`openspec show app/marketing/composition/marketing-composition --type spec` for public marketing
-composition and `openspec show <app-capability> --type spec` for other changed
-scope. Report a missing required contract as a scope gap; do not invent equivalent
-policy.
-Select only the changed surface's contracts, relevant `app/shared/` dependencies
-and existing `product/` requirements. Do not invent product specs, load ambient
+resolve `specs/` and procedure paths from its root, never the plugin
+installation. Use Spec Kit discovery: read the target's `specs/README.md` map,
+then `specs/platform/surfaces/marketing/composition/spec.md` for public marketing
+composition and the owner spec of any other changed scope. Report a missing
+required contract as a scope gap; do not invent equivalent policy.
+Select only the changed surface's specs, relevant shared `specs/platform/`
+dependencies and existing `specs/product/` requirements. Do not invent product specs, load ambient
 siblings or silently override conflicting generic rules; change the contract
 explicitly when necessary. Generated instances do not inherit template policy.
 
@@ -34,7 +33,7 @@ explicitly when necessary. Generated instances do not inherit template policy.
    fonts, constituent assets, or external provenance must be resolved.
 2. Read root and nearest AGENTS, then the target repository's applicable
    maintained content, navigation, interaction and lifecycle contracts. Public
-   marketing page/section work always follows `app/marketing/composition/marketing-composition`
+   marketing page/section work always follows `specs/platform/surfaces/marketing/composition`
    and the marketing-content structural owner before choosing an implementation
    shape. Obtain exact component APIs from Storybook. Use the canonical
    verification procedures linked by WORKFLOWS; do not load unrelated contracts.

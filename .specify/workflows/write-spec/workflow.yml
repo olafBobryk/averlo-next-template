@@ -1,0 +1,93 @@
+schema_version: "1.0"
+workflow:
+  id: "write-spec"
+  name: "Write or amend a spec"
+  version: "1.0.0"
+  author: "Averlo"
+  description: "Grill, simplify (ponytail), then Spec Kit specify/clarify/plan/tasks into the spec's tree path"
+
+# Interactive agents follow README.md themselves (grilling needs Olaf in the
+# chat). Headless:
+#   specify workflow run write-spec -i spec_path=specs/platform/surfaces/marketing/pages -i change="..."
+requires:
+  speckit_version: ">=1.2.5"
+  integrations:
+    any:
+      - "claude"
+      - "codex"
+
+inputs:
+  spec_path:
+    type: string
+    required: true
+    prompt: "Owner spec folder (e.g. specs/platform/surfaces/marketing/pages); see specs/README.md"
+  change:
+    type: string
+    required: true
+    prompt: "The change, in Olaf's words"
+  mode:
+    type: string
+    default: "amend"
+    enum: ["amend", "new"]
+    prompt: "amend an existing owner spec, or new for a genuinely new capability"
+  integration:
+    type: string
+    default: "auto"
+    prompt: "Integration to use ('auto' uses the project's initialized integration)"
+
+steps:
+  - id: grill
+    type: gate
+    message: "Grill Olaf on '{{ inputs.change }}' until every open question has an answer (README step 1). Approve when answered."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: ponytail
+    type: gate
+    message: "Apply ponytail: reuse order existing owner -> framework -> installed dependency -> new code. Record what was dropped. Approve the simplest working shape."
+    options: [approve, reject]
+    on_reject: retry
+
+  - id: point-at-folder
+    type: shell
+    run: "mkdir -p {{ inputs.spec_path }} && printf '{\"feature_directory\":\"%s\"}\\n' '{{ inputs.spec_path }}' > .specify/feature.json"
+
+  - id: draft
+    type: if
+    condition: "{{ inputs.mode == 'new' }}"
+    then:
+      - id: specify
+        command: speckit.specify
+        integration: "{{ inputs.integration }}"
+        input:
+          args: "SPECIFY_FEATURE_DIRECTORY={{ inputs.spec_path }} {{ inputs.change }}"
+    else:
+      - id: clarify
+        command: speckit.clarify
+        integration: "{{ inputs.integration }}"
+        input:
+          args: "Amend {{ inputs.spec_path }}/spec.md with a new Clarifications session for: {{ inputs.change }}"
+
+  - id: review-spec
+    type: gate
+    message: "Review {{ inputs.spec_path }}/spec.md with Olaf before planning."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: plan
+    command: speckit.plan
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.change }}"
+
+  - id: tasks
+    command: speckit.tasks
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.change }}"
+
+  - id: review-tasks
+    type: gate
+    message: "Review plan.md and tasks.md. Tasks name owned files so the main thread can split them across subagents."
+    options: [approve, reject]
+    on_reject: abort

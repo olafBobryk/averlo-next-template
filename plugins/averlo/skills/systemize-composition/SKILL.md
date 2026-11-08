@@ -76,9 +76,10 @@ missing required contract as a scope gap rather than inventing equivalent policy
    axes; tokens and defaults; shell and footer presentation; and temporary
    wrappers or renderer boundaries. Write `none` plus the inspected evidence
    when a domain has no candidate; a compressed or catch-all row is incomplete.
-4. Read root/nearest AGENTS and use stock OpenSpec discovery: run
-   `openspec list --specs`, then `openspec show app/shared/frontend/components/component-contracts --type spec`
-   for the target's component contract. Read only additional content, hierarchy,
+4. Read root/nearest AGENTS and use Spec Kit discovery: read the target's
+   `specs/README.md`, then `specs/platform/design-system/usage/spec.md` and the
+   affected `specs/platform/design-system/families/*/spec.md` for its component
+   contracts. Read only additional content, hierarchy,
    navigation and interaction behavior actually changed. Inspect complete Storybook owner
    contracts and current consumers before changing a public axis. Canonical
    procedures own verification; this does not alter the confidence and human

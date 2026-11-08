@@ -12,7 +12,7 @@ fi
 npm run typecheck
 ```
 
-The authority is [API transport](../../openspec/specs/app/shared/services/transport/api-transport/spec.md);
+The authority is [API transport](../../specs/platform/services/transport/spec.md);
 [API AGENTS](../../src/lib/api/AGENTS.md) owns client/wrapper/export structure.
 The focused tests perform no external requests.
 

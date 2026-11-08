@@ -1,21 +1,17 @@
 # Folder: `src/components/ui/input/date`
 
-## Ownership and boundary
+This folder owns the canonical single-date and date-range system.
+`DateRangeInput` is full-start-only; `DateInput` and the shared calendar core are
+available to thin start.
 
-This folder owns the canonical single-date and date-range system. DateRangeInput
-is full-start-only while DateInput and the shared calendar core remain available
-to thin-start.
-
-## Structural invariants
+## Structure
 
 - Both public inputs compose one private `CalendarPopover` and shared date
-  utilities.
-- `CalendarPopover` owns calendar state and interaction; no second calendar or
-  overlay topology may be introduced.
-- `Dropdown.Panel` is only the anchored shell. Its content remains one compact
-  `Card` using `Card.Header`, `Card.Content`, and a single wrapping
-  `Card.Footer` for single and range modes.
-- Month and year controls remain separate shared `Dropdown.Listbox` owners.
-- `Field` and `InputFrame` remain mounted as the field shell; do not introduce
-  independent manual text fields or a second calendar/overlay topology.
+  utilities. `CalendarPopover` owns calendar state and interaction; no second
+  calendar, overlay or manual text-field topology.
+- `Field` and `InputFrame` stay mounted as the field shell.
+- `Dropdown.Panel` is only the anchored shell; its content is one compact `Card`
+  with `Card.Header`, `Card.Content` and a single wrapping `Card.Footer` in single
+  and range modes.
+- Month and year controls are separate shared `Dropdown.Listbox` owners.
 - Range draft state stays internal until a complete range is committed.

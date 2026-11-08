@@ -1,26 +1,19 @@
 # Folder: `src/components/ui/input/choice`
 
-## Ownership
-
 This folder owns the native choice composition layer and complete grouped radio,
-checkbox, and toggle fields.
+checkbox and toggle fields.
 
-## Dependency direction
+## Read
+
+- `specs/platform/design-system/families/inputs/spec.md` for indicator geometry
+  and selection-state rules.
+
+## Structure
 
 - Family implementations import `ChoiceField` and `ChoiceIndicators` directly.
-- Do not add a separate `CheckboxInput`; MultiselectInput owns checkbox-style
+- There is no separate `CheckboxInput`; `MultiselectInput` owns checkbox-style
   grouped input.
-
-## Structural invariants
-
-- Keep the native input in the DOM. The visible indicator remains a sibling
-  driven by peer/group state and consumes shared peer focus tokens.
-- Borderless indicator geometry stays integer-aligned: default radio and
-  checkbox are 22px with 12px marks at 5px insets; compact checkbox is 18px
-  with a 12px mark at 3px; default toggle is 42x26px with a 22x18px thumb at
-  4px; compact toggle centers the scaled default indicator in a 34x20px slot.
-- Selection and hover never transform radio or checkbox marks; use color and
-  opacity so artwork does not drift through subpixel scaling.
-- Full-start checkbox artwork renders through the shared `Icon` registry.
-  Thin-start retains its local fallback because it does not select the icon
-  subsystem.
+- The native input stays in the DOM; the visible indicator is a sibling driven by
+  peer/group state and consumes shared peer focus tokens.
+- Full-start checkbox artwork renders through the shared `Icon` registry; thin
+  start keeps its local fallback because it does not select the icon subsystem.
