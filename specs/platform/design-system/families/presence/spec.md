@@ -29,7 +29,7 @@ Things that appear, disappear, resize or swap in place go through one owner each
 
 | Owner | Props | Defaults |
 |---|---|---|
-| `ContentPresence` (`ui/motion/presence`) | `open`, `children`, `axis: "x" \| "y"`, `gapBefore`, `gapAfter`, `durationMs`, `id`, `className`; `mode` (this batch): default masked, `"together"`, `"sequenced"` | `axis="y"`, masked default mode |
+| `ContentPresence` (`ui/motion/presence`) | `open`, `children`, `axis: "x" \| "y"`, `gapBefore`, `gapAfter`, `durationMs`, `id`, `className`; `mode` (this batch): default masked, `"sequenced"` | `axis="y"`, masked default mode |
 | `DisclosurePresence` (private) | shared by `ContentPresence` and Accordion | |
 | `MorphLabel` (`ui/helpers/MorphLabel`, this batch) | one string child | |
 | `IconSwap` (`ui/helpers/IconSwap`) | `items` + `activeIndex`, or (this batch) `swapKey` + one child; `size: "sm" \| "md" \| "lg"`, `className` | `size="md"` |
@@ -51,7 +51,7 @@ Things that appear, disappear, resize or swap in place go through one owner each
 
 | Rule | Story (Storybook title / export) | Status |
 |---|---|---|
-| P1, P7 | `UI/Motion/ContentPresence` `Vertical`, `Horizontal`, `Interruption`, `ResizeDuringInterruption`, `MaskFollowsHeightProgress`, `AccordionParity`, `SlowerReveal` | exists; `together` and `sequenced` stories this batch |
+| P1, P7 | `UI/Motion/ContentPresence` `Vertical`, `Horizontal`, `Interruption`, `ResizeDuringInterruption`, `MaskFollowsHeightProgress`, `AccordionParity`, `SlowerReveal` | exists; `sequenced` stories this batch |
 | P1 (U3) | `UI/Motion/ContentPresence` `MotionOff`, `ReducedMotion` | exists |
 | P3 | `UI/Helpers/MorphLabel` grow, shrink and interrupt stories with a frame-sampling play test (no opaque glyph past the edge) | this batch |
 | P4 | `UI/Helpers/IconSwap` `StatefulTransition`, `SizeScale`, plus `swapKey` and reduced-motion stories | additions this batch |

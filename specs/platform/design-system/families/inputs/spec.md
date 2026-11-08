@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-08 (new; form-input rules ported from a product site spec, rules only)
 
-**Status**: Accepted, living. The `together` message and `autoGrow` are built in this batch; see `tasks.md`.
+**Status**: Accepted, living. The `sequenced` message and `autoGrow` are built in this batch; see `tasks.md`.
 
 **Builds on**: `specs/platform/design-system/usage`, `specs/platform/design-system/families/presence`, `specs/platform/data/forms`
 
@@ -19,7 +19,7 @@ Every form field is a `Field` around a `ui/input` owner, so labels, descriptions
 ### Session 2026-11-08
 
 - **Q: How does a field message appear?**
-  - A: Through `ContentPresence mode="together"`: height and fade at once, overflow visible, so a two-line error never clips. The old `max-h-*` clip goes. `message`, `tone` and `messageId` keep their meaning (F7).
+  - A: Through `ContentPresence mode="sequenced"`: the box grows first and the text fades in once it fits, so a message is never clipped and never overlaps the next field (Olaf, 8 November: "fade waits until it fits"). The old `max-h-*` clip goes. `message`, `tone` and `messageId` keep their meaning (F7).
 - **Q: Does the textarea grow with its content?**
   - A: As an opt-in `autoGrow` prop on `TextAreaInput`; the default stays `rows`-based and resizable (F8).
 
@@ -41,7 +41,7 @@ Every form field is a `Field` around a `ui/input` owner, so labels, descriptions
 - **F4 MUST: inputs are 16px or larger below `md`,** so iOS does not zoom on focus. The default `sm` size meets this; a smaller size on a phone-reachable form needs a stated reason.
 - **F5 MUST: the right keyboard and autocomplete.** Email: `EmailInput` (`type="email"`, email autocomplete); name: `autoComplete="name"`; numbers: `inputMode="numeric"`; URLs: `type="url"`.
 - **F6 MUST: forms are real forms.** `<form>` with native submission, a synchronous double-submit guard, and `loading` on the submit `Button` (`specs/platform/data/forms`).
-- **F7 MUST: field messages never clip.** `Field` renders its message through `ContentPresence mode="together"` with its gap inside the box. A two-line error at 390 and 1440 is fully visible at rest (text height ≤ box height). `message`, `tone`, `messageId` and `disableMessage` keep their API.
+- **F7 MUST: field messages never clip.** `Field` renders its message through `ContentPresence mode="sequenced"` with its gap inside the box. At 390 and 1440, no frame shows a visible (opacity > 0.05) message clipped by its box or overlapping the next field, and a two-line error is fully visible at rest. `message`, `tone`, `messageId` and `disableMessage` keep their API.
 - **F8 SHOULD: auto-growing textareas use `autoGrow`.** `TextAreaInput autoGrow` grows with content from its `rows` minimum and keeps its skeleton height parity; no page-local auto-grow scripts.
 - **F9 MUST: skeleton parity.** Each input's `.Skeleton` matches its live geometry (`Field.Skeleton`, `InputFrame` skeletons).
 

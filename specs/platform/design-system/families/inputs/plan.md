@@ -4,7 +4,7 @@
 
 ## Summary
 
-Replace `Field`'s clipped `max-h` message with `ContentPresence mode="together"`, add opt-in `TextAreaInput autoGrow`, and add the two input lint rules.
+Replace `Field`'s clipped `max-h` message with `ContentPresence mode="sequenced"`, add opt-in `TextAreaInput autoGrow`, and add the two input lint rules.
 
 ## Technical Context
 

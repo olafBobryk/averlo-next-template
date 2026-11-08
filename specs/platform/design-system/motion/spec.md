@@ -25,13 +25,19 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
 - **Q: Which product-site rules come into the template?**
   - A: The universal (U), size (H), text (T), icon (I), button (B), loading (L) and responsive (R) rules, made generic. Form rules moved to `specs/platform/design-system/families/inputs` and popover rules to `.../families/overlays`. Booking and branding cases, site paths, exceptions and all values stay out; only rules are ported (constitution V).
 - **Q: Which owner animates height in the template?**
-  - A: The existing presence family (`ContentPresence`, private `DisclosurePresence`), not a new `Collapse`. It gains `mode`: the existing masked default, `together` and `sequenced` (H1).
+  - A: The existing presence family (`ContentPresence`, private `DisclosurePresence`), not a new `Collapse`. It gains `mode`: the existing masked default and `sequenced` (H1).
 - **Q: Do buttons morph by default?**
   - A: Yes. String-child changes render through `MorphLabel` and the width eases; `morph={false}` opts out. Loading keeps its fixed-width crossfade (B1).
 - **Q: How does MorphLabel move?**
   - A: Sequenced, and no visible glyph is ever outside the box. Grow: width leads and the new text fades in once it fits. Shrink: the old text fades out first, then the width closes and the new text fades in. y ±0.4em with a 3px blur. IconSwap stays scale plus fade with no blur (T1, I1).
 - **Q: Where do the token values live?**
-  - A: Token names and values are retuned in this batch. Rules here name a token role (feedback, interaction, disclosure, overlay, reveal, ambient, scroll), never a number; the final names and values are recorded in the token table below by the main thread.
+  - A: Tokens are named by character, not by implementation: `snap`, `quick`, `smooth`, `gentle`, `slow`. They are retuned from first principles, with no values taken from other repos. Rules here name a step, never a number. Which UI uses which step is set by this spec, so all overlays stay consistent while a tooltip uses a smaller step (token table).
+- **Q: Do small messages animate height and fade at once?**
+  - A: No. With overflow visible, the text overlapped the next field mid-motion. Olaf chose "fade waits until it fits": the box grows first, the text fades in once there is room, and it is never clipped and never overlaps. `together` was dropped, so field messages use `sequenced` (H1).
+- **Q: Spring or ease?**
+  - A: Springs are the model (Olaf: "modeled by the real world"). Every JS-driven animation uses its step's spring; duration plus ease is only the matched CSS fallback where no JS runs (U5).
+- **Q: Do section reveals use a duration?**
+  - A: Only time-based ones (the `in-view` and `reveal` sources), on `slow`. Scroll-scrubbed reveals follow scroll progress and have no duration.
 
 ## Requirements
 
@@ -79,7 +85,7 @@ Coordinated motion MUST preserve a clear activation/progress owner and effect ma
 ### U: Universal
 
 - **U0 MUST: every visible change is animated.** Presence, size, position, text, icon, colour, and loading-to-loaded changes move. A change snaps only under U3 or on first paint (U4).
-- **U1 MUST: tokens, never literals.** Durations, easings and springs come from `ui/foundations/motionTiming.ts`, `spring.ts` and the `motion-*` CSS classes and variables. Feature code names a token role; literal durations, easings and springs outside the token files fail lint (`tasks.md`).
+- **U1 MUST: tokens, never literals.** Durations, easings and springs come from `ui/foundations/motionTiming.ts`, `spring.ts` and the `motion-*` CSS classes and variables. Feature code names a step; literal durations, easings and springs outside the token files fail lint (`tasks.md`).
 - **U2 MUST: reuse the owners in `specs/platform/design-system/usage`.** A new variant, size, component or icon is listed in its PR with a reason (constitution III).
 - **U3 MUST: reduced motion animates nothing, fades included.**
   - JS gate: `useAnimated()`, a thin wrapper that is exactly `useMotionAllowed(true) && !useMotionDisableOverride()` with no new logic. New code uses it; existing inline gates are equivalent.
@@ -87,7 +93,7 @@ Coordinated motion MUST preserve a clear activation/progress owner and effect ma
   - Reveal and source code keeps its own gate, because it also reads the reveal root.
   - The owner gates itself; callers never pass a "no transition" class to make an owner snap.
 - **U4 MUST: no motion on first paint or on restore.** `AnimatePresence initial={false}`; restored drafts and server values render final.
-- **U5 SHOULD: springs move, durations fade.** Size, position, scale and presence use springs; opacity and colour use durations. CSS stays the default for hover, press and focus.
+- **U5 MUST: springs first.** Every JS-driven animation (size, position, scale, presence and opacity) uses its step's spring. A step's duration and ease are its matched CSS fallback, used only where no JS runs (hover, press, focus, colour).
 - **U6 MUST: one owner per animated element.** A component animates its own parts and callers do not animate the same property (`Button` owns its label, icon and width).
 - **U7 MUST: interrupt and retarget, never queue.** A new change retargets from the on-screen value. Presence `sequenced` and `MorphLabel` are the deliberate sequences, and both retarget when interrupted.
 - **U8 MUST: motion never gates access, and focus rings are never clipped at rest.**
@@ -100,10 +106,9 @@ Coordinated motion MUST preserve a clear activation/progress owner and effect ma
   | `mode` | Use for | Behaviour |
   |---|---|---|
   | default (masked) | existing consumers, accordions, queued content | measured spring size, content opaque throughout, a soft clipping edge only while moving, visible overflow at rest; no mask at all when motion is off |
-  | `together` | one- or two-line messages: field errors, limits, short notes | height and opacity move at once; overflow stays visible; never clipped |
-  | `sequenced` | larger content: follow-up fields, sections, list rows | open: height leads and the fade starts about 120ms in. Close: content fades, then height collapses. Clipped only while transparent and moving |
+  | `sequenced` | field errors, limits and notes, plus follow-up fields, sections and list rows | open: the height leads, and the content fades in once the box fits it. Close: the content fades out, then the height collapses. Content is clipped only while fully transparent; a visible glyph is never clipped and never overlaps a sibling |
 
-  Size uses the disclosure spring; opacity uses the feedback duration. Consumers never add their own sequential fades: they choose a mode.
+  Field messages use `smooth`; larger content uses `smooth` or `gentle` by distance. Consumers never add their own sequential fades: they choose a mode.
 - **H2 MUST: the animated box owns its gap.** Spacing next to conditional content goes inside the presence box (`gapBefore`/`gapAfter` or inner padding), never on a parent `gap-*`.
 - **H3 MUST: one technique per dimension.** Height goes through `ContentPresence`; width through `MorphLabel` for labels, `Button` for buttons (B1), and otherwise `ContentPresence axis="x"`. No `grid-rows-[0fr]`, `interpolate-size`, `max-h-*` tricks or ad hoc `height: "auto"` in feature code; lint flags new ones.
 - **H4 MUST: moves translate.** Use `layout="position"`; plain stretching `layout` is not used for size.
@@ -113,7 +118,7 @@ Coordinated motion MUST preserve a clear activation/progress owner and effect ma
 - **T1 MUST: text that changes in place morphs, never jumps.** Owner: `MorphLabel` (`ui/helpers/MorphLabel.tsx`, one string child).
   - Grow: the width leads; the new text fades in once it fits (about 60% of the width progress).
   - Shrink: the old text fades out first, then the width closes; the new text fades in.
-  - Text moves y ±0.4em with a 3px blur on the feedback spring; the width uses the disclosure spring.
+  - Text moves y ±0.4em with a 3px blur on `quick`; the width uses `smooth`.
   - No opaque glyph is ever outside the box. Reduced motion and `?motion=off` snap.
   - No page-local `AnimatePresence mode="wait"` text swaps and no second text-swap component.
 - **T2 MUST: never blank between two texts.** Shown text stays until the new text is known.
@@ -122,7 +127,7 @@ Coordinated motion MUST preserve a clear activation/progress owner and effect ma
 
 ### I: Icons
 
-- **I1 MUST: an icon that changes with state goes through `IconSwap`** (`ui/helpers/IconSwap.tsx`): copy/check, plus/minus, menu/close, sun/moon. Scale and opacity on the feedback moment, no blur. IconSwap gates reduced motion internally, and offers `<IconSwap swapKey={k}>{child}</IconSwap>` beside `items`/`activeIndex`. No `copied ? <Check/> : <Copy/>` ternaries and no hand-stacked icons.
+- **I1 MUST: an icon that changes with state goes through `IconSwap`** (`ui/helpers/IconSwap.tsx`): copy/check, plus/minus, menu/close, sun/moon. Scale and opacity on `snap`, no blur. IconSwap gates reduced motion internally, and offers `<IconSwap swapKey={k}>{child}</IconSwap>` beside `items`/`activeIndex`. No `copied ? <Check/> : <Copy/>` ternaries and no hand-stacked icons.
 - **I2 MUST: the accessible name stays on the control,** never on the swapping icon.
 
 ### B: Buttons
@@ -151,17 +156,27 @@ Coordinated motion MUST preserve a clear activation/progress owner and effect ma
 
 ## Token table
 
-Rules cite roles; the values live in `motionTiming.ts`, `spring.ts` and `library.css`. Token names and values are retuned in this batch, and the table records the result.
+Values live in `ui/foundations/motionTiming.ts`, `spring.ts` and `library.css` (`motion-<step>` classes, `--motion-<step>-duration` and `--motion-<step>-ease`). Each spring settles within 1% in about its step's duration, and each ease is fitted to its spring, so the CSS fallback looks the same. Mass is 1. `snap`, `quick` and `smooth` are critically damped; `gentle` and `slow` are slightly overdamped. Nothing bounces. Approved by Olaf on 8 November 2026 from the side-by-side demo.
 
-| Role | Use for | Duration / easing | Spring |
-|---|---|---|---|
-| feedback | fades, icon swaps, text swaps, small state changes | | |
-| interaction | hover-driven and direct-manipulation movement | | |
-| disclosure | presence size, label and button width, menus | | |
-| overlay | modals, sheets, large layers | | |
-| reveal | entrances | | |
-| ambient | decorative loops | | |
-| scroll | scroll-linked movement | | |
+| Step | Duration | Ease (CSS fallback) | Spring stiffness / damping / mass | Replaces |
+|---|---|---|---|---|
+| `snap` | 100ms | `cubic-bezier(0.22, 0.16, 0.18, 1)` | 4560 / 135 / 1 | feedback, micro |
+| `quick` | 160ms | `cubic-bezier(0.22, 0.16, 0.18, 1)` | 1760 / 84 / 1 | interaction, interactive |
+| `smooth` | 240ms | `cubic-bezier(0.22, 0.16, 0.18, 1)` | 780 / 56 / 1 | disclosure, component, scroll |
+| `gentle` | 360ms | `cubic-bezier(0.22, 0.24, 0.14, 1)` | 500 / 49 / 1 | overlay, macro |
+| `slow` | 560ms | `cubic-bezier(0.18, 0.2, 0.12, 1)` | 290 / 42 / 1 | reveal, grand, ambient, decorative |
+
+Which UI uses which step:
+
+| UI | Step |
+|---|---|
+| press, hover, colour, focus ring, chevron, checkbox tick, icon swap | `snap` |
+| tooltip, label swap (each phase), chips, scroll-edge fade | `quick` |
+| menus, popovers, select and combobox lists, command palette, field messages, presence size, button width | `smooth` |
+| dialogs, sheets, drawers, backdrops, carousel slides | `gentle` |
+| time-based section reveals, loading screen, image crossfade, hero entrance | `slow` |
+
+Icon keyframe values (spin, ring) stay outside the steps.
 
 ## Exceptions
 

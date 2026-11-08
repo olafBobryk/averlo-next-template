@@ -9,7 +9,7 @@ Add `mode` to the presence owner, add `MorphLabel`, make `IconSwap` gate itself 
 ## Technical Context
 
 - **Owners**: `ui/motion/presence/{DisclosurePresence,ContentPresence}.tsx`, `ui/helpers/MorphLabel.tsx` (new), `ui/helpers/IconSwap.tsx`, `ui/motion/AGENTS.md` wording ("consumers must not add sequential fades" becomes "choose a mode") is rewired by the AGENTS agent.
-- **Presence modes**: default masked (unchanged for existing consumers), `together` (height and fade at once, overflow visible), `sequenced` (open: height leads, fade starts about 120ms in; close: fade, then height). Keep the measured `ResizeObserver` sizing.
+- **Presence modes**: default masked (unchanged for existing consumers), `sequenced` (open: height leads, the content fades in once the box fits it; close: fade out, then height; clipped only while fully transparent). Keep the measured `ResizeObserver` sizing.
 - **MorphLabel**: one string child; measured width on the disclosure spring; sequenced grow and shrink; y ±0.4em + 3px blur on the feedback spring; snaps under reduced motion and `?motion=off`.
 - **IconSwap**: internal reduced-motion gate (CSS, server-safe), `swapKey` + child form beside `items`/`activeIndex`.
 - **Presence consumers to re-check**: `InlineError`, `StatusMessagePresence`, `misc/accordion/AccordionClient`, `domain/assistant/MessageQueue`, `homeHero` previews.
