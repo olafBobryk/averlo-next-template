@@ -113,6 +113,10 @@ export const catalogContract = defineCatalogOwnerContract({
 			storyId: "ui-overlays-toast--promise-lifecycle",
 		},
 		{
+			label: "Cancelled promise becomes a neutral note, not an error",
+			storyId: "ui-overlays-toast--promise-cancel",
+		},
+		{
 			label: "Stacked action feedback",
 			storyId: "ui-overlays-toast--stacked-feedback",
 		},
