@@ -1,0 +1,19 @@
+// Scroll containers are owned by ui/misc/ScrollArea; height reveal and
+// collapse are owned by ui/motion/presence (ContentPresence, DisclosurePresence).
+language js
+
+or {
+	or {
+		JsStringLiteralExpression(),
+		JsxString(),
+		JsTemplateChunkElement()
+	} as $class where {
+		$class <: r"(?s).*(?:^|[\s\"'`:!])(?:overflow-(?:x-|y-)?(?:auto|scroll)|max-h-0|max-h-\[0|max-h-px|grid-rows-\[0fr\]|\[?interpolate-size|transition-\[[^\]\s]*(?:max-height|grid-template-rows))(?:$|[\s\"'`/\]:,]).*",
+		register_diagnostic(span=$class, message="Ad hoc scroll or height trick: use ScrollArea for scrolling and ContentPresence/DisclosurePresence for height reveal (no overflow-auto/scroll, max-h-0, grid-rows-[0fr] or interpolate-size).")
+	},
+	JsPropertyObjectMember(name=$key, value=$value) where {
+		$key <: r"[\"']?(?:overflow|overflowX|overflowY|interpolateSize|interpolate-size)[\"']?",
+		$value <: r"[\"'`](?:auto|scroll|allow-keywords)[\"'`]",
+		register_diagnostic(span=$value, message="Ad hoc scroll or height trick: use ScrollArea for scrolling and ContentPresence/DisclosurePresence for height reveal.")
+	}
+}

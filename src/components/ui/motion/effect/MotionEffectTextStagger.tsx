@@ -154,6 +154,11 @@ function tokenizeSegment(
 	return tokens;
 }
 
+/** "0" in the unit of a CSS length ("0.4em" -> "0em"). */
+function zeroInUnitOf(length: string) {
+	return `0${length.trim().replace(/^-?[\d.]+/u, "") || "px"}`;
+}
+
 function StaggeredToken({
 	blurOffset,
 	blurRadius,
@@ -187,7 +192,12 @@ function StaggeredToken({
 		[start, end],
 		treatment === "clip"
 			? ["translateY(105%)", "translateY(0%)"]
-			: [`translateY(${blurOffset})`, "translateY(0px)"],
+			: // Same unit at both ends: motion interpolates the numbers in the
+				// string, so "0.4em" to "0px" would travel 0.4px, not 0.4em.
+				[
+					`translateY(${blurOffset})`,
+					`translateY(${zeroInUnitOf(blurOffset)})`,
+				],
 	);
 	const filter = useTransform(
 		progress,

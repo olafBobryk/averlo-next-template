@@ -117,6 +117,7 @@ export function ComboboxMultiSelectInputContent<T>({
 	return (
 		<div
 			className={clsx(
+				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 				"flex w-full flex-1 min-w-0 flex-nowrap items-center gap-x-2.5 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
 				contentPaddingClass,
 				chipListClassName,

@@ -165,6 +165,7 @@ function Viewer({ source, onClose }: FileViewerProps) {
 			variant="default"
 			className="w-10 shrink-0"
 		>
+			{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 			<input
 				aria-label="Page"
 				className="h-full w-full min-w-0 [appearance:textfield] bg-transparent px-1 text-center text-sm tabular-nums text-foreground outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -354,6 +355,7 @@ function Viewer({ source, onClose }: FileViewerProps) {
 				tabIndex={0}
 				aria-label="File content"
 				aria-busy={!asset || rendering}
+				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 				className="min-h-0 flex-1 overflow-auto overscroll-contain bg-background sm:rounded-r-lg lg:rounded-r-xl outline-offset-[-2px]"
 				onPointerDown={(event) => {
 					if (

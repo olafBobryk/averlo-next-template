@@ -62,12 +62,29 @@ export const ShimmerBlock: Story = {
 		const block = canvas.getByTestId("shimmer-block");
 		await expect(block).toHaveAttribute("data-skeleton-variant", "shimmer");
 		await expect(block.children).toHaveLength(0);
+		// Every shimmer paints the same viewport-anchored band (one page-wide
+		// sweep) and nothing animates on the root.
+		const root = document.documentElement;
 		const after = getComputedStyle(block, "::after");
+		await expect(getComputedStyle(root).animationName).toBe("none");
 		if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
 			await expect(after.animationName).toBe("none");
 			await expect(after.display).toBe("none");
 		} else {
 			await expect(after.animationName).not.toBe("none");
+			await expect(after.display).not.toBe("none");
+			await expect(after.backgroundAttachment).toBe("fixed");
+		}
+		// `?motion=off` stops the sweep and shows the static fill.
+		const previousOverride = root.dataset.motionOverride;
+		root.dataset.motionOverride = "off";
+		try {
+			const stopped = getComputedStyle(block, "::after");
+			await expect(stopped.animationName).toBe("none");
+			await expect(stopped.display).toBe("none");
+		} finally {
+			if (previousOverride === undefined) delete root.dataset.motionOverride;
+			else root.dataset.motionOverride = previousOverride;
 		}
 	},
 };
@@ -83,6 +100,6 @@ export const StaticOptOut: Story = {
 	play: async ({ canvas }) => {
 		const block = canvas.getByTestId("static-block");
 		await expect(block).toHaveAttribute("data-skeleton-variant", "static");
-		await expect(getComputedStyle(block, "::after").animationName).toBe("none");
+		await expect(getComputedStyle(block, "::after").content).toBe("none");
 	},
 };

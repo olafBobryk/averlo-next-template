@@ -91,6 +91,7 @@ export function ConfirmationModal({
 			<ModalHeader
 				closeDisabled={isSubmitting}
 				leadingIcon={
+					// biome-ignore lint/plugin/noAdHocDangerTone: debt
 					<Icon name="warning" size="sm" className="text-danger-text" />
 				}
 			>

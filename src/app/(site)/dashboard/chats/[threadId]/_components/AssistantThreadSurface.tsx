@@ -733,6 +733,7 @@ export function AssistantThreadSurface({
 								}}
 							>
 								<InputFrame>
+									{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 									<input
 										ref={(element) => element?.focus()}
 										aria-label="Conversation title"

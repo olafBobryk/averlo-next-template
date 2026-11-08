@@ -15,10 +15,15 @@ import {
 const textareaSizeClasses: Record<InputFrameSize, string> = {
 	xxs: "min-h-12 px-1.5 py-0.5 text-sm",
 	xs: "min-h-14 px-2 py-1 text-sm",
-	sm: "h-20 min-h-9 px-3 py-2 text-base md:text-sm",
+	sm: "px-3 py-2 text-base md:text-sm",
 	md: "min-h-[88px] px-[15px] py-2.5 text-sm",
 	lg: "min-h-[88px] px-4 py-3 text-base",
 };
+
+/** The sm box is fixed; auto-grow keeps that height as its floor. */
+function smallTextareaHeightClass(autoGrow: boolean) {
+	return autoGrow ? "min-h-20" : "h-20 min-h-9";
+}
 
 type TextAreaInputProps = {
 	label: React.ReactNode;
@@ -50,7 +55,51 @@ type TextAreaInputProps = {
 	// Textarea-specific
 	rows?: number; // default a couple lines
 	size?: InputFrameSize;
+	/**
+	 * Grow with the content instead of scrolling. The resting height stays the
+	 * default box (so the Skeleton keeps matching) and manual resize is off.
+	 */
+	autoGrow?: boolean;
 };
+
+/** Sizes the textarea to its content on input, value and width changes. */
+function useAutoGrow(
+	ref: React.RefObject<HTMLTextAreaElement | null>,
+	enabled: boolean,
+	value: string | undefined,
+) {
+	const resize = React.useCallback(() => {
+		const element = ref.current;
+		if (!element) return;
+		if (!enabled) {
+			element.style.height = "";
+			return;
+		}
+		element.style.height = "auto";
+		element.style.height = `${element.scrollHeight}px`;
+	}, [enabled, ref]);
+
+	// Controlled values can change without an input event.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: value is the resize trigger.
+	React.useLayoutEffect(() => {
+		resize();
+	}, [resize, value]);
+
+	React.useEffect(() => {
+		const element = ref.current;
+		if (!enabled || !element || typeof ResizeObserver === "undefined") return;
+		let width = element.offsetWidth;
+		const observer = new ResizeObserver(() => {
+			if (element.offsetWidth === width) return;
+			width = element.offsetWidth;
+			resize();
+		});
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [enabled, ref, resize]);
+
+	return resize;
+}
 
 function TextAreaInputRoot({
 	label,
@@ -69,8 +118,11 @@ function TextAreaInputRoot({
 	textareaClassName,
 	rows = 3,
 	size,
+	autoGrow = false,
 }: TextAreaInputProps) {
 	const isControlled = value !== undefined;
+	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+	const resize = useAutoGrow(textareaRef, autoGrow, value);
 	const [clientError, setClientError] = React.useState<string | null>(null);
 
 	const derivedError = error ?? clientError;
@@ -88,6 +140,7 @@ function TextAreaInputRoot({
 	const handleChange: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
 		const next = e.target.value;
 
+		if (autoGrow) resize();
 		if (validate) setClientError(null);
 		onChange?.(next);
 	};
@@ -122,6 +175,7 @@ function TextAreaInputRoot({
 				].join(" ")}
 			>
 				<textarea
+					ref={textareaRef}
 					id={inputId}
 					name={name}
 					disabled={disabled}
@@ -129,8 +183,10 @@ function TextAreaInputRoot({
 					required={required}
 					rows={rows}
 					className={[
-						"block w-full min-w-0 resize-y bg-transparent text-left text-foreground outline-none placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+						"block w-full min-w-0 bg-transparent text-left text-foreground outline-none placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+						autoGrow ? "resize-none" : "resize-y",
 						textareaSizeClasses[size ?? "sm"],
+						(size ?? "sm") === "sm" && smallTextareaHeightClass(autoGrow),
 						textareaClassName,
 					]
 						.filter(Boolean)

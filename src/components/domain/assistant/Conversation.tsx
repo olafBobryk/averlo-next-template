@@ -51,6 +51,7 @@ export function Conversation({
 		<div className="relative flex min-h-0 flex-1 flex-col">
 			{header ? <div className="z-10 shrink-0">{header}</div> : null}
 			<div
+				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 				className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-6"
 				onScroll={(event) => {
 					const node = event.currentTarget;

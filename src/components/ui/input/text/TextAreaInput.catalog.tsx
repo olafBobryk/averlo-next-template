@@ -40,6 +40,10 @@ export const catalogContract = defineCatalogOwnerContract({
 			label: "Multiline change, validation, and relationships",
 			storyId: "ui-input-text-area-input--textarea-contract",
 		},
+		{
+			label: "Opt-in auto-grow keeps the default resting height",
+			storyId: "ui-input-text-area-input--auto-grow",
+		},
 	],
 
 	family: "UI",

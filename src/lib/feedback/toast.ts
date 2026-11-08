@@ -40,9 +40,39 @@ export const showToast = {
 	dismiss: (id?: string | number) => toast.dismiss(id),
 	promise: async <T>(
 		promise: Promise<T>,
-		messages: { loading: string; success: string; error: string },
-		options?: ToastPromiseOptions,
+		messages: {
+			loading: string;
+			success: string;
+			error: string;
+			/** Shown (as info) instead of `error` when `options.signal` aborted it. */
+			cancelled?: string;
+		},
+		options?: ToastPromiseOptions & { signal?: AbortSignal },
 	) => {
+		const signal = options?.signal;
+		const cancelled = messages.cancelled;
+		if (signal && cancelled) {
+			// A cancelled request is not a failure: the loading toast turns into
+			// a neutral note instead of the error.
+			const id = toast.loading(
+				messageWithTitle(messages.loading, options?.loadingTitle),
+			);
+			promise.then(
+				() =>
+					toast.success(
+						messageWithTitle(messages.success, options?.successTitle),
+						{ id, duration: options?.durationMs },
+					),
+				() =>
+					signal.aborted
+						? toast.info(cancelled, { id, duration: options?.durationMs })
+						: toast.error(
+								messageWithTitle(messages.error, options?.errorTitle),
+								{ id, duration: options?.durationMs },
+							),
+			);
+			return promise;
+		}
 		toast.promise(promise, {
 			loading: messageWithTitle(messages.loading, options?.loadingTitle),
 			success: messageWithTitle(messages.success, options?.successTitle),

@@ -96,6 +96,7 @@ function DashboardTablePanelRoot<Row>({
 			>
 				{rows.length > 0 ? (
 					<div
+						// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 						className="relative max-w-full overflow-x-auto"
 						data-dashboard-table-scroll=""
 					>
@@ -315,6 +316,7 @@ export function DashboardTablePanelSkeleton({
 			{header}
 			<ContentSection.Content className="min-w-0 overflow-hidden rounded-xl border border-[var(--card-border-color)] bg-card">
 				<div
+					// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 					className="relative max-w-full overflow-x-auto"
 					data-dashboard-table-scroll=""
 				>

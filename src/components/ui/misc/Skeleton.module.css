@@ -1,25 +1,44 @@
+/*
+ * One page-wide sweep: every shimmering Skeleton paints the same
+ * viewport-anchored band (background-attachment: fixed), so placeholders on
+ * screen together sweep as one highlight instead of each crossing its own box.
+ * Each element animates its own background position on the shared document
+ * timeline; there is deliberately no inherited clock on :root, which forced a
+ * whole-document style and layout pass every frame (see the commit message).
+ */
 .shimmer::after {
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(
+	border-radius: inherit;
+	background-image: linear-gradient(
 		100deg,
-		transparent 20%,
+		transparent 0%,
 		color-mix(in srgb, var(--ui-surface-color, white) 65%, transparent) 50%,
-		transparent 80%
+		transparent 100%
 	);
-	transform: translateX(-100%);
-	animation: skeleton-shimmer 2.4s ease-in-out infinite;
+	background-size: 36vw 100vh;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position: -36vw 0;
+	animation: skeleton-page-sweep 2.4s ease-in-out infinite;
 	pointer-events: none;
 }
-@keyframes skeleton-shimmer {
+
+@keyframes skeleton-page-sweep {
 	to {
-		transform: translateX(100%);
+		background-position: 136vw 0;
 	}
 }
+
 @media (prefers-reduced-motion: reduce) {
 	.shimmer::after {
 		animation: none;
 		display: none;
 	}
+}
+
+html[data-motion-override="off"] .shimmer::after {
+	animation: none;
+	display: none;
 }

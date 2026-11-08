@@ -221,6 +221,7 @@ function createMarkdownComponents(
 
 			return (
 				<span className="markdown-task-indicator inline-flex shrink-0">
+					{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 					<input
 						aria-label={checked ? "Completed task" : "Incomplete task"}
 						checked={Boolean(checked)}
@@ -316,6 +317,7 @@ function createMarkdownComponents(
 		},
 		table: ({ children }) => (
 			<div
+				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 				className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain"
 				data-slot="markdown-table-scroll"
 			>
