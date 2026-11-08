@@ -88,6 +88,7 @@ export const thinStartProfile = {
 		coreDependencies: [
 			"pdfjs-dist",
 			"@openai/apps-sdk-ui",
+			"@floating-ui/react-dom",
 			"@radix-ui/react-slot",
 			"class-variance-authority",
 			"clsx",

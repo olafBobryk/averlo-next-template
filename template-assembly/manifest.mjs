@@ -167,6 +167,7 @@ export const assemblyCoreScripts = new Set([
 export const assemblyCoreDependencies = new Set([
 	"pdfjs-dist",
 	"@mdxeditor/editor",
+	"@floating-ui/react-dom",
 	"@openai/apps-sdk-ui",
 	"@radix-ui/react-slot",
 	"class-variance-authority",
