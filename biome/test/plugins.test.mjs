@@ -60,7 +60,7 @@ function expectedCount(source) {
 
 for (const rule of rules) {
 	for (const kind of ["invalid", "valid"]) {
-		const fixture = `${rule}.${kind}.tsx`;
+		const fixture = `${rule}.${kind}.jsx`;
 		test(`${rule} reports the expected ${kind} fixture hits`, () => {
 			const source = fs.readFileSync(path.join(fixturesDir, fixture), "utf8");
 			const diagnostics = lintWithRule(rule, { [fixture]: source });
@@ -86,14 +86,14 @@ for (const rule of rules) {
 
 	test(`${rule} diagnostics are suppressible per line`, () => {
 		const source = fs.readFileSync(
-			path.join(fixturesDir, `${rule}.invalid.tsx`),
+			path.join(fixturesDir, `${rule}.invalid.jsx`),
 			"utf8",
 		);
 		// The first statement of every invalid fixture is a single-line hit.
 		const firstHit = source.split("\n")[1];
 		const diagnostics = lintWithRule(rule, {
-			"plain.tsx": `${firstHit}\n`,
-			"ignored.tsx": `// biome-ignore lint/plugin/${rule}: fixture\n${firstHit}\n`,
+			"plain.jsx": `${firstHit}\n`,
+			"ignored.jsx": `// biome-ignore lint/plugin/${rule}: fixture\n${firstHit}\n`,
 		});
 		const hitsIn = (file) =>
 			diagnostics.filter(
@@ -101,7 +101,7 @@ for (const rule of rules) {
 					diagnostic.category === "plugin" &&
 					path.basename(diagnostic.location.path) === file,
 			).length;
-		assert.ok(hitsIn("plain.tsx") > 0);
-		assert.equal(hitsIn("ignored.tsx"), 0);
+		assert.ok(hitsIn("plain.jsx") > 0);
+		assert.equal(hitsIn("ignored.jsx"), 0);
 	});
 }
