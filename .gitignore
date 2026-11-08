@@ -36,8 +36,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env.local
+# env files: secrets stay local and owner-only; only examples are committed
+.env*
+!.env.example
+!.env*.example
+
+# spec kit per-checkout feature pointer
+/.specify/feature.json
 
 # local agent/worktree metadata
 /.codex/*
