@@ -22,6 +22,7 @@ function CatalogPreview2() {
 	const render = () => (
 		<div className="grid gap-4">
 			<PaginationControls
+				ariaLabel="Loading geometry pages"
 				current={1}
 				total={5}
 				onPrev={() => undefined}

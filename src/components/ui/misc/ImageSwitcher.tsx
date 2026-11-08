@@ -414,6 +414,7 @@ export function ImageSwitcher({
 			</motion.div>
 			{canSwitch && showControls ? (
 				<PaginationControls
+					ariaLabel="Images"
 					buttonSize={paginationButtonSize}
 					className={controlsClassName}
 					current={activeIndex + 1}

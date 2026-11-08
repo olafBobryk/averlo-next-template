@@ -255,8 +255,9 @@ export const ElevationLadder: Story = {
 		if (dark) {
 			await expect(luminance(page)).toBeLessThan(luminance(card));
 		} else {
-			await expect(luminance(panel)).toBeLessThan(luminance(card));
-			await expect(luminance(card)).toBeLessThan(luminance(page));
+			// Light ladder: quiet panel shell, soft page canvas, lifted card.
+			await expect(luminance(panel)).toBeLessThan(luminance(page));
+			await expect(luminance(page)).toBeLessThan(luminance(card));
 		}
 		await expect(luminance(card)).toBeLessThan(luminance(float));
 		const overlay = canvas.getByLabelText("Overlay level");
