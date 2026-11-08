@@ -9,7 +9,8 @@ import {
 } from "../dropdownStyles";
 import { Float } from "../surfaces";
 import { COLLISION_PADDING } from "./constants";
-import { resolveAnchoredDropdownPosition } from "./positioning";
+import { useDropdownFloating } from "./positioning";
+import { dropdownSheetClassName } from "./sheet";
 import type { DropdownSurfaceProps } from "./types";
 
 function assignRef<T>(ref: React.Ref<T> | undefined, value: T) {
@@ -32,6 +33,7 @@ export function DropdownSurface({
 	padding = "none",
 	portalTargetId,
 	positionStrategy = "absolute",
+	presentation = "auto",
 	ref,
 	elevation = "float",
 	side = "bottom",
@@ -40,16 +42,34 @@ export function DropdownSurface({
 	zIndex = 110,
 	...props
 }: DropdownSurfaceProps) {
-	const panelRef = React.useRef<HTMLDivElement | null>(null);
 	const [mountedPanelNode, setMountedPanelNode] =
 		React.useState<HTMLDivElement | null>(null);
-	const [positionStyle, setPositionStyle] =
-		React.useState<React.CSSProperties>();
+	const fixed = positionStrategy === "fixed";
+	const [anchor, setAnchor] = React.useState<Element | null>(null);
+	// The anchor ref is read after commit; setState bails when it is unchanged.
+	React.useLayoutEffect(() => {
+		setAnchor(anchorRef?.current ?? null);
+	});
+	const floating = useDropdownFloating({
+		align,
+		alignFirstOption: side === "left" || side === "right",
+		collisionPadding,
+		enabled: fixed,
+		offset,
+		presentation,
+		reference: anchor,
+		side,
+		strategy: "fixed",
+	});
+	const { setFloating, sheet } = floating;
 
-	const setPanelNode = React.useCallback((node: HTMLDivElement | null) => {
-		panelRef.current = node;
-		setMountedPanelNode(node);
-	}, []);
+	const setPanelNode = React.useCallback(
+		(node: HTMLDivElement | null) => {
+			setMountedPanelNode(node);
+			setFloating(node);
+		},
+		[setFloating],
+	);
 
 	// A cascade can pass a new registration callback on each render. Forward it
 	// separately so that ref changes never detach and remeasure the panel.
@@ -58,97 +78,38 @@ export function DropdownSurface({
 		return () => assignRef(ref, null);
 	}, [ref, mountedPanelNode]);
 
-	const calculateFixedPosition = React.useCallback(() => {
-		const anchor = anchorRef?.current;
-		const panel = panelRef.current;
-		if (!(anchor instanceof HTMLElement) || !panel) return;
-
-		const anchorRect = anchor.getBoundingClientRect();
-		const panelRect = panel.getBoundingClientRect();
-		const firstOption = panel.querySelector<HTMLElement>(
-			'[role="menuitem"], [role="option"]',
-		);
-		const contentInset = firstOption
-			? firstOption.getBoundingClientRect().top - panelRect.top
-			: 0;
-		const alignedAnchorRect =
-			side === "left" || side === "right"
-				? new DOMRect(
-						anchorRect.x,
-						anchorRect.y - contentInset,
-						anchorRect.width,
-						anchorRect.height + contentInset * 2,
-					)
-				: anchorRect;
-		const explicitWidth = matchAnchorWidth ? anchorRect.width : undefined;
-		const measuredWidth = explicitWidth ?? panelRect.width;
-		const measuredHeight = panel.scrollHeight || panelRect.height;
-		const position = resolveAnchoredDropdownPosition({
-			align,
-			anchorRect: alignedAnchorRect,
-			collisionPadding,
-			explicitWidth,
-			measuredHeight,
-			measuredWidth,
-			minWidth: explicitWidth,
-			offset,
-			positionStrategy: "fixed",
-			side,
-			zIndex,
-		});
-		setPositionStyle(position?.style);
-	}, [
-		align,
-		anchorRef,
-		collisionPadding,
-		matchAnchorWidth,
-		offset,
-		side,
-		zIndex,
-	]);
-
-	React.useLayoutEffect(() => {
-		if (positionStrategy !== "fixed") {
-			setPositionStyle(undefined);
-			return;
-		}
-		if (mountedPanelNode) calculateFixedPosition();
-	}, [calculateFixedPosition, mountedPanelNode, positionStrategy]);
-
-	React.useEffect(() => {
-		if (positionStrategy !== "fixed") return;
-		const handleViewportChange = () => calculateFixedPosition();
-		window.addEventListener("resize", handleViewportChange);
-		window.addEventListener("scroll", handleViewportChange, true);
-		return () => {
-			window.removeEventListener("resize", handleViewportChange);
-			window.removeEventListener("scroll", handleViewportChange, true);
-		};
-	}, [calculateFixedPosition, positionStrategy]);
-
-	const resolvedStyle =
-		positionStrategy === "fixed"
-			? ({
+	const resolvedStyle: React.CSSProperties | undefined = !fixed
+		? style
+		: sheet
+			? { ...style, position: "fixed", zIndex }
+			: {
 					...style,
-					left: 0,
-					position: "fixed",
-					top: 0,
-					visibility: positionStyle
+					...floating.floatingStyles,
+					maxHeight: "var(--dropdown-available-height)",
+					maxWidth: "var(--dropdown-available-width)",
+					minWidth: matchAnchorWidth
+						? "var(--dropdown-anchor-width)"
+						: undefined,
+					overflowY: floating.capped ? "auto" : style?.overflowY,
+					visibility: floating.isPositioned
 						? (style?.visibility ?? "visible")
 						: "hidden",
+					width: matchAnchorWidth ? "var(--dropdown-anchor-width)" : undefined,
 					zIndex,
-					...positionStyle,
-				} satisfies React.CSSProperties)
-			: style;
+				};
 	const panel = (
 		<Float
 			className={clsx(
 				"dropdown-panel-enter z-50 min-w-48",
 				dropdownChromeClassName,
 				elevation === "float" && dropdownElevationClassName,
-				positionStrategy === "fixed" ? "fixed" : "absolute mt-2",
+				fixed ? "fixed" : "absolute mt-2",
 				className,
+				sheet && fixed && dropdownSheetClassName,
 			)}
+			data-dropdown-presentation={
+				fixed ? (sheet ? "sheet" : "anchored") : undefined
+			}
 			padding={padding}
 			overflow={overflow}
 			ref={setPanelNode}
@@ -156,16 +117,8 @@ export function DropdownSurface({
 			style={resolvedStyle}
 			width={width}
 			{...props}
-			onAnimationEnd={(event) => {
-				if (positionStrategy === "fixed") calculateFixedPosition();
-				props.onAnimationEnd?.(event);
-			}}
 		/>
 	);
 
-	return positionStrategy === "fixed" ? (
-		<Portal target={portalTargetId}>{panel}</Portal>
-	) : (
-		panel
-	);
+	return fixed ? <Portal target={portalTargetId}>{panel}</Portal> : panel;
 }

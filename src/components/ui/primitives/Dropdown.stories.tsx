@@ -833,3 +833,170 @@ export const ScreenEdgeAlignment: Story = {
 		});
 	},
 };
+
+const viewportOptions = {
+	desktop: {
+		name: "Desktop 1440",
+		styles: { height: "900px", width: "1440px" },
+		type: "desktop",
+	},
+	phone: {
+		name: "Phone 390",
+		styles: { height: "844px", width: "390px" },
+		type: "mobile",
+	},
+	"phone-short": {
+		name: "Phone 390, short",
+		styles: { height: "360px", width: "390px" },
+		type: "mobile",
+	},
+} as const;
+
+const edgeOptions = Array.from({ length: 10 }, (_, index) => ({
+	content: `Option ${index + 1}`,
+	value: `option-${index + 1}`,
+}));
+
+const edgeTriggers = [
+	{ name: "Top left", side: "bottom", style: { left: 8, top: 8 } },
+	{ name: "Top right", side: "bottom", style: { right: 8, top: 8 } },
+	{ name: "Bottom left", side: "bottom", style: { bottom: 8, left: 8 } },
+	{ name: "Bottom right", side: "bottom", style: { bottom: 8, right: 8 } },
+	{ name: "Left middle", side: "left", style: { left: 8, top: "45%" } },
+	{ name: "Right middle", side: "right", style: { right: 8, top: "55%" } },
+] as const;
+
+function EdgeTriggers() {
+	return (
+		<>
+			{edgeTriggers.map((trigger) => (
+				<div key={trigger.name} style={{ position: "fixed", ...trigger.style }}>
+					<Dropdown.Listbox
+						ariaLabel={trigger.name}
+						menuMinWidth={260}
+						onSelect={fn()}
+						openOnHover={false}
+						options={edgeOptions}
+						presentation="anchored"
+						side={trigger.side}
+						triggerContent={trigger.name}
+					/>
+				</div>
+			))}
+		</>
+	);
+}
+
+const playEdgeTriggers: Story["play"] = async ({ canvas, canvasElement }) => {
+	const body = within(canvasElement.ownerDocument.body);
+	for (const { name } of edgeTriggers) {
+		const trigger = canvas.getByRole("button", { name });
+		await userEvent.click(trigger);
+		const list = await body.findByRole("listbox", { name });
+		const panel = list.closest('[data-slot="float"]') as HTMLElement;
+		await waitFor(() => {
+			const rect = panel.getBoundingClientRect();
+			const width = document.documentElement.clientWidth;
+			expect(panel).toHaveAttribute("data-dropdown-presentation", "anchored");
+			expect(rect.left).toBeGreaterThanOrEqual(0);
+			expect(rect.top).toBeGreaterThanOrEqual(0);
+			expect(rect.right).toBeLessThanOrEqual(width);
+			expect(rect.bottom).toBeLessThanOrEqual(window.innerHeight);
+		});
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() =>
+			expect(body.queryByRole("listbox", { name })).not.toBeInTheDocument(),
+		);
+	}
+};
+
+export const EdgePlacementPhone: Story = {
+	globals: { viewport: { value: "phone" } },
+	parameters: { layout: "fullscreen", viewport: { options: viewportOptions } },
+	render: () => <EdgeTriggers />,
+	play: playEdgeTriggers,
+};
+
+export const EdgePlacementDesktop: Story = {
+	globals: { viewport: { value: "desktop" } },
+	parameters: { layout: "fullscreen", viewport: { options: viewportOptions } },
+	render: () => <EdgeTriggers />,
+	play: playEdgeTriggers,
+};
+
+export const AutoSheetInShortViewport: Story = {
+	globals: { viewport: { value: "phone-short" } },
+	parameters: { layout: "fullscreen", viewport: { options: viewportOptions } },
+	render: () => (
+		<div className="flex h-svh items-center justify-center gap-3">
+			<Dropdown.Listbox
+				ariaLabel="Auto list"
+				onSelect={fn()}
+				openOnHover={false}
+				options={edgeOptions}
+				triggerContent="Auto"
+			/>
+			<Dropdown.Listbox
+				ariaLabel="Anchored list"
+				onSelect={fn()}
+				openOnHover={false}
+				options={edgeOptions}
+				presentation="anchored"
+				triggerContent="Anchored"
+			/>
+		</div>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const body = within(canvasElement.ownerDocument.body);
+		const width = document.documentElement.clientWidth;
+
+		// Auto: the anchored panel cannot reach its minimum height above or
+		// below the trigger, so it docks to the bottom edge at full width.
+		const autoTrigger = canvas.getByRole("button", { name: "Auto list" });
+		await userEvent.click(autoTrigger);
+		const list = await body.findByRole("listbox", { name: "Auto list" });
+		const sheet = list.closest('[data-slot="float"]') as HTMLElement;
+		await waitFor(() => {
+			expect(sheet).toHaveAttribute("data-dropdown-presentation", "sheet");
+			const rect = sheet.getBoundingClientRect();
+			expect(rect.left).toBeCloseTo(0, 0);
+			expect(rect.width).toBeCloseTo(width, 0);
+			expect(rect.bottom).toBeCloseTo(window.innerHeight, 0);
+			expect(rect.top).toBeGreaterThanOrEqual(0);
+		});
+		// The list scrolls inside the fixed sheet.
+		await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(sheet).not.toBeInTheDocument());
+		await expect(autoTrigger).toHaveFocus();
+
+		// Outside pointer-down still dismisses the sheet.
+		await userEvent.click(autoTrigger);
+		await body.findByRole("listbox", { name: "Auto list" });
+		await userEvent.click(canvasElement.ownerDocument.body);
+		await waitFor(() =>
+			expect(
+				body.queryByRole("listbox", { name: "Auto list" }),
+			).not.toBeInTheDocument(),
+		);
+
+		// An explicit anchored panel stays beside its trigger, capped to fit.
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Anchored list" }),
+		);
+		const anchoredList = await body.findByRole("listbox", {
+			name: "Anchored list",
+		});
+		const anchored = anchoredList.closest('[data-slot="float"]') as HTMLElement;
+		await waitFor(() => {
+			expect(anchored).toHaveAttribute(
+				"data-dropdown-presentation",
+				"anchored",
+			);
+			const rect = anchored.getBoundingClientRect();
+			expect(rect.top).toBeGreaterThanOrEqual(0);
+			expect(rect.bottom).toBeLessThanOrEqual(window.innerHeight);
+			expect(rect.width).toBeLessThan(width);
+		});
+	},
+};

@@ -46,7 +46,7 @@ export {
 	ProfilePictureStack,
 	type ProfilePictureStackItem,
 } from "./ProfilePicture";
-export { ScrollBorders } from "./ScrollBorders";
+export { ScrollArea, type ScrollAreaProps } from "./ScrollArea";
 export { SegmentedControl } from "./SegmentedControl";
 export {
 	Skeleton,

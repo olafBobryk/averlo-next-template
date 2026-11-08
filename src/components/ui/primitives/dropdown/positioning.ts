@@ -1,213 +1,146 @@
-import type * as React from "react";
-import type { DropdownPositionStrategy, DropdownSide } from "./types";
+"use client";
 
-type AbsolutePositioningOrigin = {
-	left: number;
-	top: number;
+import {
+	autoUpdate,
+	flip,
+	offset as offsetMiddleware,
+	type Placement,
+	shift,
+	size,
+	useFloating,
+} from "@floating-ui/react-dom";
+import * as React from "react";
+import { MIN_ANCHORED_HEIGHT } from "./constants";
+import type {
+	DropdownPositionStrategy,
+	DropdownPresentation,
+	DropdownSide,
+} from "./types";
+
+type Options = {
+	align: "start" | "end";
+	/** Align the first option with the anchor row (cascading side panels). */
+	alignFirstOption?: boolean;
+	collisionPadding: number;
+	enabled: boolean;
+	offset: number;
+	presentation: DropdownPresentation;
+	reference: Element | null;
+	/** Narrowest width the anchored panel may take before it cannot fit. */
+	requiredWidth?: number;
+	side: DropdownSide;
+	strategy: DropdownPositionStrategy;
 };
 
-export function getAbsolutePositioningOrigin(
-	element: HTMLElement,
-): AbsolutePositioningOrigin {
-	const offsetParent = element.offsetParent;
-	if (
-		!(offsetParent instanceof HTMLElement) ||
-		offsetParent === document.body ||
-		offsetParent === document.documentElement
-	) {
-		return { left: -window.scrollX, top: -window.scrollY };
+/** Content height the panel wants: its box plus anything scrolled inside it. */
+function requiredHeight(floating: HTMLElement) {
+	let hidden = Math.max(0, floating.scrollHeight - floating.clientHeight);
+	for (const area of floating.querySelectorAll<HTMLElement>(
+		'[data-scroll-area="y"]',
+	)) {
+		hidden += Math.max(0, area.scrollHeight - area.clientHeight);
 	}
-
-	const offsetParentRect = offsetParent.getBoundingClientRect();
-	return {
-		left:
-			offsetParentRect.left + offsetParent.clientLeft - offsetParent.scrollLeft,
-		top: offsetParentRect.top + offsetParent.clientTop - offsetParent.scrollTop,
-	};
+	return floating.offsetHeight + hidden;
 }
 
-function resolveDropdownSide({
-	preferredSide,
-	measuredHeight,
-	measuredWidth,
-	availableAbove,
-	availableBelow,
-	availableLeft,
-	availableRight,
-}: {
-	preferredSide: DropdownSide;
-	measuredHeight: number;
-	measuredWidth: number;
-	availableAbove: number;
-	availableBelow: number;
-	availableLeft: number;
-	availableRight: number;
-}): DropdownSide {
-	if (preferredSide === "left" || preferredSide === "right") {
-		const preferredAvailable =
-			preferredSide === "left" ? availableLeft : availableRight;
-		const oppositeSide = preferredSide === "left" ? "right" : "left";
-		const oppositeAvailable =
-			oppositeSide === "left" ? availableLeft : availableRight;
-
-		if (measuredWidth <= preferredAvailable) return preferredSide;
-		if (oppositeAvailable > preferredAvailable) return oppositeSide;
-		return preferredSide;
-	}
-
-	const preferredAvailable =
-		preferredSide === "top" ? availableAbove : availableBelow;
-	const oppositeSide = preferredSide === "top" ? "bottom" : "top";
-	const oppositeAvailable =
-		oppositeSide === "top" ? availableAbove : availableBelow;
-
-	if (measuredHeight <= preferredAvailable) return preferredSide;
-	if (oppositeAvailable > preferredAvailable) return oppositeSide;
-	return preferredSide;
-}
-
-export function resolveAnchoredDropdownPosition({
-	absoluteOrigin,
+/**
+ * The single dropdown placement engine (floating-ui). Placement, flip, shift
+ * and the height/width caps stay internal; callers keep the public
+ * side/align/offset/collisionPadding/positionStrategy props.
+ *
+ * Caps are written as CSS variables so the anchored and sheet presentations
+ * can read them without fighting over inline styles.
+ */
+export function useDropdownFloating({
 	align,
-	anchorRect,
+	alignFirstOption = false,
 	collisionPadding,
-	explicitWidth,
-	measuredHeight,
-	measuredWidth,
-	minWidth,
+	enabled,
 	offset,
-	positionStrategy,
+	presentation,
+	reference,
+	requiredWidth = 0,
 	side,
-	zIndex,
-}: {
-	absoluteOrigin?: AbsolutePositioningOrigin;
-	align: "start" | "end";
-	anchorRect: DOMRect;
-	collisionPadding: number;
-	explicitWidth?: number;
-	measuredHeight: number;
-	measuredWidth: number;
-	minWidth?: number;
-	offset: number;
-	positionStrategy: DropdownPositionStrategy;
-	side: DropdownSide;
-	zIndex: number;
-}) {
-	const availableAbove = Math.max(
-		0,
-		anchorRect.top - offset - collisionPadding,
-	);
-	const availableBelow = Math.max(
-		0,
-		window.innerHeight - anchorRect.bottom - offset - collisionPadding,
-	);
-	const availableLeft = Math.max(
-		0,
-		anchorRect.left - offset - collisionPadding,
-	);
-	const availableRight = Math.max(
-		0,
-		window.innerWidth - anchorRect.right - offset - collisionPadding,
-	);
-	const resolvedSide = resolveDropdownSide({
-		availableAbove,
-		availableBelow,
-		availableLeft,
-		availableRight,
-		measuredHeight,
-		measuredWidth,
-		preferredSide: side,
+	strategy,
+}: Options) {
+	const [sheet, setSheet] = React.useState(presentation === "sheet");
+	const [capped, setCapped] = React.useState(false);
+	const sheetRef = React.useRef(sheet);
+	sheetRef.current = sheet;
+
+	const floating = useFloating({
+		elements: { reference: enabled ? reference : null },
+		middleware: [
+			offsetMiddleware(({ elements }) => {
+				if (!alignFirstOption) return offset;
+				const option = elements.floating.querySelector<HTMLElement>(
+					'[role="menuitem"], [role="option"]',
+				);
+				const inset = option
+					? option.getBoundingClientRect().top -
+						elements.floating.getBoundingClientRect().top
+					: 0;
+				return { alignmentAxis: -inset, mainAxis: offset };
+			}),
+			flip({
+				crossAxis: "alignment",
+				// A side panel with no room on either side drops below instead.
+				fallbackAxisSideDirection: "end",
+				padding: collisionPadding,
+			}),
+			shift({ padding: collisionPadding }),
+			size({
+				padding: collisionPadding,
+				apply({ availableHeight, availableWidth, elements, placement, rects }) {
+					const element = elements.floating;
+					element.style.setProperty(
+						"--dropdown-anchor-width",
+						`${rects.reference.width}px`,
+					);
+					const xSide =
+						placement.startsWith("left") || placement.startsWith("right");
+					const viewportWidth =
+						document.documentElement.clientWidth - collisionPadding * 2;
+					const maxWidth = xSide ? availableWidth : viewportWidth;
+					const height = Math.max(0, Math.floor(availableHeight));
+					element.style.setProperty(
+						"--dropdown-available-height",
+						`${height}px`,
+					);
+					element.style.setProperty(
+						"--dropdown-available-width",
+						`${Math.max(0, Math.floor(maxWidth))}px`,
+					);
+					if (!sheetRef.current) {
+						setCapped(element.scrollHeight > height + 1);
+					}
+					if (presentation !== "auto") return;
+					const wanted = requiredHeight(element);
+					// Auto docks to the bottom edge only when the anchored panel
+					// cannot reach its minimum size in the space it has.
+					const minimum = Math.min(MIN_ANCHORED_HEIGHT, wanted);
+					setSheet(height < minimum || maxWidth < requiredWidth);
+				},
+			}),
+		],
+		open: enabled,
+		placement: `${side}-${align}` as Placement,
+		strategy,
+		transform: false,
+		whileElementsMounted: autoUpdate,
 	});
 
-	if (resolvedSide === "left" || resolvedSide === "right") {
-		const availableWidth =
-			resolvedSide === "left" ? availableLeft : availableRight;
-		const maxWidth =
-			measuredWidth > availableWidth ? availableWidth : undefined;
-		const renderedWidth = maxWidth ?? measuredWidth;
-		const rawTop =
-			align === "end" ? anchorRect.bottom - measuredHeight : anchorRect.top;
-		const top = Math.min(
-			Math.max(rawTop, collisionPadding),
-			Math.max(
-				collisionPadding,
-				window.innerHeight - measuredHeight - collisionPadding,
-			),
-		);
+	React.useEffect(() => {
+		if (presentation !== "auto") setSheet(presentation === "sheet");
+	}, [presentation]);
 
-		const viewportLeft =
-			resolvedSide === "left"
-				? Math.max(collisionPadding, anchorRect.left - renderedWidth - offset)
-				: Math.min(
-						anchorRect.right + offset,
-						window.innerWidth - collisionPadding - renderedWidth,
-					);
-		if (positionStrategy === "absolute" && !absoluteOrigin) return undefined;
-		return {
-			resolvedSide,
-			style: {
-				left:
-					viewportLeft -
-					(positionStrategy === "absolute" ? (absoluteOrigin?.left ?? 0) : 0),
-				maxWidth,
-				overflowX: maxWidth === undefined ? undefined : "auto",
-				position: positionStrategy,
-				top:
-					top -
-					(positionStrategy === "absolute" ? (absoluteOrigin?.top ?? 0) : 0),
-				width: explicitWidth,
-				zIndex,
-			} satisfies React.CSSProperties,
-		};
-	}
-	const availableHeight =
-		resolvedSide === "top" ? availableAbove : availableBelow;
-	const maxHeight =
-		measuredHeight > availableHeight ? availableHeight : undefined;
-	const renderedHeight = maxHeight ?? measuredHeight;
-
-	let viewportLeft =
-		align === "end" ? anchorRect.right - measuredWidth : anchorRect.left;
-	// Try the opposite anchor edge before shifting away from the trigger.
-	if (
-		align === "start" &&
-		viewportLeft + measuredWidth > window.innerWidth - collisionPadding
-	) {
-		viewportLeft = anchorRect.right - measuredWidth;
-	} else if (align === "end" && viewportLeft < collisionPadding) {
-		viewportLeft = anchorRect.left;
-	}
-	const maxLeft = Math.max(
-		collisionPadding,
-		window.innerWidth - measuredWidth - collisionPadding,
-	);
-	viewportLeft = Math.min(Math.max(viewportLeft, collisionPadding), maxLeft);
-	const viewportTop =
-		resolvedSide === "top"
-			? Math.max(collisionPadding, anchorRect.top - renderedHeight - offset)
-			: Math.max(
-					collisionPadding,
-					Math.min(
-						anchorRect.bottom + offset,
-						window.innerHeight - collisionPadding - renderedHeight,
-					),
-				);
-	if (positionStrategy === "absolute" && !absoluteOrigin) return undefined;
+	const resolvedSide = floating.placement.split("-")[0] as DropdownSide;
 	return {
+		capped: capped && !sheet,
+		floatingStyles: floating.floatingStyles,
+		isPositioned: floating.isPositioned,
 		resolvedSide,
-		style: {
-			left:
-				viewportLeft -
-				(positionStrategy === "absolute" ? (absoluteOrigin?.left ?? 0) : 0),
-			maxHeight,
-			minWidth,
-			overflowY: maxHeight === undefined ? undefined : "auto",
-			position: positionStrategy,
-			top:
-				viewportTop -
-				(positionStrategy === "absolute" ? (absoluteOrigin?.top ?? 0) : 0),
-			width: explicitWidth,
-			zIndex,
-		} satisfies React.CSSProperties,
+		setFloating: floating.refs.setFloating,
+		sheet,
 	};
 }

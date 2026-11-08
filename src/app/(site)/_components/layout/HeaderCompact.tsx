@@ -6,7 +6,7 @@ import { useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
-import { ScrollBorders } from "@/components/ui/misc";
+import { ScrollArea } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Panel } from "@/components/ui/primitives/surfaces";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -172,7 +172,7 @@ export default function HeaderCompact({
 							}}
 						>
 							<div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
-								<div className="relative shrink-0 pb-6">
+								<div className="relative shrink-0">
 									<HeaderSearchInput
 										value={searchQuery}
 										onValueChange={setSearchQuery}
@@ -184,9 +184,12 @@ export default function HeaderCompact({
 									/>
 								</div>
 								<div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-									<ScrollBorders
-										showBackToTop={false}
-										className="h-full w-full min-w-0 overflow-x-hidden overflow-y-auto"
+									{/* The search field is the start edge (its gap becomes the
+									    scroller padding); the viewport bottom is not an edge. */}
+									<ScrollArea
+										edgeStart="1.5rem"
+										edgeEnd={0}
+										className="h-full w-full overflow-x-hidden"
 										style={{
 											maxHeight: `calc(100vh - ${COMPACT_OPEN_SCROLL_AREA_OFFSET}px)`,
 										}}
@@ -220,7 +223,7 @@ export default function HeaderCompact({
 												</Button>
 											</div>
 										</div>
-									</ScrollBorders>
+									</ScrollArea>
 								</div>
 							</div>
 						</div>
