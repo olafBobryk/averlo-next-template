@@ -111,6 +111,7 @@
 	"src/components/ui/input/text/TextAreaInput.tsx",
 	"src/components/ui/input/text/TextInput.tsx",
 	"src/components/ui/misc/Skeleton.module.css",
+	"src/components/ui/misc/Skeleton.shimmer.css",
 	"src/components/ui/misc/Skeleton.tsx",
 	"src/components/ui/misc/Tooltip.tsx",
 	"src/components/ui/misc/index.ts",

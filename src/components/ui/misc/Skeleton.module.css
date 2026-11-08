@@ -1,25 +1,27 @@
+/* The sweep position comes from the page-wide clock in Skeleton.shimmer.css. */
 .shimmer::after {
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(
+	border-radius: inherit;
+	background-image: linear-gradient(
 		100deg,
-		transparent 20%,
-		color-mix(in srgb, var(--ui-surface-color, white) 65%, transparent) 50%,
-		transparent 80%
+		transparent calc(var(--skeleton-sweep-x) - 18vw),
+		color-mix(in srgb, var(--ui-surface-color, white) 65%, transparent)
+			var(--skeleton-sweep-x),
+		transparent calc(var(--skeleton-sweep-x) + 18vw)
 	);
-	transform: translateX(-100%);
-	animation: skeleton-shimmer 2.4s ease-in-out infinite;
+	background-size: 100vw 100vh;
+	background-attachment: fixed;
 	pointer-events: none;
 }
-@keyframes skeleton-shimmer {
-	to {
-		transform: translateX(100%);
-	}
-}
+
 @media (prefers-reduced-motion: reduce) {
 	.shimmer::after {
-		animation: none;
 		display: none;
 	}
+}
+
+html[data-motion-override="off"] .shimmer::after {
+	display: none;
 }

@@ -62,12 +62,28 @@ export const ShimmerBlock: Story = {
 		const block = canvas.getByTestId("shimmer-block");
 		await expect(block).toHaveAttribute("data-skeleton-variant", "shimmer");
 		await expect(block.children).toHaveLength(0);
+		// One page-wide clock on the root drives every shimmer band.
+		const root = document.documentElement;
 		const after = getComputedStyle(block, "::after");
 		if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-			await expect(after.animationName).toBe("none");
+			await expect(getComputedStyle(root).animationName).toBe("none");
 			await expect(after.display).toBe("none");
 		} else {
-			await expect(after.animationName).not.toBe("none");
+			await expect(getComputedStyle(root).animationName).toBe(
+				"skeleton-page-sweep",
+			);
+			await expect(after.display).not.toBe("none");
+			await expect(after.backgroundAttachment).toBe("fixed");
+		}
+		// `?motion=off` stops the clock and shows the static fill.
+		const previousOverride = root.dataset.motionOverride;
+		root.dataset.motionOverride = "off";
+		try {
+			await expect(getComputedStyle(root).animationName).toBe("none");
+			await expect(getComputedStyle(block, "::after").display).toBe("none");
+		} finally {
+			if (previousOverride === undefined) delete root.dataset.motionOverride;
+			else root.dataset.motionOverride = previousOverride;
 		}
 	},
 };
@@ -83,6 +99,10 @@ export const StaticOptOut: Story = {
 	play: async ({ canvas }) => {
 		const block = canvas.getByTestId("static-block");
 		await expect(block).toHaveAttribute("data-skeleton-variant", "static");
-		await expect(getComputedStyle(block, "::after").animationName).toBe("none");
+		await expect(getComputedStyle(block, "::after").content).toBe("none");
+		// Static placeholders alone never start the page clock.
+		await expect(getComputedStyle(document.documentElement).animationName).toBe(
+			"none",
+		);
 	},
 };
