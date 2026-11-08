@@ -1,12 +1,33 @@
-# Feature Specification: [FEATURE NAME]
+# Specification: [CAPABILITY NAME]
 
-**Feature Branch**: `[###-feature-name]`
+**Spec path**: `specs/[area]/[capability]` (the path is the identity; no numbers)
 
 **Created**: [DATE]
 
 **Status**: Draft
 
+**Builds on**: [owner specs this one depends on, as tree paths, or "none"]
+
 **Input**: User description: "$ARGUMENTS"
+
+<!--
+  LIVING SPEC: this file is the capability's single owner. New work AMENDS it:
+  add a new Clarifications session, change or add requirements (keep existing
+  IDs stable; never reuse a retired ID), and add tasks to tasks.md. Create a
+  new folder only for a genuinely new capability (see specs/README.md).
+-->
+
+## Clarifications
+
+<!--
+  One session per round of decisions, newest last. Quote Olaf's words when
+  they settle a choice. Each answer names the requirement IDs it changed.
+-->
+
+### Session [YYYY-MM-DD]
+
+- **Q: [question]**
+  - A: [answer] ([FR-00N])
 
 ## User Scenarios & Testing *(mandatory)*
 
