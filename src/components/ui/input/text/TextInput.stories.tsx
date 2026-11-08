@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fn, userEvent } from "storybook/test";
-import { waitForFieldMessages } from "@/components/ui/primitives/fieldStoryHelpers";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { TextInput } from "./TextInput";
 import { catalogContract } from "./TextInput.catalog";
@@ -38,7 +37,7 @@ export const FieldContract: Story = {
 			}
 		/>
 	),
-	play: async ({ canvasElement, canvas }) => {
+	play: async ({ canvas }) => {
 		onChange.mockClear();
 		const input = canvas.getByRole("textbox", { name: /project name/i });
 		await userEvent.type(input, "A");
@@ -48,7 +47,6 @@ export const FieldContract: Story = {
 			/use at least three characters.*enter at least three characters/i,
 		);
 		await expect(input).toHaveAttribute("aria-invalid", "true");
-		await waitForFieldMessages(canvasElement);
 	},
 };
 
