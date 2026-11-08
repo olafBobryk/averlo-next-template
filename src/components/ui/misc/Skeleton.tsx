@@ -1,7 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import type * as React from "react";
-import "./Skeleton.shimmer.css";
 import styles from "./Skeleton.module.css";
 
 const skeletonStyles = cva("relative overflow-hidden bg-muted/80", {
@@ -30,7 +29,7 @@ export type SkeletonProps = React.HTMLAttributes<HTMLDivElement> & {
 	children?: React.ReactNode;
 	radius?: SkeletonRadius;
 	/**
-	 * Shimmers by default on one page-wide clock; use static to opt out.
+	 * Shimmers by default as one page-wide sweep; use static to opt out.
 	 * Reduced motion and `?motion=off` show the static fill.
 	 */
 	animation?: "static" | "shimmer";
