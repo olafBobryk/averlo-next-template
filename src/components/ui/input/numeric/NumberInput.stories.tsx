@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fn, userEvent } from "storybook/test";
+import { waitForFieldMessages } from "@/components/ui/primitives/fieldStoryHelpers";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { NumberInput } from "./NumberInput";
 import { catalogContract } from "./NumberInput.catalog";
@@ -38,13 +39,14 @@ export const NumericContract: Story = {
 			}
 		/>
 	),
-	play: async ({ canvas }) => {
+	play: async ({ canvasElement, canvas }) => {
 		onChange.mockClear();
 		const input = canvas.getByRole("spinbutton", { name: "Seats" });
 		await userEvent.type(input, "12");
 		await expect(onChange).toHaveBeenLastCalledWith(12);
 		await userEvent.tab();
 		await expect(canvas.getByRole("alert")).toHaveTextContent("Maximum is 10.");
+		await waitForFieldMessages(canvasElement);
 	},
 };
 

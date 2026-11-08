@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fn, userEvent } from "storybook/test";
+import { waitForFieldMessages } from "@/components/ui/primitives/fieldStoryHelpers";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { EmailInput } from "./EmailInput";
 import { catalogContract } from "./EmailInput.catalog";
@@ -35,7 +36,7 @@ export const EmailContract: Story = {
 			}
 		/>
 	),
-	play: async ({ canvas }) => {
+	play: async ({ canvasElement, canvas }) => {
 		onChange.mockClear();
 		const input = canvas.getByRole("textbox", { name: "Work email" });
 		await expect(input).toHaveAttribute("type", "email");
@@ -45,6 +46,7 @@ export const EmailContract: Story = {
 		await expect(canvas.getByRole("alert")).toHaveTextContent(
 			"Enter a valid email.",
 		);
+		await waitForFieldMessages(canvasElement);
 	},
 };
 

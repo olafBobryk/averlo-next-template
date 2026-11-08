@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fn, userEvent } from "storybook/test";
+import { waitForFieldMessages } from "@/components/ui/primitives/fieldStoryHelpers";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { TextAreaInput } from "./TextAreaInput";
 import { catalogContract } from "./TextAreaInput.catalog";
@@ -36,7 +37,7 @@ export const TextareaContract: Story = {
 			/>
 		</div>
 	),
-	play: async ({ canvas }) => {
+	play: async ({ canvasElement, canvas }) => {
 		onChange.mockClear();
 		const input = canvas.getByRole("textbox", { name: "Summary" });
 		await userEvent.type(input, "Short");
@@ -45,6 +46,7 @@ export const TextareaContract: Story = {
 		await expect(canvas.getByRole("alert")).toHaveTextContent(
 			"Add more detail.",
 		);
+		await waitForFieldMessages(canvasElement);
 	},
 };
 

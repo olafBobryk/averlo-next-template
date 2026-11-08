@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fn, userEvent } from "storybook/test";
+import { waitForFieldMessages } from "@/components/ui/primitives/fieldStoryHelpers";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { ProfilePictureInput } from "./ProfilePictureInput";
 import { catalogContract } from "./ProfilePictureInput.catalog";
@@ -54,6 +55,7 @@ export const FileContract: Story = {
 		await expect(canvas.getByRole("alert")).toHaveTextContent(
 			"Only JPG, PNG, and WebP images are accepted.",
 		);
+		await waitForFieldMessages(canvasElement);
 	},
 };
 

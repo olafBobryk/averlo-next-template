@@ -185,7 +185,9 @@ export function MorphLabel({
 		for (const [index, layer] of outgoing.entries()) {
 			const { opacity, y, blur } = outgoingValues[index];
 			stopLayer(layer.id);
-			const fadeOut = animate(opacity, 0, {
+			// Declared first: motion can call onUpdate before animate() returns.
+			let fadeOut: ReturnType<typeof animate> | undefined;
+			fadeOut = animate(opacity, 0, {
 				...spring.quick,
 				onUpdate: (value) => {
 					// Shrinking waits for the old text to leave.
@@ -198,14 +200,14 @@ export function MorphLabel({
 						removeLayer(layer.id);
 				},
 			});
+			const fade = fadeOut;
 			running.current.set(layer.id, [
-				fadeOut,
+				fade,
 				animate(y, -travel, spring.quick),
 				animate(blur, BLUR_PX, spring.quick),
 			]);
-			fadeOut.then(() => {
-				if (running.current.get(layer.id)?.[0] === fadeOut)
-					removeLayer(layer.id);
+			fade.then(() => {
+				if (running.current.get(layer.id)?.[0] === fade) removeLayer(layer.id);
 			});
 		}
 		if (growing || gone()) resize();
