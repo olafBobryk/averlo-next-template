@@ -4,6 +4,7 @@
 import clsx from "clsx";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { DropdownSurface } from "@/components/ui/primitives/dropdown/DropdownSurface";
@@ -16,6 +17,7 @@ import {
 	type DropdownOptionTone,
 	dropdownEmptyStateClassName,
 	dropdownListClassName,
+	dropdownListEdge,
 	dropdownListWrapperClassName,
 	getDropdownDividerClassName,
 	getDropdownOptionClassName,
@@ -487,7 +489,8 @@ function ListboxLevel<T>({
 
 	if (role === "menu") {
 		return (
-			<div
+			<ScrollArea
+				edge={dropdownListEdge}
 				ref={setListNode}
 				id={resolvedListId}
 				role="menu"
@@ -502,12 +505,13 @@ function ListboxLevel<T>({
 				className={clsx(dropdownListWrapperClassName, className)}
 			>
 				{listContent}
-			</div>
+			</ScrollArea>
 		);
 	}
 
 	return (
-		<div
+		<ScrollArea
+			edge={dropdownListEdge}
 			ref={setListNode}
 			id={resolvedListId}
 			role="listbox"
@@ -523,7 +527,7 @@ function ListboxLevel<T>({
 			className={clsx(dropdownListWrapperClassName, className)}
 		>
 			{listContent}
-		</div>
+		</ScrollArea>
 	);
 }
 
@@ -594,6 +598,7 @@ export function Listbox<T>(props: ListboxProps<T>) {
 						padding="none"
 						portalTargetId={props.portalTargetId}
 						positionStrategy="fixed"
+						presentation="anchored"
 						ref={(node) => controller.registerSurface(childPath, node)}
 						role="presentation"
 						elevation="overlay"

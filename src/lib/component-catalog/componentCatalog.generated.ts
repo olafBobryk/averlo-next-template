@@ -68,7 +68,7 @@ import { catalogContract as catalogContract63 } from "@/components/ui/misc/Inter
 import { catalogContract as catalogContract64 } from "@/components/ui/misc/Loader.catalog";
 import { catalogContract as catalogContract65 } from "@/components/ui/misc/PaginationControls.catalog";
 import { catalogContract as catalogContract66 } from "@/components/ui/misc/ProfilePicture.catalog";
-import { catalogContract as catalogContract67 } from "@/components/ui/misc/ScrollBorders.catalog";
+import { catalogContract as catalogContract67 } from "@/components/ui/misc/ScrollArea.catalog";
 import { catalogContract as catalogContract68 } from "@/components/ui/misc/SegmentedControl.catalog";
 import { catalogContract as catalogContract69 } from "@/components/ui/misc/Skeleton.catalog";
 import { catalogContract as catalogContract70 } from "@/components/ui/misc/SocialLinks.catalog";

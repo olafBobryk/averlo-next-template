@@ -22,9 +22,11 @@ type DropdownOptionClassOptions = {
 export const dropdownChromeClassName = "!rounded-[12px]";
 export const dropdownElevationClassName = "!shadow-[var(--dropdown-shadow)]";
 
+/** The list scroller is a ScrollArea; it absorbs the list's block padding. */
+export const dropdownListEdge = 4;
 export const dropdownListWrapperClassName =
-	"flex max-h-[252px] min-h-0 flex-col overflow-y-auto p-0";
-export const dropdownListClassName = "flex shrink-0 flex-col gap-0.5 p-1";
+	"flex max-h-[252px] min-h-0 flex-col";
+export const dropdownListClassName = "flex shrink-0 flex-col gap-0.5 px-1";
 export const dropdownEmptyStateClassName = "px-4 py-3";
 export function getDropdownSurfaceClassName(
 	elevation: SurfaceElevation = "float",

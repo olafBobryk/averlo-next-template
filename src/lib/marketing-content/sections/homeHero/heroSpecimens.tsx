@@ -483,8 +483,8 @@ export const heroSpecimens = [
 		Render: HeroPreview66,
 	},
 	{
-		id: "ui-misc-scroll-borders",
-		name: "ScrollBorders",
+		id: "ui-misc-scroll-area",
+		name: "ScrollArea",
 		width: 340,
 		Render: HeroPreview67,
 	},

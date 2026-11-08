@@ -48,6 +48,7 @@ export function DropdownCollection<T>({
 	pinOnClick = false,
 	portalTargetId,
 	positionStrategy,
+	presentation,
 	role,
 	side = "bottom",
 	triggerButtonProps,
@@ -114,6 +115,7 @@ export function DropdownCollection<T>({
 			pinOnClick={pinOnClick}
 			portalTargetId={portalTargetId}
 			positionStrategy={resolvedPositionStrategy}
+			presentation={presentation}
 			renderTrigger={(trigger) => (
 				<Button
 					{...triggerButtonProps}
