@@ -264,7 +264,12 @@ export function DisclosurePresence({
 					ref={contentRef}
 					className={contentClassName}
 					initial={contentInitial}
-					animate={masked ? undefined : { opacity: open && fits ? 1 : 0 }}
+					animate={
+						masked
+							? undefined
+							: // Without motion there is no box to wait for.
+								{ opacity: open && (fits || !shouldAnimate) ? 1 : 0 }
+					}
 					transition={contentTransition}
 					onUpdate={
 						sequenced
