@@ -138,7 +138,7 @@ export function SegmentedControl<T extends string>({
 								"w-full min-w-0",
 								isSelected
 									? clsx("text-foreground", pillClassName)
-									: "text-foreground/60 hover:text-foreground",
+									: "text-muted-foreground hover:text-foreground",
 								layout === "auto" ? "w-auto max-w-full" : "w-full",
 								buttonClassName,
 							)}
@@ -156,7 +156,7 @@ export function SegmentedControl<T extends string>({
 									textClassName,
 									isSelected
 										? clsx("text-foreground", activeTextClassName)
-										: clsx("text-foreground/60", inactiveTextClassName),
+										: clsx("text-muted-foreground", inactiveTextClassName),
 								)}
 							>
 								{option.label}
