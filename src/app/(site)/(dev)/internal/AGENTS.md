@@ -6,3 +6,4 @@ Local developer routes under `/internal`.
 - The internal layout renders the shared `SiteShell` with `defaultSiteLayout` from `src/app/(site)/_components/layout/`. In profiles with marketing, assembly relocates this tree beneath `(marketing)` so the marketing layout owns the shell; do not add route-specific shell or chrome adapters.
 - Pages compose `_components/InternalPage.tsx` (`InternalPage`, `InternalPageHeader`) and design-system surfaces from `src/components`.
 - `testing/` is development-only (see its `AGENTS.md`). Production guards for `/api/debug`, `/api/dev` and `/api/internal` live with those routes.
+- `hero-collage/` is the template-only capture fixture for `npm run hero:capture`; it renders the live home hero collage in development and returns 404 in production.

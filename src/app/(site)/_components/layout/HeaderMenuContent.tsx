@@ -232,12 +232,12 @@ export function HeaderMenuGroup({
 			{groupHref ? (
 				<Button
 					href={groupHref}
-					variant="ghost"
+					variant="bare"
 					size="none"
 					align="left"
 					textVariant="menu-title"
 					textTone="inherit"
-					className="w-fit text-foreground hover:!text-foreground active:!text-foreground"
+					className="w-fit text-foreground"
 					contentClassName="w-fit gap-[10px]"
 					focusable={focusable}
 					leadingIcon={
@@ -280,12 +280,12 @@ export function HeaderMenuGroup({
 						<Button
 							key={`${item.label}-${getSiteLinkHref(item)}`}
 							href={getSiteLinkHref(item)}
-							variant="ghost"
+							variant="bare"
 							size="none"
 							align="left"
 							textVariant="menu-description"
 							textTone="inherit"
-							className="w-fit text-foreground/50 hover:!text-foreground/50 active:!text-foreground/50"
+							className="w-fit text-foreground/50"
 							contentClassName="w-fit"
 							focusable={focusable}
 							onClick={onNavigate}

@@ -31,34 +31,37 @@ export function StatusContent({
 			)}
 		>
 			{enableRevealMotion ? (
-				<MotionSource.Sequence className="flex w-full flex-col items-center justify-center gap-3">
-					<MotionSource.Root strategy={{ type: "reveal" }}>
+				<MotionSource.Sequence
+					mode="scroll"
+					className="flex w-full flex-col items-center justify-center gap-3"
+				>
+					<MotionSource.Item>
 						<MotionEffect.Entrance>
 							<Logo size="md" variant="mark" />
 						</MotionEffect.Entrance>
-					</MotionSource.Root>
-					<MotionSource.Root strategy={{ type: "reveal" }}>
+					</MotionSource.Item>
+					<MotionSource.Item>
 						<MotionEffect.Entrance>
 							<Text as="h1" variant="headingXl">
 								{heading}
 							</Text>
 						</MotionEffect.Entrance>
-					</MotionSource.Root>
-					<MotionSource.Root strategy={{ type: "reveal" }}>
+					</MotionSource.Item>
+					<MotionSource.Item>
 						<MotionEffect.Entrance>
 							<Text variant="body" tone="muted">
 								{body}
 							</Text>
 						</MotionEffect.Entrance>
-					</MotionSource.Root>
+					</MotionSource.Item>
 					{actions ? (
-						<MotionSource.Root strategy={{ type: "reveal" }}>
+						<MotionSource.Item>
 							<MotionEffect.Entrance>
 								<div className="mt-2 flex flex-wrap items-center justify-center gap-3">
 									{actions}
 								</div>
 							</MotionEffect.Entrance>
-						</MotionSource.Root>
+						</MotionSource.Item>
 					) : null}
 				</MotionSource.Sequence>
 			) : (

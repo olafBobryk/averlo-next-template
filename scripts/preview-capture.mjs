@@ -212,7 +212,7 @@ function pngDimensions(buffer) {
 	};
 }
 
-async function readPreviewMetadata(root) {
+export async function readPreviewMetadata(root) {
 	const metadataPath = path.join(root, PREVIEW_METADATA_PATH);
 	let metadata;
 	try {

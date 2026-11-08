@@ -37,7 +37,7 @@ Registered public content pages MUST render their normalized ordered sections th
 
 ### FR-002: Shared shell and navigation
 
-Header, menus and footer MUST remain shared shell responsibilities using the same resolved layout data across desktop and compact presentations. Shell navigation MUST distinguish registered internal destinations from external links and supported fragments.
+Header, menus and footer MUST remain shared shell responsibilities using the same resolved layout data across desktop and compact presentations. Shell navigation MUST distinguish registered internal destinations from external links and supported fragments. Shell navigation links (header menu items, footer links) use the `bare` Button variant.
 
 **Scenario: Compact shell navigation**
 

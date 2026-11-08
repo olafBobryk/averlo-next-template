@@ -1,0 +1,121 @@
+{
+	"schemaVersion": 1,
+	"generatedBy": "npm run hero:capture",
+	"source": {
+		"directory": "src/lib/marketing-content/sections/homeHero",
+		"files": [
+			"HomeHeroChoices.tsx",
+			"HomeHeroLibrary.tsx",
+			"heroSpecimens.tsx",
+			"pack.d.mts",
+			"pack.mjs",
+			"previews"
+		],
+		"fileCount": 104,
+		"sha256": "e9621e3bea13a02536ca7ba3fa39a1976cfee31676c2d607655e044ce883c17a"
+	},
+	"deviceScaleFactor": 2,
+	"format": {
+		"quality": 80,
+		"type": "webp"
+	},
+	"widths": [390, 768, 1440, 1920],
+	"captures": [
+		{
+			"box": {
+				"height": 1024,
+				"width": 390
+			},
+			"images": {
+				"light": {
+					"file": "hero-collage-390-light.webp",
+					"height": 2048,
+					"width": 780
+				},
+				"dark": {
+					"file": "hero-collage-390-dark.webp",
+					"height": 2048,
+					"width": 780
+				}
+			},
+			"range": "below sm (<640px)",
+			"viewport": {
+				"height": 844,
+				"width": 390
+			},
+			"width": 390
+		},
+		{
+			"box": {
+				"height": 1000,
+				"width": 768
+			},
+			"images": {
+				"light": {
+					"file": "hero-collage-768-light.webp",
+					"height": 2000,
+					"width": 1536
+				},
+				"dark": {
+					"file": "hero-collage-768-dark.webp",
+					"height": 2000,
+					"width": 1536
+				}
+			},
+			"range": "sm to lg (640-1023px)",
+			"viewport": {
+				"height": 1024,
+				"width": 768
+			},
+			"width": 768
+		},
+		{
+			"box": {
+				"height": 900,
+				"width": 1440
+			},
+			"images": {
+				"light": {
+					"file": "hero-collage-1440-light.webp",
+					"height": 1800,
+					"width": 2880
+				},
+				"dark": {
+					"file": "hero-collage-1440-dark.webp",
+					"height": 1800,
+					"width": 2880
+				}
+			},
+			"range": "lg to 2xl (1024-1535px)",
+			"viewport": {
+				"height": 900,
+				"width": 1440
+			},
+			"width": 1440
+		},
+		{
+			"box": {
+				"height": 1000,
+				"width": 1920
+			},
+			"images": {
+				"light": {
+					"file": "hero-collage-1920-light.webp",
+					"height": 2000,
+					"width": 3840
+				},
+				"dark": {
+					"file": "hero-collage-1920-dark.webp",
+					"height": 2000,
+					"width": 3840
+				}
+			},
+			"range": "2xl and wider (>=1536px)",
+			"viewport": {
+				"height": 1080,
+				"width": 1920
+			},
+			"width": 1920
+		}
+	]
+}

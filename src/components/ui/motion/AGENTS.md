@@ -29,6 +29,10 @@ text-motion and presence implementations.
 - Source progress, scheduler context, participant hooks and auto-cycle
   controller context are private; effects consume progress only through the
   nearest source context.
+- Section reveals have no separate reveal facade or marketing scroll-mode
+  switch: scroll-scrubbed reveals are `MotionSource.Sequence mode="scroll"`
+  with `MotionSource.Item` children; `reveal` sources stay for content with no
+  scroll position.
 - `owner-hover` resolves only the nearest `data-motion-owner` ancestor.
 - Animated rules compose the canonical, unlabeled `Divider` through
   `MotionEffect.Divider`.

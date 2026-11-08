@@ -53,7 +53,11 @@ export const catalogContract = defineCatalogOwnerContract({
 	chooseInstead: [
 		"Use Scroll.Lag for velocity response and indexed owners such as AutoCycle or ImageSwitcher for discrete transitions.",
 	],
-	compounds: ["MotionSource.Root", "MotionSource.Sequence"],
+	compounds: [
+		"MotionSource.Root",
+		"MotionSource.Sequence",
+		"MotionSource.Item",
+	],
 	exclusions: [
 		"Public MotionValue access, effect styling, indexed state, and scroll velocity.",
 		"Arbitrary owner selectors; owner hover resolves only the nearest data-motion-owner ancestor.",
@@ -74,6 +78,18 @@ export const catalogContract = defineCatalogOwnerContract({
 		{
 			label: "Replayable viewport exit reset and re-entry playback",
 			storyId: "ui-motion-motion-source--reveal-viewport-reentry",
+		},
+		{
+			label: "Scroll-scrubbed reveal follows and reverses with scroll",
+			storyId: "ui-motion-motion-source--scroll-reveal-scrub",
+		},
+		{
+			label: "At-load catch-up stops at live scroll progress",
+			storyId: "ui-motion-motion-source--scroll-reveal-catch-up",
+		},
+		{
+			label: "Scroll Sequence staggers item sub-ranges",
+			storyId: "ui-motion-motion-source--scroll-sequence-stagger",
 		},
 		{
 			label: "Staged footer-heading handoff composition",

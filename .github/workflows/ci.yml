@@ -29,6 +29,8 @@ jobs:
         run: npm run lint
       - name: Component catalogue is current
         run: npm run catalog:check
+      - name: Hero collage captures are current
+        run: npm run verify:hero-capture
       # tsc needs next-env.d.ts and the generated route types.
       - name: Generate Next.js route types
         run: npx next typegen

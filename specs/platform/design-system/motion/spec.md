@@ -37,7 +37,9 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
 - **Q: Spring or ease?**
   - A: Springs are the model (Olaf: "modeled by the real world"). Every JS-driven animation uses its step's spring; duration plus ease is only the matched CSS fallback where no JS runs (U5).
 - **Q: Do section reveals use a duration?**
-  - A: Only time-based ones (the `in-view` and `reveal` sources), on `slow`. Scroll-scrubbed reveals follow scroll progress and have no duration.
+  - A: No. Section reveals (hero text, status page content, footer) are scroll-scrubbed: they follow scroll progress, reverse when scrolling back and have no duration. `slow` is used only for the at-load catch-up intro (FR-013) and for reveals with no scroll position, such as modal content (`reveal` source). Olaf chose to extend `MotionSource` rather than add a separate reveal facade or a marketing scroll-mode switch.
+- **Q: What happens to a scroll reveal already on screen when the page loads?**
+  - A: It catches up to its current scroll-progress state with a timed intro and stops exactly there: an item 50% through its range animates from 0 to 50%, never beyond and never below, then follows scroll. If scroll changes during the intro, it lands on the live progress (FR-013).
 
 ### Session 2026-11-08 (AGENTS.md thinning)
 
@@ -94,7 +96,7 @@ Hybrid MUST be the default driver and Motion the maintained fallback; effects an
 
 ### FR-006: One scheduler; sources own reveal
 
-There MUST be one global scheduler (the site `MotionProvider`), with no page-local or nested global schedulers. `MotionSource.Sequence` enters its nearest scheduler once and owns relative descendant reveal batching. Viewport re-entry reset is owned by the scheduler and source through shared progress; effects never install reveal observers or reset themselves.
+There MUST be one global scheduler (the site `MotionProvider`), with no page-local or nested global schedulers. `MotionSource.Sequence` enters its nearest scheduler once and owns relative descendant reveal batching. Viewport re-entry reset is owned by the scheduler and source through shared progress; effects never install reveal observers or reset themselves. `MotionSource.Sequence mode="scroll"` instead owns one scroll progress and gives each `MotionSource.Item` a staggered sub-range of it, `[i·stagger / total, (i·stagger + slow) / total]` with `total = slow + (n − 1)·stagger`; it does not enter the scheduler, and items never own their own scroll progress.
 
 ### FR-007: `CounterpartReveal` ownership
 
@@ -119,6 +121,22 @@ Surface tint recipes MUST preserve their interpolation space, tint strength and 
 ### FR-012: Memoization needs a reason
 
 Motion code SHOULD memoize only for correctness or a measured performance benefit.
+
+### FR-013: Scroll reveals catch up at load
+
+A scroll reveal on screen when it activates MUST catch up from hidden to its live scroll progress with a timed intro on `slow`, stop exactly at that progress and then follow scroll. The intro scales live progress, so it never passes it, never falls below its own start, and lands on the live value when scroll changes during it. A scroll Sequence's intro lasts `slow + (n − 1)·stagger` at a constant rate, so each item's sub-range plays over `slow`. The scroll source owns this, together with `ready` (held hidden until ready) and `disabled` gating; a source that persists across client navigation (the footer) catches up again on the new route. Reduced motion and `?motion=off` render every item fully shown with no intro (U3). A reveal's offset MUST be reachable: content that ends the page completes by the maximum scroll position. Scroll sources that are not reveals (parallax, text shift) render their current pose at once with no intro.
+
+**Scenario: Partially scrolled at load**
+
+- **When** a reveal item is 50% through its scroll range as the page loads
+- **Then** it animates from 0 to 50% and stops there, and further scrolling moves it from 50%
+
+**Scenario: Scroll during the intro**
+
+- **When** the user scrolls while the catch-up intro is running
+- **Then** the intro ends on the new live progress, never above it
+
+Verified by the `ScrollRevealScrub`, `ScrollRevealCatchUp`, `ScrollRevealCatchUpRetarget`, `ScrollSequenceStagger` and `ScrollRevealMotionOff` MotionSource stories, in both drivers where the driver owns the behaviour.
 
 ### U: Universal
 
@@ -211,8 +229,8 @@ Which UI uses which step:
 | press, hover, colour, focus ring, chevron, checkbox tick, icon swap | `snap` |
 | tooltip, label swap (each phase), chips, scroll-edge fade | `quick` |
 | menus, popovers, select and combobox lists, command palette, field messages, presence size, button width | `smooth` |
-| dialogs, sheets, drawers, backdrops, carousel slides | `gentle` |
-| time-based section reveals, loading screen, image crossfade, hero entrance | `slow` |
+| dialogs, sheets, drawers, backdrops, carousel slides, full-width header menu panel | `gentle` |
+| scroll-reveal catch-up intro at load, reveals with no scroll position (modal content), loading screen, image crossfade | `slow` |
 
 Icon keyframe values (spin, ring) stay outside the steps.
 

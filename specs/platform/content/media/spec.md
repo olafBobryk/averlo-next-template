@@ -77,3 +77,7 @@ Decorative and brand imagery SHOULD default to committed presentation assets; ed
 ### FR-008: Narrow media exceptions
 
 The annotation `averlo-media-exception-next-line <rule> -- <rationale>` exempts one reported rule once, on the next line, never a whole file, and is never used on ordinary imagery. Temporary URLs, reference captures and missing alt text are non-waivable. The media verifier rejects stale annotations.
+
+### FR-009: Pre-captured decorative hero collage
+
+The decorative home hero collage MUST be served as committed pre-captured images of the repository's own live specimens (one per hero breakpoint and app theme, empty alt) rather than assembled in the browser. This narrowly exempts it from the FR-001 and FR-005 capture prohibition; it never covers reference or design-tool captures. When the hero specimens change, `npm run hero:capture` MUST be rerun; `npm run verify:hero-capture` fails while the captures are stale.

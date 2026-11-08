@@ -28,6 +28,8 @@ export const assemblyTemplateOnlyPaths = new Set([
 	"docs/benchmarks/design-system-agent-benchmark.md",
 	"docs/benchmarks/design-system-agent-benchmark-runs.jsonl",
 	"docs/benchmarks/design-system-agent-benchmark-runs.md",
+	"scripts/_lib/hero-capture.mjs",
+	"scripts/capture-hero-collage.mjs",
 	"scripts/create-template-profile.mjs",
 	"scripts/dev-thin.mjs",
 	"scripts/generate-repository-footprint.mjs",
@@ -35,6 +37,7 @@ export const assemblyTemplateOnlyPaths = new Set([
 	"scripts/measure-storybook-performance.mjs",
 	"scripts/review-thin-start-api.mjs",
 	"scripts/verify/verify-design-system-agent-benchmark.mjs",
+	"scripts/verify/verify-hero-capture.mjs",
 	"scripts/verify/verify-template-profiles.mjs",
 	"scripts/verify/verify-create-averlo.mjs",
 	".github/workflows/ci.yml",
@@ -69,6 +72,8 @@ export const assemblyTemplateOnlyRoots = [
 	"template-profiles",
 	"template-surfaces",
 	"src/app/(site)/(marketing)/repository-footprint",
+	// Capture fixture for the canonical hero collage (`npm run hero:capture`).
+	"src/app/(site)/(dev)/internal/hero-collage",
 ];
 
 // Platform specs are core unless a surface owns them (template-surfaces/*).
@@ -103,6 +108,8 @@ export const assemblyTemplateOnlyScripts = new Set([
 	"create:project",
 	"dev:thin",
 	"footprint:generate",
+	"hero:capture",
+	"verify:hero-capture",
 	"review:thin-start-api",
 	"measure:storybook-performance",
 	"generate:design-system-agent-benchmark-report",

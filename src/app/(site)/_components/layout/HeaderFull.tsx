@@ -1,8 +1,15 @@
 "use client";
 
 import clsx from "clsx";
-import { AnimatePresence, motion, type Transition } from "motion/react";
-import { type CSSProperties, useEffect, useId, useRef, useState } from "react";
+import { motion, type Transition } from "motion/react";
+import {
+	type CSSProperties,
+	useEffect,
+	useId,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import Logo from "@/components/branding/Logo";
 import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
@@ -10,7 +17,7 @@ import { IconSwap } from "@/components/ui/helpers/IconSwap";
 import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { Panel } from "@/components/ui/primitives/surfaces";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
+import { useAnimated } from "@/hooks/useMotionAllowed";
 import {
 	getHeaderSearchGroups,
 	getMenuContentHeight,
@@ -22,6 +29,7 @@ import {
 } from "./HeaderMenuContent";
 import type { SiteLayoutDocument, SiteLink } from "./siteLayout";
 import { getSiteLinkHref } from "./siteLayout";
+import { useMenuPanelSequence } from "./useMenuPanelSequence";
 
 const HEADER_EXPANDED_HEIGHT = 100;
 const HEADER_COMPACT_HEIGHT = 70;
@@ -43,14 +51,11 @@ function HeaderTopNavLink({
 	return (
 		<Button
 			href={getSiteLinkHref(link)}
-			variant="ghost"
+			variant="bare"
 			size="md"
 			textVariant="nav"
 			textTone="inherit"
-			className={clsx(
-				"text-foreground/50 hover:!text-foreground/50 active:!text-foreground/50",
-				className,
-			)}
+			className={clsx("text-foreground/50", className)}
 			focusable={focusable}
 		>
 			{link.label}
@@ -74,32 +79,50 @@ export default function HeaderFull({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const headerRef = useRef<HTMLElement>(null);
+	const menuPanelRef = useRef<HTMLDivElement>(null);
+	const menuContentRef = useRef<HTMLDivElement>(null);
 	const menuId = useId();
-	const isCompact = isScrolled && !isMenuOpen;
+	const motionAllowed = useAnimated();
+	const menu = useMenuPanelSequence(isMenuOpen, motionAllowed);
+	// The shell keeps its open state until the menu panel starts closing.
+	const isCompact = isScrolled && !menu.extended;
 	const isSearchActive = searchQuery.trim().length > 0;
-	const areTopNavLinksVisible = !isMenuOpen;
+	const areTopNavLinksVisible = !menu.extended;
 	const closedTopNavLinks = layout.topNavLinks.slice(
 		0,
 		HEADER_CLOSED_LINK_LIMIT,
 	);
 	const searchGroups = getHeaderSearchGroups(searchQuery, layout.searchGroups);
 	const activeMenuGroups = isSearchActive ? searchGroups : layout.menuGroups;
+	const menuContentHeightLg = getMenuContentHeight(
+		activeMenuGroups,
+		HEADER_MENU_CAPPED_COLUMNS,
+	);
+	const menuContentHeightXl = getMenuContentHeight(
+		activeMenuGroups,
+		HEADER_MENU_DEFAULT_COLUMNS,
+	);
 	const menuContentHeightStyle = {
-		"--header-menu-content-height-lg": `${getMenuContentHeight(
-			activeMenuGroups,
-			HEADER_MENU_CAPPED_COLUMNS,
-		)}px`,
-		"--header-menu-content-height-xl": `${getMenuContentHeight(
-			activeMenuGroups,
-			HEADER_MENU_DEFAULT_COLUMNS,
-		)}px`,
+		"--header-menu-content-height-lg": `${menuContentHeightLg}px`,
+		"--header-menu-content-height-xl": `${menuContentHeightXl}px`,
 	} as CSSProperties;
-	const showHeaderSurface = isScrolled || isMenuOpen;
-	const motionAllowed = useMotionAllowed(true);
+	// CSS picks the breakpoint's height; motion cannot interpolate the CSS
+	// variable, so the resolved number is what the resize animates to.
+	const menuGridRef = useRef<HTMLDivElement>(null);
+	const [menuContentHeight, setMenuContentHeight] = useState<number>();
+	const showHeaderSurface = isScrolled || menu.extended;
 	const headerTransition: Transition = motionAllowed
 		? spring.gentle
 		: instantTransition;
-	const menuTransition: Transition = motionAllowed
+	// Menu panel open/close on `gentle`; the content fades on `quick` (as
+	// presence does); resizing the open content stays on `smooth`.
+	const menuPanelTransition: Transition = motionAllowed
+		? spring.gentle
+		: instantTransition;
+	const menuFadeTransition: Transition = motionAllowed
+		? spring.quick
+		: instantTransition;
+	const menuResizeTransition: Transition = motionAllowed
 		? spring.smooth
 		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
@@ -145,6 +168,34 @@ export default function HeaderFull({
 			document.removeEventListener("pointerdown", handlePointerDown);
 		};
 	}, [isMenuOpen]);
+
+	useLayoutEffect(() => {
+		void menuContentHeightLg;
+		void menuContentHeightXl;
+		if (!menu.mounted) {
+			// A remounted menu starts from the CSS value again.
+			setMenuContentHeight(undefined);
+			return;
+		}
+
+		const resolve = () => {
+			const element = menuGridRef.current;
+			if (!element) return;
+			const height = Number.parseFloat(
+				getComputedStyle(element).getPropertyValue(
+					"--header-menu-content-height",
+				),
+			);
+			if (Number.isFinite(height)) setMenuContentHeight(height);
+		};
+
+		resolve();
+		window.addEventListener("resize", resolve);
+
+		return () => {
+			window.removeEventListener("resize", resolve);
+		};
+	}, [menu.mounted, menuContentHeightLg, menuContentHeightXl]);
 
 	return (
 		<motion.header
@@ -290,53 +341,71 @@ export default function HeaderFull({
 						</div>
 					</motion.div>
 				</div>
-				<AnimatePresence initial={false}>
-					{isMenuOpen ? (
+				{menu.mounted ? (
+					<motion.div
+						ref={menuPanelRef}
+						id={menuId}
+						aria-hidden={!isMenuOpen || undefined}
+						inert={!isMenuOpen || undefined}
+						initial={motionAllowed ? { height: 0 } : false}
+						// spec exception E-001
+						animate={{ height: menu.extended ? "auto" : 0 }}
+						transition={menuPanelTransition}
+						onUpdate={(latest) =>
+							menu.onPanelUpdate(
+								Number.parseFloat(String(latest.height)),
+								menuContentRef.current?.offsetHeight ?? 0,
+							)
+						}
+						onAnimationComplete={menu.onPanelComplete}
+						className="pointer-events-auto relative w-full overflow-hidden px-section-x"
+					>
 						<motion.div
-							id={menuId}
-							initial={{ height: 0, opacity: 0 }}
-							animate={{ height: "auto", opacity: 1 }}
-							exit={{ height: 0, opacity: 0 }}
-							transition={menuTransition}
-							className="pointer-events-auto relative w-full overflow-hidden px-section-x"
+							ref={menuContentRef}
+							className="mx-auto w-full max-w-section-max border-t border-border"
+							style={{
+								paddingTop: HEADER_MENU_TOP_PADDING,
+								paddingBottom: HEADER_MENU_BOTTOM_PADDING,
+							}}
+							initial={motionAllowed ? { opacity: 0 } : false}
+							animate={{ opacity: menu.visible ? 1 : 0 }}
+							transition={menuFadeTransition}
+							onUpdate={menu.onContentUpdate}
+							onAnimationComplete={menu.onContentComplete}
 						>
-							<div
-								className="mx-auto w-full max-w-section-max border-t border-border"
-								style={{
-									paddingTop: HEADER_MENU_TOP_PADDING,
-									paddingBottom: HEADER_MENU_BOTTOM_PADDING,
+							<motion.div
+								ref={menuGridRef}
+								className="relative [--header-menu-content-height:var(--header-menu-content-height-lg)] xl:[--header-menu-content-height:var(--header-menu-content-height-xl)]"
+								initial={false}
+								animate={{
+									height:
+										menuContentHeight ?? "var(--header-menu-content-height)",
 								}}
+								style={menuContentHeightStyle}
+								transition={menuResizeTransition}
 							>
-								<motion.div
-									className="relative [--header-menu-content-height:var(--header-menu-content-height-lg)] xl:[--header-menu-content-height:var(--header-menu-content-height-xl)]"
-									initial={false}
-									animate={{ height: "var(--header-menu-content-height)" }}
-									style={menuContentHeightStyle}
-									transition={menuTransition}
-								>
-									<div className="absolute inset-0">
-										{isSearchActive ? (
-											<HeaderSearchResults
-												className="lg:grid-cols-5 xl:grid-cols-6"
-												groups={searchGroups}
-												onNavigate={closeMenu}
-												columnCount={HEADER_MENU_DEFAULT_COLUMNS}
-												noResultsText={layout.search.noResultsText}
-											/>
-										) : (
-											<HeaderMenuGrid
-												className="lg:grid-cols-5 xl:grid-cols-6"
-												groups={layout.menuGroups}
-												onNavigate={closeMenu}
-												columnCount={HEADER_MENU_DEFAULT_COLUMNS}
-											/>
-										)}
-									</div>
-								</motion.div>
-							</div>
+								<div className="absolute inset-0">
+									{isSearchActive ? (
+										<HeaderSearchResults
+											className="lg:grid-cols-5 xl:grid-cols-6"
+											groups={searchGroups}
+											onNavigate={closeMenu}
+											columnCount={HEADER_MENU_DEFAULT_COLUMNS}
+											noResultsText={layout.search.noResultsText}
+										/>
+									) : (
+										<HeaderMenuGrid
+											className="lg:grid-cols-5 xl:grid-cols-6"
+											groups={layout.menuGroups}
+											onNavigate={closeMenu}
+											columnCount={HEADER_MENU_DEFAULT_COLUMNS}
+										/>
+									)}
+								</div>
+							</motion.div>
 						</motion.div>
-					) : null}
-				</AnimatePresence>
+					</motion.div>
+				) : null}
 			</div>
 		</motion.header>
 	);
