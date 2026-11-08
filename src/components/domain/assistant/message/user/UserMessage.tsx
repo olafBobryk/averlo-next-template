@@ -100,6 +100,7 @@ export function UserMessage({
 						className="h-auto"
 						contentClassName="w-full min-w-0"
 					>
+						{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 						<textarea
 							ref={textareaRef}
 							aria-label="Edit message"

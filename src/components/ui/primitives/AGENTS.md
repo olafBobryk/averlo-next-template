@@ -27,4 +27,6 @@ The lowest-level reusable UI components.
   thin-start renderers (`template-profiles/thin-start/overrides/`); overrides do
   not fork their tokens or geometry.
 - Feedback presence composes the motion presence family (`../motion/presence/`).
+- Dropdown surfaces and Listbox import `../misc/ScrollArea` directly (it depends
+  only on Button), never the misc facade.
 - Composite keyboard navigation and scoped shortcuts stay with their owner.

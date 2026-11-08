@@ -11,6 +11,9 @@ This folder owns small reusable interaction helpers used by higher-level UI.
 
 ## Ownership split
 
+- `MorphLabel` owns in-place string label swaps (`Button` uses it for string
+  children); `IconSwap` owns icon swaps and gates reduced motion itself. Rules:
+  `specs/platform/design-system/motion/spec.md` (T1, I1).
 - `IconSwap` owns only the visual state transition; the surrounding control owns
   its accessible name, keyboard semantics and focus.
 - `ArrowAction` composes the canonical Button with decorative Icon layers;

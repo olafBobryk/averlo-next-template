@@ -8,6 +8,8 @@ components that are neither complete inputs nor overlays.
 - `specs/platform/content/hierarchy/spec.md` when changing Chip, avatar or
   identity colour, or semantic tint.
 - `specs/platform/data/loading/spec.md` when changing skeletons or state owners.
+- `specs/platform/design-system/scroll/spec.md` when changing `ScrollArea`, the
+  one inner-scroll owner (it replaced `ScrollBorders`).
 - Storybook owner stories for component APIs and defaults.
 
 ## Structure
