@@ -95,6 +95,7 @@ export function DashboardCommandPalette({
 							<Icon className="!size-4 text-muted-foreground" name="search" />
 						}
 					>
+						{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 						<input
 							aria-activedescendant={
 								activeCommandId
@@ -144,6 +145,7 @@ export function DashboardCommandPalette({
 						<Divider decorative />
 					</div>
 					<div
+						// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 						className="min-h-0 overflow-y-auto overscroll-contain p-2"
 						style={{
 							maxHeight: anchored

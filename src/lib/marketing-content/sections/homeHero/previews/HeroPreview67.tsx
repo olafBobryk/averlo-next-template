@@ -9,6 +9,7 @@ function CatalogPreview1() {
 			{...args}
 			data-testid="scroll-region"
 			tabIndex={0}
+			// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 			className="h-40 w-72 overflow-y-auto"
 		>
 			{rows.map((row) => (

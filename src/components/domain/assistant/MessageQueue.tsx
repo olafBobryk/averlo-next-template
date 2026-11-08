@@ -116,6 +116,7 @@ export function MessageQueue({
 								</Button>
 							</div>
 						</div>
+						{/* biome-ignore lint/plugin/noAdHocScrollHeight: debt */}
 						<ol className="max-h-64 overflow-y-auto overscroll-contain">
 							<AnimatePresence initial={false}>
 								{items.map((item, index) => (

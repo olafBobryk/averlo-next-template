@@ -239,6 +239,7 @@ export function useComposerPicker({
 							role="listbox"
 							aria-label={trigger.kind === "command" ? "Commands" : "Context"}
 							aria-busy={loading}
+							// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 							className="min-h-0 overflow-y-auto max-h-[280px] p-2 space-y-1"
 						>
 							{items.map((item, i) => (

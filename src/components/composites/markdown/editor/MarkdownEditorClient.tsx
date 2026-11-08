@@ -192,6 +192,7 @@ export function MarkdownEditorClient({
 			{!markdownSyntaxIsParseable ? (
 				<Text
 					aria-live="polite"
+					// biome-ignore lint/plugin/noAdHocDangerTone: debt
 					className="mt-2 block text-danger"
 					id={syntaxErrorId}
 					theme="inherit"

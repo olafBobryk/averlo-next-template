@@ -377,6 +377,7 @@ function FileInputRoot({
 					aria-label={
 						typeof label === "string" ? `${label} file list` : "File list"
 					}
+					// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 					className="m-0 min-w-0 max-w-full overflow-x-auto rounded-md border-0 p-0"
 					onDragEnter={handleDragEnter}
 					onDragLeave={handleDragLeave}

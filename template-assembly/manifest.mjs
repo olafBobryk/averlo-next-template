@@ -37,6 +37,7 @@ export const assemblyTemplateOnlyPaths = new Set([
 	"scripts/verify/verify-design-system-agent-benchmark.mjs",
 	"scripts/verify/verify-template-profiles.mjs",
 	"scripts/verify/verify-create-averlo.mjs",
+	".github/workflows/ci.yml",
 	".github/workflows/publish-create-averlo.yml",
 	".github/workflows/update-repository-footprint.yml",
 ]);
@@ -89,6 +90,7 @@ export const assemblyCoreRoots = [
 	".storybook",
 	".vercelignore",
 	".vscode",
+	"biome",
 	"biome.json",
 	"docs",
 	"next-sitemap.config.js",
@@ -120,6 +122,7 @@ export const assemblyTemplateOnlyDevDependencies = new Set(["js-tiktoken"]);
 export const assemblyCoreScripts = new Set([
 	"verify:forms",
 	"verify:loading",
+	"test:unit",
 	"dev",
 	"dev:local",
 	"preview:tunnel",

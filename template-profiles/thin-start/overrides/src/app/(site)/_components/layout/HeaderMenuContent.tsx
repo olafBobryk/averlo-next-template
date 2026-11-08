@@ -215,6 +215,7 @@ export function HeaderSearchInput({
 				) : undefined
 			}
 		>
+			{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 			<input
 				id={searchId}
 				type="search"

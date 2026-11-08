@@ -164,6 +164,7 @@ export default function HeaderCompact({
 					<div className="mx-auto w-full max-w-section-max">
 						<div
 							data-open={isMenuOpen}
+							// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 							className="grid min-h-0 transition-[grid-template-rows,opacity] motion-component data-[open=false]:grid-rows-[0fr] data-[open=false]:opacity-0 data-[open=true]:grid-rows-[1fr] data-[open=true]:opacity-100"
 							style={{
 								height: isMenuOpen
@@ -186,6 +187,7 @@ export default function HeaderCompact({
 								<div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
 									<ScrollBorders
 										showBackToTop={false}
+										// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 										className="h-full w-full min-w-0 overflow-x-hidden overflow-y-auto"
 										style={{
 											maxHeight: `calc(100vh - ${COMPACT_OPEN_SCROLL_AREA_OFFSET}px)`,

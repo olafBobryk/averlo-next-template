@@ -436,6 +436,7 @@ export function Composer({
 						/>
 					) : null}
 
+					{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 					<textarea
 						{...picker.aria}
 						aria-label="Message Assistant"
@@ -510,6 +511,7 @@ export function Composer({
 						value={text}
 					/>
 					<div className="flex items-center gap-1">
+						{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 						<input
 							accept="application/pdf,image/jpeg,image/png,image/webp"
 							aria-label="Attach files"

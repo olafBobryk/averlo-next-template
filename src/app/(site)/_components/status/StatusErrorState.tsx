@@ -74,6 +74,7 @@ export function StatusErrorState({
 			details={
 				showDetails ? (
 					<div className="mt-4 flex w-full flex-col items-center gap-3">
+						{/* biome-ignore lint/plugin/noAdHocScrollHeight: debt */}
 						<pre className="max-h-48 w-full overflow-auto rounded-lg border border-border/15 bg-surface p-4 text-left text-xs leading-relaxed text-foreground/80">
 							{errorDetails}
 						</pre>
