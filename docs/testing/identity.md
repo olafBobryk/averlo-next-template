@@ -9,8 +9,8 @@ npm run verify:platform
 
 These checks use resettable, non-durable server-memory fixtures, not a live
 identity or storage provider. They do not send recovery email. Behavioral
-authority is [access and membership](../../openspec/specs/app/shared/services/identity/access-and-membership/spec.md)
-and [private-file access](../../openspec/specs/app/shared/services/files/private-file-access/spec.md).
+authority is [access and membership](../../specs/platform/services/identity/spec.md)
+and [private-file access](../../specs/platform/services/files/spec.md).
 Structural ownership remains with [auth](../../src/lib/auth/AGENTS.md) and
 [platform](../../src/app/(site)/dashboard/platform/AGENTS.md).
 

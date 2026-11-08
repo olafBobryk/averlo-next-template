@@ -10,11 +10,11 @@ Deliver enquiry forms reliably without exposing credentials or weakening the rep
 ## Workflow
 
 1. Read the repository root and nearest `AGENTS.md` files. Then read local `PRODUCT.md`, `DESIGN.md`, component guidance, and existing form/input/button/toast implementations when present.
-2. Use stock OpenSpec discovery: run `openspec list --specs`, then `openspec show <app-capability> --type spec`
-   for the target repository's installed `app/shared/data-lifecycle/form-behavior`,
-   `app/shared/services/delivery/submission-protection`, `app/shared/services/delivery/contact-delivery` and
-   `app/shared/services/transport/api-transport` contracts when applicable. Resolve
-   `openspec/specs/app/` and verification paths from the target
+2. Use Spec Kit discovery: read the target repository's `specs/README.md`, then
+   its installed `specs/platform/data/forms/spec.md`,
+   `specs/platform/services/delivery/spec.md` (contact delivery and submission
+   protection) and `specs/platform/services/transport/spec.md` when applicable.
+   Resolve `specs/` and verification paths from the target
    repository root, never the plugin installation; read only applicable scope
    and choose exact owner APIs from Storybook. Report a required missing
    contract as a scope gap rather than inventing equivalent policy. If no local

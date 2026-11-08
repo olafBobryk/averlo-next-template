@@ -1,19 +1,16 @@
 # Folder: `scripts/verify`
 
-## Role
+Executable repository verification entrypoints, one per `verify:*` npm script.
+Run them through the [verify workflow](../../.specify/workflows/verify/README.md).
 
-Executable repository verification entrypoints grouped by verification ownership.
-
-## Invariants
-
-- Keep public npm script names stable when moving or renaming an implementation file.
-- Resolve repository fixtures and source files from the repository root unless a verifier intentionally tests path-relative behavior.
-- Update assembly ownership, template profiles, package scripts, and tracked documentation whenever a verifier path changes.
-- Keep shared execution helpers outside this folder when they are also used by non-verification scripts.
-- Verification scripts may inspect source text, but must not rewrite product source or generated profile output.
-
-## Adding A Verifier
-
-- Add the executable here using the existing `verify-*.ts` or `verify-*.mjs` convention.
-- Expose it through a stable `verify:*` package script.
-- Add it to assembly/profile ownership when the verified surface is optional.
+- Add a verifier as `verify-*.ts` or `verify-*.mjs` and expose it through a
+  stable `verify:*` package script; keep script names stable when moving files.
+- Resolve fixtures and sources from the repository root unless a verifier tests
+  path-relative behaviour.
+- Verifiers may read source text but never rewrite product source or generated
+  profile output.
+- Helpers shared with non-verification scripts live outside this folder.
+- When a verifier path changes, update assembly ownership
+  (`template-assembly/manifest.mjs`, `template-surfaces/`), profiles, package
+  scripts and the docs that name it. Optional surfaces list their verifiers in
+  `template-surfaces/`.

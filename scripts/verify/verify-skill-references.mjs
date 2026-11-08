@@ -5,10 +5,11 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const REPOSITORY_PATH_PREFIXES = [
+	".specify/",
 	".storybook/",
 	"AGENTS.md",
 	"docs/",
-	"openspec/",
+	"specs/",
 	"WORKFLOWS.md",
 	"package.json",
 	"payload.config.ts",
@@ -129,7 +130,7 @@ export function collectSkillReferenceErrors(root) {
 		const repositoryContext = extractSection(content, "## Repository context");
 		const proseWithoutCode = repositoryContext.replace(/`[^`\n]+`/gu, "");
 		for (const match of proseWithoutCode.matchAll(
-			/(?:^|\s)((?:\.storybook|docs|openspec|plugins|references|scripts|src|template-(?:assembly|profiles|surfaces))\/[\w@./*()_-]+)/gu,
+			/(?:^|\s)((?:\.specify|\.storybook|docs|specs|plugins|references|scripts|src|template-(?:assembly|profiles|surfaces))\/[\w@./*()_-]+)/gu,
 		)) {
 			errors.push(
 				`${relativeMarkdownPath}: repository path must be backticked ${match[1]}`,

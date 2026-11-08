@@ -4,16 +4,17 @@
 
 The canonical template owns positive assembly. Generated projects are independent
 outputs; their selected surfaces and content mode determine installed features.
-The maintained [assembly contract](../../openspec/specs/template/assembly/project-assembly/spec.md)
+The maintained [assembly contract](../../specs/template/assembly/spec.md)
 and [assembly policy](../../template-assembly/AGENTS.md) own that boundary.
 
 ## Run assembly verification
 
 1. Run `npm run verify:profiles` and `npm run verify:create-averlo` from the
    canonical template. The profile matrix checks supported profile/content pairs,
-   explicit ownership, omissions, overrides, independent app-contract copies, and
-   app-reference/link closure. Every output excludes template contracts and history;
-   its generated stock configuration belongs to the product and permits configured
+   explicit ownership, omissions, overrides, independent copies of the selected
+   `specs/platform/` folders and `.specify/`, and spec-reference/link closure.
+   Every output excludes `specs/template/`, the template-only workflows and any
+   product spec; its copies belong to the product and permit configured
    persistence/delivery when installed examples are deliberately replaced.
 2. To inspect an output, run `npm run create:project -- --profile <profile>
    --content <mode> --output <new-directory>`. Profiles are `full`, `app-only`,

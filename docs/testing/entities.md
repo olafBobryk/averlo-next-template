@@ -1,9 +1,9 @@
 # Verify entity presentation
 
-The maintained [entity presentation](../../openspec/specs/app/shared/frontend/content/entity-presentation/spec.md)
-contract composes [action behavior](../../openspec/specs/app/shared/data-lifecycle/action-behavior/spec.md),
-[loading behavior](../../openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md)
-and [access and membership](../../openspec/specs/app/shared/services/identity/access-and-membership/spec.md).
+The maintained [entity presentation](../../specs/platform/content/entities/spec.md)
+contract composes [action behavior](../../specs/platform/data/actions/spec.md),
+[loading behavior](../../specs/platform/data/loading/spec.md)
+and [access and membership](../../specs/platform/services/identity/spec.md).
 Read the selected entity's domain/factory/renderer/route adapter and owner story,
 nearest entity/dashboard/platform policies, and assistant/Markdown policy only
 when those surfaces actually apply. Facts, React-free fetch-free factories,

@@ -1,0 +1,71 @@
+schema_version: "1.0"
+workflow:
+  id: "main"
+  name: "Main thread"
+  version: "1.0.0"
+  author: "Averlo"
+  description: "Orchestrator only: route a request, specify it, build it in parallel worktrees, review it locally and open one PR per batch"
+
+# The main thread follows README.md itself; this file is the canonical step
+# outline. Run headless only for the deterministic gates and checks:
+#   specify workflow run main -i request="..." -i batch=pricing-page
+requires:
+  speckit_version: ">=1.2.5"
+  integrations:
+    any:
+      - "claude"
+      - "codex"
+
+inputs:
+  request:
+    type: string
+    required: true
+    prompt: "What did Olaf ask for (verbatim)?"
+  batch:
+    type: string
+    required: true
+    prompt: "Batch slug for the integration branch (kebab-case, e.g. pricing-page)"
+  base:
+    type: string
+    default: "main"
+    prompt: "Branch the integration branch is cut from"
+
+steps:
+  - id: route
+    type: gate
+    message: "Route '{{ inputs.request }}' (README step 1). Approve only if it needs specs or code; answer questions and narrow corrections directly."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: write-spec
+    type: gate
+    message: "Run the write-spec workflow for every owner spec this batch amends or creates, then approve. Olaf must have answered the grill questions."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: integration-branch
+    type: shell
+    run: "git fetch origin {{ inputs.base }} && git worktree add -b feat/{{ inputs.batch }} ../.worktrees/$(basename \"$PWD\")/{{ inputs.batch }} origin/{{ inputs.base }}"
+
+  - id: brief-subagents
+    type: gate
+    message: "Write one brief per subagent (README template): disjoint owned files, spec path, done definition, report format. Each works in its own worktree cut from feat/{{ inputs.batch }}. Approve once all are merged into the integration branch."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: checks
+    type: shell
+    timeout: 1800
+    run: "npm run lint && npm run typecheck && npm run verify:static"
+
+  - id: local-review
+    type: gate
+    message: "Start the preview through the repo wrappers, load every changed route/story, and give Olaf the verified links. Approve when Olaf has reviewed."
+    options: [approve, reject]
+    on_reject: retry
+
+  - id: open-pr
+    type: gate
+    message: "Push feat/{{ inputs.batch }} and open ONE PR (gh pr create). Do not merge unless Olaf asked. Report: PR link, preview links, what is verified and what is not."
+    options: [approve, reject]
+    on_reject: abort

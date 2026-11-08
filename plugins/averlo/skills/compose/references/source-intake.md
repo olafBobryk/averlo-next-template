@@ -23,7 +23,7 @@ Systemize Composition decision, not a Compose failure or reason to invent cases.
 Never register the accumulated page as a section.
 
 Apply the target repository's marketing-content and shell AGENTS plus the
-`app/marketing/composition/marketing-composition` contract. Source-backed multi-section pages use
+`specs/platform/surfaces/marketing/composition` contract. Source-backed multi-section pages use
 the installed route family, document and registered renderer boundary even when
 their visual recipe remains local. Each renderer owns one logical source section
 and exactly one shared `Section` root, background/frame from its current owner
@@ -92,7 +92,7 @@ CSS. Exact local identity assets do not authorize changes to nested shared owner
    calibrated scope and pause when no supplied face can reproduce an
    authoritative role.
 4. Retain exact constituent asset bytes and follow the target repository's
-   `app/shared/frontend/content/media-delivery` spec and marketing-content AGENTS. When the authority contains existing vector identity
+   `specs/platform/content/media` spec and marketing-content AGENTS. When the authority contains existing vector identity
    artwork, export that exact logo or mark as SVG and commit it as a constituent
    asset, or reuse an identical existing asset. Preserve its geometry and
    `viewBox`; never redraw it, replace it with text or a glyph, or accept a

@@ -1,6 +1,6 @@
 # Verify action behavior
 
-The maintained [action contract](../../openspec/specs/app/shared/data-lifecycle/action-behavior/spec.md)
+The maintained [action contract](../../specs/platform/data/actions/spec.md)
 owns non-form changes. [Forms](forms.md) own complete submissions and
 [loading](loading.md) owns initial reads; use their existing procedures instead
 of restating their scenarios. [Feedback ownership](../../src/lib/feedback/AGENTS.md)

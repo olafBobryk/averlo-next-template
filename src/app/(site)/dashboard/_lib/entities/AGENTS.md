@@ -1,33 +1,11 @@
 # Dashboard entity contracts
 
-## Ownership
+Dashboard-owned entity verticals (`account/`, `invitation/`, `member/`, `organization/`, `record/`), each with `domain.ts` and `presentation.ts`.
 
-- Keep global account identity separate from organization-scoped membership facts.
-- Domain modules own serializable facts and mutation inputs. Presentation factories derive labels, fields, columns, URLs, semantic variants, and commands without React or data fetching.
-- Renderers consume ready presentation models. Routes and adapters resolve sessions, organizations, capabilities, persistence, and mutation.
-- Import owning presentation factories directly. Do not add a global entity barrel, renderer registry, or presentation namespace.
-- The reference member and record verticals are optional examples, not a framework every product must retain.
-- Keep four distinct layers: serializable domain facts/mutation inputs; React-free,
-  fetch-free presentation factories; ready-model renderers and owned skeletons;
-  route/server adapters for session, organization, authorization and persistence.
-  Do not add cross-product entity maps, a presentation namespace or an optional
-  entity framework. Client visibility never replaces execution authorization.
-- Fixture/report domains stay explicit and resettable, with no external writes
-  or implied durable production persistence unless that persistence is explicitly
-  introduced through its owning boundary.
-
-## Reuse
-
-- An entity implements only the profile, compact, actor, avatar, list, table, detail, selector, Command-K, Markdown mention, empty, and skeleton surfaces it actually needs.
-- Reuse the owning definitions wherever those surfaces appear. New renderers remain under their owning entity.
-- Run `npm run verify:frontend-entities` after changing an entity contract,
-  renderer, or canonical path.
-
-## Behavioral contracts and evidence
-
-Follow [entity presentation](../../../../../../openspec/specs/app/shared/frontend/content/entity-presentation/spec.md),
-[action behavior](../../../../../../openspec/specs/app/shared/data-lifecycle/action-behavior/spec.md),
-[loading behavior](../../../../../../openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md)
-and [access and membership](../../../../../../openspec/specs/app/shared/services/identity/access-and-membership/spec.md).
-Use [entity verification](../../../../../../docs/testing/entities.md); load assistant
-or Markdown policy only when the selected entity actually uses those surfaces.
+- Read `specs/platform/content/entities/spec.md` (presentation), `specs/platform/data/actions/spec.md` (mutations), `specs/platform/data/loading/spec.md` (skeletons) and `specs/platform/services/identity/spec.md` (identity vs membership) when changing an entity.
+- Four dependency layers, in this direction: serializable domain facts and mutation inputs (`domain.ts`) → React-free, fetch-free presentation factories (`presentation.ts`) → ready-model renderers and skeletons in `../../_components/entities/` → route/server adapters that resolve session, organization, authorization and persistence.
+- Import owning presentation factories directly. No global entity barrel, renderer registry, presentation namespace or cross-product entity map.
+- An entity implements only the surfaces it needs (profile, compact, actor, avatar, list, table, detail, selector, Command-K, Markdown mention, empty, skeleton); consumers reuse its definitions instead of copying labels or variants. New renderers stay under the owning entity.
+- Fixture-only support and report domains live in `../platform/`; shared lifecycle helpers in `../entity-lifecycle.ts`; presentation contracts in `../presentation/`.
+- The member and record verticals are optional reference examples.
+- Run `npm run verify:frontend-entities` after changing an entity contract, renderer or canonical path. Verification: [entity verification](../../../../../../docs/testing/entities.md).

@@ -3,7 +3,7 @@ export const assemblyGeneratedPaths = new Set([
 	"PRODUCT.md",
 	"README.md",
 	"WORKFLOWS.md",
-	"openspec/config.yaml",
+	".specify/workflows/workflow-registry.json",
 	"docs/README.md",
 	"next.config.ts",
 	"package-lock.json",
@@ -16,8 +16,8 @@ export const assemblyGeneratedPaths = new Set([
 ]);
 
 export const assemblyTemplateOnlyPaths = new Set([
-	"openspec/specs/.gitkeep",
 	"docs/operations/project-assembly.md",
+	"docs/development/workflow.md",
 	"docs/development/skeleton-generation-shimmer-20261010.md",
 	"docs/operations/chip-capitalization-backport.md",
 	"docs/operations/disclosure-alignment-backport.md",
@@ -41,21 +41,27 @@ export const assemblyTemplateOnlyPaths = new Set([
 	".github/workflows/update-repository-footprint.yml",
 ]);
 
-// Only these stock integration files may escape the template-only .agents root.
-export const assemblyOpenSpecSkillPaths = new Set([
-	".agents/skills/openspec-explore/SKILL.md",
-	".agents/skills/openspec-propose/SKILL.md",
-	".agents/skills/openspec-apply-change/SKILL.md",
-	".agents/skills/openspec-update-change/SKILL.md",
-	".agents/skills/openspec-sync-specs/SKILL.md",
-	".agents/skills/openspec-archive-change/SKILL.md",
-]);
+// Only the stock Spec Kit agent skills may escape the template-only .agents and .claude roots.
+export function isAssemblySpecKitSkillPath(relativePath) {
+	return /^\.(?:agents|claude)\/skills\/speckit-[a-z0-9-]+\/SKILL\.md$/u.test(
+		relativePath,
+	);
+}
+
+// Workflows that run against the template itself, never inside a generated project.
+export const assemblyTemplateOnlyWorkflows = [
+	"create-project",
+	"publish",
+	"backport",
+];
 
 export const assemblyTemplateOnlyRoots = [
 	".agents",
-	"openspec/changes",
-	"openspec/specs/template",
-	"docs/skills",
+	".claude",
+	...assemblyTemplateOnlyWorkflows.map(
+		(workflowId) => `.specify/workflows/${workflowId}`,
+	),
+	"specs/template",
 	"plugins",
 	"packages",
 	"template-assembly",
@@ -64,26 +70,17 @@ export const assemblyTemplateOnlyRoots = [
 	"src/app/(site)/(marketing)/repository-footprint",
 ];
 
+// Platform specs are core unless a surface owns them (template-surfaces/*).
 // Shared behavioral dependencies apply to installed uses; they do not install features.
-export const assemblyCoreSpecPaths = new Set([
-	"openspec/specs/app/shared/data-lifecycle/action-behavior/spec.md",
-	"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md",
-	"openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md",
-	"openspec/specs/app/shared/frontend/interaction/keyboard-and-overlays/spec.md",
-	"openspec/specs/app/shared/frontend/interaction/responsive-and-motion/spec.md",
-	"openspec/specs/app/shared/frontend/content/content-hierarchy/spec.md",
-	"openspec/specs/app/shared/frontend/components/component-contracts/spec.md",
-	"openspec/specs/app/shared/services/transport/api-transport/spec.md",
-	"openspec/specs/app/shared/services/delivery/submission-protection/spec.md",
-	"openspec/specs/app/shared/frontend/navigation/route-identity/spec.md",
-	"openspec/specs/app/shared/frontend/navigation/document-metadata/spec.md",
-	"openspec/specs/app/shared/services/identity/access-and-membership/spec.md",
-	"openspec/specs/app/shared/frontend/content/media-delivery/spec.md",
-]);
+export const assemblyCoreSpecRoots = [
+	"specs/README.md",
+	"specs/platform",
+	"specs/product",
+];
 
 export const assemblyCoreRoots = [
-	...assemblyOpenSpecSkillPaths,
-	...assemblyCoreSpecPaths,
+	...assemblyCoreSpecRoots,
+	".specify",
 	".env.example",
 	".gitignore",
 	".storybook",

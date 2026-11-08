@@ -1,7 +1,7 @@
 # Verify keyboard, overlays and responsive motion
 
-Behavior lives in [keyboard and overlays](../../openspec/specs/app/shared/frontend/interaction/keyboard-and-overlays/spec.md)
-and [responsive and motion](../../openspec/specs/app/shared/frontend/interaction/responsive-and-motion/spec.md).
+Behavior lives in [keyboard and overlays](../../specs/platform/design-system/families/overlays/spec.md)
+and [responsive and motion](../../specs/platform/design-system/motion/spec.md).
 Nearest [motion](../../src/components/ui/motion/AGENTS.md),
 [overlay](../../src/components/ui/overlays/AGENTS.md), modal and primitive policy
 owns dependencies; exact props, source/effect families and variants stay in owner

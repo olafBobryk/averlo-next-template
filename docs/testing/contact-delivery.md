@@ -19,9 +19,9 @@ keyboard/focus, immediate duplicate prevention, visible pending state, failure
 preservation, retry and accessible results. Login/support run only in dashboard
 profiles and contact only in marketing profiles.
 
-Behavioral authority is [submission protection](../../openspec/specs/app/shared/services/delivery/submission-protection/spec.md),
-[explicitly enabled contact delivery](../../openspec/specs/app/shared/services/delivery/contact-delivery/spec.md)
-and the existing [form contract](../../openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md).
+Behavioral authority is [submission protection](../../specs/platform/services/delivery/spec.md),
+[explicitly enabled contact delivery](../../specs/platform/services/delivery/spec.md)
+and the existing [form contract](../../specs/platform/data/forms/spec.md).
 Structural owners are [forms](../../src/lib/forms/AGENTS.md),
 [API](../../src/lib/api/AGENTS.md) and the existing input owners. Reuse existing
 inputs, transport, toast, modal and feedback owners; do not create contact-only

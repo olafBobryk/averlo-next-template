@@ -36,9 +36,9 @@ export const applicationSurfaces = {
 	},
 	dashboard: {
 		ownedPaths: [
-			"openspec/specs/app/dashboard/navigation/route-enrichment/spec.md",
-			"openspec/specs/app/shared/services/files/private-file-access/spec.md",
-			"openspec/specs/app/shared/frontend/content/entity-presentation/spec.md",
+			"specs/platform/surfaces/dashboard",
+			"specs/platform/services/files",
+			"specs/platform/content/entities",
 			"docs/testing/identity.md",
 			"src/lib/api/auth.test.ts",
 			"docs/testing/entities.md",

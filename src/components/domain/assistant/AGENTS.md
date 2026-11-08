@@ -1,14 +1,16 @@
-# Assistant component ownership
+# Folder: `src/components/domain/assistant`
 
-- Keep the top-level Assistant facade limited to complete consumer-facing
+Assistant component ownership.
+
+## Structure
+
+- The top-level Assistant facade exports only complete consumer-facing
   compositions. Message roles, response rendering, tool dispatch, lifecycle
-  frames, and entity connectors remain private implementation families.
-- Chat tool calls use compact per-call disclosures with arguments and actual output.
-  Actionable approvals belong in the decision area above the composer.
-- `ToolPresentationFrame` remains the owner for standalone entity tool presentations;
-  do not import entity identity cards into chat output. Never add a tool wrapper
-  without a real tool contract and execution path.
-- Keep tool dispatch exhaustive over `AssistantToolName`. Add a typed branch
-  when a real tool family is introduced; do not add a renderer registry or cast
-  tool names and states into an entity contract.
-- Do not export `ToolPresentationFrame` from the top-level Assistant facade.
+  frames and entity connectors are private implementation families.
+- `ToolPresentationFrame` owns standalone entity tool presentations and is not
+  exported from the top-level facade; chat output does not import entity identity
+  cards.
+- Tool dispatch stays exhaustive over `AssistantToolName`: add a typed branch for
+  a real tool family; no renderer registry and no casting tool names or states
+  into an entity contract. Never add a tool wrapper without a real tool contract
+  and execution path.

@@ -36,10 +36,6 @@ async function exists(filePath) {
 		.catch(() => false);
 }
 
-function git(args, cwd) {
-	return run("git", args, cwd, { silent: true }).stdout.trim();
-}
-
 async function verifyInterruptedCleanup(tempRoot) {
 	const fakeTemplateRoot = path.join(tempRoot, "interrupt-template");
 	const fakeCreator = path.join(
@@ -87,27 +83,35 @@ async function verifyInterruptedCleanup(tempRoot) {
 }
 
 async function assertGeneratedProject(targetRoot, { installed }) {
-	const pkg = await readJson(path.join(targetRoot, "package.json"));
-	if (pkg.name !== path.basename(targetRoot)) {
-		throw new Error(`Generated package name is ${pkg.name}.`);
-	}
-	const receipt = await readJson(
-		path.join(targetRoot, ".template-profile.json"),
+	// The public `create-averlo verify` subcommand owns the generic output checks.
+	const verified = run(
+		process.execPath,
+		[
+			sourceBin,
+			"verify",
+			targetRoot,
+			"--profile",
+			"thin-start",
+			"--content",
+			"static",
+			...(installed ? [] : ["--no-install"]),
+		],
+		templateRoot,
+		{ allowFailure: true, silent: true },
 	);
-	if (receipt.profile !== "thin-start" || receipt.content !== "static") {
-		throw new Error("Generated profile receipt is incorrect.");
+	if (verified.status !== 0) {
+		throw new Error(
+			`create-averlo verify rejected the generated project:\n${verified.stderr}`,
+		);
 	}
 	for (const requiredPath of [
-		"PRODUCT.md",
-		"openspec/config.yaml",
-		"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md",
-		"openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md",
-		"openspec/specs/app/shared/frontend/content/media-delivery/spec.md",
-		"openspec/specs/app/marketing/content-sources/source-resolution/spec.md",
-		"openspec/specs/app/marketing/metadata/public-document-metadata/spec.md",
+		"specs/platform/data/forms/spec.md",
+		"specs/platform/data/loading/spec.md",
+		"specs/platform/content/media/spec.md",
+		"specs/platform/surfaces/marketing/content-sources/spec.md",
+		"specs/platform/surfaces/marketing/metadata/spec.md",
+		".specify/workflows/main/workflow.yml",
 		"scripts/verify/forms/contact.mjs",
-		"docs/README.md",
-		"package-lock.json",
 		"src/app/(site)/(marketing)/internal/testing/page.tsx",
 	]) {
 		if (!(await exists(path.join(targetRoot, requiredPath)))) {
@@ -115,16 +119,12 @@ async function assertGeneratedProject(targetRoot, { installed }) {
 		}
 	}
 	for (const retiredPath of [
-		"openspec/changes",
-		"openspec/specs/template",
-		"openspec/specs/product",
-		"openspec/specs/app/dashboard",
-		"openspec/specs/app/data-lifecycle",
-		"openspec/specs/app/content",
+		"specs/platform/surfaces/dashboard",
+		"specs/platform/content/entities",
+		".specify/workflows/create-project",
+		".specify/workflows/backport",
 		"scripts/verify/forms/login.mjs",
 		"scripts/verify/forms/support.mjs",
-		"docs/project/README.md",
-		"docs/project/source/README.md",
 		"src/app/(site)/(dev)/internal/dictionary",
 		"src/app/(site)/(dev)/internal/playground",
 		"src/app/(site)/(dev)/internal/reference",
@@ -133,38 +133,6 @@ async function assertGeneratedProject(targetRoot, { installed }) {
 		if (await exists(path.join(targetRoot, retiredPath))) {
 			throw new Error(`Generated project retained ${retiredPath}.`);
 		}
-	}
-	const config = await fs.readFile(
-		path.join(targetRoot, "openspec/config.yaml"),
-		"utf8",
-	);
-	if (
-		!config.includes("independent product project") ||
-		!config.includes("cross-client/server data-lifecycle") ||
-		!config.includes("Reserve openspec/specs/product/") ||
-		/in the template repository|Contact and support fixtures never send email/iu.test(
-			config,
-		)
-	)
-		throw new Error(
-			"Created project lost scoped project-owned OpenSpec guidance.",
-		);
-	if ((await exists(path.join(targetRoot, "node_modules"))) !== installed) {
-		throw new Error(
-			`Generated dependency installation state does not match installed=${installed}.`,
-		);
-	}
-	if (git(["branch", "--show-current"], targetRoot) !== "main") {
-		throw new Error("Generated project is not on main.");
-	}
-	if (git(["rev-list", "--count", "HEAD"], targetRoot) !== "1") {
-		throw new Error("Generated project does not have one initial commit.");
-	}
-	if (git(["remote"], targetRoot) !== "") {
-		throw new Error("Generated project unexpectedly has a remote.");
-	}
-	if (git(["status", "--porcelain"], targetRoot) !== "") {
-		throw new Error("Generated project is not clean.");
 	}
 }
 

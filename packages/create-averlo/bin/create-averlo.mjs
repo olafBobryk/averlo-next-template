@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { createProject } from "../lib/create-project.mjs";
 import { parseCliArgs, resolveCliOptions } from "../lib/options.mjs";
 import { createPrompt } from "../lib/prompt.mjs";
+import { parseVerifyArgs, verifyProject } from "../lib/verify-project.mjs";
 
 const packageRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
@@ -18,6 +19,7 @@ async function readJson(relativePath) {
 
 function printHelp() {
 	console.log(`Usage: create-averlo <project-directory> [options]
+       create-averlo verify <project-directory> [--profile <id>] [--content <mode>] [--no-install]
 
 Options:
   --profile <id>    full, app-only, marketing-only, or thin-start
@@ -26,10 +28,27 @@ Options:
   --help            Show this help
   --version         Show the package version
 
-Agents and other non-interactive callers must provide the project directory and --profile.`);
+Agents and other non-interactive callers must provide the project directory and --profile.
+\`verify\` checks a created project (package name, receipt, docs and specs,
+lockfile/dependencies, git state); name a project folder called "verify" as ./verify.`);
+}
+
+async function runVerify(argv) {
+	const options = parseVerifyArgs(argv);
+	const failures = await verifyProject(options);
+	if (failures.length > 0) {
+		throw new Error(`project verification failed:\n- ${failures.join("\n- ")}`);
+	}
+	console.log(
+		`Averlo project verified: ${path.resolve(options.projectDirectory)}`,
+	);
 }
 
 async function main() {
+	if (process.argv[2] === "verify") {
+		await runVerify(process.argv.slice(3));
+		return;
+	}
 	const parsed = parseCliArgs(process.argv.slice(2));
 	const pkg = await readJson("package.json");
 	if (parsed.help) {

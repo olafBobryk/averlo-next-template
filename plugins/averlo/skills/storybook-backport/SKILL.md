@@ -16,12 +16,13 @@ than editing or synchronizing a copy.
 
 ## Required companions
 
-1. Invoke `$storybook:stories` before creating or editing a story or UI.
-2. Invoke `$averlo:design-system` before inspecting shared UI implementation. Keep its evidence receipt.
-3. Use `$template-backport-workflow` to classify every selected change as port, adapt, skip, or defer.
-4. Use `$agent-worktree-workflow` when source and template mutations need isolation.
-5. Invoke `$averlo:entities`, `$averlo:surfaces`, or `$averlo:skeletons` when the story changes those contracts.
-6. Invoke `$preview` for visual candidate review and visual backport evidence. Preview owns the review modes, capture procedure, artifacts, and handoff; do not duplicate those rules here.
+1. Read the target repository's `AGENTS.md`, nearest `AGENTS.md` files and the
+   owner specs (`specs/README.md`) before creating or editing a story or UI.
+   Use `$storybook:stories` when it is installed.
+2. Classify every selected change as port, adapt, skip or defer; the template's
+   backport workflow owns that procedure.
+3. Use the repository's preview wrappers (or `$preview` when installed) for
+   visual candidate review and visual backport evidence.
 
 Read [references/story-metadata.md](references/story-metadata.md) before adding or changing backport metadata.
 
@@ -63,8 +64,8 @@ this order:
 Group candidates only when they share an owner, dependency, or one coherent
 behavioral concern. Ask for approval of the exact ordered IDs in the proposed
 batch; do not substitute adjacent candidates after approval. For a visual
-candidate, invoke `$preview` before mutation to preserve the current target
-state, then invoke it again after implementation against the same story and
+candidate, capture a verified preview before mutation to preserve the current
+target state, then capture it again after implementation against the same story and
 comparable viewport. Non-visual candidates still require the packet, but not
 invented visual evidence.
 
@@ -93,24 +94,24 @@ Editing an approved or ported story invalidates its fingerprint. Return it to ca
 
 ## Template mode
 
-1. Run discovery from the canonical template:
+The canonical procedure is the template's Spec Kit backport workflow,
+`.specify/workflows/backport/` (`README.md`, `workflow.yml`): pin the source
+repository and SHA, classify, amend the owner specs, port rules rather than
+values, and record the source in the PR. Within it, discover approved stories
+with this skill's scanner:
 
-   ```sh
-   node <skill-path>/scripts/scan-story-backports.mjs scan \
-     --workspace <bounded-parent-directory> \
-     --template <template-root>
-   ```
+```sh
+node <skill-path>/scripts/scan-story-backports.mjs scan \
+  --workspace <bounded-parent-directory> \
+  --template <template-root>
+```
 
-   Add `--json` only for machine consumption. The default report is the human review view.
-
-2. Treat only `backport-approved` entries as eligible. Candidate, rejected, ported, and canonical stories are informational.
-3. If more than one approved story targets the same canonical story ID, stop and obtain an explicit selection. Never choose by recency or traversal order.
-4. Compare the source story and its minimum local dependencies against the template. Classify product routes, entities, persistence, auth, and copy separately from reusable behavior.
-5. Port or adapt the story plus only the smallest shared component/catalogue changes needed to make it executable. Do not copy generated catalogues; regenerate them in the template.
-6. Preserve the canonical owner and public import boundary. Add no caller-owned visual override merely to make the source story fit.
-7. Set the target story to `backport-canonical` with source repository, source story ID, and the approved fingerprint.
-8. Run focused Storybook checks, catalogue checks, lint, typecheck, profile verification, and build as required by the changed owners.
-9. Only after the target passes, change the source tag to `backport-ported` while preserving its approved fingerprint. If the source is not writable, report the incomplete transition and do not claim the lifecycle is finished.
+Only `backport-approved` entries are eligible; stop and ask when two approved
+stories target the same canonical story ID. Port the story plus the smallest
+shared component/catalogue change, regenerate catalogues in the template, set
+the target to `backport-canonical` with source repository, story ID and
+fingerprint, and only after the template checks pass change the source tag to
+`backport-ported`.
 
 ## Scanner contract
 
@@ -123,6 +124,5 @@ Editing an approved or ported story invalidates its fingerprint. Return it to ca
 ## Completion report
 
 Report the source and target story paths, status transition, fingerprint,
-port/adapt/skip decisions, design-system evidence receipt when applicable,
-verification results, and any direct Storybook preview used. Do not create a
+port/adapt/skip decisions, verification results, and any direct Storybook preview used. Do not create a
 separate run ledger.

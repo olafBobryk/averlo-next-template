@@ -1,59 +1,12 @@
 # Dashboard entity renderer policy
 
-- Renderers receive resolved domain facts or presentation view models and never
-  fetch sessions, organizations, capabilities, or persistence themselves.
-- Serializable facts and mutation inputs belong to domain modules; React-free,
-  fetch-free presentation factories own labels, fields, columns, URLs, variants
-  and semantic commands. Routes/adapters own authorization again at execution.
-  Global account identity is distinct from organization membership.
-- Import the entity-owned presentation factory directly. Do not add a global
-  renderer or presentation registry.
-- Loading states belong to their live component as `Component.Skeleton`, must
-  preserve the live geometry, and should be reviewed in the component owner's
-  colocated Storybook stories.
-- Entity deletion uses the shared confirmation primitive, includes impacts and
-  warnings where useful, rolls optimistic state back on failure, and returns
-  `false` to keep a failed confirmation open.
-- Entity deletion completion declares `refresh` for collection actions or
-  `navigate` for detail exits. Navigation owns one push or replacement and must
-  not refresh the deleted detail route. Returned and thrown failures both roll
-  optimistic state back.
-- Use the shared table, detail, property-list, Markdown, selector, More-menu,
-  state, toast, and modal components before creating entity-local substitutes.
-- Entity-specific selectors compose `EntitySelector`. The shared selector owns
-  plain closed-field labels, portal behavior, and option mapping; each entity
-  wrapper owns its presentation model and explicit option renderer.
-- Assistant tool lifecycle chrome belongs to the private assistant-owned
-  `ToolPresentationFrame`. An entity tool wrapper owns its React-free
-  presentation factory and explicit result renderer. Add a wrapper only when
-  that entity has real Assistant tool contracts and execution; Record is the
-  only current tool family.
-- `DashboardTablePanel` owns responsive data-table mechanics. Its first identity
-  column is always retained, optional columns are removed from right to left
-  when their card overflows, and a final `kind: "action"` column is always
-  visible and sticky. Set a higher `responsivePriority` only when a call site
-  needs a later optional column to survive longer than the positional default.
-- When a table needs its own header, compose it with the shared `ContentSection.Header`
-  slots. If the owning dashboard section already supplies all title, context,
-  and actions, omit the table header; the table body owns its own containment
-  and the section heading stays outside it. Do not pass a null or
-  empty placeholder header. Keep table-level search, filters, summaries, and
-  actions in a real caller-owned header rather than adding table-specific
-  toolbar props or a second Card.
-- A table supports at most one action column, and it must be the final column.
-  Mirror `kind` and `responsivePriority` in `DashboardTablePanel.Skeleton` so
-  live and loading layouts hide columns in the same order.
-- For a fully loaded collection, set `pageSize` on `DashboardTablePanel` and its
-  skeleton. The shared table owns pagination and sorts the complete collection
-  before paging. Overview excerpts may instead use `viewMoreHref`; do not combine
-  the two. Remote pagination needs an explicit data contract, not a guessed total.
+React renderers for dashboard entities, one folder per vertical (`account/`, `member/`, `organization/`, `record/`) plus shared `EntitySelector`, `EntityDeletion`, `EntityIdentity` and `DashboardEntityState`.
 
-## Verification boundary
-
-Follow [entity verification](../../../../../../docs/testing/entities.md), which
-links the authoritative entity/action/loading/access capabilities. Review the
-selected vertical's domain, factory, renderer, adapter and owner story together;
-do not add unused entity surfaces or imply disconnected tool execution. Fixture
-reset and external-write isolation remain domain responsibilities. Detail deletion
-uses replacement navigation once; preserving a failed confirmation also preserves
-input, selection and the last durable state.
+- Read `specs/platform/content/entities/spec.md` when changing entity presentation, `specs/platform/data/actions/spec.md` for mutations and deletion, and `specs/platform/data/loading/spec.md` for skeletons.
+- Renderers receive ready presentation models or domain facts; they never fetch sessions, organizations, capabilities or persistence. Domain facts and presentation factories live in `../../_lib/entities/<entity>/`; routes and adapters own authorization at execution.
+- Import the owning entity's presentation factory directly; no global renderer or presentation registry.
+- Loading states are `Component.Skeleton` on their live component, with colocated owner stories.
+- Entity selectors compose `EntitySelector`; each entity wrapper owns its presentation model and option renderer.
+- Tool lifecycle chrome belongs to `src/components/domain/assistant/message/assistant/tool-call/ToolPresentationFrame.tsx`; an entity tool wrapper (only `record/` today) owns its factory and result renderer.
+- Data tables compose `../data/DashboardTablePanel.tsx` and its `Skeleton`; prefer shared table, detail, property-list, Markdown, selector, More-menu, state, toast and modal owners over entity-local substitutes.
+- Verification: [entity verification](../../../../../../docs/testing/entities.md).
