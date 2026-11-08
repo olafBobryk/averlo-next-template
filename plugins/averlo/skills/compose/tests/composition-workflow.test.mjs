@@ -920,39 +920,47 @@ test("Animate requires an accepted static target and keeps its endpoint exact", 
 	assert.match(animate, /current native static Target/u);
 	assert.match(animate, /Preserve the accepted motion-off endpoint exactly/u);
 	assert.match(animate, /linked `\$averlo:visual-parity`/u);
-	assert.match(
-		animate,
-		/app\/shared\/frontend\/interaction\/responsive-and-motion/u,
-	);
+	assert.match(animate, /specs\/platform\/design-system\/motion\/spec\.md/u);
 	assert.match(animate, /canonical interaction verification procedure/u);
 	assert.doesNotMatch(animate, /active plane|handoff state/iu);
 });
 
 test("section construction belongs to marketing owners and scoped source procedures", async () => {
-	const [owner, intake, focus, compose] = await Promise.all([
-		readRepository("src/lib/marketing-content/AGENTS.md"),
-		readSkill("compose", "references/source-intake.md"),
-		readSkill("visual-parity", "references/focus-packet.md"),
-		readSkill("compose"),
-	]);
+	// AGENTS.md owns structure; the marketing specs own section behaviour.
+	const [owner, pages, composition, intake, focus, compose] = await Promise.all(
+		[
+			readRepository("src/lib/marketing-content/AGENTS.md"),
+			readRepository("specs/platform/surfaces/marketing/pages/spec.md"),
+			readRepository("specs/platform/surfaces/marketing/composition/spec.md"),
+			readSkill("compose", "references/source-intake.md"),
+			readSkill("visual-parity", "references/focus-packet.md"),
+			readSkill("compose"),
+		],
+	);
 	for (const required of [
 		"MarketingPageDocument",
 		"renderMarketingSections",
-		"Section.Background",
-		"Storybook contract",
-		"one named renderer",
 		"Tailwind",
 		"media",
-		"independently reviewable semantic/source section",
-		"exactly one shared `Section`",
-		"meaningful source-neutral content/media",
-		"generated",
+		"specs/platform/surfaces/marketing/pages/spec.md",
+		"specs/platform/surfaces/marketing/composition/spec.md",
 	])
 		assert.ok(owner.includes(required), `missing structural rule: ${required}`);
-	assert.match(owner, /headers, footers, multiple independent source cases/u);
 	assert.match(
 		owner,
 		/sections\/\*\*\/<blockType>\/<PascalBlockType>Section\.tsx/u,
+	);
+	const policy = `${pages}\n${composition}`.replace(/\s+/gu, " ");
+	for (const required of [
+		"Section.Background",
+		"independently reviewable semantic/source section",
+		"exactly one shared `Section`",
+		"meaningful source-neutral content/media",
+	])
+		assert.ok(policy.includes(required), `missing section rule: ${required}`);
+	assert.match(
+		policy,
+		/headers, footers, multiple (?:independent )?source cases/u,
 	);
 	assert.match(
 		intake,
@@ -971,7 +979,7 @@ test("section construction belongs to marketing owners and scoped source procedu
 	);
 	assert.match(
 		compose,
-		/always follows `app\/marketing\/composition\/marketing-composition`/u,
+		/always follows `specs\/platform\/surfaces\/marketing\/composition`/u,
 	);
 	assert.doesNotMatch(compose, /Section\.Background|renderMarketingSections/u);
 });
@@ -1006,7 +1014,7 @@ test("route and marketing verifiers reject implementation-shape bypasses", async
 test("Compose calibrates font faces and requires exact exported vector identity", async () => {
 	const [intake, media] = await Promise.all([
 		readSkill("compose", "references/source-intake.md"),
-		readRepository("src/lib/marketing-content/AGENTS.md"),
+		readRepository("specs/platform/content/media/spec.md"),
 	]);
 
 	assert.match(intake, /Figma weight labels/u);
@@ -1019,12 +1027,16 @@ test("Compose calibrates font faces and requires exact exported vector identity"
 	assert.match(intake, /Disable font synthesis/u);
 	assert.match(intake, /export that exact logo or mark as SVG/u);
 	assert.match(intake, /never redraw it, replace it with text or a glyph/u);
-	assert.match(media, /Keep exact SVG assets as vectors/u);
+	assert.match(
+		media,
+		/SVGs? (?:assets )?stay vectors|exact SVG assets as vectors/u,
+	);
 });
 
 test("marketing media policy is composed, deterministic, and narrowly exemptable", async () => {
-	const [media, verifier, surface] = await Promise.all([
+	const [owner, mediaSpec, verifier, surface] = await Promise.all([
 		readRepository("src/lib/marketing-content/AGENTS.md"),
+		readRepository("specs/platform/content/media/spec.md"),
 		fs.readFile(
 			path.resolve(
 				process.cwd(),
@@ -1038,14 +1050,15 @@ test("marketing media policy is composed, deterministic, and narrowly exemptable
 		),
 	]);
 
+	const media = mediaSpec.replace(/\s+/gu, " ");
 	assert.match(
-		media,
+		owner,
 		/averlo-media-exception-next-line <rule> -- <rationale>/u,
 	);
-	assert.match(media, /One annotation exempts one reported rule once/u);
+	assert.match(media, /exempts one reported rule once/u);
 	assert.match(media, /non-waivable/u);
-	assert.match(media, /npm run verify:marketing-media/u);
-	assert.match(media, /npm run verify:marketing/u);
+	assert.match(owner, /npm run verify:marketing-media/u);
+	assert.match(owner, /npm run verify:marketing/u);
 	assert.match(verifier, /exemptableMarketingMediaRules/u);
 	assert.match(verifier, /temporary-media-url/u);
 	assert.match(verifier, /reference-capture/u);
@@ -1057,7 +1070,7 @@ test("composition review preserves the excluded header and types every authority
 	const [compose, focusPacket, marketing] = await Promise.all([
 		readSkill("compose"),
 		readSkill("visual-parity", "references/focus-packet.md"),
-		readRepository("src/app/(site)/(marketing)/_components/AGENTS.md"),
+		readRepository("specs/platform/surfaces/marketing/composition/spec.md"),
 	]);
 
 	assert.match(compose, /header remains unchanged in\s+the shared shell/u);

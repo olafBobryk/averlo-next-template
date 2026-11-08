@@ -140,10 +140,12 @@ async function buildCopyPlan(sourceRoot, profile, selectedSurfaces) {
 			omitted.push({ path: relativePath, reason: "template-only" });
 			continue;
 		}
-		if (
-			withinAny(relativePath, assemblyTemplateOnlyRoots) &&
-			!isAssemblySpecKitSkillPath(relativePath)
-		) {
+		if (isAssemblySpecKitSkillPath(relativePath)) {
+			ownership.set(relativePath, "core");
+			included.push(relativePath);
+			continue;
+		}
+		if (withinAny(relativePath, assemblyTemplateOnlyRoots)) {
 			omitted.push({ path: relativePath, reason: "template-only" });
 			continue;
 		}
