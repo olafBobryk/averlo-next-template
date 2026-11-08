@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { defineCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { Button } from "./Button";
 import { Field } from "./Field";
@@ -76,6 +77,54 @@ function CatalogPreview3() {
 	)({ ...{}, ...{} } as never);
 }
 
+const twoLineError = (
+	<>
+		Enter a project name between 3 and 60 characters that teammates will
+		recognize.
+		<br />
+		Names cannot start with a number.
+	</>
+);
+
+/** Two-line validation messages at narrow and wide layout widths. */
+export function FieldMessageWidthsExample() {
+	const [invalid, setInvalid] = useState(false);
+	return (
+		<div className="grid gap-6">
+			<Button onClick={() => setInvalid(!invalid)}>
+				{invalid ? "Clear errors" : "Show errors"}
+			</Button>
+			{[390, 1440].map((width) => (
+				<div
+					key={width}
+					data-testid={`field-width-${width}`}
+					style={{ width, maxWidth: "none" }}
+				>
+					<Field
+						label={`Project name (${width}px)`}
+						message={invalid ? twoLineError : undefined}
+						tone={invalid ? "error" : "default"}
+						inputId={`project-name-${width}`}
+						messageId={`project-name-${width}-message`}
+					>
+						<InputFrame fullWidth tone={invalid ? "error" : "default"}>
+							<input
+								id={`project-name-${width}`}
+								aria-invalid={invalid || undefined}
+								aria-errormessage={
+									invalid ? `project-name-${width}-message` : undefined
+								}
+								className={inputVariants()}
+							/>
+						</InputFrame>
+					</Field>
+					<p data-testid={`field-after-${width}`}>Following content</p>
+				</div>
+			))}
+		</div>
+	);
+}
+
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-primitives-field",
 	name: "Field",
@@ -91,6 +140,7 @@ export const catalogContract = defineCatalogOwnerContract({
 	exclusions: [
 		"Page-local label, required-marker, or validation-message wiring.",
 		"Using Field as a generic status banner.",
+		"Clipping or height-capping the message region; it opens to the message's measured height.",
 	],
 	guarantees: [
 		{
@@ -104,6 +154,10 @@ export const catalogContract = defineCatalogOwnerContract({
 		{
 			label: "Skeleton parity",
 			storyId: "ui-primitives-field--skeleton-parity",
+		},
+		{
+			label: "Multi-line messages open fully at narrow and wide widths",
+			storyId: "ui-primitives-field--multi-line-message",
 		},
 	],
 
@@ -125,6 +179,14 @@ export const catalogContract = defineCatalogOwnerContract({
 			axes: [],
 			stage: "standard",
 			Render: CatalogPreview2,
+		},
+		{
+			id: "multi-line-message",
+			name: "Multi-line message",
+			baseline: {},
+			axes: [],
+			stage: "standard",
+			Render: FieldMessageWidthsExample,
 		},
 		{
 			id: "skeleton-parity",

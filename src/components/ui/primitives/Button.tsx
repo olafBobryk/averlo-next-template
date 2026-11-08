@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import Link from "next/link";
 import * as React from "react";
+import { MorphLabel } from "@/components/ui/helpers/MorphLabel";
 import { Icon, type IconName } from "@/components/ui/icons/Icon";
 import { Loader } from "@/components/ui/misc/Loader";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
@@ -46,6 +47,12 @@ export type ButtonBaseProps = {
 	iconSize?: number;
 	focusable?: boolean;
 	disabled?: boolean;
+	/**
+	 * String labels morph when they change: the old text leaves, the button
+	 * eases to the new width and the new text arrives once it fits. Defaults to
+	 * true; pass false for an instant swap.
+	 */
+	morph?: boolean;
 } & Omit<ButtonStyleProps, "align"> & {
 		align?: "left" | "center" | "between";
 	};
@@ -270,6 +277,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			loading,
 			iconSize,
 			focusable = true,
+			morph = true,
 			...rest
 		} = props;
 
@@ -303,6 +311,12 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			align === "between" || align === "center" ? "w-full" : "w-fit";
 		const isTextChild =
 			typeof children === "string" || typeof children === "number";
+		const label =
+			morph && typeof children === "string" ? (
+				<MorphLabel>{children}</MorphLabel>
+			) : (
+				children
+			);
 		const usesCustomTextPresentation =
 			textVariant !== undefined ||
 			textTone !== undefined ||
@@ -337,10 +351,14 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 								style={textTone ? undefined : { color: "inherit" }}
 								className={textClassName}
 							>
-								{children}
+								{label}
 							</Text>
 						) : isTextChild ? (
-							<span className="truncate">{children}</span>
+							morph && typeof children === "string" ? (
+								label
+							) : (
+								<span className="truncate">{children}</span>
+							)
 						) : (
 							children
 						)

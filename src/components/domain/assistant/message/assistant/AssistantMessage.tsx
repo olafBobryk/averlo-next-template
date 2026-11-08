@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { CopyStatusIcon } from "@/components/ui/helpers/useCopyAction";
 import { Button } from "@/components/ui/primitives/Button";
 import { InlineError } from "@/components/ui/primitives/InlineError";
 import type {
@@ -73,11 +74,17 @@ export function AssistantMessage({
 						<Button
 							variant="bare"
 							size="none"
-							iconSize={12}
 							className="min-h-6 py-1"
 							shape="square"
 							aria-label={copied ? "Copied response" : "Copy response"}
-							leadingIcon={copied ? "check" : "copy"}
+							leadingIcon={
+								// The 15px swap box keeps the 12px icon geometry.
+								<CopyStatusIcon
+									copied={copied}
+									size="sm"
+									className="-m-[1.5px]"
+								/>
+							}
 							onClick={async () => {
 								try {
 									await navigator.clipboard.writeText(

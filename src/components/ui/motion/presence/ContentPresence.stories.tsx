@@ -228,6 +228,184 @@ export const MaskFollowsHeightProgress: Story = {
 	},
 };
 
+type PresenceSample = {
+	t: number;
+	size: number;
+	contentSize: number;
+	opacity: number;
+	/** Visible content cut by the box or overlapping the next sibling. */
+	violation: string | null;
+	mask: string;
+};
+
+/** Samples the region and its content every frame until `done` resolves. */
+async function samplePresence(
+	region: HTMLElement,
+	done: () => Promise<unknown>,
+): Promise<PresenceSample[]> {
+	const samples: PresenceSample[] = [];
+	const start = performance.now();
+	let frame = 0;
+	const sample = () => {
+		const content = region.firstElementChild as HTMLElement | null;
+		const box = region.getBoundingClientRect();
+		const opacity = content ? Number(getComputedStyle(content).opacity) : 0;
+		const contentBox = content?.getBoundingClientRect();
+		const next = region.nextElementSibling?.getBoundingClientRect();
+		let violation: string | null = null;
+		if (contentBox && opacity > 0.05) {
+			const clipped =
+				getComputedStyle(region).overflow !== "visible" &&
+				contentBox.bottom > box.bottom + 0.5;
+			if (clipped) violation = `clipped at opacity ${opacity}`;
+			else if (next && contentBox.bottom > next.top + 0.5)
+				violation = `overlaps next sibling at opacity ${opacity}`;
+		}
+		samples.push({
+			t: performance.now() - start,
+			size: box.height,
+			contentSize: contentBox?.height ?? 0,
+			opacity,
+			violation,
+			mask: getComputedStyle(region).maskImage,
+		});
+		frame = requestAnimationFrame(sample);
+	};
+	frame = requestAnimationFrame(sample);
+	try {
+		await done();
+	} finally {
+		cancelAnimationFrame(frame);
+	}
+	return samples;
+}
+
+export const Sequenced: Story = {
+	render: () => <PresenceExample mode="sequenced" />,
+	play: async ({ canvas, canvasElement }) => {
+		const region = canvasElement.querySelector(
+			'[data-slot="content-presence"]',
+		) as HTMLElement;
+		const toggle = canvas.getByRole("button", { name: "Toggle content" });
+		await waitFor(() =>
+			expect(getComputedStyle(region).overflow).toBe("visible"),
+		);
+		const openHeight = region.getBoundingClientRect().height;
+		// Close: the content fades out before the box starts to collapse.
+		const closing = await samplePresence(region, async () => {
+			await userEvent.click(toggle);
+			await waitFor(() => expect(region.firstElementChild).toBeNull());
+		});
+		const firstShrink = closing.find(({ size }) => size < openHeight - 1);
+		expect(firstShrink).toBeDefined();
+		expect(firstShrink?.opacity ?? 1).toBeLessThanOrEqual(0.05);
+		// Open: the box grows first; the content fades in once the box fits it.
+		const opening = await samplePresence(region, async () => {
+			await userEvent.click(toggle);
+			await waitFor(() =>
+				expect(
+					Number(
+						getComputedStyle(region.firstElementChild as HTMLElement).opacity,
+					),
+				).toBe(1),
+			);
+		});
+		expect(opening.some(({ size }) => size > 0 && size < openHeight - 1)).toBe(
+			true,
+		);
+		const firstVisible = opening.find(({ opacity }) => opacity > 0.05);
+		expect(firstVisible?.size ?? 0).toBeGreaterThanOrEqual(
+			(firstVisible?.contentSize ?? Number.POSITIVE_INFINITY) - 0.5,
+		);
+		for (const { violation, mask } of [...closing, ...opening]) {
+			expect(violation).toBeNull();
+			expect(mask).toBe("none");
+		}
+		await expect(
+			canvas.getByRole("button", { name: "Apply option" }),
+		).toBeVisible();
+	},
+};
+
+function SequencedGrowthExample() {
+	const [lines, setLines] = useState(1);
+	return (
+		<div className="grid max-w-lg gap-3">
+			<Button onClick={() => setLines(lines === 1 ? 3 : 1)}>
+				Change message
+			</Button>
+			<div>
+				<ContentPresence open mode="sequenced">
+					{Array.from({ length: lines }, (_, index) => (
+						<p key={String(index)}>Message line {index + 1}</p>
+					))}
+				</ContentPresence>
+				<p>Following content</p>
+			</div>
+		</div>
+	);
+}
+
+export const SequencedContentGrowth: Story = {
+	render: () => <SequencedGrowthExample />,
+	play: async ({ canvas, canvasElement }) => {
+		const region = canvasElement.querySelector(
+			'[data-slot="content-presence"]',
+		) as HTMLElement;
+		const samples = await samplePresence(region, async () => {
+			await userEvent.click(
+				canvas.getByRole("button", { name: "Change message" }),
+			);
+			await waitFor(() =>
+				expect(canvas.getByText("Message line 3")).toBeInTheDocument(),
+			);
+			await waitFor(() =>
+				expect(
+					Number(
+						getComputedStyle(region.firstElementChild as HTMLElement).opacity,
+					),
+				).toBe(1),
+			);
+			await waitFor(() =>
+				expect(getComputedStyle(region).overflow).toBe("visible"),
+			);
+		});
+		// Content that outgrows its box never shows past the moving edge.
+		for (const { violation } of samples) expect(violation).toBeNull();
+	},
+};
+
+export const SequencedMotionOff: Story = {
+	render: () => <MotionOffSequencedExample />,
+	play: async ({ canvas, canvasElement }) => {
+		const region = canvasElement.querySelector(
+			'[data-slot="content-presence"]',
+		) as HTMLElement;
+		const toggle = canvas.getByRole("button", { name: "Toggle content" });
+		await userEvent.click(toggle);
+		await expect(
+			canvas.queryByText("Additional options"),
+		).not.toBeInTheDocument();
+		await userEvent.click(toggle);
+		await expect(
+			canvas.getByRole("button", { name: "Apply option" }),
+		).toBeVisible();
+		await expect(
+			getComputedStyle(region.firstElementChild as HTMLElement).opacity,
+		).toBe("1");
+	},
+};
+
+function MotionOffSequencedExample() {
+	const settings = useSettingsContext();
+	const original = useRef(settings?.motionDisabled ?? false);
+	useEffect(() => {
+		settings?.setMotionDisabled(true);
+		return () => settings?.setMotionDisabled(original.current);
+	}, [settings?.setMotionDisabled]);
+	return <PresenceExample mode="sequenced" />;
+}
+
 function AccordionParityExample() {
 	const [open, setOpen] = useState(false);
 	return (

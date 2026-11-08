@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { expect, userEvent } from "storybook/test";
+import { expect, userEvent, waitFor } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { Icon } from "../icons/Icon";
 import { Button } from "../primitives/Button";
 import { IconSwap } from "./IconSwap";
-import { catalogContract } from "./IconSwap.catalog";
+import { catalogContract, KeyedIconSwapHarness } from "./IconSwap.catalog";
 
 function IconSwapHarness() {
 	const [activeIndex, setActiveIndex] = useState(0);
@@ -78,4 +78,65 @@ export const SizeScale: Story = {
 			))}
 		</div>
 	),
+};
+
+function swapLayers(root: HTMLElement) {
+	return Array.from(
+		root.querySelectorAll<HTMLElement>('[data-slot="icon-swap"] > span'),
+	);
+}
+
+export const KeyedSwap: Story = {
+	render: () => <KeyedIconSwapHarness />,
+	play: async ({ canvas }) => {
+		const root = canvas.getByTestId("keyed-swap");
+		await expect(swapLayers(root)).toHaveLength(1);
+		// Story setup switches the appearance atomically; let it settle.
+		await waitFor(() =>
+			expect(document.documentElement).not.toHaveAttribute(
+				"data-theme-switching",
+			),
+		);
+		await userEvent.click(canvas.getByRole("button", { name: "Copy" }));
+		const [previous, next] = swapLayers(root);
+		await expect(next).toHaveAttribute("data-state", "active");
+		await expect(previous).toHaveAttribute("data-state", "inactive");
+		await expect(previous).toHaveAttribute("aria-hidden", "true");
+		// The swap animates rather than jumping.
+		await expect(
+			Number.parseFloat(getComputedStyle(next).transitionDuration),
+		).toBeGreaterThan(0);
+		await waitFor(() => expect(getComputedStyle(previous).opacity).toBe("0"));
+		await waitFor(() => expect(getComputedStyle(next).opacity).toBe("1"));
+		// Swapping back reuses the mounted icon instead of stacking a third.
+		await userEvent.click(canvas.getByRole("button", { name: "Copied" }));
+		await expect(swapLayers(root)).toHaveLength(2);
+		await expect(previous).toHaveAttribute("data-state", "active");
+	},
+};
+
+export const ReducedMotion: Story = {
+	render: () => <KeyedIconSwapHarness />,
+	beforeEach: () => {
+		const native = window.matchMedia;
+		window.matchMedia = (query) => {
+			const media = native.call(window, query);
+			if (query === "(prefers-reduced-motion: reduce)")
+				Object.defineProperty(media, "matches", { value: true });
+			return media;
+		};
+		return () => {
+			window.matchMedia = native;
+		};
+	},
+	play: async ({ canvas }) => {
+		const root = canvas.getByTestId("keyed-swap");
+		await userEvent.click(canvas.getByRole("button", { name: "Copy" }));
+		const [previous, next] = swapLayers(root);
+		await expect(
+			Number.parseFloat(getComputedStyle(next).transitionDuration),
+		).toBe(0);
+		await expect(getComputedStyle(next).opacity).toBe("1");
+		await expect(getComputedStyle(previous).opacity).toBe("0");
+	},
 };

@@ -1,7 +1,8 @@
 // components/ui/primitives/Field.tsx
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
+import { ContentPresence } from "@/components/ui/motion/presence";
 import { InputFrameSkeleton, type InputFrameSkeletonProps } from "./InputFrame";
 import { Text } from "./Text";
 
@@ -47,6 +48,10 @@ function FieldRoot({
 }: FieldProps) {
 	const hasMessage = Boolean(message);
 	const announceMessage = tone === "error" && hasMessage;
+	// Keep the last message and tone while the message region closes.
+	const shown = React.useRef({ message, tone });
+	if (hasMessage) shown.current = { message, tone };
+	const shownTone = shown.current.tone;
 
 	return (
 		<div
@@ -97,32 +102,32 @@ function FieldRoot({
 			{children}
 
 			{disableMessage ? null : (
-				<div
-					className={[
-						"transition-all motion-micro -mt-3 overflow-hidden",
-						message ? "max-h-7" : "max-h-0",
-					].join(" ")}
-				>
-					<Text
-						as="p"
-						variant="caption"
-						tone="muted"
-						className={[
-							"transition-all motion-micro mt-3", // preserve the field gap only while visible
-							tone === "error"
-								? "!text-danger-text"
-								: tone === "success"
-									? "!text-success-text"
-									: "text-transparent",
-						].join(" ")}
-						id={messageId}
-						role={announceMessage ? "alert" : undefined}
-						aria-live={announceMessage ? "polite" : undefined}
-						aria-atomic={announceMessage ? "true" : undefined}
-						aria-hidden={!hasMessage}
-					>
-						{message ?? "placeholder"}
-					</Text>
+				// The negative margin cancels the column gap while the region is
+				// closed; the gap returns inside the region so it opens with it.
+				<div className="-mt-3">
+					<ContentPresence open={hasMessage} mode="sequenced">
+						<Text
+							as="p"
+							variant="caption"
+							tone="muted"
+							className={[
+								"pt-3",
+								shownTone === "error"
+									? "!text-danger-text"
+									: shownTone === "success"
+										? "!text-success-text"
+										: undefined,
+							]
+								.filter(Boolean)
+								.join(" ")}
+							id={hasMessage ? messageId : undefined}
+							role={announceMessage ? "alert" : undefined}
+							aria-live={announceMessage ? "polite" : undefined}
+							aria-atomic={announceMessage ? "true" : undefined}
+						>
+							{hasMessage ? message : shown.current.message}
+						</Text>
+					</ContentPresence>
 				</div>
 			)}
 		</div>

@@ -1100,7 +1100,7 @@ async function assertComponentExport(outputRoot, profileCase) {
 			`${profileCase.profileId}/${profileCase.content} is missing Component Export scripts.`,
 		);
 	}
-	const expectedOwnerCount = selectedSurfaces.has("dashboard") ? 95 : 82;
+	const expectedOwnerCount = selectedSurfaces.has("dashboard") ? 96 : 83;
 	if (catalogFiles.length !== expectedOwnerCount) {
 		throw new Error(
 			`${profileCase.profileId}/${profileCase.content} expected ${expectedOwnerCount} installed catalogue owners, found ${catalogFiles.length}.`,
