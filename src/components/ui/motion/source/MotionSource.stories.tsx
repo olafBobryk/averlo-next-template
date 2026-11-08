@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { cubicBezier } from "motion";
 import Link from "next/link";
 import { useState } from "react";
 import { expect, userEvent, waitFor } from "storybook/test";
 import { focusRing } from "@/components/ui/foundations/focus";
+import { motionTiming } from "@/components/ui/foundations/motionTiming";
 import * as MotionEffect from "@/components/ui/motion/effect";
 import { Button } from "@/components/ui/primitives/Button";
 import { Panel } from "@/components/ui/primitives/surfaces";
@@ -772,6 +774,16 @@ function sliceOf(value: number, [start, end]: readonly [number, number]) {
 	return Math.min(1, Math.max(0, (value - start) / (end - start)));
 }
 
+/** The `slow` token curve, built here from the token, not the runtime. */
+const slowCurve = cubicBezier(
+	...(motionTiming.slow.ease as [number, number, number, number]),
+);
+
+/** Where pure scrolling puts an item: its slice position eased on `slow`. */
+function easedSliceOf(value: number, range: readonly [number, number]) {
+	return slowCurve(sliceOf(value, range));
+}
+
 /** Live progress of a `["start A%", "start B%"]` offset from the element rect. */
 function liveProgress(element: HTMLElement, from: number, to: number) {
 	const height = window.innerHeight;
@@ -811,10 +823,12 @@ function ScrollRevealFixture({
 	count,
 	lead,
 	offset,
+	stagger,
 }: {
 	count: number;
 	lead: "catch-up" | "below-fold";
 	offset?: MotionSource.SequenceScrollOffset;
+	stagger?: number;
 }) {
 	return (
 		<div className="min-h-[320vh] bg-background text-foreground">
@@ -823,6 +837,7 @@ function ScrollRevealFixture({
 				className="grid max-w-3xl gap-4 px-8"
 				mode="scroll"
 				offset={offset}
+				stagger={stagger}
 			>
 				{["First", "Second", "Third"].slice(0, count).map((label) => (
 					<MotionSource.Item key={label}>
@@ -854,9 +869,13 @@ const verifyScrubFollowsScroll: NonNullable<Story["play"]> = async ({
 			() => {
 				const live = liveProgress(sequence, 0.95, 0.55);
 				expect(Math.abs(live - target)).toBeLessThan(progressTolerance);
-				expect(Math.abs(opacityOf(effect) - live)).toBeLessThan(
+				const opacity = opacityOf(effect);
+				// The item follows its slice eased on `slow`, not linearly.
+				expect(Math.abs(opacity - easedSliceOf(live, [0, 1]))).toBeLessThan(
 					progressTolerance,
 				);
+				if (target > 0 && target < 1)
+					expect(opacity - live).toBeGreaterThan(0.1);
 			},
 			{ timeout: 3000 },
 		);
@@ -875,7 +894,8 @@ const verifyCatchUpStopsAtScrollProgress: NonNullable<Story["play"]> = async ({
 	expect(Math.abs(live - 0.5)).toBeLessThan(progressTolerance);
 	const ranges = itemRanges(canvasElement);
 	ranges.forEach((range, index) => {
-		const expected = sliceOf(live, range);
+		// The scroll-scrub value for this position: the intro lands on it.
+		const expected = easedSliceOf(live, range);
 		const values = samples.map((frame) => frame[index]);
 		// Animated up from hidden, never beyond, and settled exactly there.
 		expect(Math.min(...values)).toBeLessThan(expected * 0.6);
@@ -886,15 +906,29 @@ const verifyCatchUpStopsAtScrollProgress: NonNullable<Story["play"]> = async ({
 			progressTolerance,
 		);
 	});
-	// After the intro the slice follows scroll again.
+	// After the intro the slice follows scroll again, and scrolling back to
+	// the load position reproduces exactly the value the intro landed on.
+	const landed = samples.at(-1) ?? [];
+	const loadScroll = window.scrollY;
 	window.scrollTo(0, window.innerHeight * 0.1);
 	await waitFor(
 		() => {
 			const next = liveProgress(sequence, 1, 0.5);
 			effects.forEach((effect, index) => {
 				expect(
-					Math.abs(opacityOf(effect) - sliceOf(next, ranges[index])),
+					Math.abs(opacityOf(effect) - easedSliceOf(next, ranges[index])),
 				).toBeLessThan(progressTolerance);
+			});
+		},
+		{ timeout: 3000 },
+	);
+	window.scrollTo(0, loadScroll);
+	await waitFor(
+		() => {
+			effects.forEach((effect, index) => {
+				expect(Math.abs(opacityOf(effect) - landed[index])).toBeLessThan(
+					progressTolerance,
+				);
 			});
 		},
 		{ timeout: 3000 },
@@ -945,7 +979,7 @@ export const ScrollRevealCatchUpRetarget: Story = {
 		const live = liveProgress(sequence, 1, 0.5);
 		expect(Math.abs(live - 0.9)).toBeLessThan(progressTolerance);
 		itemRanges(canvasElement).forEach((range, index) => {
-			const expected = sliceOf(live, range);
+			const expected = easedSliceOf(live, range);
 			const values = samples.map((frame) => frame[index]);
 			expect(Math.max(...values)).toBeLessThanOrEqual(
 				expected + progressTolerance,
@@ -958,21 +992,27 @@ export const ScrollRevealCatchUpRetarget: Story = {
 	},
 };
 
-export const ScrollSequenceStagger: Story = {
-	args: { children: null, strategy: { type: "scroll" } },
-	beforeEach: resetStoryScroll,
-	render: () => <ScrollRevealFixture count={3} lead="below-fold" />,
-	play: async ({ canvasElement }) => {
+function verifySequenceStagger(
+	stagger: number,
+	expectedRanges: readonly (readonly [number, number])[],
+): NonNullable<Story["play"]> {
+	return async ({ canvasElement }) => {
 		const sequence = scrollSequence(canvasElement);
 		const effects = itemEffects(canvasElement);
 		await waitFor(() =>
 			expect(sequence).toHaveAttribute("data-motion-source-mode", "animated"),
 		);
+		expect(sequence).toHaveAttribute(
+			"data-motion-source-sequence-stagger",
+			String(stagger),
+		);
 		const ranges = itemRanges(canvasElement);
-		const expectedRanges = getScrollSequenceRanges(3, 0.18);
+		const computedRanges = getScrollSequenceRanges(3, stagger);
 		ranges.forEach(([start, end], index) => {
 			expect(start).toBeCloseTo(expectedRanges[index][0], 3);
 			expect(end).toBeCloseTo(expectedRanges[index][1], 3);
+			expect(start).toBeCloseTo(computedRanges[index][0], 3);
+			expect(end).toBeCloseTo(computedRanges[index][1], 3);
 		});
 		expect(ranges[0][0]).toBe(0);
 		expect(ranges[2][1]).toBe(1);
@@ -985,9 +1025,9 @@ export const ScrollSequenceStagger: Story = {
 				const live = liveProgress(sequence, 0.95, 0.55);
 				const values = effects.map(opacityOf);
 				values.forEach((value, index) => {
-					expect(Math.abs(value - sliceOf(live, ranges[index]))).toBeLessThan(
-						progressTolerance,
-					);
+					expect(
+						Math.abs(value - easedSliceOf(live, ranges[index])),
+					).toBeLessThan(progressTolerance);
 				});
 				expect(values[0]).toBeGreaterThan(values[1]);
 				expect(values[1]).toBeGreaterThan(values[2]);
@@ -995,7 +1035,33 @@ export const ScrollSequenceStagger: Story = {
 			{ timeout: 3000 },
 		);
 		await scrollUntilRevealed(canvasElement);
-	},
+	};
+}
+
+export const ScrollSequenceStagger: Story = {
+	args: { children: null, strategy: { type: "scroll" } },
+	beforeEach: resetStoryScroll,
+	render: () => <ScrollRevealFixture count={3} lead="below-fold" />,
+	// 0.18s apart over 0.92s: [0, 0.6087], [0.1957, 0.8043], [0.3913, 1].
+	play: verifySequenceStagger(0.18, [
+		[0, 0.6087],
+		[0.1957, 0.8043],
+		[0.3913, 1],
+	]),
+};
+
+export const ScrollSequenceTightStagger: Story = {
+	args: { children: null, strategy: { type: "scroll" } },
+	beforeEach: resetStoryScroll,
+	render: () => (
+		<ScrollRevealFixture count={3} lead="below-fold" stagger={0.06} />
+	),
+	// 0.06s apart over 0.68s: [0, 0.8235], [0.0882, 0.9118], [0.1765, 1].
+	play: verifySequenceStagger(0.06, [
+		[0, 0.8235],
+		[0.0882, 0.9118],
+		[0.1765, 1],
+	]),
 };
 
 export const ScrollRevealMotionOff: Story = {

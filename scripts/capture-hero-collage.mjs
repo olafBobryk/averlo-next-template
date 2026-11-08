@@ -138,7 +138,13 @@ async function goto(page, url, timeoutMs) {
 	}
 }
 
-// The hero background box at this viewport is the size the capture must fill.
+// The hero text column's blurred backdrop reaches about this far past the
+// column (its \`-inset-y-6\` plus the blur), in CSS pixels.
+const TEXT_BACKDROP = { x: 24, y: 44 };
+
+// The hero background box at this viewport is the size the capture must fill;
+// the hero text region (headline, body, CTA and backdrop, relative to that box)
+// is where the repository cards must not go.
 async function measureHeroBox(browser, urls, target, timeoutMs) {
 	const { context, page } = await openPage(browser, {
 		height: target.viewportHeight,
@@ -162,7 +168,51 @@ async function measureHeroBox(browser, urls, target, timeoutMs) {
 				`Hero background box at ${target.width}px measured ${box.width}x${box.height}.`,
 			);
 		}
-		return box;
+		// Wait for the entrance motion to finish so the text sits at rest.
+		const deadline = Date.now() + timeoutMs;
+		let previous = "";
+		let stableSince = Date.now();
+		let textRegion;
+		while (Date.now() < deadline) {
+			textRegion = await page
+				.locator("[data-fidelity-preview-collage]")
+				.first()
+				.evaluate((collage, backdrop) => {
+					const origin = collage.getBoundingClientRect();
+					const section = collage.closest("section") ?? document.body;
+					const rects = [];
+					for (const element of section.querySelectorAll("h1, p, a, button")) {
+						if (collage.contains(element)) continue;
+						const column = element.closest(".grid");
+						for (const rect of [
+							element.getBoundingClientRect(),
+							column?.getBoundingClientRect(),
+						])
+							if (rect && rect.width > 0 && rect.height > 0) rects.push(rect);
+					}
+					if (rects.length === 0) return null;
+					const left = Math.min(...rects.map((rect) => rect.left));
+					const top = Math.min(...rects.map((rect) => rect.top));
+					const right = Math.max(...rects.map((rect) => rect.right));
+					const bottom = Math.max(...rects.map((rect) => rect.bottom));
+					return {
+						x: Math.round(Math.max(0, left - origin.left - backdrop.x)),
+						y: Math.round(Math.max(0, top - origin.top - backdrop.y)),
+						width: Math.round(right - left + 2 * backdrop.x),
+						height: Math.round(bottom - top + 2 * backdrop.y),
+					};
+				}, TEXT_BACKDROP);
+			const signature = JSON.stringify(textRegion);
+			if (signature !== previous) {
+				previous = signature;
+				stableSince = Date.now();
+			} else if (Date.now() - stableSince >= STABLE_MS) break;
+			await page.waitForTimeout(150);
+		}
+		if (!textRegion) {
+			throw new Error(`Hero text not found at ${target.width}px.`);
+		}
+		return { box, textRegion };
 	} finally {
 		await context.close();
 	}
@@ -218,14 +268,21 @@ async function waitForSettledCollage(page, timeoutMs) {
 	throw new Error("The hero collage did not settle before the timeout.");
 }
 
-async function captureCollage(browser, urls, box, theme, options) {
+async function captureCollage(browser, urls, box, textRegion, theme, options) {
 	const { context, page, pageErrors } = await openPage(browser, {
 		height: box.height,
 		scale: options.scale,
 		width: box.width,
 	});
 	try {
-		await goto(page, urls.capture, options.timeoutMs);
+		const url = new URL(urls.capture);
+		url.searchParams.set(
+			"avoid",
+			[textRegion.x, textRegion.y, textRegion.width, textRegion.height].join(
+				",",
+			),
+		);
+		await goto(page, url.toString(), options.timeoutMs);
 		// The Next.js development indicator is not part of the collage.
 		await page.addStyleTag({
 			content: "nextjs-portal{display:none!important}",
@@ -283,7 +340,7 @@ async function main() {
 	const captures = [];
 	try {
 		for (const target of HERO_CAPTURE_TARGETS) {
-			const box = await measureHeroBox(
+			const { box, textRegion } = await measureHeroBox(
 				browser,
 				urls,
 				target,
@@ -291,7 +348,14 @@ async function main() {
 			);
 			const images = {};
 			for (const theme of HERO_CAPTURE_THEMES) {
-				const png = await captureCollage(browser, urls, box, theme, options);
+				const png = await captureCollage(
+					browser,
+					urls,
+					box,
+					textRegion,
+					theme,
+					options,
+				);
 				const file = heroCaptureFileName(target.width, theme);
 				const info = await sharp(png)
 					.webp({ effort: 6, quality: options.quality })
@@ -303,6 +367,7 @@ async function main() {
 			}
 			captures.push({
 				box,
+				textRegion,
 				images,
 				range: target.range,
 				viewport: { height: target.viewportHeight, width: target.width },

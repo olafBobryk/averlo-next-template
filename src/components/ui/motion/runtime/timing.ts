@@ -42,6 +42,11 @@ function toGsapTiming(transition: Transition) {
 	};
 }
 
+/** A step's CSS-fallback curve (its `motionTiming` ease) as a 0–1 function. */
+export function getMotionStepEase(step: MotionStep) {
+	return toGsapTiming(motionTiming[step]).ease;
+}
+
 export function getGsapTiming(step: MotionStep) {
 	return toGsapTiming(stepSpring[step]);
 }

@@ -16,10 +16,12 @@ export const HERO_CAPTURE_THEMES = ["light", "dark"];
 export const HERO_CAPTURED_SOURCES = [
 	"HomeHeroChoices.tsx",
 	"HomeHeroLibrary.tsx",
+	"HomeHeroStackLogo.tsx",
 	"heroSpecimens.tsx",
 	"pack.d.mts",
 	"pack.mjs",
 	"previews",
+	"stackLogos.ts",
 ];
 
 // One capture per hero layout range. The hero changes at Tailwind `sm` (640)

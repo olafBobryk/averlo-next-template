@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { spring } from "motion";
+import { cubicBezier, spring } from "motion";
+import { motionTiming } from "@/components/ui/foundations/motionTiming";
 import { spring as stepSpring } from "@/components/ui/foundations/spring";
 import {
 	createProgressTrajectory,
 	getGsapRevealTiming,
 	getGsapTiming,
+	getMotionStepEase,
 } from "./timing";
 
 test("preserves configured reveal trajectory at intermediate timestamps", () => {
@@ -64,4 +66,22 @@ test("invalid explicit duration uses the configured trajectory", () => {
 			createProgressTrajectory(0, 1, 0, duration).durationMs,
 			getGsapTiming("slow").duration * 1000,
 		);
+});
+
+test("step ease is the step's token curve, fixed at 0 and 1 and monotonic", () => {
+	const ease = getMotionStepEase("slow");
+	const reference = cubicBezier(
+		...(motionTiming.slow.ease as [number, number, number, number]),
+	);
+	assert.equal(ease(0), 0);
+	assert.equal(ease(1), 1);
+	let previous = 0;
+	for (let step = 1; step <= 100; step += 1) {
+		const value = ease(step / 100);
+		assert.equal(value, reference(step / 100));
+		assert.ok(value >= previous);
+		previous = value;
+	}
+	// Ease-out: well ahead of linear early in the step.
+	assert.ok(ease(0.25) > 0.4);
 });

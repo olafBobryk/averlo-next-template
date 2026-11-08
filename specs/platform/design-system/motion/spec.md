@@ -40,6 +40,8 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
   - A: No. Section reveals (hero text, status page content, footer) are scroll-scrubbed: they follow scroll progress, reverse when scrolling back and have no duration. `slow` is used only for the at-load catch-up intro (FR-013) and for reveals with no scroll position, such as modal content (`reveal` source). Olaf chose to extend `MotionSource` rather than add a separate reveal facade or a marketing scroll-mode switch.
 - **Q: What happens to a scroll reveal already on screen when the page loads?**
   - A: It catches up to its current scroll-progress state with a timed intro and stops exactly there: an item 50% through its range animates from 0 to 50%, never beyond and never below, then follows scroll. If scroll changes during the intro, it lands on the live progress (FR-013).
+- **Q: Do scroll Sequence items move at a constant rate?**
+  - A: No. With a linear slice per item, the hero headline, text and call to action each slid at constant speed, 0.18 s apart, which Olaf found awkward. Olaf chose "eased, tighter stagger": each item eases within its slice on the `slow` curve, during both the catch-up intro and the scroll scrub, while the Sequence clock stays linear. The hero's lines start 0.06 s apart; the 0.18 s default stays for other Sequences (FR-006, FR-013).
 
 ### Session 2026-11-08 (AGENTS.md thinning)
 
@@ -96,7 +98,7 @@ Hybrid MUST be the default driver and Motion the maintained fallback; effects an
 
 ### FR-006: One scheduler; sources own reveal
 
-There MUST be one global scheduler (the site `MotionProvider`), with no page-local or nested global schedulers. `MotionSource.Sequence` enters its nearest scheduler once and owns relative descendant reveal batching. Viewport re-entry reset is owned by the scheduler and source through shared progress; effects never install reveal observers or reset themselves. `MotionSource.Sequence mode="scroll"` instead owns one scroll progress and gives each `MotionSource.Item` a staggered sub-range of it, `[i·stagger / total, (i·stagger + slow) / total]` with `total = slow + (n − 1)·stagger`; it does not enter the scheduler, and items never own their own scroll progress.
+There MUST be one global scheduler (the site `MotionProvider`), with no page-local or nested global schedulers. `MotionSource.Sequence` enters its nearest scheduler once and owns relative descendant reveal batching. Viewport re-entry reset is owned by the scheduler and source through shared progress; effects never install reveal observers or reset themselves. `MotionSource.Sequence mode="scroll"` instead owns one scroll progress and gives each `MotionSource.Item` a staggered sub-range of it, `[i·stagger / total, (i·stagger + slow) / total]` with `total = slow + (n − 1)·stagger`; it does not enter the scheduler, and items never own their own scroll progress. Each item eases within its slice on the `slow` token curve: its progress is `ease_slow((p − start) / (end − start))`, clamped to 0–1, whether the Sequence progress `p` comes from scrolling or from the catch-up intro. A call site may tighten `stagger` for lines read as one block.
 
 ### FR-007: `CounterpartReveal` ownership
 
@@ -124,19 +126,19 @@ Motion code SHOULD memoize only for correctness or a measured performance benefi
 
 ### FR-013: Scroll reveals catch up at load
 
-A scroll reveal on screen when it activates MUST catch up from hidden to its live scroll progress with a timed intro on `slow`, stop exactly at that progress and then follow scroll. The intro scales live progress, so it never passes it, never falls below its own start, and lands on the live value when scroll changes during it. A scroll Sequence's intro lasts `slow + (n − 1)·stagger` at a constant rate, so each item's sub-range plays over `slow`. The scroll source owns this, together with `ready` (held hidden until ready) and `disabled` gating; a source that persists across client navigation (the footer) catches up again on the new route. Reduced motion and `?motion=off` render every item fully shown with no intro (U3). A reveal's offset MUST be reachable: content that ends the page completes by the maximum scroll position. Scroll sources that are not reveals (parallax, text shift) render their current pose at once with no intro.
+A scroll reveal on screen when it activates MUST catch up from hidden to its live scroll progress with a timed intro on `slow`, stop exactly at that progress and then follow scroll. The intro scales live progress, so it never passes it, never falls below its own start, and lands on the live value when scroll changes during it. A scroll Sequence's intro lasts `slow + (n − 1)·stagger` on a constant-rate Sequence clock, so each item's sub-range plays over `slow` and eases on the `slow` curve within it (FR-006). The ease is monotonic and fixes 0 and 1, so an item's catch-up lands exactly on the eased value pure scrolling gives at that position and never passes it. The scroll source owns this, together with `ready` (held hidden until ready) and `disabled` gating; a source that persists across client navigation (the footer) catches up again on the new route. Reduced motion and `?motion=off` render every item fully shown with no intro (U3). A reveal's offset MUST be reachable: content that ends the page completes by the maximum scroll position. Scroll sources that are not reveals (parallax, text shift) render their current pose at once with no intro.
 
 **Scenario: Partially scrolled at load**
 
 - **When** a reveal item is 50% through its scroll range as the page loads
-- **Then** it animates from 0 to 50% and stops there, and further scrolling moves it from 50%
+- **Then** it animates from 0 to the value scrolling gives at 50% (eased on `slow` within a Sequence item) and stops there, and further scrolling moves it from there
 
 **Scenario: Scroll during the intro**
 
 - **When** the user scrolls while the catch-up intro is running
 - **Then** the intro ends on the new live progress, never above it
 
-Verified by the `ScrollRevealScrub`, `ScrollRevealCatchUp`, `ScrollRevealCatchUpRetarget`, `ScrollSequenceStagger` and `ScrollRevealMotionOff` MotionSource stories, in both drivers where the driver owns the behaviour.
+Verified by the `ScrollRevealScrub` (items follow their eased slice), `ScrollRevealCatchUp` (the intro lands on the scroll-scrub value), `ScrollRevealCatchUpRetarget`, `ScrollSequenceStagger`, `ScrollSequenceTightStagger` (0.06 s sub-ranges) and `ScrollRevealMotionOff` MotionSource stories, in both drivers where the driver owns the behaviour, and by the `getMotionStepEase` unit test in `runtime/timing.test.ts`.
 
 ### U: Universal
 

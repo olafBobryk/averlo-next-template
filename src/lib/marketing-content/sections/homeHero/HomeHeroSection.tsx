@@ -29,6 +29,7 @@ function HomeHeroSectionRoot({ section }: HomeHeroSectionProps) {
 			</Section.Background>
 			<MotionSource.Sequence
 				mode="scroll"
+				stagger={0.06}
 				className="relative flex w-full grow flex-col items-start justify-start lg:justify-center"
 			>
 				<div className="relative grid max-w-150 justify-items-start gap-7 lg:max-w-[38%] before:pointer-events-none before:absolute before:inset-x-0 before:-inset-y-6 before:-z-10 before:rounded-full before:bg-background/90 before:blur-2xl">

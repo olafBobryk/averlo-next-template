@@ -6,13 +6,15 @@
 		"files": [
 			"HomeHeroChoices.tsx",
 			"HomeHeroLibrary.tsx",
+			"HomeHeroStackLogo.tsx",
 			"heroSpecimens.tsx",
 			"pack.d.mts",
 			"pack.mjs",
-			"previews"
+			"previews",
+			"stackLogos.ts"
 		],
-		"fileCount": 104,
-		"sha256": "e9621e3bea13a02536ca7ba3fa39a1976cfee31676c2d607655e044ce883c17a"
+		"fileCount": 106,
+		"sha256": "671683bd63356c0b3119124d77836f78c50d05762ad1a3d4e51c7baac97ce6ea"
 	},
 	"deviceScaleFactor": 2,
 	"format": {
@@ -25,6 +27,12 @@
 			"box": {
 				"height": 1024,
 				"width": 390
+			},
+			"textRegion": {
+				"x": 0,
+				"y": 80,
+				"width": 399,
+				"height": 364
 			},
 			"images": {
 				"light": {
@@ -50,6 +58,12 @@
 				"height": 1000,
 				"width": 768
 			},
+			"textRegion": {
+				"x": 14,
+				"y": 93,
+				"width": 648,
+				"height": 339
+			},
 			"images": {
 				"light": {
 					"file": "hero-collage-768-light.webp",
@@ -74,6 +88,12 @@
 				"height": 900,
 				"width": 1440
 			},
+			"textRegion": {
+				"x": 48,
+				"y": 271,
+				"width": 540,
+				"height": 459
+			},
 			"images": {
 				"light": {
 					"file": "hero-collage-1440-light.webp",
@@ -97,6 +117,12 @@
 			"box": {
 				"height": 1000,
 				"width": 1920
+			},
+			"textRegion": {
+				"x": 186,
+				"y": 321,
+				"width": 618,
+				"height": 459
 			},
 			"images": {
 				"light": {

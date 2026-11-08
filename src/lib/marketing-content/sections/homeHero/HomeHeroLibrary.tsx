@@ -11,8 +11,10 @@ import {
 import { PortalScope } from "@/components/ui/overlays/Portal";
 import type { HomeHeroServiceItem } from "../../types";
 import { HomeHeroChoices } from "./HomeHeroChoices";
+import { HomeHeroStackLogo } from "./HomeHeroStackLogo";
 import { heroSpecimens } from "./heroSpecimens";
 import { packCenterOut } from "./pack.mjs";
+import { stackLogos } from "./stackLogos";
 
 // One specimen failing must not remove the rest of the decorative collection.
 class SpecimenBoundary extends Component<
@@ -32,6 +34,13 @@ class SpecimenBoundary extends Component<
 	}
 }
 
+// How far past the section edges the packed content is scaled, so the uneven
+// outermost specimens crop instead of leaving empty margins.
+const COVER_OVERSCAN = 1.08;
+// Extra clearance (section pixels) kept between the repository cards and the
+// hero text region while packing.
+const TEXT_MARGIN = 32;
+
 type Measurement = {
 	id: string;
 	width: number;
@@ -40,12 +49,113 @@ type Measurement = {
 	left: number;
 	top: number;
 	priority: number;
+	keepClear: boolean;
 };
+
+export type HeroTextRegion = {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+};
+
+const overlaps = (
+	a: { x: number; y: number; width: number; height: number },
+	b: { x: number; y: number; width: number; height: number },
+) =>
+	a.x < b.x + b.width &&
+	a.x + a.width > b.x &&
+	a.y < b.y + b.height &&
+	a.y + a.height > b.y;
+
+// Pack, then cover the section: the packed content fills it edge to edge and
+// the ragged outer specimens bleed past the edges. With a hero text region
+// (section pixels), the repository cards and stack logos (keepClear) are
+// packed outside it;
+// the region is mapped into packing coordinates from the previous pass until
+// the covered result keeps every card clear of it.
+function layout(
+	measurements: Measurement[],
+	width: number,
+	height: number,
+	avoid: HeroTextRegion | undefined,
+) {
+	const aspect = width / height;
+	const cover = (packed: ReturnType<typeof packCenterOut>) =>
+		COVER_OVERSCAN * Math.max(width / packed.width, height / packed.height);
+	let packed = packCenterOut(measurements, { gap: 40, aspect });
+	let scale = cover(packed);
+	if (!avoid) return { packed, scale };
+	// Start the cards in the largest free band beside or below the text.
+	const bands = [
+		{
+			x: avoid.x + avoid.width,
+			y: 0,
+			width: width - avoid.x - avoid.width,
+			height,
+		},
+		{
+			x: 0,
+			y: avoid.y + avoid.height,
+			width,
+			height: height - avoid.y - avoid.height,
+		},
+		{ x: 0, y: 0, width: avoid.x, height },
+		{ x: 0, y: 0, width, height: avoid.y },
+	];
+	const band = bands.reduce((a, b) =>
+		b.width * b.height > a.width * a.height ? b : a,
+	);
+	const screen = (item: {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+	}) => ({
+		x: width / 2 + item.x * scale,
+		y: height / 2 + item.y * scale,
+		width: item.width * scale,
+		height: item.height * scale,
+	});
+	for (let pass = 0; pass < 8; pass += 1) {
+		const toPacking = (x: number, y: number) => ({
+			x: (x - width / 2) / scale + packed.offset.x,
+			y: (y - height / 2) / scale + packed.offset.y,
+		});
+		const topLeft = toPacking(avoid.x - TEXT_MARGIN, avoid.y - TEXT_MARGIN);
+		const bottomRight = toPacking(
+			avoid.x + avoid.width + TEXT_MARGIN,
+			avoid.y + avoid.height + TEXT_MARGIN,
+		);
+		packed = packCenterOut(measurements, {
+			gap: 40,
+			aspect,
+			avoid: {
+				left: topLeft.x,
+				top: topLeft.y,
+				right: bottomRight.x,
+				bottom: bottomRight.y,
+			},
+			start: toPacking(band.x + band.width / 2, band.y + band.height / 2),
+		});
+		scale = cover(packed);
+		if (
+			packed.items.every(
+				(item) => !item.keepClear || !overlaps(screen(item), avoid),
+			)
+		)
+			break;
+	}
+	return { packed, scale };
+}
 
 export default function HomeHeroLibrary({
 	services,
+	avoid,
 }: {
 	services: HomeHeroServiceItem[];
+	/** Hero text region in section pixels; the repository cards stay clear of it. */
+	avoid?: HeroTextRegion;
 }) {
 	const rootRef = useRef<HTMLDivElement>(null);
 	const [mounted, setMounted] = useState(false);
@@ -123,6 +233,7 @@ export default function HomeHeroLibrary({
 					measurements.push({
 						id: specimen.dataset.heroSpecimen ?? "",
 						priority,
+						keepClear: specimen.dataset.keepClear === "true",
 						width: (right - left + 64) * scale,
 						height: (bottom - top + 64) * scale,
 						scale,
@@ -130,14 +241,11 @@ export default function HomeHeroLibrary({
 						top: top - 32,
 					});
 				}
-				const packed = packCenterOut(measurements, {
-					gap: 40,
-					centerIds: ["hero-skills", "hero-installation"],
-					aspect: root.clientWidth / root.clientHeight,
-				});
-				const scale = Math.min(
-					(root.clientWidth - 24) / packed.width,
-					(root.clientHeight - 24) / packed.height,
+				const { packed, scale } = layout(
+					measurements,
+					root.clientWidth,
+					root.clientHeight,
+					avoid,
 				);
 				const cluster = root.querySelector<HTMLElement>("[data-hero-cluster]");
 				if (!cluster || !Number.isFinite(scale)) return;
@@ -184,7 +292,7 @@ export default function HomeHeroLibrary({
 			observer.disconnect();
 			mutations.disconnect();
 		};
-	}, [mounted]);
+	}, [mounted, avoid]);
 	return (
 		<div
 			ref={rootRef}
@@ -203,18 +311,33 @@ export default function HomeHeroLibrary({
 							id: "hero-skills",
 							name: "Skills pack",
 							width: 420,
-							priority: 2,
+							priority: 4,
 							content: <HomeHeroChoices services={services} kind="skills" />,
 						},
 						{
 							id: "hero-installation",
 							name: "Starting point",
 							width: 420,
-							priority: 1,
+							priority: 2,
 							content: (
 								<HomeHeroChoices services={services} kind="installation" />
 							),
 						},
+						{
+							id: "hero-workflows",
+							name: "Workflows",
+							width: 420,
+							priority: 1,
+							content: <HomeHeroChoices services={services} kind="workflows" />,
+						},
+						...stackLogos.map((logo) => ({
+							id: `hero-stack-${logo.name}`,
+							name: logo.name,
+							width: 200,
+							priority: 0,
+							keepClear: true,
+							content: <HomeHeroStackLogo logo={logo} />,
+						})),
 						...heroSpecimens.map((specimen) => ({
 							...specimen,
 							priority: 0,
@@ -223,7 +346,7 @@ export default function HomeHeroLibrary({
 					]
 						.filter(
 							(specimen) =>
-								specimen.priority === 0 ||
+								!["hero-skills", "hero-installation"].includes(specimen.id) ||
 								services.some((service) =>
 									service.surfaceIds.some((id) =>
 										specimen.id === "hero-skills"
@@ -233,11 +356,15 @@ export default function HomeHeroLibrary({
 								),
 						)
 						.sort((a, b) => a.name.localeCompare(b.name))
-						.map(({ id, width, priority, content }) => (
+						.map(({ id, width, priority, content, ...specimen }) => (
 							<div
 								key={id}
 								data-hero-specimen={id}
 								data-pack-priority={priority}
+								data-keep-clear={
+									priority > 0 ||
+									("keepClear" in specimen && specimen.keepClear)
+								}
 								className="absolute"
 							>
 								<div

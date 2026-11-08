@@ -49,6 +49,7 @@ specs/
   template/                         canonical-only; never copied to clones
     assembly/                       project assembly
     demos/                          demo fixtures
+    hero-collage/                   home hero collage reflects stack, skills, workflows
   product/                          empty here; a project's own specs
 ```
 

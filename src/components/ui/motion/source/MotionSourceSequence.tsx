@@ -15,6 +15,7 @@ import {
 	useState,
 } from "react";
 import { motionTiming } from "@/components/ui/foundations/motionTiming";
+import { getMotionStepEase } from "../runtime/timing";
 import {
 	clampMotionProgress,
 	MotionSourceContext,
@@ -313,7 +314,8 @@ const ScrollSequenceContext = createContext<ScrollSequenceSlices | null>(null);
 /**
  * Sub-range i of n: each item spans one `slow` reveal and starts `stagger`
  * seconds after the previous one, normalised to the whole sequence. The
- * linear intro over the same total therefore plays each slice over `slow`.
+ * linear intro over the same total therefore plays each slice over `slow`,
+ * and each item eases within its slice (`getScrollSequenceItemProgress`).
  */
 export function getScrollSequenceRanges(count: number, stagger: number) {
 	const span = Number(motionTiming.slow.duration);
@@ -423,9 +425,17 @@ function ScrollSequence({
 	);
 }
 
-function sliceProgress(value: number, [start, end]: ItemRange) {
+const easeItemSlice = getMotionStepEase("slow");
+
+/**
+ * An item's progress at Sequence progress `value`: its linear position in
+ * the slice, eased on the `slow` curve. The ease is monotonic and fixes 0
+ * and 1, so the catch-up intro (which scales the Sequence progress) still
+ * lands on exactly the value pure scrolling gives, and never passes it.
+ */
+function getScrollSequenceItemProgress(value: number, [start, end]: ItemRange) {
 	if (end <= start) return value >= end ? 1 : 0;
-	return clampMotionProgress((value - start) / (end - start));
+	return easeItemSlice(clampMotionProgress((value - start) / (end - start)));
 }
 
 type MotionSourceItemOwnProps = {
@@ -439,7 +449,8 @@ export type MotionSourceItemProps = MotionSourceItemOwnProps &
 
 /**
  * One staggered slice of a scroll Sequence's progress. Effects inside it
- * see 0 to 1 across the slice and keep their own `range` within it.
+ * see 0 to 1 across the slice, eased on `slow`, and keep their own `range`
+ * within it.
  */
 export function MotionSourceItem({
 	as: Tag = "div",
@@ -456,7 +467,9 @@ export function MotionSourceItem({
 	}
 	const nodeRef = useRef<HTMLElement | null>(null);
 	const [range, setRange] = useState<ItemRange>([0, 1]);
-	const progress = useMotionValue(sliceProgress(source.progress.get(), range));
+	const progress = useMotionValue(
+		getScrollSequenceItemProgress(source.progress.get(), range),
+	);
 	const parentProgress = source.progress;
 
 	useLayoutEffect(() => {
@@ -470,9 +483,9 @@ export function MotionSourceItem({
 	}, [slices]);
 
 	useLayoutEffect(() => {
-		progress.jump(sliceProgress(parentProgress.get(), range));
+		progress.jump(getScrollSequenceItemProgress(parentProgress.get(), range));
 		return parentProgress.on("change", (value) =>
-			progress.set(sliceProgress(value, range)),
+			progress.set(getScrollSequenceItemProgress(value, range)),
 		);
 	}, [parentProgress, progress, range]);
 

@@ -88,8 +88,12 @@ export const catalogContract = defineCatalogOwnerContract({
 			storyId: "ui-motion-motion-source--scroll-reveal-catch-up",
 		},
 		{
-			label: "Scroll Sequence staggers item sub-ranges",
+			label: "Scroll Sequence staggers eased item sub-ranges",
 			storyId: "ui-motion-motion-source--scroll-sequence-stagger",
+		},
+		{
+			label: "Tight 0.06s stagger keeps eased item sub-ranges",
+			storyId: "ui-motion-motion-source--scroll-sequence-tight-stagger",
 		},
 		{
 			label: "Staged footer-heading handoff composition",
