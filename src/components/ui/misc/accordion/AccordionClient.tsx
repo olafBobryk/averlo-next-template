@@ -147,7 +147,7 @@ export function AccordionClient({
 	return (
 		<div
 			className={clsx(
-				"group/accordion rounded-none border-0 bg-transparent transition-colors motion-micro",
+				"group/accordion rounded-none border-0 bg-transparent transition-colors motion-snap",
 				disabled && "opacity-60",
 				className,
 			)}
@@ -194,7 +194,7 @@ export function AccordionClient({
 					</span>
 					<span
 						aria-hidden
-						className="grid size-6 shrink-0 place-items-center text-muted-foreground transition-transform motion-micro group-data-[open=true]/accordion:rotate-180"
+						className="grid size-6 shrink-0 place-items-center text-muted-foreground transition-transform motion-snap group-data-[open=true]/accordion:rotate-180"
 					>
 						<Icon name="chevron-down" size="sm" />
 					</span>
@@ -226,7 +226,7 @@ function AccordionCardToggle() {
 			<Icon
 				aria-hidden
 				className={clsx(
-					"transition-transform motion-micro",
+					"transition-transform motion-snap",
 					state.isOpen && "rotate-180",
 				)}
 				name="chevron-down"
@@ -248,7 +248,7 @@ export function AccordionCardHeader({
 		<CardHeader
 			{...props}
 			className={clsx(
-				"grid-cols-[minmax(0,1fr)_auto_auto] transition-[padding,border-color] motion-micro",
+				"grid-cols-[minmax(0,1fr)_auto_auto] transition-[padding,border-color] motion-smooth",
 				className,
 				!state.isOpen && "!border-transparent !pb-0",
 			)}
@@ -354,7 +354,7 @@ export function AccordionCardClient({
 			<Card
 				{...cardProps}
 				className={clsx(
-					"group/accordion-card !pb-4 transition-[gap] motion-micro data-[open=false]:gap-0 data-[size=sm]:!pb-3",
+					"group/accordion-card !pb-4 transition-[gap] motion-smooth data-[open=false]:gap-0 data-[size=sm]:!pb-3",
 					disabled && "opacity-60",
 					className,
 				)}

@@ -95,10 +95,10 @@ export default function HeaderFull({
 	const showHeaderSurface = isScrolled || isMenuOpen;
 	const motionAllowed = useMotionAllowed(true);
 	const headerTransition: Transition = motionAllowed
-		? spring.macro
+		? spring.gentle
 		: instantTransition;
 	const menuTransition: Transition = motionAllowed
-		? spring.component
+		? spring.smooth
 		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
 

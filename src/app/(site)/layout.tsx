@@ -14,7 +14,7 @@ export default function SiteLayout({
 }>) {
 	return (
 		<SettingsProvider>
-			<MotionProvider expressive={0}>
+			<MotionProvider>
 				<IconProvider registry={openaiIconRegistry}>
 					{children}
 					<FormValidationClientMount />

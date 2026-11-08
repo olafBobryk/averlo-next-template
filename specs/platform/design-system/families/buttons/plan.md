@@ -4,7 +4,7 @@
 
 ## Summary
 
-`Button` morphs by default: string-child changes render through `MorphLabel` and the width eases on the disclosure spring; `morph={false}` opts out; loading keeps the fixed-width crossfade.
+`Button` morphs by default: string-child changes render through `MorphLabel` and the width eases on the `smooth` spring; `morph={false}` opts out; loading keeps the fixed-width crossfade.
 
 ## Technical Context
 

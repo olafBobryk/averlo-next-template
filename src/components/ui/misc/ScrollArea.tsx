@@ -5,10 +5,8 @@ import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import {
-	instantTransition,
-	motionTiming,
-} from "@/components/ui/foundations/motionTiming";
+import { instantTransition } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { Button } from "@/components/ui/primitives/Button";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
@@ -252,7 +250,7 @@ export function ScrollArea({
 						initial={{ opacity: 0, y: 8 }}
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: 8 }}
-						transition={motionAllowed ? motionTiming.scroll : instantTransition}
+						transition={motionAllowed ? spring.quick : instantTransition}
 					>
 						<Button
 							aria-label="Back to top"

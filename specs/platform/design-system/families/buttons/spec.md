@@ -19,7 +19,7 @@ One `Button` owns every clickable action and button-like link: its variant, size
 ### Session 2026-11-08
 
 - **Q: Do buttons morph by default?**
-  - A: Yes. When string `children` change, the label renders through `MorphLabel` and the width eases on the disclosure spring. `morph={false}` opts out. Loading keeps today's fixed-width crossfade to the spinner (BT3).
+  - A: Yes. When string `children` change, the label renders through `MorphLabel` and the width eases on the `smooth` spring. `morph={false}` opts out. Loading keeps today's fixed-width crossfade to the spinner (BT3).
 
 ### Session 2026-11-08 (AGENTS.md thinning)
 

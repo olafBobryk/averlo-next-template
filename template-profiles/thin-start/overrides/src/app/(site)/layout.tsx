@@ -12,7 +12,7 @@ export default function SiteLayout({
 }>) {
 	return (
 		<SettingsProvider>
-			<MotionProvider expressive={0}>
+			<MotionProvider>
 				{children}
 				<FormValidationClientMount />
 				<LoadingScreenMount />

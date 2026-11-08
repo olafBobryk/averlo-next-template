@@ -54,10 +54,10 @@ export default function HeaderCompact({
 	const activeMenuGroups = isSearchActive ? searchGroups : layout.menuGroups;
 	const motionAllowed = useMotionAllowed(true);
 	const headerTransition: Transition = motionAllowed
-		? spring.macro
+		? spring.gentle
 		: instantTransition;
 	const heightTransition: Transition = motionAllowed
-		? spring.component
+		? spring.smooth
 		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
 	const headerHeight = isMenuOpen
@@ -165,7 +165,7 @@ export default function HeaderCompact({
 						<div
 							data-open={isMenuOpen}
 							// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-							className="grid min-h-0 transition-[grid-template-rows,opacity] motion-component data-[open=false]:grid-rows-[0fr] data-[open=false]:opacity-0 data-[open=true]:grid-rows-[1fr] data-[open=true]:opacity-100"
+							className="grid min-h-0 transition-[grid-template-rows,opacity] motion-smooth data-[open=false]:grid-rows-[0fr] data-[open=false]:opacity-0 data-[open=true]:grid-rows-[1fr] data-[open=true]:opacity-100"
 							style={{
 								height: isMenuOpen
 									? `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`

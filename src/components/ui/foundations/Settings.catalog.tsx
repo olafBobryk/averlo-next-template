@@ -101,7 +101,7 @@ export const catalogContract = defineCatalogOwnerContract({
 		"The application root or a settings control must read or change shared UI preferences.",
 	],
 	chooseInstead: [
-		"Use MotionScope for a local expressive-motion adjustment that is not an application preference.",
+		"Use the motion steps in motionTiming and spring for transition values; they are not an application preference.",
 	],
 	compounds: ["AppearancePreference", "resolveAppearance"],
 	exclusions: [

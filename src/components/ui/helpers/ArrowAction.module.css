@@ -49,8 +49,7 @@
 	grid-area: 1 / 1;
 	width: 0.75rem;
 	height: 0.75rem;
-	transition: transform var(--motion-interaction-duration)
-		var(--motion-interaction-ease);
+	transition: transform var(--motion-snap-duration) var(--motion-snap-ease);
 	will-change: transform;
 }
 

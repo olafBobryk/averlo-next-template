@@ -3,25 +3,12 @@ import { useEffect } from "react";
 import { expect, userEvent } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { Button } from "../primitives/Button";
-import {
-	MotionProvider,
-	MotionScope,
-	useMotionTransition,
-} from "./MotionProvider";
+import { MotionProvider } from "./MotionProvider";
 import { catalogContract } from "./MotionProvider.catalog";
 import {
 	useIntroDisableOverride,
 	useMotionDisableOverride,
 } from "./motionDisableOverride";
-
-function TransitionEvidence() {
-	const transition = useMotionTransition("interaction");
-	return (
-		<output data-testid="transition-duration">
-			{String(transition.duration)}
-		</output>
-	);
-}
 
 function OverrideEvidence() {
 	const motionDisabled = useMotionDisableOverride();
@@ -59,7 +46,6 @@ const meta = {
 	excludeStories: ["catalogContract"],
 	title: "UI/Foundations/Motion Provider and Overrides",
 	component: MotionProvider,
-	subcomponents: { MotionScope },
 	tags: ["autodocs"],
 	parameters: {
 		catalogContract,
@@ -72,28 +58,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj;
-
-export const ScopedMotionVariables: Story = {
-	render: () => (
-		<MotionProvider expressive={-0.25}>
-			<MotionScope expressive={0.75}>
-				<div data-testid="motion-scope">
-					<TransitionEvidence />
-				</div>
-			</MotionScope>
-		</MotionProvider>
-	),
-	play: async ({ canvas }) => {
-		const scope = canvas.getByTestId("motion-scope").parentElement;
-		await expect(scope).toHaveAttribute("data-motion-scope");
-		await expect(scope?.getAttribute("style")).toContain(
-			"--motion-interaction-duration",
-		);
-		await expect(
-			Number(canvas.getByTestId("transition-duration").textContent),
-		).toBeGreaterThan(0);
-	},
-};
 
 export const AutomationOverrides: Story = {
 	render: () => <OverrideEvidence />,

@@ -75,7 +75,7 @@ export function DisclosurePresence({
 	const transition = useMemo<Transition>(
 		() =>
 			durationMs === undefined
-				? spring.disclosure
+				? spring.smooth
 				: {
 						type: "spring",
 						duration: Math.max(0, durationMs) / 1000,
@@ -90,8 +90,8 @@ export function DisclosurePresence({
 	const masked = mode === "masked";
 	const sequenced = mode === "sequenced";
 	const overflowVisible = open && (!shouldAnimate || settled);
-	// Springs drive every property; the fade uses the feedback spring.
-	const fade = spring.feedback;
+	// Springs drive every property; the fade uses the quick spring.
+	const fade = spring.quick;
 	const sizeTransition: Transition = shouldAnimate
 		? transition
 		: { duration: 0 };

@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import type * as React from "react";
-import { getSpring } from "@/components/ui/foundations/spring";
+import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
@@ -60,7 +60,7 @@ export function ComboboxMultiSelectInputContent<T>({
 	chipListClassName,
 }: ComboboxMultiSelectInputContentProps<T>) {
 	const motionAllowed = useMotionAllowed(true);
-	const chipTransition = getSpring("feedback", { intensity: "strong" });
+	const chipTransition = spring.quick;
 
 	const renderChipContent = (option: ComboboxMultiSelectOption<T>) => (
 		<>

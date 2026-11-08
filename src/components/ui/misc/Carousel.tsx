@@ -18,7 +18,7 @@ import {
 } from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import { getSpring } from "@/components/ui/foundations/spring";
+import { spring } from "@/components/ui/foundations/spring";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 export type CarouselItem = {
@@ -273,11 +273,7 @@ export function Carousel({
 			if (target === undefined) return;
 			settleAnimationRef.current?.stop();
 			if (shouldAnimate) {
-				settleAnimationRef.current = animate(
-					trackX,
-					target,
-					getSpring("interaction"),
-				);
+				settleAnimationRef.current = animate(trackX, target, spring.gentle);
 			} else {
 				trackX.jump(target);
 			}
@@ -317,7 +313,7 @@ export function Carousel({
 			settleAnimationRef.current?.stop();
 			if (shouldAnimate) {
 				settleAnimationRef.current = animate(trackX, target, {
-					...getSpring("interaction", { expressive: 0.35 }),
+					...spring.gentle,
 					velocity: velocityX,
 				});
 			} else {
@@ -491,7 +487,7 @@ export function Carousel({
 							aria-label={`Show slide ${index + 1}: ${item.label}`}
 							className={clsx(
 								focusRing.visibleDefault,
-								"size-2.5 cursor-pointer rounded-full border-0 bg-foreground/20 transition-[background-color,transform] motion-interactive",
+								"size-2.5 cursor-pointer rounded-full border-0 bg-foreground/20 transition-[background-color,transform] motion-snap",
 								activeIndex === index && "scale-[1.15] bg-primary",
 							)}
 							key={item.id}

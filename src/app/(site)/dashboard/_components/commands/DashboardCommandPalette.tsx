@@ -2,8 +2,8 @@
 
 import { motion, useIsPresent } from "motion/react";
 import * as React from "react";
-import { useMotionTransition } from "@/components/ui/foundations/MotionProvider";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
 import {
 	ModalDescription,
@@ -55,7 +55,7 @@ export function DashboardCommandPalette({
 	const present = useIsPresent();
 	const allowed = useMotionAllowed(true);
 	const off = useMotionDisableOverride();
-	const transition = useMotionTransition("disclosure");
+	const transition = spring.smooth;
 	const animate = anchored && allowed && !off;
 	React.useEffect(() => {
 		if (activeCommandId)

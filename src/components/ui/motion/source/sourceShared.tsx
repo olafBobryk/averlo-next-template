@@ -14,10 +14,8 @@ import {
 	useState,
 } from "react";
 import { useMotionDriverReady } from "@/components/ui/foundations/motionDriverContext";
-import {
-	getMotionTiming,
-	type MotionTimingPreset,
-} from "@/components/ui/foundations/motionTiming";
+import type { MotionStep } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { useAppReady } from "@/hooks/useAppReady";
 import {
 	MotionSourceContext,
@@ -25,7 +23,7 @@ import {
 	type MotionSourceMode,
 } from "./context";
 export type MotionSourceBreakpoint = "base" | "sm" | "md" | "lg" | "xl" | "2xl";
-export type MotionSourceTiming = MotionTimingPreset;
+export type MotionSourceTiming = MotionStep;
 
 export type MotionSourceStrategy =
 	| {
@@ -150,7 +148,7 @@ export function useProgressTarget(
 			return;
 		}
 		hasSettledInitialTarget.current = true;
-		const controls = animate(progress, target, getMotionTiming(timing));
+		const controls = animate(progress, target, spring[timing]);
 		return () => controls.stop();
 	}, [mode, progress, skipInitialAnimation, target, timing]);
 }

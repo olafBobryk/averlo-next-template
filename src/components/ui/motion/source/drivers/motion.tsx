@@ -14,11 +14,8 @@ import {
 	useState,
 } from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import {
-	getMotionTiming,
-	resolveMotionTransition as resolveMotionCssTransition,
-} from "@/components/ui/foundations/motionTiming";
-import { getSpring } from "@/components/ui/foundations/spring";
+import { motionTiming } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { clampMotionProgress, type MotionSourceMode } from "../context";
 import { useMotionParticipant } from "../scheduler/useMotionParticipant";
@@ -50,7 +47,7 @@ export function MotionScrollSource({
 		target: targetRef,
 		offset: strategy.offset ?? defaultScrollOffset,
 	});
-	const springProgress = useSpring(scrollYProgress, getSpring("scroll"));
+	const springProgress = useSpring(scrollYProgress, spring.smooth);
 	const sourceProgress =
 		strategy.smooth === false ? scrollYProgress : springProgress;
 	const progress = useMotionValue(staticProgress);
@@ -97,7 +94,7 @@ export function InteractionSource({
 			? "animated"
 			: "instant";
 	const progress = useMotionValue(appReady ? 0 : 1);
-	const timing = strategy.timing ?? "interactive";
+	const timing = strategy.timing ?? "quick";
 
 	useEffect(() => {
 		const root = targetRef.current;
@@ -180,7 +177,7 @@ export function BooleanSource({
 			? "animated"
 			: "instant";
 	const progress = useMotionValue(appReady ? Number(strategy.active) : 1);
-	const timing = strategy.timing ?? "interactive";
+	const timing = strategy.timing ?? "quick";
 	useProgressTarget(
 		progress,
 		mode === "static-final" ? 1 : Number(strategy.active),
@@ -222,7 +219,7 @@ export function MotionInViewSource({
 		progress,
 		enabled ? Number(inView) : 1,
 		enabled ? "animated" : "static-final",
-		"grand",
+		"slow",
 	);
 
 	return (
@@ -268,8 +265,8 @@ export function MotionRevealSource({
 				const duration = strategy.duration;
 				const transition =
 					Number.isFinite(duration) && duration !== undefined && duration > 0
-						? { ...resolveMotionCssTransition("reveal"), duration }
-						: getMotionTiming("grand");
+						? { ...motionTiming.slow, duration }
+						: spring.slow;
 				animationRef.current = animate(progress, 1, {
 					...transition,
 					delay,

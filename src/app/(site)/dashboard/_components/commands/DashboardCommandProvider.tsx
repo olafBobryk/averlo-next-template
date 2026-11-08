@@ -372,7 +372,7 @@ export function DashboardCommandTrigger({
 					aria-label="Open dashboard commands"
 					aria-haspopup="dialog"
 					aria-expanded={context.active}
-					className="flex h-full w-full min-w-0 items-center gap-2 px-3 text-left text-sm text-muted-foreground outline-none transition-colors motion-interactive hover:text-foreground"
+					className="flex h-full w-full min-w-0 items-center gap-2 px-3 text-left text-sm text-muted-foreground outline-none transition-colors motion-snap hover:text-foreground"
 					onClick={() => context.open(field.current ?? undefined)}
 					type="button"
 				>

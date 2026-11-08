@@ -48,8 +48,7 @@
 	}
 
 	.animate-ring {
-		animation: ring var(--motion-decorative-duration) var(--motion-ring-ease)
-			both;
+		animation: ring var(--motion-ring-duration) var(--motion-ring-ease) both;
 	}
 
 	.icon-bell-animate {
@@ -58,7 +57,6 @@
 
 	.icon-bell-animate:hover,
 	.group:hover .icon-bell-animate {
-		animation: ring var(--motion-decorative-duration) var(--motion-ring-ease)
-			both;
+		animation: ring var(--motion-ring-duration) var(--motion-ring-ease) both;
 	}
 }

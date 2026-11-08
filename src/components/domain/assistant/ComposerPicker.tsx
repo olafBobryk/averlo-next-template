@@ -2,8 +2,8 @@
 import { motion } from "motion/react";
 import type { KeyboardEvent, RefObject } from "react";
 import { useEffect, useId, useRef, useState } from "react";
-import { useMotionTransition } from "@/components/ui/foundations/MotionProvider";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
@@ -55,7 +55,7 @@ export function useComposerPicker({
 	const [error, setError] = useState("");
 	const [retry, setRetry] = useState(0);
 	const container = useRef<HTMLDivElement>(null);
-	const transition = useMotionTransition("disclosure");
+	const transition = spring.smooth;
 	const allowed = useMotionAllowed(true);
 	const off = useMotionDisableOverride();
 	const animate = allowed && !off;
@@ -252,7 +252,7 @@ export function useComposerPicker({
 									aria-selected={i === index}
 									onMouseDown={(event) => event.preventDefault()}
 									onClick={() => choose(item)}
-									className={`flex w-full text-left min-h-9 items-center gap-3 rounded-[17px] px-2 py-2 cursor-pointer motion-micro transition-colors ${i === index ? "bg-[var(--button-ghost-hover)]" : "hover:bg-[var(--button-ghost-hover)]"}`}
+									className={`flex w-full text-left min-h-9 items-center gap-3 rounded-[17px] px-2 py-2 cursor-pointer motion-snap transition-colors ${i === index ? "bg-[var(--button-ghost-hover)]" : "hover:bg-[var(--button-ghost-hover)]"}`}
 								>
 									<span className="flex size-4 shrink-0 items-center justify-center">
 										<Icon

@@ -1,10 +1,10 @@
 import { calcGeneratorDuration, cubicBezier, spring } from "motion";
 import type { Transition } from "motion/react";
 import {
-	getMotionTiming,
-	type MotionTimingPreset,
-	resolveMotionTransition as resolveMotionCssTransition,
+	type MotionStep,
+	motionTiming,
 } from "@/components/ui/foundations/motionTiming";
+import { spring as stepSpring } from "@/components/ui/foundations/spring";
 
 function isBezier(ease: unknown): ease is [number, number, number, number] {
 	return (
@@ -42,18 +42,18 @@ function toGsapTiming(transition: Transition) {
 	};
 }
 
-export function getGsapTiming(preset: MotionTimingPreset) {
-	return toGsapTiming(getMotionTiming(preset));
+export function getGsapTiming(step: MotionStep) {
+	return toGsapTiming(stepSpring[step]);
 }
 
 export function getGsapRevealTiming(duration?: number) {
 	if (Number.isFinite(duration) && duration !== undefined && duration > 0) {
 		return toGsapTiming({
-			...resolveMotionCssTransition("reveal"),
+			...motionTiming.slow,
 			duration,
 		});
 	}
-	return getGsapTiming("grand");
+	return getGsapTiming("slow");
 }
 
 /** Absolute keyframes and incoming velocity preserve interrupted/reversed springs. */
@@ -75,19 +75,7 @@ export function createProgressTrajectory(
 					),
 		};
 	}
-	const transition = getMotionTiming("grand");
-	if (transition.type !== "spring") {
-		const timing = getGsapTiming("grand");
-		return {
-			durationMs: timing.duration * 1000,
-			sample: (milliseconds: number) =>
-				from +
-				(to - from) *
-					timing.ease(
-						Math.min(1, Math.max(0, milliseconds / (timing.duration * 1000))),
-					),
-		};
-	}
+	const transition = stepSpring.slow;
 	const generator = spring({
 		keyframes: [from, to],
 		stiffness: Number(transition.stiffness),

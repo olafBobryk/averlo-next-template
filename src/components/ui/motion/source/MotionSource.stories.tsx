@@ -141,7 +141,7 @@ function StrategyTeachingSurface() {
 				>
 					<MotionSource.Root
 						asChild
-						strategy={{ type: "hover", timing: "component" }}
+						strategy={{ type: "hover", timing: "smooth" }}
 					>
 						<Link
 							className={`inline-flex rounded-sm ${focusRing.visibleDefault}`}
@@ -236,10 +236,7 @@ export const StrategyMatrix: Story = {
 			"data-motion-source-strategy",
 			"hover",
 		);
-		await expect(direct).toHaveAttribute(
-			"data-motion-source-timing",
-			"component",
-		);
+		await expect(direct).toHaveAttribute("data-motion-source-timing", "smooth");
 		await waitFor(() => expect(allLinesHidden(direct)).toBe(true));
 		await userEvent.hover(directBoundary);
 		await waitFor(() => expect(allLinesHidden(direct)).toBe(true));
@@ -330,7 +327,7 @@ export const HybridDriverBoundary: Story = {
 
 				<MotionSource.Root
 					asChild
-					strategy={{ type: "hover", timing: "component" }}
+					strategy={{ type: "hover", timing: "smooth" }}
 				>
 					<button
 						className={`rounded-lg border border-subtle p-6 text-start ${focusRing.visibleDefault}`}
@@ -527,9 +524,7 @@ function FooterHeadingHandoffSurface() {
 			>
 				{active ? "Reset footer heading" : "Complete footer heading"}
 			</Button>
-			<MotionSource.Root
-				strategy={{ type: "boolean", active, timing: "grand" }}
-			>
+			<MotionSource.Root strategy={{ type: "boolean", active, timing: "slow" }}>
 				<Text as="h2" theme="dark" variant="headingPage">
 					<MotionEffect.TextStagger
 						as="span"

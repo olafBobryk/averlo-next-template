@@ -108,7 +108,7 @@ function SliderInputRoot({
 					<div className="group relative flex h-full min-h-8 min-w-0 flex-1 items-center has-[:disabled]:opacity-50">
 						<span
 							aria-hidden
-							className="pointer-events-none absolute inset-x-0 h-1.5 overflow-hidden rounded-full bg-foreground/10 transition-[background-color,box-shadow] motion-interactive group-hover:bg-foreground/15 group-has-[:focus-visible]:ring-3 group-has-[:focus-visible]:ring-ring/30"
+							className="pointer-events-none absolute inset-x-0 h-1.5 overflow-hidden rounded-full bg-foreground/10 transition-[background-color,box-shadow] motion-snap group-hover:bg-foreground/15 group-has-[:focus-visible]:ring-3 group-has-[:focus-visible]:ring-ring/30"
 							data-slot="slider-track"
 						>
 							<span

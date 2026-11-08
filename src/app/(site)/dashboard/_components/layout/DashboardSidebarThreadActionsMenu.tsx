@@ -132,7 +132,7 @@ export function DashboardSidebarThreadActionsMenu({
 	return (
 		<span
 			className={clsx(
-				"flex shrink-0 overflow-hidden transition-[width,opacity] motion-interactive w-0 opacity-0 group-hover/sidebar-row:w-5 group-hover/sidebar-row:opacity-100 group-focus-within/sidebar-row:w-5 group-focus-within/sidebar-row:opacity-100 [@media(hover:none)]:w-5 [@media(hover:none)]:opacity-100",
+				"flex shrink-0 overflow-hidden transition-[width,opacity] motion-quick w-0 opacity-0 group-hover/sidebar-row:w-5 group-hover/sidebar-row:opacity-100 group-focus-within/sidebar-row:w-5 group-focus-within/sidebar-row:opacity-100 [@media(hover:none)]:w-5 [@media(hover:none)]:opacity-100",
 				(open || pending) && "!w-5 !opacity-100",
 			)}
 		>
@@ -148,7 +148,7 @@ export function DashboardSidebarThreadActionsMenu({
 						size="md"
 						className={
 							motionAllowed
-								? "group-hover:scale-[1.02] transition-transform motion-interactive"
+								? "group-hover:scale-[1.02] transition-transform motion-snap"
 								: undefined
 						}
 					/>

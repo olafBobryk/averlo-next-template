@@ -73,7 +73,7 @@ export function DashboardSidebarSection({
 							name="chevron-down"
 							size="sm"
 							className={clsx(
-								"transition-transform motion-micro",
+								"transition-transform motion-snap",
 								open && "rotate-180",
 							)}
 						/>

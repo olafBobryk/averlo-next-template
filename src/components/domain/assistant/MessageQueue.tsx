@@ -6,8 +6,8 @@ import {
 	useIsPresent,
 } from "motion/react";
 import { useState } from "react";
-import { useMotionTransition } from "@/components/ui/foundations/MotionProvider";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import { spring } from "@/components/ui/foundations/spring";
 import { ContentPresence } from "@/components/ui/motion/presence/ContentPresence";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/surfaces";
@@ -61,11 +61,8 @@ export function MessageQueue({
 	const locked = disabled || sendingQueuedItem;
 	const motionAllowed = useMotionAllowed(true);
 	const motionDisabled = useMotionDisableOverride();
-	const duration = useMotionTransition("disclosure").duration;
 	const transition =
-		motionAllowed && !motionDisabled
-			? { type: "spring" as const, bounce: 0, duration }
-			: { duration: 0 };
+		motionAllowed && !motionDisabled ? spring.smooth : { duration: 0 };
 	const [hovered, setHovered] = useState<string | null>(null);
 	const [focused, setFocused] = useState<string | null>(null);
 	const [dragged, setDragged] = useState<string | null>(null);

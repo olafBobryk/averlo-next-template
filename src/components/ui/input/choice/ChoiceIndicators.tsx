@@ -27,7 +27,7 @@ export function ChoiceIndicatorRadio({
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator relative size-[22px] shrink-0 overflow-hidden rounded-full transition-colors motion-micro",
+				"choice-field-indicator relative size-[22px] shrink-0 overflow-hidden rounded-full transition-colors motion-snap",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",
@@ -39,7 +39,7 @@ export function ChoiceIndicatorRadio({
 		>
 			<div
 				className={clsx(
-					"absolute inset-[5px] size-3 rounded-full bg-primary-foreground transition-[scale] motion-interactive",
+					"absolute inset-[5px] size-3 rounded-full bg-primary-foreground transition-[scale] motion-snap",
 					checked ? "scale-100" : "scale-0",
 				)}
 			/>
@@ -56,7 +56,7 @@ export function ChoiceIndicatorMulti({
 	return (
 		<div
 			className={clsx(
-				"choice-field-indicator relative shrink-0 overflow-hidden transition-colors motion-micro",
+				"choice-field-indicator relative shrink-0 overflow-hidden transition-colors motion-snap",
 				size === "compact"
 					? "size-[18px] rounded-[6px]"
 					: "size-[22px] rounded-[8px]",
@@ -74,7 +74,7 @@ export function ChoiceIndicatorMulti({
 				name="check"
 				size="sm"
 				className={clsx(
-					"absolute text-primary-foreground transition-[scale] motion-interactive",
+					"absolute text-primary-foreground transition-[scale] motion-snap",
 					size === "compact" ? "inset-[3px]" : "inset-[5px]",
 					checked ? "scale-100" : "scale-0",
 				)}
@@ -92,7 +92,7 @@ export function ChoiceIndicatorToggle({
 	const indicator = (
 		<div
 			className={clsx(
-				"choice-field-indicator relative h-[26px] min-w-[42px] shrink-0 overflow-hidden rounded-full transition-colors motion-micro",
+				"choice-field-indicator relative h-[26px] min-w-[42px] shrink-0 overflow-hidden rounded-full transition-colors motion-snap",
 				focusRing.peerDefault,
 				focusRing.peerError,
 				disabled ? "opacity-60" : "opacity-100",
@@ -104,7 +104,7 @@ export function ChoiceIndicatorToggle({
 		>
 			<div
 				className={clsx(
-					"absolute left-1 top-1 h-[18px] w-[22px] rounded-full transition-[background-color,translate,box-shadow] motion-interactive",
+					"absolute left-1 top-1 h-[18px] w-[22px] rounded-full transition-[background-color,translate,box-shadow] motion-snap",
 					checked
 						? "translate-x-[calc(20px-0.5rem)] bg-primary-foreground shadow-sm"
 						: "translate-x-0 bg-white shadow-sm dark:bg-muted-foreground",

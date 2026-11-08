@@ -3,10 +3,8 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
-import {
-	getMotionTiming,
-	type MotionTimingPreset,
-} from "@/components/ui/foundations/motionTiming";
+import type { MotionStep } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { Loader } from "@/components/ui/misc/Loader";
 import {
 	ErrorState,
@@ -25,7 +23,7 @@ type SuspenseBoundaryProps = {
 	className?: string;
 	disableWhenReducedMotion?: boolean;
 	forceReducedMotion?: boolean;
-	timingPreset?: MotionTimingPreset;
+	step?: MotionStep;
 };
 
 export function SuspenseBoundary({
@@ -39,7 +37,7 @@ export function SuspenseBoundary({
 	className,
 	disableWhenReducedMotion = true,
 	forceReducedMotion,
-	timingPreset = "micro",
+	step = "snap",
 }: SuspenseBoundaryProps) {
 	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
 	const shouldAnimate = motionAllowed && forceReducedMotion !== true;
@@ -60,7 +58,7 @@ export function SuspenseBoundary({
 								className={clsx(className)}
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
-								transition={getMotionTiming(timingPreset)}
+								transition={spring[step]}
 							>
 								{resolvedFallback}
 							</motion.div>
@@ -76,7 +74,7 @@ export function SuspenseBoundary({
 							className={clsx(className)}
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
-							transition={getMotionTiming(timingPreset)}
+							transition={spring[step]}
 						>
 							{children}
 						</motion.div>
@@ -135,7 +133,7 @@ export function SuspenseBoundary({
 					aria-hidden={contentHidden || undefined}
 					initial={false}
 					animate={{ opacity: contentHidden ? 0 : 1 }}
-					transition={getMotionTiming(timingPreset)}
+					transition={spring[step]}
 				>
 					{children}
 				</motion.div>
@@ -145,7 +143,7 @@ export function SuspenseBoundary({
 						aria-hidden={!contentHidden || undefined}
 						initial={false}
 						animate={{ opacity: contentHidden ? 1 : 0 }}
-						transition={getMotionTiming(timingPreset)}
+						transition={spring[step]}
 					>
 						{overlayContent}
 					</motion.div>
@@ -175,7 +173,7 @@ export function SuspenseBoundary({
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
-				transition={getMotionTiming(timingPreset)}
+				transition={spring[step]}
 			>
 				{content}
 			</motion.div>
