@@ -21,6 +21,11 @@ One shared dashboard shell owns the chrome around every dashboard page: geometry
 - **Q: Where did these rules come from?**
   - A: The dashboard layout `AGENTS.md` and parts of the registry and platform `AGENTS.md` files, which had no spec home. The rules are copied here unchanged in meaning so those files can keep only structure and pointers.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `plugins/averlo/README.md` (origin/main `3fd01907`) with no other spec home. They are FR-011 to FR-013, with their meaning kept. Surfaces, geometry, sidebar layout, account footer, toolbar, gutters and scroll ownership from the layout `AGENTS.md` were already FR-001 to FR-007.
+
 ## Requirements
 
 ### FR-001: Surfaces and workspace
@@ -62,6 +67,18 @@ Contextual commands MUST register through the shell-owned command provider and u
 ### FR-010: Route identity stays with the registry
 
 Canonical route identity and ancestry MUST remain with the route registry, not the layout. Browser metadata comes from the shared family factories, not shell enrichment (`specs/platform/navigation/metadata`).
+
+### FR-011: The sidebar is the navigation layer
+
+The workspace MUST be one inset surface below a contextual toolbar on the recessed outer background. The sidebar is the raised navigation layer that owns workspace identity, search and account controls, and its category labels come from dashboard registry metadata. Section headings sit outside the cards that group related properties (`specs/platform/content/hierarchy` FR-005).
+
+### FR-012: Command search opens in place
+
+Command search MUST expand from the visible sidebar field or rail control without moving the field or dimming the app. Phone drawer search stays anchored in its drawer; only keyboard opening without a visible anchor uses the viewport inset. Command hierarchy uses plain icons, two-line rows and indentation.
+
+### FR-013: File preview split
+
+The file preview split MUST mount around both the page toolbar and its content. The file toolbar aligns with the page toolbar on the shell surface, both panes use the page background, and the viewer is neither a nested card nor an independently elevated surface.
 
 ## Success Criteria
 

@@ -19,6 +19,11 @@ Keep installed destinations, semantic ancestry and contextual navigation consist
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/lib/surfaces/AGENTS.md` (origin/main `3fd01907`) with no other spec home. It is FR-004, with its meaning kept. One identity per destination, no parallel maps, semantic ancestry, contextual-command unregistration and closing command search before execution were already FR-001 to FR-003.
+
 ## Requirements
 
 ### FR-001: Canonical installed destinations
@@ -47,3 +52,7 @@ Surface-specific actions MUST be available only while their owning surface is ac
 
 - **When** the active surface unmounts and another route opens
 - **Then** its former contextual commands are no longer offered
+
+### FR-004: Identity verification covers its edges
+
+Route identity verification MUST cover dynamic-parameter escaping, exact and pattern lookup, and absent-profile boundaries.

@@ -19,6 +19,11 @@ Provide shared canonical and social destination consistency, centrally derived a
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/app/(site)/(dev)/internal/AGENTS.md` and `src/config/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-004 to FR-007, with their meaning kept. Private route-first noindex titles, canonical consistency, code-owned utility metadata and central app identity were already FR-001 to FR-003.
+
 ## Requirements
 
 ### FR-001: Private title and indexing policy
@@ -47,3 +52,19 @@ Page metadata MUST derive shared app identity through the canonical metadata own
 
 - **When** the configured app identity changes
 - **Then** participating route metadata uses that identity without page-specific name replacements
+
+### FR-004: Internal availability follows the profile
+
+Selected internal surfaces MUST stay reachable in production unless their nearest policy declares them development-only. `/internal/testing` is development-only and production-gated. Omitted surfaces fail closed because assembly removes their routes and generated navigation entries. Production guards on `/api/debug`, `/api/dev` and `/api/internal` MUST NOT be weakened.
+
+### FR-005: Private development routes stay non-indexable
+
+Testing, component-export and other private development routes MUST stay non-indexable.
+
+### FR-006: Metadata outputs stay in parity
+
+Title, description, canonical, robots, Open Graph and Twitter output MUST agree. Canonicals derive from installed hrefs, never from incidental request queries or CMS input.
+
+### FR-007: Navigation labels are presentation data
+
+Navigation labels and descriptions MUST be treated as route presentation data. No second marketing document is built from navigation labels, and dashboard metadata is not copied into page-local exports. Route pages MUST NOT hardcode app names, title separators, robots, canonical or social metadata.

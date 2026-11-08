@@ -19,6 +19,11 @@ Keep data-dependent regions understandable and usable while reading data, reserv
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/app/(site)/dashboard/_components/entities/AGENTS.md`, `src/components/ui/misc/AGENTS.md` and `src/components/ui/misc/state/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-008 and FR-009, with their meaning kept; live/skeleton parity, inert placeholders and live static context were already FR-001 to FR-004.
+
 ## Requirements
 
 ### FR-001: Preserve independent known content
@@ -123,3 +128,11 @@ Initial and region loading MUST remain distinct from a user-initiated pending ac
 
 - **When** a form submits while other content is already available
 - **Then** the submit action owns pending feedback under `specs/platform/data/forms` and unrelated content is not replaced by loading placeholders
+
+### FR-008: Skeletons belong to their live owner
+
+A component's loading state MUST belong to its live component as `Component.Skeleton` and be reviewed in the owner's colocated stories. The skeleton preserves the live owner's outer DOM, wrapper layout, spacing and breakpoint structure, replacing only content nodes.
+
+### FR-009: Complete state owners first
+
+A region MUST select an existing complete state, live or skeleton owner before generic loading pieces. Generic state is used only when no owner applies or inside an approved extension; a missing boundary is reported instead of building an approximate feature-local state tree.

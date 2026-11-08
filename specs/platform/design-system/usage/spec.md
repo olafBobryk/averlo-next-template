@@ -23,6 +23,11 @@ Make supported shared UI behavior discoverable and faithful across runtime consu
 - **Q: What does this spec add?**
   - A: The owner-per-pattern table (FR-006), the never-re-implement list (FR-007) and the stated-reason rule for new variants and components (FR-008), so the folder `AGENTS.md` files can stay thin.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/components/AGENTS.md`, `src/components/ui/AGENTS.md`, `src/components/ui/primitives/AGENTS.md`, `src/components/branding/AGENTS.md`, `src/components/ui/icons/AGENTS.md`, `src/components/composites/markdown/AGENTS.md` and `plugins/averlo/README.md` (icons) (origin/main `3fd01907`) with no other spec home. They are FR-009 to FR-020, with their meaning kept. Storybook-owned support, neutral teaching, distinct wrappers, stable public names and mounted native semantics were already FR-001 to FR-005. The assistant tool-call and approval rule from `src/components/domain/assistant/AGENTS.md` lives with the dashboard pages spec.
+
 ## Requirements
 
 ### FR-001: Discoverable supported owner contract
@@ -141,6 +146,54 @@ A new variant, size, component, icon or owner MUST be listed in its spec and PR 
 
 - **When** a design needs a button size the owner lacks
 - **Then** the PR names the size, the reason no existing size fits, and the story that teaches it
+
+### FR-009: Inventory interactive roles first
+
+Before composing a form or settings surface, every interactive role (fields, uploads, disclosures, navigation, secondary actions) MUST be inventoried and mapped to its owner. Native HTML is no exemption: `details`/`summary` MUST NOT duplicate the shared Accordion.
+
+### FR-010: Compare before adding a variant
+
+Before adding a variant, the full supported contract, all current values and their consumers MUST be compared for behaviour, semantic purpose and complete visual signature, and an equivalent value is reused. No product, section, route, brand or reference-specific aliases. A new value updates the contract, exhaustive teaching and consumers together (FR-002, FR-008).
+
+### FR-011: Global defaults live in the owner
+
+A requested global default MUST be made in the owner and its teaching, not in compensating consumer styles.
+
+### FR-012: Extensions are additive
+
+`className` and other extensions MUST be additive: they never remove required semantics, focus behaviour, slot identity or structural selectors. Overriding owner geometry or styling signals an API gap unless the user explicitly asks for that departure.
+
+### FR-013: No parallel trees or exposed internals
+
+Feature code MUST NOT rebuild a complete owner from raw parts or expose its private helpers, and MUST NOT add parallel component trees, overlays, registries or reference indexes. Shared behaviour stays with the narrowest coherent owner.
+
+### FR-014: Brand
+
+Consumers MUST NOT replace the tone variants or token-driven focus behaviour of `Logo`.
+
+### FR-015: Icon provider
+
+The default icon provider is the OpenAI Apps SDK UI set, through Averlo's named registry. An application MAY replace the provider without changing semantic icon names. Fill defaults and state overrides live in the `Icon` Storybook contract and native SDK fill states are preserved; Averlo surface and typography tokens are not replaced for icons. Unsupported brand and rich-text glyphs keep explicit Phosphor fallbacks.
+
+### FR-016: Icons by meaning
+
+Registered symbols MUST be chosen by semantic purpose (upload, download, filter, rename, delete, restore, overflow), with file-specific folder, video-play, audio-waveform, table or code symbols instead of one generic document for every file. Visible labels stay where they fit and every icon-only control has an accessible name. Icon-only controls use the shared square icon-button size, not a text button's width. A missing meaning extends the named registry for the active provider; an unrelated glyph or duplicate inline SVG is never substituted. Rendered examples are verified.
+
+### FR-017: Control icons are decorative
+
+Icons inside controls MUST be decorative by default; accessible naming and visible focus belong to the containing control. Physical directions are never flipped globally.
+
+### FR-018: Markdown stays a closed format
+
+Markdown MUST NOT expose arbitrary `className`, JSX, HTML passthrough, data registries or product-specific card directives. Underline is the only allowlisted HTML-shaped construct: the editor stores paired `<u>...</u>` tags and `Markdown.Render` transforms only exact paired tags; general raw HTML parsing is never enabled for it.
+
+### FR-019: Markdown rendering
+
+`Markdown.Render` MUST stay presentation-authoritative. Renderer task markup is non-interactive and does not change the Lexical-owned editor DOM, and task-list styling does not suppress ordinary mixed-list markers. Tables own their local overflow; no universal minimum width and no table overflow moved to the whole editor canvas. `Markdown.Editor.Skeleton` preserves the live editor's density-owned minimum toolbar and content topology without predicting document-driven expansion.
+
+### FR-020: Markdown editor controls
+
+Visible editor controls MUST use the application icon and interaction systems; package-owned toolbar, menu and link-dialog UI is not acceptable. Responsive toolbar collapse is measurement-driven.
 
 ## Success Criteria
 

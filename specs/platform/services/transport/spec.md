@@ -19,6 +19,11 @@ Make API outcomes consistent and testable while preserving server credential bou
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/lib/AGENTS.md` and `src/lib/api/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-004 and FR-005, with their meaning kept; centralized request behaviour, the replaceable fetcher, typed outcomes and caller-owned feedback were already FR-001 to FR-003.
+
 ## Requirements
 
 ### FR-001: Consistent request outcomes
@@ -47,3 +52,11 @@ Sensitive provider credentials MUST remain on the server. Transport MUST NOT own
 
 - **When** a server provider request fails
 - **Then** the client receives a safe failure without credentials and its initiating surface owns recovery feedback
+
+### FR-004: Canonical endpoint wrappers
+
+App code SHOULD call canonical endpoint wrappers rather than scattering raw `fetch`. A facade wrapper MUST be exposed only for intended cross-owner reuse.
+
+### FR-005: Injected environment assumptions
+
+Browser defaults MUST stay explicit. Project environment and service assumptions are injected rather than hardwired into generic factories.

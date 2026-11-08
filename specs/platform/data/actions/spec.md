@@ -19,6 +19,11 @@ Make non-form state changes understandable, recoverable and safe across action g
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/app/(site)/dashboard/_components/entities/AGENTS.md` and `src/lib/feedback/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-007 to FR-010, with their meaning kept. The pending owner, channel ownership, durable success instructions, confirmation, optimistic rollback, single replacement navigation and active-send cancellation were already FR-001 to FR-006.
+
 ## Requirements
 
 ### FR-001: One pending action owner
@@ -84,3 +89,24 @@ Pending sends MUST retain their initiating action owner and an active cancellabl
 
 - **When** a run is active while another content region loads
 - **Then** the user can still invoke cancellation and edit any independent retained draft
+
+### FR-007: Failed confirmation stays open
+
+Entity deletion MUST use the shared confirmation primitive, with impacts and warnings where useful. A failed confirmation returns `false` to stay open and preserves its input, selection and the last durable state.
+
+**Scenario: Deletion fails inside the confirmation**
+
+- **When** a confirmed deletion is rejected or throws
+- **Then** the confirmation stays open with its input and selection, and the last durable state is still shown
+
+### FR-008: Deletion declares its completion
+
+Deletion completion MUST declare `refresh` for collection actions or `navigate` for detail exits. Navigation owns exactly one push or replacement and never refreshes the deleted detail route.
+
+### FR-009: InlineError presentation follows its container
+
+`InlineError` MUST use card presentation for a standalone page or composer failure and inline presentation inside an already bounded surface. Composer-adjacent approval, queue and error surfaces keep the shared `Card` fill and elevation.
+
+### FR-010: One feedback system
+
+Collection completion MUST follow its collection owner. Feature code MUST NOT add local confirmations, notification hosts or parallel feedback systems; force-review states use the same owners.

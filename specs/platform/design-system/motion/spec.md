@@ -8,7 +8,7 @@
 
 **Builds on**: `specs/platform/design-system/usage`, `specs/platform/design-system/families/presence`, `specs/platform/design-system/families/buttons`, `specs/platform/data/loading`
 
-**Verified by**: [docs/testing/interactions.md](../../../../docs/testing/interactions.md), [docs/operations/scroll-performance.md](../../../../docs/operations/scroll-performance.md), and the Storybook play tests named per rule
+**Verified by**: [docs/testing/interactions.md](../../../../docs/testing/interactions.md), `docs/operations/scroll-performance.md` when installed, and the Storybook play tests named per rule
 
 ## Purpose
 
@@ -38,6 +38,11 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
   - A: Springs are the model (Olaf: "modeled by the real world"). Every JS-driven animation uses its step's spring; duration plus ease is only the matched CSS fallback where no JS runs (U5).
 - **Q: Do section reveals use a duration?**
   - A: Only time-based ones (the `in-view` and `reveal` sources), on `slow`. Scroll-scrubbed reveals follow scroll progress and have no duration.
+
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/components/ui/motion/AGENTS.md`, `src/components/ui/foundations/AGENTS.md` and `src/components/ui/helpers/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-005 to FR-012, with their meaning kept; responsive CSS-first layout, bounded hidden work, motion never gating agency and source/effect ownership were already FR-001 to FR-004 and R1. Shared focus tokens moved to `specs/platform/design-system/families/overlays` FR-014; the Lenis scroll transport to `specs/platform/design-system/scroll` S14.
 
 ## Requirements
 
@@ -81,6 +86,39 @@ Coordinated motion MUST preserve a clear activation/progress owner and effect ma
 - **When** the viewport changes or playback is interrupted
 - **Then** content and controls remain usable and competing animation/reset owners do not leave the surface stuck
 
+### Drivers, schedulers and owners
+
+### FR-005: One driver choice, made centrally
+
+Hybrid MUST be the default driver and Motion the maintained fallback; effects and product call sites never select drivers. In hybrid, GSAP drives reveal, in-view and scroll-linked progress and Motion drives direct interaction sources (hover, boolean state). Effects stay driver-agnostic on the shared scalar progress contract.
+
+### FR-006: One scheduler; sources own reveal
+
+There MUST be one global scheduler (the site `MotionProvider`), with no page-local or nested global schedulers. `MotionSource.Sequence` enters its nearest scheduler once and owns relative descendant reveal batching. Viewport re-entry reset is owned by the scheduler and source through shared progress; effects never install reveal observers or reset themselves.
+
+### FR-007: `CounterpartReveal` ownership
+
+`CounterpartReveal` MUST own coincident base and counterpart geometry, decorative duplicate semantics, measured anchor alignment and reversible mask selection. Callers own the two treatments, the marked anchor and a declarative circle, swipe or grid strategy; strategies never own content.
+
+### FR-008: Motion wrappers keep the real owner
+
+Interaction wrappers MUST preserve the real owner and never create duplicate focus stops; the `owner-hover` owner keeps semantics, accessible naming and visible focus. Decorative `ArrowAction` instances never enter the accessibility tree. Labeled divider content is never scaled.
+
+### FR-009: CSS interactions stay CSS
+
+Ordinary CSS interactions MUST NOT take a `motion/react` dependency just to use a spring; they use their step's CSS fallback (U5). Transitions and springs keep their token mapping, with no hardcoded page-local timing systems (U1).
+
+### FR-010: Theme switching is atomic
+
+Theme switching MUST be an atomic two-frame CSS-transition transaction. It never stops, restarts or remounts animations, loaders or motion timelines.
+
+### FR-011: Surface tints are preserved
+
+Surface tint recipes MUST preserve their interpolation space, tint strength and underlying surface, including inherited `--ui-surface-color` ownership.
+
+### FR-012: Memoization needs a reason
+
+Motion code SHOULD memoize only for correctness or a measured performance benefit.
 
 ### U: Universal
 
