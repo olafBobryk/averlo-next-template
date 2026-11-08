@@ -27,6 +27,11 @@ Keep controls and layered interactions operable through accessible names, native
 - **Q: Toasts for long promises?**
   - A: The toast promise helper gains a cancel option (FR-009).
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/components/ui/overlays/AGENTS.md`, `src/components/ui/overlays/modal/AGENTS.md`, `src/components/ui/primitives/AGENTS.md`, `src/components/ui/foundations/AGENTS.md` (focus tokens) and `plugins/averlo/README.md` (origin/main `3fd01907`) with no other spec home. They are FR-010 to FR-014, with their meaning kept. The README called the compact-row frame "muted"; that variant is retired, so FR-010 names the default xxs `InputFrame`. Focus entry and return, the single pending close lock, anchored versus blocking roles and no second portal stack were already FR-001 to FR-004 and FR-008; the old minimum-width and opposite-edge positioning rule is superseded by FR-005 and FR-006.
+
 ## Requirements
 
 ### Keyboard and overlays (migrated)
@@ -119,6 +124,28 @@ Blocking flows MUST use `useModal`/`ModalForm`/`ModalCard`, confirmation MUST us
 
 - **When** the caller cancels the promise it passed to `showToast.promise`
 - **Then** the loading toast is dismissed and no success or error toast follows
+
+### Menu composition, surfaces and focus
+
+### FR-010: Dropdown separation and mixed rows
+
+Dropdown separation MUST use independent `Divider`s: full width between major content blocks, inset between action groups, and never a separator border on an interactive row. Mixed controls and actions use `Dropdown.Menu` custom control entries; a consumer never rebuilds the list. A compact row that needs a hover background pairs a default-variant xxs `InputFrame` with xs `ghost` buttons.
+
+### FR-011: Overlay fills
+
+`Float` MUST use a distinct raised fill; modals keep the `Card` fill at overlay elevation.
+
+### FR-012: Stacked modals
+
+The modal shell MUST own the topmost focus context and a reference-counted body scroll lock across stacked modals. Modal step state MUST NOT submit early.
+
+### FR-013: Recursive menus keep a flat DOM
+
+Recursive `Dropdown`/`Listbox` MUST preserve the exact flat DOM when no option has children. Navigation, active descendant, focus return and dismissal stay with the owning cascade level.
+
+### FR-014: Focus and keyboard are never forked
+
+Shared focus tokens MUST NOT be weakened. Consumers never override visible focus globally, install duplicate global shortcut listeners or fork composite keyboard behaviour.
 
 ## API and defaults
 

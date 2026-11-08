@@ -19,6 +19,11 @@ Keep the canonical template demonstrations truthful, resettable and isolated whi
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `PRODUCT.md`, `src/lib/auth/AGENTS.md` and `src/app/(component-export)/internal/demo/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-006 to FR-012, with their meaning kept. Resettable, external-write-free fixtures from the dashboard `AGENTS.md` files were already FR-001 and FR-005.
+
 ## Requirements
 
 ### FR-001: Resettable external-write-free fixtures
@@ -75,3 +80,33 @@ Fixture behavior MUST remain external-write-free and MUST NOT masquerade as dura
 
 - **When** a template example lacks a configured private-file provider
 - **Then** its fixture does not perform external storage writes or imply durable storage
+
+### FR-006: Demonstrations are not a business
+
+The canonical dashboard and fixtures MUST demonstrate reusable patterns, not a specific business.
+
+### FR-007: Fixture authentication is a reference
+
+The fixture authentication adapter MUST stay non-durable, keep opaque sessions in server memory, and remain a reference implementation, not a production persistence model (FR-004).
+
+### Component export
+
+### FR-008: Bare export hierarchy
+
+The component export's visible hierarchy MUST be only section, group, owner label, owner description, state labels, bare component and whitespace. No site navigation, `Card`, `Panel`, `Divider`, borders, shadows or decorative export chrome.
+
+### FR-009: Scoped previews
+
+Export previews MUST stay inside `PortalScope`, keep preview ID scoping and project one authored axis at a time.
+
+### FR-010: Export stage geometry
+
+Standard export stages MUST be 640px; wide and overlay stages are 1248px inside a 1440px canvas with 96px side margins. An export-geometry change requires the component sweep (`npm run verify:component-sweep`).
+
+### FR-011: The manifest projects installed contracts
+
+The export manifest MUST project installed typed owner contracts (useful variants, states, compositions and failure cases). It never infers public support from arbitrary exports or fills an omitted profile feature from private identities, and it preserves the generated manifest order.
+
+### FR-012: Keep useful demonstrations
+
+A useful prior demonstration MUST be retained until equivalent lowest-owner teaching exists.

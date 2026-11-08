@@ -21,6 +21,11 @@ Materialize independent projects from explicit positive ownership while preservi
 - **Q: What does a generated project receive?**
   - A: The selected `specs/platform/**` specs, `.specify/` (constitution, templates, scripts, workflows, integrations) and an empty `specs/product/` skeleton. Never `specs/template/**`. Clones are never forced to pull later template changes (FR-003, FR-004).
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from root `AGENTS.md`, `PRODUCT.md`, `template-assembly/AGENTS.md`, `template-profiles/thin-start/AGENTS.md` and `src/app/(site)/(dev)/internal/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-007 to FR-016, with their meaning kept; FR-007 states the Spec Kit delivery set that replaces "stock OpenSpec integration". Demo reset, no-delivery and non-durability describing canonical examples rather than prohibiting real persistence was already FR-003.
+
 ## Requirements
 
 ### FR-001: Positive output ownership
@@ -92,3 +97,42 @@ Generated projects MUST inherit the maintained `specs/platform/data/loading` con
 - **When** a project is assembled with or without dashboard routes
 - **Then** its loading tests match its installed surfaces and omitted dashboard/authentication cases are not imported or executed
 
+### FR-007: What a generated project receives
+
+A generated project MUST receive the selected `specs/platform/**` folders, `specs/README.md`, the `specs/product/` skeleton and `.specify/` (constitution, templates, scripts, the main, write-spec and verify workflows, and the Spec Kit skills). It MUST NOT receive `specs/template/`, the create-project or backport workflows, or any plugin.
+
+### FR-008: Specs follow their surface
+
+Ownership MUST select shared media for every profile; marketing content sources, public metadata, composition and pages only with marketing; and dashboard navigation, shell and pages plus entities and files only with the dashboard.
+
+### FR-009: Positive selection only
+
+`create:project` MUST positively select the profile, content mode and opt-in capabilities. There are no exclusion flags, no in-place mutation and no second creation engine.
+
+### FR-010: The receipt is immutable
+
+Missing receipt capabilities MUST normalize to `[]`; later capability markers stay outside the immutable receipt.
+
+### FR-011: One selection drives every output
+
+Generated routes, API exports, configuration, package state, docs ownership and the receipt MUST derive from the same selected surfaces.
+
+### FR-012: Trace only proven edges
+
+Propagation work MUST trace only a changed owner's proven assembly, profile, override, inventory and export edges; canonical identity alone does not justify inspecting every profile. Intentional omissions are preserved, and the thin API is not widened for canonical implementation details.
+
+### FR-013: Report what propagated
+
+After propagation, the focused behaviour checks plus the assembly checks MUST run, and the report names the actual output edges and omissions.
+
+### FR-014: Thin start
+
+Thin start MUST keep `Markdown.Render`, the retained component family entries and their public types while excluding the editor, dashboard, broad helper and unselected surface dependencies. It supports `static` and `payload-ready` content modes and defaults to `payload-ready`.
+
+### FR-015: Internal layout without marketing
+
+`defaultSiteLayout` MUST stay valid in profiles without marketing: optional links derive from the installed app surface registry and the generated internal-route map, and fail closed when a destination is absent.
+
+### FR-016: Internal tree under marketing
+
+In profiles with marketing, the internal tree MUST be relocated beneath `(marketing)` so the marketing layout owns its shell.

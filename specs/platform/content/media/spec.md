@@ -6,7 +6,7 @@
 
 **Status**: Accepted, living
 
-**Verified by**: [docs/testing/marketing-composition.md](../../../../docs/testing/marketing-composition.md)
+**Verified by**: `docs/testing/marketing-composition.md` when installed
 
 ## Purpose
 
@@ -18,6 +18,11 @@ Keep production media durable, accessible and responsive while preserving actual
 
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
+
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/lib/marketing-content/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-005 to FR-008, with their meaning kept; durable constituent assets, source-neutral delivery, purposeful alt text, evidence-based preloading and named local exceptions were already FR-001 to FR-004.
 
 ## Requirements
 
@@ -56,3 +61,19 @@ Media loading MUST follow its owner defaults. Preloading MUST be reserved for a 
 
 - **When** a specific media use cannot follow an otherwise applicable default
 - **Then** its documented exception covers only that use and rule while the durable-asset constraints remain intact
+
+### FR-005: Temporary design-tool assets become committed assets
+
+Temporary design-tool assets MUST be downloaded into the owning committed asset boundary; the original URL is provenance only. Production MUST NOT render flattened frames, section captures, task artifacts or expiring Figma/MCP URLs.
+
+### FR-006: Committed raster marketing assets
+
+Committed raster marketing assets MUST use a static import with `next/image`, truthful intrinsic dimensions, responsive `sizes` and `placeholder="blur"` with the generated blur. A public-path string MUST NOT be used where a static import exists, and blur data is never fabricated. SVGs stay vectors, without raster blur.
+
+### FR-007: Static and remote media branches
+
+Decorative and brand imagery SHOULD default to committed presentation assets; editorial and product imagery may come from the configured source. The resolved static branch carries `StaticImageData`, the remote branch carries `src`, `width`, `height` and `blurDataURL`, and both carry alt text. Provider records MUST NOT reach renderers.
+
+### FR-008: Narrow media exceptions
+
+The annotation `averlo-media-exception-next-line <rule> -- <rationale>` exempts one reported rule once, on the next line, never a whole file, and is never used on ordinary imagery. Temporary URLs, reference captures and missing alt text are non-waivable. The media verifier rejects stale annotations.

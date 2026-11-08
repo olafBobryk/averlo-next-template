@@ -21,6 +21,11 @@ One `Button` owns every clickable action and button-like link: its variant, size
 - **Q: Do buttons morph by default?**
   - A: Yes. When string `children` change, the label renders through `MorphLabel` and the width eases on the disclosure spring. `morph={false}` opts out. Loading keeps today's fixed-width crossfade to the spinner (BT3).
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `plugins/averlo/README.md` (origin/main `3fd01907`) with no other spec home. Bare treatment is BT7. BT4 now also says no detached loading label, so only the clicked action shows loading.
+
 ## API and defaults
 
 | Prop | Values | Default |
@@ -45,9 +50,10 @@ Related owners: `ArrowAction` (arrow call-to-action), `useCopyAction` (copy with
 - **BT1 MUST: one owner.** Actions and button-like links use `Button` (or `buttonStyles` inside an owner that cannot render `Button`). No page-local button styling.
 - **BT2 MUST: no new variants or sizes without a stated reason** (motion B2, usage FR-008).
 - **BT3 MUST: buttons morph between states.** String-child changes render through `MorphLabel` and the width eases; icon changes go through `IconSwap`. The button keeps its place. `morph={false}` opts out for fixed-width layouts. `loading` keeps its dimensions and accessible label, crossfading the content to the spinner. No ternary between two `<Button>`s and no width-animating wrapper.
-- **BT4 MUST: pending state belongs to the activated action.** `loading` sets `aria-busy` and disables the button; conflicting siblings are unavailable without their own spinners (`specs/platform/data/actions` FR-001, `specs/platform/data/forms` FR-003).
+- **BT4 MUST: pending state belongs to the activated action.** `loading` sets `aria-busy` and disables the button; conflicting siblings are unavailable without their own spinners or a detached loading label (`specs/platform/data/actions` FR-001, `specs/platform/data/forms` FR-003).
 - **BT5 MUST: snaps when motion is off.** Morph and crossfade snap under reduced motion and `?motion=off`.
 - **BT6 MUST: skeleton parity.** `Button.Skeleton` matches the live geometry for every size.
+- **BT7 MUST: bare where hover stays transparent.** Disclosure arrows, contextual ellipsis triggers and copy controls use the `bare` treatment and stay transparent on hover.
 
 ## Proof
 

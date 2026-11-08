@@ -6,7 +6,7 @@
 
 **Status**: Accepted, living
 
-**Verified by**: [docs/testing/contact-delivery.md](../../../../docs/testing/contact-delivery.md)
+**Verified by**: `docs/testing/contact-delivery.md` when installed
 
 ## Purpose
 
@@ -18,6 +18,11 @@ This owner has two sections. **Contact delivery**: Define truthful, private beha
 
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged. The two OpenSpec capabilities merged into one owner with two sections; contact delivery keeps FR-001 to FR-003 and submission protection continues at FR-004.
+
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/lib/api/AGENTS.md`, `src/lib/forms/AGENTS.md` and the `src/components/ui/input/**/AGENTS.md` files (origin/main `3fd01907`) with no other spec home. They are FR-008 to FR-012, with their meaning kept. Server normalization, server-owned recipients and credentials, the reply path, guards before downstream work, the neutral honeypot and server attachment validation were already FR-001 to FR-007.
 
 ## Requirements: contact delivery
 
@@ -85,3 +90,25 @@ Cooldown and rate-limit behavior MUST reuse established policy. A missing thresh
 
 - **When** a guarded endpoint receives another submission inside its established cooldown
 - **Then** the existing policy determines the safe response without exposing personal content in diagnostics
+
+## Requirements: privacy, scope and operational gates
+
+### FR-008: Nothing personal leaves the server
+
+Delivery and guard code MUST NOT log or return personal submission content, addresses, recipients, secrets or provider responses containing personal data.
+
+### FR-009: Operational gates are separate
+
+An implementation or verification task alone MUST NOT authorize provisioning, recipient setup, inbox confirmation, deployment configuration or an intentional send; each is a separate operational gate.
+
+### FR-010: Client conveniences are not authority
+
+Disabled buttons, delays, hidden fields, `accept` hints and client file filtering are client conveniences, never server authorization; the `SpamProtectionFields` honeypot is not a security boundary. `validateFiles` checks only the declared extension or MIME type, count and bytes; the consuming server owner authorizes, inspects content and signatures, and normalizes.
+
+### FR-011: Internal forms need an explicit reason
+
+An internal form MUST gain submission protection only from an explicit task, threat model or owner requirement.
+
+### FR-012: Established cooldowns and rate-limit decisions
+
+Support keeps its existing 30-second cooldown; contact adds no threshold. Before selecting, provisioning or tuning a provider rate limit, the repository policy MUST be found first; if none exists and the choice affects throttling, cost or service limits, an explicit user decision is required and no value is invented (FR-007).

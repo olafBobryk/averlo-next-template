@@ -21,6 +21,11 @@ How to add any dashboard page: route shape, registry entry, server ownership, co
 - **Q: Where did these rules come from?**
   - A: They were behaviour rules in the dashboard `AGENTS.md` files with no spec home. They move here so those files keep only structure and pointers; wording is kept close to the source.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/app/(site)/dashboard/AGENTS.md`, `src/app/(site)/dashboard/_components/entities/AGENTS.md`, `src/components/domain/assistant/AGENTS.md` and `plugins/averlo/README.md` (assistant) (origin/main `3fd01907`) with no other spec home. They are FR-013 to FR-021, with their meaning kept; the assistant rules are FR-016 to FR-021 here until an assistant spec exists. Product neutrality, surface composition, table headers and responsive columns, pagination and deletion were already FR-006 to FR-011.
+
 ## Requirements
 
 ### FR-001: One page spec per page
@@ -70,6 +75,44 @@ Template dashboard routes MUST stay product-neutral reference implementations; c
 ### FR-012: Proved
 
 `npm run verify:dashboard-pages` MUST pass after adding, removing or moving a route, and a characterisation test MUST cover the page's sections and states at 390 and 1440.
+
+### FR-013: Refactors preserve behaviour
+
+A refactor MUST preserve public entries plus live and skeleton DOM geometry, behaviour, capabilities, mutation semantics, accessibility and responsive behaviour.
+
+### FR-014: Entity tool wrappers need real tools
+
+An entity tool wrapper MUST exist only when the entity has real Assistant tool contracts and execution (Record is the only current family; `specs/platform/content/entities` FR-004).
+
+### FR-015: One entity selector
+
+The shared `EntitySelector` MUST own plain closed-field labels, portal behaviour and option mapping.
+
+### Assistant
+
+### FR-016: Tool calls
+
+Chat tool calls MUST show one collapsible summary above each reply, with its divider directly beneath the trigger, and one quiet disclosure per call with its arguments and actual safe output. Call counts and states are real; elapsed time appears only when the runtime supplies it. Calls use a request/result envelope with typed content blocks, expandable argument properties and bounded output. Executable tools still pass the runtime allowlist and authorization.
+
+### FR-017: Approvals
+
+Actionable approvals MUST sit in the decision area above the composer, with a domain-neutral title and description: callers explain the action, target and consequences, and arguments stay in the tool disclosure. Approvals are not coupled to Record fields. Allow once is primary and Deny is bare; heading and description are grouped tightly and the actions are separated.
+
+### FR-018: Session queue
+
+The session queue MUST attach beneath the composer: its tinted shell extends 40px under the composer, rows share the header height, a six-dot drag handle reveals on hover, right-side actions are always visible, and disclosure and reorder move. The right-side pencil moves an item back into the composer, and an unsent draft becomes a queue item. Resume is the empty composer's Play control, never a separate queue control. Rows never expand into inline editors.
+
+### FR-019: Messages and pickers
+
+User bubbles MUST fit their content. Timestamp and edit/copy controls share a row aligned to the bubble text inset, revealed on hover or focus. Editing updates the existing message and keeps its attachments. The `/` and `@` pickers use the anchored `Float` layout; generic commands are limited to `/help` and `/new` until a project supplies domain commands.
+
+### FR-020: Context references
+
+Context search and execution-time resolution MUST belong to the actor-scoped adapter. References keep stable identities through drafts, queues and edits and never grant tool permission; source authorization is preserved and simulated providers are identified.
+
+### FR-021: Runs, queues and remembered permissions
+
+Queue operations and remembered tool permissions MUST affect subsequent runs. There is one active submission, cancellation is confirmed, servers claim approvals and deduplicate execution. Grants never override authorization or the current tool mode, and duplicating history never revives approvals. Reference permissions last across chats and reloads until the reference server resets. Queues are conversation-scoped browser-session state, never durable.
 
 ## Success Criteria
 

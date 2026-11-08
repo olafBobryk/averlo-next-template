@@ -21,6 +21,11 @@ This is the submission side of the data-lifecycle family. Initial and region loa
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/components/ui/input/AGENTS.md` (origin/main `3fd01907`) with no other spec home. It is FR-008, with its meaning kept; complete forms already follow FR-001 to FR-007 and `docs/testing/forms.md`.
+
 ## Requirements
 
 ### FR-001: Accessible field feedback
@@ -110,3 +115,7 @@ Login MUST preserve email and clear the password after server rejection, show an
 
 - **When** a successful login includes an external continuation URL
 - **Then** navigation stays on the application's safe local fallback
+
+### FR-008: Ordinary form work stays scoped
+
+Ordinary form work MUST NOT load contact credentials, recipients or deployment procedures. Those belong to explicitly configured delivery under `specs/platform/services/delivery`.

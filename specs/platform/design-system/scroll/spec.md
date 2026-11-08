@@ -8,7 +8,7 @@
 
 **Builds on**: `specs/platform/design-system/usage`, `specs/platform/design-system/motion`
 
-**Verified by**: `UI/Misc/ScrollArea` Storybook play tests (this batch), [docs/operations/scroll-performance.md](../../../../docs/operations/scroll-performance.md)
+**Verified by**: `UI/Misc/ScrollArea` Storybook play tests (this batch), `docs/operations/scroll-performance.md` when installed
 
 ## Purpose
 
@@ -26,6 +26,11 @@ Inner scrollers run to their real visible edge, fade content under that edge, co
   - A: The menu-search result cap and the pricing-carousel exception are product decisions and stay with that product. The rules below are generic.
 - **Q: Scrollbar colours?**
   - A: From theme tokens; hidden only on carousels and tab rows (S13).
+
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/components/ui/motion/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are S14 and S15, with their meaning kept.
 
 ## Requirements
 
@@ -45,6 +50,8 @@ Rule IDs are stable and are cited by tests and lint rules.
 - **S11 MUST: page-level carousels bleed.** A horizontal carousel in page content runs to the viewport edge; the page gutter becomes its padding with matching `scroll-padding` so snap lines up with the gutter; the next card peeks; horizontal overscroll is contained; no fade (S4); the scrollbar is hidden.
 - **S12 MUST: inner scrollers contain overscroll.** `ScrollArea` sets `overscroll-contain` on its axis.
 - **S13 MUST: scrollbars take their colours from theme tokens.** Scrollbars are hidden only on carousels (S11) and tab rows (S10), through `scrollbar="hidden"`.
+- **S14 MUST: one page-scroll transport.** `ScrollController` owns Lenis as the optional page-scroll transport, synced with GSAP `ScrollTrigger`. Motion sources never create a second scroll transport; the Motion fallback keeps its own wheel transport.
+- **S15 SHOULD: measure only when measuring.** Measured scroll procedures (`docs/operations/scroll-performance.md` when installed) are loaded only when scroll performance is actually being measured.
 
 ## Exceptions register
 

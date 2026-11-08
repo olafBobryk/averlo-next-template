@@ -21,6 +21,11 @@ How to add any public page so it fits the shared shell, renders from source-neut
 - **Q: Where does a new page's spec go?**
   - A: In the project's `specs/product/marketing/pages/<route>/spec.md`, from the page-spec template. The template itself ships no product pages (constitution VII).
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/lib/marketing-content/AGENTS.md` (origin/main `3fd01907`) with no other spec home. It is FR-011, with its meaning kept; server document resolution and `layout` delegation were already FR-003, which now names `renderMarketingSections()`.
+
 ## Requirements
 
 ### FR-001: One page spec per page, from the template
@@ -33,7 +38,7 @@ The page MUST be declared once in the marketing route family registry and reache
 
 ### FR-003: Pages render ordered sections
 
-The route page MUST resolve its document on the server and delegate its `layout` to the section renderer registry; it does not import or compose section renderers directly. Each section is one independently meaningful semantic region with source-neutral fields (`specs/platform/surfaces/marketing/composition` FR-001).
+The route page MUST resolve its document on the server and delegate its `layout` to `renderMarketingSections()` (the section renderer registry); it does not import or compose section renderers directly. Each section is one independently meaningful semantic region with source-neutral fields (`specs/platform/surfaces/marketing/composition` FR-001).
 
 ### FR-004: Section renderer shape
 
@@ -62,6 +67,10 @@ Title, description, canonical and social metadata MUST follow `specs/platform/su
 ### FR-010: Proved at 390 and 1440
 
 A Playwright characterisation test MUST cover each section rendering, each state, the primary CTA destination and the metadata at 390 and 1440 wide, with no horizontal scroll and essential content present on first render (`specs/platform/design-system/motion` FR-001).
+
+### FR-011: New composed pages join the route family
+
+A new source-backed multi-section page MUST belong to the installed marketing route family and its canonical surface registry. Existing utility and document exceptions keep their narrower owners and do not authorize new route-local composed pages.
 
 ## Success Criteria
 

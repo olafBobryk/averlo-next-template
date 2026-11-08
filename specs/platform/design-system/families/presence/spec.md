@@ -25,6 +25,11 @@ Things that appear, disappear, resize or swap in place go through one owner each
 - **Q: IconSwap changes?**
   - A: It gates reduced motion internally (callers drop `transitionClassName` gating) and gains `<IconSwap swapKey={k}>{child}</IconSwap>`. Instant icon swaps in the assistant messages move onto it (P4).
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/components/ui/motion/AGENTS.md`, `src/components/ui/misc/AGENTS.md`, `src/components/ui/misc/accordion/AGENTS.md` and `src/components/ui/primitives/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are P8 to P11, with their meaning kept; no consumer sequential fades (P1), no presence-owned trigger, focus or announcement (P2) and a single feedback measurement (P5) were already here. The `mode` rules are unchanged.
+
 ## API and defaults
 
 | Owner | Props | Defaults |
@@ -46,6 +51,10 @@ Things that appear, disappear, resize or swap in place go through one owner each
 - **P5 MUST: feedback presence composes this family.** `InlineError`, `StatusMessagePresence` and `Field` messages use `ContentPresence` and add no second measurement or animation.
 - **P6 MUST: new motion code gates through `useAnimated()`.**
 - **P7 MUST: interruption retargets.** Toggling mid-animation retargets from the on-screen value; resize during movement settles to usable content.
+- **P8 MUST: masked-mode details.** `DisclosurePresence`, shared by `ContentPresence` and Accordion, animates measured spring dimensions with continuously opaque content, shows a 16px soft clipping edge only during movement, leaves visible overflow unmasked after settling, and omits the mask entirely when motion is disabled, including on close.
+- **P9 MUST: `ContentPresence` owns normal-flow presence only.** It owns measured normal-flow insertion and removal and its optional gap, independent of viewport reveal (P2).
+- **P10 MUST: swap owners keep their lifecycle.** `ImageSwitcher` owns its preload and transition lifecycle; `SuspenseBoundary` keeps its controlled and React Suspense modes in one owner.
+- **P11 MUST: custom Accordion triggers stay real.** A custom Accordion `renderTrigger` attaches the disclosure props only to the actual disclosure button.
 
 ## Proof
 

@@ -6,7 +6,7 @@
 
 **Status**: Accepted, living
 
-**Verified by**: [docs/testing/identity.md](../../../../docs/testing/identity.md)
+**Verified by**: `docs/testing/identity.md` when installed
 
 ## Purpose
 
@@ -18,6 +18,11 @@ Preserve server-owned identity, organization and platform authorization across p
 
 - **Q: What changed in the move from OpenSpec to Spec Kit?**
   - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
+
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/lib/auth/AGENTS.md`, `src/app/(site)/dashboard/_registry/AGENTS.md` and `src/app/(site)/dashboard/platform/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-006 and FR-007, with their meaning kept; FR-006 names the `platformRole` axis explicitly. Server authorization, visibility not being authorization, usable denial, safe continuations, deliberate invitations and the last verified identity were already FR-001 to FR-005. The fixture adapter rule lives with the template demos.
 
 ## Requirements
 
@@ -75,3 +80,16 @@ Account identity changes MUST NOT remove the last verified sign-in identity need
 
 - **When** a user attempts to remove their only verified sign-in identity
 - **Then** the server rejects the removal and the existing access path remains usable
+
+### FR-006: Three access axes; platform role is explicit
+
+Global identity, organization role and `platformRole` MUST remain three distinct access axes. `platformRole` MUST NOT be inferred from organization owner or administrator membership; every platform route and mutation MUST be authorized with `AuthUser.platformRole`.
+
+**Scenario: Organization owner opens a platform route**
+
+- **When** an organization owner without a platform role requests a platform route or mutation
+- **Then** the server denies it
+
+### FR-007: Active organization needs active membership
+
+A selected organization MUST be valid only while an active membership in it exists.

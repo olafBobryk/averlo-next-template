@@ -23,6 +23,11 @@ Every form field is a `Field` around a `ui/input` owner, so labels, descriptions
 - **Q: Does the textarea grow with its content?**
   - A: As an opt-in `autoGrow` prop on `TextAreaInput`; the default stays `rows`-based and resizable (F8).
 
+### Session 2026-11-08 (AGENTS.md thinning)
+
+- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
+  - A: Behaviour rules from `src/components/ui/input/AGENTS.md`, `src/components/ui/input/{choice,editable,files}/AGENTS.md`, `src/components/ui/primitives/AGENTS.md` and `plugins/averlo/README.md` (origin/main `3fd01907`) with no other spec home. They are F10 to F16, with their meaning kept; mounted native semantics were already `specs/platform/design-system/usage` FR-004. The retired `muted` InputFrame variant is history and is not restated.
+
 ## API and defaults
 
 | Owner | Key props | Defaults |
@@ -44,6 +49,13 @@ Every form field is a `Field` around a `ui/input` owner, so labels, descriptions
 - **F7 MUST: field messages never clip.** `Field` renders its message through `ContentPresence mode="sequenced"` with its gap inside the box. At 390 and 1440, no frame shows a visible (opacity > 0.05) message clipped by its box or overlapping the next field, and a two-line error is fully visible at rest. `message`, `tone`, `messageId` and `disableMessage` keep their API.
 - **F8 SHOULD: auto-growing textareas use `autoGrow`.** `TextAreaInput autoGrow` grows with content from its `rows` minimum and keeps its skeleton height parity; no page-local auto-grow scripts.
 - **F9 MUST: skeleton parity.** Each input's `.Skeleton` matches its live geometry (`Field.Skeleton`, `InputFrame` skeletons).
+- **F10 MUST: the complete input first.** Consumers use the complete supported input before `Field`, `InputFrame` or raw native parts. Lower-level composition is only for an approved reusable input extension with an ownership reason, and authorization to build a new owner does not make its private controls public.
+- **F11 MUST: relationships reach the real input.** Labels, descriptions, messages, required state, IDs, `aria-describedby` and `aria-invalid` connect to the real input, not only a wrapper (`specs/platform/data/forms` FR-001). Generated IDs fall back to `React.useId()` when neither `id` nor `name` owns the form identity.
+- **F12 MUST: choice indicators are integer-aligned and borderless.** Default radio and checkbox are 22px with 12px marks at 5px insets; the compact checkbox is 18px with a 12px mark at 3px; the default toggle is 42x26px with a 22x18px thumb at 4px; the compact toggle centres the scaled default indicator in a 34x20px slot.
+- **F13 MUST: choice marks never transform.** Selection and hover change radio and checkbox marks through colour and opacity only, so artwork does not drift through subpixel scaling.
+- **F14 MUST: editable fields keep their geometry.** Display and edit states do not shift (`InputFrame` stays mounted), and pending and error state stay inside the existing `Field` topology.
+- **F15 MUST: the editable file rail's add tile has a solid border.**
+- **F16 MUST: one input chrome.** `InputFrame` and `Dropdown` own compact input chrome and inset menu styling. Composers share the `InputFrame` fill and shadow of ordinary inputs and search; a presentation may change geometry, never fork the background. In light mode the default chrome is soft and shadowless, dark default chrome is unchanged, and `strong` gives a heavier frame.
 
 ## Proof
 
