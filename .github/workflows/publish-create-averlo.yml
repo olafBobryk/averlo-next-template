@@ -1,7 +1,11 @@
 name: Publish create-averlo
 
 on:
-  push:
+  # Publish only after CI (lint, typecheck, unit, Storybook, build) passed on
+  # a push to main.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
   release:
@@ -53,7 +57,11 @@ jobs:
         working-directory: packages/create-averlo
 
   propagate:
-    if: github.event_name != 'release'
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

@@ -32,7 +32,8 @@ GitHub workflow for the project that will own it.
 
 ## Publishing
 
-Every push to `main` runs `publish-create-averlo.yml`. It prepares the next npm
+Every push to `main` runs `ci.yml` (lint, typecheck, unit, Storybook and build
+tests); only when it passes does `publish-create-averlo.yml` run. It prepares the next npm
 patch version from a clean committed template, verifies all profiles and an
 installed generated project, publishes through npm trusted publishing, checks
 public project creation, and records a GitHub release. Publishing is serialized;

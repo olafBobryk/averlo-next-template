@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  static:
+    name: Lint, typecheck and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Lint (Biome and GritQL ownership rules)
+        run: npm run lint
+      - name: Component catalogue is current
+        run: npm run catalog:check
+      # tsc needs next-env.d.ts and the generated route types.
+      - name: Generate Next.js route types
+        run: npx next typegen
+      - name: Typecheck
+        run: npm run typecheck
+      # The visual-parity skill tests drive a real browser.
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Unit tests
+        run: npm run test:unit
+
+  storybook:
+    name: Storybook tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Storybook interaction, accessibility and contract tests
+        run: npm run test-storybook
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
