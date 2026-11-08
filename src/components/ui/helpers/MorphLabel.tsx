@@ -49,8 +49,8 @@ function createLayerValues(visible: boolean): LayerValues {
  * - Grow: the box widens first; the new text fades in once it fits.
  * - Shrink: the old text fades out first, then the box closes while the new
  *   text fades in.
- * Text travels ±0.4em with a 3px blur on the feedback spring; the width uses
- * the disclosure spring. Reduced motion and `?motion=off` snap.
+ * Text travels ±0.4em with a 3px blur on the quick spring; the width uses
+ * the smooth spring. Reduced motion and `?motion=off` snap.
  */
 export function MorphLabel({
 	children,
@@ -152,9 +152,9 @@ export function MorphLabel({
 			entered = true;
 			stopLayer(current.id);
 			running.current.set(current.id, [
-				animate(nextValues.opacity, 1, spring.feedback),
-				animate(nextValues.y, 0, spring.feedback),
-				animate(nextValues.blur, 0, spring.feedback),
+				animate(nextValues.opacity, 1, spring.quick),
+				animate(nextValues.y, 0, spring.quick),
+				animate(nextValues.blur, 0, spring.quick),
 			]);
 		};
 
@@ -163,7 +163,7 @@ export function MorphLabel({
 			if (sized) return;
 			sized = true;
 			const run = animate(width, to, {
-				...spring.disclosure,
+				...spring.smooth,
 				onUpdate: (value) => {
 					// Growing: the new text arrives only once it fits.
 					if (growing && value >= to - FIT_TOLERANCE_PX) enter();
@@ -186,7 +186,7 @@ export function MorphLabel({
 			const { opacity, y, blur } = outgoingValues[index];
 			stopLayer(layer.id);
 			const fadeOut = animate(opacity, 0, {
-				...spring.feedback,
+				...spring.quick,
 				onUpdate: (value) => {
 					// Shrinking waits for the old text to leave.
 					if (!growing && gone()) resize();
@@ -200,8 +200,8 @@ export function MorphLabel({
 			});
 			running.current.set(layer.id, [
 				fadeOut,
-				animate(y, -travel, spring.feedback),
-				animate(blur, BLUR_PX, spring.feedback),
+				animate(y, -travel, spring.quick),
+				animate(blur, BLUR_PX, spring.quick),
 			]);
 			fadeOut.then(() => {
 				if (running.current.get(layer.id)?.[0] === fadeOut)

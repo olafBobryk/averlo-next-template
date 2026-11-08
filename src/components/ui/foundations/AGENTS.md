@@ -17,8 +17,8 @@ surface-tint and CSS-token infrastructure.
 - `SettingsProvider`, motion override hooks and `MotionProvider` are client
   boundaries. Pure token modules (`focus.ts`, `motionTiming.ts`, `spring.ts`,
   `surfaceTint.ts`) stay usable without React state.
-- `MotionProvider` owns root timing variables and the global reveal scheduler;
-  `MotionScope` overrides timing variables only for its subtree.
+- `MotionProvider` owns the motion driver and the global reveal scheduler. Step
+  values live only in `motionTiming.ts`, `spring.ts` and `library.css`.
 - Appearance and text scale are application-root state: no route-local theme
   stores, route-owned `.dark` effects or root font-size mutation.
 - Shared focus tokens here are the only library-level focus-ring recipes; feature

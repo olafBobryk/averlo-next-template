@@ -169,7 +169,7 @@ export function UserMessage({
 					className="relative mt-2 flex h-7 items-center justify-end text-xs text-muted-foreground"
 				>
 					<div
-						className={`absolute right-4 flex items-center gap-3 motion-micro transition-opacity ${editing ? "" : "opacity-0 group-hover/turn:opacity-100 group-focus-within/turn:opacity-100"}`}
+						className={`absolute right-4 flex items-center gap-3 motion-snap transition-opacity ${editing ? "" : "opacity-0 group-hover/turn:opacity-100 group-focus-within/turn:opacity-100"}`}
 					>
 						{!editing && (
 							<time className="whitespace-nowrap" dateTime={message.createdAt}>

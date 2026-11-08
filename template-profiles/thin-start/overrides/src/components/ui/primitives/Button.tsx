@@ -159,7 +159,7 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 		<>
 			<span
 				className={clsx(
-					"inline-flex max-w-full items-center transition-opacity motion-micro",
+					"inline-flex max-w-full items-center transition-opacity motion-snap",
 					buttonContentGap(size),
 					loading && "opacity-0",
 					contentClassName,
@@ -172,7 +172,7 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonProps>(function Button(
 			<span
 				aria-hidden
 				className={clsx(
-					"pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity motion-micro",
+					"pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity motion-snap",
 					loading && "opacity-100",
 				)}
 			>

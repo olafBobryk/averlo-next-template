@@ -32,7 +32,7 @@ export const textVariants = cva("", {
 			inherit: "",
 		},
 		interactive: {
-			true: "transition-colors motion-interactive",
+			true: "transition-colors motion-snap",
 			false: "",
 		},
 	},

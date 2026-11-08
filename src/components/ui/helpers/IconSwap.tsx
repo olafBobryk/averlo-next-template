@@ -127,7 +127,7 @@ export function IconSwap(props: IconSwapProps) {
 						data-state={isActive ? "active" : "inactive"}
 						aria-hidden={isActive ? undefined : true}
 						className={clsx(
-							"absolute inset-0 flex items-center justify-center transition-all motion-micro motion-reduce:transition-none",
+							"absolute inset-0 flex items-center justify-center transition-all motion-snap motion-reduce:transition-none",
 							sizeClasses[size],
 							transitionClassName,
 							!animated && "transition-none",

@@ -1,6 +1,6 @@
 // Motion timing, easing and spring values come from the motion tokens
-// (src/components/ui/foundations/motionTiming.ts, spring.ts, motion.css,
-// library.css). Zero is allowed: `{ duration: 0 }` is the instant snap.
+// (src/components/ui/foundations/motionTiming.ts, spring.ts, library.css).
+// Zero is allowed: `{ duration: 0 }` is the instant transition.
 language js
 
 pattern nonzero_number() {
@@ -22,7 +22,7 @@ or {
 	JsPropertyObjectMember(name=$key, value=$value) where {
 		$key <: r"[\"']?(?:duration|delay|stiffness|damping|mass|bounce|visualDuration|repeatDelay|staggerChildren|delayChildren)[\"']?",
 		$value <: motion_number(),
-		register_diagnostic(span=$value, message="Motion timing literal: use a motion token from ui/foundations (motionTiming.ts, spring.ts) instead of a numeric duration, delay or spring value.")
+		register_diagnostic(span=$value, message="Motion timing literal: use a motion step from ui/foundations (spring.ts, motionTiming.ts) instead of a numeric duration, delay or spring value.")
 	},
 	JsPropertyObjectMember(name=$key, value=JsArrayExpression() as $value) where {
 		$key <: r"[\"']?ease[\"']?",
@@ -42,6 +42,6 @@ or {
 		JsTemplateChunkElement()
 	} as $class where {
 		$class <: r"(?s).*(?:cubic-bezier\(|(?:^|[\s\"'`:!])(?:duration|delay|ease)-(?:[0-9]|\[[0-9.c])|(?:transition|animation)-duration:\s*[0-9]).*",
-		register_diagnostic(span=$class, message="Motion timing literal in a class or style string: use the motion utilities and --motion-* tokens from ui/foundations/motion.css.")
+		register_diagnostic(span=$class, message="Motion timing literal in a class or style string: use the motion-<step> utilities and --motion-<step>-* tokens from ui/foundations/library.css.")
 	}
 }

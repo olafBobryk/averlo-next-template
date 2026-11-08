@@ -48,7 +48,7 @@ export function Card<T extends ElementType = "div">({
 			className={clsx(
 				"group/card text-sm",
 				interactive &&
-					"transition-colors motion-micro hover:bg-[color-mix(in_srgb,var(--card)_98%,var(--foreground))]",
+					"transition-colors motion-snap hover:bg-[color-mix(in_srgb,var(--card)_98%,var(--foreground))]",
 				usesStructuredSpacing && cardStyles({ size: resolvedSize }),
 				usesDefaultGap &&
 					(resolvedSize === "sm"

@@ -137,7 +137,7 @@ export function HeaderSearchInput({
 						size="sm"
 						textVariant="menu-description"
 						textTone="muted"
-						className="pointer-events-none opacity-0 transition-opacity motion-micro group-hover/header-search:pointer-events-auto group-hover/header-search:opacity-100 group-focus-within/header-search:pointer-events-auto group-focus-within/header-search:opacity-100"
+						className="pointer-events-none opacity-0 transition-opacity motion-snap group-hover/header-search:pointer-events-auto group-hover/header-search:opacity-100 group-focus-within/header-search:pointer-events-auto group-focus-within/header-search:opacity-100"
 						contentClassName="w-fit"
 						aria-label={clearLabel}
 						onMouseDown={(event) => event.preventDefault()}

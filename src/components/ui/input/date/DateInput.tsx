@@ -147,7 +147,7 @@ function DateInputRoot({
 							name="chevron-down"
 							aria-hidden
 							className={clsx(
-								"shrink-0 text-muted-foreground transition-transform motion-micro",
+								"shrink-0 text-muted-foreground transition-transform motion-snap",
 								open && "rotate-180",
 							)}
 							style={{ width: 16, height: 16 }}

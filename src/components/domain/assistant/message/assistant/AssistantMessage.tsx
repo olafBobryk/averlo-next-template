@@ -101,7 +101,7 @@ export function AssistantMessage({
 							}}
 						/>
 						<time
-							className="opacity-0 motion-micro transition-opacity group-hover/response:opacity-100 group-focus-within/response:opacity-100"
+							className="opacity-0 motion-snap transition-opacity group-hover/response:opacity-100 group-focus-within/response:opacity-100"
 							dateTime={message.createdAt}
 						>
 							{new Date(message.createdAt).toLocaleTimeString([], {

@@ -328,7 +328,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 			<>
 				<span
 					className={clsx(
-						"inline-flex max-w-full items-center transition-opacity motion-micro group-data-[loading=true]:opacity-0",
+						"inline-flex max-w-full items-center transition-opacity motion-snap group-data-[loading=true]:opacity-0",
 						buttonContentGap(size ?? "md"),
 						contentAlignClass,
 						contentWidthClass,
@@ -373,7 +373,7 @@ const ButtonRoot = React.forwardRef<ButtonElement, ButtonProps>(
 				{loadingState !== undefined && (
 					<span
 						aria-hidden="true"
-						className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity motion-micro pointer-events-none group-data-[loading=true]:opacity-100"
+						className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity motion-snap pointer-events-none group-data-[loading=true]:opacity-100"
 					>
 						<Loader />
 					</span>

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import * as React from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { PaginationControls } from "@/components/ui/misc/PaginationControls";
 import type { ButtonProps } from "@/components/ui/primitives/Button";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -51,7 +51,7 @@ export type ImageSwitcherProps = {
 
 const defaultIntervalMs = 4500;
 const defaultSwipeOffsetThreshold = 72;
-const imageSwitcherTransition = getMotionTiming("grand");
+const imageSwitcherTransition = spring.slow;
 
 function getWrappedImageIndex(index: number, total: number) {
 	if (total <= 0) return 0;

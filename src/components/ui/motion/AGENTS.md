@@ -19,8 +19,8 @@ text-motion and presence implementations.
 
 - Family indexes are the external surfaces. Internals import direct owners; do
   not add a broad `@/components/ui/motion` facade or runtime namespace object.
-- `MotionProvider`, `MotionScope`, timing and spring utilities are foundation
-  owners; implementations resolve timing and springs through them.
+- `MotionProvider`, `motionTiming` and `spring` are foundation owners;
+  implementations name a step and resolve timing and springs through them.
 - `presence/` owns controlled insertion/removal and measured layout-space
   transitions. Its private `DisclosurePresence` is shared by `ContentPresence`
   and Accordion.

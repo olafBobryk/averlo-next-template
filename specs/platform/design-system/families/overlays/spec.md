@@ -98,9 +98,9 @@ Nonblocking anchored interactions MUST preserve their documented anchor, keyboar
 - **When** the anchored panel's minimum width does not fit the viewport
 - **Then** `auto` presents the sheet, and widening the viewport returns to the anchored panel
 
-### FR-007: Menus move on the disclosure moment and snap when motion is off
+### FR-007: Menus move on the `smooth` step and snap when motion is off
 
-Dropdown entry and exit MUST use the disclosure moment with a small y nudge, and MUST snap under reduced motion and `?motion=off` (motion U3).
+Dropdown entry and exit MUST use the `smooth` step with a small y nudge, and MUST snap under reduced motion and `?motion=off` (motion U3).
 
 **Scenario: Motion off**
 

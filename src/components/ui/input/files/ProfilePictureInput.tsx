@@ -170,11 +170,11 @@ function ProfilePictureInputRoot({
 						disabled={disabled}
 					>
 						{renderPicture("2xl", "h-full w-full rounded-full border-0")}
-						<span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors motion-interactive group-hover:bg-black/30 group-data-[disabled=true]:hidden">
+						<span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors motion-snap group-hover:bg-black/30 group-data-[disabled=true]:hidden">
 							<Icon
 								name="camera"
 								size="md"
-								className="text-white opacity-0 transition-opacity motion-interactive group-hover:opacity-100"
+								className="text-white opacity-0 transition-opacity motion-snap group-hover:opacity-100"
 							/>
 						</span>
 					</Button>

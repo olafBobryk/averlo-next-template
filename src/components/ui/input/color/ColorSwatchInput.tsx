@@ -205,14 +205,14 @@ function ColorSwatchInputRoot<T extends string>({
 									<span
 										aria-hidden
 										className={clsx(
-											"pointer-events-none absolute inset-0 rounded-full border transition-[border-color,border-width] motion-interactive",
+											"pointer-events-none absolute inset-0 rounded-full border transition-[border-color,border-width] motion-snap",
 											checked ? "border-2 border-border" : "border-transparent",
 										)}
 									/>
 									<span
 										aria-hidden
 										className={clsx(
-											"absolute inset-0 block rounded-full transition-transform motion-interactive",
+											"absolute inset-0 block rounded-full transition-transform motion-snap",
 											checked ? "scale-75" : "scale-100",
 										)}
 										style={{ backgroundColor: preset.colorHex }}
@@ -246,7 +246,7 @@ function ColorSwatchInputRoot<T extends string>({
 							<span
 								aria-hidden
 								className={clsx(
-									"pointer-events-none absolute inset-0 rounded-full border transition-[border-color,border-width] motion-interactive",
+									"pointer-events-none absolute inset-0 rounded-full border transition-[border-color,border-width] motion-snap",
 									selectedCustomColorHex
 										? "border-2 border-border"
 										: "border-transparent",
@@ -255,7 +255,7 @@ function ColorSwatchInputRoot<T extends string>({
 							{selectedCustomColorHex ? (
 								<span
 									aria-hidden
-									className="absolute inset-0 block scale-75 rounded-full transition-transform motion-interactive"
+									className="absolute inset-0 block scale-75 rounded-full transition-transform motion-snap"
 									style={{ backgroundColor: selectedCustomColorHex }}
 								/>
 							) : (

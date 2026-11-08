@@ -145,7 +145,7 @@ export function summaryColumnStyle(
 			? "translateX(clamp(-234px, calc((768px - 100%) / 2), 0px))"
 			: "translateX(0px)",
 		transition: animated
-			? "transform var(--motion-interaction-duration, 200ms) var(--motion-interaction-ease, ease)"
+			? "transform var(--motion-gentle-duration) var(--motion-gentle-ease)"
 			: "none",
 	};
 }

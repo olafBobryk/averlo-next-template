@@ -73,7 +73,7 @@ function EffectTeachingSurface() {
 			</Button>
 			<MotionSource.Root
 				className="grid gap-8"
-				strategy={{ type: "boolean", active, timing: "grand" }}
+				strategy={{ type: "boolean", active, timing: "slow" }}
 			>
 				<div className="grid gap-5 md:grid-cols-3">
 					<MotionEffect.Entrance>
@@ -136,7 +136,7 @@ function TextEffectsTeachingSurface() {
 	return (
 		<MotionSource.Root
 			className="grid max-w-4xl gap-7 p-8"
-			strategy={{ type: "boolean", active, timing: "grand" }}
+			strategy={{ type: "boolean", active, timing: "slow" }}
 		>
 			<MotionEffect.TextStagger as="h2" variant="headingLg">
 				A stable character stagger
@@ -213,7 +213,7 @@ function TextStaggerTeachingSurface() {
 			</Button>
 			<MotionSource.Root
 				className="grid gap-8"
-				strategy={{ type: "boolean", active, timing: "grand" }}
+				strategy={{ type: "boolean", active, timing: "slow" }}
 			>
 				<MotionEffect.TextStagger
 					as="h2"
@@ -354,9 +354,7 @@ function StatRevealCompositionSurface() {
 			>
 				{active ? "Reverse statistic" : "Complete statistic"}
 			</Button>
-			<MotionSource.Root
-				strategy={{ type: "boolean", active, timing: "grand" }}
-			>
+			<MotionSource.Root strategy={{ type: "boolean", active, timing: "slow" }}>
 				<MotionEffect.TextStagger
 					blurOffset="10px"
 					className="font-medium"
@@ -498,7 +496,7 @@ function GridRevealTeachingSurface() {
 	const [narrow, setNarrow] = useState(false);
 	return (
 		<SettingsProvider defaultMotionDisabled={false} storageKey={null}>
-			<MotionProvider expressive={0}>
+			<MotionProvider>
 				<div className="grid gap-6 p-8">
 					<div className="flex flex-wrap gap-3">
 						<Button
@@ -520,7 +518,7 @@ function GridRevealTeachingSurface() {
 						<MotionSource.Root
 							className="relative overflow-hidden rounded-xl"
 							data-testid="grid-landscape"
-							strategy={{ type: "boolean", active, timing: "grand" }}
+							strategy={{ type: "boolean", active, timing: "slow" }}
 							style={{ height: 360, width: narrow ? 460 : 900 }}
 						>
 							<MotionEffect.GridReveal tileStyle={gridTileStyle} />
@@ -528,7 +526,7 @@ function GridRevealTeachingSurface() {
 						<MotionSource.Root
 							className="relative h-[440px] overflow-hidden rounded-xl"
 							data-testid="grid-portrait"
-							strategy={{ type: "boolean", active, timing: "grand" }}
+							strategy={{ type: "boolean", active, timing: "slow" }}
 						>
 							<MotionEffect.GridReveal tileStyle={gridTileStyle} />
 						</MotionSource.Root>
@@ -657,7 +655,7 @@ function GridRevealStaticFinalSurface() {
 		<MotionSource.Root
 			className="relative m-8 h-[300px] max-w-3xl overflow-hidden rounded-xl"
 			data-testid="grid-static-final"
-			strategy={{ type: "boolean", active: false, timing: "grand" }}
+			strategy={{ type: "boolean", active: false, timing: "slow" }}
 		>
 			<MotionEffect.GridReveal tileStyle={gridTileStyle} />
 		</MotionSource.Root>
@@ -713,7 +711,7 @@ function GeometricMediaTeachingSurface() {
 			</Button>
 			<MotionSource.Root
 				className="grid gap-5 md:grid-cols-2"
-				strategy={{ type: "boolean", active, timing: "grand" }}
+				strategy={{ type: "boolean", active, timing: "slow" }}
 			>
 				<MotionEffect.Clip
 					axis="inline"
@@ -859,7 +857,7 @@ function CounterpartRevealTeachingSurface() {
 	const [narrow, setNarrow] = useState(false);
 	return (
 		<SettingsProvider defaultMotionDisabled={false} storageKey={null}>
-			<MotionProvider expressive={0}>
+			<MotionProvider>
 				<div className="grid min-h-screen gap-8 bg-background p-8">
 					<div className="grid gap-2">
 						<Text as="h2" variant="headingLg">
@@ -890,7 +888,7 @@ function CounterpartRevealTeachingSurface() {
 						<div className="grid gap-3">
 							<Text variant="bodyStrong">Controlled before / after</Text>
 							<MotionSource.Root
-								strategy={{ type: "boolean", active, timing: "component" }}
+								strategy={{ type: "boolean", active, timing: "smooth" }}
 							>
 								<MotionEffect.CounterpartReveal
 									className={narrow ? "w-72" : "w-full"}
@@ -914,7 +912,7 @@ function CounterpartRevealTeachingSurface() {
 							>
 								<MotionSource.Root
 									as="span"
-									strategy={{ type: "owner-hover", timing: "component" }}
+									strategy={{ type: "owner-hover", timing: "smooth" }}
 								>
 									<MotionEffect.CounterpartReveal
 										as="span"
@@ -1068,7 +1066,7 @@ function CounterpartRevealStrategiesSurface() {
 	const [active, setActive] = useState(false);
 	return (
 		<SettingsProvider defaultMotionDisabled={false} storageKey={null}>
-			<MotionProvider expressive={0}>
+			<MotionProvider>
 				<div className="grid min-h-screen gap-8 bg-background p-8">
 					<div className="grid gap-2">
 						<Text as="h2" variant="headingLg">
@@ -1089,7 +1087,7 @@ function CounterpartRevealStrategiesSurface() {
 					</Button>
 					<MotionSource.Root
 						className="grid items-start gap-6 lg:grid-cols-3"
-						strategy={{ type: "boolean", active, timing: "grand" }}
+						strategy={{ type: "boolean", active, timing: "slow" }}
 					>
 						{counterpartRevealVariants.map((variant) => (
 							<div className="grid gap-3" key={variant.id}>
@@ -1230,7 +1228,7 @@ export const HoverTextReplay: HoverTextReplayStory = {
 	args: {
 		stagger: 0.4,
 		text: "Featured work",
-		timing: "grand",
+		timing: "slow",
 	},
 	argTypes: {
 		stagger: {
@@ -1242,8 +1240,8 @@ export const HoverTextReplay: HoverTextReplayStory = {
 		timing: {
 			control: "select",
 			description:
-				"Shared MotionSource timing preset for the complete hover transition.",
-			options: ["micro", "interactive", "component", "macro", "grand"],
+				"Shared MotionSource timing step for the complete hover transition.",
+			options: ["snap", "quick", "smooth", "gentle", "slow"],
 		},
 	},
 	parameters: {

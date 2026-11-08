@@ -1,28 +1,18 @@
 "use client";
 // Native specimen adapted from @/components/ui/foundations/MotionProvider.catalog.
 import {
-	MotionScope,
-	useMotionTransition,
-} from "@/components/ui/foundations/MotionProvider";
+	useIntroDisableOverride,
+	useMotionDisableOverride,
+} from "@/components/ui/foundations/motionDisableOverride";
 
-function TransitionEvidence() {
-	const transition = useMotionTransition("interaction");
+function CatalogPreview1() {
+	const motionDisabled = useMotionDisableOverride();
+	const introDisabled = useIntroDisableOverride();
 	return (
-		<output data-testid="transition-duration">
-			{String(transition.duration)}
+		<output aria-live="polite">
+			Motion {motionDisabled ? "disabled" : "enabled"}; intro{" "}
+			{introDisabled ? "disabled" : "enabled"}
 		</output>
 	);
-}
-function CatalogPreview1() {
-	const render = () => (
-		<MotionScope expressive={-0.25}>
-			<MotionScope expressive={0.75}>
-				<div data-testid="motion-scope">
-					<TransitionEvidence />
-				</div>
-			</MotionScope>
-		</MotionScope>
-	);
-	return render();
 }
 export default CatalogPreview1;

@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
 import Portal from "@/components/ui/overlays/Portal";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -26,7 +26,7 @@ const DEFAULT_CHEVRON_ICON = ({ isOpen }: { isOpen: boolean }) => {
 			name="chevron-down"
 			aria-hidden
 			data-is-open={isOpen}
-			className="data-[is-open=true]:rotate-180 transition-transform motion-micro"
+			className="data-[is-open=true]:rotate-180 transition-transform motion-snap"
 			style={{ width: 15, height: 15 }}
 		/>
 	);
@@ -418,7 +418,7 @@ export function DropdownRoot({
 					initial={{ opacity: 0, y: menuMotionY }}
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: menuMotionY }}
-					transition={resolveMotionTransition("disclosure")}
+					transition={spring.smooth}
 					style={menuStyle}
 					className={resolvedMenuClassName}
 					onMouseEnter={clearHoverTimeout}

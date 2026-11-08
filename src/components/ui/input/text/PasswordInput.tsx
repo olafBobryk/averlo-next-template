@@ -212,7 +212,7 @@ function PasswordInputRoot({
 									"shrink-0 relative select-none aspect-square",
 									"!p-1 !rounded-[8px] max-w-fit max-h-fit ",
 									"text-foreground/80 hover:text-foreground",
-									"transition-all motion-micro",
+									"transition-all motion-snap",
 								]
 									.filter(Boolean)
 									.join(" ")}
@@ -272,7 +272,7 @@ function PasswordInputRoot({
 							className={[
 								"h-full rounded-full",
 								motionAllowed
-									? "transition-[width] motion-micro"
+									? "transition-[width] motion-snap"
 									: "transition-none",
 							]
 								.filter(Boolean)

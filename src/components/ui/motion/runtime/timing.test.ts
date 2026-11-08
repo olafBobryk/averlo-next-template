@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cubicBezier, spring } from "motion";
-import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
+import { spring } from "motion";
+import { spring as stepSpring } from "@/components/ui/foundations/spring";
 import {
 	createProgressTrajectory,
 	getGsapRevealTiming,
@@ -9,28 +9,17 @@ import {
 } from "./timing";
 
 test("preserves configured reveal trajectory at intermediate timestamps", () => {
-	const transition = getMotionTiming("grand");
+	const transition = stepSpring.slow;
 	const trajectory = createProgressTrajectory(0, 1);
 	assert.ok(trajectory.durationMs > 0);
-	if (transition.type === "spring") {
-		const reference = spring({
-			keyframes: [0, 1],
-			stiffness: Number(transition.stiffness),
-			damping: Number(transition.damping),
-			mass: Number(transition.mass),
-		});
-		for (const ms of [0, 16, 80, 150, 300, 600, 1200])
-			assert.equal(trajectory.sample(ms), reference.next(ms).value);
-	} else {
-		const ease = cubicBezier(
-			...(transition.ease as [number, number, number, number]),
-		);
-		for (const fraction of [0, 0.05, 0.2, 0.5, 0.8, 1])
-			assert.equal(
-				trajectory.sample(trajectory.durationMs * fraction),
-				ease(fraction),
-			);
-	}
+	const reference = spring({
+		keyframes: [0, 1],
+		stiffness: Number(transition.stiffness),
+		damping: Number(transition.damping),
+		mass: Number(transition.mass),
+	});
+	for (const ms of [0, 16, 80, 150, 300, 600, 1200])
+		assert.equal(trajectory.sample(ms), reference.next(ms).value);
 });
 
 test("explicit durations retain the existing easing, including reverse playback", () => {
@@ -49,8 +38,7 @@ test("explicit durations retain the existing easing, including reverse playback"
 });
 
 test("interrupted and reversed springs retain position and velocity", () => {
-	const transition = getMotionTiming("grand");
-	if (transition.type !== "spring") return;
+	const transition = stepSpring.slow;
 	for (const [from, to, velocity] of [
 		[0.4, 0, 2],
 		[0.8, 1, -3],
@@ -74,6 +62,6 @@ test("invalid explicit duration uses the configured trajectory", () => {
 	for (const duration of [0, -1, NaN, Infinity])
 		assert.equal(
 			createProgressTrajectory(0, 1, 0, duration).durationMs,
-			getGsapTiming("grand").duration * 1000,
+			getGsapTiming("slow").duration * 1000,
 		);
 });

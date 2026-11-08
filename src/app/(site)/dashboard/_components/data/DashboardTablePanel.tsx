@@ -138,7 +138,7 @@ function DashboardTablePanelRoot<Row>({
 													<Button
 														align="left"
 														className={clsx(
-															"-mx-1.5 -my-1 border-0 px-1.5 py-1 !text-[var(--card-chrome-foreground)] transition-colors motion-interactive hover:text-foreground",
+															"-mx-1.5 -my-1 border-0 px-1.5 py-1 !text-[var(--card-chrome-foreground)] transition-colors motion-snap hover:text-foreground",
 															(column.align === "right" || isAction) &&
 																"ml-auto",
 														)}
@@ -153,12 +153,12 @@ function DashboardTablePanelRoot<Row>({
 														<span className="truncate">{column.header}</span>
 														<span className="relative inline-grid size-3 shrink-0 place-items-center">
 															<Icon
-																className="absolute opacity-0 scale-50 text-muted-foreground transition-all motion-micro group-data-[sort-direction=neutral]:opacity-100 group-data-[sort-direction=neutral]:scale-100"
+																className="absolute opacity-0 scale-50 text-muted-foreground transition-all motion-snap group-data-[sort-direction=neutral]:opacity-100 group-data-[sort-direction=neutral]:scale-100"
 																name="minus"
 																size="sm"
 															/>
 															<Icon
-																className="absolute text-muted-foreground transition-all motion-micro group-data-[sort-direction=neutral]:opacity-0 group-data-[sort-direction=neutral]:scale-50 group-data-[sort-direction=ascending]:rotate-180"
+																className="absolute text-muted-foreground transition-all motion-snap group-data-[sort-direction=neutral]:opacity-0 group-data-[sort-direction=neutral]:scale-50 group-data-[sort-direction=ascending]:rotate-180"
 																name="chevron-down"
 																size="sm"
 															/>

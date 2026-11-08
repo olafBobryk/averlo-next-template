@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { motion } from "motion/react";
 import * as React from "react";
 import { type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
-import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
 import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import Portal from "@/components/ui/overlays/Portal";
@@ -167,8 +167,8 @@ export function ModalDescription(
 	return <Card.Description {...props} />;
 }
 
-const overlayTransition = resolveMotionTransition("overlay");
-const panelTransition = resolveMotionTransition("disclosure");
+const overlayTransition = spring.gentle;
+const panelTransition = spring.gentle;
 
 const FOCUSABLE_SELECTOR = [
 	"a[href]",
