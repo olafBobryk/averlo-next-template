@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { IconSwap } from "@/components/ui/helpers/IconSwap";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { InlineError } from "@/components/ui/primitives/InlineError";
 import { InputFrame } from "@/components/ui/primitives/InputFrame";
@@ -229,10 +231,22 @@ export function UserMessage({
 									title={copied ? "Copied" : "Copy message"}
 									variant="bare"
 									size="none"
-									iconSize={14}
 									className="min-h-7 py-1"
 									shape="round"
-									leadingIcon={copied ? "check" : "copy"}
+									leadingIcon={
+										// The 15px swap box keeps the row's 14px icon geometry.
+										<IconSwap
+											swapKey={copied ? "check" : "copy"}
+											size="sm"
+											className="-m-[0.5px]"
+										>
+											<Icon
+												name={copied ? "check" : "copy"}
+												animate
+												style={{ width: 14, height: 14 }}
+											/>
+										</IconSwap>
+									}
 									onClick={async () => {
 										try {
 											await navigator.clipboard.writeText(text);

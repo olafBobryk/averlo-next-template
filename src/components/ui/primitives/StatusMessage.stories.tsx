@@ -96,6 +96,14 @@ export const ControlledPresence: Story = {
 		await waitFor(() => {
 			expect(canvas.getByText("A controlled contextual notice.")).toBeVisible();
 		});
+		// The toggle's morphing label settles before the accessibility scan.
+		await waitFor(
+			() =>
+				expect(getComputedStyle(canvas.getByText("Hide notice")).opacity).toBe(
+					"1",
+				),
+			{ timeout: 3000 },
+		);
 	},
 };
 

@@ -1,1 +1,5 @@
-export { ContentPresence, type ContentPresenceProps } from "./ContentPresence";
+export {
+	ContentPresence,
+	type ContentPresenceProps,
+	type PresenceMode,
+} from "./ContentPresence";

@@ -2,14 +2,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/primitives/Button";
 import { defineCatalogOwnerContract } from "@/lib/component-catalog/contract";
-import { ContentPresence } from "./index";
+import { ContentPresence, type PresenceMode } from "./index";
 
 export function PresenceExample({
 	axis = "y",
 	durationMs,
+	mode,
 }: {
 	axis?: "x" | "y";
 	durationMs?: number;
+	mode?: PresenceMode;
 }) {
 	const [open, setOpen] = useState(true);
 	const [expanded, setExpanded] = useState(false);
@@ -32,6 +34,7 @@ export function PresenceExample({
 					id={`presence-${axis}`}
 					open={open}
 					axis={axis}
+					mode={mode}
 					durationMs={durationMs}
 					gapBefore="0.75rem"
 					gapAfter="0.75rem"
@@ -60,6 +63,7 @@ export const catalogContract = defineCatalogOwnerContract({
 		"A conditional region enters or leaves normal flow, vertically or horizontally.",
 		"Shares Accordion’s continuous spring reveal and soft 16px moving edge; content stays opaque throughout.",
 		"Use zero gaps by default; let this owner animate any requested before/after spacing.",
+		"Choose `mode`: `masked` (default) for regions and panels; `sequenced` for messages and other content whose visible glyphs must never be clipped or overlap what follows (the box grows first and the content fades in once it fits; closing reverses the order).",
 	],
 	chooseInstead: [
 		"Use Accordion for an interactive disclosure, MotionSource/Effect for viewport or scroll reveals.",
@@ -69,6 +73,7 @@ export const catalogContract = defineCatalogOwnerContract({
 		"Disclosure controls, focus management, and announcement semantics: these belong to the caller.",
 		"Parent gaps that duplicate this component’s spacing.",
 		"A second global motion scheduler or local timing system.",
+		"Consumer-side fades or delays layered on top of a presence; pick a `mode` instead.",
 	],
 	guarantees: [
 		{
@@ -86,6 +91,14 @@ export const catalogContract = defineCatalogOwnerContract({
 		{
 			label: "Motion-off content access",
 			storyId: "ui-motion-content-presence--motion-off",
+		},
+		{
+			label: "Sequenced mode: no visible glyph clipped or overlapping",
+			storyId: "ui-motion-content-presence--sequenced",
+		},
+		{
+			label: "Sequenced content growth stays unclipped",
+			storyId: "ui-motion-content-presence--sequenced-content-growth",
 		},
 	],
 	previewTargets: [
@@ -106,6 +119,25 @@ export const catalogContract = defineCatalogOwnerContract({
 			stage: "standard",
 			Render: ({ coordinate }) => (
 				<PresenceExample axis={coordinate.axis as "x" | "y"} />
+			),
+		},
+		{
+			id: "modes",
+			name: "Presence modes",
+			baseline: { mode: "masked" },
+			axes: [
+				{
+					id: "mode",
+					label: "Mode",
+					values: [
+						{ id: "masked", label: "Masked", value: "masked" },
+						{ id: "sequenced", label: "Sequenced", value: "sequenced" },
+					],
+				},
+			],
+			stage: "standard",
+			Render: ({ coordinate }) => (
+				<PresenceExample mode={coordinate.mode as PresenceMode} />
 			),
 		},
 	],

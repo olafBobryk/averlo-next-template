@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
 import { useSettingsContext } from "@/components/ui/foundations/settingsContext";
 
 type NetworkInformationLike = {
@@ -50,4 +51,14 @@ export function useMotionAllowed(disableWhenReduced: boolean) {
 	}, [disableWhenReduced, forcedDisabled]);
 
 	return forcedDisabled ? false : allowed;
+}
+
+/**
+ * True when UI state transitions may animate: the reduced-motion/settings gate
+ * and the `?motion=off` preview override both allow it.
+ */
+export function useAnimated() {
+	const allowed = useMotionAllowed(true);
+	const disabled = useMotionDisableOverride();
+	return allowed && !disabled;
 }

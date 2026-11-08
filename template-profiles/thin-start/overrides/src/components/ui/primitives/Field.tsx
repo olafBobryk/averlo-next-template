@@ -1,5 +1,8 @@
+"use client";
+
 import clsx from "clsx";
-import type * as React from "react";
+import * as React from "react";
+import { ContentPresence } from "@/components/ui/motion/presence";
 import {
 	InputFrame,
 	type InputFrameSize,
@@ -49,6 +52,11 @@ function FieldRoot({
 	const messageId =
 		providedMessageId ??
 		(resolvedMessage && inputId ? `${inputId}-message` : undefined);
+	const hasMessage = !disableMessage && Boolean(resolvedMessage);
+	// Keep the last message and tone while the message region closes.
+	const shown = React.useRef({ message: resolvedMessage, tone: resolvedTone });
+	if (hasMessage)
+		shown.current = { message: resolvedMessage, tone: resolvedTone };
 
 	return (
 		<div className={clsx("group/field flex flex-col gap-3", className)}>
@@ -73,19 +81,28 @@ function FieldRoot({
 				</div>
 			) : null}
 			{children}
-			{!disableMessage && resolvedMessage ? (
-				<Text
-					id={messageId}
-					variant="support"
-					className={clsx(
-						resolvedTone === "error" && "text-danger",
-						resolvedTone === "success" && "text-success",
-					)}
-					role={resolvedTone === "error" ? "alert" : undefined}
-				>
-					{resolvedMessage}
-				</Text>
-			) : null}
+			{disableMessage ? null : (
+				// The negative margin cancels the column gap while the region is
+				// closed; the gap returns inside the region so it opens with it.
+				<div className="-mt-3">
+					<ContentPresence open={hasMessage} mode="sequenced">
+						<Text
+							id={hasMessage ? messageId : undefined}
+							variant="support"
+							className={clsx(
+								"pt-3",
+								shown.current.tone === "error" && "text-danger",
+								shown.current.tone === "success" && "text-success",
+							)}
+							role={
+								hasMessage && resolvedTone === "error" ? "alert" : undefined
+							}
+						>
+							{hasMessage ? resolvedMessage : shown.current.message}
+						</Text>
+					</ContentPresence>
+				</div>
+			)}
 		</div>
 	);
 }

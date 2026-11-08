@@ -1445,6 +1445,14 @@ export const UnderlineOwners: Story = {
 		await waitFor(() =>
 			expect(card.querySelectorAll("line").length).not.toBe(before),
 		);
+		// The toggle's morphing label settles before the accessibility scan.
+		await waitFor(
+			() =>
+				expect(getComputedStyle(canvas.getByText("Widen card")).opacity).toBe(
+					"1",
+				),
+			{ timeout: 3000 },
+		);
 	},
 };
 

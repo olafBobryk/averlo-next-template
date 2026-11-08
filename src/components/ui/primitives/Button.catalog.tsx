@@ -1,11 +1,51 @@
 "use client";
 
-import { type ComponentProps, type ComponentType, createElement } from "react";
+import {
+	type ComponentProps,
+	type ComponentType,
+	createElement,
+	useState,
+} from "react";
 import {
 	type CatalogPreviewProps,
 	defineCatalogOwnerContract,
 } from "@/lib/component-catalog/contract";
 import { Button } from "./Button";
+
+/** String labels morph by default; `morph={false}` swaps instantly; loading keeps its width. */
+export function ButtonLabelChangeExample() {
+	const [saved, setSaved] = useState(false);
+	const [instant, setInstant] = useState(false);
+	const [loading, setLoading] = useState(false);
+	return (
+		<div className="grid justify-items-start gap-3">
+			<Button
+				data-testid="morph-button"
+				variant="primary"
+				onClick={() => setSaved(!saved)}
+			>
+				{saved ? "Saved to drafts" : "Save"}
+			</Button>
+			<Button
+				data-testid="instant-button"
+				morph={false}
+				onClick={() => setInstant(!instant)}
+			>
+				{instant ? "Saved to drafts" : "Save"}
+			</Button>
+			<Button
+				data-testid="loading-button"
+				loading={loading}
+				onClick={() => setLoading(true)}
+			>
+				Submit request
+			</Button>
+			<Button variant="ghost" onClick={() => setLoading(false)}>
+				Reset loading
+			</Button>
+		</div>
+	);
+}
 
 function CatalogPreview1() {
 	const render = () => (
@@ -159,6 +199,7 @@ export const catalogContract = defineCatalogOwnerContract({
 		"An action needs shared hierarchy, sizing, icons, loading, focus, or button-like link behavior.",
 		"Primary is the principal action; secondary is the default standard action; ghost gains a hover surface; bare stays transparent; link underlines navigation. Inverse is a compatibility name for primary.",
 		"Danger and warning are semantic tones independent of emphasis.",
+		"String labels morph when they change (sequenced MorphLabel: the width eases and no visible glyph leaves the label box); pass `morph={false}` for an instant swap. Loading keeps the fixed-width crossfade to the spinner.",
 		"Use xxs/xs/compact for dense controls, sm/md for everyday actions, lg/xl for prominent actions. None delegates dimensions; chip is content-height; icon/icon-sm preserve icon-only callers.",
 		"Shape standard fits a label; round/square are icon-only. Radius pill explicitly requests full rounding and sm requests 7px, overriding shape corners.",
 		"Emphasis and semantic tone are independent. Shared owner tokens supply geometry and visible focus; typography follows the shared Text system. Existing primary/secondary/ghost/bare teaching describes this API, not an automatic application-wide variant selection policy.",
@@ -199,6 +240,10 @@ export const catalogContract = defineCatalogOwnerContract({
 		{
 			label: "Click and focus contract",
 			storyId: "ui-primitives-button--interaction-contract",
+		},
+		{
+			label: "Label morph, instant opt-out and fixed-width loading",
+			storyId: "ui-primitives-button--label-change",
 		},
 	],
 

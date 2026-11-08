@@ -1,13 +1,21 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
-import { DisclosurePresence } from "./DisclosurePresence";
+import { useAnimated } from "@/hooks/useMotionAllowed";
+import { DisclosurePresence, type PresenceMode } from "./DisclosurePresence";
+
+export type { PresenceMode };
 
 export type ContentPresenceProps = {
 	open: boolean;
 	children: ReactNode;
+	/**
+	 * `masked` (default) keeps content opaque behind a soft moving edge;
+	 * `sequenced` never clips or overlaps a visible glyph: the box grows first
+	 * and the content fades in once it fits; closing, the content fades out
+	 * first and then the box collapses.
+	 */
+	mode?: PresenceMode;
 	axis?: "x" | "y";
 	gapBefore?: string;
 	gapAfter?: string;
@@ -23,13 +31,8 @@ export function ContentPresence({
 	offsetY: _offsetY,
 	...props
 }: ContentPresenceProps) {
-	const allowed = useMotionAllowed(true);
-	const disabled = useMotionDisableOverride();
+	const animated = useAnimated();
 	return (
-		<DisclosurePresence
-			{...props}
-			animate={allowed && !disabled}
-			slot="content-presence"
-		/>
+		<DisclosurePresence {...props} animate={animated} slot="content-presence" />
 	);
 }
