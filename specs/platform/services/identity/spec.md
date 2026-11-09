@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/services/identity`
 
-**Migrated from**: OpenSpec `app/shared/services/identity/access-and-membership` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: `docs/testing/identity.md` when installed
@@ -11,18 +9,6 @@
 ## Purpose
 
 Preserve server-owned identity, organization and platform authorization across protected reads, changes and account lifecycle flows.
-
-## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/lib/auth/AGENTS.md`, `src/app/(site)/dashboard/_registry/AGENTS.md` and `src/app/(site)/dashboard/platform/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-006 and FR-007, with their meaning kept; FR-006 names the `platformRole` axis explicitly. Server authorization, visibility not being authorization, usable denial, safe continuations, deliberate invitations and the last verified identity were already FR-001 to FR-005. The fixture adapter rule lives with the template demos.
 
 ## Requirements
 

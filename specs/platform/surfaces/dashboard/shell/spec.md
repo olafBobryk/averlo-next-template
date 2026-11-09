@@ -2,7 +2,7 @@
 
 **Spec path**: `specs/platform/surfaces/dashboard/shell`
 
-**Created**: 2026-11-08 (new; behaviour rules copied from the dashboard layout, registry and platform `AGENTS.md` files)
+**Created**: 2026-11-08
 
 **Status**: Accepted, living
 
@@ -13,18 +13,6 @@
 ## Purpose
 
 One shared dashboard shell owns the chrome around every dashboard page: geometry, sidebar, toolbar, account footer, command registration and the platform branch. Pages compose inside it and never compensate for it.
-
-## Clarifications
-
-### Session 2026-11-08
-
-- **Q: Where did these rules come from?**
-  - A: The dashboard layout `AGENTS.md` and parts of the registry and platform `AGENTS.md` files, which had no spec home. The rules are copied here unchanged in meaning so those files can keep only structure and pointers.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `plugins/averlo/README.md` (origin/main `3fd01907`) with no other spec home. They are FR-011 to FR-013, with their meaning kept. Surfaces, geometry, sidebar layout, account footer, toolbar, gutters and scroll ownership from the layout `AGENTS.md` were already FR-001 to FR-007.
 
 ## Requirements
 

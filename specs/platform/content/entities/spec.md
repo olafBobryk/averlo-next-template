@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/content/entities`
 
-**Migrated from**: OpenSpec `app/shared/frontend/content/entity-presentation` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: [docs/testing/entities.md](../../../../docs/testing/entities.md)
@@ -11,13 +9,6 @@
 ## Purpose
 
 Keep entity facts, identity, actions and collection meaning consistent across detail pages, collections, selectors and genuine tool presentations.
-
-## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
 
 ## Requirements
 

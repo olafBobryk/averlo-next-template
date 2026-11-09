@@ -121,12 +121,6 @@ conflict. `AGENTS.md` files are thin entry points: structure, topology, import
 direction, and pointers to the spec that owns each behaviour. Amend this file
 through the write-spec workflow, bump the version, and record the date.
 
-1.1.0 (2026-11-08, AGENTS.md thinning): process rules from the root
-`AGENTS.md`, `PRODUCT.md`, `src/components/AGENTS.md`,
-`src/lib/marketing-content/AGENTS.md`, `src/payload/AGENTS.md` and
-`src/config/AGENTS.md` folded into I, III, VII, the new IX and the Agent
-principles.
-
 1.2.0 (2026-11-09, compose and systemize workflows): the retired
 `$averlo:compose`, `$averlo:systemize-composition` and `$averlo:animate` skills
 are replaced by the compose and systemize workflows; their still-valid rules

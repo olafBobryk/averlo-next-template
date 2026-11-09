@@ -2,7 +2,7 @@
 
 **Spec path**: `specs/platform/design-system/families/inputs`
 
-**Created**: 2026-11-08 (new; form-input rules ported from a product site spec, rules only)
+**Created**: 2026-11-08
 
 **Status**: Accepted, living. The `sequenced` message and `autoGrow` are built in this batch; see `tasks.md`.
 
@@ -22,11 +22,6 @@ Every form field is a `Field` around a `ui/input` owner, so labels, descriptions
   - A: Through `ContentPresence mode="sequenced"`: the box grows first and the text fades in once it fits, so a message is never clipped and never overlaps the next field (Olaf, 8 November: "fade waits until it fits"). The old `max-h-*` clip goes. `message`, `tone` and `messageId` keep their meaning (F7).
 - **Q: Does the textarea grow with its content?**
   - A: As an opt-in `autoGrow` prop on `TextAreaInput`; the default stays `rows`-based and resizable (F8).
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/components/ui/input/AGENTS.md`, `src/components/ui/input/{choice,editable,files}/AGENTS.md`, `src/components/ui/primitives/AGENTS.md` and `plugins/averlo/README.md` (origin/main `3fd01907`) with no other spec home. They are F10 to F16, with their meaning kept; mounted native semantics were already `specs/platform/design-system/usage` FR-004. The retired `muted` InputFrame variant is history and is not restated.
 
 ## API and defaults
 

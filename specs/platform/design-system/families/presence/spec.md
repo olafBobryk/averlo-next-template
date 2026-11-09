@@ -2,7 +2,7 @@
 
 **Spec path**: `specs/platform/design-system/families/presence`
 
-**Created**: 2026-11-08 (new)
+**Created**: 2026-11-08
 
 **Status**: Accepted, living. Presence modes, `MorphLabel`, the `IconSwap` changes and `useAnimated()` are built in this batch; see `tasks.md`.
 
@@ -24,11 +24,6 @@ Things that appear, disappear, resize or swap in place go through one owner each
   - A: Sequenced, never a glyph outside the box (P3). A frame-sampling test proves it.
 - **Q: IconSwap changes?**
   - A: It gates reduced motion internally (callers drop `transitionClassName` gating) and gains `<IconSwap swapKey={k}>{child}</IconSwap>`. Instant icon swaps in the assistant messages move onto it (P4).
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/components/ui/motion/AGENTS.md`, `src/components/ui/misc/AGENTS.md`, `src/components/ui/misc/accordion/AGENTS.md` and `src/components/ui/primitives/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are P8 to P11, with their meaning kept; no consumer sequential fades (P1), no presence-owned trigger, focus or announcement (P2) and a single feedback measurement (P5) were already here. The `mode` rules are unchanged.
 
 ## API and defaults
 

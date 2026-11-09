@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/template/demos`
 
-**Migrated from**: OpenSpec `template/demonstrations/demo-behavior` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: [docs/testing/forms.md](../../../docs/testing/forms.md), [docs/testing/contact-delivery.md](../../../docs/testing/contact-delivery.md)
@@ -11,18 +9,6 @@
 ## Purpose
 
 Keep the canonical template demonstrations truthful, resettable and isolated while allowing independently generated products to replace examples with real providers and persistence.
-
-## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `PRODUCT.md`, `src/lib/auth/AGENTS.md` and `src/app/(component-export)/internal/demo/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-006 to FR-012, with their meaning kept. Resettable, external-write-free fixtures from the dashboard `AGENTS.md` files were already FR-001 and FR-005.
 
 ## Requirements
 

@@ -2,7 +2,7 @@
 
 **Spec path**: `specs/platform/surfaces/dashboard/pages`
 
-**Created**: 2026-11-08 (new; rules moved from the dashboard route, entity and registry `AGENTS.md` files)
+**Created**: 2026-11-08
 
 **Status**: Accepted, living
 
@@ -15,16 +15,6 @@
 How to add any dashboard page: route shape, registry entry, server ownership, composition inside the shell, tables, states and proof. A real page's own spec lives in a project's `specs/product/dashboard/<area>/`, written from `.specify/templates/page-spec-template.md`.
 
 ## Clarifications
-
-### Session 2026-11-08
-
-- **Q: Where did these rules come from?**
-  - A: They were behaviour rules in the dashboard `AGENTS.md` files with no spec home. They move here so those files keep only structure and pointers; wording is kept close to the source.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/app/(site)/dashboard/AGENTS.md`, `src/app/(site)/dashboard/_components/entities/AGENTS.md`, `src/components/domain/assistant/AGENTS.md` and `plugins/averlo/README.md` (assistant) (origin/main `3fd01907`) with no other spec home. They are FR-013 to FR-021, with their meaning kept; the assistant rules are FR-016 to FR-021 here until an assistant spec exists. Product neutrality, surface composition, table headers and responsive columns, pagination and deletion were already FR-006 to FR-011.
 
 ### Session 2026-11-09 (compose skill retired)
 

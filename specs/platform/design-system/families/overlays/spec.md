@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/design-system/families/overlays`
 
-**Migrated from**: OpenSpec `app/shared/frontend/interaction/keyboard-and-overlays` (origin/main `3fd01907`); the family API and the popover rules are new
-
 **Status**: Accepted, living. The Dropdown engine, `presentation` and the toast cancel option are built in this batch; see `tasks.md`.
 
 **Builds on**: `specs/platform/design-system/usage`, `specs/platform/design-system/motion`, `specs/platform/design-system/scroll`
@@ -18,19 +16,12 @@ Keep controls and layered interactions operable through accessible names, native
 
 ### Session 2026-11-08
 
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only for FR-001 to FR-004: each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, and scenarios kept their wording.
 - **Q: How does Dropdown stay on screen?**
   - A: Its engine moves to `@floating-ui/react-dom` (offset, flip, shift with `collisionPadding`, size for the height cap, autoUpdate) behind the existing public props (FR-005).
 - **Q: Phones?**
   - A: A new `presentation="anchored" | "sheet" | "auto"`, default `auto`. The sheet is a full-width panel docked to the bottom edge, chosen only when the anchored panel cannot fit its minimum size in the available space; no device or breakpoint logic (FR-006).
 - **Q: Toasts for long promises?**
   - A: The toast promise helper gains a cancel option (FR-009).
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/components/ui/overlays/AGENTS.md`, `src/components/ui/overlays/modal/AGENTS.md`, `src/components/ui/primitives/AGENTS.md`, `src/components/ui/foundations/AGENTS.md` (focus tokens) and `plugins/averlo/README.md` (origin/main `3fd01907`) with no other spec home. They are FR-010 to FR-014, with their meaning kept. The README called the compact-row frame "muted"; that variant is retired, so FR-010 names the default xxs `InputFrame`. Focus entry and return, the single pending close lock, anchored versus blocking roles and no second portal stack were already FR-001 to FR-004 and FR-008; the old minimum-width and opposite-edge positioning rule is superseded by FR-005 and FR-006.
 
 ## Requirements
 

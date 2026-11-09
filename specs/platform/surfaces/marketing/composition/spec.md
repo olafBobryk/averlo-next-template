@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/surfaces/marketing/composition`
 
-**Migrated from**: OpenSpec `app/marketing/composition/marketing-composition` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: [docs/testing/marketing-composition.md](../../../../../docs/testing/marketing-composition.md)
@@ -13,16 +11,6 @@
 Render public pages as ordered semantic content within a shared shell and retain stable boundaries for source-backed review and maintenance.
 
 ## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/app/(site)/(marketing)/_components/AGENTS.md` and `src/lib/marketing-content/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-005 to FR-014, with their meaning kept. Ordered semantic content, the shared shell and layout data, distinct review boundaries and the fidelity/reuse split were already FR-001 to FR-004.
 
 ### Session 2026-11-09 (compose skill retired)
 

@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/design-system/usage`
 
-**Migrated from**: OpenSpec `app/shared/frontend/components/component-contracts` (origin/main `3fd01907`); the owner table is new
-
 **Status**: Accepted, living
 
 **Builds on**: `specs/platform/design-system/families/*`, `specs/platform/design-system/motion`, `specs/platform/design-system/scroll`
@@ -16,26 +14,12 @@ Make supported shared UI behavior discoverable and faithful across runtime consu
 
 ## Clarifications
 
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only for FR-001 to FR-005: each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, and scenarios kept their wording.
-- **Q: What does this spec add?**
-  - A: The owner-per-pattern table (FR-006), the never-re-implement list (FR-007) and the stated-reason rule for new variants and components (FR-008), so the folder `AGENTS.md` files can stay thin.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/components/AGENTS.md`, `src/components/ui/AGENTS.md`, `src/components/ui/primitives/AGENTS.md`, `src/components/branding/AGENTS.md`, `src/components/ui/icons/AGENTS.md`, `src/components/composites/markdown/AGENTS.md` and `plugins/averlo/README.md` (icons) (origin/main `3fd01907`) with no other spec home. They are FR-009 to FR-020, with their meaning kept. Storybook-owned support, neutral teaching, distinct wrappers, stable public names and mounted native semantics were already FR-001 to FR-005. The assistant tool-call and approval rule from `src/components/domain/assistant/AGENTS.md` lives with the dashboard pages spec.
-
 ### Session 2026-11-09 (compose and systemize skills retired)
 
 - **Q: How is each piece of a source design (Figma frame, screenshot) mapped to the design system?**
   - A: Olaf approved five levels: 1 use as is, 2 use an existing variant, 3 alter the owner, 4 new variant, 5 new component. Every piece names its owner from the Storybook catalogue. Levels 1–2 need no sign-off; levels 3–5 need Olaf's sign-off per row (FR-021).
 - **Q: How does an approved level 3–5 row enter the design system?**
   - A: Through one "add an item" rule: owner in the right folder, a family spec line, a Storybook story with a play test, the catalogue entry, and the item listed in the PR (FR-022).
-- **Q: Which rules came from the retired `$averlo:compose` and `$averlo:systemize-composition` skills?**
-  - A: Only the still-valid rules, with no procedure: one user action is one interactive root (FR-023), an altered owner changes its recipe in place so callers inherit it (FR-021 level 3), and human decisions are recorded only after Olaf decides (FR-024). Their procedures became `.specify/workflows/compose/` and `.specify/workflows/systemize/`. Confidence routing, action manifests and provenance ledgers were dropped as too heavy.
 
 ## Requirements
 

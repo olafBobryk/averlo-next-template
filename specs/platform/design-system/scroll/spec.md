@@ -2,7 +2,7 @@
 
 **Spec path**: `specs/platform/design-system/scroll`
 
-**Created**: 2026-11-08 (new; rules ported from a product site's scroll-container rules, rules only)
+**Created**: 2026-11-08
 
 **Status**: Accepted, living. `ScrollArea` is built in this batch; see `tasks.md`.
 
@@ -26,11 +26,6 @@ Inner scrollers run to their real visible edge, fade content under that edge, co
   - A: The menu-search result cap and the pricing-carousel exception are product decisions and stay with that product. The rules below are generic.
 - **Q: Scrollbar colours?**
   - A: From theme tokens; hidden only on carousels and tab rows (S13).
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/components/ui/motion/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are S14 and S15, with their meaning kept.
 
 ## Requirements
 

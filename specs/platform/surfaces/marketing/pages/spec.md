@@ -2,7 +2,7 @@
 
 **Spec path**: `specs/platform/surfaces/marketing/pages`
 
-**Created**: 2026-11-08 (new; generic rules gathered from the marketing route and content `AGENTS.md` files)
+**Created**: 2026-11-08
 
 **Status**: Accepted, living
 
@@ -20,11 +20,6 @@ How to add any public page so it fits the shared shell, renders from source-neut
 
 - **Q: Where does a new page's spec go?**
   - A: In the project's `specs/product/marketing/pages/<route>/spec.md`, from the page-spec template. The template itself ships no product pages (constitution VII).
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/lib/marketing-content/AGENTS.md` (origin/main `3fd01907`) with no other spec home. It is FR-011, with its meaning kept; server document resolution and `layout` delegation were already FR-003, which now names `renderMarketingSections()`.
 
 ### Session 2026-11-09 (compose skill retired)
 

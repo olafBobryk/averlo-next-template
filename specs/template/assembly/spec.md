@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/template/assembly`
 
-**Migrated from**: OpenSpec `template/assembly/project-assembly` (origin/main `3fd01907`)
-
 **Status**: Accepted, living. Canonical-only: never copied into a generated project.
 
 **Verified by**: [docs/operations/project-assembly.md](../../../docs/operations/project-assembly.md)
@@ -16,15 +14,8 @@ Materialize independent projects from explicit positive ownership while preservi
 
 ### Session 2026-11-08
 
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format, plus one decided substitution. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, and scenarios kept their wording. Olaf decided on 8 November 2026 that Spec Kit replaces OpenSpec entirely, so "stock OpenSpec integration" now reads "stock Spec Kit integration (`.specify/`)", "app contracts" now reads "platform specs" (`specs/platform/**`), "template contracts" means `specs/template/**`, and "proposal history" means template change history (FR-003, FR-005).
 - **Q: What does a generated project receive?**
   - A: The selected `specs/platform/**` specs, `.specify/` (constitution, templates, scripts, workflows, integrations) and an empty `specs/product/` skeleton. Never `specs/template/**`. Clones are never forced to pull later template changes (FR-003, FR-004).
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from root `AGENTS.md`, `PRODUCT.md`, `template-assembly/AGENTS.md`, `template-profiles/thin-start/AGENTS.md` and `src/app/(site)/(dev)/internal/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-007 to FR-016, with their meaning kept; FR-007 states the Spec Kit delivery set that replaces "stock OpenSpec integration". Demo reset, no-delivery and non-durability describing canonical examples rather than prohibiting real persistence was already FR-003.
 
 ## Requirements
 

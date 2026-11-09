@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/data/loading`
 
-**Migrated from**: OpenSpec `app/shared/data-lifecycle/loading-state-behavior` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: [docs/testing/loading.md](../../../../docs/testing/loading.md)
@@ -11,18 +9,6 @@
 ## Purpose
 
 Keep data-dependent regions understandable and usable while reading data, reserving appropriate space and providing clear completion or recovery. This is the read/presentation side of the data-lifecycle family; [`specs/platform/data/forms`](../forms/spec.md) owns form validation, pending submissions, submission feedback, retry, and success.
-
-## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/app/(site)/dashboard/_components/entities/AGENTS.md`, `src/components/ui/misc/AGENTS.md` and `src/components/ui/misc/state/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-008 and FR-009, with their meaning kept; live/skeleton parity, inert placeholders and live static context were already FR-001 to FR-004.
 
 ## Requirements
 

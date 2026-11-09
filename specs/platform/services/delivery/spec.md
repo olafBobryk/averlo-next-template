@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/services/delivery`
 
-**Migrated from**: OpenSpec `app/shared/services/delivery/contact-delivery`, `app/shared/services/delivery/submission-protection` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: `docs/testing/contact-delivery.md` when installed
@@ -15,16 +13,6 @@
 This owner has two sections. **Contact delivery**: Define truthful, private behavior for explicitly configured contact delivery. **Submission protection**: Protect explicitly exposed submission boundaries through reusable server guards without inventing blanket dashboard policy or new abuse thresholds. **Averlo-managed contact delivery** (FR-013 to FR-017) refines contact delivery for an independent project that explicitly enables it.
 
 ## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged. The two OpenSpec capabilities merged into one owner with two sections; contact delivery keeps FR-001 to FR-003 and submission protection continues at FR-004.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/lib/api/AGENTS.md`, `src/lib/forms/AGENTS.md` and the `src/components/ui/input/**/AGENTS.md` files (origin/main `3fd01907`) with no other spec home. They are FR-008 to FR-012, with their meaning kept. Server normalization, server-owned recipients and credentials, the reply path, guards before downstream work, the neutral honeypot and server attachment validation were already FR-001 to FR-007.
 
 ### Session 2026-11-09 (contact-form skill retired)
 

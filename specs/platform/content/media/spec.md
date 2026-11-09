@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/content/media`
 
-**Migrated from**: OpenSpec `app/shared/frontend/content/media-delivery` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: `docs/testing/marketing-composition.md` when installed
@@ -11,18 +9,6 @@
 ## Purpose
 
 Keep production media durable, accessible and responsive while preserving actual constituent assets and source-neutral rendering contracts.
-
-## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/lib/marketing-content/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-005 to FR-008, with their meaning kept; durable constituent assets, source-neutral delivery, purposeful alt text, evidence-based preloading and named local exceptions were already FR-001 to FR-004.
 
 ## Requirements
 

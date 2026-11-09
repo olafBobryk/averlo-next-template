@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/data/actions`
 
-**Migrated from**: OpenSpec `app/shared/data-lifecycle/action-behavior` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: [docs/testing/actions.md](../../../../docs/testing/actions.md)
@@ -11,18 +9,6 @@
 ## Purpose
 
 Make non-form state changes understandable, recoverable and safe across action groups. Form submissions remain owned by `specs/platform/data/forms` and initial reads by `specs/platform/data/loading`.
-
-## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/app/(site)/dashboard/_components/entities/AGENTS.md` and `src/lib/feedback/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-007 to FR-010, with their meaning kept. The pending owner, channel ownership, durable success instructions, confirmation, optimistic rollback, single replacement navigation and active-send cancellation were already FR-001 to FR-006.
 
 ## Requirements
 

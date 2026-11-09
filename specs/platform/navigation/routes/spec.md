@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/navigation/routes`
 
-**Migrated from**: OpenSpec `app/shared/frontend/navigation/route-identity` (origin/main `3fd01907`)
-
 **Status**: Accepted, living
 
 **Verified by**: [docs/testing/routes-and-metadata.md](../../../../docs/testing/routes-and-metadata.md)
@@ -11,18 +9,6 @@
 ## Purpose
 
 Keep installed destinations, semantic ancestry and contextual navigation consistent across public, authentication and dashboard route families.
-
-## Clarifications
-
-### Session 2026-11-08
-
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only. Each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, `WHEN`/`THEN` scenarios kept their wording, and capability references became tree paths. The meaning is unchanged.
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/lib/surfaces/AGENTS.md` (origin/main `3fd01907`) with no other spec home. It is FR-004, with its meaning kept. One identity per destination, no parallel maps, semantic ancestry, contextual-command unregistration and closing command search before execution were already FR-001 to FR-003.
 
 ## Requirements
 

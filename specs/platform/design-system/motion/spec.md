@@ -2,8 +2,6 @@
 
 **Spec path**: `specs/platform/design-system/motion`
 
-**Migrated from**: OpenSpec `app/shared/frontend/interaction/responsive-and-motion` (origin/main `3fd01907`), plus the generic state-motion rules of a product site spec (rules only)
-
 **Status**: Accepted, living. Parts are built in this batch; see `tasks.md`.
 
 **Builds on**: `specs/platform/design-system/usage`, `specs/platform/design-system/families/presence`, `specs/platform/design-system/families/buttons`, `specs/platform/data/loading`
@@ -20,8 +18,6 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
 
 ### Session 2026-11-08
 
-- **Q: What changed in the move from OpenSpec to Spec Kit?**
-  - A: Format only for FR-001 to FR-004: each OpenSpec requirement became an FR ID in its original order, `SHALL` became `MUST`, and scenarios kept their wording.
 - **Q: Which product-site rules come into the template?**
   - A: The universal (U), size (H), text (T), icon (I), button (B), loading (L) and responsive (R) rules, made generic. Form rules moved to `specs/platform/design-system/families/inputs` and popover rules to `.../families/overlays`. Booking and branding cases, site paths, exceptions and all values stay out; only rules are ported (constitution V).
 - **Q: Which owner animates height in the template?**
@@ -42,11 +38,6 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
   - A: It catches up to its current scroll-progress state with a timed intro and stops exactly there: an item 50% through its range animates from 0 to 50%, never beyond and never below, then follows scroll. If scroll changes during the intro, it lands on the live progress (FR-013).
 - **Q: Do scroll Sequence items move at a constant rate?**
   - A: No. With a linear slice per item, the hero headline, text and call to action each slid at constant speed, 0.18 s apart, which Olaf found awkward. Olaf chose "eased, tighter stagger": each item eases within its slice on the `slow` curve, during both the catch-up intro and the scroll scrub, while the Sequence clock stays linear. The hero's lines start 0.06 s apart; the 0.18 s default stays for other Sequences (FR-006, FR-013).
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `src/components/ui/motion/AGENTS.md`, `src/components/ui/foundations/AGENTS.md` and `src/components/ui/helpers/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-005 to FR-012, with their meaning kept; responsive CSS-first layout, bounded hidden work, motion never gating agency and source/effect ownership were already FR-001 to FR-004 and R1. Shared focus tokens moved to `specs/platform/design-system/families/overlays` FR-014; the Lenis scroll transport to `specs/platform/design-system/scroll` S14.
 
 ### Session 2026-11-09 (animate skill retired)
 

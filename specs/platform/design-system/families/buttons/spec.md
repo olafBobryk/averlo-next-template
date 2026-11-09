@@ -2,7 +2,7 @@
 
 **Spec path**: `specs/platform/design-system/families/buttons`
 
-**Created**: 2026-11-08 (new)
+**Created**: 2026-11-08
 
 **Status**: Accepted, living. The default morph is built in this batch; see `tasks.md`.
 
@@ -20,11 +20,6 @@ One `Button` owns every clickable action and button-like link: its variant, size
 
 - **Q: Do buttons morph by default?**
   - A: Yes. When string `children` change, the label renders through `MorphLabel` and the width eases on the `smooth` spring. `morph={false}` opts out. Loading keeps today's fixed-width crossfade to the spinner (BT3).
-
-### Session 2026-11-08 (AGENTS.md thinning)
-
-- **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
-  - A: Behaviour rules from `plugins/averlo/README.md` (origin/main `3fd01907`) with no other spec home. Bare treatment is BT7. BT4 now also says no detached loading label, so only the clicked action shows loading.
 
 ## API and defaults
 
