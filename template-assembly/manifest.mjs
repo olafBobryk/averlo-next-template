@@ -123,6 +123,8 @@ export const assemblyTemplateOnlyScripts = new Set([
 export const assemblyTemplateOnlyDevDependencies = new Set(["js-tiktoken"]);
 
 export const assemblyCoreScripts = new Set([
+	"check:push",
+	"test:storybook:changed",
 	"verify:forms",
 	"verify:loading",
 	"test:unit",

@@ -64,12 +64,17 @@ not verified, anything that needs a spec change, commit SHAs.
 
 ## 5. Checks
 
-Run the [verify workflow](../verify/README.md): always `static` (lint,
-policy verifiers, typecheck); `build` and `smoke` for runtime changes; the
-feature suites the changed specs name (forms, loading, marketing, entities…);
-`storybook` for component changes; `profiles` and `create-averlo` when
-assembly, specs or `.specify/` change. A subagent's own passing check does not
-prove the integrated branch passes; rerun on the integration branch.
+Before every push, run `npm run check:push` on the integration branch: lint,
+typecheck, unit tests and the Storybook tests related to the files changed
+since `origin/main` (set `CHECK_BASE`, e.g. `CHECK_BASE=main`, in a
+project without that remote). Never push while it is unfinished or failing. A
+subagent's own passing check does not prove the integrated branch passes.
+
+The full Storybook suite, the production build and the rest of the
+[verify workflow](../verify/README.md) run in CI (free on this public repo).
+Run one of them locally only when a change needs it before review: the feature
+suites a changed spec names, or `profiles` and `create-averlo` when assembly,
+specs or `.specify/` change.
 
 ## 6. One PR per batch
 

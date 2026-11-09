@@ -21,6 +21,8 @@
 		"lint": "biome check",
 		"typecheck": "tsc --noEmit --pretty false",
 		"test:unit": "tsx --test 'src/**/*.test.ts' 'src/**/*.test.tsx' 'scripts/**/*.test.mjs' 'biome/**/*.test.mjs' 'plugins/**/*.test.mjs' 'packages/create-averlo/test/*.test.mjs'",
+		"test:storybook:changed": "vitest run --project storybook --changed ${CHECK_BASE:-origin/main}",
+		"check:push": "npm run lint && npm run typecheck && npm run --if-present test:unit && npm run --if-present test:storybook:changed",
 		"verify:static": "npm run lint && npm run verify:route-surfaces && npm run verify:route-metadata && npm run verify:modals && npm run verify:surface-contracts && npm run verify:retired-semantic-service && npm run verify:retired-template-intelligence && npm run verify:skill-references && npm run typecheck",
 		"verify:build": "npm run build",
 		"verify:smoke": "node scripts/verify/verify-smoke.mjs",

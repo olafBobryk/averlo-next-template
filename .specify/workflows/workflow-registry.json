@@ -11,7 +11,7 @@
 		},
 		"main": {
 			"name": "Main thread",
-			"version": "1.0.0",
+			"version": "1.1.0",
 			"description": "Orchestrator only: route a request, specify it, build it in parallel worktrees, review it locally and open one PR per batch",
 			"source": "local",
 			"installed_at": "2026-11-08T18:00:00.000000+00:00",

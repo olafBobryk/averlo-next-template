@@ -47,6 +47,8 @@ export const thinStartProfile = {
 	},
 	assembly: {
 		coreScripts: [
+			"check:push",
+			"test:storybook:changed",
 			"verify:forms",
 			"verify:loading",
 			"build-storybook",
