@@ -6,6 +6,8 @@ import { useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
+import { IconSwap } from "@/components/ui/helpers/IconSwap";
+import { Icon } from "@/components/ui/icons/Icon";
 import { ScrollArea } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Panel } from "@/components/ui/primitives/surfaces";
@@ -62,13 +64,10 @@ export default function HeaderCompact({
 	const heightTransition: Transition = motionAllowed
 		? spring.smooth
 		: instantTransition;
-	// Menu open/close moves the header height on `gentle`; the content fades
-	// on `quick` (as presence does).
+	// Menu open/close moves the header height on `gentle`; the content fades with the
+	// header surface on the same step; resizing stays on `smooth`.
 	const menuPanelTransition: Transition = motionAllowed
 		? spring.gentle
-		: instantTransition;
-	const menuFadeTransition: Transition = motionAllowed
-		? spring.quick
 		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
 	// spec exception E-001
@@ -161,9 +160,9 @@ export default function HeaderCompact({
 						</motion.div>
 						<Button
 							variant="ghost"
-							size="sm"
-							align="center"
-							trailingIcon={isMenuOpen ? "minus" : "plus"}
+							size="icon-sm"
+							textTone="inherit"
+							className="pointer-events-auto text-foreground hover:!text-foreground active:!text-foreground"
 							onClick={toggleMenu}
 							aria-expanded={isMenuOpen}
 							aria-label={
@@ -171,9 +170,33 @@ export default function HeaderCompact({
 									? layout.mobile.closeAriaLabel
 									: layout.mobile.openAriaLabel
 							}
-						>
-							{layout.mobile.menuLabel}
-						</Button>
+							leadingIcon={
+								<IconSwap
+									activeIndex={isMenuOpen ? 1 : 0}
+									size="md"
+									items={[
+										{
+											icon: (
+												<Icon
+													name="menu"
+													className="size-full text-foreground"
+													style={{ width: "100%", height: "100%" }}
+												/>
+											),
+										},
+										{
+											icon: (
+												<Icon
+													name="close"
+													className="size-full text-foreground"
+													style={{ width: "100%", height: "100%" }}
+												/>
+											),
+										},
+									]}
+								/>
+							}
+						/>
 					</motion.div>
 				</motion.div>
 				<div className="relative w-full px-section-x">
@@ -187,9 +210,10 @@ export default function HeaderCompact({
 								style={{
 									height: `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`,
 								}}
-								initial={false}
-								animate={{ opacity: menu.visible ? 1 : 0 }}
-								transition={menuFadeTransition}
+								initial={motionAllowed ? { opacity: 0 } : false}
+								// Fades with the header surface, on the same step.
+								animate={{ opacity: menu.extended ? 1 : 0 }}
+								transition={headerTransition}
 							>
 								<div className="relative shrink-0">
 									<HeaderSearchInput

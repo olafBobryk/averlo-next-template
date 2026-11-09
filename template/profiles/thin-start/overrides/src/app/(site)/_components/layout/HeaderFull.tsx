@@ -102,13 +102,10 @@ export default function HeaderFull({
 	const headerTransition: Transition = motionAllowed
 		? spring.gentle
 		: instantTransition;
-	// Menu panel open/close on `gentle`; the content fades on `quick` (as
-	// presence does); resizing the open content stays on `smooth`.
+	// Menu panel open/close on `gentle`; the content fades with the
+	// header surface on the same step; resizing stays on `smooth`.
 	const menuPanelTransition: Transition = motionAllowed
 		? spring.gentle
-		: instantTransition;
-	const menuFadeTransition: Transition = motionAllowed
-		? spring.quick
 		: instantTransition;
 	const menuResizeTransition: Transition = motionAllowed
 		? spring.smooth
@@ -279,23 +276,16 @@ export default function HeaderFull({
 					>
 						<motion.div
 							ref={menuContentRef}
-							className="relative w-full border-t border-transparent"
+							className="w-full border-t border-border"
 							style={{
 								paddingTop: HEADER_MENU_TOP_PADDING,
 								paddingBottom: HEADER_MENU_BOTTOM_PADDING,
 							}}
-							initial={false}
-							animate={{ opacity: menu.visible ? 1 : 0 }}
-							transition={menuFadeTransition}
+							initial={motionAllowed ? { opacity: 0 } : false}
+							// Fades with the header surface, on the same step.
+							animate={{ opacity: menu.extended ? 1 : 0 }}
+							transition={headerTransition}
 						>
-							{/* Fades as the menu closes, so the clip need not reach it. */}
-							<motion.div
-								aria-hidden="true"
-								className="pointer-events-none absolute inset-x-0 -top-px border-t border-border"
-								initial={false}
-								animate={{ opacity: menu.extended ? 1 : 0 }}
-								transition={menuFadeTransition}
-							/>
 							<motion.div
 								className="relative overflow-hidden"
 								initial={false}

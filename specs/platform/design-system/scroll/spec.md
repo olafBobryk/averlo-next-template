@@ -62,7 +62,7 @@ An exception exists only once it has a row. The code carries `// spec exception 
 
 | ID | Rule broken | Where | Why | Decided by / when | Revisit when |
 |---|---|---|---|---|---|
-| E-001 | motion H3 (height goes through `ContentPresence`) | `src/app/(site)/_components/layout/useMenuPanelPresence.ts`, used by `HeaderFull` (menu panel) and `HeaderCompact` (header height), plus the thin-start overrides of both | `ContentPresence` uses one transition for opening and resizing, but the menu panel opens and closes on `gentle` while its open content resizes on `smooth`, and the compact header is itself the fixed-height box. The hook keeps H1 `masked` presence (content visible, clipped by the moving edge) on the shared springs | Olaf approved the `gentle` header menu, 8 November 2026, and masked presence, 9 November 2026 | `ContentPresence` supports a separate open/close step and resize step, and can drive an outer box |
+| E-001 | motion H3 (height goes through `ContentPresence`) | `src/app/(site)/_components/layout/useMenuPanelPresence.ts`, used by `HeaderFull` (menu panel) and `HeaderCompact` (header height), plus the thin-start overrides of both | `ContentPresence` uses one transition for opening and resizing, but the menu panel opens and closes on `gentle` while its open content resizes on `smooth`, and the compact header is itself the fixed-height box. The moving edge clips the content while it fades with the header surface on `gentle` (H1 `masked`) | Olaf approved the `gentle` header menu, 8 November 2026, and the clipped content fading with the header surface, 9 November 2026 | `ContentPresence` supports a separate open/close step and resize step, and can drive an outer box |
 
 A generated project keeps its own register.
 

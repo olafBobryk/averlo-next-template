@@ -3,9 +3,9 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 /**
- * Header menu panel presence (motion H1 `masked`). The content stays fully
- * visible and the moving panel edge clips it: opening, the panel grows over
- * visible content; closing, it shrinks at once and unmounts when closed.
+ * Header menu panel presence (motion H1 `masked`). The moving panel edge clips
+ * the content, which fades with the header surface: opening, the panel grows
+ * as the content fades in; closing, both run at once and it unmounts when closed.
  *
  * The header panels cannot use `ContentPresence`: the full header resizes its
  * open content on `smooth` while presence uses one transition for opening and
@@ -31,8 +31,6 @@ export function useMenuPanelPresence(open: boolean, animated: boolean) {
 		mounted,
 		/** The panel holds (or moves to) its open size. */
 		extended: open,
-		/** The content is visible whenever it is rendered. */
-		visible: mounted,
 		onPanelComplete,
 	};
 }
