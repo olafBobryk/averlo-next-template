@@ -120,6 +120,10 @@ export const catalogContract = defineCatalogOwnerContract({
 	],
 	guarantees: [
 		{
+			label: "Opaque fill hides what is behind it",
+			storyId: "ui-primitives-input-frame--opaque",
+		},
+		{
 			label: "Strong chrome retains focus and validation",
 			storyId: "ui-primitives-input-frame--strong",
 		},

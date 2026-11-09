@@ -117,6 +117,7 @@ export function HeaderSearchInput({
 
 	return (
 		<InputFrame
+			opaque
 			size="sm"
 			className={
 				className ??

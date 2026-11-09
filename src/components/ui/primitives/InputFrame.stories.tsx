@@ -325,3 +325,26 @@ export const Strong: Story = {
 };
 
 export const StrongDark: Story = { ...Strong, globals: { theme: "dark" } };
+
+const isTranslucent = (color: string) =>
+	/rgba\([^)]*,\s*0?\.\d+\)|\/\s*0?\.\d+\)/.test(color);
+
+export const Opaque: Story = {
+	render: () => (
+		<div className="grid max-w-sm gap-3 bg-[repeating-linear-gradient(45deg,var(--foreground)_0_6px,transparent_6px_12px)] p-4">
+			<InputFrame data-testid="default-frame">
+				<input aria-label="Default fill" className={inputVariants()} />
+			</InputFrame>
+			<InputFrame opaque data-testid="opaque-frame">
+				<input aria-label="Opaque fill" className={inputVariants()} />
+			</InputFrame>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const fill = (id: string) =>
+			getComputedStyle(canvas.getByTestId(id)).backgroundColor;
+		// The default light fill is a tint; opaque mixes it into the surface.
+		await expect(isTranslucent(fill("default-frame"))).toBe(true);
+		await expect(isTranslucent(fill("opaque-frame"))).toBe(false);
+	},
+};

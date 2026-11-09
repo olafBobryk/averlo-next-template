@@ -193,6 +193,7 @@ export function HeaderSearchInput({
 
 	return (
 		<InputFrame
+			opaque
 			className={clsx(
 				"group/header-search min-h-10 text-foreground",
 				className ??
