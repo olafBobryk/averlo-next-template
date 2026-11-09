@@ -2,20 +2,23 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: trigger wrapper behavior is delegated through render props and nested controls */
 "use client";
 
+import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
-import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
+import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
 import Portal from "@/components/ui/overlays/Portal";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { getDropdownSurfaceClassName } from "../dropdownStyles";
 import { COLLISION_PADDING, DEFAULT_MENU_MIN_WIDTH } from "./constants";
-import {
-	getAbsolutePositioningOrigin,
-	resolveAnchoredDropdownPosition,
-} from "./positioning";
-import type { DropdownProps, DropdownSide } from "./types";
+import { useDropdownFloating } from "./positioning";
+import { dropdownSheetClassName } from "./sheet";
+import type { DropdownProps } from "./types";
 import type { DropdownCollectionController } from "./useDropdownCollectionController";
+
+const toCssLength = (value: number | string) =>
+	typeof value === "number" ? `${value}px` : value;
 
 const DEFAULT_CHEVRON_ICON = ({ isOpen }: { isOpen: boolean }) => {
 	return (
@@ -23,7 +26,7 @@ const DEFAULT_CHEVRON_ICON = ({ isOpen }: { isOpen: boolean }) => {
 			name="chevron-down"
 			aria-hidden
 			data-is-open={isOpen}
-			className="data-[is-open=true]:rotate-180 transition-transform motion-micro"
+			className="data-[is-open=true]:rotate-180 transition-transform motion-snap"
 			style={{ width: 15, height: 15 }}
 		/>
 	);
@@ -44,6 +47,7 @@ export function DropdownRoot({
 	side = "bottom",
 	offset = 8,
 	positionStrategy = "absolute",
+	presentation = "auto",
 	disabled,
 	open,
 	openOnHover = true,
@@ -57,13 +61,16 @@ export function DropdownRoot({
 	collectionController?: DropdownCollectionController;
 	keepOpenWhileFocusWithin?: boolean;
 }) {
-	const motionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const reducedMotionAllowed = useMotionAllowed(disableWhenReducedMotion);
+	const motionDisabled = useMotionDisableOverride();
+	const motionAllowed = reducedMotionAllowed && !motionDisabled;
 	const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
 	const [isPinned, setIsPinned] = React.useState(false);
 	const rootRef = React.useRef<HTMLElement | null>(null);
 	const menuRef = React.useRef<HTMLDivElement | null>(null);
-	const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>();
-	const [resolvedSide, setResolvedSide] = React.useState<DropdownSide>(side);
+	const [referenceNode, setReferenceNode] = React.useState<HTMLElement | null>(
+		null,
+	);
 	const hoverTimeoutRef = React.useRef<number | null>(null);
 	const lastOpenMethodRef = React.useRef<"keyboard" | "pointer" | null>(null);
 	const isOpenControlled = open !== undefined;
@@ -257,61 +264,27 @@ export function DropdownRoot({
 		setOpenState(!isOpen);
 	};
 
-	const calculateMenuPosition = React.useCallback(() => {
-		if (!rootRef.current) return;
-
-		const rect = rootRef.current.getBoundingClientRect();
-		const explicitWidth = menuWidth === "trigger" ? rect.width : menuWidth;
-		const resolvedMinWidth =
-			explicitWidth ?? (menuWidth === "trigger" ? rect.width : menuMinWidth);
-		const measuredWidth =
-			explicitWidth ??
-			Math.max(menuRef.current?.offsetWidth ?? 0, resolvedMinWidth ?? 0);
-		const measuredHeight =
-			menuRef.current?.scrollHeight ??
-			menuRef.current?.getBoundingClientRect().height ??
-			0;
-		const position = resolveAnchoredDropdownPosition({
-			absoluteOrigin:
-				positionStrategy === "absolute" && menuRef.current
-					? getAbsolutePositioningOrigin(menuRef.current)
-					: undefined,
-			align,
-			anchorRect: rect,
-			collisionPadding,
-			explicitWidth,
-			measuredHeight,
-			measuredWidth,
-			minWidth: resolvedMinWidth,
-			offset,
-			positionStrategy,
-			side,
-			zIndex: 90,
-		});
-		if (!position) return;
-		setResolvedSide(position.resolvedSide);
-		setMenuStyle(position.style);
-	}, [
+	const floating = useDropdownFloating({
 		align,
 		collisionPadding,
-		menuMinWidth,
-		menuWidth,
+		enabled: isOpen,
 		offset,
-		positionStrategy,
+		presentation,
+		reference: referenceNode,
+		requiredWidth: menuWidth === "trigger" ? 0 : (menuWidth ?? menuMinWidth),
 		side,
-	]);
+		strategy: positionStrategy,
+	});
 
-	React.useEffect(() => {
-		if (isOpen) {
-			calculateMenuPosition();
-		} else {
-			setMenuStyle(undefined);
-			setResolvedSide(side);
-		}
-	}, [isOpen, calculateMenuPosition, side]);
+	React.useLayoutEffect(() => {
+		setReferenceNode(isOpen ? rootRef.current : null);
+	}, [isOpen]);
 
+	// Focus once the panel is positioned: until then it is visibility-hidden and
+	// none of its controls can take focus.
+	const { isPositioned } = floating;
 	React.useEffect(() => {
-		if (!isOpen) return;
+		if (!isOpen || !isPositioned) return;
 		if (
 			autoFocusMenu &&
 			menuRef.current &&
@@ -320,28 +293,7 @@ export function DropdownRoot({
 			const focusTarget = getMenuFocusableElements()[0];
 			focusTarget?.focus({ preventScroll: true });
 		}
-		const handleResize = () => calculateMenuPosition();
-		const observer = new ResizeObserver(handleResize);
-		if (menuRef.current) observer.observe(menuRef.current);
-		if (rootRef.current) observer.observe(rootRef.current);
-		window.addEventListener("resize", handleResize);
-		if (positionStrategy === "fixed") {
-			window.addEventListener("scroll", handleResize, true);
-		}
-		return () => {
-			observer.disconnect();
-			window.removeEventListener("resize", handleResize);
-			if (positionStrategy === "fixed") {
-				window.removeEventListener("scroll", handleResize, true);
-			}
-		};
-	}, [
-		isOpen,
-		calculateMenuPosition,
-		autoFocusMenu,
-		positionStrategy,
-		getMenuFocusableElements,
-	]);
+	}, [isOpen, isPositioned, autoFocusMenu, getMenuFocusableElements]);
 
 	React.useEffect(() => {
 		if (!isOpen && !isPinned) return;
@@ -421,32 +373,44 @@ export function DropdownRoot({
 		collectionController,
 	]);
 
+	const { setFloating, sheet } = floating;
 	const setMenuNode = React.useCallback(
 		(node: HTMLDivElement | null) => {
 			menuRef.current = node;
-			if (node && isOpen) {
-				calculateMenuPosition();
-			}
+			setFloating(node);
 		},
-		[isOpen, calculateMenuPosition],
+		[setFloating],
 	);
 
-	const baseMenuClassName = [
+	const explicitWidth =
+		menuWidth === "trigger" ? "var(--dropdown-anchor-width)" : menuWidth;
+	const menuStyle: React.CSSProperties = sheet
+		? { zIndex: 90 }
+		: {
+				...floating.floatingStyles,
+				maxHeight: "var(--dropdown-available-height)",
+				maxWidth: "var(--dropdown-available-width)",
+				// The minimum never beats the space the panel has.
+				minWidth: `min(${toCssLength(explicitWidth ?? menuMinWidth)}, var(--dropdown-available-width, 100vw))`,
+				overflowY: floating.capped ? "auto" : undefined,
+				visibility: floating.isPositioned ? undefined : "hidden",
+				width: explicitWidth,
+				zIndex: 90,
+			};
+	const resolvedMenuClassName = clsx(
 		getDropdownSurfaceClassName(menuElevation),
-		"w-fit z-[91]",
-		positionStrategy === "fixed" ? "fixed" : "absolute",
-	]
-		.filter(Boolean)
-		.join(" ");
-	const resolvedMenuClassName = [baseMenuClassName, menuClassName]
-		.filter(Boolean)
-		.join(" ");
-	const menuMotionY = resolvedSide === "top" ? 6 : -6;
+		"flex w-fit flex-col overscroll-contain z-[91]",
+		sheet ? "fixed" : positionStrategy === "fixed" ? "fixed" : "absolute",
+		menuClassName,
+		sheet && dropdownSheetClassName,
+	);
+	const menuMotionY = sheet ? 16 : floating.resolvedSide === "top" ? 6 : -6;
 	const menuNode = motionAllowed ? (
 		<AnimatePresence>
 			{isOpen ? (
 				<motion.div
 					ref={setMenuNode}
+					data-dropdown-presentation={sheet ? "sheet" : "anchored"}
 					data-elevation={menuElevation}
 					data-slot="float"
 					data-surface-role="float"
@@ -454,7 +418,7 @@ export function DropdownRoot({
 					initial={{ opacity: 0, y: menuMotionY }}
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: menuMotionY }}
-					transition={resolveMotionTransition("disclosure")}
+					transition={spring.smooth}
 					style={menuStyle}
 					className={resolvedMenuClassName}
 					onMouseEnter={clearHoverTimeout}
@@ -469,6 +433,7 @@ export function DropdownRoot({
 	) : isOpen ? (
 		<div
 			ref={setMenuNode}
+			data-dropdown-presentation={sheet ? "sheet" : "anchored"}
 			data-elevation={menuElevation}
 			data-slot="float"
 			data-surface-role="float"

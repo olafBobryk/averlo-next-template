@@ -1,7 +1,12 @@
-/** Deterministic, center-out rectangle packing. No DOM or framework dependency. */
+/**
+ * Deterministic, center-out rectangle packing. No DOM or framework dependency.
+ * The first item is centred on `start`; items marked `keepClear` never
+ * overlap `avoid`. The result is centred on the packed content's bounds, whose
+ * size it returns with that centre (`offset`) in the input coordinates.
+ */
 export function packCenterOut(
 	items,
-	{ gap = 14, aspect = 984 / 1180, centerIds = [] } = {},
+	{ gap = 14, aspect = 984 / 1180, avoid, start = { x: 0, y: 0 } } = {},
 ) {
 	if (
 		!Number.isFinite(gap) ||
@@ -50,9 +55,18 @@ export function packCenterOut(
 						{ x, y: r.y + r.height + gap },
 					]),
 				])
-			: [{ x: -item.width / 2, y: -item.height / 2 }];
+			: [{ x: start.x - item.width / 2, y: start.y - item.height / 2 }];
 		for (const candidate of candidates) {
 			const r = { ...item, ...candidate };
+			if (
+				avoid &&
+				item.keepClear &&
+				r.x < avoid.right + gap &&
+				r.x + r.width + gap > avoid.left &&
+				r.y < avoid.bottom + gap &&
+				r.y + r.height + gap > avoid.top
+			)
+				continue;
 			if (
 				placed.some(
 					(p) =>
@@ -85,22 +99,14 @@ export function packCenterOut(
 		placed.push(best.r);
 		bounds = best.b;
 	}
-	const anchors = placed.filter((item) => centerIds.includes(item.id));
-	const centerX = anchors.length
-		? (Math.min(...anchors.map((r) => r.x)) +
-				Math.max(...anchors.map((r) => r.x + r.width))) /
-			2
-		: (bounds.left + bounds.right) / 2;
-	const centerY = anchors.length
-		? (Math.min(...anchors.map((r) => r.y)) +
-				Math.max(...anchors.map((r) => r.y + r.height))) /
-			2
-		: (bounds.top + bounds.bottom) / 2;
-	const width = 2 * Math.max(centerX - bounds.left, bounds.right - centerX),
-		height = 2 * Math.max(centerY - bounds.top, bounds.bottom - centerY);
+	const centerX = (bounds.left + bounds.right) / 2,
+		centerY = (bounds.top + bounds.bottom) / 2;
+	const width = bounds.right - bounds.left,
+		height = bounds.bottom - bounds.top;
 	return {
 		width,
 		height,
+		offset: { x: centerX, y: centerY },
 		items: placed
 			.sort((a, b) => a.index - b.index)
 			.map(({ index, ...r }) => ({

@@ -1,0 +1,85 @@
+{
+	"schema_version": "1.0",
+	"workflows": {
+		"speckit": {
+			"name": "Full SDD Cycle",
+			"version": "1.0.1",
+			"description": "Runs specify \u2192 plan \u2192 tasks \u2192 implement with review gates",
+			"source": "bundled",
+			"installed_at": "2026-11-08T16:57:02.413290+00:00",
+			"updated_at": "2026-11-08T16:57:02.413296+00:00"
+		},
+		"main": {
+			"name": "Main thread",
+			"version": "1.1.0",
+			"description": "Orchestrator only: route a request, specify it, build it in parallel worktrees, review it locally and open one PR per batch",
+			"source": "local",
+			"installed_at": "2026-11-08T18:00:00.000000+00:00",
+			"updated_at": "2026-11-08T18:00:00.000000+00:00"
+		},
+		"write-spec": {
+			"name": "Write or amend a spec",
+			"version": "1.0.0",
+			"description": "Grill, simplify (ponytail), then Spec Kit specify/clarify/plan/tasks into the spec's tree path",
+			"source": "local",
+			"installed_at": "2026-11-08T18:00:00.000000+00:00",
+			"updated_at": "2026-11-08T18:00:00.000000+00:00"
+		},
+		"verify": {
+			"name": "Verify",
+			"version": "1.0.0",
+			"description": "Run one named verification suite (npm run verify:* and friends) and report its exit code",
+			"source": "local",
+			"installed_at": "2026-11-08T18:00:00.000000+00:00",
+			"updated_at": "2026-11-08T18:00:00.000000+00:00"
+		},
+		"create-project": {
+			"name": "Create an Averlo project",
+			"version": "1.0.0",
+			"description": "Create an independent project with the published create-averlo initializer and verify it",
+			"source": "local",
+			"installed_at": "2026-11-08T18:00:00.000000+00:00",
+			"updated_at": "2026-11-08T18:00:00.000000+00:00"
+		},
+		"publish": {
+			"name": "Publish an Averlo project",
+			"version": "1.1.0",
+			"description": "Publish a verified local project to private GitLab and Vercel production, with confirmed targets and collision checks",
+			"source": "local",
+			"installed_at": "2026-11-08T18:00:00.000000+00:00",
+			"updated_at": "2026-11-09T00:00:00.000000+00:00"
+		},
+		"backport": {
+			"name": "Backport from a child project",
+			"version": "1.0.0",
+			"description": "Bring something a generated project did into the template: diff from the source SHA, port rules not values, record repo and SHA in the PR",
+			"source": "local",
+			"installed_at": "2026-11-08T18:00:00.000000+00:00",
+			"updated_at": "2026-11-08T18:00:00.000000+00:00"
+		},
+		"compose": {
+			"name": "Compose a page from a design",
+			"version": "1.0.0",
+			"description": "Map every source piece to a design-system owner and level, build with existing owners, get Olaf's first look and per-row approvals, then close the gap with measured parity passes",
+			"source": "local",
+			"installed_at": "2026-11-09T00:00:00.000000+00:00",
+			"updated_at": "2026-11-09T00:00:00.000000+00:00"
+		},
+		"systemize": {
+			"name": "Systemize a design file",
+			"version": "1.0.0",
+			"description": "Map a whole Figma file to design-system owners and levels, list the unique components and record the ones Olaf approves; never edits components",
+			"source": "local",
+			"installed_at": "2026-11-09T00:00:00.000000+00:00",
+			"updated_at": "2026-11-09T00:00:00.000000+00:00"
+		},
+		"contact-delivery": {
+			"name": "Set up Averlo contact delivery",
+			"version": "1.0.0",
+			"description": "Build, provision, test and ship an Averlo-managed Resend contact form: explicit recipients, Production-only credentials, confirmed sends",
+			"source": "local",
+			"installed_at": "2026-11-09T00:00:00.000000+00:00",
+			"updated_at": "2026-11-09T00:00:00.000000+00:00"
+		}
+	}
+}

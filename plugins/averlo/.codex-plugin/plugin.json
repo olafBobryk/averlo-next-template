@@ -1,7 +1,7 @@
 {
 	"name": "averlo",
 	"version": "0.1.0+codex.20260828132907",
-	"description": "Repository workflows for native source composition, human-reviewed systemization, motion, and reusable Averlo Next application patterns.",
+	"description": "Pointers to the Averlo template's Spec Kit workflows for creating and publishing projects, plus standalone visual-parity screenshot comparison.",
 	"author": {
 		"name": "Olaf Bobryk",
 		"url": "https://averlo-next-template.vercel.app"
@@ -11,34 +11,24 @@
 	"keywords": [
 		"averlo",
 		"nextjs",
-		"entities",
-		"surfaces",
-		"skeletons",
+		"spec-kit",
 		"design-system",
 		"figma",
-		"storybook",
-		"backport",
-		"visual-parity",
-		"composition",
-		"motion",
-		"export"
+		"visual-parity"
 	],
 	"skills": "./skills/",
 	"interface": {
 		"displayName": "Averlo",
 		"shortDescription": "Build with Averlo contracts",
-		"longDescription": "Averlo packages repository workflows for native source-backed composition, measured visual-parity review, replacement-routed design-system systemization, explicit animation, entity UI, application surface registries, Storybook evidence, deterministic Figma exports, and reviewed backports.",
+		"longDescription": "Averlo packages short pointers to the template's Spec Kit workflows for creating and publishing projects, and a standalone visual-parity skill for measured screenshot comparison. Composition, systemization, backports and contact delivery are Spec Kit workflows in the target repository.",
 		"developerName": "Olaf Bobryk",
 		"category": "Developer Tools",
 		"capabilities": ["Write"],
 		"websiteURL": "https://averlo-next-template.vercel.app",
 		"defaultPrompt": [
-			"Audit this entity UI against Averlo",
-			"Review this route surface registry",
-			"Backport approved Storybook stories into the Averlo template",
-			"Compose this source-backed surface for measured human review",
-			"Systemize this accepted composition while explaining its visual effects",
-			"Animate this accepted static surface"
+			"Create a new Averlo project",
+			"Publish this Averlo project",
+			"Compare these two screenshots for visual parity"
 		]
 	}
 }

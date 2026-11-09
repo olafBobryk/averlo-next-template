@@ -6,8 +6,28 @@ import { createProgressTrajectory } from "./timing";
 export function animateGsapProgress(
 	progress: MotionValue<number>,
 	target: number,
-	options: { duration?: number; delay?: number; onComplete?: () => void } = {},
+	options: {
+		duration?: number;
+		delay?: number;
+		/** A constant-rate clock over `duration`, for callers that slice it. */
+		linear?: boolean;
+		onComplete?: () => void;
+	} = {},
 ) {
+	if (options.linear && options.duration !== undefined) {
+		const clock = { value: progress.get() };
+		return gsap.to(clock, {
+			value: target,
+			duration: options.duration,
+			delay: options.delay ?? 0,
+			ease: "none",
+			onUpdate: () => progress.set(clock.value),
+			onComplete: () => {
+				progress.set(target);
+				options.onComplete?.();
+			},
+		});
+	}
 	const trajectory = createProgressTrajectory(
 		progress.get(),
 		target,

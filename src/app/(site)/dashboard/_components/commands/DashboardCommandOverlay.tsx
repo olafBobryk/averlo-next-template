@@ -2,8 +2,8 @@
 
 import { motion, useIsPresent } from "motion/react";
 import * as React from "react";
-import { useMotionTransition } from "@/components/ui/foundations/MotionProvider";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import { spring } from "@/components/ui/foundations/spring";
 import Portal from "@/components/ui/overlays/Portal";
 import { Float } from "@/components/ui/primitives/surfaces";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -66,7 +66,7 @@ export function DashboardCommandOverlay({
 	const present = useIsPresent();
 	const allowed = useMotionAllowed(true);
 	const off = useMotionDisableOverride();
-	const transition = useMotionTransition("disclosure");
+	const transition = spring.smooth;
 	const animate = allowed && !off;
 	const root = React.useRef<HTMLDivElement>(null);
 	const width = Math.min(560, viewport.right - anchor.left - 12);

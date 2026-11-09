@@ -27,9 +27,13 @@ function HomeHeroSectionRoot({ section }: HomeHeroSectionProps) {
 			<Section.Background>
 				<HomeHeroPreviewCollage services={section.services} />
 			</Section.Background>
-			<MotionSource.Sequence className="relative flex w-full grow flex-col items-start justify-start lg:justify-center">
+			<MotionSource.Sequence
+				mode="scroll"
+				stagger={0.06}
+				className="relative flex w-full grow flex-col items-start justify-start lg:justify-center"
+			>
 				<div className="relative grid max-w-150 justify-items-start gap-7 lg:max-w-[38%] before:pointer-events-none before:absolute before:inset-x-0 before:-inset-y-6 before:-z-10 before:rounded-full before:bg-background/90 before:blur-2xl">
-					<MotionSource.Root strategy={{ type: "reveal" }}>
+					<MotionSource.Item>
 						<MotionEffect.Entrance axis="x" distance={-20}>
 							<Text
 								as="h1"
@@ -39,15 +43,15 @@ function HomeHeroSectionRoot({ section }: HomeHeroSectionProps) {
 								{section.headline}
 							</Text>
 						</MotionEffect.Entrance>
-					</MotionSource.Root>
-					<MotionSource.Root strategy={{ type: "reveal" }}>
+					</MotionSource.Item>
+					<MotionSource.Item>
 						<MotionEffect.Entrance axis="x" distance={-20}>
 							<Text as="p" variant="body" tone="muted" className="max-w-110">
 								{section.descriptions[0]?.text ?? ""}
 							</Text>
 						</MotionEffect.Entrance>
-					</MotionSource.Root>
-					<MotionSource.Root strategy={{ type: "reveal" }}>
+					</MotionSource.Item>
+					<MotionSource.Item>
 						<MotionEffect.Entrance axis="x" distance={-20}>
 							<Button
 								href={getMarketingLinkHref(section.cta)}
@@ -57,7 +61,7 @@ function HomeHeroSectionRoot({ section }: HomeHeroSectionProps) {
 								{section.cta.label}
 							</Button>
 						</MotionEffect.Entrance>
-					</MotionSource.Root>
+					</MotionSource.Item>
 				</div>
 			</MotionSource.Sequence>
 		</Section>

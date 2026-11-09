@@ -33,7 +33,7 @@ export function DashboardSidebarItem({
 	return (
 		<div
 			className={clsx(
-				"group/sidebar-row relative flex w-full min-w-0 items-center gap-0.5 rounded-md transition-colors motion-interactive",
+				"group/sidebar-row relative flex w-full min-w-0 items-center gap-0.5 rounded-md transition-colors motion-snap",
 				active
 					? "bg-primary/10 text-primary-text hover:bg-primary/15"
 					: [
@@ -150,7 +150,7 @@ export function DashboardSidebarBranch({
 								<Icon
 									aria-hidden
 									className={clsx(
-										"transition-transform motion-micro",
+										"transition-transform motion-snap",
 										triggerProps["aria-expanded"] && "rotate-180",
 									)}
 									name="chevron-down"

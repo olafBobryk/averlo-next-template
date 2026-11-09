@@ -22,7 +22,7 @@ at real customer data or replace its fixture accounts with production identities
 
 ## Contract and coverage
 
-[form-behavior](../../openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md) is the behavioral
+[form-behavior](../../specs/platform/data/forms/spec.md) is the behavioral
 authority. Tests exercise complete forms rather than every input separately.
 The checks below target the currently installed examples. Their contact/support
 no-delivery results remain intentional demo behavior; the reusable app contract
@@ -43,42 +43,26 @@ template owners and are not imposed on independent apps by the form contract.
 
 The endpoint cases and successful browser submissions are real requests.
 Interception is limited to deterministic browser failure and pending scenarios.
-Passing structural OpenSpec validation alone does not establish runtime behavior.
+A spec that reads correctly does not establish runtime behavior; only these checks do.
 
-## Standard OpenSpec operations
+## Changing the contract
 
-Initialized with official OpenSpec **1.15.0**, default `spec-driven` schema and six
-unmodified Codex skills under `.agents/skills/`. Install the CLI using the
-[official installation guide](https://openspec.dev/docs/installation). Generated
-projects inherit the skills and specs, not the machine's executable.
-
-Use `openspec list --specs` and `openspec show app/shared/data-lifecycle/form-behavior --type spec` to
-discover the maintained contract. Use the stock propose, apply, sync and archive
-skills for subsequent behavior changes. The six core skills do not include the
-optional verify skill; executable verification remains the command above.
-
-`config.yaml` supplies concise context and apply/archive guidance. The pilot
-uses no custom schema, reference index or routing skill. OpenSpec's `references`
-field indexes external spec stores; it is not a local source-file map. Its stock
-skills and context support the planned lifecycle, but this pilot does not prove
-implicit topic routing in a fresh agent session. Decide any extra routing
-separately after observing that behavior.
+Change form behaviour by amending `specs/platform/data/forms/spec.md` through the
+[write-spec workflow](../../.specify/workflows/write-spec/README.md) (a new
+Clarifications session plus tasks), then rerun this procedure.
 
 ## Independent projects
 
-Assembly copies the maintained generic spec, configuration, stock skills and
-this procedure. It omits template proposal history. Dashboard profiles receive
-login/support test modules; marketing profiles receive contact. The common
-runner checks the forms installed in the current project's source tree. An
-installed form missing its test module is an error, not a skipped test.
-
-New projects own these copies independently and may change their requirements
-through their own OpenSpec changes.
+Assembly copies the platform specs, `.specify/` and this procedure. Dashboard
+profiles receive login/support test modules; marketing profiles receive contact.
+The common runner checks the forms installed in the current project's source
+tree. An installed form missing its test module is an error, not a skipped test.
+New projects own these copies and amend them through their own write-spec runs.
 
 ## Submission protection
 
 The behavioral authority is
-[submission protection](../../openspec/specs/app/shared/services/delivery/submission-protection/spec.md);
+[submission protection](../../specs/platform/services/delivery/spec.md);
 [forms ownership](../../src/lib/forms/AGENTS.md) keeps helper structure. Run the
 installed guard tests without a server:
 

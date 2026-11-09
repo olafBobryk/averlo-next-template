@@ -27,6 +27,24 @@ function IconSwapHarness() {
 		</Button>
 	);
 }
+/** The keyed form: pass the current icon and the key that identifies it. */
+export function KeyedIconSwapHarness() {
+	const [copied, setCopied] = useState(false);
+	return (
+		<Button
+			aria-label={copied ? "Copied" : "Copy"}
+			onClick={() => setCopied((current) => !current)}
+			variant="secondary"
+		>
+			<span data-testid="keyed-swap">
+				<IconSwap swapKey={copied ? "check" : "copy"}>
+					<Icon name={copied ? "check" : "copy"} />
+				</IconSwap>
+			</span>
+			Copy
+		</Button>
+	);
+}
 function CatalogPreview1() {
 	const render = () => <IconSwapHarness />;
 	return (
@@ -65,6 +83,8 @@ export const catalogContract = defineCatalogOwnerContract({
 		'import { IconSwap } from "@/components/ui/helpers/IconSwap";',
 	chooseWhen: [
 		"A real control switches between stateful icons and needs the shared transition.",
+		"Use `items` + `activeIndex` for a fixed icon set, or `swapKey` + the current icon as children when the icon is derived from state.",
+		"Reduced motion and `?motion=off` snap internally; callers pass no gating classes.",
 	],
 	chooseInstead: [
 		"Use Icon for a single static glyph, or CopyStatusIcon for copy feedback.",
@@ -73,6 +93,7 @@ export const catalogContract = defineCatalogOwnerContract({
 	exclusions: [
 		"Accessible-name ownership; the surrounding control must provide it.",
 		"One-off opacity, scale, or rotation stacks.",
+		'Instant icon swaps on a control (for example `leadingIcon={copied ? "check" : "copy"}`); route them through IconSwap.',
 	],
 	guarantees: [
 		{
@@ -80,6 +101,14 @@ export const catalogContract = defineCatalogOwnerContract({
 			storyId: "ui-helpers-icon-swap--stateful-transition",
 		},
 		{ label: "Shared size scale", storyId: "ui-helpers-icon-swap--size-scale" },
+		{
+			label: "Keyed swap crossfades the replaced icon",
+			storyId: "ui-helpers-icon-swap--keyed-swap",
+		},
+		{
+			label: "Reduced motion snaps",
+			storyId: "ui-helpers-icon-swap--reduced-motion",
+		},
 	],
 
 	family: "UI",
@@ -92,6 +121,14 @@ export const catalogContract = defineCatalogOwnerContract({
 			axes: [],
 			stage: "standard",
 			Render: CatalogPreview1,
+		},
+		{
+			id: "keyed-swap",
+			name: "Keyed swap",
+			baseline: {},
+			axes: [],
+			stage: "standard",
+			Render: KeyedIconSwapHarness,
 		},
 		{
 			id: "size-scale",

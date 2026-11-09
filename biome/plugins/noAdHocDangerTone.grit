@@ -1,0 +1,12 @@
+// Error tone is owned by Field, InlineError, StatusMessage* and the input
+// owners (plus the tone vocabularies in foundations, accent and surfaces).
+language js
+
+or {
+	JsStringLiteralExpression(),
+	JsxString(),
+	JsTemplateChunkElement()
+} as $class where {
+	$class <: r"(?s).*(?:^|[\s\"'`:!\[])(?:text|border)-danger(?:$|[\s\"'`/:\]-]).*",
+	register_diagnostic(span=$class, message="Ad hoc danger tone: show errors through Field `message`/`tone`, InlineError or StatusMessage instead of text-danger/border-danger classes.")
+}

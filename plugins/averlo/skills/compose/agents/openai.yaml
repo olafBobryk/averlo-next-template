@@ -1,6 +1,0 @@
-interface:
-  display_name: "Averlo · Compose"
-  short_description: "Build a native measured visual-parity pass"
-  default_prompt: "Use $averlo:compose to build this source-backed surface natively and return its current visual-parity evidence for review."
-policy:
-  allow_implicit_invocation: true

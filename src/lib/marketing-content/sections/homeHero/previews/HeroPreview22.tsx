@@ -13,6 +13,7 @@ function CatalogPreview1() {
 			</button>
 			<label className={`rounded-md border p-2 ${focusRing.fieldDefault}`}>
 				<span className="sr-only">Field shell</span>
+				{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 				<input className="outline-none" placeholder="Focus the field" />
 			</label>
 		</div>

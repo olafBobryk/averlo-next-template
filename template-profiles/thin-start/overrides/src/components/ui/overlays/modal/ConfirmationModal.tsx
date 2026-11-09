@@ -84,6 +84,7 @@ export function ConfirmationModal({
 			<ModalHeader
 				closeDisabled={isSubmitting}
 				leadingIcon={
+					// biome-ignore lint/plugin/noAdHocDangerTone: debt
 					<span aria-hidden className="text-danger">
 						!
 					</span>
@@ -111,6 +112,7 @@ export function ConfirmationModal({
 							))}
 						</dl>
 					) : null}
+					{/* biome-ignore lint/plugin/noAdHocDangerTone: debt */}
 					{warning ? <Text className="text-danger">{warning}</Text> : null}
 					{error ? <InlineError>{error}</InlineError> : null}
 				</ModalContent>

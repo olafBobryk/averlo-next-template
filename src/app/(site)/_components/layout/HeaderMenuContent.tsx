@@ -137,7 +137,7 @@ export function HeaderSearchInput({
 						size="sm"
 						textVariant="menu-description"
 						textTone="muted"
-						className="pointer-events-none opacity-0 transition-opacity motion-micro group-hover/header-search:pointer-events-auto group-hover/header-search:opacity-100 group-focus-within/header-search:pointer-events-auto group-focus-within/header-search:opacity-100"
+						className="pointer-events-none opacity-0 transition-opacity motion-snap group-hover/header-search:pointer-events-auto group-hover/header-search:opacity-100 group-focus-within/header-search:pointer-events-auto group-focus-within/header-search:opacity-100"
 						contentClassName="w-fit"
 						aria-label={clearLabel}
 						onMouseDown={(event) => event.preventDefault()}
@@ -148,6 +148,7 @@ export function HeaderSearchInput({
 				) : undefined
 			}
 		>
+			{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 			<input
 				id={searchId}
 				type="search"
@@ -231,12 +232,12 @@ export function HeaderMenuGroup({
 			{groupHref ? (
 				<Button
 					href={groupHref}
-					variant="ghost"
+					variant="bare"
 					size="none"
 					align="left"
 					textVariant="menu-title"
 					textTone="inherit"
-					className="w-fit text-foreground hover:!text-foreground active:!text-foreground"
+					className="w-fit text-foreground"
 					contentClassName="w-fit gap-[10px]"
 					focusable={focusable}
 					leadingIcon={
@@ -279,12 +280,12 @@ export function HeaderMenuGroup({
 						<Button
 							key={`${item.label}-${getSiteLinkHref(item)}`}
 							href={getSiteLinkHref(item)}
-							variant="ghost"
+							variant="bare"
 							size="none"
 							align="left"
 							textVariant="menu-description"
 							textTone="inherit"
-							className="w-fit text-foreground/50 hover:!text-foreground/50 active:!text-foreground/50"
+							className="w-fit text-foreground/50"
 							contentClassName="w-fit"
 							focusable={focusable}
 							onClick={onNavigate}

@@ -20,6 +20,28 @@ const waitForThemeSettle = () =>
 		window.setTimeout(resolve, 250);
 	});
 
+// Spring-driven fades (presence `sequenced`, MorphLabel) keep running after
+// Storybook's test-mode CSS pause. Wait until no element's opacity or height
+// changes between two samples so Axe scans the settled frame, not a blend.
+const MOTION_SAMPLE_MS = 50;
+const MOTION_SETTLE_LIMIT_MS = 3000;
+const sampleMotion = () =>
+	Array.from(document.body.querySelectorAll<HTMLElement>("*"), (element) => {
+		return `${getComputedStyle(element).opacity}:${element.offsetHeight}`;
+	}).join("|");
+const waitForMotionSettle = async () => {
+	const deadline = performance.now() + MOTION_SETTLE_LIMIT_MS;
+	let previous = sampleMotion();
+	while (performance.now() < deadline) {
+		await new Promise((resolve) =>
+			window.setTimeout(resolve, MOTION_SAMPLE_MS),
+		);
+		const next = sampleMotion();
+		if (next === previous) return;
+		previous = next;
+	}
+};
+
 // Storybook has no application loading screen, so its preview is ready as soon
 // as the shared environment loads. Motion owners still consume the real signal.
 markAppReady();
@@ -40,6 +62,7 @@ const preview: Preview = {
 		// color transitions time to reach the already-selected root palette so
 		// Axe never samples a dark-to-light intermediate value.
 		await waitForThemeSettle();
+		await waitForMotionSettle();
 	},
 	decorators: [
 		(Story, context) => {

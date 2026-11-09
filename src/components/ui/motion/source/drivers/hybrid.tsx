@@ -6,56 +6,92 @@ import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { animateGsapProgress } from "../../runtime/animateProgress";
 import { type gsap, ScrollTrigger } from "../../runtime/gsap";
 import { toScrollTriggerPosition } from "../../runtime/scrollOffsets";
-import { clampMotionProgress } from "../context";
 import { useMotionParticipant } from "../scheduler/useMotionParticipant";
 import {
 	defaultScrollOffset,
 	type MotionSourceRootProps,
 	type MotionSourceStrategy,
+	type ScrollSourceProps,
 	SourceFrame,
-	useBreakpointActive,
+	useScrollSourceState,
 	useSourceReady,
 } from "../sourceShared";
 
 export function GsapScrollSource({
+	introDuration,
 	strategy,
 	...props
-}: MotionSourceRootProps & {
-	strategy: Extract<MotionSourceStrategy, { type: "scroll" }>;
-}) {
+}: ScrollSourceProps) {
 	const targetRef = useRef<HTMLElement | null>(null);
-	const activeFrom = strategy.activeFrom ?? "base";
-	const breakpointActive = useBreakpointActive(activeFrom);
-	const appReady = useSourceReady();
-	const motionAllowed = useMotionAllowed(true);
-	const motionDisabled = useMotionDisableOverride();
-	const enabled =
-		appReady && motionAllowed && !motionDisabled && breakpointActive;
-	const staticProgress = clampMotionProgress(strategy.staticProgress ?? 1);
-	const progress = useMotionValue(staticProgress);
+	const {
+		enabled,
+		introProgress,
+		markIntroPlayed,
+		pathname,
+		progress,
+		shouldPlayIntro,
+		staticProgress,
+		syncRoute,
+	} = useScrollSourceState(strategy);
+	const introDurationRef = useRef(introDuration);
+	introDurationRef.current = introDuration;
 	const offset = strategy.offset ?? defaultScrollOffset;
 	const start = toScrollTriggerPosition(offset?.[0], "top bottom");
 	const end = toScrollTriggerPosition(offset?.[1], "bottom top");
 
 	useLayoutEffect(() => {
+		void pathname;
+		syncRoute();
 		if (!enabled) {
 			progress.jump(staticProgress);
 			return;
 		}
 		const target = targetRef.current;
 		if (!target) return;
-
+		const playIntro = shouldPlayIntro(target);
+		// One trigger owns live progress; during the intro it is scaled by
+		// the intro factor, so the intro lands on live progress, never past it.
+		const factor = () => (playIntro ? introProgress.get() : 1);
 		const trigger = ScrollTrigger.create({
 			end,
 			invalidateOnRefresh: true,
-			onRefresh: (self) => progress.jump(self.progress),
-			onUpdate: (self) => progress.set(self.progress),
+			onRefresh: (self) => progress.jump(self.progress * factor()),
+			onUpdate: (self) => progress.set(self.progress * factor()),
 			start,
 			trigger: target,
 		});
-		progress.jump(trigger.progress);
-		return () => trigger.kill();
-	}, [enabled, end, progress, start, staticProgress]);
+		progress.jump(trigger.progress * factor());
+		if (!playIntro) return () => trigger.kill();
+
+		const unsubscribe = introProgress.on("change", (value) =>
+			progress.set(trigger.progress * value),
+		);
+		const duration = introDurationRef.current?.();
+		const tween = animateGsapProgress(introProgress, 1, {
+			duration:
+				duration === undefined
+					? undefined
+					: duration * (1 - introProgress.get()),
+			linear: duration !== undefined,
+			onComplete: markIntroPlayed,
+		});
+		return () => {
+			tween.kill();
+			unsubscribe();
+			trigger.kill();
+		};
+	}, [
+		enabled,
+		end,
+		introProgress,
+		markIntroPlayed,
+		pathname,
+		progress,
+		shouldPlayIntro,
+		start,
+		staticProgress,
+		syncRoute,
+	]);
 
 	return (
 		<SourceFrame

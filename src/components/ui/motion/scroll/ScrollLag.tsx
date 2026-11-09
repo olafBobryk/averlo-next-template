@@ -17,7 +17,7 @@ import {
 	useState,
 } from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import { getSpring } from "@/components/ui/foundations/spring";
+import { spring } from "@/components/ui/foundations/spring";
 import { useAppReady } from "@/hooks/useAppReady";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
@@ -100,7 +100,7 @@ function ScrollLagMotion({
 			: base.get(),
 	);
 
-	const scrollSpring = getSpring("scroll");
+	const scrollSpring = spring.smooth;
 	const smoothVelocity = useSpring(safeVelocity, {
 		...scrollSpring,
 		stiffness: stiffness ?? scrollSpring.stiffness,

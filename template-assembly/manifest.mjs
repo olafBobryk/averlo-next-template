@@ -3,7 +3,7 @@ export const assemblyGeneratedPaths = new Set([
 	"PRODUCT.md",
 	"README.md",
 	"WORKFLOWS.md",
-	"openspec/config.yaml",
+	".specify/workflows/workflow-registry.json",
 	"docs/README.md",
 	"next.config.ts",
 	"package-lock.json",
@@ -16,8 +16,9 @@ export const assemblyGeneratedPaths = new Set([
 ]);
 
 export const assemblyTemplateOnlyPaths = new Set([
-	"openspec/specs/.gitkeep",
 	"docs/operations/project-assembly.md",
+	"docs/development/workflow.md",
+	"docs/development/cms-editing-direction.md",
 	"docs/development/skeleton-generation-shimmer-20261010.md",
 	"docs/operations/chip-capitalization-backport.md",
 	"docs/operations/disclosure-alignment-backport.md",
@@ -28,6 +29,8 @@ export const assemblyTemplateOnlyPaths = new Set([
 	"docs/benchmarks/design-system-agent-benchmark.md",
 	"docs/benchmarks/design-system-agent-benchmark-runs.jsonl",
 	"docs/benchmarks/design-system-agent-benchmark-runs.md",
+	"scripts/_lib/hero-capture.mjs",
+	"scripts/capture-hero-collage.mjs",
 	"scripts/create-template-profile.mjs",
 	"scripts/dev-thin.mjs",
 	"scripts/generate-repository-footprint.mjs",
@@ -35,60 +38,62 @@ export const assemblyTemplateOnlyPaths = new Set([
 	"scripts/measure-storybook-performance.mjs",
 	"scripts/review-thin-start-api.mjs",
 	"scripts/verify/verify-design-system-agent-benchmark.mjs",
+	"scripts/verify/verify-hero-capture.mjs",
 	"scripts/verify/verify-template-profiles.mjs",
 	"scripts/verify/verify-create-averlo.mjs",
+	".github/workflows/ci.yml",
 	".github/workflows/publish-create-averlo.yml",
 	".github/workflows/update-repository-footprint.yml",
 ]);
 
-// Only these stock integration files may escape the template-only .agents root.
-export const assemblyOpenSpecSkillPaths = new Set([
-	".agents/skills/openspec-explore/SKILL.md",
-	".agents/skills/openspec-propose/SKILL.md",
-	".agents/skills/openspec-apply-change/SKILL.md",
-	".agents/skills/openspec-update-change/SKILL.md",
-	".agents/skills/openspec-sync-specs/SKILL.md",
-	".agents/skills/openspec-archive-change/SKILL.md",
-]);
+// Only the stock Spec Kit agent skills may escape the template-only .agents and .claude roots.
+export function isAssemblySpecKitSkillPath(relativePath) {
+	return /^\.(?:agents|claude)\/skills\/speckit-[a-z0-9-]+\/SKILL\.md$/u.test(
+		relativePath,
+	);
+}
+
+// Workflows that run against the template itself, never inside a generated project.
+export const assemblyTemplateOnlyWorkflows = [
+	"create-project",
+	"publish",
+	"backport",
+];
 
 export const assemblyTemplateOnlyRoots = [
 	".agents",
-	"openspec/changes",
-	"openspec/specs/template",
-	"docs/skills",
+	".claude",
+	...assemblyTemplateOnlyWorkflows.map(
+		(workflowId) => `.specify/workflows/${workflowId}`,
+	),
+	"specs/template",
 	"plugins",
 	"packages",
 	"template-assembly",
 	"template-profiles",
 	"template-surfaces",
 	"src/app/(site)/(marketing)/repository-footprint",
+	// Capture fixture for the canonical hero collage (`npm run hero:capture`).
+	"src/app/(site)/(dev)/internal/hero-collage",
 ];
 
+// Platform specs are core unless a surface owns them (template-surfaces/*).
 // Shared behavioral dependencies apply to installed uses; they do not install features.
-export const assemblyCoreSpecPaths = new Set([
-	"openspec/specs/app/shared/data-lifecycle/action-behavior/spec.md",
-	"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md",
-	"openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md",
-	"openspec/specs/app/shared/frontend/interaction/keyboard-and-overlays/spec.md",
-	"openspec/specs/app/shared/frontend/interaction/responsive-and-motion/spec.md",
-	"openspec/specs/app/shared/frontend/content/content-hierarchy/spec.md",
-	"openspec/specs/app/shared/frontend/components/component-contracts/spec.md",
-	"openspec/specs/app/shared/services/transport/api-transport/spec.md",
-	"openspec/specs/app/shared/services/delivery/submission-protection/spec.md",
-	"openspec/specs/app/shared/frontend/navigation/route-identity/spec.md",
-	"openspec/specs/app/shared/frontend/navigation/document-metadata/spec.md",
-	"openspec/specs/app/shared/services/identity/access-and-membership/spec.md",
-	"openspec/specs/app/shared/frontend/content/media-delivery/spec.md",
-]);
+export const assemblyCoreSpecRoots = [
+	"specs/README.md",
+	"specs/platform",
+	"specs/product",
+];
 
 export const assemblyCoreRoots = [
-	...assemblyOpenSpecSkillPaths,
-	...assemblyCoreSpecPaths,
+	...assemblyCoreSpecRoots,
+	".specify",
 	".env.example",
 	".gitignore",
 	".storybook",
 	".vercelignore",
 	".vscode",
+	"biome",
 	"biome.json",
 	"docs",
 	"next-sitemap.config.js",
@@ -104,22 +109,26 @@ export const assemblyTemplateOnlyScripts = new Set([
 	"create:project",
 	"dev:thin",
 	"footprint:generate",
+	"hero:capture",
+	"verify:hero-capture",
 	"review:thin-start-api",
 	"measure:storybook-performance",
 	"generate:design-system-agent-benchmark-report",
 	"verify:design-system-agent-benchmark",
-	"verify:storybook-backport",
+	"verify:backport-scanner",
 	"verify:profiles",
 	"verify:create-averlo",
-	"verify:composition-workflows",
 	"verify:visual-parity",
 ]);
 
 export const assemblyTemplateOnlyDevDependencies = new Set(["js-tiktoken"]);
 
 export const assemblyCoreScripts = new Set([
+	"check:push",
+	"test:storybook:changed",
 	"verify:forms",
 	"verify:loading",
+	"test:unit",
 	"dev",
 	"dev:local",
 	"preview:tunnel",
@@ -167,6 +176,7 @@ export const assemblyCoreScripts = new Set([
 export const assemblyCoreDependencies = new Set([
 	"pdfjs-dist",
 	"@mdxeditor/editor",
+	"@floating-ui/react-dom",
 	"@openai/apps-sdk-ui",
 	"@radix-ui/react-slot",
 	"class-variance-authority",

@@ -1,96 +1,15 @@
 import type { Transition } from "motion/react";
-import type {
-	MotionIntensity,
-	MotionMoment,
-	MotionResolveOptions,
-	MotionTimingPreset,
-} from "@/components/ui/foundations/motionTiming";
-import { motionPresetMomentMap } from "@/components/ui/foundations/motionTiming";
+import type { MotionStep } from "@/components/ui/foundations/motionTiming";
 
-export type SpringPreset = MotionMoment | MotionTimingPreset;
-
-type SpringConfig = {
-	stiffness: number;
-	damping: number;
-	mass: number;
+/**
+ * Step springs (mass 1). `snap`, `quick` and `smooth` are critically damped;
+ * `gentle` and `slow` are slightly overdamped. Each settles within 1% in about
+ * its step's duration, so it matches the CSS fallback in `motionTiming.ts`.
+ */
+export const spring: Record<MotionStep, Transition> = {
+	snap: { type: "spring", stiffness: 4560, damping: 135, mass: 1 },
+	quick: { type: "spring", stiffness: 1760, damping: 84, mass: 1 },
+	smooth: { type: "spring", stiffness: 780, damping: 56, mass: 1 },
+	gentle: { type: "spring", stiffness: 500, damping: 49, mass: 1 },
+	slow: { type: "spring", stiffness: 290, damping: 42, mass: 1 },
 };
-
-const springMomentMap = {
-	feedback: { stiffness: 520, damping: 34, mass: 0.2 },
-	interaction: { stiffness: 320, damping: 30, mass: 0.3 },
-	disclosure: { stiffness: 260, damping: 28, mass: 0.35 },
-	overlay: { stiffness: 180, damping: 26, mass: 0.45 },
-	reveal: { stiffness: 150, damping: 24, mass: 0.55 },
-	ambient: { stiffness: 120, damping: 22, mass: 0.65 },
-	scroll: { stiffness: 220, damping: 28, mass: 0.4 },
-} as const satisfies Record<MotionMoment, SpringConfig>;
-
-const intensityScale = {
-	subtle: 0.88,
-	normal: 1,
-	strong: 1.12,
-	hero: 0.78,
-} as const satisfies Record<MotionIntensity, number>;
-
-function clamp(value: number, min: number, max: number) {
-	return Math.min(max, Math.max(min, value));
-}
-
-function normalizePreset(preset: SpringPreset): MotionMoment {
-	if (preset in motionPresetMomentMap) {
-		return motionPresetMomentMap[preset as MotionTimingPreset];
-	}
-	return preset as MotionMoment;
-}
-
-export function getSpring(
-	preset: SpringPreset,
-	{ intensity = "normal", expressive = 0 }: MotionResolveOptions = {},
-): Transition {
-	const config = springMomentMap[normalizePreset(preset)];
-	const scale =
-		intensityScale[intensity] * (1 - clamp(expressive, -1, 1) * 0.08);
-
-	return {
-		type: "spring",
-		stiffness: Math.round(config.stiffness * scale),
-		damping: Math.round(config.damping * (1 - clamp(expressive, -1, 1) * 0.04)),
-		mass: config.mass,
-	};
-}
-
-export const spring = {
-	get feedback() {
-		return getSpring("feedback");
-	},
-	get interaction() {
-		return getSpring("interaction");
-	},
-	get disclosure() {
-		return getSpring("disclosure");
-	},
-	get overlay() {
-		return getSpring("overlay");
-	},
-	get reveal() {
-		return getSpring("reveal");
-	},
-	get ambient() {
-		return getSpring("ambient");
-	},
-	get scroll() {
-		return getSpring("scroll");
-	},
-	get micro() {
-		return getSpring("micro");
-	},
-	get interactive() {
-		return getSpring("interactive");
-	},
-	get component() {
-		return getSpring("component");
-	},
-	get macro() {
-		return getSpring("macro");
-	},
-} as const;

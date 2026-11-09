@@ -101,7 +101,7 @@ export function buttonStyles(props: ButtonStyleProps) {
 	const filled =
 		variant === "primary" || variant === "inverse" || variant === "secondary";
 	return clsx(
-		"group relative inline-flex shrink-0 items-center whitespace-nowrap border-0 bg-clip-padding cursor-pointer select-none transition-colors motion-interactive motion-reduce:transition-none",
+		"group relative inline-flex shrink-0 items-center whitespace-nowrap border-0 bg-clip-padding cursor-pointer select-none transition-colors motion-snap motion-reduce:transition-none",
 		"disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
 		focusRing.visibleDefault,
 		buttonGeometry(props),

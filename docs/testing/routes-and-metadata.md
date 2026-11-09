@@ -1,19 +1,19 @@
 # Verify routes and document metadata
 
-Behavioral contracts are [route identity](../../openspec/specs/app/shared/frontend/navigation/route-identity/spec.md)
-and [document metadata](../../openspec/specs/app/shared/frontend/navigation/document-metadata/spec.md).
+Behavioral contracts are [route identity](../../specs/platform/navigation/routes/spec.md)
+and [document metadata](../../specs/platform/navigation/metadata/spec.md).
 Structural owners are [configuration](../../src/config/AGENTS.md),
 [shared route identity](../../src/lib/surfaces/AGENTS.md) and, when installed,
 the dashboard registry's nearest AGENTS. Inspect the changed family and consumers,
 not every family by default.
 
 For installed dashboard enrichment, discover
-`app/dashboard/navigation/route-enrichment`. For installed public marketing
+`specs/platform/surfaces/dashboard/navigation`. For installed public marketing
 title policy or authoritative page/body reads, discover
-`app/marketing/metadata/public-document-metadata` and the relevant
-`app/marketing/content-sources/source-resolution` dependency. Use stock
-`openspec list --specs`, then `openspec show <capability-id> --type spec`;
-these surface contracts are conditional and do not install omitted areas.
+`specs/platform/surfaces/marketing/metadata` and the relevant
+`specs/platform/surfaces/marketing/content-sources` dependency (all listed in
+`specs/README.md`); these surface contracts are conditional and do not install
+omitted areas.
 Shared metadata retains canonical/social destination consistency, app identity
 and private title/indexing policy. Do not load unrelated sibling capabilities.
 
@@ -42,7 +42,7 @@ When profile inclusion changes, run `npm run verify:profiles` in the template.
 - Confirm active contextual actions unregister on departure and command search
   closes before navigation/execution. Visibility is not authorization: test the
   owning server denial under the
-  [access contract](../../openspec/specs/app/shared/services/identity/access-and-membership/spec.md)
+  [access contract](../../specs/platform/services/identity/spec.md)
   when relevant, using the installed auth/platform verifiers.
 - Inspect route-first private dashboard/auth/internal titles, app-first public
   titles, home app-only, and private `noindex, nofollow`, including component-export

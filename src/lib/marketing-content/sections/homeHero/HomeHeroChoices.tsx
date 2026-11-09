@@ -9,7 +9,7 @@ export function HomeHeroChoices({
 }: {
 	services: HomeHeroServiceItem[];
 	skeleton?: boolean;
-	kind: "skills" | "installation";
+	kind: "skills" | "installation" | "workflows";
 }) {
 	const skills = services.some((service) =>
 		service.surfaceIds.includes("skillsPack"),
@@ -28,16 +28,38 @@ export function HomeHeroChoices({
 						Skills pack
 					</Copy>
 					<ul className="grid gap-2">
+						{["Visual parity", "Create project", "Publish project"].map(
+							(skill) => (
+								<li key={skill}>
+									<Copy as="span" variant="support" tone="muted">
+										{skill}
+									</Copy>
+								</li>
+							),
+						)}
+					</ul>
+				</Card>
+			)}
+			{kind === "workflows" && (
+				<Card padding="sm" className="grid gap-4" data-hero-workflows="">
+					<Copy as="h2" variant="headingSm">
+						Workflows
+					</Copy>
+					<ul className="grid gap-2">
 						{[
-							"Create project",
+							"Main thread",
+							"Write a spec",
+							"Create a project",
+							"Publish a project",
+							"Backport from a project",
+							"Verify",
 							"Compose",
-							"Visual parity",
 							"Systemize",
-							"Animate",
-						].map((skill) => (
-							<li key={skill}>
+							"Contact delivery",
+						].map((workflow) => (
+							<li key={workflow}>
 								<Copy as="span" variant="support" tone="muted">
-									{skill}
+									{workflow}
 								</Copy>
 							</li>
 						))}

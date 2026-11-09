@@ -62,6 +62,7 @@ export const surfaceLayoutStyles = cva("", {
 			lg: "gap-8",
 		},
 		overflow: {
+			// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 			auto: "overflow-auto",
 			hidden: "overflow-hidden",
 			visible: "overflow-visible",

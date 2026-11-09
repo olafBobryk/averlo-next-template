@@ -14,55 +14,89 @@ import {
 	useState,
 } from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import {
-	getMotionTiming,
-	resolveMotionTransition as resolveMotionCssTransition,
-} from "@/components/ui/foundations/motionTiming";
-import { getSpring } from "@/components/ui/foundations/spring";
+import { motionTiming } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
-import { clampMotionProgress, type MotionSourceMode } from "../context";
+import type { MotionSourceMode } from "../context";
 import { useMotionParticipant } from "../scheduler/useMotionParticipant";
 import {
 	defaultScrollOffset,
 	type MotionSourceRootProps,
 	type MotionSourceStrategy,
+	type ScrollSourceProps,
 	SourceFrame,
-	useBreakpointActive,
 	useProgressTarget,
+	useScrollSourceState,
 	useSourceReady,
 } from "../sourceShared";
 export function MotionScrollSource({
+	introDuration,
 	strategy,
 	...props
-}: MotionSourceRootProps & {
-	strategy: Extract<MotionSourceStrategy, { type: "scroll" }>;
-}) {
+}: ScrollSourceProps) {
 	const targetRef = useRef<HTMLElement | null>(null);
-	const activeFrom = strategy.activeFrom ?? "base";
-	const breakpointActive = useBreakpointActive(activeFrom);
-	const appReady = useSourceReady();
-	const motionAllowed = useMotionAllowed(true);
-	const motionDisabled = useMotionDisableOverride();
-	const enabled =
-		appReady && motionAllowed && !motionDisabled && breakpointActive;
-	const staticProgress = clampMotionProgress(strategy.staticProgress ?? 1);
+	const {
+		enabled,
+		introProgress,
+		markIntroPlayed,
+		pathname,
+		progress,
+		shouldPlayIntro,
+		staticProgress,
+		syncRoute,
+	} = useScrollSourceState(strategy);
+	const introDurationRef = useRef(introDuration);
+	introDurationRef.current = introDuration;
 	const { scrollYProgress } = useScroll({
 		target: targetRef,
 		offset: strategy.offset ?? defaultScrollOffset,
 	});
-	const springProgress = useSpring(scrollYProgress, getSpring("scroll"));
+	const springProgress = useSpring(scrollYProgress, spring.smooth);
 	const sourceProgress =
 		strategy.smooth === false ? scrollYProgress : springProgress;
-	const progress = useMotionValue(staticProgress);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
+		void pathname;
+		syncRoute();
 		if (!enabled) {
 			progress.jump(staticProgress);
 			return;
 		}
-		progress.jump(sourceProgress.get());
-		return sourceProgress.on("change", (value) => progress.set(value));
-	}, [enabled, progress, sourceProgress, staticProgress]);
+		const target = targetRef.current;
+		if (!target || !shouldPlayIntro(target)) {
+			progress.jump(sourceProgress.get());
+			return sourceProgress.on("change", (value) => progress.set(value));
+		}
+		// Live progress scaled by the intro factor: the intro lands on live
+		// progress, never past it, and then simply follows scroll.
+		const update = () =>
+			progress.set(sourceProgress.get() * introProgress.get());
+		progress.jump(sourceProgress.get() * introProgress.get());
+		const unsubscribeScroll = sourceProgress.on("change", update);
+		const unsubscribeIntro = introProgress.on("change", update);
+		const duration = introDurationRef.current?.();
+		const controls = animate(introProgress, 1, {
+			...(duration === undefined
+				? spring.slow
+				: { duration: duration * (1 - introProgress.get()), ease: "linear" }),
+			onComplete: markIntroPlayed,
+		});
+		return () => {
+			controls.stop();
+			unsubscribeScroll();
+			unsubscribeIntro();
+		};
+	}, [
+		enabled,
+		introProgress,
+		markIntroPlayed,
+		pathname,
+		progress,
+		shouldPlayIntro,
+		sourceProgress,
+		staticProgress,
+		syncRoute,
+	]);
 
 	return (
 		<SourceFrame
@@ -97,7 +131,7 @@ export function InteractionSource({
 			? "animated"
 			: "instant";
 	const progress = useMotionValue(appReady ? 0 : 1);
-	const timing = strategy.timing ?? "interactive";
+	const timing = strategy.timing ?? "quick";
 
 	useEffect(() => {
 		const root = targetRef.current;
@@ -180,7 +214,7 @@ export function BooleanSource({
 			? "animated"
 			: "instant";
 	const progress = useMotionValue(appReady ? Number(strategy.active) : 1);
-	const timing = strategy.timing ?? "interactive";
+	const timing = strategy.timing ?? "quick";
 	useProgressTarget(
 		progress,
 		mode === "static-final" ? 1 : Number(strategy.active),
@@ -222,7 +256,7 @@ export function MotionInViewSource({
 		progress,
 		enabled ? Number(inView) : 1,
 		enabled ? "animated" : "static-final",
-		"grand",
+		"slow",
 	);
 
 	return (
@@ -268,8 +302,8 @@ export function MotionRevealSource({
 				const duration = strategy.duration;
 				const transition =
 					Number.isFinite(duration) && duration !== undefined && duration > 0
-						? { ...resolveMotionCssTransition("reveal"), duration }
-						: getMotionTiming("grand");
+						? { ...motionTiming.slow, duration }
+						: spring.slow;
 				animationRef.current = animate(progress, 1, {
 					...transition,
 					delay,

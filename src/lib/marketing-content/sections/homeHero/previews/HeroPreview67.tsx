@@ -1,27 +1,19 @@
 "use client";
-// Native specimen adapted from @/components/ui/misc/ScrollBorders.catalog.
-import { ScrollBorders } from "@/components/ui/misc/ScrollBorders";
+// Native specimen adapted from @/components/ui/misc/ScrollArea.catalog.
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 
 const rows = Array.from({ length: 12 }, (_, index) => `Result ${index + 1}`);
 function CatalogPreview1() {
-	const render = (args: Parameters<typeof ScrollBorders>[0]) => (
-		<ScrollBorders
-			{...args}
-			data-testid="scroll-region"
-			tabIndex={0}
-			className="h-40 w-72 overflow-y-auto"
-		>
-			{rows.map((row) => (
-				<div className="border-b border-border p-3" key={row}>
-					{row}
-				</div>
-			))}
-		</ScrollBorders>
-	);
 	return (
-		render as unknown as (
-			args: Record<string, unknown>,
-		) => ReturnType<typeof render>
-	)({ ...{}, ...{ onScroll: () => undefined } } as never);
+		<div className="w-72 overflow-hidden rounded-xl border border-border bg-card">
+			<ScrollArea className="h-40" edge={8} tabIndex={0}>
+				{rows.map((row) => (
+					<div className="px-3 py-2 text-sm" key={row}>
+						{row}
+					</div>
+				))}
+			</ScrollArea>
+		</div>
+	);
 }
 export default CatalogPreview1;

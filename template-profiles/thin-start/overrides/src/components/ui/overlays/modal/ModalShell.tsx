@@ -289,6 +289,7 @@ export function ModalContent({
 	return (
 		<Card.Content
 			className={clsx(
+				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 				"min-h-0 overflow-y-auto overscroll-contain px-5 py-4",
 				className,
 			)}

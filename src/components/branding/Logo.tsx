@@ -7,7 +7,7 @@ import { focusRing } from "../ui/foundations/focus";
 
 const logoStyles = cva(
 	clsx(
-		"inline-flex items-center shrink-0 transition-opacity motion-micro rounded-sm",
+		"inline-flex items-center shrink-0 transition-opacity motion-snap rounded-sm",
 		focusRing.visibleDefault,
 	),
 	{

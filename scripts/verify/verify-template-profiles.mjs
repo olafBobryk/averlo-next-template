@@ -12,8 +12,9 @@ import {
 	assertPackageOwnership,
 } from "../../template-assembly/assembler.mjs";
 import {
-	assemblyCoreSpecPaths,
-	assemblyOpenSpecSkillPaths,
+	assemblyTemplateOnlyWorkflows,
+	isAssemblySpecKitSkillPath,
+	isWithinPath,
 } from "../../template-assembly/manifest.mjs";
 import {
 	getProfileVerificationCommands,
@@ -424,13 +425,7 @@ async function assertGeneratedDocumentation(outputRoot, profileCase) {
 		path.join(outputRoot, "AGENTS.md"),
 		"utf8",
 	);
-	for (const heading of [
-		"## Project",
-		"## Averlo Plugin Pack",
-		"## Development and Review Isolation",
-		"## Application Areas",
-		"## Design System",
-	]) {
+	for (const heading of ["## Read first", "## Structure"]) {
 		if (!agentInstructions.includes(heading)) {
 			throw new Error(
 				`${profileCase.profileId}/${profileCase.content} generated AGENTS.md is missing ${heading}.`,
@@ -451,18 +446,18 @@ async function assertGeneratedDocumentation(outputRoot, profileCase) {
 		}
 	}
 	for (const requiredPolicy of [
-		"stock OpenSpec discovery",
-		"project-owned maintained behavior in `openspec/specs/app/`",
-		"This project owns its `app/` contracts and OpenSpec configuration",
-		"Nearest `AGENTS.md` owns structure and dependency direction",
-		"Storybook owns supported component APIs/defaults",
-		"names-only `WORKFLOWS.md` menu",
-		"independent copies",
-		"A source-backed composition must not call Figma or edit product code",
-		"$averlo:compose",
-		"$averlo:systemize-composition",
-		"$averlo:animate",
-		"$averlo:visual-parity",
+		"`.specify/memory/constitution.md`",
+		"`.specify/workflows/main/README.md`",
+		"`.specify/workflows/write-spec/README.md`",
+		"`specs/README.md` maps every spec",
+		"this project's own copies of the selected Averlo platform specs",
+		"`specs/product/` holds this project's real business requirements",
+		"a conflict needs an explicit spec change",
+		"the nearest `AGENTS.md`",
+		"owner's Storybook stories",
+		"`WORKFLOWS.md` (names-only menu)",
+		"`.specify/workflows/compose/README.md`",
+		"`.specify/workflows/systemize/README.md`",
 		"npm run verify:marketing",
 	]) {
 		if (!agentInstructions.replace(/\s+/gu, " ").includes(requiredPolicy)) {
@@ -506,13 +501,7 @@ async function assertCanonicalAgentContract(templateRoot) {
 		path.join(templateRoot, "AGENTS.md"),
 		"utf8",
 	);
-	for (const heading of [
-		"## Project",
-		"## Averlo Plugin Pack",
-		"## Development and Review Isolation",
-		"## Application Areas",
-		"## Design System",
-	]) {
+	for (const heading of ["## Read first", "## Structure"]) {
 		if (!agentInstructions.includes(heading)) {
 			throw new Error(`Canonical AGENTS.md is missing ${heading}.`);
 		}
@@ -525,6 +514,8 @@ async function assertCanonicalAgentContract(templateRoot) {
 		"showToast",
 		"ConfirmationModal",
 		"useTailwindBreakpoints",
+		"openspec",
+		"OpenSpec",
 	]) {
 		if (agentInstructions.includes(forbiddenText)) {
 			throw new Error(
@@ -533,27 +524,39 @@ async function assertCanonicalAgentContract(templateRoot) {
 		}
 	}
 	for (const requiredPolicy of [
-		"`openspec list --specs`",
-		"`openspec show <capability-id> --type spec`",
-		"normal stock change lifecycle",
-		"Generated projects receive explicitly selected independent app copies",
-		"Nearest `AGENTS.md` owns source topology, dependency direction",
-		"Storybook owner contracts own supported component APIs and defaults",
-		"`WORKFLOWS.md` is their names-only menu",
-		"A source-backed composition must not call Figma or edit product code",
-		"$averlo:compose",
-		"$averlo:systemize-composition",
-		"$averlo:animate",
-		"$averlo:visual-parity",
+		"`.specify/memory/constitution.md`",
+		"`.specify/workflows/main/README.md`",
+		"`.specify/workflows/write-spec/README.md`",
+		"`specs/README.md` maps every spec",
+		"`specs/template/` applies only to assembly or demo work",
+		"nearest `AGENTS.md`",
+		"owner's Storybook stories",
+		"`WORKFLOWS.md` (names-only menu)",
+		"`.specify/workflows/compose/README.md`",
+		"`.specify/workflows/systemize/README.md`",
+		"BEGIN:nextjs-agent-rules",
 	]) {
 		if (!agentInstructions.replace(/\s+/gu, " ").includes(requiredPolicy)) {
 			throw new Error(
-				`Canonical AGENTS.md is missing workflow-delivery policy: ${requiredPolicy}.`,
+				`Canonical AGENTS.md is missing entry-point policy: ${requiredPolicy}.`,
 			);
 		}
 	}
-	if (!(await pathExists(path.join(templateRoot, "PRODUCT.md")))) {
-		throw new Error("Canonical template is missing PRODUCT.md.");
+	const policyLines = agentInstructions
+		.split("<!-- BEGIN:nextjs-agent-rules -->", 1)[0]
+		.trimEnd()
+		.split("\n").length;
+	if (policyLines > 40) {
+		throw new Error(
+			`Canonical AGENTS.md must stay a thin entry point (${policyLines} > 40 lines before the Next.js block).`,
+		);
+	}
+	for (const match of agentInstructions.matchAll(
+		/`((?:\.specify|specs|docs|template-[a-z]+|packages|plugins)\/[^`\s]*|PRODUCT\.md|WORKFLOWS\.md)`/gu,
+	)) {
+		if (!(await pathExists(path.join(templateRoot, match[1])))) {
+			throw new Error(`Canonical AGENTS.md names a missing path: ${match[1]}`);
+		}
 	}
 }
 
@@ -682,142 +685,167 @@ async function assertNoAssistantCapability(outputRoot) {
 	}
 }
 
-async function assertProjectOpenSpecConfig(outputRoot) {
-	const relativePath = "openspec/config.yaml";
-	const configPath = path.join(outputRoot, relativePath);
-	const config = await fs.readFile(configPath, "utf8");
-	if (
-		!/^schema: spec-driven$/mu.test(config) ||
-		!/^context: \|$/mu.test(config) ||
-		!config.includes("independent product project") ||
-		!config.includes("openspec/specs/app/") ||
-		!config.includes("project-owned copies") ||
-		!config.includes("existing product contracts") ||
-		!config.includes("cross-client/server data-lifecycle") ||
-		!config.includes("Reserve openspec/specs/product/") ||
-		!config.includes("never installs a feature") ||
-		!/^operations:$/mu.test(config) ||
-		[...config.matchAll(/^([^\s#][^:]*):/gmu)].some(
-			(match) => !["schema", "context", "operations"].includes(match[1]),
-		) ||
-		/in the template repository|propagate applicable|Contact and support fixtures never send email|template\/(?:demo-behavior|project-assembly)/iu.test(
-			config,
-		)
-	)
-		throw new Error(
-			"Generated OpenSpec config retains template policy or lacks project ownership.",
-		);
-	const sourcePath = path.resolve(relativePath);
-	const [sourceConfig, sourceStat, outputStat] = await Promise.all([
-		fs.readFile(sourcePath, "utf8"),
-		fs.stat(sourcePath),
-		fs.stat(configPath),
-	]);
-	if (
-		config === sourceConfig ||
-		(sourceStat.dev === outputStat.dev && sourceStat.ino === outputStat.ino)
-	)
-		throw new Error(
-			"Generated OpenSpec config must be an independent project-owned configuration.",
-		);
-}
-
-function isScopedAppCapability(capability) {
-	return /^app\/(?:shared\/(?:data-lifecycle|frontend\/(?:components|interaction|navigation|content)|services\/(?:identity|files|delivery|transport))|marketing\/(?:composition|content-sources|metadata)|dashboard\/navigation)\/[a-z][a-z0-9-]*$/u.test(
-		capability,
-	);
-}
-
-async function assertAppCapabilityReferences(outputRoot, file) {
-	const text = await fs.readFile(file, "utf8");
-	for (const match of text.matchAll(
-		/(?<![a-z0-9-/])((?:app|template|product|content|data-lifecycle|delivery|domain|experience|identity|integration|interaction|navigation|ui-system)(?:\/[a-z][a-z0-9-]*)+)(?![a-z0-9-/])/gu,
-	)) {
-		if (!isScopedAppCapability(match[1]))
-			throw new Error(
-				`Generated capability has a legacy, non-app or unsupported-scope dependency: ${match[1]}`,
-			);
-		if (
-			!(await pathExists(
-				path.join(outputRoot, "openspec/specs", match[1], "spec.md"),
-			))
-		)
-			throw new Error(`Generated capability dependency missing: ${match[1]}`);
-	}
-}
-
-async function assertBehaviorContracts(outputRoot, surfaces) {
-	await assertProjectOpenSpecConfig(outputRoot);
-	const expected = new Set(assemblyCoreSpecPaths);
-	for (const surface of surfaces) {
-		for (const owned of templateSurfaces[surface]?.ownedPaths ?? []) {
-			if (owned.startsWith("openspec/specs/")) expected.add(owned);
-		}
-	}
+async function walkRelativeFiles(root, relativeDirectory) {
 	const files = [];
 	async function visit(directory) {
 		if (!(await pathExists(directory))) return;
 		for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
 			const target = path.join(directory, entry.name);
 			if (entry.isDirectory()) await visit(target);
-			else files.push(target);
+			else files.push(path.relative(root, target).split(path.sep).join("/"));
 		}
 	}
-	if (await pathExists(path.join(outputRoot, "openspec/changes")))
-		throw new Error("Generated OpenSpec history must remain excluded.");
-	for (const namespace of ["template", "product"]) {
-		if (await pathExists(path.join(outputRoot, "openspec/specs", namespace)))
+	await visit(path.join(root, relativeDirectory));
+	return files.sort();
+}
+
+const GENERATED_SPECIFY_PATHS = new Set([
+	".specify/workflows/workflow-registry.json",
+	".specify/feature.json",
+]);
+
+async function assertProjectSpecKit(outputRoot) {
+	for (const requiredPath of [
+		".specify/memory/constitution.md",
+		".specify/templates/spec-template.md",
+		".specify/workflows/main/workflow.yml",
+		".specify/workflows/write-spec/workflow.yml",
+		".specify/workflows/verify/workflow.yml",
+		"specs/README.md",
+	]) {
+		if (!(await pathExists(path.join(outputRoot, requiredPath))))
 			throw new Error(
-				"Generated specs retain template, product, legacy or unsupported namespaces.",
+				`Generated project is missing Spec Kit path: ${requiredPath}`,
 			);
 	}
-	await visit(path.join(outputRoot, "openspec/specs"));
-	const actual = new Set(files.map((file) => path.relative(outputRoot, file)));
+	for (const workflowId of assemblyTemplateOnlyWorkflows) {
+		if (
+			await pathExists(path.join(outputRoot, ".specify/workflows", workflowId))
+		)
+			throw new Error(
+				`Generated project retains template-only workflow: ${workflowId}`,
+			);
+	}
+	if (await pathExists(path.join(outputRoot, ".specify/feature.json")))
+		throw new Error("Generated project retains per-checkout Spec Kit state.");
+	const registryPath = path.join(
+		outputRoot,
+		".specify/workflows/workflow-registry.json",
+	);
+	if (
+		await pathExists(path.resolve(".specify/workflows/workflow-registry.json"))
+	) {
+		const registry = JSON.parse(await fs.readFile(registryPath, "utf8"));
+		for (const workflowId of Object.keys(registry.workflows ?? {})) {
+			if (
+				assemblyTemplateOnlyWorkflows.includes(workflowId) ||
+				!(await pathExists(
+					path.join(outputRoot, ".specify/workflows", workflowId),
+				))
+			)
+				throw new Error(
+					`Generated workflow registry lists an absent or template-only workflow: ${workflowId}`,
+				);
+		}
+	}
+	const [sourceSkills, outputSkills] = await Promise.all(
+		[process.cwd(), outputRoot].map(async (root) =>
+			[
+				...(await walkRelativeFiles(root, ".agents")),
+				...(await walkRelativeFiles(root, ".claude")),
+			].filter(
+				(file) => root === outputRoot || isAssemblySpecKitSkillPath(file),
+			),
+		),
+	);
+	if (
+		outputSkills.some((file) => !isAssemblySpecKitSkillPath(file)) ||
+		JSON.stringify(outputSkills) !== JSON.stringify(sourceSkills)
+	)
+		throw new Error(
+			"Generated project must retain exactly the stock Spec Kit agent skills.",
+		);
+}
+
+function surfaceForSpecPath(relativePath) {
+	for (const [surfaceKey, surface] of Object.entries(templateSurfaces)) {
+		for (const owned of surface.ownedPaths ?? []) {
+			if (owned.startsWith("specs/") && isWithinPath(relativePath, owned))
+				return surfaceKey;
+		}
+	}
+	return null;
+}
+
+async function assertSpecReferences(outputRoot, file) {
+	const text = await fs.readFile(file, "utf8");
+	for (const match of text.matchAll(
+		/(?<![a-z0-9-/.])(specs\/[a-z][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*(?:\.md)?)(?![a-z0-9-])/gu,
+	)) {
+		const reference = match[1];
+		if (!/^specs\/(?:platform|product)(?:\/|$)/u.test(reference))
+			throw new Error(
+				`Generated capability has a template, legacy or unsupported-scope dependency: ${reference}`,
+			);
+		if (!(await pathExists(path.join(outputRoot, reference))))
+			throw new Error(`Generated capability dependency missing: ${reference}`);
+	}
+}
+
+async function assertIndependentCopy(outputRoot, relativePath) {
+	const sourcePath = path.resolve(relativePath);
+	const outputPath = path.join(outputRoot, relativePath);
+	if (
+		(await fs.readFile(sourcePath, "utf8")) !==
+		(await fs.readFile(outputPath, "utf8"))
+	)
+		throw new Error(`Generated independent contract differs: ${relativePath}`);
+	const [sourceStat, outputStat] = await Promise.all([
+		fs.stat(sourcePath),
+		fs.stat(outputPath),
+	]);
+	if (sourceStat.dev === outputStat.dev && sourceStat.ino === outputStat.ino)
+		throw new Error(
+			`Generated contract shares its source inode: ${relativePath}`,
+		);
+}
+
+async function assertBehaviorContracts(outputRoot, surfaces) {
+	await assertProjectSpecKit(outputRoot);
+	const expected = new Set(
+		(await walkRelativeFiles(process.cwd(), "specs")).filter((file) => {
+			if (isWithinPath(file, "specs/template")) return false;
+			const owner = surfaceForSpecPath(file);
+			return owner === null || surfaces.has(owner);
+		}),
+	);
+	if (await pathExists(path.join(outputRoot, "openspec")))
+		throw new Error("Generated project retains retired OpenSpec contracts.");
+	const actual = new Set(await walkRelativeFiles(outputRoot, "specs"));
 	if (
 		[...actual].some(
 			(file) =>
-				!file.endsWith("/spec.md") ||
-				!isScopedAppCapability(
-					file.slice("openspec/specs/".length, -"/spec.md".length),
-				),
+				!/^specs\/(?:README\.md$|platform\/|product\/)/u.test(file) ||
+				(isWithinPath(file, "specs/product") && !file.endsWith("/README.md")),
 		)
 	)
 		throw new Error(
 			"Generated specs retain template, product, legacy or unsupported namespaces.",
 		);
-	const expectedCount =
-		13 +
-		(surfaces.has("dashboard") ? 3 : 0) +
-		(surfaces.has("marketing") ? 4 : 0);
-	if (expected.size !== expectedCount)
-		throw new Error(
-			`Explicit selected capability count differs: expected ${expectedCount}, got ${expected.size}`,
-		);
 	for (const [capability, shouldExist] of [
-		["app/shared/frontend/content/media-delivery", true],
-		[
-			"app/marketing/content-sources/source-resolution",
-			surfaces.has("marketing"),
-		],
-		[
-			"app/marketing/metadata/public-document-metadata",
-			surfaces.has("marketing"),
-		],
-		["app/dashboard/navigation/route-enrichment", surfaces.has("dashboard")],
-		[
-			"app/shared/frontend/content/entity-presentation",
-			surfaces.has("dashboard"),
-		],
-		[
-			"app/shared/services/files/private-file-access",
-			surfaces.has("dashboard"),
-		],
-		[
-			"app/shared/services/delivery/contact-delivery",
-			surfaces.has("marketing"),
-		],
+		["specs/platform/data/forms", true],
+		["specs/platform/data/loading", true],
+		["specs/platform/content/media", true],
+		["specs/platform/services/delivery", true],
+		["specs/platform/surfaces/marketing", surfaces.has("marketing")],
+		["specs/platform/surfaces/dashboard", surfaces.has("dashboard")],
+		["specs/platform/content/entities", surfaces.has("dashboard")],
+		["specs/platform/services/files", surfaces.has("dashboard")],
 	]) {
-		if (expected.has(`openspec/specs/${capability}/spec.md`) !== shouldExist)
+		if (
+			[...expected].some((file) => isWithinPath(file, capability)) !==
+			shouldExist
+		)
 			throw new Error(
 				`Explicit capability surface ownership differs: ${capability}`,
 			);
@@ -829,27 +857,22 @@ async function assertBehaviorContracts(outputRoot, surfaces) {
 		throw new Error(
 			`Generated behavioral capability ownership mismatch: ${[...actual].join(", ")}`,
 		);
-	for (const relativePath of [...expected, ...assemblyOpenSpecSkillPaths]) {
-		const sourcePath = path.resolve(relativePath);
-		const outputPath = path.join(outputRoot, relativePath);
-		if (
-			(await fs.readFile(sourcePath, "utf8")) !==
-			(await fs.readFile(outputPath, "utf8"))
-		)
-			throw new Error(
-				`Generated independent contract differs: ${relativePath}`,
-			);
-		const [sourceStat, outputStat] = await Promise.all([
-			fs.stat(sourcePath),
-			fs.stat(outputPath),
-		]);
-		if (sourceStat.dev === outputStat.dev && sourceStat.ino === outputStat.ino)
-			throw new Error(
-				`Generated contract shares its source inode: ${relativePath}`,
-			);
-	}
-	await visit(path.join(outputRoot, "docs/testing"));
-	files.push(path.join(outputRoot, "WORKFLOWS.md"));
+	const specifyFiles = (await walkRelativeFiles(outputRoot, ".specify")).filter(
+		(file) => !GENERATED_SPECIFY_PATHS.has(file),
+	);
+	for (const relativePath of [
+		...expected,
+		...specifyFiles,
+		...(await walkRelativeFiles(outputRoot, ".agents")),
+		...(await walkRelativeFiles(outputRoot, ".claude")),
+	])
+		await assertIndependentCopy(outputRoot, relativePath);
+	const files = [
+		...(await walkRelativeFiles(outputRoot, "docs/testing")),
+		...(await walkRelativeFiles(outputRoot, "specs")),
+		...specifyFiles.filter((file) => file.endsWith("README.md")),
+		"WORKFLOWS.md",
+	].map((file) => path.join(outputRoot, file));
 	for (const file of files) {
 		const text = await fs.readFile(file, "utf8");
 		for (const match of text.matchAll(
@@ -864,18 +887,13 @@ async function assertBehaviorContracts(outputRoot, surfaces) {
 					`Generated policy has a missing link: ${path.relative(outputRoot, file)} -> ${target}`,
 				);
 		}
-		if (file.endsWith("spec.md"))
-			await assertAppCapabilityReferences(outputRoot, file);
+		if (file.endsWith("spec.md")) await assertSpecReferences(outputRoot, file);
 	}
 	const agentText = await fs.readFile(
 		path.join(outputRoot, "AGENTS.md"),
 		"utf8",
 	);
-	if (
-		/repository-workflows|template\/(?:(?:assembly|demonstrations)\/)?(?:project-assembly|demo-behavior)|openspec\/specs\/(?!app\/|product\/)/u.test(
-			agentText,
-		)
-	)
+	if (/repository-workflows|openspec|specs\/template/iu.test(agentText))
 		throw new Error(
 			"Generated instructions retain retired or generator-only guidance.",
 		);
@@ -900,8 +918,8 @@ async function assertStorybook(outputRoot, profileCase) {
 	for (const forbiddenPath of [
 		".agents/plugins",
 		"plugins",
-		"openspec/changes",
-		"openspec/specs/template",
+		"openspec",
+		"specs/template",
 	]) {
 		if (await pathExists(path.join(outputRoot, forbiddenPath))) {
 			throw new Error(
@@ -910,10 +928,9 @@ async function assertStorybook(outputRoot, profileCase) {
 		}
 	}
 	for (const requiredPath of [
-		...assemblyOpenSpecSkillPaths,
-		"openspec/config.yaml",
-		"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md",
-		"openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md",
+		".specify/memory/constitution.md",
+		"specs/platform/data/forms/spec.md",
+		"specs/platform/data/loading/spec.md",
 		"docs/testing/forms.md",
 		"docs/testing/loading.md",
 		"WORKFLOWS.md",
@@ -923,26 +940,15 @@ async function assertStorybook(outputRoot, profileCase) {
 	]) {
 		if (!(await pathExists(path.join(outputRoot, requiredPath))))
 			throw new Error(
-				`Generated project is missing form/OpenSpec ownership: ${requiredPath}`,
+				`Generated project is missing form/spec ownership: ${requiredPath}`,
 			);
 	}
-	const stockSkills = await fs.readdir(path.join(outputRoot, ".agents/skills"));
-	if (
-		stockSkills.length !== 6 ||
-		stockSkills.some(
-			(name) =>
-				!assemblyOpenSpecSkillPaths.has(`.agents/skills/${name}/SKILL.md`),
-		)
-	)
-		throw new Error(
-			"Generated project must retain only the six stock OpenSpec skills.",
-		);
 	const surfaces = new Set(
 		templateProfiles[profileCase.profileId].assembly.surfaces,
 	);
 	await assertBehaviorContracts(outputRoot, surfaces);
 	if (
-		(await pathExists(path.join(outputRoot, "openspec/specs/form-behavior"))) ||
+		(await pathExists(path.join(outputRoot, "specs/form-behavior"))) ||
 		(await pathExists(path.join(outputRoot, "scripts/verify/loading"))) !==
 			surfaces.has("dashboard")
 	)
@@ -1090,7 +1096,7 @@ async function assertComponentExport(outputRoot, profileCase) {
 			`${profileCase.profileId}/${profileCase.content} is missing Component Export scripts.`,
 		);
 	}
-	const expectedOwnerCount = selectedSurfaces.has("dashboard") ? 95 : 82;
+	const expectedOwnerCount = selectedSurfaces.has("dashboard") ? 96 : 83;
 	if (catalogFiles.length !== expectedOwnerCount) {
 		throw new Error(
 			`${profileCase.profileId}/${profileCase.content} expected ${expectedOwnerCount} installed catalogue owners, found ${catalogFiles.length}.`,
@@ -1205,8 +1211,7 @@ async function verifyContractGuards(templateRoot, tempRoot) {
 	const outputRoot = path.join(tempRoot, "full-payload-ready-assemble-1");
 	const otherRoot = path.join(tempRoot, "thin-start-static-assemble-1");
 	const surfaces = new Set(templateProfiles.full.assembly.surfaces);
-	const relativeSpec =
-		"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md";
+	const relativeSpec = "specs/platform/data/forms/spec.md";
 	const sourcePath = path.join(templateRoot, relativeSpec);
 	const outputPath = path.join(outputRoot, relativeSpec);
 	const otherPath = path.join(otherRoot, relativeSpec);
@@ -1224,44 +1229,45 @@ async function verifyContractGuards(templateRoot, tempRoot) {
 		await fs.rename(backup, outputPath);
 	}
 	for (const reference of [
-		"app/shared/services/identity/missing-contract",
-		"app/shared/frontend/content/missing-deep-contract",
-		"template/demonstrations/demo-behavior",
-		"product/orders/order-fulfillment",
-		"app/data-lifecycle/form-behavior",
-		"app/shared/unknown/missing-contract",
-		"data-lifecycle/form-behavior",
+		"specs/platform/services/identity/missing-contract",
+		"specs/platform/content/missing-deep-contract",
+		"specs/template/demos",
+		"specs/product/orders/order-fulfillment",
+		"specs/legacy/form-behavior",
+		"specs/app/shared/data-lifecycle/form-behavior",
 	]) {
 		try {
 			await fs.appendFile(outputPath, `\nDependency: ${reference}.\n`);
 			await assert.rejects(
-				assertAppCapabilityReferences(outputRoot, outputPath),
-				/dependency missing|legacy, non-app or unsupported-scope dependency/u,
+				assertSpecReferences(outputRoot, outputPath),
+				/dependency missing|template, legacy or unsupported-scope dependency/u,
 			);
 			await fs.writeFile(
 				outputPath,
 				`${outputBefore}\nDependency: \`${reference}\`.\n`,
 			);
 			await assert.rejects(
-				assertAppCapabilityReferences(outputRoot, outputPath),
-				/dependency missing|legacy, non-app or unsupported-scope dependency/u,
+				assertSpecReferences(outputRoot, outputPath),
+				/dependency missing|template, legacy or unsupported-scope dependency/u,
 			);
 		} finally {
 			await fs.writeFile(outputPath, outputBefore);
 		}
 	}
-	for (const namespace of [
-		"template/demonstrations",
-		"product",
-		"data-lifecycle",
-		"app/data-lifecycle",
+	for (const leaked of [
+		"specs/template/demos/spec.md",
+		"specs/product/orders/spec.md",
+		"specs/legacy/leaked/spec.md",
+		"specs/data-lifecycle/form-behavior/spec.md",
 	]) {
-		const leakedPath = path.join(
+		const leakedPath = path.join(outputRoot, leaked);
+		const createdRoot = path.join(
 			outputRoot,
-			"openspec/specs",
-			namespace,
-			"leaked/spec.md",
+			leaked.startsWith("specs/product/")
+				? "specs/product/orders"
+				: leaked.split("/").slice(0, 2).join("/"),
 		);
+		const preexisting = await pathExists(createdRoot);
 		try {
 			await fs.mkdir(path.dirname(leakedPath), { recursive: true });
 			await fs.writeFile(leakedPath, "Forbidden generated namespace.\n");
@@ -1270,56 +1276,51 @@ async function verifyContractGuards(templateRoot, tempRoot) {
 				/template, product, legacy or unsupported namespaces/u,
 			);
 		} finally {
-			const cleanupNamespace = namespace.startsWith("app/")
-				? namespace
-				: namespace.split("/", 1)[0];
-			await fs.rm(path.join(outputRoot, "openspec/specs", cleanupNamespace), {
-				recursive: true,
-				force: true,
-			});
+			if (preexisting) await fs.rm(leakedPath, { force: true });
+			else await fs.rm(createdRoot, { recursive: true, force: true });
 		}
 	}
-	const historyPath = path.join(
-		outputRoot,
-		"openspec/changes/invented-history",
-	);
+	const leakedWorkflow = path.join(outputRoot, ".specify/workflows/backport");
 	try {
-		await fs.mkdir(historyPath, { recursive: true });
+		await fs.mkdir(leakedWorkflow, { recursive: true });
 		await fs.writeFile(
-			path.join(historyPath, "proposal.md"),
-			"History leakage.\n",
+			path.join(leakedWorkflow, "workflow.yml"),
+			'schema_version: "1.0"\n',
 		);
 		await assert.rejects(
 			assertBehaviorContracts(outputRoot, surfaces),
-			/history must remain excluded/u,
+			/template-only workflow/u,
 		);
 	} finally {
-		await fs.rm(path.join(outputRoot, "openspec/changes"), {
-			recursive: true,
-			force: true,
-		});
+		await fs.rm(leakedWorkflow, { recursive: true, force: true });
 	}
-	const configPath = path.join(outputRoot, "openspec/config.yaml");
-	const configBefore = await fs.readFile(configPath, "utf8");
-	const otherConfigPath = path.join(otherRoot, "openspec/config.yaml");
-	const otherConfigBefore = await fs.readFile(otherConfigPath, "utf8");
-	const sourceConfigPath = path.join(templateRoot, "openspec/config.yaml");
-	const sourceConfigBefore = await fs.readFile(sourceConfigPath, "utf8");
+	const constitutionPath = ".specify/memory/constitution.md";
+	const outputConstitution = path.join(outputRoot, constitutionPath);
+	const constitutionBefore = await fs.readFile(outputConstitution, "utf8");
+	const otherConstitutionBefore = await fs.readFile(
+		path.join(otherRoot, constitutionPath),
+		"utf8",
+	);
+	const sourceConstitutionBefore = await fs.readFile(
+		path.join(templateRoot, constitutionPath),
+		"utf8",
+	);
 	try {
-		await fs.appendFile(configPath, "# Independent project edit.\n");
+		await fs.appendFile(outputConstitution, "\nIndependent project edit.\n");
 		assert.equal(
-			await fs.readFile(sourceConfigPath, "utf8"),
-			sourceConfigBefore,
+			await fs.readFile(path.join(templateRoot, constitutionPath), "utf8"),
+			sourceConstitutionBefore,
 		);
-		assert.equal(await fs.readFile(otherConfigPath, "utf8"), otherConfigBefore);
-		await assertProjectOpenSpecConfig(outputRoot);
-		await fs.writeFile(configPath, sourceConfigBefore);
+		assert.equal(
+			await fs.readFile(path.join(otherRoot, constitutionPath), "utf8"),
+			otherConstitutionBefore,
+		);
 		await assert.rejects(
-			assertProjectOpenSpecConfig(outputRoot),
-			/config.*(?:template policy|independent project-owned)/u,
+			assertBehaviorContracts(outputRoot, surfaces),
+			/Generated independent contract differs/u,
 		);
 	} finally {
-		await fs.writeFile(configPath, configBefore);
+		await fs.writeFile(outputConstitution, constitutionBefore);
 	}
 	const procedurePath = path.join(outputRoot, "docs/testing/forms.md");
 	const procedureBefore = await fs.readFile(procedurePath, "utf8");
@@ -1368,7 +1369,7 @@ async function verifyContractGuards(templateRoot, tempRoot) {
 	}
 	await assertBehaviorContracts(outputRoot, surfaces);
 	console.log(
-		"Scoped app omission, deep dependencies, legacy/template/history/product exclusion, broken-link, project-config and independent-copy guards passed.",
+		"Scoped platform omission, spec dependencies, template/product/workflow exclusion, broken-link and independent-copy guards passed.",
 	);
 }
 
@@ -1420,8 +1421,7 @@ async function verifyOwnershipGuards(templateRoot, tempRoot) {
 	}
 	const previousMarketing = templateSurfaces.marketing.ownedPaths;
 	const previousDashboard = templateSurfaces.dashboard.ownedPaths;
-	const conflictingPath =
-		"openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md";
+	const conflictingPath = "specs/platform/data/forms/spec.md";
 	try {
 		templateSurfaces.marketing.ownedPaths = [
 			...previousMarketing,

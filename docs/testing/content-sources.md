@@ -1,6 +1,6 @@
 # Verify content sources
 
-The [source-resolution contract](../../openspec/specs/app/marketing/content-sources/source-resolution/spec.md)
+The [source-resolution contract](../../specs/platform/surfaces/marketing/content-sources/spec.md)
 owns behavior. [Marketing-content AGENTS](../../src/lib/marketing-content/AGENTS.md)
 and `src/payload/AGENTS.md`, when installed, own adapter and
 activation structure. Read only the selected mode, document, collection/global,

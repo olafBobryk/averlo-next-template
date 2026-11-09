@@ -1,0 +1,55 @@
+schema_version: "1.0"
+workflow:
+  id: "create-project"
+  name: "Create an Averlo project"
+  version: "1.0.0"
+  author: "Averlo"
+  description: "Create an independent project with the published create-averlo initializer and verify it"
+
+# Runs before a project exists. From the directory that will contain it:
+#   specify workflow run <template>/.specify/workflows/create-project/workflow.yml \
+#     -i directory=my-project -i profile=thin-start -i content=static
+requires:
+  speckit_version: ">=1.2.5"
+
+inputs:
+  directory:
+    type: string
+    required: true
+    prompt: "New project directory (lowercase npm-compatible basename; must not exist)"
+  profile:
+    type: string
+    required: true
+    enum: ["full", "app-only", "marketing-only", "thin-start"]
+    prompt: "Route profile"
+  content:
+    type: string
+    default: "payload-ready"
+    enum: ["static", "payload-ready"]
+    prompt: "Content mode (app-only supports static only)"
+  install:
+    type: string
+    default: "yes"
+    enum: ["yes", "no"]
+    prompt: "Install dependencies?"
+
+steps:
+  - id: create
+    type: if
+    condition: "{{ inputs.install == 'no' }}"
+    then:
+      - id: create-lockfile-only
+        type: shell
+        timeout: 1800
+        run: "npx --yes create-averlo '{{ inputs.directory }}' --profile '{{ inputs.profile }}' --content '{{ inputs.content }}' --no-install"
+      - id: verify-lockfile-only
+        type: shell
+        run: "npx --yes create-averlo verify '{{ inputs.directory }}' --profile '{{ inputs.profile }}' --content '{{ inputs.content }}' --no-install"
+    else:
+      - id: create-installed
+        type: shell
+        timeout: 1800
+        run: "npx --yes create-averlo '{{ inputs.directory }}' --profile '{{ inputs.profile }}' --content '{{ inputs.content }}'"
+      - id: verify-installed
+        type: shell
+        run: "npx --yes create-averlo verify '{{ inputs.directory }}' --profile '{{ inputs.profile }}' --content '{{ inputs.content }}'"

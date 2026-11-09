@@ -1,23 +1,19 @@
 # Folder: `src/components/ui/misc/accordion`
 
-## Ownership
-
 Component-owned implementation for the public `Accordion` composition.
 
-## Public boundary
+## Read
 
-- `Accordion.tsx` is the server-safe public owner inside this folder.
+- `specs/platform/design-system/families/presence/spec.md` when changing
+  disclosure motion.
+- Storybook owner stories for the `Accordion` API and defaults.
+
+## Structure
+
+- `Accordion.tsx` is the server-safe public owner inside this folder; do not
+  make the entire public owner client-only.
 - `AccordionClient.tsx` and `Accordion.shared.ts` are private implementation
   modules and use direct sibling imports.
-
-## Structural Invariants
-
-- Preserve the server-safe public entry and skeleton boundary; do not make the
-  entire public owner client-only.
 - Compact and Card disclosure implementations remain under the `Accordion`
   namespace. Their animation delegates to the private motion/presence
   `DisclosurePresence` owner shared with controlled ContentPresence.
-- Live and skeleton variants preserve matching outer geometry and the shared
-  Card, Button, Text, icon, focus, and motion dependencies.
-- A custom `renderTrigger` attaches disclosure props only to the actual
-  disclosure button, never sibling interactive elements.

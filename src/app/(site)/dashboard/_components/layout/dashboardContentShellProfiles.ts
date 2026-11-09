@@ -14,12 +14,14 @@ export const dashboardContentShellProfiles = {
 		bodyClassName: "",
 		contentClassName: "min-h-full",
 		gutterClassName: dashboardPageGutterClassName,
+		// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 		mainClassName: "min-h-0 overflow-y-auto [&_.dashboard-page-body]:max-w-6xl",
 	},
 	wide: {
 		bodyClassName: "",
 		contentClassName: "min-h-full",
 		gutterClassName: dashboardPageGutterClassName,
+		// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 		mainClassName: "min-h-0 overflow-y-auto",
 	},
 	workspace: {

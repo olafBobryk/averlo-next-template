@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, fn, userEvent } from "storybook/test";
+import { expect, fn, userEvent, waitFor } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { Button } from "./Button";
-import { catalogContract } from "./Button.catalog";
+import { ButtonLabelChangeExample, catalogContract } from "./Button.catalog";
 
 const meta = {
 	id: "ui-primitives-button",
@@ -407,5 +407,91 @@ export const TransparentSkeletons: Story = {
 					.width,
 			).toBe(16);
 		}
+	},
+};
+
+/** Reads the button width and any visible label glyph past the label box. */
+async function sampleButton(button: HTMLElement, done: () => Promise<unknown>) {
+	const widths: number[] = [];
+	const overflow: number[] = [];
+	let handle = 0;
+	const sample = () => {
+		widths.push(button.getBoundingClientRect().width);
+		const box = button.querySelector<HTMLElement>('[data-slot="morph-label"]');
+		if (box) {
+			const bounds = box.getBoundingClientRect();
+			for (const layer of box.querySelectorAll<HTMLElement>(
+				"[data-morph-layer]",
+			)) {
+				if (Number(getComputedStyle(layer).opacity) <= 0.05) continue;
+				const range = document.createRange();
+				range.selectNodeContents(layer);
+				const past = range.getBoundingClientRect().right - bounds.right;
+				if (past > 1) overflow.push(past);
+			}
+		}
+		handle = requestAnimationFrame(sample);
+	};
+	handle = requestAnimationFrame(sample);
+	try {
+		await done();
+	} finally {
+		cancelAnimationFrame(handle);
+	}
+	return { widths, overflow };
+}
+
+export const LabelChange: Story = {
+	render: () => <ButtonLabelChangeExample />,
+	play: async ({ canvas }) => {
+		// Default: the label morphs and the width eases.
+		const morphing = canvas.getByTestId("morph-button");
+		const before = morphing.getBoundingClientRect().width;
+		const grow = await sampleButton(morphing, async () => {
+			await userEvent.click(morphing);
+			await waitFor(
+				() => {
+					expect(morphing).toHaveAccessibleName("Saved to drafts");
+					expect(morphing.querySelectorAll("[data-morph-layer]")).toHaveLength(
+						1,
+					);
+					expect(
+						morphing.querySelector<HTMLElement>('[data-slot="morph-label"]')
+							?.style.width,
+					).toBe("auto");
+				},
+				{ timeout: 3000 },
+			);
+		});
+		const after = morphing.getBoundingClientRect().width;
+		expect(after).toBeGreaterThan(before + 20);
+		expect(
+			grow.widths.some((width) => width > before + 1 && width < after - 1),
+		).toBe(true);
+		expect(grow.overflow).toEqual([]);
+
+		// Opt-out: no MorphLabel, the width jumps on the same frame.
+		const instant = canvas.getByTestId("instant-button");
+		await expect(instant.querySelector('[data-slot="morph-label"]')).toBeNull();
+		const instantBefore = instant.getBoundingClientRect().width;
+		await userEvent.click(instant);
+		await expect(instant).toHaveAccessibleName("Saved to drafts");
+		await expect(instant.getBoundingClientRect().width).toBeGreaterThan(
+			instantBefore + 20,
+		);
+
+		// Loading: fixed width, the label crossfades to the spinner.
+		const loading = canvas.getByTestId("loading-button");
+		const loadingWidth = loading.getBoundingClientRect().width;
+		await userEvent.click(loading);
+		await expect(loading).toHaveAttribute("aria-busy", "true");
+		await expect(loading).toHaveAttribute("data-loading", "true");
+		await expect(loading.getBoundingClientRect().width).toBe(loadingWidth);
+		await waitFor(() =>
+			expect(
+				getComputedStyle(loading.firstElementChild as HTMLElement).opacity,
+			).toBe("0"),
+		);
+		await expect(loading.getBoundingClientRect().width).toBe(loadingWidth);
 	},
 };

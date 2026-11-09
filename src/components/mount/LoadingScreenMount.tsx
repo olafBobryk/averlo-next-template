@@ -8,7 +8,8 @@ import {
 	useIntroDisableOverride,
 	useMotionDisableOverride,
 } from "@/components/ui/foundations/motionDisableOverride";
-import { getMotionTiming } from "@/components/ui/foundations/motionTiming";
+import { motionTiming } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 import { markAppReady, markAppVisible } from "@/lib/appReadySignal";
 import { shouldPlayLoadingIntroForDocument } from "@/lib/loadingScreenLifecycle";
@@ -17,7 +18,7 @@ import { Text } from "../ui/primitives/Text";
 type Phase = "loading" | "revealing" | "transitioning" | "done";
 
 const REVEAL_DURATION_MS = Math.round(
-	Number(getMotionTiming("grand").duration ?? 0) * 1000,
+	Number(motionTiming.slow.duration ?? 0) * 1000,
 );
 const FONT_READY_TIMEOUT_MS = 1_500;
 
@@ -145,23 +146,20 @@ export default function LoadingScreenMount() {
 			data-loading-screen-mount="true"
 			data-loading-stage={phase}
 			animate={{ opacity: phase === "transitioning" ? 0 : 1 }}
-			transition={getMotionTiming("grand")}
+			transition={spring.slow}
 			onAnimationComplete={() => {
 				if (phase !== "transitioning") return;
 				markAppVisible();
 				setPhase("done");
 			}}
 		>
-			<motion.div
-				className="flex items-stretch"
-				transition={getMotionTiming("grand")}
-			>
+			<motion.div className="flex items-stretch" transition={spring.slow}>
 				<Logo as="span" variant="mark" size="lg" />
 				<motion.div
 					initial={{ maxWidth: 0 }}
 					animate={{ maxWidth: phase === "loading" ? 0 : 420 }}
 					className="overflow-hidden flex items-center"
-					transition={getMotionTiming("grand")}
+					transition={spring.slow}
 				>
 					<div className="min-w-0.5 rounded-full bg-primary h-full mx-3" />
 					<Text variant="heading2xxl" className="font-black!">

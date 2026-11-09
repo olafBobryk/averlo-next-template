@@ -1,0 +1,58 @@
+schema_version: "1.0"
+workflow:
+  id: "backport"
+  name: "Backport from a child project"
+  version: "1.0.0"
+  author: "Averlo"
+  description: "Bring something a generated project did into the template: diff from the source SHA, port rules not values, record repo and SHA in the PR"
+
+# Runs in the template checkout:
+#   specify workflow run backport -i source_repo=/abs/child -i source_sha=<sha> -i paths="src/components/ui/misc"
+requires:
+  speckit_version: ">=1.2.5"
+
+inputs:
+  source_repo:
+    type: string
+    required: true
+    prompt: "Child repository (local path or remote URL)"
+  source_sha:
+    type: string
+    required: true
+    prompt: "Source commit SHA that contains the change"
+  base_sha:
+    type: string
+    default: ""
+    prompt: "Child commit to diff from (empty: the commit before source_sha)"
+  paths:
+    type: string
+    default: ""
+    prompt: "Space-separated paths to limit the diff (empty: whole commit range)"
+
+steps:
+  - id: diff
+    type: shell
+    run: "B='{{ inputs.base_sha }}'; git -C '{{ inputs.source_repo }}' diff --stat \"${B:-{{ inputs.source_sha }}~1}\" '{{ inputs.source_sha }}' -- {{ inputs.paths }}"
+
+  - id: classify
+    type: gate
+    message: "Classify every changed hunk as port, adapt, skip or defer (README step 2). Port RULES and reusable behaviour, never the child's values, branding, copy or code style. Approve the list with Olaf."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: amend-specs
+    type: gate
+    message: "Amend the owner specs through write-spec before code (README step 3). Approve when the specs are updated."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: checks
+    type: shell
+    timeout: 1800
+    run: "npm run verify:static && npm run verify:profiles"
+
+  - id: pr
+    type: gate
+    message: "Open the PR through the main workflow. Its body records source repo {{ inputs.source_repo }} and SHA {{ inputs.source_sha }}. Children are never forced to pull."
+    options: [approve, reject]
+    on_reject: abort

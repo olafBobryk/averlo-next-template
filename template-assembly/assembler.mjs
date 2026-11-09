@@ -10,12 +10,13 @@ import {
 	assemblyCoreRoots,
 	assemblyCoreScripts,
 	assemblyGeneratedPaths,
-	assemblyOpenSpecSkillPaths,
 	assemblyProjectDocs,
 	assemblyTemplateOnlyDevDependencies,
 	assemblyTemplateOnlyPaths,
 	assemblyTemplateOnlyRoots,
 	assemblyTemplateOnlyScripts,
+	assemblyTemplateOnlyWorkflows,
+	isAssemblySpecKitSkillPath,
 	isWithinPath,
 } from "./manifest.mjs";
 import {
@@ -139,10 +140,12 @@ async function buildCopyPlan(sourceRoot, profile, selectedSurfaces) {
 			omitted.push({ path: relativePath, reason: "template-only" });
 			continue;
 		}
-		if (
-			withinAny(relativePath, assemblyTemplateOnlyRoots) &&
-			!assemblyOpenSpecSkillPaths.has(relativePath)
-		) {
+		if (isAssemblySpecKitSkillPath(relativePath)) {
+			ownership.set(relativePath, "core");
+			included.push(relativePath);
+			continue;
+		}
+		if (withinAny(relativePath, assemblyTemplateOnlyRoots)) {
 			omitted.push({ path: relativePath, reason: "template-only" });
 			continue;
 		}
@@ -516,40 +519,7 @@ async function writeProjectDocs(
 		path.join(destinationRoot, "WORKFLOWS.md"),
 		`${installedEntries.join("\n")}\n`,
 	);
-	await fs.mkdir(path.join(destinationRoot, "openspec"), { recursive: true });
-	await fs.writeFile(
-		path.join(destinationRoot, "openspec/config.yaml"),
-		[
-			"schema: spec-driven",
-			"context: |",
-			"  Read PRODUCT.md and applicable AGENTS.md for this project's intent and policy.",
-			"  This is an independent product project. Maintained contracts under",
-			"  openspec/specs/app/ are project-owned copies; change them through stock",
-			"  OpenSpec operations as the product evolves. Start with the changed surface,",
-			"  then relevant shared dependencies and existing product contracts. app/shared/",
-			"  groups frontend, cross-client/server data-lifecycle and service behavior.",
-			"  Marketing and dashboard contracts apply only to installed uses. Folder location",
-			"  never installs a feature. Reserve openspec/specs/product/ for this project's",
-			"  real business requirements; do not invent a placeholder specification.",
-			"  Product rules refine generic contracts; incompatible obligations require an",
-			"  explicit spec change rather than silent precedence.",
-			"  The installed profile receipt identifies selected features, not product requirements.",
-			"  Forms own submissions, loading owns reads, and actions own non-form changes.",
-			"  Nearest AGENTS owns structure; Storybook owns component APIs and defaults;",
-			"  canonical procedures own execution and evidence. Use Preview for local servers.",
-			"  Installed examples remain accurately described until deliberately replaced.",
-			"  Real persistence and delivery use their authorized configured boundaries.",
-			"operations:",
-			"  apply:",
-			"    guidance:",
-			"      - Run applicable form and loading verification against a verified Preview URL when those behaviors change.",
-			"      - Preserve unrelated work and use stock operations without custom routing skills or schemas.",
-			"  archive:",
-			"    guidance:",
-			"      - Record actual verification evidence and any remaining gaps before archiving.",
-			"",
-		].join("\n"),
-	);
+	await writeWorkflowRegistry(sourceRoot, destinationRoot);
 	const profileLabel = profile.id;
 	const projectLabel = projectName ?? `${profileLabel} project`;
 	await fs.writeFile(
@@ -610,39 +580,49 @@ async function writeProjectDocs(
 		[
 			"# Project Agent Instructions",
 			"",
-			"## Project",
+			`\`${projectLabel}\` is an independent Averlo project initialized with the \`${profileLabel}\` profile and \`${content}\` content mode. \`.template-profile.json\` is its immutable setup receipt; never infer product requirements from Averlo reference fixtures.`,
 			"",
-			`- This is \`${projectLabel}\`, an independent Averlo project initialized with the \`${profileLabel}\` profile and \`${content}\` content mode.`,
-			"- Read `PRODUCT.md` before making product, audience, or UX decisions. `.template-profile.json` owns the immutable installed profile; do not infer product requirements from Averlo reference fixtures.",
+			"## Read first",
 			"",
-			"## Averlo Plugin Pack",
+			"- `.specify/memory/constitution.md`: principles every agent follows.",
+			"- `PRODUCT.md` before product, audience or UX decisions.",
+			"- Main thread (the agent talking to the project owner): `.specify/workflows/main/README.md`. A subagent follows its brief and the files below instead.",
+			"- Writing or amending a spec: `.specify/workflows/write-spec/README.md`.",
+			"- Behaviour: `specs/README.md` maps every spec. `specs/platform/` holds this project's own copies of the selected Averlo platform specs; `specs/product/` holds this project's real business requirements once they exist. Product rules refine platform specs; a conflict needs an explicit spec change.",
+			"- Structure, topology, import direction and server/client boundaries: the nearest `AGENTS.md`. Component APIs and defaults: the owner's Storybook stories.",
+			"- Procedures: `WORKFLOWS.md` (names-only menu).",
 			"",
-			"- Use stock OpenSpec discovery for applicable project-owned maintained behavior in `openspec/specs/app/`; normal implementation needs no repository routing skill. Read only the contracts for the changed scope. Missing required contracts are scope gaps to resolve explicitly.",
-			"- Optional operational workflows keep their explicit boundaries. `$averlo:compose` owns native source-backed composition and measured human review passes. `$averlo:systemize-composition` explicitly owns later shared design-system decisions, `$averlo:animate` explicitly owns motion, and `$averlo:visual-parity` supplies subordinate evidence. A source-backed composition must not call Figma or edit product code until Compose is loaded; systemization and animation must not begin without their explicit workflows.",
-			"- Start with the changed surface, then relevant `app/shared/` dependencies and existing `product/` business contracts. Shared data-lifecycle covers client/server behavior together; folder location never installs a feature. `openspec/specs/product/` is reserved for this project's real business requirements; no placeholder spec is generated. Product rules refine generic contracts; incompatible obligations require an explicit spec change.",
-			"- This project owns its `app/` contracts and OpenSpec configuration. Template-only contracts and history are excluded; installed examples may be deliberately replaced with real configured persistence and delivery.",
-			"- Nearest `AGENTS.md` owns structure and dependency direction; Storybook owns supported component APIs/defaults. Canonical procedures own execution and evidence, linked by the names-only `WORKFLOWS.md` menu. Existing verifiers own deterministic policy. Inherited contracts are independent copies, not evidence that optional features or providers are installed.",
-			"- Complete-form behavior is owned by `openspec/specs/app/shared/data-lifecycle/form-behavior/spec.md`. Use standard OpenSpec operations for contract changes and `docs/testing/forms.md` for verification. These files and the stock Codex skills are independent project-owned copies.",
-			"- Initial and region loading behavior is owned by `openspec/specs/app/shared/data-lifecycle/loading-state-behavior/spec.md`; use `docs/testing/loading.md` for verification. The data-lifecycle family groups independent read/presentation and submission contracts without duplicate parent rules.",
+			"## Structure",
 			"",
-			"## Development and Review Isolation",
-			"",
-			"- Use `$preview` to start, recover, verify, or hand off application and Storybook previews. It owns wrapper selection, server isolation, generated preview state, review modes, section anchors, screenshots, and verified review links.",
-			"- Do not start development servers or report a preview as live outside that workflow.",
-			"",
-			"## Application Areas",
-			"",
-			"- The dashboard is the application implementation area.",
-			"- Marketing is the public-site implementation area.",
-			"- `.template-profile.json` determines which areas exist. Use the applicable maintained contracts and nearest `AGENTS.md` for their structure.",
-			"- Resolve provider-specific records and metadata in server-side resolvers or adapters before data reaches the frontend contract.",
-			"- In a marketing-capable project, run `npm run verify:marketing` for the composed section, shell, and media contract; use its focused child commands only for diagnosis.",
-			"",
-			"## Design System",
-			"",
-			"- For UI work, follow the nearest `AGENTS.md`, Storybook owner evidence, and existing repository verifiers rather than treating this file as a component catalogue or API reference. Find the highest complete supported owner before composing lower-level parts.",
+			"- `.template-profile.json` determines which areas exist: the dashboard is the application area and marketing the public site.",
+			"- Provider-specific records and metadata resolve in server-side resolvers or adapters before data reaches the frontend contract.",
+			"- In a marketing-capable project, run `npm run verify:marketing` for the composed section, shell and media contract.",
+			"- Building from a design source follows `.specify/workflows/compose/README.md`; mapping a whole design file follows `.specify/workflows/systemize/README.md`. Motion comes from `specs/platform/design-system/motion` during the build.",
 			"",
 		].join("\n"),
+	);
+}
+
+async function writeWorkflowRegistry(sourceRoot, destinationRoot) {
+	const relativePath = ".specify/workflows/workflow-registry.json";
+	const sourcePath = path.join(sourceRoot, relativePath);
+	if (!(await pathExists(sourcePath))) return;
+	const registry = JSON.parse(await fs.readFile(sourcePath, "utf8"));
+	const workflows = Object.fromEntries(
+		Object.entries(registry.workflows ?? {}).filter(
+			([workflowId]) =>
+				!assemblyTemplateOnlyWorkflows.includes(workflowId) &&
+				existsSync(
+					path.join(destinationRoot, ".specify/workflows", workflowId),
+				),
+		),
+	);
+	await fs.mkdir(path.dirname(path.join(destinationRoot, relativePath)), {
+		recursive: true,
+	});
+	await fs.writeFile(
+		path.join(destinationRoot, relativePath),
+		`${JSON.stringify({ ...registry, workflows }, null, 2)}\n`,
 	);
 }
 

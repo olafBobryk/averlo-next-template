@@ -1,25 +1,24 @@
 # Folder: `src/components/ui/input/files`
 
-## Ownership and boundary
-
 This folder owns controlled file selection and profile-picture fields.
 
-## Private topology
+## Read
 
-- `FilePreview` and `FileInspectModal` are private FileInput composition owners
-  and must not gain public exports or catalogue identities.
-- FileInput owns client-side form state and presentation only. Upload transport,
-  persistence, progress, server deletion, and authoritative validation remain
+- `specs/platform/services/files/spec.md` and
+  `specs/platform/services/delivery/spec.md` for upload validation and
+  attachment rules (enforced server-side, outside this family).
+
+## Structure
+
+- `FilePreview` and `FileInspectModal` are private `FileInput` composition owners;
+  no public exports or catalogue identities.
+- `FileInput` owns client-side form state and presentation only. Upload transport,
+  persistence, progress, server deletion and authoritative validation live
   outside this family.
-- The editable file rail ends with the shared Card-backed add tile with a solid border. Read mode reuses
-  the same preview topology without add/remove controls.
-
-## Structural invariants
-
-- FileInput preview callbacks and FilePreviewProvider delegate inspection to a caller-owned host. Keep the callback contract in this family and the viewer in composites; inputs must not import composites or dashboard code.
-
-- Keep the native file input synchronized with controlled visual state.
-- Object URLs are revoked when pending files are replaced or the component
-  unmounts.
-- Client filtering is not a security boundary; server handlers validate
-  independently.
+- Preview callbacks and `FilePreviewProvider` delegate inspection to a
+  caller-owned host: the callback contract stays here, the viewer in composites.
+  Inputs never import composites or dashboard code.
+- The editable file rail ends with the shared Card-backed add tile; read mode
+  reuses the same preview topology without add/remove controls.
+- The native file input stays synchronized with controlled visual state; object
+  URLs are revoked when pending files are replaced or on unmount.

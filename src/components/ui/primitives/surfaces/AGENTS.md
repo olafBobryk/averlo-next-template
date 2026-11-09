@@ -1,42 +1,27 @@
 # Folder: `src/components/ui/primitives/surfaces`
 
-## Ownership
+Server-safe Panel, Card, Float, and semantic elevation vocabulary used on the
+Page canvas.
 
-- This folder owns the server-safe Panel, Card, Float, and semantic elevation
-  vocabulary used on the Page canvas.
+## Read
+
+- `specs/platform/content/hierarchy/spec.md` when deciding grouping, Card or
+  ContentSection usage, headings or section backgrounds.
+- Storybook owner stories for surface APIs and defaults.
+
+## Structure
+
 - The public boundary is the explicit `index.ts` facade. Internal composition
   may import sibling modules directly to avoid facade cycles.
 - Page is a foundation canvas rather than a React component. Overlay remains an
   interaction context owned by overlay systems.
-
-## Structural invariants
-
-- Keep structure and elevation independent: Card may use float or overlay
+- Structure and elevation are independent: Card may use float or overlay
   elevation without becoming Float, and Float remains behavior-free.
 - Card parts remain under a real Card root and preserve their `data-slot` and
-  `group/card` selectors. Header and footer separators inherit the root outline
-  color. Card tables use the same shared subtle border recipe for their outline,
-  header separator, row dividers and footer separator.
-- ContentSection owns unboxed page groups. Keep section headings and descriptions
-  outside cards. Enclose a cohesive property/control group in one Card; do not
-  remove that boundary or create a card per field. Card.Header is optional;
-  reserve Card.Header for the identity and highest-priority
-  information of a self-contained item. ContentSection parts use their own slots.
+  `group/card` selectors. ContentSection parts use their own slots.
 - Opaque surfaces publish their resolved fill through `--ui-surface-color`;
   transparent surfaces inherit the nearest owning surface.
-- The shared class recipe is implementation-only. Do not export it from the
-  public facade or give it a separate Storybook identity.
-- Surface primitives must not own portal, focus, dismissal, positioning, or
-  modal behavior.
-- Semantic section-background owners provide context and selective descendant
-  styling, not Panel/Card/Float radius, elevation, fill or slot ownership. Stable
-  layout/reveal-position wrappers may retain transparent borders; do not remove
-  them without geometry proof. Gradient borders keep outer border and inner fill
-  as separate wrappers with aligned radii.
-- Semantic accents use the closed shared surface contract. Feature code must not
-  imitate internal slots, inspection attributes, recipes or tokens to reconstruct
-  a surface; inspection helpers remain private.
-
-Content-section headings use text alone. Do not add decorative leading icons in application sections, loading states, catalogue previews, or Storybook examples. Use heading text and spacing to establish hierarchy.
-
-- Card owns opt-in `interactive` hover fill. Use a bare semantic control inside an interactive Card so button hover backgrounds do not stack. Disable Card interaction styling when the control is disabled.
+- The shared class recipe and inspection helpers are implementation-only: not
+  exported from the facade and without a separate Storybook identity.
+- Surface primitives own no portal, focus, dismissal, positioning or modal
+  behavior.

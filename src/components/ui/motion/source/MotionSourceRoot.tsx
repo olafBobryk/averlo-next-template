@@ -12,7 +12,7 @@ import {
 	MotionRevealSource,
 	MotionScrollSource,
 } from "./drivers/motion";
-import type { MotionSourceRootProps } from "./sourceShared";
+import type { MotionSourceRootProps, ScrollSourceProps } from "./sourceShared";
 
 export type {
 	MotionSourceBreakpoint,
@@ -20,15 +20,20 @@ export type {
 	MotionSourceStrategy,
 	MotionSourceTiming,
 } from "./sourceShared";
+/** Scroll progress owner for the selected driver; shared with the scroll Sequence. */
+export function ScrollSource(props: ScrollSourceProps) {
+	return useMotionDriver() === "hybrid" ? (
+		<GsapScrollSource {...props} />
+	) : (
+		<MotionScrollSource {...props} />
+	);
+}
+
 export function MotionSourceRoot(props: MotionSourceRootProps) {
 	const driver = useMotionDriver();
 	switch (props.strategy.type) {
 		case "scroll":
-			return driver === "hybrid" ? (
-				<GsapScrollSource {...props} strategy={props.strategy} />
-			) : (
-				<MotionScrollSource {...props} strategy={props.strategy} />
-			);
+			return <ScrollSource {...props} strategy={props.strategy} />;
 		case "hover":
 			return <InteractionSource {...props} strategy={props.strategy} />;
 		case "owner-hover":

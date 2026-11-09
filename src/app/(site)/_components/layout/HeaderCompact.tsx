@@ -6,10 +6,10 @@ import { useState } from "react";
 import Logo from "@/components/branding/Logo";
 import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
-import { ScrollBorders } from "@/components/ui/misc";
+import { ScrollArea } from "@/components/ui/misc";
 import { Button } from "@/components/ui/primitives/Button";
 import { Panel } from "@/components/ui/primitives/surfaces";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
+import { useAnimated } from "@/hooks/useMotionAllowed";
 import {
 	getHeaderSearchGroups,
 	HeaderMenuGroup,
@@ -18,6 +18,7 @@ import {
 } from "./HeaderMenuContent";
 import type { SiteLayoutDocument } from "./siteLayout";
 import { getSiteLinkHref } from "./siteLayout";
+import { useMenuPanelSequence } from "./useMenuPanelSequence";
 
 const COMPACT_OPEN_TOP_PADDING = 16;
 const COMPACT_OPEN_BAR_HEIGHT = 48;
@@ -47,20 +48,31 @@ export default function HeaderCompact({
 }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
-	const showHeaderSurface = isScrolled || isMenuOpen;
-	const isCondensed = isScrolled && !isMenuOpen;
+	const motionAllowed = useAnimated();
+	const menu = useMenuPanelSequence(isMenuOpen, motionAllowed);
+	// The header is the menu panel: it keeps its open state until it closes.
+	const showHeaderSurface = isScrolled || menu.extended;
+	const isCondensed = isScrolled && !menu.extended;
 	const isSearchActive = searchQuery.trim().length > 0;
 	const searchGroups = getHeaderSearchGroups(searchQuery, layout.searchGroups);
 	const activeMenuGroups = isSearchActive ? searchGroups : layout.menuGroups;
-	const motionAllowed = useMotionAllowed(true);
 	const headerTransition: Transition = motionAllowed
-		? spring.macro
+		? spring.gentle
 		: instantTransition;
 	const heightTransition: Transition = motionAllowed
-		? spring.component
+		? spring.smooth
+		: instantTransition;
+	// Menu open/close moves the header height on `gentle`; the content fades
+	// on `quick` (as presence does).
+	const menuPanelTransition: Transition = motionAllowed
+		? spring.gentle
+		: instantTransition;
+	const menuFadeTransition: Transition = motionAllowed
+		? spring.quick
 		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
-	const headerHeight = isMenuOpen
+	// spec exception E-001
+	const headerHeight = menu.extended
 		? "100vh"
 		: isCondensed
 			? COMPACT_CONDENSED_HEADER_HEIGHT
@@ -96,7 +108,17 @@ export default function HeaderCompact({
 				height: headerHeight,
 				...entranceState,
 			}}
-			transition={heightTransition}
+			transition={{
+				...heightTransition,
+				height: menu.mounted ? menuPanelTransition : heightTransition,
+			}}
+			onUpdate={(latest) =>
+				menu.onPanelUpdate(
+					Number.parseFloat(String(latest.height)),
+					window.innerHeight,
+				)
+			}
+			onAnimationComplete={menu.onPanelComplete}
 			className={clsx("fixed inset-x-0 top-0 z-50 h-[76px]", className)}
 		>
 			<Panel
@@ -162,17 +184,22 @@ export default function HeaderCompact({
 				</motion.div>
 				<div className="relative w-full px-section-x">
 					<div className="mx-auto w-full max-w-section-max">
-						<div
-							data-open={isMenuOpen}
-							className="grid min-h-0 transition-[grid-template-rows,opacity] motion-component data-[open=false]:grid-rows-[0fr] data-[open=false]:opacity-0 data-[open=true]:grid-rows-[1fr] data-[open=true]:opacity-100"
-							style={{
-								height: isMenuOpen
-									? `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`
-									: undefined,
-							}}
-						>
-							<div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
-								<div className="relative shrink-0 pb-6">
+						{menu.mounted ? (
+							<motion.div
+								data-open={isMenuOpen}
+								aria-hidden={!isMenuOpen || undefined}
+								inert={!isMenuOpen || undefined}
+								className="flex min-h-0 min-w-0 flex-col overflow-hidden"
+								style={{
+									height: `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`,
+								}}
+								initial={motionAllowed ? { opacity: 0 } : false}
+								animate={{ opacity: menu.visible ? 1 : 0 }}
+								transition={menuFadeTransition}
+								onUpdate={menu.onContentUpdate}
+								onAnimationComplete={menu.onContentComplete}
+							>
+								<div className="relative shrink-0">
 									<HeaderSearchInput
 										value={searchQuery}
 										onValueChange={setSearchQuery}
@@ -184,9 +211,12 @@ export default function HeaderCompact({
 									/>
 								</div>
 								<div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-									<ScrollBorders
-										showBackToTop={false}
-										className="h-full w-full min-w-0 overflow-x-hidden overflow-y-auto"
+									{/* The search field is the start edge (its gap becomes the
+									    scroller padding); the viewport bottom is not an edge. */}
+									<ScrollArea
+										edgeStart="1.5rem"
+										edgeEnd={0}
+										className="h-full w-full overflow-x-hidden"
 										style={{
 											maxHeight: `calc(100vh - ${COMPACT_OPEN_SCROLL_AREA_OFFSET}px)`,
 										}}
@@ -220,10 +250,10 @@ export default function HeaderCompact({
 												</Button>
 											</div>
 										</div>
-									</ScrollBorders>
+									</ScrollArea>
 								</div>
-							</div>
-						</div>
+							</motion.div>
+						) : null}
 					</div>
 				</div>
 			</motion.div>

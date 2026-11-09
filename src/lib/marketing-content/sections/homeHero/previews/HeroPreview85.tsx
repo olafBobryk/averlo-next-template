@@ -13,6 +13,7 @@ function CatalogPreview1() {
 			>
 				<label className="grid gap-1 p-2">
 					Name
+					{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 					<input name="name" />
 				</label>
 			</ModalForm>

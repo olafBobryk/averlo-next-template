@@ -18,7 +18,7 @@ import {
 } from "react";
 import { focusRing } from "@/components/ui/foundations/focus";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
-import { getSpring } from "@/components/ui/foundations/spring";
+import { spring } from "@/components/ui/foundations/spring";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
 
 export type CarouselItem = {
@@ -170,6 +170,8 @@ export function Carousel({
 	const suppressClickRef = useRef(false);
 	const suppressClickTimerRef = useRef<number | null>(null);
 	const positionIndexRef = useRef(clampIndex(initialIndex, items.length));
+	// The slide a settle is heading to; it stays active while the track moves.
+	const targetIndexRef = useRef<number | null>(null);
 	const directionRef = useRef<"ltr" | "rtl">("ltr");
 	const dragRef = useRef<PointerDrag | null>(null);
 	const [activeIndex, setActiveIndex] = useState(positionIndexRef.current);
@@ -182,6 +184,7 @@ export function Carousel({
 	const wideLayoutActive = useWideLayoutActive(wideLayout);
 
 	useMotionValueEvent(trackX, "change", (value) => {
+		if (targetIndexRef.current !== null) return;
 		let closestIndex = 0;
 		let closestDistance = Number.POSITIVE_INFINITY;
 		for (const [index, point] of snapPoints.entries()) {
@@ -226,8 +229,13 @@ export function Carousel({
 				),
 			);
 			setSnapPoints(nextSnapPoints);
-			const nextIndex = clampIndex(positionIndexRef.current, slides.length);
+			const nextIndex = clampIndex(
+				targetIndexRef.current ?? positionIndexRef.current,
+				slides.length,
+			);
 			positionIndexRef.current = nextIndex;
+			// Jumping stops a running settle, so it lands on its target here.
+			targetIndexRef.current = null;
 			trackX.jump(nextSnapPoints[nextIndex] ?? 0);
 		};
 
@@ -272,14 +280,17 @@ export function Carousel({
 					: snapPoints[selectedIndex];
 			if (target === undefined) return;
 			settleAnimationRef.current?.stop();
+			targetIndexRef.current = selectedIndex;
 			if (shouldAnimate) {
-				settleAnimationRef.current = animate(
-					trackX,
-					target,
-					getSpring("interaction"),
-				);
+				settleAnimationRef.current = animate(trackX, target, {
+					...spring.gentle,
+					onComplete: () => {
+						targetIndexRef.current = null;
+					},
+				});
 			} else {
 				trackX.jump(target);
+				targetIndexRef.current = null;
 			}
 			positionIndexRef.current = selectedIndex;
 			setActiveIndex(selectedIndex);
@@ -315,13 +326,18 @@ export function Carousel({
 
 			const target = snapPoints[closestIndex] ?? 0;
 			settleAnimationRef.current?.stop();
+			targetIndexRef.current = closestIndex;
 			if (shouldAnimate) {
 				settleAnimationRef.current = animate(trackX, target, {
-					...getSpring("interaction", { expressive: 0.35 }),
+					...spring.gentle,
 					velocity: velocityX,
+					onComplete: () => {
+						targetIndexRef.current = null;
+					},
 				});
 			} else {
 				trackX.jump(target);
+				targetIndexRef.current = null;
 			}
 			positionIndexRef.current = closestIndex;
 			setActiveIndex(closestIndex);
@@ -355,6 +371,7 @@ export function Carousel({
 			if (wideLayoutActive) return;
 			if (event.button !== 0) return;
 			settleAnimationRef.current?.stop();
+			targetIndexRef.current = null;
 			if (suppressClickTimerRef.current !== null) {
 				window.clearTimeout(suppressClickTimerRef.current);
 				suppressClickTimerRef.current = null;
@@ -491,7 +508,7 @@ export function Carousel({
 							aria-label={`Show slide ${index + 1}: ${item.label}`}
 							className={clsx(
 								focusRing.visibleDefault,
-								"size-2.5 cursor-pointer rounded-full border-0 bg-foreground/20 transition-[background-color,transform] motion-interactive",
+								"size-2.5 cursor-pointer rounded-full border-0 bg-foreground/20 transition-[background-color,transform] motion-snap",
 								activeIndex === index && "scale-[1.15] bg-primary",
 							)}
 							key={item.id}

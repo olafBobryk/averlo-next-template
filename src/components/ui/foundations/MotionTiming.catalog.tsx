@@ -1,79 +1,74 @@
 "use client";
 
 import { defineCatalogOwnerContract } from "@/lib/component-catalog/contract";
-import {
-	getMotionCssVariables,
-	getMotionTiming,
-	motionTiming,
-} from "./motionTiming";
-import { getSpring, spring } from "./spring";
+import { motionSteps, motionTiming } from "./motionTiming";
+import { spring } from "./spring";
 
-function CatalogPreview1() {
-	const render = () => {
-		const variables = getMotionCssVariables();
-		return (
-			<dl className="grid grid-cols-2 gap-2" data-testid="timing-table">
-				<dt>Feedback</dt>
-				<dd>{String(motionTiming.feedback.duration)}</dd>
-				<dt>Overlay</dt>
-				<dd>{String(motionTiming.overlay.duration)}</dd>
-				<dt>Reveal</dt>
-				<dd>{String(getMotionTiming("grand").duration)}</dd>
-				<dt>CSS token</dt>
-				<dd>
-					{String(
-						variables["--motion-overlay-duration" as keyof typeof variables],
-					)}
-				</dd>
-			</dl>
-		);
-	};
+export function MotionStepTable() {
 	return (
-		render as unknown as (
-			args: Record<string, unknown>,
-		) => ReturnType<typeof render>
-	)({ ...{}, ...{} } as never);
+		<table className="text-left text-sm" data-testid="step-table">
+			<thead>
+				<tr>
+					<th className="pr-4">Step</th>
+					<th className="pr-4">Duration</th>
+					<th className="pr-4">CSS token</th>
+					<th>Spring k / c / m</th>
+				</tr>
+			</thead>
+			<tbody>
+				{motionSteps.map((step) => (
+					<tr data-step={step} key={step}>
+						<td className="pr-4">{step}</td>
+						<td className="pr-4" data-cell="duration">
+							{String(motionTiming[step].duration)}
+						</td>
+						<td className="pr-4">
+							<code>{`--motion-${step}-duration`}</code>
+						</td>
+						<td data-cell="spring">
+							{String(spring[step].stiffness)} / {String(spring[step].damping)}{" "}
+							/ {String(spring[step].mass)}
+						</td>
+					</tr>
+				))}
+			</tbody>
+		</table>
+	);
 }
+
 function CatalogPreview2() {
-	const render = () => (
+	return (
 		<dl className="grid grid-cols-2 gap-2">
-			<dt>Interactive type</dt>
-			<dd data-testid="spring-type">{String(spring.interaction.type)}</dd>
-			<dt>Strong stiffness</dt>
-			<dd data-testid="spring-stiffness">
-				{String(getSpring("overlay", { intensity: "strong" }).stiffness)}
-			</dd>
+			<dt>Quick type</dt>
+			<dd data-testid="spring-type">{String(spring.quick.type)}</dd>
+			<dt>Gentle stiffness</dt>
+			<dd data-testid="spring-stiffness">{String(spring.gentle.stiffness)}</dd>
 		</dl>
 	);
-	return (
-		render as unknown as (
-			args: Record<string, unknown>,
-		) => ReturnType<typeof render>
-	)({ ...{}, ...{} } as never);
 }
 
 export const catalogContract = defineCatalogOwnerContract({
 	id: "ui-foundations-motion-timing",
 	name: "Motion Timing and Spring",
-	role: "Shared transition and spring vocabulary for feedback, interaction, disclosure, overlays, reveals, ambient motion, and scroll behavior.",
+	role: "Five character-named motion steps (snap, quick, smooth, gentle, slow): a spring for JS-driven motion and a matched duration and ease for CSS.",
 	importStatement:
-		'import { getMotionTiming, motionTiming, resolveMotionTransition } from "@/components/ui/foundations/motionTiming";\nimport { getSpring, spring } from "@/components/ui/foundations/spring";',
+		'import { instantTransition, motionTiming } from "@/components/ui/foundations/motionTiming";\nimport { spring } from "@/components/ui/foundations/spring";',
 	chooseWhen: [
-		"A CSS or motion/react interaction needs a library-owned duration, easing, or spring.",
+		"A motion/react animation needs its step's spring, or a CSS interaction needs the step's motion-<step> class or --motion-<step>-* variables.",
 	],
 	chooseInstead: [
-		"Use MotionScope when a subtree needs a shared expressive adjustment.",
+		"Use the owning component (ContentPresence, MorphLabel, IconSwap, Button) when it already animates the change.",
 	],
-	compounds: ["motionTiming", "getMotionTiming", "spring", "getSpring"],
-	exclusions: ["Hard-coded page-local durations and easings."],
+	compounds: ["motionTiming", "spring", "instantTransition"],
+	exclusions: ["Hard-coded page-local durations, easings and springs."],
 	guarantees: [
 		{
-			label: "Moment hierarchy",
-			storyId: "ui-foundations-motion-timing--moment-hierarchy",
+			label: "Step scale",
+			storyId: "ui-foundations-motion-timing--step-scale",
 		},
 		{
-			label: "Resolved spring tokens",
-			storyId: "ui-foundations-motion-timing--resolved-springs",
+			label: "Step springs",
+			storyId: "ui-foundations-motion-timing--step-springs",
 		},
 	],
 
@@ -81,16 +76,16 @@ export const catalogContract = defineCatalogOwnerContract({
 	group: "Foundations",
 	previewTargets: [
 		{
-			id: "moment-hierarchy",
-			name: "Moment hierarchy",
+			id: "step-scale",
+			name: "Step scale",
 			baseline: {},
 			axes: [],
 			stage: "standard",
-			Render: CatalogPreview1,
+			Render: MotionStepTable,
 		},
 		{
-			id: "resolved-springs",
-			name: "Resolved spring tokens",
+			id: "step-springs",
+			name: "Step springs",
 			baseline: {},
 			axes: [],
 			stage: "standard",

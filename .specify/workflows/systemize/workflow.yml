@@ -1,0 +1,48 @@
+schema_version: "1.0"
+workflow:
+  id: "systemize"
+  name: "Systemize a design file"
+  version: "1.0.0"
+  author: "Averlo"
+  description: "Map a whole Figma file to design-system owners and levels, list the unique components and record the ones Olaf approves; never edits components"
+
+# Interactive agents follow README.md themselves (approval needs Olaf in the
+# chat). Headless:
+#   specify workflow run systemize -i source="<figma file url>" -i slug=brand-site
+requires:
+  speckit_version: ">=1.2.5"
+
+inputs:
+  source:
+    type: string
+    required: true
+    prompt: "Figma file URL"
+  slug:
+    type: string
+    required: true
+    prompt: "Decision file slug (docs/design-system/decisions/<slug>.md)"
+
+steps:
+  - id: map
+    type: gate
+    message: "Map every frame of {{ inputs.source }}: each distinct piece gets a Storybook owner, a level 1-5 (usage FR-021) and a reason."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: deduplicate
+    type: gate
+    message: "Collapse repeats into one list of unique components (piece, owner, level, reason, frames). Distinct versions of one part are one level 4 row."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: approve
+    type: gate
+    message: "Olaf approves, rejects or defers each level 3-5 row."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: output
+    type: gate
+    message: "Record only the decided rows in docs/design-system/decisions/{{ inputs.slug }}.md (usage FR-024). Build each approved row later through write-spec and main using usage FR-022; this workflow edits no components."
+    options: [approve, reject]
+    on_reject: abort

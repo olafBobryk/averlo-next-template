@@ -1,0 +1,107 @@
+schema_version: "1.0"
+workflow:
+  id: "verify"
+  name: "Verify"
+  version: "1.0.0"
+  author: "Averlo"
+  description: "Run one named verification suite (npm run verify:* and friends) and report its exit code"
+
+# specify workflow run verify -i suite=static
+# Live suites need a verified preview URL: -i base_url='http://localhost:PORT?motion=off&reveal=off'
+requires:
+  speckit_version: ">=1.2.5"
+
+inputs:
+  suite:
+    type: string
+    default: "static"
+    enum:
+      - "static"
+      - "build"
+      - "smoke"
+      - "storybook"
+      - "forms"
+      - "loading"
+      - "marketing"
+      - "frontend-entities"
+      - "dashboard"
+      - "auth"
+      - "profiles"
+      - "create-averlo"
+      - "template-tools"
+    prompt: "Suite to run (see README for what each covers)"
+  base_url:
+    type: string
+    default: ""
+    prompt: "Verified preview URL for live suites (forms, loading)"
+
+steps:
+  - id: run-suite
+    type: switch
+    expression: "{{ inputs.suite }}"
+    cases:
+      static:
+        - id: static
+          type: shell
+          timeout: 1800
+          run: "npm run verify:static"
+      build:
+        - id: build
+          type: shell
+          timeout: 1800
+          run: "npm run verify:build"
+      smoke:
+        - id: smoke
+          type: shell
+          timeout: 900
+          run: "npm run verify:smoke"
+      storybook:
+        - id: storybook
+          type: shell
+          timeout: 1800
+          run: "npm run test-storybook && npm run catalog:check"
+      forms:
+        - id: forms
+          type: shell
+          timeout: 900
+          run: "test -n '{{ inputs.base_url }}' && npm run verify:forms -- --base-url '{{ inputs.base_url }}'"
+      loading:
+        - id: loading
+          type: shell
+          timeout: 900
+          run: "test -n '{{ inputs.base_url }}' && npm run verify:loading -- --base-url '{{ inputs.base_url }}'"
+      marketing:
+        - id: marketing
+          type: shell
+          timeout: 900
+          run: "npm run verify:marketing"
+      frontend-entities:
+        - id: frontend-entities
+          type: shell
+          timeout: 900
+          run: "npm run verify:frontend-entities"
+      dashboard:
+        - id: dashboard
+          type: shell
+          timeout: 900
+          run: "npm run verify:dashboard"
+      auth:
+        - id: auth
+          type: shell
+          timeout: 900
+          run: "npm run verify:auth"
+      profiles:
+        - id: profiles
+          type: shell
+          timeout: 3600
+          run: "npm run verify:profiles"
+      create-averlo:
+        - id: create-averlo
+          type: shell
+          timeout: 1800
+          run: "npm run verify:create-averlo"
+      template-tools:
+        - id: template-tools
+          type: shell
+          timeout: 900
+          run: "npm run verify:backport-scanner && npm run verify:visual-parity && npm run verify:skill-references"

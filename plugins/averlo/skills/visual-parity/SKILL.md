@@ -5,11 +5,11 @@ description: Capture and mechanically compare a generated Averlo surface against
 
 # Averlo · Visual Parity
 
-Own reproducible capture and raw pixel evidence. `$averlo:compose` interprets
-source-parity measurements, `$averlo:systemize-composition` interprets
-target-before/target-after measurements, and `$averlo:animate` interprets
-static endpoint evidence. This skill never edits product code, assigns their
-workflow status, or decides whether a human should accept a result.
+Own reproducible capture and raw pixel evidence. The workflow that requested
+the evidence (for example the target repository's `compose` or `systemize`
+Spec Kit workflow) interprets the measurements. This skill never edits product
+code, assigns workflow status, or decides whether a human should accept a
+result.
 
 ## Frame the evidence
 

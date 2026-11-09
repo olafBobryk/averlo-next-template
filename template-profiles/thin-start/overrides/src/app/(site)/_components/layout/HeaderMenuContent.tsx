@@ -215,6 +215,7 @@ export function HeaderSearchInput({
 				) : undefined
 			}
 		>
+			{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 			<input
 				id={searchId}
 				type="search"
@@ -288,7 +289,7 @@ export function HeaderMenuGroup({
 			{groupHref ? (
 				<Button
 					href={groupHref}
-					variant="ghost"
+					variant="bare"
 					size="none"
 					className="w-fit justify-start text-sm font-medium text-foreground"
 					contentClassName="gap-2"
@@ -315,7 +316,7 @@ export function HeaderMenuGroup({
 						<Button
 							key={`${item.label}-${getSiteLinkHref(item)}`}
 							href={getSiteLinkHref(item)}
-							variant="ghost"
+							variant="bare"
 							size="none"
 							className="w-fit justify-start text-sm font-normal text-muted hover:text-foreground"
 							onClick={onNavigate}

@@ -30,9 +30,62 @@ directory and profile explicitly.
 Generated repositories have no remote. Add one later with the normal Git or
 GitHub workflow for the project that will own it.
 
+## Verify a created project
+
+```text
+create-averlo verify <project-directory> [--profile <id>] [--content <mode>] [--no-install]
+```
+
+Checks the package name against the directory, the schema-2
+`.template-profile.json` (and the given profile/content), `PRODUCT.md`,
+`AGENTS.md`, `docs/README.md`, `.specify/memory/constitution.md` and
+`specs/README.md`, the absence of `openspec/` and `specs/template/`, the
+lockfile and dependency state (`--no-install` expects no `node_modules`), and
+git (`main`, one commit, clean, no remote). It exits non-zero and lists every
+mismatch. Name a project folder literally called `verify` (or `publish`,
+`contact`, `backport`) as `./<name>`.
+
+## Workflow subcommands
+
+These carry the operational steps of the template's Spec Kit workflows. Each
+prints its own usage with `--help`, and none prints, logs or passes a secret
+value through arguments.
+
+```text
+create-averlo publish preflight --project <path> [--config <path>] [--json]
+create-averlo publish config [--config <path>] [--json]
+```
+
+Read-only preflight for the `publish` workflow. Reads the owner-only (mode 600)
+`~/.config/averlo/publish-project.json`, checks that the project is a clean,
+schema-2 project on `main` with no remote and no `.vercel` link, and prints only
+the non-secret GitLab and Vercel targets to confirm. It creates nothing.
+
+```text
+create-averlo contact audit [--repo <path>]
+create-averlo contact provision --project <vercel-project> [--repo <path>]
+create-averlo contact sync --client-email <email> [--repo <path>]
+```
+
+Helpers for the `contact-delivery` workflow. `audit` is read-only JSON about
+candidate contact files and non-secret `.env.local` metadata. `provision` uses
+the owner-only Resend management credential to create a domain-restricted
+`sending_access` key and stores it in the ignored, mode-600 `.env.local` with
+Bobryk-only local recipients. `sync` pushes the key and the client plus Bobryk
+recipients to Vercel Production only, through stdin.
+
+```text
+create-averlo backport scan --workspace <bounded-parent> --template <template-root> [--include-template] [--json]
+create-averlo backport fingerprint --template <root> --story <story-file> --export <story-export>
+```
+
+Storybook backport scanner for the `backport` workflow. TypeScript is resolved
+from `--template`. `scan` exits 1 on validation errors and 2 on conflicts.
+
 ## Publishing
 
-Every push to `main` runs `publish-create-averlo.yml`. It prepares the next npm
+Every push to `main` runs `ci.yml` (lint, typecheck, unit, Storybook and build
+tests); only when it passes does `publish-create-averlo.yml` run. It prepares the next npm
 patch version from a clean committed template, verifies all profiles and an
 installed generated project, publishes through npm trusted publishing, checks
 public project creation, and records a GitHub release. Publishing is serialized;

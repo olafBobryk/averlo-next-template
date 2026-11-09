@@ -71,7 +71,7 @@ function ChoiceFieldRoot({
 				inputRef.current?.focus({ preventScroll: true });
 			}}
 			className={clsx(
-				"group choice-field flex w-full items-center gap-3 text-left transition-colors motion-interactive",
+				"group choice-field flex w-full items-center gap-3 text-left transition-colors motion-snap",
 				disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
 				className,
 			)}

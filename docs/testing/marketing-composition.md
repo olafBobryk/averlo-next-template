@@ -1,7 +1,7 @@
 # Verify marketing composition and media
 
-Behavior belongs to [marketing composition](../../openspec/specs/app/marketing/composition/marketing-composition/spec.md)
-and [media delivery](../../openspec/specs/app/shared/frontend/content/media-delivery/spec.md).
+Behavior belongs to [marketing composition](../../specs/platform/surfaces/marketing/composition/spec.md)
+and [media delivery](../../specs/platform/content/media/spec.md).
 [Marketing-content AGENTS](../../src/lib/marketing-content/AGENTS.md) owns exact
 route/document/renderer/media topology; shell adapters follow their nearest AGENTS.
 Storybook owns the shared `Section` root, background, frame and supported API.
@@ -45,20 +45,18 @@ before its one affected use: one rule once, valid rationale, no stale/file-wide
 opt-out. Temporary URLs, reference captures and missing alt remain non-waivable.
 The media verifier scans the real marketing tree. Run
 `node --test scripts/verify/verify-marketing-media-policy.test.mjs` for focused
-static/remote/SVG and exception-boundary cases. Template plugin integration also
-uses `npm run verify:composition-workflows` and `npm run verify:visual-parity`.
-These checks do not substitute for visual asset provenance.
+static/remote/SVG and exception-boundary cases. These checks do not substitute
+for visual asset provenance.
 
 ## Source-backed review
 
-Use the existing Compose source-intake and Visual Parity focus-packet procedures
-for external-source implementation and measured review. Before edits classify
-hierarchy, headings, bounds, full-bleed backgrounds and rhythm. Map each content
-case to a stable ID, block, renderer and selector; keep shell/footer cases,
-excluded headers and accumulated gates separate. Preserve distinct source cases;
-pause on an ambiguous split. Later reuse/splitting is an explicit Systemize
-decision. The approved header remains unchanged in production and excluded from
-Compose parity; shared owners require their separate authorization.
+External-source implementation and measured review follow the
+[compose workflow](../../.specify/workflows/compose/README.md). Map each content
+case to a stable ID, block, renderer and selector; keep shell/footer cases and
+excluded headers separate. Preserve distinct source cases; pause on an ambiguous
+split. Changing a shared owner needs Olaf's sign-off on its level 3–5 row. The
+approved header remains unchanged in production and excluded from compose
+parity.
 
 For material UI changes use Preview for a verified local route and direct section
 anchor when available. Verify native DOM, stable selectors and both comparison

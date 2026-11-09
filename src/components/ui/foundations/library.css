@@ -152,32 +152,19 @@
 	--font-size-display-xxl: calc(2.25rem * var(--text-scale));
 	--font-size-display-xl: calc(1.625rem * var(--text-scale));
 
-	--motion-feedback-duration: 140ms;
-	--motion-feedback-ease: cubic-bezier(0.33, 0.1, 0.2, 1);
-	--motion-interaction-duration: 200ms;
-	--motion-interaction-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
-	--motion-disclosure-duration: 260ms;
-	--motion-disclosure-ease: cubic-bezier(0.16, 1, 0.3, 1);
-	--motion-overlay-duration: 320ms;
-	--motion-overlay-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-	--motion-reveal-duration: 940ms;
-	--motion-reveal-ease: cubic-bezier(0.32, 0.04, 0.18, 1);
-	--motion-ambient-duration: 900ms;
-	--motion-ambient-ease: cubic-bezier(0.33, 0, 0.2, 1);
-	--motion-scroll-duration: 260ms;
-	--motion-scroll-ease: cubic-bezier(0.16, 1, 0.3, 1);
-	--motion-micro-duration: var(--motion-feedback-duration);
-	--motion-micro-ease: var(--motion-feedback-ease);
-	--motion-interactive-duration: var(--motion-interaction-duration);
-	--motion-interactive-ease: var(--motion-interaction-ease);
-	--motion-component-duration: var(--motion-disclosure-duration);
-	--motion-component-ease: var(--motion-disclosure-ease);
-	--motion-macro-duration: var(--motion-overlay-duration);
-	--motion-macro-ease: var(--motion-overlay-ease);
-	--motion-grand-duration: var(--motion-reveal-duration);
-	--motion-grand-ease: var(--motion-reveal-ease);
-	--motion-decorative-duration: var(--motion-ambient-duration);
-	--motion-decorative-ease: var(--motion-ambient-ease);
+	/* Motion steps (specs/platform/design-system/motion, token table). */
+	--motion-snap-duration: 100ms;
+	--motion-snap-ease: cubic-bezier(0.22, 0.16, 0.18, 1);
+	--motion-quick-duration: 160ms;
+	--motion-quick-ease: cubic-bezier(0.22, 0.16, 0.18, 1);
+	--motion-smooth-duration: 240ms;
+	--motion-smooth-ease: cubic-bezier(0.22, 0.16, 0.18, 1);
+	--motion-gentle-duration: 360ms;
+	--motion-gentle-ease: cubic-bezier(0.22, 0.24, 0.14, 1);
+	--motion-slow-duration: 560ms;
+	--motion-slow-ease: cubic-bezier(0.18, 0.2, 0.12, 1);
+	/* Icon keyframe values stay outside the steps. */
+	--motion-ring-duration: 900ms;
 	--motion-ring-ease: cubic-bezier(0.36, 0.07, 0.19, 0.97);
 	--motion-spin-duration: 2s;
 	--motion-spin-ease: cubic-bezier(0.75, 0.25, 0.25, 0.75);
@@ -462,142 +449,45 @@
 
 @layer utilities {
 	/*
-	 * .motion-micro
-	 * -------------------------
-	 * Very small, quick transitions for micro-interactions.
-	 *
-	 * Ideal for:
-	 * - Icon / chevron rotations (eg. dropdown chevron pointing up when open).
-	 * - Tiny hover effects (opacity, color, background on pills or badges).
-	 * - Button hover states where only color/opacity changes.
-	 * - Focus rings appearing on inputs.
-	 * - Small border-color changes on validation.
-	 * - Slight scale on icons or small buttons (scale(0.97–1.03)).
-	 *
-	 * Use on:
-	 * - The chevron SVG on dropdown triggers when you toggle `rotate-180`.
-	 * - Small elements that should feel snappy and responsive with almost no lag.
+	 * Step utilities: CSS fallbacks for the step springs (U5). Pick the step
+	 * from the motion spec's "Which UI uses which step" table.
+	 * snap: press, hover, colour, focus ring, chevron, checkbox tick, icon swap.
+	 * quick: tooltip, label swap, chips, scroll-edge fade.
+	 * smooth: menus, popovers, lists, command palette, field messages, size.
+	 * gentle: dialogs, sheets, drawers, backdrops, carousel slides.
+	 * slow: time-based reveals, loading screen, image crossfade, hero entrance.
 	 */
-	.motion-micro,
-	.motion-feedback {
-		transition-duration: var(--motion-feedback-duration);
-		transition-timing-function: var(--motion-feedback-ease);
+	.motion-snap {
+		transition-duration: var(--motion-snap-duration);
+		transition-timing-function: var(--motion-snap-ease);
 	}
 
-	/*
-	 * .motion-interactive
-	 * -------------------------
-	 * For interactive elements where the user explicitly clicks or taps.
-	 *
-	 * Ideal for:
-	 * - Dropdown triggers (the pill/button that opens a menu).
-	 * - Buttons that slightly change background, scale, or shadow on hover/active.
-	 * - Toggle switches and checkboxes changing state.
-	 * - Tabs highlighting / underline sliding between active tabs.
-	 * - Chips / filters being selected or deselected.
-	 *
-	 * Specific examples:
-	 * - DateRangeInput pill: background + border subtle change on hover/active.
-	 * - Cards that slightly lift with a shadow when hovered.
-	 * - A button that grows in width when loading text appears ("Save" -> "Saving…").
-	 */
-	.motion-interactive,
-	.motion-interaction {
-		transition-duration: var(--motion-interaction-duration);
-		transition-timing-function: var(--motion-interaction-ease);
+	.motion-quick {
+		transition-duration: var(--motion-quick-duration);
+		transition-timing-function: var(--motion-quick-ease);
 	}
 
-	/*
-	 * .motion-component
-	 * -------------------------
-	 * For component-level transitions where the shape/size/layout of a component changes.
-	 *
-	 * Ideal for:
-	 * - Dropdown menus appearing/disappearing (opacity, translateY) if not using Framer.
-	 * - Panels expanding/collapsing in an accordion.
-	 * - Cards changing layout slightly (eg. showing extra text or controls).
-	 * - Form sections sliding in when a toggle reveals more fields.
-	 * - Width/height changes where the component grows/shrinks a bit.
-	 *
-	 * Specific examples:
-	 * - A filter sidebar opening from the side (width change).
-	 * - A details row expanding inside a table to show extra information.
-	 * - A "more options" panel inside a card that fades and slides down into view.
-	 */
-	.motion-component,
-	.motion-disclosure {
-		transition-duration: var(--motion-disclosure-duration);
-		transition-timing-function: var(--motion-disclosure-ease);
+	.motion-smooth {
+		transition-duration: var(--motion-smooth-duration);
+		transition-timing-function: var(--motion-smooth-ease);
 	}
 
-	/*
-	 * .motion-macro
-	 * -------------------------
-	 * For large, page-level or layout-level transitions that should feel slower and smoother.
-	 *
-	 * Ideal for:
-	 * - Entire sidebars opening/closing.
-	 * - Overlay panels / drawers sliding in from edges.
-	 * - Modals fading in combined with a backdrop.
-	 * - Big layout shifts (eg. dashboard content area resizing when nav collapses).
-	 * - Page sections expanding to show advanced filters, analytics, or details.
-	 *
-	 * Specific examples:
-	 * - A full-height filter drawer on mobile that slides up.
-	 * - The main content shifting right when a left sidebar expands.
-	 * - A hero section height expanding when a "show more" description is opened.
-	 */
-	.motion-macro,
-	.motion-overlay {
-		transition-duration: var(--motion-overlay-duration);
-		transition-timing-function: var(--motion-overlay-ease);
+	.motion-gentle {
+		transition-duration: var(--motion-gentle-duration);
+		transition-timing-function: var(--motion-gentle-ease);
 	}
 
-	/*
-	 * .motion-grand
-	 * -------------------------
-	 * For slow, deliberate reveal or scene-level transitions that should feel cinematic.
-	 *
-	 * Ideal for:
-	 * - Hero or intro sequences.
-	 * - Layered reveal choreography across multiple sections.
-	 * - Large decorative transforms that should settle with more weight than macro UI motion.
-	 */
-	.motion-grand,
-	.motion-reveal {
-		transition-duration: var(--motion-reveal-duration);
-		transition-timing-function: var(--motion-reveal-ease);
-	}
-
-	/*
-	 * .motion-decorative
-	 * -------------------------
-	 * For non-interactive, decorative animations that loop or pulse.
-	 *
-	 * Ideal for:
-	 * - Icon accent animations (bell, subtle pulses).
-	 * - Background glows or ambient motion.
-	 *
-	 * Use on:
-	 * - Elements with a keyframe animation where you want consistent timing.
-	 */
-	.motion-decorative,
-	.motion-ambient {
-		animation-duration: var(--motion-ambient-duration);
-		animation-timing-function: var(--motion-ambient-ease);
-		transition-duration: var(--motion-ambient-duration);
-		transition-timing-function: var(--motion-ambient-ease);
-	}
-
-	.motion-scroll {
-		transition-duration: var(--motion-scroll-duration);
-		transition-timing-function: var(--motion-scroll-ease);
+	.motion-slow {
+		animation-duration: var(--motion-slow-duration);
+		animation-timing-function: var(--motion-slow-ease);
+		transition-duration: var(--motion-slow-duration);
+		transition-timing-function: var(--motion-slow-ease);
 	}
 
 	.dropdown-panel-enter {
 		transform-origin: top right;
-		animation: dropdown-panel-enter var(--motion-disclosure-duration)
-			var(--motion-disclosure-ease) both;
+		animation: dropdown-panel-enter var(--motion-smooth-duration)
+			var(--motion-smooth-ease) both;
 	}
 }
 
@@ -620,13 +510,25 @@
 }
 
 @layer base {
+	/* Scrollbar theme tokens (S13). They resolve against each theme scope's
+	   foreground, and the track stays transparent so it sits on any surface. */
+	:root,
+	.dark {
+		--scrollbar-thumb: color-mix(in oklch, var(--foreground), transparent 80%);
+		--scrollbar-thumb-hover: color-mix(
+			in oklch,
+			var(--foreground),
+			transparent 70%
+		);
+		--scrollbar-track: transparent;
+	}
+
 	* {
 		margin: 0;
 		padding: 0;
 		box-sizing: border-box;
 		scrollbar-width: thin;
-		scrollbar-color: color-mix(in oklch, var(--foreground), transparent 80%)
-			var(--background);
+		scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 		@apply border-border outline-ring/50;
 	}
 
@@ -662,13 +564,12 @@
 	}
 
 	html[data-motion-override="off"] {
-		--motion-feedback-duration: 1ms;
-		--motion-interaction-duration: 1ms;
-		--motion-disclosure-duration: 1ms;
-		--motion-overlay-duration: 1ms;
-		--motion-reveal-duration: 1ms;
-		--motion-ambient-duration: 1ms;
-		--motion-scroll-duration: 1ms;
+		--motion-snap-duration: 1ms;
+		--motion-quick-duration: 1ms;
+		--motion-smooth-duration: 1ms;
+		--motion-gentle-duration: 1ms;
+		--motion-slow-duration: 1ms;
+		--motion-ring-duration: 1ms;
 		scroll-behavior: auto;
 	}
 
@@ -689,21 +590,23 @@
 	}
 
 	::-webkit-scrollbar-track {
-		background: var(--background);
+		background: var(--scrollbar-track);
 	}
 
 	::-webkit-scrollbar-thumb {
-		background: color-mix(in oklch, var(--foreground), transparent 82%);
+		background: var(--scrollbar-thumb);
+		background-clip: padding-box;
 		border-radius: 999px;
-		border: 2px solid var(--background);
+		border: 2px solid transparent;
 	}
 
 	::-webkit-scrollbar-thumb:hover {
-		background: color-mix(in oklch, var(--foreground), transparent 72%);
+		background: var(--scrollbar-thumb-hover);
+		background-clip: padding-box;
 	}
 
 	::-webkit-scrollbar-corner {
-		background: var(--background);
+		background: var(--scrollbar-track);
 	}
 
 	input:-webkit-autofill,

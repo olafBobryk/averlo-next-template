@@ -219,7 +219,11 @@ export function ToolCallView({
 						<ToolArguments input={request.toolCall.value.arguments} />
 					)}
 				{error && (
-					<p role="status" className="text-danger text-sm">
+					<p
+						role="status"
+						// biome-ignore lint/plugin/noAdHocDangerTone: debt
+						className="text-danger text-sm"
+					>
 						{error}
 					</p>
 				)}
@@ -230,6 +234,7 @@ export function ToolCallView({
 						</div>
 						<section
 							ref={viewport}
+							// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 							className="overflow-y-auto"
 							style={{ maxHeight: `${lines * 1.25}rem` }}
 							aria-label="Tool output"

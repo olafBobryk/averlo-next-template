@@ -53,7 +53,7 @@ export function ToolCallGroup({
 							<Icon
 								name="caret-right"
 								size="sm"
-								className={`motion-micro transition-transform ${open ? "rotate-90" : ""}`}
+								className={`motion-snap transition-transform ${open ? "rotate-90" : ""}`}
 							/>
 						</Button>
 						<Divider decorative />

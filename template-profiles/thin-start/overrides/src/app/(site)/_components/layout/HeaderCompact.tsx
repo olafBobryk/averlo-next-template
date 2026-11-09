@@ -8,7 +8,7 @@ import { instantTransition } from "@/components/ui/foundations/motionTiming";
 import { spring } from "@/components/ui/foundations/spring";
 import { Button } from "@/components/ui/primitives/Button";
 import { Panel } from "@/components/ui/primitives/surfaces";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
+import { useAnimated } from "@/hooks/useMotionAllowed";
 import {
 	getHeaderSearchGroups,
 	HeaderMenuGroup,
@@ -18,6 +18,7 @@ import {
 } from "./HeaderMenuContent";
 import type { SiteLayoutDocument } from "./siteLayout";
 import { getSiteLinkHref } from "./siteLayout";
+import { useMenuPanelSequence } from "./useMenuPanelSequence";
 
 const COMPACT_OPEN_TOP_PADDING = 16;
 const COMPACT_OPEN_BAR_HEIGHT = 48;
@@ -59,20 +60,31 @@ export default function HeaderCompact({
 		noResultsText: "No matching pages",
 	};
 	const searchSourceGroups = layout.searchGroups ?? menuGroups;
-	const showHeaderSurface = isScrolled || isMenuOpen;
-	const isCondensed = isScrolled && !isMenuOpen;
+	const motionAllowed = useAnimated();
+	const menu = useMenuPanelSequence(isMenuOpen, motionAllowed);
+	// The header is the menu panel: it keeps its open state until it closes.
+	const showHeaderSurface = isScrolled || menu.extended;
+	const isCondensed = isScrolled && !menu.extended;
 	const isSearchActive = searchQuery.trim().length > 0;
 	const searchGroups = getHeaderSearchGroups(searchQuery, searchSourceGroups);
 	const activeMenuGroups = isSearchActive ? searchGroups : menuGroups;
-	const motionAllowed = useMotionAllowed(true);
 	const headerTransition: Transition = motionAllowed
-		? spring.macro
+		? spring.gentle
 		: instantTransition;
 	const heightTransition: Transition = motionAllowed
-		? spring.component
+		? spring.smooth
+		: instantTransition;
+	// Menu open/close moves the header height on `gentle`; the content fades
+	// on `quick` (as presence does).
+	const menuPanelTransition: Transition = motionAllowed
+		? spring.gentle
+		: instantTransition;
+	const menuFadeTransition: Transition = motionAllowed
+		? spring.quick
 		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
-	const headerHeight = isMenuOpen
+	// spec exception E-001
+	const headerHeight = menu.extended
 		? "100vh"
 		: isCondensed
 			? COMPACT_CONDENSED_HEADER_HEIGHT
@@ -108,7 +120,17 @@ export default function HeaderCompact({
 				height: headerHeight,
 				...entranceState,
 			}}
-			transition={heightTransition}
+			transition={{
+				...heightTransition,
+				height: menu.mounted ? menuPanelTransition : heightTransition,
+			}}
+			onUpdate={(latest) =>
+				menu.onPanelUpdate(
+					Number.parseFloat(String(latest.height)),
+					window.innerHeight,
+				)
+			}
+			onAnimationComplete={menu.onPanelComplete}
 			className={clsx(
 				"fixed inset-x-0 top-0 z-50 h-[76px] px-section-x",
 				className,
@@ -172,17 +194,23 @@ export default function HeaderCompact({
 						{mobile.menuLabel}
 					</Button>
 				</motion.div>
-				<div
-					data-open={isMenuOpen}
-					className="grid min-h-0 transition-[grid-template-rows,opacity] motion-component data-[open=false]:grid-rows-[0fr] data-[open=false]:opacity-0 data-[open=true]:grid-rows-[1fr] data-[open=true]:opacity-100"
-					style={{
-						height: isMenuOpen
-							? `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`
-							: undefined,
-					}}
-				>
-					<div className="overflow-hidden">
+				{menu.mounted ? (
+					<motion.div
+						data-open={isMenuOpen}
+						aria-hidden={!isMenuOpen || undefined}
+						inert={!isMenuOpen || undefined}
+						className="min-h-0 overflow-hidden"
+						style={{
+							height: `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`,
+						}}
+						initial={motionAllowed ? { opacity: 0 } : false}
+						animate={{ opacity: menu.visible ? 1 : 0 }}
+						transition={menuFadeTransition}
+						onUpdate={menu.onContentUpdate}
+						onAnimationComplete={menu.onContentComplete}
+					>
 						<div
+							// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 							className="overflow-auto"
 							style={{
 								maxHeight: `calc(100vh - ${COMPACT_OPEN_SCROLL_AREA_OFFSET}px)`,
@@ -223,8 +251,8 @@ export default function HeaderCompact({
 								</div>
 							</div>
 						</div>
-					</div>
-				</div>
+					</motion.div>
+				) : null}
 			</motion.div>
 		</motion.header>
 	);

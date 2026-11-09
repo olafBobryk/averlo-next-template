@@ -93,6 +93,7 @@ export function SummaryOverlay({
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
+						// biome-ignore lint/plugin/noMotionLiterals: debt
 						transition={{ duration: reduced ? 0 : 0.18 }}
 						className="fixed right-3 top-14 z-40 w-[min(440px,calc(100vw-24px))]"
 						style={anchor}
@@ -105,6 +106,7 @@ export function SummaryOverlay({
 								role="dialog"
 								aria-label={label}
 								id="workspace-summary"
+								// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 								className="max-h-[calc(100dvh-80px)] overflow-y-auto p-4 outline-none"
 							>
 								<div className="mb-4 flex items-center justify-between gap-3">
@@ -143,7 +145,7 @@ export function summaryColumnStyle(
 			? "translateX(clamp(-234px, calc((768px - 100%) / 2), 0px))"
 			: "translateX(0px)",
 		transition: animated
-			? "transform var(--motion-interaction-duration, 200ms) var(--motion-interaction-ease, ease)"
+			? "transform var(--motion-gentle-duration) var(--motion-gentle-ease)"
 			: "none",
 	};
 }

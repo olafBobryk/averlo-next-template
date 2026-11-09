@@ -1,0 +1,14 @@
+// Native text controls are owned by ui/input/** and ui/primitives/**.
+// Hidden inputs carry form state, not UI, and are allowed everywhere.
+language js
+
+or {
+	JsxSelfClosingElement(name=$name, attributes=$attributes),
+	JsxOpeningElement(name=$name, attributes=$attributes)
+} where {
+	$name <: r"(?:input|textarea)",
+	not $attributes <: contains JsxAttribute(name=`type`, initializer=$type) where {
+		$type <: contains r"[\"']hidden[\"']"
+	},
+	register_diagnostic(span=$name, message="Raw form control: compose the owning component from ui/input (TextInput, TextAreaInput, choice inputs, FileInput) instead of a native <input>/<textarea>.")
+}

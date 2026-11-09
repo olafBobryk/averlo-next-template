@@ -14,6 +14,7 @@ function CatalogPreview1() {
 				fullWidth
 				size="sm"
 			>
+				{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 				<input
 					aria-label="Small amount"
 					className={inputVariants({
@@ -24,12 +25,14 @@ function CatalogPreview1() {
 				/>
 			</InputFrame>
 			<InputFrame fullWidth size="md">
+				{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 				<input
 					aria-label="Medium input"
 					className={inputVariants({ size: "md" })}
 				/>
 			</InputFrame>
 			<InputFrame fullWidth size="lg">
+				{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 				<input
 					aria-label="Large input"
 					className={inputVariants({ size: "lg" })}

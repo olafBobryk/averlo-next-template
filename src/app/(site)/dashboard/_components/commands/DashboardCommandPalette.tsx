@@ -2,8 +2,8 @@
 
 import { motion, useIsPresent } from "motion/react";
 import * as React from "react";
-import { useMotionTransition } from "@/components/ui/foundations/MotionProvider";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
 import {
 	ModalDescription,
@@ -55,7 +55,7 @@ export function DashboardCommandPalette({
 	const present = useIsPresent();
 	const allowed = useMotionAllowed(true);
 	const off = useMotionDisableOverride();
-	const transition = useMotionTransition("disclosure");
+	const transition = spring.smooth;
 	const animate = anchored && allowed && !off;
 	React.useEffect(() => {
 		if (activeCommandId)
@@ -95,6 +95,7 @@ export function DashboardCommandPalette({
 							<Icon className="!size-4 text-muted-foreground" name="search" />
 						}
 					>
+						{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 						<input
 							aria-activedescendant={
 								activeCommandId
@@ -144,6 +145,7 @@ export function DashboardCommandPalette({
 						<Divider decorative />
 					</div>
 					<div
+						// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 						className="min-h-0 overflow-y-auto overscroll-contain p-2"
 						style={{
 							maxHeight: anchored

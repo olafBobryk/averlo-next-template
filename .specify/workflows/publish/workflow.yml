@@ -1,0 +1,46 @@
+schema_version: "1.0"
+workflow:
+  id: "publish"
+  name: "Publish an Averlo project"
+  version: "1.1.0"
+  author: "Averlo"
+  description: "Publish a verified local project to private GitLab and Vercel production, with confirmed targets and collision checks"
+
+# Run from the template checkout (the preflight is create-averlo's read-only `publish preflight`):
+#   specify workflow run publish -i project=/abs/path/to/project
+# Every external write sits behind a gate; never pass a verdict input for them.
+requires:
+  speckit_version: ">=1.2.5"
+
+inputs:
+  project:
+    type: string
+    required: true
+    prompt: "Absolute path of the initialized project"
+
+steps:
+  - id: preflight
+    type: shell
+    run: "node packages/create-averlo/bin/create-averlo.mjs publish preflight --project '{{ inputs.project }}'"
+
+  - id: confirm-targets
+    type: gate
+    message: "Show Olaf all six targets from the preflight (GitLab host+namespace, private visibility, repository name, Vercel team, Vercel project, production target) and the collision checks (README step 2). Approve only on his explicit confirmation."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: gitlab
+    type: gate
+    message: "Create the private GitLab project, add the remote, push main and verify it (README step 4). Approve when verified."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: confirm-production
+    type: gate
+    message: "Link Vercel, connect Git and deploy production (README step 5) only after Olaf confirms again."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: recheck
+    type: shell
+    run: "node packages/create-averlo/bin/create-averlo.mjs publish preflight --project '{{ inputs.project }}' || true"

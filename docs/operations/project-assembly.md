@@ -4,16 +4,34 @@
 
 The canonical template owns positive assembly. Generated projects are independent
 outputs; their selected surfaces and content mode determine installed features.
-The maintained [assembly contract](../../openspec/specs/template/assembly/project-assembly/spec.md)
+The maintained [assembly contract](../../specs/template/assembly/spec.md)
 and [assembly policy](../../template-assembly/AGENTS.md) own that boundary.
+
+## Profiles
+
+| Profile          | Included surfaces                                    | Content choices           | Default         |
+| ---------------- | ---------------------------------------------------- | ------------------------- | --------------- |
+| `full`           | Marketing, auth, dashboard, and developer tools.     | `static`, `payload-ready` | `payload-ready` |
+| `app-only`       | Auth, dashboard, and developer tools; no marketing.  | `static`                  | `static`        |
+| `marketing-only` | Marketing and developer tools; no auth or dashboard. | `static`, `payload-ready` | `payload-ready` |
+| `thin-start`     | Minimal marketing specialist surface.                | `static`, `payload-ready` | `payload-ready` |
+
+Generated projects are one-way starting points, not alternate states of the
+template checkout. `create-averlo` and `npm run create:project` install
+dependencies and create a local `main` repository with one commit and no
+remote; `--no-install` generates only the project and lockfile. The canonical
+template's `/repository-footprint` page (a commit-history snapshot of the
+authored repository size) is template-only and never reaches a generated
+project.
 
 ## Run assembly verification
 
 1. Run `npm run verify:profiles` and `npm run verify:create-averlo` from the
    canonical template. The profile matrix checks supported profile/content pairs,
-   explicit ownership, omissions, overrides, independent app-contract copies, and
-   app-reference/link closure. Every output excludes template contracts and history;
-   its generated stock configuration belongs to the product and permits configured
+   explicit ownership, omissions, overrides, independent copies of the selected
+   `specs/platform/` folders and `.specify/`, and spec-reference/link closure.
+   Every output excludes `specs/template/`, the template-only workflows and any
+   product spec; its copies belong to the product and permit configured
    persistence/delivery when installed examples are deliberately replaced.
 2. To inspect an output, run `npm run create:project -- --profile <profile>
    --content <mode> --output <new-directory>`. Profiles are `full`, `app-only`,

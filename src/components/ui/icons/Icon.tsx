@@ -61,13 +61,13 @@ type IconProps = {
 
 const animatedIconClassMap: Record<string, string> = {
 	close:
-		"group-hover:scale-105 group-active:scale-100 transition-transform motion-interactive",
-	plus: "group-hover:rotate-[180deg] transition-[transform] motion-interactive",
+		"group-hover:scale-105 group-active:scale-100 transition-transform motion-snap",
+	plus: "group-hover:rotate-[180deg] transition-[transform] motion-snap",
 	"arrow-right":
-		"group-hover:translate-x-[2px] transition-transform motion-interactive",
+		"group-hover:translate-x-[2px] transition-transform motion-snap",
 	spinner: "animate-spin-smooth",
 	warning: "animate-pulse",
-	bell: "icon-bell-animate transition-transform motion-interactive",
+	bell: "icon-bell-animate transition-transform motion-snap",
 };
 
 type IconSkeletonProps = {
@@ -103,6 +103,7 @@ const IconRoot = ({
 				<span
 					className={[
 						iconSizeStyles({ size }),
+						// biome-ignore lint/plugin/noAdHocDangerTone: debt
 						"inline-flex items-center justify-center rounded-[4px] border border-dashed border-danger/50 text-[9px] leading-none text-danger-text/80",
 						frame === "none" ? className : undefined,
 					]

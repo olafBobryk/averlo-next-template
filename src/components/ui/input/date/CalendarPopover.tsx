@@ -452,7 +452,7 @@ export function CalendarPopover({
 										aria-label={formatDisplayDate(dateValue)}
 										aria-selected={selectedSingle || inRange}
 										className={clsx(
-											"relative z-10 inline-flex size-9 items-center justify-center rounded-full text-sm outline-none transition-colors motion-micro",
+											"relative z-10 inline-flex size-9 items-center justify-center rounded-full text-sm outline-none transition-colors motion-snap",
 											selectedSingle || selectedEndpoint
 												? "bg-primary text-primary-foreground"
 												: "hover:bg-muted",

@@ -3,11 +3,13 @@
 import clsx from "clsx";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "../Button";
 import Divider from "../Divider";
 import {
 	dropdownCompactOptionClassName,
 	dropdownListClassName,
+	dropdownListEdge,
 	dropdownListWrapperClassName,
 	getDropdownDividerClassName,
 	getDropdownOptionClassName,
@@ -338,7 +340,8 @@ function DropdownControlMenu({
 				</Button>
 			)}
 			renderMenu={({ close }) => (
-				<div
+				<ScrollArea
+					edge={dropdownListEdge}
 					id={id}
 					role="dialog"
 					aria-label={ariaLabel}
@@ -408,7 +411,7 @@ function DropdownControlMenu({
 							);
 						})}
 					</div>
-				</div>
+				</ScrollArea>
 			)}
 		/>
 	);

@@ -13,10 +13,7 @@ function SourcePreview() {
 	const [active, setActive] = useState(false);
 	return (
 		<div className="grid max-w-3xl gap-5 p-6 sm:grid-cols-2">
-			<MotionSource.Root
-				asChild
-				strategy={{ type: "hover", timing: "component" }}
-			>
+			<MotionSource.Root asChild strategy={{ type: "hover", timing: "smooth" }}>
 				<Link
 					className={`rounded-lg border border-subtle p-5 text-xl ${focusRing.visibleDefault}`}
 					href="/motion-source"
@@ -56,7 +53,11 @@ export const catalogContract = defineCatalogOwnerContract({
 	chooseInstead: [
 		"Use Scroll.Lag for velocity response and indexed owners such as AutoCycle or ImageSwitcher for discrete transitions.",
 	],
-	compounds: ["MotionSource.Root", "MotionSource.Sequence"],
+	compounds: [
+		"MotionSource.Root",
+		"MotionSource.Sequence",
+		"MotionSource.Item",
+	],
 	exclusions: [
 		"Public MotionValue access, effect styling, indexed state, and scroll velocity.",
 		"Arbitrary owner selectors; owner hover resolves only the nearest data-motion-owner ancestor.",
@@ -77,6 +78,22 @@ export const catalogContract = defineCatalogOwnerContract({
 		{
 			label: "Replayable viewport exit reset and re-entry playback",
 			storyId: "ui-motion-motion-source--reveal-viewport-reentry",
+		},
+		{
+			label: "Scroll-scrubbed reveal follows and reverses with scroll",
+			storyId: "ui-motion-motion-source--scroll-reveal-scrub",
+		},
+		{
+			label: "At-load catch-up stops at live scroll progress",
+			storyId: "ui-motion-motion-source--scroll-reveal-catch-up",
+		},
+		{
+			label: "Scroll Sequence staggers eased item sub-ranges",
+			storyId: "ui-motion-motion-source--scroll-sequence-stagger",
+		},
+		{
+			label: "Tight 0.06s stagger keeps eased item sub-ranges",
+			storyId: "ui-motion-motion-source--scroll-sequence-tight-stagger",
 		},
 		{
 			label: "Staged footer-heading handoff composition",

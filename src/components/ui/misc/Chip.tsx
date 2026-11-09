@@ -218,7 +218,7 @@ function chipClassName(
 		disabled
 			? "cursor-not-allowed opacity-50"
 			: isInteractive && [
-					"cursor-pointer transition-colors motion-interactive",
+					"cursor-pointer transition-colors motion-quick",
 					customColor === "muted"
 						? "hover:bg-[var(--chip-background-hover)] active:bg-[var(--chip-background-active)]"
 						: customColor

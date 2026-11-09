@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { motion } from "motion/react";
 import * as React from "react";
-import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { Chip, type ChipTone } from "@/components/ui/misc/Chip";
 import { InspectableImage } from "@/components/ui/misc/InspectableImage";
 import { Skeleton } from "@/components/ui/misc/Skeleton";
@@ -164,7 +164,7 @@ function FilePreviewRoot({
 			initial={{ opacity: 0, y: 6, scale: 0.98 }}
 			animate={{ opacity: 1, y: 0, scale: 1 }}
 			exit={{ opacity: 0, y: -6, scale: 0.98 }}
-			transition={resolveMotionTransition("interaction")}
+			transition={spring.smooth}
 			style={{ height: previewHeight, width: (previewHeight * 16) / 9 }}
 			className={["relative min-w-0 aspect-video shrink-0", className].join(
 				" ",

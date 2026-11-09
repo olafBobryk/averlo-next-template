@@ -12,10 +12,7 @@ function SourcePreview() {
 	const [active, setActive] = useState(false);
 	return (
 		<div className="grid max-w-3xl gap-5 p-6 sm:grid-cols-2">
-			<MotionSource.Root
-				asChild
-				strategy={{ type: "hover", timing: "component" }}
-			>
+			<MotionSource.Root asChild strategy={{ type: "hover", timing: "smooth" }}>
 				<Link
 					className={`rounded-lg border border-subtle p-5 text-xl ${focusRing.visibleDefault}`}
 					href="/motion-source"

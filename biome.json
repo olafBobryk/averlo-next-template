@@ -15,7 +15,8 @@
 			"!.codex",
 			"!test-results",
 			"!dist",
-			"!build"
+			"!build",
+			"!biome/test/fixtures"
 		]
 	},
 	"formatter": {
@@ -38,6 +39,68 @@
 			"react": "recommended"
 		}
 	},
+	"plugins": [
+		{
+			"path": "./biome/plugins/noMotionLiterals.grit",
+			"includes": [
+				"**/src/**/*.ts",
+				"**/src/**/*.tsx",
+				"!**/src/components/ui/foundations/**",
+				"!**/src/components/ui/motion/runtime/**",
+				"!**/src/config/**",
+				"!**/*.stories.tsx",
+				"!**/*.catalog.tsx",
+				"!**/*.test.ts",
+				"!**/*.test.tsx"
+			]
+		},
+		{
+			"path": "./biome/plugins/noRawFormControls.grit",
+			"includes": [
+				"**/src/**/*.tsx",
+				"!**/src/components/ui/input/**",
+				"!**/src/components/ui/primitives/**",
+				"!**/*.stories.tsx",
+				"!**/*.catalog.tsx",
+				"!**/*.test.ts",
+				"!**/*.test.tsx"
+			]
+		},
+		{
+			"path": "./biome/plugins/noAdHocDangerTone.grit",
+			"includes": [
+				"**/src/**/*.ts",
+				"**/src/**/*.tsx",
+				"!**/src/components/ui/input/**",
+				"!**/src/components/ui/foundations/**",
+				"!**/src/components/ui/primitives/Field.tsx",
+				"!**/src/components/ui/primitives/InlineError.tsx",
+				"!**/src/components/ui/primitives/StatusMessage*.tsx",
+				"!**/src/components/ui/primitives/accent.ts",
+				"!**/src/components/ui/primitives/surfaces/**",
+				"!**/src/components/ui/overlays/toast/**",
+				"!**/src/components/ui/misc/state/**",
+				"!**/src/components/ui/misc/Chip.tsx",
+				"!**/*.stories.tsx",
+				"!**/*.catalog.tsx",
+				"!**/*.test.ts",
+				"!**/*.test.tsx"
+			]
+		},
+		{
+			"path": "./biome/plugins/noAdHocScrollHeight.grit",
+			"includes": [
+				"**/src/**/*.ts",
+				"**/src/**/*.tsx",
+				"!**/src/components/ui/misc/ScrollArea.tsx",
+				"!**/src/components/ui/motion/presence/**",
+				"!**/*.stories.tsx",
+				"!**/*.catalog.tsx",
+				"!**/*.test.ts",
+				"!**/*.test.tsx"
+			]
+		}
+	],
 	"assist": {
 		"actions": {
 			"source": {

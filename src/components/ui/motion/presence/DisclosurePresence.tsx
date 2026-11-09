@@ -8,6 +8,7 @@ import {
 } from "motion/react";
 import {
 	type ReactNode,
+	useCallback,
 	useLayoutEffect,
 	useMemo,
 	useRef,
@@ -15,11 +16,26 @@ import {
 } from "react";
 import { spring } from "@/components/ui/foundations/spring";
 
+/**
+ * - `masked` (default): continuous opaque content behind a 16px soft edge.
+ * - `sequenced`: a visible glyph is never clipped and never overlaps what
+ *   follows. Opening, the size grows first and the content fades in once the
+ *   box fits it; closing, the content fades out first and then the size
+ *   closes. Content is clipped only while fully transparent.
+ */
+export type PresenceMode = "masked" | "sequenced";
+
+/** Sequenced closing: the size starts closing once the content is this faint. */
+const FADED_OPACITY = 0.05;
+/** Sub-pixel tolerance for "the box fits the content". */
+const FIT_TOLERANCE_PX = 0.5;
+
 /** Shared measured reveal for controlled presence and Accordion. */
 export function DisclosurePresence({
 	open,
 	children,
 	animate: shouldAnimate,
+	mode = "masked",
 	axis = "y",
 	gapBefore = "0px",
 	gapAfter = "0px",
@@ -32,6 +48,7 @@ export function DisclosurePresence({
 	open: boolean;
 	children: ReactNode;
 	animate: boolean;
+	mode?: PresenceMode;
 	axis?: "x" | "y";
 	gapBefore?: string;
 	gapAfter?: string;
@@ -58,7 +75,7 @@ export function DisclosurePresence({
 	const transition = useMemo<Transition>(
 		() =>
 			durationMs === undefined
-				? spring.disclosure
+				? spring.smooth
 				: {
 						type: "spring",
 						duration: Math.max(0, durationMs) / 1000,
@@ -70,19 +87,79 @@ export function DisclosurePresence({
 	const before = axis === "x" ? "marginInlineStart" : "marginTop";
 	const after = axis === "x" ? "marginInlineEnd" : "marginBottom";
 	const mounted = open || (shouldAnimate && retained);
+	const masked = mode === "masked";
+	const sequenced = mode === "sequenced";
 	const overflowVisible = open && (!shouldAnimate || settled);
+	// Springs drive every property; the fade uses the quick spring.
+	const fade = spring.quick;
+	const sizeTransition: Transition = shouldAnimate
+		? transition
+		: { duration: 0 };
+	// Sequenced opening shows the content only once the box fits it.
+	const [fits, setFits] = useState(open);
+	const fitsRef = useRef(fits);
+	fitsRef.current = fits;
+	// Content that outgrows a settled box hides at once, then fades back in.
+	const hideInstantly = useRef(false);
+	const contentTransition: Transition =
+		!shouldAnimate || hideInstantly.current ? { duration: 0 } : fade;
+	// Sequenced closing holds the open size until the content has faded out.
+	const [faded, setFaded] = useState(!open);
+	const fadedRef = useRef(false);
+	fadedRef.current = faded;
+	const holdSize = sequenced && !open && shouldAnimate && retained && !faded;
+	// Sequenced content that outgrows its box hides before the next paint and
+	// fades back in once the box fits it again.
+	const hideOutgrown = useCallback(() => {
+		if (!fitsRef.current) return;
+		hideInstantly.current = true;
+		fitsRef.current = false;
+		if (contentRef.current) contentRef.current.style.opacity = "0";
+		setFits(false);
+	}, []);
+	useLayoutEffect(() => {
+		if (!sequenced || !open || !shouldAnimate) return;
+		const target = measuredSize.current;
+		const content = contentRef.current;
+		if (target === undefined || !content) return;
+		if (content.getBoundingClientRect()[dimension] > target + FIT_TOLERANCE_PX)
+			hideOutgrown();
+	});
+	const markFits = useCallback(() => {
+		if (fitsRef.current || !openRef.current) return;
+		fitsRef.current = true;
+		hideInstantly.current = false;
+		setFits(true);
+	}, []);
+	// Content mounted by an opening transition starts transparent; content
+	// present on first render does not animate in.
+	const firstRender = useRef(true);
+	const contentInitial =
+		masked || !shouldAnimate || firstRender.current ? false : { opacity: 0 };
 
 	useLayoutEffect(() => {
-		if (open) setRetained(true);
+		if (open) {
+			setRetained(true);
+			setFaded(false);
+		}
 		if (!shouldAnimate) {
 			setRetained(open);
 			setSettled(open);
+			setFits(open);
 			maskAlpha.set(open ? 1 : 0);
 			return;
+		}
+		// Content present on first render is already in place.
+		if (!firstRender.current || !open) {
+			fitsRef.current = false;
+			setFits(false);
 		}
 		setSettled(false);
 		maskAlpha.set(0);
 	}, [open, shouldAnimate, maskAlpha]);
+	useLayoutEffect(() => {
+		firstRender.current = false;
+	}, []);
 
 	useLayoutEffect(() => {
 		if (!open || !shouldAnimate) return;
@@ -95,16 +172,35 @@ export function DisclosurePresence({
 				Math.abs(measuredSize.current - nextSize) < 0.5
 			)
 				return;
+			const outgrown =
+				measuredSize.current !== undefined && nextSize > measuredSize.current;
 			measuredSize.current = nextSize;
+			if (sequenced && outgrown) hideOutgrown();
 			setSettled(false);
 			maskAlpha.set(0);
 			setSize(nextSize);
 		};
 		measure();
+		// A box already at its size (a reversed close) fits without moving.
+		const current = panelRef.current?.getBoundingClientRect()[dimension] ?? 0;
+		if (
+			sequenced &&
+			measuredSize.current !== undefined &&
+			current >= measuredSize.current - FIT_TOLERANCE_PX
+		)
+			markFits();
 		const observer = new ResizeObserver(measure);
 		observer.observe(content);
 		return () => observer.disconnect();
-	}, [open, shouldAnimate, dimension, maskAlpha]);
+	}, [
+		open,
+		shouldAnimate,
+		dimension,
+		maskAlpha,
+		sequenced,
+		markFits,
+		hideOutgrown,
+	]);
 
 	return (
 		<motion.div
@@ -118,15 +214,20 @@ export function DisclosurePresence({
 			inert={!open || undefined}
 			initial={false}
 			animate={{
-				[dimension]: open ? (shouldAnimate ? (size ?? "auto") : "auto") : 0,
-				[before]: open ? gapBefore : 0,
-				[after]: open ? gapAfter : 0,
+				[dimension]:
+					open || holdSize ? (shouldAnimate ? (size ?? "auto") : "auto") : 0,
+				[before]: open || holdSize ? gapBefore : 0,
+				[after]: open || holdSize ? gapAfter : 0,
 			}}
-			transition={shouldAnimate ? transition : { duration: 0 }}
+			transition={sizeTransition}
 			onUpdate={(latest) => {
 				const target = measuredSize.current;
 				const current = Number(latest[dimension]);
 				if (!openRef.current || !target || !Number.isFinite(current)) return;
+				if (sequenced) {
+					if (current >= target - FIT_TOLERANCE_PX) markFits();
+					return;
+				}
 				// Follow the same dimension progress, delayed until the final 2%.
 				// No second animation or wait for the spring's settling tail.
 				const progress = Math.min(1, current / target);
@@ -134,6 +235,8 @@ export function DisclosurePresence({
 			}}
 			onAnimationComplete={() => {
 				if (!openRef.current) {
+					// A held sequenced size has not started closing yet.
+					if (sequenced && shouldAnimate && !fadedRef.current) return;
 					setRetained(false);
 					setSettled(false);
 					return;
@@ -144,6 +247,7 @@ export function DisclosurePresence({
 						(panelRef.current?.getBoundingClientRect()[dimension] ?? 0) - size,
 					) < 1
 				) {
+					markFits();
 					setSettled(true);
 				}
 			}}
@@ -151,20 +255,47 @@ export function DisclosurePresence({
 				minWidth: 0,
 				...(axis === "x" ? { flexShrink: 0 } : {}),
 				overflow: overflowVisible ? "visible" : "hidden",
-				maskImage: !shouldAnimate || overflowVisible ? "none" : maskImage,
+				maskImage:
+					!masked || !shouldAnimate || overflowVisible ? "none" : maskImage,
 			}}
 		>
 			{mounted ? (
-				<div
+				<motion.div
 					ref={contentRef}
 					className={contentClassName}
+					initial={contentInitial}
+					animate={
+						masked
+							? undefined
+							: // Without motion there is no box to wait for.
+								{ opacity: open && (fits || !shouldAnimate) ? 1 : 0 }
+					}
+					transition={contentTransition}
+					onUpdate={
+						sequenced
+							? (latest) => {
+									if (
+										!openRef.current &&
+										Number(latest.opacity) <= FADED_OPACITY
+									)
+										setFaded(true);
+								}
+							: undefined
+					}
+					onAnimationComplete={
+						sequenced
+							? () => {
+									if (!openRef.current) setFaded(true);
+								}
+							: undefined
+					}
 					style={{
 						display: "flow-root",
 						...(axis === "x" ? { width: "max-content" } : {}),
 					}}
 				>
 					{children}
-				</div>
+				</motion.div>
 			) : null}
 		</motion.div>
 	);

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -15,8 +15,8 @@ type InteractionGateProps = {
 	title?: string;
 };
 
-const overlayTransition = resolveMotionTransition("overlay");
-const panelTransition = resolveMotionTransition("disclosure");
+const overlayTransition = spring.gentle;
+const panelTransition = spring.gentle;
 
 export function InteractionGate({
 	active,

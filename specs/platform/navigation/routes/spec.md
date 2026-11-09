@@ -1,0 +1,44 @@
+# Specification: Route identity
+
+**Spec path**: `specs/platform/navigation/routes`
+
+**Status**: Accepted, living
+
+**Verified by**: [docs/testing/routes-and-metadata.md](../../../../docs/testing/routes-and-metadata.md)
+
+## Purpose
+
+Keep installed destinations, semantic ancestry and contextual navigation consistent across public, authentication and dashboard route families.
+
+## Requirements
+
+### FR-001: Canonical installed destinations
+
+Each installed product route MUST have one canonical family identity and supported destination contract. Dynamic destinations MUST use their typed parameters. Internal development routes MUST remain distinct from product route identity. Omitted profile features MUST NOT appear as installed destinations.
+
+**Scenario: Navigate to a dynamic detail**
+
+- **When** navigation targets an installed detail with a resource identifier
+- **Then** all participating surfaces derive the same supported destination from its canonical identity and parameters
+
+### FR-002: Semantic ancestry and consistent vocabulary
+
+Navigation, breadcrumbs, page headings, loading labels and contextual commands MUST use consistent destination vocabulary. Breadcrumbs MUST contain navigable semantic ancestors rather than filesystem parents or arbitrary cross-links, and the current destination MUST remain the page heading.
+
+**Scenario: Detail outside a filesystem-shaped hierarchy**
+
+- **When** a detail's semantic parent differs from its directory ancestry
+- **Then** its trail uses the navigable semantic parent and does not invent intermediate breadcrumb destinations
+
+### FR-003: Contextual actions follow the active surface
+
+Surface-specific actions MUST be available only while their owning surface is active and MUST unregister on departure. Command search MUST close before executing an action or navigation. Action visibility MUST NOT replace server authorization under `specs/platform/services/identity`.
+
+**Scenario: Leave a surface with contextual commands**
+
+- **When** the active surface unmounts and another route opens
+- **Then** its former contextual commands are no longer offered
+
+### FR-004: Identity verification covers its edges
+
+Route identity verification MUST cover dynamic-parameter escaping, exact and pattern lookup, and absent-profile boundaries.

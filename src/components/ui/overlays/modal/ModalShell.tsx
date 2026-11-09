@@ -5,8 +5,9 @@ import clsx from "clsx";
 import { motion } from "motion/react";
 import * as React from "react";
 import { type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
-import { resolveMotionTransition } from "@/components/ui/foundations/motionTiming";
+import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import Portal from "@/components/ui/overlays/Portal";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/surfaces";
@@ -113,12 +114,13 @@ export function ModalContent({
 	className,
 	...props
 }: React.ComponentPropsWithoutRef<"div">) {
+	// The panel stays fixed; the body scrolls inside it and fades under the
+	// header and footer edges. The 1rem edge is the body's block padding.
 	return (
-		<Card.Content
-			className={clsx(
-				"min-h-0 overflow-y-auto overscroll-contain px-5 py-4",
-				className,
-			)}
+		<ScrollArea
+			as={Card.Content}
+			className={clsx("px-5", className)}
+			edge="1rem"
 			{...props}
 		/>
 	);
@@ -165,8 +167,8 @@ export function ModalDescription(
 	return <Card.Description {...props} />;
 }
 
-const overlayTransition = resolveMotionTransition("overlay");
-const panelTransition = resolveMotionTransition("disclosure");
+const overlayTransition = spring.gentle;
+const panelTransition = spring.gentle;
 
 const FOCUSABLE_SELECTOR = [
 	"a[href]",

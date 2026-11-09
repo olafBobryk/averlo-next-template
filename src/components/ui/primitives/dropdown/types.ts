@@ -47,6 +47,12 @@ export type DropdownProps = {
 	side?: "top" | "bottom" | "left" | "right";
 	offset?: number;
 	positionStrategy?: "fixed" | "absolute";
+	/**
+	 * `anchored` floats beside the trigger; `sheet` docks a full-width panel to
+	 * the bottom edge; `auto` (default) docks only when the anchored panel
+	 * cannot fit its minimum size in the available space.
+	 */
+	presentation?: DropdownPresentation;
 	disabled?: boolean;
 	open?: boolean;
 	openOnHover?: boolean;
@@ -58,6 +64,7 @@ export type DropdownProps = {
 
 export type DropdownSide = NonNullable<DropdownProps["side"]>;
 export type DropdownPositionStrategy = "absolute" | "fixed";
+export type DropdownPresentation = "anchored" | "sheet" | "auto";
 type DropdownAnchorRef = { current: Element | null };
 
 export type DropdownSurfaceProps = FloatProps<"div"> & {
@@ -68,6 +75,8 @@ export type DropdownSurfaceProps = FloatProps<"div"> & {
 	offset?: number;
 	portalTargetId?: string;
 	positionStrategy?: DropdownPositionStrategy;
+	/** Fixed panels only; see `DropdownProps.presentation`. */
+	presentation?: DropdownPresentation;
 	ref?: React.Ref<HTMLDivElement>;
 	side?: DropdownSide;
 	zIndex?: number;
@@ -119,6 +128,7 @@ export type DropdownCompoundProps = Pick<
 	| "pinOnClick"
 	| "portalTargetId"
 	| "positionStrategy"
+	| "presentation"
 	| "side"
 > & {
 	ariaLabel: string;

@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { IconSwap } from "@/components/ui/helpers/IconSwap";
+import { Icon } from "@/components/ui/icons/Icon";
 import { Button } from "@/components/ui/primitives/Button";
 import { InlineError } from "@/components/ui/primitives/InlineError";
 import { InputFrame } from "@/components/ui/primitives/InputFrame";
@@ -98,6 +100,7 @@ export function UserMessage({
 						className="h-auto"
 						contentClassName="w-full min-w-0"
 					>
+						{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 						<textarea
 							ref={textareaRef}
 							aria-label="Edit message"
@@ -166,7 +169,7 @@ export function UserMessage({
 					className="relative mt-2 flex h-7 items-center justify-end text-xs text-muted-foreground"
 				>
 					<div
-						className={`absolute right-4 flex items-center gap-3 motion-micro transition-opacity ${editing ? "" : "opacity-0 group-hover/turn:opacity-100 group-focus-within/turn:opacity-100"}`}
+						className={`absolute right-4 flex items-center gap-3 motion-snap transition-opacity ${editing ? "" : "opacity-0 group-hover/turn:opacity-100 group-focus-within/turn:opacity-100"}`}
 					>
 						{!editing && (
 							<time className="whitespace-nowrap" dateTime={message.createdAt}>
@@ -229,10 +232,22 @@ export function UserMessage({
 									title={copied ? "Copied" : "Copy message"}
 									variant="bare"
 									size="none"
-									iconSize={14}
 									className="min-h-7 py-1"
 									shape="round"
-									leadingIcon={copied ? "check" : "copy"}
+									leadingIcon={
+										// The 15px swap box keeps the row's 14px icon geometry.
+										<IconSwap
+											swapKey={copied ? "check" : "copy"}
+											size="sm"
+											className="-m-[0.5px]"
+										>
+											<Icon
+												name={copied ? "check" : "copy"}
+												animate
+												style={{ width: 14, height: 14 }}
+											/>
+										</IconSwap>
+									}
 									onClick={async () => {
 										try {
 											await navigator.clipboard.writeText(text);

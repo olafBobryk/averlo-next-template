@@ -19,6 +19,7 @@ function CatalogPreview1() {
 			messageId="project-name-message"
 		>
 			<InputFrame fullWidth tone="error">
+				{/* biome-ignore lint/plugin/noRawFormControls: debt */}
 				<input
 					id="project-name"
 					aria-describedby="project-name-description"

@@ -25,7 +25,7 @@ export type DashboardSidebarShellProps = {
 export function getDashboardSidebarOffsetClassNames(collapsed: boolean) {
 	return {
 		content: clsx(
-			"h-dvh min-w-0 bg-surface transition-[padding] motion-macro sm:pl-[64px]",
+			"h-dvh min-w-0 bg-surface transition-[padding] motion-gentle sm:pl-[64px]",
 			collapsed ? "lg:pl-[64px]" : "lg:pl-[240px]",
 		),
 	};
@@ -148,6 +148,7 @@ export function DashboardSidebarShell({
 				{identity}
 			</div>
 			<div
+				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
 				className="-mt-1 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3 pt-1"
 				data-dashboard-sidebar-body
 			>
@@ -166,7 +167,7 @@ export function DashboardSidebarShell({
 				background="panel"
 				border="none"
 				className={clsx(
-					"fixed inset-y-0 left-0 z-40 !hidden !w-[64px] transition-[width] motion-macro",
+					"fixed inset-y-0 left-0 z-40 !hidden !w-[64px] transition-[width] motion-gentle",
 					!mobileOpen && "sm:!flex",
 					collapsed ? "lg:!w-[64px]" : "lg:!w-[240px]",
 				)}

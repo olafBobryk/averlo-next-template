@@ -28,7 +28,10 @@ export type SkeletonProps = React.HTMLAttributes<HTMLDivElement> & {
 	as?: "div" | "span";
 	children?: React.ReactNode;
 	radius?: SkeletonRadius;
-	/** Shimmers by default; use static to opt out. Reduced motion disables shimmer. */
+	/**
+	 * Shimmers by default as one page-wide sweep; use static to opt out.
+	 * Reduced motion and `?motion=off` show the static fill.
+	 */
 	animation?: "static" | "shimmer";
 };
 
