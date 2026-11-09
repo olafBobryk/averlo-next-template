@@ -24,7 +24,7 @@ materializes independent projects through positive assembly.
   the public site; a generated project's profile decides which exist.
 - Provider-specific records and metadata resolve in server-side resolvers or
   adapters before data reaches the frontend contract.
-- `template-assembly/`, `template-profiles/`, `template-surfaces/`, `packages/`
+- `template/assembly/`, `template/profiles/`, `template/surfaces/`, `packages/`
   and `plugins/` are template-only and never ship to generated projects.
 - Building from a design source follows `.specify/workflows/compose/README.md`;
   mapping a whole design file follows `.specify/workflows/systemize/README.md`.

@@ -19,6 +19,8 @@ type InputFrameProps = React.HTMLAttributes<HTMLDivElement> & {
 	end?: React.ReactNode;
 	error?: boolean;
 	fullWidth?: boolean;
+	/** Solid fill over the surface behind (default variant only). */
+	opaque?: boolean;
 	start?: React.ReactNode;
 	tone?: "default" | "error" | "success";
 };
@@ -43,6 +45,7 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 			end,
 			error = false,
 			fullWidth = false,
+			opaque = false,
 			start,
 			tone = error ? "error" : "default",
 			...rest
@@ -70,6 +73,7 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 				aria-invalid={tone === "error" || undefined}
 				data-disabled={disabled || undefined}
 				data-slot="input-frame"
+				data-opaque={opaque && variant === "default" ? "" : undefined}
 				{...rest}
 			>
 				{start ? (

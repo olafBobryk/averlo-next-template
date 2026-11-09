@@ -119,6 +119,8 @@ export type InputFrameSize = NonNullable<
 >;
 
 export type InputFrameProps = {
+	/** Solid default fill over the surface behind (`library.css`). */
+	opaque?: boolean;
 	start?: React.ReactNode;
 	end?: React.ReactNode;
 	fullWidth?: boolean;
@@ -142,6 +144,7 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 			tone,
 			fullWidth,
 			disabled,
+			opaque,
 			...rest
 		},
 		ref,
@@ -167,6 +170,9 @@ const InputFrameRoot = React.forwardRef<HTMLDivElement, InputFrameProps>(
 				aria-invalid={tone === "error" || undefined}
 				data-disabled={disabled ? true : undefined}
 				data-slot="input-frame"
+				data-opaque={
+					opaque && (variant ?? "default") === "default" ? "" : undefined
+				}
 				{...rest}
 			>
 				{start ? (

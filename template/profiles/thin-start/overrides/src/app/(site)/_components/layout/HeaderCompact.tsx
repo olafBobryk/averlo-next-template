@@ -18,7 +18,7 @@ import {
 } from "./HeaderMenuContent";
 import type { SiteLayoutDocument } from "./siteLayout";
 import { getSiteLinkHref } from "./siteLayout";
-import { useMenuPanelSequence } from "./useMenuPanelSequence";
+import { useMenuPanelPresence } from "./useMenuPanelPresence";
 
 const COMPACT_OPEN_TOP_PADDING = 16;
 const COMPACT_OPEN_BAR_HEIGHT = 48;
@@ -61,7 +61,7 @@ export default function HeaderCompact({
 	};
 	const searchSourceGroups = layout.searchGroups ?? menuGroups;
 	const motionAllowed = useAnimated();
-	const menu = useMenuPanelSequence(isMenuOpen, motionAllowed);
+	const menu = useMenuPanelPresence(isMenuOpen, motionAllowed);
 	// The header is the menu panel: it keeps its open state until it closes.
 	const showHeaderSurface = isScrolled || menu.extended;
 	const isCondensed = isScrolled && !menu.extended;
@@ -74,13 +74,10 @@ export default function HeaderCompact({
 	const heightTransition: Transition = motionAllowed
 		? spring.smooth
 		: instantTransition;
-	// Menu open/close moves the header height on `gentle`; the content fades
-	// on `quick` (as presence does).
+	// Menu open/close moves the header height on `gentle`; the content fades with the
+	// header surface on the same step; resizing stays on `smooth`.
 	const menuPanelTransition: Transition = motionAllowed
 		? spring.gentle
-		: instantTransition;
-	const menuFadeTransition: Transition = motionAllowed
-		? spring.quick
 		: instantTransition;
 	const shouldAnimateEntrance = animateEntrance && motionAllowed;
 	// spec exception E-001
@@ -124,12 +121,6 @@ export default function HeaderCompact({
 				...heightTransition,
 				height: menu.mounted ? menuPanelTransition : heightTransition,
 			}}
-			onUpdate={(latest) =>
-				menu.onPanelUpdate(
-					Number.parseFloat(String(latest.height)),
-					window.innerHeight,
-				)
-			}
 			onAnimationComplete={menu.onPanelComplete}
 			className={clsx(
 				"fixed inset-x-0 top-0 z-50 h-[76px] px-section-x",
@@ -178,7 +169,8 @@ export default function HeaderCompact({
 					</motion.div>
 					<Button
 						variant="ghost"
-						className="min-h-10 gap-2 px-3"
+						size="icon-sm"
+						className="text-foreground"
 						leadingIcon={
 							<HeaderMenuIcon
 								name={isMenuOpen ? "close" : "menu"}
@@ -190,9 +182,7 @@ export default function HeaderCompact({
 						aria-label={
 							isMenuOpen ? mobile.closeAriaLabel : mobile.openAriaLabel
 						}
-					>
-						{mobile.menuLabel}
-					</Button>
+					/>
 				</motion.div>
 				{menu.mounted ? (
 					<motion.div
@@ -204,10 +194,9 @@ export default function HeaderCompact({
 							height: `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`,
 						}}
 						initial={motionAllowed ? { opacity: 0 } : false}
-						animate={{ opacity: menu.visible ? 1 : 0 }}
-						transition={menuFadeTransition}
-						onUpdate={menu.onContentUpdate}
-						onAnimationComplete={menu.onContentComplete}
+						// Fades with the header surface, on the same step.
+						animate={{ opacity: menu.extended ? 1 : 0 }}
+						transition={headerTransition}
 					>
 						<div
 							// biome-ignore lint/plugin/noAdHocScrollHeight: debt

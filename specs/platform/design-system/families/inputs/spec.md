@@ -28,7 +28,7 @@ Every form field is a `Field` around a `ui/input` owner, so labels, descriptions
 | Owner | Key props | Defaults |
 |---|---|---|
 | `Field` (`ui/primitives/Field`) | `label`, `description`, `message`, `tone: "default" \| "error" \| "success"`, `required`, `inputId`, `descriptionId`, `messageId`, `disableMessage`, `labelAction`; `Field.Skeleton` | `tone="default"`; an `error` message is announced |
-| `InputFrame` (`ui/primitives/InputFrame`) | `size: "xxs" \| "xs" \| "sm" \| "md" \| "lg"`, `variant: "default" \| "strong"`, `presentation`, `tone` | `size="sm"`, `variant="default"` (soft, shadowless in light mode) |
+| `InputFrame` (`ui/primitives/InputFrame`) | `size: "xxs" \| "xs" \| "sm" \| "md" \| "lg"`, `variant: "default" \| "strong"`, `opaque`, `presentation`, `tone` | `size="sm"`, `variant="default"` (soft, shadowless in light mode) |
 | `TextInput`, `EmailInput`, `PasswordInput`, `PhoneInput`, `TextAreaInput` (`ui/input/text`) | `label`, `description`, `value`/`defaultValue`, `onChange`, `error`, `validate`, `required`, `disabled`, `size`; `TextInput` adds `copy`; `TextAreaInput` adds `rows` and (this batch) `autoGrow` | `TextAreaInput rows={3}`, resizable |
 | Selection, choice, numeric, date, colour, file, editable inputs (`ui/input/*`) | per owner story | per owner story |
 | `SpamProtectionFields` | honeypot fields for exposed public forms | hidden from people and assistive tech |
@@ -50,13 +50,14 @@ Every form field is a `Field` around a `ui/input` owner, so labels, descriptions
 - **F13 MUST: choice marks never transform.** Selection and hover change radio and checkbox marks through colour and opacity only, so artwork does not drift through subpixel scaling.
 - **F14 MUST: editable fields keep their geometry.** Display and edit states do not shift (`InputFrame` stays mounted), and pending and error state stay inside the existing `Field` topology.
 - **F15 MUST: the editable file rail's add tile has a solid border.**
-- **F16 MUST: one input chrome.** `InputFrame` and `Dropdown` own compact input chrome and inset menu styling. Composers share the `InputFrame` fill and shadow of ordinary inputs and search; a presentation may change geometry, never fork the background. In light mode the default chrome is soft and shadowless, dark default chrome is unchanged, and `strong` gives a heavier frame.
+- **F16 MUST: one input chrome.** `InputFrame` and `Dropdown` own compact input chrome and inset menu styling. Composers share the `InputFrame` fill and shadow of ordinary inputs and search; a presentation may change geometry, never fork the background. In light mode the default chrome is soft and shadowless, dark default chrome is unchanged, and `strong` gives a heavier frame. `opaque` makes the default fill solid by mixing the same tint into the surface behind (`--ui-surface-color`, else the page background); it is for a frame over moving content, such as the header search over the hero.
 
 ## Proof
 
 | Rule | Story (Storybook title / export) | Status |
 |---|---|---|
 | F1, F2, F7 | `UI/Primitives/Field` `LabelDescriptionAndErrorRelationships`, `SuccessAndLabelAction` | exists; F7 adds a two-line error play test at 390 and 1440 (this batch) |
+| F16 (`opaque`) | `UI/Primitives/InputFrame` `Opaque` | exists |
 | F3 | `UI/Input/Text/PhoneInput` `PhoneContract` | exists |
 | F5 | `UI/Input/Text/EmailInput` `EmailContract`, `UI/Input/Text/TextInput` `FieldContract` | exists |
 | F8 | `UI/Input/Text/TextAreaInput` `TextareaContract` plus an `autoGrow` story | `autoGrow` story this batch |

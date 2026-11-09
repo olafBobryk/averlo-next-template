@@ -3,7 +3,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
-import thinStartProfile from "../template-profiles/thin-start/manifest.mjs";
+import thinStartProfile from "../template/profiles/thin-start/manifest.mjs";
 
 function parseArgs(argv) {
 	const options = {

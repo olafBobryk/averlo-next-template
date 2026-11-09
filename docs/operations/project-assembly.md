@@ -5,7 +5,7 @@
 The canonical template owns positive assembly. Generated projects are independent
 outputs; their selected surfaces and content mode determine installed features.
 The maintained [assembly contract](../../specs/template/assembly/spec.md)
-and [assembly policy](../../template-assembly/AGENTS.md) own that boundary.
+and [assembly policy](../../template/assembly/AGENTS.md) own that boundary.
 
 ## Profiles
 
@@ -50,7 +50,7 @@ project.
 5. When a changed source has a proven inventory/override edge, update that owner,
    reassemble, and repeat its focused check. Regenerate the positive thin inventory
    with `node scripts/generate-template-assembly-inventory.mjs <materialized-src>
-   template-assembly/thin-start-src-files.json` after reviewing the selected source
+   template/assembly/thin-start-src-files.json` after reviewing the selected source
    paths. Use source ownership paths before output route remapping, and preserve
    paths conditional on other supported content modes. Never copy generator-only rules or unrelated agent files into instances.
 

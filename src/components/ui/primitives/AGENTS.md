@@ -24,7 +24,7 @@ The lowest-level reusable UI components.
   or expose their raw pieces. Recursive Dropdown and Listbox branches render
   portal-backed sibling surfaces beside the parent row.
 - Button visual recipes are private shared implementation used by canonical and
-  thin-start renderers (`template-profiles/thin-start/overrides/`); overrides do
+  thin-start renderers (`template/profiles/thin-start/overrides/`); overrides do
   not fork their tokens or geometry.
 - Feedback presence composes the motion presence family (`../motion/presence/`).
 - Dropdown surfaces and Listbox import `../misc/ScrollArea` directly (it depends

@@ -1,4 +1,4 @@
-const overridesRoot = "template-profiles/app-only/overrides";
+const overridesRoot = "template/profiles/app-only/overrides";
 
 export const appOnlyProfile = {
 	schemaVersion: 2,

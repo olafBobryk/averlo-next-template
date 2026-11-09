@@ -51,31 +51,31 @@ const owners = [
 
 const thinOwners = [
 	[
-		"template-profiles/thin-start/overrides/src/components/ui/input/choice/ChoiceField.tsx",
+		"template/profiles/thin-start/overrides/src/components/ui/input/choice/ChoiceField.tsx",
 		"ChoiceField",
 	],
 	[
-		"template-profiles/thin-start/overrides/src/components/ui/input/choice/RadioInput.tsx",
+		"template/profiles/thin-start/overrides/src/components/ui/input/choice/RadioInput.tsx",
 		"RadioInput",
 	],
 	[
-		"template-profiles/thin-start/overrides/src/components/ui/input/choice/ToggleInput.tsx",
+		"template/profiles/thin-start/overrides/src/components/ui/input/choice/ToggleInput.tsx",
 		"ToggleInput",
 	],
 	[
-		"template-profiles/thin-start/overrides/src/components/ui/input/choice/MultiselectInput.tsx",
+		"template/profiles/thin-start/overrides/src/components/ui/input/choice/MultiselectInput.tsx",
 		"MultiselectInput",
 	],
 	[
-		"template-profiles/thin-start/overrides/src/components/ui/input/text/TextInput.tsx",
+		"template/profiles/thin-start/overrides/src/components/ui/input/text/TextInput.tsx",
 		"TextInput",
 	],
 	[
-		"template-profiles/thin-start/overrides/src/components/ui/input/selection/SelectInput.tsx",
+		"template/profiles/thin-start/overrides/src/components/ui/input/selection/SelectInput.tsx",
 		"SelectInput",
 	],
 	[
-		"template-profiles/thin-start/overrides/src/lib/marketing-content/sections/homeHero/HomeHeroSection.tsx",
+		"template/profiles/thin-start/overrides/src/lib/marketing-content/sections/homeHero/HomeHeroSection.tsx",
 		"HomeHeroSection",
 	],
 ] as const;
@@ -202,7 +202,7 @@ const markdownIndexSource = fs.readFileSync(
 	"utf8",
 );
 const thinMarkdownIndexPath =
-	"template-profiles/thin-start/overrides/src/components/composites/markdown/index.ts";
+	"template/profiles/thin-start/overrides/src/components/composites/markdown/index.ts";
 const thinMarkdownIndexSource = fs.readFileSync(
 	path.join(root, thinMarkdownIndexPath),
 	"utf8",
@@ -287,7 +287,7 @@ const forbiddenGraphTokens = [
 	"react-force-graph-3d",
 	"three-spritetext",
 ];
-const searchableFiles = ["src", "scripts", "template-profiles", "package.json"];
+const searchableFiles = ["src", "scripts", "template/profiles", "package.json"];
 for (const token of forbiddenGraphTokens) {
 	for (const relativePath of searchableFiles) {
 		const absolutePath = path.join(root, relativePath);

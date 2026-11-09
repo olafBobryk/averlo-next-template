@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { templateSurfaces } from "../template-surfaces/index.mjs";
+import { templateSurfaces } from "../surfaces/index.mjs";
 import { getCapabilitySurfaces } from "./capabilities/index.mjs";
 import {
 	assemblyCoreDependencies,

@@ -31,7 +31,7 @@ const fileInspect = readIfPresent(
 	"src/components/ui/input/files/FileInspectModal.tsx",
 );
 const thinShell = readIfPresent(
-	"template-profiles/thin-start/overrides/src/components/ui/overlays/modal/ModalShell.tsx",
+	"template/profiles/thin-start/overrides/src/components/ui/overlays/modal/ModalShell.tsx",
 );
 
 assert.doesNotMatch(

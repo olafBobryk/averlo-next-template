@@ -130,7 +130,7 @@ export const thinStartProfile = {
 			"vitest",
 		],
 		surfaces: ["marketing", "testing", "payload"],
-		sourceInventory: "template-assembly/thin-start-src-files.json",
+		sourceInventory: "template/assembly/thin-start-src-files.json",
 		verificationCommands: [
 			"npm run verify:static",
 			"npm run verify:marketing",
@@ -138,7 +138,7 @@ export const thinStartProfile = {
 			"npm run verify:smoke",
 		],
 	},
-	overridesRoot: "template-profiles/thin-start/overrides",
+	overridesRoot: "template/profiles/thin-start/overrides",
 	sharedFiles: [
 		"src/components/ui/primitives/InputFrame.tsx",
 		"src/components/ui/primitives/surfaces/AGENTS.md",
@@ -154,7 +154,7 @@ export const thinStartProfile = {
 		"src/lib/marketing-content/sections/homeHero/HomeHeroPreviewCollage.tsx",
 	],
 	overrides: overrideFiles.map((target) => ({
-		source: `template-profiles/thin-start/overrides/${target}`,
+		source: `template/profiles/thin-start/overrides/${target}`,
 		target,
 	})),
 	apiReview: {

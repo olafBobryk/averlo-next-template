@@ -16,9 +16,9 @@ const REPOSITORY_PATH_PREFIXES = [
 	"plugins/",
 	"scripts/",
 	"src/",
-	"template-assembly/",
-	"template-profiles/",
-	"template-surfaces/",
+	"template/assembly/",
+	"template/profiles/",
+	"template/surfaces/",
 ];
 const WALK_EXCLUDED_DIRECTORIES = new Set([
 	".git",

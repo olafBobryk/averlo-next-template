@@ -352,7 +352,7 @@ export function renderTsconfigFile(state) {
 		'\t\t".next/types/**/*.ts",',
 		'\t\t".next/dev/types/**/*.ts"',
 		"\t],",
-		'\t"exclude": ["node_modules", "template-profiles/**/overrides/**"]',
+		'\t"exclude": ["node_modules", "template/profiles/**/overrides/**"]',
 		"}",
 		"",
 	].join("\n");

@@ -449,6 +449,25 @@
 
 @layer utilities {
 	/*
+	 * Opaque input fill: the default tint mixed into the surface behind
+	 * (`--ui-surface-color`, else the page background), so content under a
+	 * transparent bar cannot show through. The dark fill is already solid.
+	 */
+	[data-slot="input-frame"][data-opaque] {
+		background-color: color-mix(
+			in srgb,
+			var(--foreground) 5%,
+			var(--ui-surface-color, var(--color-background))
+		);
+	}
+
+	.dark [data-slot="input-frame"][data-opaque] {
+		background-color: var(--input-frame-background);
+	}
+}
+
+@layer utilities {
+	/*
 	 * Step utilities: CSS fallbacks for the step springs (U5). Pick the step
 	 * from the motion spec's "Which UI uses which step" table.
 	 * snap: press, hover, colour, focus ring, chevron, checkbox tick, icon swap.

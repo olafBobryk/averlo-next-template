@@ -26,7 +26,7 @@
 	"src/app/(site)/_components/layout/SiteChrome.tsx",
 	"src/app/(site)/_components/layout/SiteShell.tsx",
 	"src/app/(site)/_components/layout/siteLayout.ts",
-	"src/app/(site)/_components/layout/useMenuPanelSequence.ts",
+	"src/app/(site)/_components/layout/useMenuPanelPresence.ts",
 	"src/app/(site)/_components/status/StatusContent.tsx",
 	"src/app/(site)/_components/status/StatusErrorState.tsx",
 	"src/app/(site)/layout.tsx",
