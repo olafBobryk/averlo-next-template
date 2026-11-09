@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "c70131bea13ed9f3ad5e858897c6c9ff1ab4c291",
+	"head": "0f837075d930404a8a818275c9423ac7461e7e4d",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -3035,6 +3035,51 @@
 			"lines": 151216,
 			"textBytes": 4758805,
 			"tokens": 1218820
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "8863b816ad983fc6bac51b9eeae2c6ffeb753d41",
+			"subject": "Group template folders under template/ and keep header menu links visible",
+			"files": 1345,
+			"lines": 151122,
+			"textBytes": 4755735,
+			"tokens": 1218034
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "d94126afc2a57aa50124480a9579584fe551d4a4",
+			"subject": "Fade the header menu divider as the menu closes",
+			"files": 1345,
+			"lines": 151138,
+			"textBytes": 4756433,
+			"tokens": 1218206
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "e0ef95ffe64b9206b66704d5b77b346b2ab3466f",
+			"subject": "Fade header menu content with the header surface; icon toggle on phones",
+			"files": 1345,
+			"lines": 151137,
+			"textBytes": 4756452,
+			"tokens": 1218193
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "27adef3632f7af42233d3b967244c04020c17da3",
+			"subject": "Add InputFrame opaque and use it for the header search",
+			"files": 1345,
+			"lines": 151196,
+			"textBytes": 4758637,
+			"tokens": 1218790
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "0f837075d930404a8a818275c9423ac7461e7e4d",
+			"subject": "Merge pull request #8 from olafBobryk/chore/group-template-folders",
+			"files": 1345,
+			"lines": 151196,
+			"textBytes": 4758637,
+			"tokens": 1218790
 		}
 	],
 	"version": 1
