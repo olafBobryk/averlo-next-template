@@ -18,6 +18,7 @@ export const assemblyGeneratedPaths = new Set([
 export const assemblyTemplateOnlyPaths = new Set([
 	"docs/operations/project-assembly.md",
 	"docs/development/workflow.md",
+	"docs/development/cms-editing-direction.md",
 	"docs/development/skeleton-generation-shimmer-20261010.md",
 	"docs/operations/chip-capitalization-backport.md",
 	"docs/operations/disclosure-alignment-backport.md",
