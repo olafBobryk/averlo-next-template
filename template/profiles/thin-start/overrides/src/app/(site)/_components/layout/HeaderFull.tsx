@@ -279,7 +279,7 @@ export default function HeaderFull({
 					>
 						<motion.div
 							ref={menuContentRef}
-							className="w-full border-t border-border"
+							className="relative w-full border-t border-transparent"
 							style={{
 								paddingTop: HEADER_MENU_TOP_PADDING,
 								paddingBottom: HEADER_MENU_BOTTOM_PADDING,
@@ -288,6 +288,14 @@ export default function HeaderFull({
 							animate={{ opacity: menu.visible ? 1 : 0 }}
 							transition={menuFadeTransition}
 						>
+							{/* Fades as the menu closes, so the clip need not reach it. */}
+							<motion.div
+								aria-hidden="true"
+								className="pointer-events-none absolute inset-x-0 -top-px border-t border-border"
+								initial={false}
+								animate={{ opacity: menu.extended ? 1 : 0 }}
+								transition={menuFadeTransition}
+							/>
 							<motion.div
 								className="relative overflow-hidden"
 								initial={false}
