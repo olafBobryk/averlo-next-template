@@ -51,6 +51,20 @@ monthly/yearly toggle, FAQ below."
    what changed, checks run, and what is not verified (for example "CI not yet
    green", "not checked in Safari").
 
+## Local servers
+
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Isolated, prewarmed preview on a random port and build directory; warms the home route before reporting ready. |
+| `npm run dev:local` | Stable local server on ports 3000–3010, only when one is actually needed. |
+| `npm run storybook:preview` | Start or reuse this checkout's single Storybook instance (start the Next preview first); records its URL in ignored `.codex/storybook-preview.json`. |
+| `npm run storybook:status` | Show the paired preview and Storybook URLs. Do not run raw `storybook dev` or assume a fixed port. |
+| `npm run storybook:stop` | Stop only a Storybook server the coordinator launched. |
+| `npm run measure:storybook-performance` | Capture a cold-cache catalogue baseline from the managed Storybook instance. |
+
+Scroll-sensitive changes are measured with the
+[scroll-performance workflow](../operations/scroll-performance.md).
+
 ## Next.js defaults
 
 Next.js 16 ships its docs in `node_modules/next/dist/docs/`; read the relevant

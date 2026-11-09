@@ -26,6 +26,11 @@ How to add any public page so it fits the shared shell, renders from source-neut
 - **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
   - A: Behaviour rules from `src/lib/marketing-content/AGENTS.md` (origin/main `3fd01907`) with no other spec home. It is FR-011, with its meaning kept; server document resolution and `layout` delegation were already FR-003, which now names `renderMarketingSections()`.
 
+### Session 2026-11-09 (compose skill retired)
+
+- **Q: How is a page built from a source design now?**
+  - A: Through the compose workflow (`.specify/workflows/compose/`), replacing the retired `$averlo:compose` skill. Its only page-level rule is FR-012: the page spec carries the piece-to-owner mapping. Composition rules stay in `specs/platform/surfaces/marketing/composition`.
+
 ## Requirements
 
 ### FR-001: One page spec per page, from the template
@@ -71,6 +76,10 @@ A Playwright characterisation test MUST cover each section rendering, each state
 ### FR-011: New composed pages join the route family
 
 A new source-backed multi-section page MUST belong to the installed marketing route family and its canonical surface registry. Existing utility and document exceptions keep their narrower owners and do not authorize new route-local composed pages.
+
+### FR-012: Source-backed pages carry their mapping
+
+A page built from a source design MUST record, in its page spec, the source frame, the mapping table of every piece to its owner and level (`specs/platform/design-system/usage` FR-021) and the parity threshold set at intake. Motion follows the usage map in `specs/platform/design-system/motion`; there is no separate animation pass.
 
 ## Success Criteria
 

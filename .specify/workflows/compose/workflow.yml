@@ -1,0 +1,87 @@
+schema_version: "1.0"
+workflow:
+  id: "compose"
+  name: "Compose a page from a design"
+  version: "1.0.0"
+  author: "Averlo"
+  description: "Map every source piece to a design-system owner and level, build with existing owners, get Olaf's first look and per-row approvals, then close the gap with measured parity passes"
+
+# Interactive agents follow README.md themselves (the checkpoints need Olaf in
+# the chat). Headless:
+#   specify workflow run compose -i source="<figma url or png>" -i spec_path=specs/product/marketing/pages/pricing -i route=/pricing
+requires:
+  speckit_version: ">=1.2.5"
+
+inputs:
+  source:
+    type: string
+    required: true
+    prompt: "Source frame: Figma URL with node, or a PNG path"
+  spec_path:
+    type: string
+    required: true
+    prompt: "Target page spec folder (e.g. specs/product/marketing/pages/pricing)"
+  route:
+    type: string
+    required: true
+    prompt: "Route the page renders at (e.g. /pricing)"
+  threshold:
+    type: string
+    default: "5"
+    prompt: "Parity threshold: max changed pixels per section, in percent (set once, at intake)"
+  width:
+    type: string
+    default: "1440"
+    prompt: "Fixed capture viewport width"
+
+steps:
+  - id: intake
+    type: gate
+    message: "Intake (README step 1): export each section of {{ inputs.source }} at 1x, supply fonts and assets, and write the mapping table (piece, Storybook owner, level 1-5, reason) into {{ inputs.spec_path }}/spec.md. Threshold {{ inputs.threshold }}% at {{ inputs.width }}px, ?motion=off; it never changes unless Olaf asks."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: build
+    type: gate
+    message: "Build {{ inputs.route }} with existing owners only (levels 1-2; level 3-5 rows use their closest level 1-2 owner for now). Header and shell unchanged."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: first-look
+    type: gate
+    message: "First look (README step 3): show Olaf source and build side by side per section, plus every level 3-5 row for per-row approval. Go or stop?"
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: additions
+    type: gate
+    message: "Apply each approved level 3-5 row through usage FR-022: owner in its folder, family-spec line, story with play test, npm run catalog:generate, listed in the PR."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: parity-loop
+    type: do-while
+    max_iterations: 5
+    condition: "{{ steps.parity-pass.output.choice == 'another-pass' }}"
+    steps:
+      - id: capture
+        type: shell
+        timeout: 300
+        run: "mkdir -p .codex/compose && npm run preview:capture -- --route '{{ inputs.route }}?motion=off' --review composition --width {{ inputs.width }} --output .codex/compose/build.png"
+
+      - id: parity-pass
+        type: gate
+        message: "Diff each section: node scripts/compose-diff.mjs --source <section.png> --build .codex/compose/build.png --top <top> --threshold {{ inputs.threshold }}. Fix the worst section within the approved mapping. Choose another-pass unless every section is <= {{ inputs.threshold }}% or two passes brought no improvement (5 passes at most). Reject cancels."
+        options: [another-pass, done, reject]
+        on_reject: abort
+
+  - id: checks
+    type: shell
+    timeout: 1800
+    run: "npm run verify:static"
+
+  - id: review
+    type: gate
+    message: "Review (README step 6): report each section's changed-pixel % (0% exact, otherwise measured), diff images, approved additions, checks and verified preview links. Open the PR through the main workflow."
+    options: [approve, reject]
+    on_reject: abort

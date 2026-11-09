@@ -24,6 +24,11 @@ Render public pages as ordered semantic content within a shared shell and retain
 - **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
   - A: Behaviour rules from `src/app/(site)/(marketing)/_components/AGENTS.md` and `src/lib/marketing-content/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-005 to FR-014, with their meaning kept. Ordered semantic content, the shared shell and layout data, distinct review boundaries and the fidelity/reuse split were already FR-001 to FR-004.
 
+### Session 2026-11-09 (compose skill retired)
+
+- **Q: Where do the still-valid rules of the retired `$averlo:compose` skill go?**
+  - A: Olaf: the old compose, animate and systemize skills "never worked" and forced too much. Only rules move here: native text and semantics (FR-015), supplied fonts and exact assets (FR-016) and source provenance (FR-017). FR-004, FR-007 and FR-014 now point at the compose workflow (`.specify/workflows/compose/`) and the design-system usage levels instead of the skills. The per-section procedure, Figma connector identity, Agent Space rules, focus packets and continuation rules were dropped.
+
 ## Requirements
 
 ### FR-001: Ordered semantic page content
@@ -55,7 +60,7 @@ Independently reviewed composition regions MUST retain stable semantic identitie
 
 ### FR-004: Source fidelity and later reuse are distinct decisions
 
-Source-backed composition MUST preserve approved hierarchy, assets, content boundaries and independent cases. Combining cases or changing shared owners for later reuse MUST require the applicable explicit systemization decision rather than being treated as a prerequisite for source fidelity.
+Source-backed composition MUST preserve approved hierarchy, assets, content boundaries and independent cases. Combining cases or changing shared owners for later reuse MUST require Olaf's sign-off on a level 3–5 row (`specs/platform/design-system/usage` FR-021) rather than being treated as a prerequisite for source fidelity.
 
 **Scenario: Similar independent source cases**
 
@@ -70,9 +75,9 @@ Header and footer behaviour MUST stay aligned across breakpoints. The marketing 
 
 Shell regions MUST NOT be hidden through route CSS, and a source footer MUST NOT be reproduced inside content blocks; shell media follows `specs/platform/content/media`. Keep stable header, content, footer and content-plus-footer composition frames. Review state and capture boundaries belong to `SiteShell`/Preview, never route CSS. Shell cases have no content-block or shared `Section` obligation.
 
-### FR-007: The approved header is fixed during Compose
+### FR-007: The approved header is fixed during compose
 
-During Compose the approved header is immutable and excluded from source parity, but it stays on the production page. Editing, retheming or replacing it needs separately scoped non-Compose work. Source frames and local identity assets MUST NOT authorize changes to nested shared design-system owners.
+During the compose workflow the approved header is immutable and excluded from source parity, but it stays on the production page. Editing, retheming or replacing it needs separately scoped work outside compose. Source frames and local identity assets MUST NOT authorize changes to nested shared design-system owners.
 
 ### FR-008: Installed internal routes stay plain links
 
@@ -100,4 +105,16 @@ A content renderer MUST NOT contain headers, footers, multiple source cases or t
 
 ### FR-014: Distinct cases stay distinct
 
-Distinct source and parity cases MUST stay distinct; a shared background or theme is no reason to merge them (FR-004). Decomposition and authority locks are owned by the Compose source-intake and Visual Parity focus-packet procedures.
+Distinct source and parity cases MUST stay distinct; a shared background or theme is no reason to merge them (FR-004). Each content case maps to one authoritative source section frame; when that frame or its bounds are ambiguous, the work pauses rather than substituting the page frame. The procedure is `.specify/workflows/compose/`.
+
+### FR-015: Built natively
+
+Source-backed sections MUST be built from real selectable text, semantic controls, responsive layout and exact copy. A source screenshot, section export or reconstructed frame is evidence only; rendering it as product UI is invalid whatever its pixel score (`specs/platform/content/media` FR-001).
+
+### FR-016: Supplied fonts and exact assets
+
+Fonts and constituent assets MUST be supplied (by the repository, the source file, a caller-supplied path or a configured shared library) before a section is built. A missing licensed font or asset is waited for, never silently substituted, borrowed from another project or rasterised. Each supplied font face loads under one evidenced CSS weight with font synthesis off. Vector logos and marks are exported as SVG with their geometry and `viewBox` kept, never redrawn or replaced with text.
+
+### FR-017: Source provenance
+
+An external design source MUST be recorded in `PRODUCT.md` under `## Product sources`: source, authority, focus and supplied material. Workflow progress and conversion status are never recorded there.

@@ -114,10 +114,9 @@ export const assemblyTemplateOnlyScripts = new Set([
 	"measure:storybook-performance",
 	"generate:design-system-agent-benchmark-report",
 	"verify:design-system-agent-benchmark",
-	"verify:storybook-backport",
+	"verify:backport-scanner",
 	"verify:profiles",
 	"verify:create-averlo",
-	"verify:composition-workflows",
 	"verify:visual-parity",
 ]);
 

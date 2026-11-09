@@ -9,13 +9,12 @@ The canonical procedure is the template's Spec Kit workflow
 `.specify/workflows/publish/` (`README.md` for the steps and confirmations,
 `workflow.yml` for the gates) in [averlo-next-template](https://github.com/olafBobryk/averlo-next-template/tree/main/.specify/workflows/publish).
 Read it from a local template checkout when one exists, otherwise from GitHub,
-and follow it exactly.
-
-Start with this skill's bundled preflight, which reads the owner-only
-`~/.config/averlo/publish-project.json` and prints only non-secret targets:
+and follow it exactly. It starts with the read-only preflight, which reads the
+owner-only `~/.config/averlo/publish-project.json` and prints only non-secret
+targets:
 
 ```sh
-node scripts/publish-project.mjs preflight --project <project-root>
+npx --yes create-averlo publish preflight --project <project-root>
 ```
 
 Every external write waits for Olaf's explicit confirmation of all six targets

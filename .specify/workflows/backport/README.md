@@ -20,9 +20,10 @@ pull template changes. Steps: [workflow.yml](workflow.yml).
    cites the source repo and SHA.
 4. **Port** on the integration branch through the main workflow (subagents own
    disjoint files). For approved Storybook candidates, the scanner finds them:
-   `node plugins/averlo/skills/storybook-backport/scripts/scan-story-backports.mjs scan --workspace <bounded-parent> --template .`
-   (see `plugins/averlo/skills/storybook-backport/SKILL.md` for the tag
-   lifecycle).
+   `node packages/create-averlo/bin/create-averlo.mjs backport scan --workspace <bounded-parent> --template .`
+   (see [story-metadata.md](story-metadata.md) for the tag lifecycle; a child
+   records an approved fingerprint with
+   `npx --yes create-averlo backport fingerprint --template . --story <file> --export <name>`).
 5. **Check.** `npm run verify:static`, the changed owners' suites,
    `npm run verify:profiles` if assembly is touched, Storybook for components.
 6. **PR.** One PR whose body records `Backport from <repo>@<sha>` and the

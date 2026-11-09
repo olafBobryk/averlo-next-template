@@ -22,7 +22,7 @@ specify workflow run verify -i suite=forms -i base_url='http://localhost:PORT?mo
 | `auth` | `npm run verify:auth` | Identity and membership |
 | `profiles` | `npm run verify:profiles` (template only) | Assembly, specs, `.specify/`, AGENTS.md |
 | `create-averlo` | `npm run verify:create-averlo` (template only) | The initializer |
-| `plugin-skills` | composition, storybook-backport, visual-parity and skill-reference tests (template only) | `plugins/**` |
+| `template-tools` | create-averlo backport scanner, visual-parity skill and skill-reference tests (template only) | `plugins/**`, `packages/create-averlo/lib/backport.mjs` |
 
 Suites that a profile did not install are absent in a generated project; the
 step then fails with a missing npm script, which is the honest result. Live

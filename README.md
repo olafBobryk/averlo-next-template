@@ -2,220 +2,44 @@
 
 ![Averlo Next Template banner](public/averlo-next-template-banner.png)
 
-Choose a route profile, materialize a clean project, and build its design system
-on a focused Next.js App Router foundation.
+A Next.js starter you hand to your coding agent: one command makes a clean,
+independent project, and the agent takes it from there.
 
-Averlo provides marketing, authentication, dashboard, and local developer
-surfaces without turning the generated project into a demo-heavy product. Its
-frontend stays source-agnostic: server-side resolvers turn fallback or Payload
-documents into lightweight page, layout, and section props.
-
-The canonical template also publishes `/repository-footprint`, a commit-history
-snapshot of its authored repository size. Generated projects do not include it.
-
-Behaviour lives in [Spec Kit](https://github.com/github/spec-kit) specs mapped by
-`specs/README.md`: reusable `specs/platform/` contracts, canonical-only
-`specs/template/` assembly and demo contracts, and `specs/product/`, which a
-generated project fills with its real business rules. The constitution
-(`.specify/memory/constitution.md`) and the workflows in `.specify/workflows/`
-(menu: [WORKFLOWS](WORKFLOWS.md)) define how work is specified, built, reviewed
-and released; [docs/development/workflow.md](docs/development/workflow.md) walks
-through one change end to end. Nearest `AGENTS.md` files hold structure only.
-
-## Instant Setup
-
-Template repository: [github.com/olafBobryk/averlo-next-template](https://github.com/olafBobryk/averlo-next-template)
-
-Create a clean project directly from a published profile initializer:
+## Quick start
 
 ```sh
-npx create-averlo my-project --profile thin-start --content static
-npx create-averlo verify my-project --profile thin-start --content static
+npx --yes create-averlo my-project --profile full
 ```
 
-The command installs dependencies by default and initializes a local `main`
-repository with one commit and no remote. Use `--no-install` to generate only
-the project and lockfile. Non-interactive callers must provide the project
-directory and `--profile`; interactive terminals prompt for missing choices.
+Prefer a smaller start? Swap `full` for `marketing-only`, `app-only` or
+`thin-start`.
 
-### Agent Bootstrap
+Then paste this to your coding agent (Codex, Claude Code or similar):
 
-Copy this prompt into Codex or another coding agent:
+> Open `my-project`. Read `AGENTS.md` and `PRODUCT.md`, help me fill in what
+> the product is, then start the preview and show me the site. Follow the
+> project's specs and workflows, and keep secrets out of chat and Git.
 
-**Create a project from `https://github.com/olafBobryk/averlo-next-template`.
-Read `PRODUCT.md`, `AGENTS.md`, and `README.md`; help me
-choose a route profile; materialize it into a new folder; and verify the result
-before project-specific work. Preserve the existing UI primitives, marketing
-layout contract, resolvers, and isolated agent dev workflow. Keep secrets,
-environment files, generated indexes, build output, and local service metadata
-out of Git.**
+## What you get
 
-Equivalent shell-first setup:
+- **A design system with Storybook.** Ready-made components, each with live
+  stories and tests, so pages are built from parts that already work.
+- **Specs your agent follows.** Behaviour is written down with
+  [Spec Kit](https://github.com/github/spec-kit), so changes start from a clear
+  rule instead of a guess.
+- **Step-by-step workflows.** Repeatable procedures for writing a spec,
+  building from a design, verifying, publishing and more.
+- **Motion and smooth scroll.** Built-in reveal, hover and scroll animation
+  with smooth page scrolling that respects reduced motion.
+- **A marketing site and an app dashboard.** Public pages plus sign-in and a
+  dashboard; pick the profile that includes the parts you need.
+- **Checks that catch mistakes.** Lint, type checks, unit and Storybook tests
+  and a production build run locally and in CI.
 
-```sh
-git clone https://github.com/olafBobryk/averlo-next-template.git averlo-template
-cd averlo-template
-npm install
-npm run create:project -- --profile <profile> --content <content> --output ../my-project
-```
+## Learn more
 
-Then work from the generated project:
-
-```sh
-cd ../my-project
-npm run dev
-```
-
-### Storybook
-
-Storybook uses the same checkout and source environment as the isolated Next
-preview, but it remains a separate Vite process. Start the Next preview first,
-then let the managed command reuse or start the checkout's sole Storybook
-instance:
-
-```sh
-npm run storybook:preview
-```
-
-The command prints the Storybook URL and records it in ignored
-`.codex/storybook-preview.json`. Use `npm run storybook:status` to rediscover
-it; do not run raw `storybook dev` or assume a fixed port.
-
-## Choose a Profile
-
-Profile selection is the main setup decision:
-
-| Profile          | Included surfaces                                    | Content choices           | Default         |
-| ---------------- | ---------------------------------------------------- | ------------------------- | --------------- |
-| `full`           | Marketing, auth, dashboard, and developer tools.     | `static`, `payload-ready` | `payload-ready` |
-| `app-only`       | Auth, dashboard, and developer tools; no marketing.  | `static`                  | `static`        |
-| `marketing-only` | Marketing and developer tools; no auth or dashboard. | `static`, `payload-ready` | `payload-ready` |
-| `thin-start`     | Minimal marketing specialist surface.                | `static`, `payload-ready` | `payload-ready` |
-
-Generated projects are one-way starting points rather than alternate states of
-this checkout. Positive assembly copies only selected, explicitly owned project
-code and omits template profiles, inventories, and creation machinery.
-
-## How It Works
-
-- **Route profiles** decide which production surfaces belong in the generated
-  project.
-- **Developer routes** under `/internal` are local-development tools, not public
-  product surfaces.
-- **Shared primitives** provide reusable UI, overlay, motion, focus, and branding
-  foundations.
-- **Marketing documents** describe site layout, pages, and named sections.
-- **Server resolvers** adapt fallback or Payload data into small render props.
-- **Section renderers** own presentation without importing Payload document
-  shapes.
-
-The content source is replaceable; the layout contract and section renderers
-remain stable.
-
-## Content Modes
-
-Marketing-capable profiles support three content states:
-
-- **Static:** render committed TypeScript fallback content without Payload.
-- **Payload-ready:** retain the guarded scaffold while admin and API routes stay
-  inactive.
-- **Payload-powered:** activate the real admin/API routes with Neon Postgres and
-  Vercel Blob.
-
-No generated profile is Payload-powered by default. Read
-[`docs/operations/payload-vercel-neon-blob.md`](docs/operations/payload-vercel-neon-blob.md)
-before activation.
-
-The marketing layout model and resolver boundary already exist. When using the
-optional `$cms-backfill` workflow, treat that model as an input to preserve and
-populate—not as a missing schema or permission to introduce a reorderable page
-builder.
-
-## Public Safety
-
-This repository is designed to remain safe as a public template. Do not commit
-secrets, tokens, deploy hooks, database URLs, Payload secrets, environment files,
-generated agent indexes, local Vercel metadata, build output, dependency folders,
-raw client files, or throwaway worktrees.
-
-Use ignored local files or platform environment stores for secrets. Keep
-source-specific CMS and deployment details behind server-side adapters so the
-frontend continues to render the same small contract.
-
-## Core Workflows
-
-### Development
-
-Use `npm run dev` for the isolated, prewarmed preview workflow. It selects a
-random port and an isolated build directory, then warms the home route before
-reporting the preview ready. Use `npm run dev:local` only when a stable local
-server is actually needed:
-
-```sh
-npm run dev
-```
-
-### Thin Start
-
-`thin-start` can also be reviewed as an isolated workspace before committing to
-that profile. Create it with the normal project command, then run
-`npm run review:thin-start-api -- --root <output> --strict` from the template.
-
-### Scroll Performance
-
-The repository includes real-page measurement and disposable autoresearch
-worktrees for scroll-sensitive changes. Use them only when a change is being
-measured or optimized against real page-scroll evidence; see
-[`docs/operations/scroll-performance.md`](docs/operations/scroll-performance.md).
-
-## Repository Map
-
-```text
-.
-|-- AGENTS.md               Agent entry point and repository structure
-|-- PRODUCT.md              Product purpose, audience, and boundaries
-|-- WORKFLOWS.md            Names-only menu of procedures
-|-- .specify/               Spec Kit constitution, templates, and workflows
-|-- specs/                  Living behaviour specs (platform, template, product)
-|-- docs/development/       Development workflow walkthrough and Next.js defaults
-|-- docs/testing/           Verification procedures per behaviour area
-|-- docs/benchmarks/        Template-assessment systems and historical evidence
-|-- docs/operations/        External-service and measurement runbooks
-|-- scripts/                Creation, development, and verification tooling
-|-- src/app/                Marketing, auth, dashboard, Payload, and API routes
-|-- src/components/         Shared UI and product components
-|-- src/lib/marketing-content/  Layout contract, fallback data, and resolvers
-`-- src/payload/            Guarded Payload-ready infrastructure
-```
-
-## Essential Scripts
-
-| Script                                  | Purpose                                                                              |
-| --------------------------------------- | ------------------------------------------------------------------------------------ |
-| `npm run create:project`                | Materialize a route profile into a project workspace.                                |
-| `npm run dev`                           | Start an isolated, prewarmed preview on a random port.                               |
-| `npm run dev:local`                     | Start the former local server flow on port 3000–3010.                                |
-| `npm run storybook:preview`             | Start or reuse the current checkout's Storybook server.                              |
-| `npm run storybook:status`              | Show the paired preview and Storybook URLs.                                          |
-| `npm run storybook:stop`                | Stop only a Storybook server launched by the coordinator.                            |
-| `npm run measure:storybook-performance` | Capture a cold-cache developer-catalog baseline from the managed Storybook instance. |
-| `npm run verify:static`                 | Run static policy, formatting, and type checks.                                      |
-| `npm run verify:marketing`              | Verify composed marketing section, shell, and media contracts.                       |
-| `npm run verify:profiles`               | Materialize and verify every profile.                                                |
-| `npm run verify:create-averlo`          | Pack and smoke-test the public initializer without publishing it.                    |
-| `npm run build`                         | Create the production Next.js build.                                                 |
-
-## Deployment
-
-The template targets Vercel. Static and Payload-ready projects deploy without
-live Payload routes. Payload-powered projects use Neon for `DATABASE_URL`,
-Vercel Blob for `BLOB_READ_WRITE_TOKEN`, and a project-specific
-`PAYLOAD_SECRET`; follow the Payload deployment guide before enabling them.
-
-## Further Reading
-
-- [Payload on Vercel with Neon and Blob](docs/operations/payload-vercel-neon-blob.md)
-- [Scroll-performance workflow](docs/operations/scroll-performance.md)
-- [Development workflow](docs/development/workflow.md)
-- [Averlo plugin skills](plugins/averlo/README.md)
-- [Benchmarks](docs/benchmarks/README.md)
+- [Specs map](specs/README.md)
+- [Workflows](WORKFLOWS.md)
+- [Docs](docs/)
+- [create-averlo](packages/create-averlo/README.md)
+- [Averlo agent plugin](plugins/averlo/README.md)

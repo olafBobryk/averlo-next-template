@@ -28,6 +28,15 @@ Make supported shared UI behavior discoverable and faithful across runtime consu
 - **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
   - A: Behaviour rules from `src/components/AGENTS.md`, `src/components/ui/AGENTS.md`, `src/components/ui/primitives/AGENTS.md`, `src/components/branding/AGENTS.md`, `src/components/ui/icons/AGENTS.md`, `src/components/composites/markdown/AGENTS.md` and `plugins/averlo/README.md` (icons) (origin/main `3fd01907`) with no other spec home. They are FR-009 to FR-020, with their meaning kept. Storybook-owned support, neutral teaching, distinct wrappers, stable public names and mounted native semantics were already FR-001 to FR-005. The assistant tool-call and approval rule from `src/components/domain/assistant/AGENTS.md` lives with the dashboard pages spec.
 
+### Session 2026-11-09 (compose and systemize skills retired)
+
+- **Q: How is each piece of a source design (Figma frame, screenshot) mapped to the design system?**
+  - A: Olaf approved five levels: 1 use as is, 2 use an existing variant, 3 alter the owner, 4 new variant, 5 new component. Every piece names its owner from the Storybook catalogue. Levels 1–2 need no sign-off; levels 3–5 need Olaf's sign-off per row (FR-021).
+- **Q: How does an approved level 3–5 row enter the design system?**
+  - A: Through one "add an item" rule: owner in the right folder, a family spec line, a Storybook story with a play test, the catalogue entry, and the item listed in the PR (FR-022).
+- **Q: Which rules came from the retired `$averlo:compose` and `$averlo:systemize-composition` skills?**
+  - A: Only the still-valid rules, with no procedure: one user action is one interactive root (FR-023), an altered owner changes its recipe in place so callers inherit it (FR-021 level 3), and human decisions are recorded only after Olaf decides (FR-024). Their procedures became `.specify/workflows/compose/` and `.specify/workflows/systemize/`. Confidence routing, action manifests and provenance ledgers were dropped as too heavy.
+
 ## Requirements
 
 ### FR-001: Discoverable supported owner contract
@@ -194,6 +203,48 @@ Markdown MUST NOT expose arbitrary `className`, JSX, HTML passthrough, data regi
 ### FR-020: Markdown editor controls
 
 Visible editor controls MUST use the application icon and interaction systems; package-owned toolbar, menu and link-dialog UI is not acceptable. Responsive toolbar collapse is measurement-driven.
+
+### FR-021: Map every source piece to a level
+
+When a surface is built from a source design, every visible piece MUST be mapped to one owner from the Storybook catalogue (FR-006 names the owners) and one level. The mapping is a table with one row per piece: piece, owner, level, reason.
+
+| Level | Name | When | Sign-off |
+|---|---|---|---|
+| 1 | Use as is | The source does not specify the piece's look (for example a checkbox drawn as a placeholder): use the template's own owner unchanged | None |
+| 2 | Use existing variant | The piece matches an existing owner and one of its variants | None |
+| 3 | Alter owner | One source version that differs from the owner's look: change the owner's recipe in place, so every caller already using the right semantic API inherits it. No parallel value is added to keep the old look | Olaf, per row |
+| 4 | New variant | Two or more distinct versions of the same part: add a variant to the existing owner (FR-010) | Olaf, per row |
+| 5 | New component | No owner covers the piece | Olaf, per row |
+
+A piece with no named owner is an unmapped row and blocks the build. A row that is not signed off stays at the closest level 1 or 2 match until Olaf decides.
+
+**Scenario: A source button differs from the template button**
+
+- **When** the only primary button in the source has a different radius and weight from `Button` `primary`
+- **Then** its row is level 3 on `ui/primitives/Button`, it waits for Olaf's sign-off, and once approved the `primary` recipe changes in the owner rather than in the caller
+
+### FR-022: Add an item to the design system
+
+Every approved level 3, 4 or 5 row MUST land as one complete item:
+
+1. The owner lives in the folder its pattern belongs to (nearest `AGENTS.md`; FR-006 for existing owners).
+2. Its family spec (or this spec's FR-006 table for a new owner) gains a line naming the item and the reason no existing owner fits (FR-008).
+3. A Storybook story teaches it, with a play test proving its behaviour.
+4. `npm run catalog:generate` adds or updates its catalogue entry.
+5. The PR lists the item with its level and reason.
+
+**Scenario: Approved new variant**
+
+- **When** Olaf approves a level 4 row for a second card style
+- **Then** `Card` gains the variant with a family-spec line, a story and play test, a regenerated catalogue, and a PR entry
+
+### FR-023: One action, one interactive root
+
+A user action MUST remain one interactive root and one tab stop even when it is drawn as several visual segments; a compound composes `Button`-owned segments without adding a second interactive root or a compound-named `Button` variant.
+
+### FR-024: Decisions are recorded after Olaf decides
+
+A design-system mapping decision MAY be recorded in `docs/design-system/decisions/<slug>.md` only after Olaf approves, rejects or defers it: the piece, the decision, the chosen owner and the reason. Proposed but undecided rows, confidence scores and status are never recorded. Code, stories and the catalogue stay the truth for implemented owners.
 
 ## Success Criteria
 

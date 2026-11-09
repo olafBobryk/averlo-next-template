@@ -28,7 +28,7 @@ inputs:
       - "auth"
       - "profiles"
       - "create-averlo"
-      - "plugin-skills"
+      - "template-tools"
     prompt: "Suite to run (see README for what each covers)"
   base_url:
     type: string
@@ -100,8 +100,8 @@ steps:
           type: shell
           timeout: 1800
           run: "npm run verify:create-averlo"
-      plugin-skills:
-        - id: plugin-skills
+      template-tools:
+        - id: template-tools
           type: shell
           timeout: 900
-          run: "npm run verify:composition-workflows && npm run verify:storybook-backport && npm run verify:visual-parity && npm run verify:skill-references"
+          run: "npm run verify:backport-scanner && npm run verify:visual-parity && npm run verify:skill-references"

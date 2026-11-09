@@ -48,6 +48,11 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
 - **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
   - A: Behaviour rules from `src/components/ui/motion/AGENTS.md`, `src/components/ui/foundations/AGENTS.md` and `src/components/ui/helpers/AGENTS.md` (origin/main `3fd01907`) with no other spec home. They are FR-005 to FR-012, with their meaning kept; responsive CSS-first layout, bounded hidden work, motion never gating agency and source/effect ownership were already FR-001 to FR-004 and R1. Shared focus tokens moved to `specs/platform/design-system/families/overlays` FR-014; the Lenis scroll transport to `specs/platform/design-system/scroll` S14.
 
+### Session 2026-11-09 (animate skill retired)
+
+- **Q: What replaces the retired `$averlo:animate` skill?**
+  - A: Nothing separate. Olaf: the skills "never worked" and forced too much. A composed surface takes its motion from this spec's "Which UI uses which step" usage map while it is built. The still-valid animate rules are FR-014 (settled motion equals the motion-off render) and FR-015 (reuse an approved composition before adding choreography). Motion theses, endpoint-parity packets and backport-candidate tagging were dropped.
+
 ## Requirements
 
 Rule IDs (U0, H1, …) are stable and are cited by tests and lint rules. Each rule names its one owner.
@@ -139,6 +144,14 @@ A scroll reveal on screen when it activates MUST catch up from hidden to its liv
 - **Then** the intro ends on the new live progress, never above it
 
 Verified by the `ScrollRevealScrub` (items follow their eased slice), `ScrollRevealCatchUp` (the intro lands on the scroll-scrub value), `ScrollRevealCatchUpRetarget`, `ScrollSequenceStagger`, `ScrollSequenceTightStagger` (0.06 s sub-ranges) and `ScrollRevealMotionOff` MotionSource stories, in both drivers where the driver owns the behaviour, and by the `getMotionStepEase` unit test in `runtime/timing.test.ts`.
+
+### FR-014: Settled motion equals the motion-off render
+
+Motion MUST NOT change a surface's resting state: the settled motion-on render, the reduced-motion render and the `?motion=off` render of a surface are the same. A composed surface is compared with its source at `?motion=off`.
+
+### FR-015: Reuse approved choreography first
+
+A surface's motion MUST reuse an existing Storybook composition whose `parameters.motionComposition` is `status: "approved"` when its static hierarchy, roles and order match, and otherwise the smallest set of existing `MotionSource`/`MotionEffect` owners. New coordinated choreography is a new item under `specs/platform/design-system/usage` FR-022; no local scheduler, observer, reset system or timing family is added (FR-006).
 
 ### U: Universal
 

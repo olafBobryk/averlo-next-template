@@ -33,7 +33,7 @@ selectors rather than generated classes or visible copy.
 
 ```markdown
 Phase: frame | verify
-Workflow owner: compose | systemize-composition | animate | direct-review
+Workflow owner: compose | systemize | direct-review
 Focus: section | page | shell | site | component
 Target: <route, selector, or Storybook story>
 Target identity: <repository revision or dirty identity plus capture SHA-256>

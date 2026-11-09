@@ -26,6 +26,11 @@ How to add any dashboard page: route shape, registry entry, server ownership, co
 - **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
   - A: Behaviour rules from `src/app/(site)/dashboard/AGENTS.md`, `src/app/(site)/dashboard/_components/entities/AGENTS.md`, `src/components/domain/assistant/AGENTS.md` and `plugins/averlo/README.md` (assistant) (origin/main `3fd01907`) with no other spec home. They are FR-013 to FR-021, with their meaning kept; the assistant rules are FR-016 to FR-021 here until an assistant spec exists. Product neutrality, surface composition, table headers and responsive columns, pagination and deletion were already FR-006 to FR-011.
 
+### Session 2026-11-09 (compose skill retired)
+
+- **Q: Do the composition rules apply to dashboard pages built from a source design?**
+  - A: Yes, through the compose workflow (`.specify/workflows/compose/`). FR-022 carries the rules that apply here; the shell stays fixed the way the marketing header does.
+
 ## Requirements
 
 ### FR-001: One page spec per page
@@ -113,6 +118,10 @@ Context search and execution-time resolution MUST belong to the actor-scoped ada
 ### FR-021: Runs, queues and remembered permissions
 
 Queue operations and remembered tool permissions MUST affect subsequent runs. There is one active submission, cancellation is confirmed, servers claim approvals and deduplicate execution. Grants never override authorization or the current tool mode, and duplicating history never revives approvals. Reference permissions last across chats and reloads until the reference server resets. Queues are conversation-scoped browser-session state, never durable.
+
+### FR-022: Source-backed dashboard pages
+
+A dashboard page built from a source design MUST map every piece to its owner and level (`specs/platform/design-system/usage` FR-021) in its page spec, be built natively (real text and semantic controls, never a rendered source capture; supplied fonts and exact assets, never substitutes), and leave the dashboard shell (sidebar, toolbar, commands) unchanged: shell pixels are excluded from parity and a shell change needs its own scoped work.
 
 ## Success Criteria
 

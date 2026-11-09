@@ -90,7 +90,8 @@ duplication, implicit router, capability index or routing skill.
   fifty. Record what was left out and why.
 - **Follow the workflows.** The main thread follows `.specify/workflows/main/`;
   spec work follows `.specify/workflows/write-spec/`. Other procedures
-  (create-project, publish, backport, verify) live beside them.
+  (create-project, publish, backport, compose, systemize, contact-delivery,
+  verify) live beside them.
 - **Discovery order.** Root and nearest `AGENTS.md`, then the colocated
   Storybook contract and story, then callable Storybook docs if already
   available (never install a service, guess an owner ID or infer props from
@@ -98,9 +99,9 @@ duplication, implicit router, capability index or routing skill.
   then the minimum implementation source. Source exports and repository search
   route discovery; they do not establish public support.
 - **Optional skills never block.** Plugin skills are optional for ordinary
-  implementation and review. Source-backed composition does not call Figma or
-  edit product code until `$averlo:compose` is loaded; systemization and motion
-  work begin only through `$averlo:systemize-composition` and `$averlo:animate`.
+  implementation and review. Building from a design source follows the compose
+  workflow and mapping a whole design file follows the systemize workflow;
+  motion comes from the motion spec during the build, with no separate pass.
 - **Operational gates.** Implementation and verification never authorize
   provisioning, credentials, recipients, deployment, intentional sends or
   production resource changes; each is a separate operational gate, and a
@@ -126,4 +127,9 @@ through the write-spec workflow, bump the version, and record the date.
 `src/config/AGENTS.md` folded into I, III, VII, the new IX and the Agent
 principles.
 
-**Version**: 1.1.0 | **Ratified**: 2026-11-08 | **Last Amended**: 2026-11-08
+1.2.0 (2026-11-09, compose and systemize workflows): the retired
+`$averlo:compose`, `$averlo:systemize-composition` and `$averlo:animate` skills
+are replaced by the compose and systemize workflows; their still-valid rules
+moved into the design-system usage, motion and surface specs.
+
+**Version**: 1.2.0 | **Ratified**: 2026-11-08 | **Last Amended**: 2026-11-09

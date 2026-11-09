@@ -1,0 +1,83 @@
+schema_version: "1.0"
+workflow:
+  id: "contact-delivery"
+  name: "Set up Averlo contact delivery"
+  version: "1.0.0"
+  author: "Averlo"
+  description: "Build, provision, test and ship an Averlo-managed Resend contact form: explicit recipients, Production-only credentials, confirmed sends"
+
+# Runs in the independent project, only when Olaf explicitly asks:
+#   specify workflow run contact-delivery -i vercel_project=<name> -i client_email=<email>
+# Every provisioning, send and deployment step sits behind a gate; never pass a
+# verdict input for them. Secrets never appear in arguments or output.
+requires:
+  speckit_version: ">=1.2.5"
+
+inputs:
+  project:
+    type: string
+    default: "."
+    prompt: "Project root"
+  vercel_project:
+    type: string
+    required: true
+    prompt: "Vercel project name (names the Resend sending key)"
+  client_email:
+    type: string
+    default: ""
+    prompt: "Client address for website enquiries (empty: ask Olaf)"
+
+steps:
+  - id: recipient
+    type: gate
+    message: "Establish the client recipient (README step 1). If '{{ inputs.client_email }}' is empty and none is configured, stop and ask exactly: What email address should receive website enquiries? Then rerun with -i client_email=<answer>; sync needs it."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: audit
+    type: shell
+    run: "npx --yes create-averlo contact audit --repo '{{ inputs.project }}'"
+
+  - id: implement
+    type: gate
+    message: "Implement the form and server route to specs/platform/services/delivery FR-001 to FR-017 and specs/platform/data/forms (README step 3). Approve when done."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: confirm-provision
+    type: gate
+    message: "Provision a per-project sending key only if needed. If the management credential does not exist yet, get Olaf's explicit confirmation before creating it (README step 4 and Credential policy)."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: provision
+    type: shell
+    run: "npx --yes create-averlo contact provision --repo '{{ inputs.project }}' --project '{{ inputs.vercel_project }}'"
+
+  - id: mocked-test
+    type: gate
+    message: "Browser test with the POST intercepted or mocked: validation, focus, loading, failure preservation, success (README step 5). Approve when it passes."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: local-send
+    type: gate
+    message: "One real local send to bobryk.olaf@gmail.com only, confirmed in Gmail (README step 6). Approve when confirmed."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: confirm-deploy
+    type: gate
+    message: "Deploy only when Olaf explicitly authorises publishing (README step 7). Approve after the production deployment is verified."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: sync
+    type: shell
+    run: "npx --yes create-averlo contact sync --repo '{{ inputs.project }}' --client-email '{{ inputs.client_email }}'"
+
+  - id: production-send
+    type: gate
+    message: "Submit the production form once, confirm the Bobryk copy and To list in Gmail, then report exactly: We sent a website-enquiry test to {{ inputs.client_email }}. Could you confirm it arrived?"
+    options: [approve, reject]
+    on_reject: abort

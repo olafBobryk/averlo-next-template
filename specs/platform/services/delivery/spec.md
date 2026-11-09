@@ -8,9 +8,11 @@
 
 **Verified by**: `docs/testing/contact-delivery.md` when installed
 
+**Operated by**: `.specify/workflows/contact-delivery/` (provisioning, recipients, sends and deployment for an Averlo-managed project)
+
 ## Purpose
 
-This owner has two sections. **Contact delivery**: Define truthful, private behavior for explicitly configured contact delivery. **Submission protection**: Protect explicitly exposed submission boundaries through reusable server guards without inventing blanket dashboard policy or new abuse thresholds.
+This owner has two sections. **Contact delivery**: Define truthful, private behavior for explicitly configured contact delivery. **Submission protection**: Protect explicitly exposed submission boundaries through reusable server guards without inventing blanket dashboard policy or new abuse thresholds. **Averlo-managed contact delivery** (FR-013 to FR-017) refines contact delivery for an independent project that explicitly enables it.
 
 ## Clarifications
 
@@ -23,6 +25,11 @@ This owner has two sections. **Contact delivery**: Define truthful, private beha
 
 - **Q: Which rules moved here when the `AGENTS.md` files were thinned?**
   - A: Behaviour rules from `src/lib/api/AGENTS.md`, `src/lib/forms/AGENTS.md` and the `src/components/ui/input/**/AGENTS.md` files (origin/main `3fd01907`) with no other spec home. They are FR-008 to FR-012, with their meaning kept. Server normalization, server-owned recipients and credentials, the reply path, guards before downstream work, the neutral honeypot and server attachment validation were already FR-001 to FR-007.
+
+### Session 2026-11-09 (contact-form skill retired)
+
+- **Q: Where did the `$averlo:contact-form` skill's conventions go?**
+  - A: Olaf retired the skill. Its delivery conventions that this spec lacked are FR-013 to FR-017 and apply to Averlo-managed contact delivery in an independent project; its setup procedure is the `contact-delivery` workflow, and its script helpers are `create-averlo contact audit|provision|sync`. Its form UX fallback was already covered by `specs/platform/data/forms`, and its logging rule was already FR-003 and FR-008, so neither was copied. Template fixture forms stay no-delivery (FR-009).
 
 ## Requirements: contact delivery
 
@@ -112,3 +119,52 @@ An internal form MUST gain submission protection only from an explicit task, thr
 ### FR-012: Established cooldowns and rate-limit decisions
 
 Support keeps its existing 30-second cooldown; contact adds no threshold. Before selecting, provisioning or tuning a provider rate limit, the repository policy MUST be found first; if none exists and the choice affects throttling, cost or service limits, an explicit user decision is required and no value is invented (FR-007).
+
+## Requirements: Averlo-managed contact delivery
+
+These refine FR-001 to FR-003 when an independent project explicitly enables Averlo-managed delivery through the `contact-delivery` workflow.
+
+### FR-013: Sender and reply path
+
+The sender MUST be the site name inferred from the project, at `developer@averlo.co`. `replyTo` MUST be the submitter's validated address, so replying reaches the enquirer.
+
+**Scenario: Client replies to an enquiry**
+
+- **When** a client replies to a delivered website enquiry
+- **Then** the reply is addressed to the submitter, not to `developer@averlo.co`
+
+### FR-014: Professional client-facing notification
+
+The notification MUST identify itself as a website enquiry, summarize the contact and message details, explain that replying continues the conversation and end with `Delivered by Averlo`. The reusable notification template MUST NOT contain sandbox, test or development language.
+
+**Scenario: Production enquiry**
+
+- **When** a valid enquiry is delivered to the client
+- **Then** it reads as a professional website enquiry ending with `Delivered by Averlo` and mentions no test or sandbox
+
+### FR-015: Missing configuration is HTTP 503
+
+When the sending credential or recipients are absent, the endpoint MUST respond with HTTP `503` (FR-001's unavailable result) and send nothing.
+
+**Scenario: Credential absent**
+
+- **When** a delivery-enabled endpoint runs without its sending credential or recipients
+- **Then** it returns `503` without implying delivery
+
+### FR-016: Explicit production recipients
+
+Production recipients MUST be configured explicitly as the client's address plus `bobryk.olaf@gmail.com`, trimmed and deduplicated (FR-002). A recipient MUST NOT be inferred from a submitter, and the `bobryk.olaf@gmail.com` copy MUST NOT be removed silently.
+
+**Scenario: Submitter supplies an address**
+
+- **When** a submission's email field names any address
+- **Then** that address becomes only the reply path and never a recipient
+
+### FR-017: Sending credentials only in Production
+
+The project's domain-restricted sending credential MUST be configured only in the Production deployment environment and the project's ignored local `.env.local`, never in Preview or Development. The Resend management credential MUST NOT be stored in a repository or deployment environment and MUST NOT send email.
+
+**Scenario: Preview deployment**
+
+- **When** a Preview or Development deployment handles a contact submission
+- **Then** it has no sending credential and returns `503` (FR-015)

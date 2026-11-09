@@ -26,9 +26,9 @@ materializes independent projects through positive assembly.
   adapters before data reaches the frontend contract.
 - `template-assembly/`, `template-profiles/`, `template-surfaces/`, `packages/`
   and `plugins/` are template-only and never ship to generated projects.
-- Source-backed composition, systemization and motion run only through the
-  optional `$averlo:compose`, `$averlo:systemize-composition` and `$averlo:animate`
-  skills; `$averlo:visual-parity` supplies evidence.
+- Building from a design source follows `.specify/workflows/compose/README.md`;
+  mapping a whole design file follows `.specify/workflows/systemize/README.md`.
+  Motion comes from `specs/platform/design-system/motion` during the build.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

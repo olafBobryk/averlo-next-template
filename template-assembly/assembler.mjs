@@ -597,7 +597,7 @@ async function writeProjectDocs(
 			"- `.template-profile.json` determines which areas exist: the dashboard is the application area and marketing the public site.",
 			"- Provider-specific records and metadata resolve in server-side resolvers or adapters before data reaches the frontend contract.",
 			"- In a marketing-capable project, run `npm run verify:marketing` for the composed section, shell and media contract.",
-			"- Source-backed composition, systemization and motion run only through the optional `$averlo:compose`, `$averlo:systemize-composition` and `$averlo:animate` skills; `$averlo:visual-parity` supplies evidence.",
+			"- Building from a design source follows `.specify/workflows/compose/README.md`; mapping a whole design file follows `.specify/workflows/systemize/README.md`. Motion comes from `specs/platform/design-system/motion` during the build.",
 			"",
 		].join("\n"),
 	);

@@ -1,11 +1,12 @@
 # Publish workflow
 
 Publishes an initialized project to private GitLab and Vercel production. Only
-when Olaf explicitly asks. Run from the template checkout; the preflight script
-is `plugins/averlo/skills/publish-project/scripts/publish-project.mjs`. Steps:
-[workflow.yml](workflow.yml).
+when Olaf explicitly asks. Run from the template checkout; the preflight is
+the read-only `create-averlo publish preflight` command
+(`node packages/create-averlo/bin/create-averlo.mjs` here,
+`npx --yes create-averlo` elsewhere). Steps: [workflow.yml](workflow.yml).
 
-1. **Preflight.** `node plugins/averlo/skills/publish-project/scripts/publish-project.mjs preflight --project <root>`
+1. **Preflight.** `node packages/create-averlo/bin/create-averlo.mjs publish preflight --project <root>`
    reads the owner-only `~/.config/averlo/publish-project.json` and prints only
    non-secret targets. Stop if it is missing or invalid; never fall back to a
    personal namespace, GitHub or another team.

@@ -28,21 +28,15 @@ export function HomeHeroChoices({
 						Skills pack
 					</Copy>
 					<ul className="grid gap-2">
-						{[
-							"Create project",
-							"Compose",
-							"Visual parity",
-							"Systemize",
-							"Animate",
-							"Storybook backport",
-							"Publish project",
-						].map((skill) => (
-							<li key={skill}>
-								<Copy as="span" variant="support" tone="muted">
-									{skill}
-								</Copy>
-							</li>
-						))}
+						{["Visual parity", "Create project", "Publish project"].map(
+							(skill) => (
+								<li key={skill}>
+									<Copy as="span" variant="support" tone="muted">
+										{skill}
+									</Copy>
+								</li>
+							),
+						)}
 					</ul>
 				</Card>
 			)}
@@ -59,6 +53,9 @@ export function HomeHeroChoices({
 							"Publish a project",
 							"Backport from a project",
 							"Verify",
+							"Compose",
+							"Systemize",
+							"Contact delivery",
 						].map((workflow) => (
 							<li key={workflow}>
 								<Copy as="span" variant="support" tone="muted">

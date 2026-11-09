@@ -41,3 +41,7 @@ A change that adds, removes or renames a stack library, a shipped skill or a wor
 ### FR-003: Current logo set
 
 Each stack logo is its own collage item: a large monochrome mark in the collage's text colour with its name, kept with a per-logo source note in `src/lib/marketing-content/sections/homeHero/stackLogos.ts`. The current set is, in order: Next.js, React, Tailwind CSS, Motion, GSAP, Lenis, Spec Kit, Storybook, Biome, Vitest, Playwright, Payload.
+
+### FR-004: Current skills and workflows cards
+
+The skills card lists the Averlo plugin skills, in order: Visual parity, Create project, Publish project. The workflows card lists the Spec Kit workflows, in order: Main thread, Write a spec, Create a project, Publish a project, Backport from a project, Verify, Compose, Systemize, Contact delivery. Both lists live in `src/lib/marketing-content/sections/homeHero/HomeHeroChoices.tsx`.

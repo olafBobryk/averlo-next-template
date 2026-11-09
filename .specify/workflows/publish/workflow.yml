@@ -2,11 +2,11 @@ schema_version: "1.0"
 workflow:
   id: "publish"
   name: "Publish an Averlo project"
-  version: "1.0.0"
+  version: "1.1.0"
   author: "Averlo"
   description: "Publish a verified local project to private GitLab and Vercel production, with confirmed targets and collision checks"
 
-# Run from the template checkout (the preflight script lives in the Averlo plugin):
+# Run from the template checkout (the preflight is create-averlo's read-only `publish preflight`):
 #   specify workflow run publish -i project=/abs/path/to/project
 # Every external write sits behind a gate; never pass a verdict input for them.
 requires:
@@ -21,7 +21,7 @@ inputs:
 steps:
   - id: preflight
     type: shell
-    run: "node plugins/averlo/skills/publish-project/scripts/publish-project.mjs preflight --project '{{ inputs.project }}'"
+    run: "node packages/create-averlo/bin/create-averlo.mjs publish preflight --project '{{ inputs.project }}'"
 
   - id: confirm-targets
     type: gate
@@ -43,4 +43,4 @@ steps:
 
   - id: recheck
     type: shell
-    run: "node plugins/averlo/skills/publish-project/scripts/publish-project.mjs preflight --project '{{ inputs.project }}' || true"
+    run: "node packages/create-averlo/bin/create-averlo.mjs publish preflight --project '{{ inputs.project }}' || true"

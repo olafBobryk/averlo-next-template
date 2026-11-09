@@ -15,17 +15,12 @@ Do not invent product specs, load ambient siblings or infer feature
 installation from folders; a conflict with a shared rule needs an explicit spec
 change.
 
-`$averlo:compose` owns native source-backed realization
-and measured human review passes. `$averlo:systemize-composition` explicitly
-owns deterministic established-owner replacement plus confidence-routed
-ambiguous shared design-system decisions, `$averlo:animate`
-explicitly owns motion, and `$averlo:visual-parity` supplies reproducible
-evidence to all three. These operational workflows may invoke Figma skills as
-subordinate steps; their explicit approval and source-authority boundaries remain.
-
-`$averlo:create-project`, `$averlo:publish-project` and the template mode of
-`$averlo:storybook-backport` are short pointers to the template's Spec Kit
-workflows (`.specify/workflows/create-project/`, `publish/`, `backport/`).
+`$averlo:create-project` and `$averlo:publish-project` are short pointers to
+the template's Spec Kit workflows (`.specify/workflows/create-project/` and
+`publish/`). `$averlo:visual-parity` is a standalone screenshot-comparison
+skill. Composition, systemization, backports and contact delivery are Spec Kit
+workflows in the target repository (`.specify/workflows/compose/`,
+`systemize/`, `backport/`, `contact-delivery/`), not plugin skills.
 
 UI guidance (assistant, dashboard shell, dropdowns, surfaces, icons, file
 inspection) lives in the target's specs and Storybook owners, not here.
@@ -41,6 +36,3 @@ installation artifacts. Do not edit or synchronize them. Make every change to
 plugin metadata, skills, agents, references, scripts, and tests in this
 directory, then reinstall or republish the plugin when a consumer needs the
 updated version.
-
-The sensitive contact-form workflow belongs exclusively in this plugin as
-`$averlo:contact-form`; do not maintain a standalone global copy.

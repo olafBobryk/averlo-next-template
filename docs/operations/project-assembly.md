@@ -7,6 +7,23 @@ outputs; their selected surfaces and content mode determine installed features.
 The maintained [assembly contract](../../specs/template/assembly/spec.md)
 and [assembly policy](../../template-assembly/AGENTS.md) own that boundary.
 
+## Profiles
+
+| Profile          | Included surfaces                                    | Content choices           | Default         |
+| ---------------- | ---------------------------------------------------- | ------------------------- | --------------- |
+| `full`           | Marketing, auth, dashboard, and developer tools.     | `static`, `payload-ready` | `payload-ready` |
+| `app-only`       | Auth, dashboard, and developer tools; no marketing.  | `static`                  | `static`        |
+| `marketing-only` | Marketing and developer tools; no auth or dashboard. | `static`, `payload-ready` | `payload-ready` |
+| `thin-start`     | Minimal marketing specialist surface.                | `static`, `payload-ready` | `payload-ready` |
+
+Generated projects are one-way starting points, not alternate states of the
+template checkout. `create-averlo` and `npm run create:project` install
+dependencies and create a local `main` repository with one commit and no
+remote; `--no-install` generates only the project and lockfile. The canonical
+template's `/repository-footprint` page (a commit-history snapshot of the
+authored repository size) is template-only and never reaches a generated
+project.
+
 ## Run assembly verification
 
 1. Run `npm run verify:profiles` and `npm run verify:create-averlo` from the

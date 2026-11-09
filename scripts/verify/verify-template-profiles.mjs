@@ -456,10 +456,8 @@ async function assertGeneratedDocumentation(outputRoot, profileCase) {
 		"the nearest `AGENTS.md`",
 		"owner's Storybook stories",
 		"`WORKFLOWS.md` (names-only menu)",
-		"$averlo:compose",
-		"$averlo:systemize-composition",
-		"$averlo:animate",
-		"$averlo:visual-parity",
+		"`.specify/workflows/compose/README.md`",
+		"`.specify/workflows/systemize/README.md`",
 		"npm run verify:marketing",
 	]) {
 		if (!agentInstructions.replace(/\s+/gu, " ").includes(requiredPolicy)) {
@@ -534,10 +532,8 @@ async function assertCanonicalAgentContract(templateRoot) {
 		"nearest `AGENTS.md`",
 		"owner's Storybook stories",
 		"`WORKFLOWS.md` (names-only menu)",
-		"$averlo:compose",
-		"$averlo:systemize-composition",
-		"$averlo:animate",
-		"$averlo:visual-parity",
+		"`.specify/workflows/compose/README.md`",
+		"`.specify/workflows/systemize/README.md`",
 		"BEGIN:nextjs-agent-rules",
 	]) {
 		if (!agentInstructions.replace(/\s+/gu, " ").includes(requiredPolicy)) {

@@ -43,11 +43,11 @@
 		},
 		"publish": {
 			"name": "Publish an Averlo project",
-			"version": "1.0.0",
+			"version": "1.1.0",
 			"description": "Publish a verified local project to private GitLab and Vercel production, with confirmed targets and collision checks",
 			"source": "local",
 			"installed_at": "2026-11-08T18:00:00.000000+00:00",
-			"updated_at": "2026-11-08T18:00:00.000000+00:00"
+			"updated_at": "2026-11-09T00:00:00.000000+00:00"
 		},
 		"backport": {
 			"name": "Backport from a child project",
@@ -56,6 +56,30 @@
 			"source": "local",
 			"installed_at": "2026-11-08T18:00:00.000000+00:00",
 			"updated_at": "2026-11-08T18:00:00.000000+00:00"
+		},
+		"compose": {
+			"name": "Compose a page from a design",
+			"version": "1.0.0",
+			"description": "Map every source piece to a design-system owner and level, build with existing owners, get Olaf's first look and per-row approvals, then close the gap with measured parity passes",
+			"source": "local",
+			"installed_at": "2026-11-09T00:00:00.000000+00:00",
+			"updated_at": "2026-11-09T00:00:00.000000+00:00"
+		},
+		"systemize": {
+			"name": "Systemize a design file",
+			"version": "1.0.0",
+			"description": "Map a whole Figma file to design-system owners and levels, list the unique components and record the ones Olaf approves; never edits components",
+			"source": "local",
+			"installed_at": "2026-11-09T00:00:00.000000+00:00",
+			"updated_at": "2026-11-09T00:00:00.000000+00:00"
+		},
+		"contact-delivery": {
+			"name": "Set up Averlo contact delivery",
+			"version": "1.0.0",
+			"description": "Build, provision, test and ship an Averlo-managed Resend contact form: explicit recipients, Production-only credentials, confirmed sends",
+			"source": "local",
+			"installed_at": "2026-11-09T00:00:00.000000+00:00",
+			"updated_at": "2026-11-09T00:00:00.000000+00:00"
 		}
 	}
 }
