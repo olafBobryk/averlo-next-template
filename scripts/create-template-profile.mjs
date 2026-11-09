@@ -6,19 +6,19 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { assembleTemplateProfile } from "../template-assembly/assembler.mjs";
+import { assembleTemplateProfile } from "../template/assembly/assembler.mjs";
 import {
 	getCapabilitySurfaces,
 	normalizeCapabilities,
 	readEffectiveCapabilities,
-} from "../template-assembly/capabilities/index.mjs";
+} from "../template/assembly/capabilities/index.mjs";
 import {
 	getProfileContentMode,
 	getProfileVerificationCommands,
 	getTemplateProfile,
 	templateProfiles,
-} from "../template-profiles/index.mjs";
-import { templateSurfaces } from "../template-surfaces/index.mjs";
+} from "../template/profiles/index.mjs";
+import { templateSurfaces } from "../template/surfaces/index.mjs";
 
 const TEMPLATE_ROOT = process.cwd();
 const PROFILE_MARKER = ".template-profile.json";

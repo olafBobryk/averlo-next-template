@@ -21,7 +21,7 @@ import {
 } from "./HeaderMenuContent";
 import type { SiteLayoutDocument, SiteLink } from "./siteLayout";
 import { getSiteLinkHref } from "./siteLayout";
-import { useMenuPanelSequence } from "./useMenuPanelSequence";
+import { useMenuPanelPresence } from "./useMenuPanelPresence";
 
 const HEADER_EXPANDED_HEIGHT = 100;
 const HEADER_COMPACT_HEIGHT = 70;
@@ -72,7 +72,7 @@ export default function HeaderFull({
 	const menuContentRef = useRef<HTMLDivElement>(null);
 	const menuId = useId();
 	const motionAllowed = useAnimated();
-	const menu = useMenuPanelSequence(isMenuOpen, motionAllowed);
+	const menu = useMenuPanelPresence(isMenuOpen, motionAllowed);
 	const menuGroups = layout.menuGroups ?? [];
 	const mobile = layout.mobile ?? {
 		closeAriaLabel: "Close navigation",
@@ -274,12 +274,6 @@ export default function HeaderFull({
 						// spec exception E-001
 						animate={{ height: menu.extended ? "auto" : 0 }}
 						transition={menuPanelTransition}
-						onUpdate={(latest) =>
-							menu.onPanelUpdate(
-								Number.parseFloat(String(latest.height)),
-								menuContentRef.current?.offsetHeight ?? 0,
-							)
-						}
 						onAnimationComplete={menu.onPanelComplete}
 						className="pointer-events-auto overflow-hidden"
 					>
@@ -290,11 +284,9 @@ export default function HeaderFull({
 								paddingTop: HEADER_MENU_TOP_PADDING,
 								paddingBottom: HEADER_MENU_BOTTOM_PADDING,
 							}}
-							initial={motionAllowed ? { opacity: 0 } : false}
+							initial={false}
 							animate={{ opacity: menu.visible ? 1 : 0 }}
 							transition={menuFadeTransition}
-							onUpdate={menu.onContentUpdate}
-							onAnimationComplete={menu.onContentComplete}
 						>
 							<motion.div
 								className="relative overflow-hidden"

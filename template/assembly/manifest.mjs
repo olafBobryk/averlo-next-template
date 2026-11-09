@@ -69,15 +69,15 @@ export const assemblyTemplateOnlyRoots = [
 	"specs/template",
 	"plugins",
 	"packages",
-	"template-assembly",
-	"template-profiles",
-	"template-surfaces",
+	"template/assembly",
+	"template/profiles",
+	"template/surfaces",
 	"src/app/(site)/(marketing)/repository-footprint",
 	// Capture fixture for the canonical hero collage (`npm run hero:capture`).
 	"src/app/(site)/(dev)/internal/hero-collage",
 ];
 
-// Platform specs are core unless a surface owns them (template-surfaces/*).
+// Platform specs are core unless a surface owns them (template/surfaces/*).
 // Shared behavioral dependencies apply to installed uses; they do not install features.
 export const assemblyCoreSpecRoots = [
 	"specs/README.md",

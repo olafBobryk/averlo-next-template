@@ -18,7 +18,7 @@ import {
 } from "./HeaderMenuContent";
 import type { SiteLayoutDocument } from "./siteLayout";
 import { getSiteLinkHref } from "./siteLayout";
-import { useMenuPanelSequence } from "./useMenuPanelSequence";
+import { useMenuPanelPresence } from "./useMenuPanelPresence";
 
 const COMPACT_OPEN_TOP_PADDING = 16;
 const COMPACT_OPEN_BAR_HEIGHT = 48;
@@ -49,7 +49,7 @@ export default function HeaderCompact({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const motionAllowed = useAnimated();
-	const menu = useMenuPanelSequence(isMenuOpen, motionAllowed);
+	const menu = useMenuPanelPresence(isMenuOpen, motionAllowed);
 	// The header is the menu panel: it keeps its open state until it closes.
 	const showHeaderSurface = isScrolled || menu.extended;
 	const isCondensed = isScrolled && !menu.extended;
@@ -112,12 +112,6 @@ export default function HeaderCompact({
 				...heightTransition,
 				height: menu.mounted ? menuPanelTransition : heightTransition,
 			}}
-			onUpdate={(latest) =>
-				menu.onPanelUpdate(
-					Number.parseFloat(String(latest.height)),
-					window.innerHeight,
-				)
-			}
 			onAnimationComplete={menu.onPanelComplete}
 			className={clsx("fixed inset-x-0 top-0 z-50 h-[76px]", className)}
 		>
@@ -193,11 +187,9 @@ export default function HeaderCompact({
 								style={{
 									height: `calc(100vh - ${COMPACT_OPEN_MENU_OFFSET}px)`,
 								}}
-								initial={motionAllowed ? { opacity: 0 } : false}
+								initial={false}
 								animate={{ opacity: menu.visible ? 1 : 0 }}
 								transition={menuFadeTransition}
-								onUpdate={menu.onContentUpdate}
-								onAnimationComplete={menu.onContentComplete}
 							>
 								<div className="relative shrink-0">
 									<HeaderSearchInput

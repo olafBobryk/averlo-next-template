@@ -11,6 +11,6 @@ Run them through the [verify workflow](../../.specify/workflows/verify/README.md
   profile output.
 - Helpers shared with non-verification scripts live outside this folder.
 - When a verifier path changes, update assembly ownership
-  (`template-assembly/manifest.mjs`, `template-surfaces/`), profiles, package
+  (`template/assembly/manifest.mjs`, `template/surfaces/`), profiles, package
   scripts and the docs that name it. Optional surfaces list their verifiers in
-  `template-surfaces/`.
+  `template/surfaces/`.

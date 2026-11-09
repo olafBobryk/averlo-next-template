@@ -3,7 +3,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import thinStartProfile from "../template-profiles/thin-start/manifest.mjs";
+import thinStartProfile from "../template/profiles/thin-start/manifest.mjs";
 
 const PARKED_IMPORT_PATTERN =
 	/(\.thin-start|thin-start\/reference|reference\/averlo-components)/;

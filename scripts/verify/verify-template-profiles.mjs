@@ -10,17 +10,17 @@ import process from "node:process";
 import {
 	assembleTemplateProfile,
 	assertPackageOwnership,
-} from "../../template-assembly/assembler.mjs";
+} from "../../template/assembly/assembler.mjs";
 import {
 	assemblyTemplateOnlyWorkflows,
 	isAssemblySpecKitSkillPath,
 	isWithinPath,
-} from "../../template-assembly/manifest.mjs";
+} from "../../template/assembly/manifest.mjs";
 import {
 	getProfileVerificationCommands,
 	templateProfiles,
-} from "../../template-profiles/index.mjs";
-import { templateSurfaces } from "../../template-surfaces/index.mjs";
+} from "../../template/profiles/index.mjs";
+import { templateSurfaces } from "../../template/surfaces/index.mjs";
 
 const PROFILE_CASES = [
 	{ profileId: "full", content: "payload-ready" },

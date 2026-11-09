@@ -21,8 +21,8 @@ const isDirectory = (name: string) => {
 const canonicalTemplate =
 	!generated &&
 	JSON.parse(read("package.json")).name === "averlo-next-template" &&
-	isDirectory("template-assembly") &&
-	isDirectory("template-profiles");
+	isDirectory("template/assembly") &&
+	isDirectory("template/profiles");
 const shells: [string, string][] = [
 	[
 		"installed modal shell",
@@ -39,13 +39,13 @@ if (canonicalTemplate) {
 	shells.push([
 		"thin override modal shell",
 		read(
-			"template-profiles/thin-start/overrides/src/components/ui/overlays/modal/ModalShell.tsx",
+			"template/profiles/thin-start/overrides/src/components/ui/overlays/modal/ModalShell.tsx",
 		),
 	]);
 	confirmations.push([
 		"thin override confirmation",
 		read(
-			"template-profiles/thin-start/overrides/src/components/ui/overlays/modal/ConfirmationModal.tsx",
+			"template/profiles/thin-start/overrides/src/components/ui/overlays/modal/ConfirmationModal.tsx",
 		),
 	]);
 }

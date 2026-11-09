@@ -130,7 +130,7 @@ Sources: npm's package dependency documentation
 the public downloads API
 (https://api.npmjs.org/downloads/range/2026-09-06:2026-10-07/create-averlo),
 and the repository's `packages/create-averlo/lib/create-project.mjs`,
-`template-assembly/manifest.mjs`, `template-assembly/assembler.mjs`, profile/surface
+`template/assembly/manifest.mjs`, `template/assembly/assembler.mjs`, profile/surface
 manifests, icon registries, and current application imports.
 
 ## Release status
