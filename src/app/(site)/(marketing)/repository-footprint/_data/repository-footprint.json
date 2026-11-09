@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "0d5d71aa2062711edf2db06b5f000a3054639e87",
+	"head": "c70131bea13ed9f3ad5e858897c6c9ff1ab4c291",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -2585,6 +2585,456 @@
 			"lines": 151280,
 			"textBytes": 5195014,
 			"tokens": 1271682
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "1d3c85da0b0db69a8809dd68a07687fd960acbed",
+			"subject": "Install Spec Kit 1.2.5 with Claude and Codex integrations",
+			"files": 1486,
+			"lines": 159005,
+			"textBytes": 5580381,
+			"tokens": 1362410
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "e1c6752718edf5f80d1fb76cf255a170cc23513a",
+			"subject": "Write the template constitution and living-spec templates",
+			"files": 1487,
+			"lines": 159175,
+			"textBytes": 5586265,
+			"tokens": 1363893
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "e0b841dc29eabb45fda80b4365b20da2320558cc",
+			"subject": "Migrate OpenSpec capabilities into the Spec Kit spec tree",
+			"files": 1505,
+			"lines": 160390,
+			"textBytes": 5647371,
+			"tokens": 1375597
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "9add0e5c02234dcf467305654b15219eee2c1e33",
+			"subject": "Format Spec Kit JSON state with Biome",
+			"files": 1505,
+			"lines": 160387,
+			"textBytes": 5647206,
+			"tokens": 1375641
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "616d27c0eff414752d0578ef1ae5cdc378889588",
+			"subject": "Add design-system specs: usage, motion, scroll and four families",
+			"files": 1526,
+			"lines": 161295,
+			"textBytes": 5713557,
+			"tokens": 1392585
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "d9571f7ec5dac91f471e98d5714339eb133eda9e",
+			"subject": "Add surface page and dashboard shell specs",
+			"files": 1529,
+			"lines": 161510,
+			"textBytes": 5728954,
+			"tokens": 1395829
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "71539bed1a0a0540498935b85721db92c4045f75",
+			"subject": "Add the specs map and an empty product skeleton",
+			"files": 1535,
+			"lines": 161640,
+			"textBytes": 5735234,
+			"tokens": 1397126
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "1bf07a309b4784c6fb63a9f153249f033fbeb4c5",
+			"subject": "Retire OpenSpec",
+			"files": 1363,
+			"lines": 151935,
+			"textBytes": 4822486,
+			"tokens": 1215121
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "5c868fe43472741315ec6e0635db1ac6ac812287",
+			"subject": "Merge ws/specs: Spec Kit install and spec tree migration",
+			"files": 1363,
+			"lines": 151935,
+			"textBytes": 4822486,
+			"tokens": 1215121
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "ee147232c3b496b2d2d8a6278e26d88bd0e0d9a8",
+			"subject": "Record motion decisions: character-named steps, springs first, fit-then-fade messages",
+			"files": 1363,
+			"lines": 151950,
+			"textBytes": 4824501,
+			"tokens": 1215767
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "53c0205e824d5bc7fd403d2a5f84c68f63644f1e",
+			"subject": "Move Dropdown onto floating-ui and add ScrollArea",
+			"files": 1446,
+			"lines": 151475,
+			"textBytes": 5204086,
+			"tokens": 1274383
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "6ead2dc4d8bbe4673ef9b69ac6fb7b6364369753",
+			"subject": "Merge ws/overlays-scroll: floating-ui Dropdown with presentation modes, ScrollArea",
+			"files": 1364,
+			"lines": 152145,
+			"textBytes": 4833573,
+			"tokens": 1218468
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "491c6bc0d9cdd7370ac3d444c38ec49979133e3e",
+			"subject": "Rewire agent entry points and workflows to Spec Kit",
+			"files": 1430,
+			"lines": 150066,
+			"textBytes": 5098619,
+			"tokens": 1255956
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "36cf3f1a2ce1c71b059e43a9ecbac1776c036a71",
+			"subject": "Ship Spec Kit skills as core and point policy tests at owner specs",
+			"files": 1430,
+			"lines": 150081,
+			"textBytes": 5099313,
+			"tokens": 1256137
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "848932eedbf151d948771030be0475c9f6ce23bb",
+			"subject": "Ignore Spec Kit workflow run state",
+			"files": 1431,
+			"lines": 150083,
+			"textBytes": 5099388,
+			"tokens": 1256154
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "ecf36a6cad3db65072d785f1308f47a94e575815",
+			"subject": "Merge ws/agents-workflows: thin AGENTS.md, Spec Kit workflows, docs, rewired assembly",
+			"files": 1349,
+			"lines": 150935,
+			"textBytes": 4737602,
+			"tokens": 1202798
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "5aea691c02e514f41f9e6af5cccd210dd9cdb7a8",
+			"subject": "Add GritQL lint rules for design-system ownership",
+			"files": 1458,
+			"lines": 151646,
+			"textBytes": 5210356,
+			"tokens": 1275883
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "3e87ed2bb6191ce897e181d2ddb457bdc7b3bf75",
+			"subject": "Ignore every env file except examples",
+			"files": 1458,
+			"lines": 151651,
+			"textBytes": 5210470,
+			"tokens": 1275911
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "2719ff89f0f7709c064b5f2d2af4bb62e29d3060",
+			"subject": "Add test:unit and keep lint fixtures out of tsc",
+			"files": 1458,
+			"lines": 151652,
+			"textBytes": 5210640,
+			"tokens": 1275962
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "4f62f4cdc1b7a7d67a666baddb0805d079493f26",
+			"subject": "Fix MotionEffectTextStagger blur offset unit",
+			"files": 1458,
+			"lines": 151662,
+			"textBytes": 5210982,
+			"tokens": 1276083
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "b39ca944766fb4ff071a8fbd0e209ea2d0f32fbf",
+			"subject": "Drive skeleton shimmer from one page-wide clock",
+			"files": 1459,
+			"lines": 151723,
+			"textBytes": 5212976,
+			"tokens": 1276586
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "3fda61a8627fd053ce12d5b0db4e0a97f8a46690",
+			"subject": "Add opt-in autoGrow to TextAreaInput",
+			"files": 1459,
+			"lines": 151814,
+			"textBytes": 5215936,
+			"tokens": 1277339
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "7688f1eeaa10b1528bc8165315395757b306dc0e",
+			"subject": "Let showToast.promise report cancellation as info",
+			"files": 1459,
+			"lines": 151911,
+			"textBytes": 5218603,
+			"tokens": 1278017
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "e5a2a1a804400551a77a9dd69c2f2a3aac4c086f",
+			"subject": "Run CI on PRs and main; publish create-averlo only after it passes",
+			"files": 1460,
+			"lines": 151991,
+			"textBytes": 5220875,
+			"tokens": 1278610
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "62acb7307eefcfd08714807908153d11a2b1948f",
+			"subject": "Replace the :root shimmer clock with a per-element fixed band",
+			"files": 1459,
+			"lines": 151969,
+			"textBytes": 5220417,
+			"tokens": 1278464
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "fefe38ddaa9c64faa19600467538b61d96843d33",
+			"subject": "Merge ws/checks-extras: Biome spec rules, CI, skeleton shimmer, small ports",
+			"files": 1363,
+			"lines": 151621,
+			"textBytes": 4762823,
+			"tokens": 1209535
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "566906675d7c6c7e14d05a91213f21e71aecb172",
+			"subject": "Mark remaining ad hoc scroll/height sites as lint debt",
+			"files": 1363,
+			"lines": 151623,
+			"textBytes": 4762942,
+			"tokens": 1209565
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "cdcf09c9e90aae90767a94813c5899f9a109366f",
+			"subject": "Fold thinned AGENTS.md rules into specs and the constitution",
+			"files": 1349,
+			"lines": 151585,
+			"textBytes": 4790272,
+			"tokens": 1214111
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "9fb8caa14ca9cb41ecf883048a3ef8cc8a4e9b84",
+			"subject": "Merge ws/rules: fold thinned AGENTS.md rules into owner specs",
+			"files": 1363,
+			"lines": 152273,
+			"textBytes": 4815612,
+			"tokens": 1220878
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "1048188322919bbac1afa26b38a778b050a912aa",
+			"subject": "Classify @floating-ui/react-dom as a core assembly dependency",
+			"files": 1363,
+			"lines": 152275,
+			"textBytes": 4815668,
+			"tokens": 1220895
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "efc22113066e5aca88354a61ad26e601b4882272",
+			"subject": "Add sequenced presence, MorphLabel and button label morph",
+			"files": 1448,
+			"lines": 152709,
+			"textBytes": 5240082,
+			"tokens": 1283441
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "b4e106db193e0337f3c158d75da1444f50721459",
+			"subject": "Merge ws/motion: presence sequenced mode, Field messages, MorphLabel, Button morph, IconSwap gate",
+			"files": 1366,
+			"lines": 153704,
+			"textBytes": 4860736,
+			"tokens": 1232654
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "fa54a1015b602d58fc9cd0144a3f390026d50cb2",
+			"subject": "Mark assistant lint debt; point helper, primitive and misc AGENTS.md at new owners",
+			"files": 1366,
+			"lines": 153717,
+			"textBytes": 4861410,
+			"tokens": 1232822
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "1d11d22b226581eea61a799c0906a8ac4caf696a",
+			"subject": "Add state and testing defaults to the development workflow",
+			"files": 1366,
+			"lines": 153719,
+			"textBytes": 4861931,
+			"tokens": 1232945
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "5d4cdd7d7d602861a3689ce8083dad679a00dff3",
+			"subject": "Fix pre-existing Storybook test failures",
+			"files": 1363,
+			"lines": 152278,
+			"textBytes": 4815807,
+			"tokens": 1220926
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "28fa0d13f7f12a6686156bcca98f5337108c89cf",
+			"subject": "Merge ws/sb-fixes: fix the 15 Storybook tests failing on origin/main",
+			"files": 1366,
+			"lines": 153722,
+			"textBytes": 4862070,
+			"tokens": 1232976
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "514d5b38bf05a52b1cbbddd129f32be3efd682bb",
+			"subject": "Retune motion tokens to five character-named steps",
+			"files": 1365,
+			"lines": 152849,
+			"textBytes": 4837320,
+			"tokens": 1226669
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "f55c026cfb86594dd47092605a6ff3eeaa918d96",
+			"subject": "Merge ws/tokens: snap/quick/smooth/gentle/slow motion steps, springs first",
+			"files": 1365,
+			"lines": 152854,
+			"textBytes": 4837980,
+			"tokens": 1226823
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "bc46a2da933c7563c39eaa8d2a768993bfc93c7f",
+			"subject": "Fix CI Storybook failures: MorphLabel fade ordering, settle Field messages before a11y scans",
+			"files": 1366,
+			"lines": 152893,
+			"textBytes": 4839564,
+			"tokens": 1227192
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "7873a830f20cadae83c53505d148b45d5e7af612",
+			"subject": "Settle spring motion before Storybook a11y scans instead of per-story waits",
+			"files": 1365,
+			"lines": 152879,
+			"textBytes": 4838987,
+			"tokens": 1227064
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "42bcac19fb3266a6c7bd5a21351cac425fb3c55e",
+			"subject": "Scrub section reveals with scroll, sequence the header menu, pre-capture the hero",
+			"files": 1371,
+			"lines": 154707,
+			"textBytes": 4897958,
+			"tokens": 1242484
+		},
+		{
+			"date": "2026-11-08",
+			"hash": "2822f578677bac9a5a1e5fe7de1c9203dc6dc17d",
+			"subject": "Show sequenced presence content on the opening render when motion is off",
+			"files": 1371,
+			"lines": 154712,
+			"textBytes": 4898060,
+			"tokens": 1242514
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "2fc7e4983df3347201443b839632ef78df93743c",
+			"subject": "Ease the hero reveal and make the hero collage fill and show the repo's state",
+			"files": 1374,
+			"lines": 155300,
+			"textBytes": 4932295,
+			"tokens": 1257570
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "9265ed9e907cb16f7aac42e2488862af0c70af5c",
+			"subject": "Replace composition skills with lightweight Spec Kit workflows; simplify README",
+			"files": 1344,
+			"lines": 151470,
+			"textBytes": 4780792,
+			"tokens": 1224661
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "fb807024c6159d50aa5cb36f1d153adae8451bbb",
+			"subject": "Give the RTL carousel story's aria-current wait room for the settle spring",
+			"files": 1344,
+			"lines": 151473,
+			"textBytes": 4780894,
+			"tokens": 1224689
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "c5bc74bbcd52277d40ce12e544d202801a2af6bc",
+			"subject": "Drop migration provenance from specs and the constitution",
+			"files": 1344,
+			"lines": 151148,
+			"textBytes": 4755814,
+			"tokens": 1218084
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "4c585062150106ac36f5e280158bd92c15ccc914",
+			"subject": "Keep the chosen carousel slide active while the track settles",
+			"files": 1344,
+			"lines": 151169,
+			"textBytes": 4756481,
+			"tokens": 1218250
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "0411cf41abbd1946ad671418ab823f5190135585",
+			"subject": "Run fast checks locally before every push; leave heavy suites to CI",
+			"files": 1344,
+			"lines": 151180,
+			"textBytes": 4757045,
+			"tokens": 1218402
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "651c0b1b52792380b8136f84c0082f52f5fbbfed",
+			"subject": "Park the client-editing CMS direction as a template-only doc",
+			"files": 1345,
+			"lines": 151216,
+			"textBytes": 4758805,
+			"tokens": 1218820
+		},
+		{
+			"date": "2026-11-09",
+			"hash": "c70131bea13ed9f3ad5e858897c6c9ff1ab4c291",
+			"subject": "Merge pull request #7 from olafBobryk/feat/spec-kit-foundations",
+			"files": 1345,
+			"lines": 151216,
+			"textBytes": 4758805,
+			"tokens": 1218820
 		}
 	],
 	"version": 1
