@@ -170,6 +170,8 @@ export function Carousel({
 	const suppressClickRef = useRef(false);
 	const suppressClickTimerRef = useRef<number | null>(null);
 	const positionIndexRef = useRef(clampIndex(initialIndex, items.length));
+	// The slide a settle is heading to; it stays active while the track moves.
+	const targetIndexRef = useRef<number | null>(null);
 	const directionRef = useRef<"ltr" | "rtl">("ltr");
 	const dragRef = useRef<PointerDrag | null>(null);
 	const [activeIndex, setActiveIndex] = useState(positionIndexRef.current);
@@ -182,6 +184,7 @@ export function Carousel({
 	const wideLayoutActive = useWideLayoutActive(wideLayout);
 
 	useMotionValueEvent(trackX, "change", (value) => {
+		if (targetIndexRef.current !== null) return;
 		let closestIndex = 0;
 		let closestDistance = Number.POSITIVE_INFINITY;
 		for (const [index, point] of snapPoints.entries()) {
@@ -226,8 +229,13 @@ export function Carousel({
 				),
 			);
 			setSnapPoints(nextSnapPoints);
-			const nextIndex = clampIndex(positionIndexRef.current, slides.length);
+			const nextIndex = clampIndex(
+				targetIndexRef.current ?? positionIndexRef.current,
+				slides.length,
+			);
 			positionIndexRef.current = nextIndex;
+			// Jumping stops a running settle, so it lands on its target here.
+			targetIndexRef.current = null;
 			trackX.jump(nextSnapPoints[nextIndex] ?? 0);
 		};
 
@@ -272,10 +280,17 @@ export function Carousel({
 					: snapPoints[selectedIndex];
 			if (target === undefined) return;
 			settleAnimationRef.current?.stop();
+			targetIndexRef.current = selectedIndex;
 			if (shouldAnimate) {
-				settleAnimationRef.current = animate(trackX, target, spring.gentle);
+				settleAnimationRef.current = animate(trackX, target, {
+					...spring.gentle,
+					onComplete: () => {
+						targetIndexRef.current = null;
+					},
+				});
 			} else {
 				trackX.jump(target);
+				targetIndexRef.current = null;
 			}
 			positionIndexRef.current = selectedIndex;
 			setActiveIndex(selectedIndex);
@@ -311,13 +326,18 @@ export function Carousel({
 
 			const target = snapPoints[closestIndex] ?? 0;
 			settleAnimationRef.current?.stop();
+			targetIndexRef.current = closestIndex;
 			if (shouldAnimate) {
 				settleAnimationRef.current = animate(trackX, target, {
 					...spring.gentle,
 					velocity: velocityX,
+					onComplete: () => {
+						targetIndexRef.current = null;
+					},
 				});
 			} else {
 				trackX.jump(target);
+				targetIndexRef.current = null;
 			}
 			positionIndexRef.current = closestIndex;
 			setActiveIndex(closestIndex);
@@ -351,6 +371,7 @@ export function Carousel({
 			if (wideLayoutActive) return;
 			if (event.button !== 0) return;
 			settleAnimationRef.current?.stop();
+			targetIndexRef.current = null;
 			if (suppressClickTimerRef.current !== null) {
 				window.clearTimeout(suppressClickTimerRef.current);
 				suppressClickTimerRef.current = null;
