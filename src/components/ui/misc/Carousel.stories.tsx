@@ -136,10 +136,13 @@ export const RightToLeftKeyboardNavigation: Story = {
 		region.focus();
 		await userEvent.keyboard("{ArrowLeft}");
 		await waitFor(() => expect(args.onIndexChange).toHaveBeenCalledWith(1));
-		await waitFor(() =>
-			expect(
-				canvas.getByRole("button", { name: "Show slide 2: Frame" }),
-			).toHaveAttribute("aria-current", "true"),
+		// aria-current follows the track position, which settles on a spring.
+		await waitFor(
+			() =>
+				expect(
+					canvas.getByRole("button", { name: "Show slide 2: Frame" }),
+				).toHaveAttribute("aria-current", "true"),
+			{ timeout: 3000 },
 		);
 	},
 };
