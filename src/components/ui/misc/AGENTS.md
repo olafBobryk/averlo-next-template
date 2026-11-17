@@ -9,7 +9,7 @@ components that are neither complete inputs nor overlays.
   identity colour, or semantic tint.
 - `specs/platform/data/loading/spec.md` when changing skeletons or state owners.
 - `specs/platform/design-system/scroll/spec.md` when changing `ScrollArea`, the
-  one inner-scroll owner (it replaced `ScrollBorders`).
+  one inner-scroll owner.
 - Storybook owner stories for component APIs and defaults.
 
 ## Structure
