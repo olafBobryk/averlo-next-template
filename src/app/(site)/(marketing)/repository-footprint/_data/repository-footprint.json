@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "0f837075d930404a8a818275c9423ac7461e7e4d",
+	"head": "11b641b862e34578a41f805d43b5d32c0c4380d1",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -3080,6 +3080,42 @@
 			"lines": 151196,
 			"textBytes": 4758637,
 			"tokens": 1218790
+		},
+		{
+			"date": "2026-11-19",
+			"hash": "0725994b3dd4a9124e92f97b53eeca8f159a87d7",
+			"subject": "Make every scroll reveal finish: reveal = intro × reach",
+			"files": 1348,
+			"lines": 151634,
+			"textBytes": 4775778,
+			"tokens": 1223227
+		},
+		{
+			"date": "2026-11-19",
+			"hash": "cad18971d4bb99297258c3fba72e7ca532e9e892",
+			"subject": "Keep each scroll reveal's start; pull only its end in to the max scroll",
+			"files": 1348,
+			"lines": 151656,
+			"textBytes": 4777022,
+			"tokens": 1223576
+		},
+		{
+			"date": "2026-11-19",
+			"hash": "d75461e740a3bfe187154432ef8f13a0fef26df2",
+			"subject": "Snap a finished scroll reveal to exactly 1",
+			"files": 1348,
+			"lines": 151658,
+			"textBytes": 4777123,
+			"tokens": 1223607
+		},
+		{
+			"date": "2026-11-19",
+			"hash": "11b641b862e34578a41f805d43b5d32c0c4380d1",
+			"subject": "Merge pull request #9 from olafBobryk/fix/reveal-intro-reach",
+			"files": 1348,
+			"lines": 151658,
+			"textBytes": 4777123,
+			"tokens": 1223607
 		}
 	],
 	"version": 1
