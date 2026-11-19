@@ -106,7 +106,9 @@ export function layoutReach({
 
 export function reachAt(slot: ReachSlot, scrollY: number) {
 	if (slot.reached) return 1;
-	return Math.min(1, Math.max(0, (scrollY - slot.start) / slot.length));
+	const value = (scrollY - slot.start) / slot.length;
+	// Float error must not leave a finished reveal a hair short of 1.
+	return value >= 1 - 1e-9 ? 1 : Math.max(0, value);
 }
 
 // One scheduler for every group: scroll updates, layout changes re-measure. Both run once per frame.
