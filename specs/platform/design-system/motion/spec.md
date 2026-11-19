@@ -39,6 +39,36 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
 - **Q: Do scroll Sequence items move at a constant rate?**
   - A: No. With a linear slice per item, the hero headline, text and call to action each slid at constant speed, 0.18 s apart, which Olaf found awkward. Olaf chose "eased, tighter stagger": each item eases within its slice on the `slow` curve, during both the catch-up intro and the scroll scrub, while the Sequence clock stays linear. The hero's lines start 0.06 s apart; the 0.18 s default stays for other Sequences (FR-006, FR-013).
 
+### Session 2026-11-19 (scroll reveals: intro × reach)
+
+- **Context.** The product site found three bugs that the template's scroll reveals share:
+  - content reached only at the max scroll never fully revealed;
+  - content on screen at load ran on separate clocks and stopped part-way, because the catch-up intro was capped by scroll progress;
+  - a page's first content never transitioned in.
+  Olaf fixed them on the product site with one always-live formula and asked for this backport. The 2026-11-08 answers on the catch-up intro and the linear Sequence slices are replaced. Their "eased" choice stays: each term eases on `slow`.
+- **Q: Content you can reach only at the very bottom?**
+  - A: it finishes at the max scroll. The reveal keeps its usual scrub length, shifted to end at the max scroll (V2).
+- **Q: Content on screen at load?**
+  - A: it plays one sequence in reading order and ends fully revealed (V3).
+- **Q: A latch once the load sequence is done?**
+  - A: "dont like the idea that there is a switch. should be a equation based both systems live all the time". This gives `reveal = intro(t) × reach(y)` (V1).
+- **Q: Which items join the load sequence?**
+  - A: items whose top is above the 95% line at entry (V3).
+- **Q: Cards stacked in one column on phones?**
+  - A: include them: each card reveals from its own position (V2).
+- **Q: Dividers?**
+  - A: a section's top rule draws in first, before its heading (V4).
+- **Q: A reload from mid-page?**
+  - A: leave it as is. Content above where the browser restores you shows final (V3).
+- **Q: Nested reveal items?**
+  - A: they share their parent's slot (V3).
+- **Q: How does it land in the template (backport)?**
+  - A: inside `MotionSource`: `Sequence mode="scroll"` and `MotionSource.Item` are rebuilt on `intro × reach`. There is still no separate reveal facade and no marketing scroll-mode switch. The scroll strategy's catch-up intro is removed (FR-006, FR-013).
+- **Q: Entry timing in the template?**
+  - A: each item's entrance plays over `slow`, eased on `slow`. The step to the next item is its Sequence's `stagger` (the hero's 0.06 s, otherwise 0.18 s), and 0.18 s between Sequences (V3).
+- **Q: The footer's own offset?**
+  - A: drop it; V2 finishes the footer at the max scroll. The footer's static top border becomes the drawn divider, first in its Sequence (V4).
+
 ### Session 2026-11-09 (animate skill retired)
 
 - **Q: What replaces the retired `$averlo:animate` skill?**
@@ -94,7 +124,7 @@ Hybrid MUST be the default driver and Motion the maintained fallback; effects an
 
 ### FR-006: One scheduler; sources own reveal
 
-There MUST be one global scheduler (the site `MotionProvider`), with no page-local or nested global schedulers. `MotionSource.Sequence` enters its nearest scheduler once and owns relative descendant reveal batching. Viewport re-entry reset is owned by the scheduler and source through shared progress; effects never install reveal observers or reset themselves. `MotionSource.Sequence mode="scroll"` instead owns one scroll progress and gives each `MotionSource.Item` a staggered sub-range of it, `[i·stagger / total, (i·stagger + slow) / total]` with `total = slow + (n − 1)·stagger`; it does not enter the scheduler, and items never own their own scroll progress. Each item eases within its slice on the `slow` token curve: its progress is `ease_slow((p − start) / (end − start))`, clamped to 0–1, whether the Sequence progress `p` comes from scrolling or from the catch-up intro. A call site may tighten `stagger` for lines read as one block.
+There MUST be one global scheduler (the site `MotionProvider`), with no page-local or nested global schedulers. `MotionSource.Sequence` enters its nearest scheduler once and owns relative descendant reveal batching. Viewport re-entry reset is owned by the scheduler and source through shared progress; effects never install reveal observers or reset themselves. `MotionSource.Sequence mode="scroll"` instead owns its items' scroll reveals and does not enter the scheduler: each `MotionSource.Item` shows `ease_slow(intro) × ease_slow(reach)` (V1–V3). `intro` comes from the one page-wide entry sequence (`source/entrySequence.ts`), and `reach` from the Sequence's measured item positions (`source/scrollReach.ts`). Both read the window scroll position directly rather than through a driver; the entry intro plays on the driver's progress clock (GSAP in hybrid). A call site may tighten `stagger` for lines read as one block.
 
 ### FR-007: `CounterpartReveal` ownership
 
@@ -120,21 +150,21 @@ Surface tint recipes MUST preserve their interpolation space, tint strength and 
 
 Motion code SHOULD memoize only for correctness or a measured performance benefit.
 
-### FR-013: Scroll reveals catch up at load
+### FR-013: Scroll reveals finish
 
-A scroll reveal on screen when it activates MUST catch up from hidden to its live scroll progress with a timed intro on `slow`, stop exactly at that progress and then follow scroll. The intro scales live progress, so it never passes it, never falls below its own start, and lands on the live value when scroll changes during it. A scroll Sequence's intro lasts `slow + (n − 1)·stagger` on a constant-rate Sequence clock, so each item's sub-range plays over `slow` and eases on the `slow` curve within it (FR-006). The ease is monotonic and fixes 0 and 1, so an item's catch-up lands exactly on the eased value pure scrolling gives at that position and never passes it. The scroll source owns this, together with `ready` (held hidden until ready) and `disabled` gating; a source that persists across client navigation (the footer) catches up again on the new route. Reduced motion and `?motion=off` render every item fully shown with no intro (U3). A reveal's offset MUST be reachable: content that ends the page completes by the maximum scroll position. Scroll sources that are not reveals (parallax, text shift) render their current pose at once with no intro.
+A scroll reveal MUST follow V1–V3. Content on screen at entry plays the entry sequence and ends fully revealed. Every other item scrubs from its own position and finishes by the max scroll at the latest. `ready={false}` holds a Sequence hidden, and a Sequence that persists across client navigation (the footer) joins the new route's entry sequence. Reduced motion and `?motion=off` render every item fully shown (V5). Scroll sources that are not reveals (parallax, text shift) render their current pose at once, with no intro. The 2026-11-08 catch-up intro, which scaled live scroll progress, is retired.
 
-**Scenario: Partially scrolled at load**
+**Scenario: On screen at load**
 
-- **When** a reveal item is 50% through its scroll range as the page loads
-- **Then** it animates from 0 to the value scrolling gives at 50% (eased on `slow` within a Sequence item) and stops there, and further scrolling moves it from there
+- **When** a Sequence's items are above the 95% line as the page loads
+- **Then** they play in reading order, each over `slow`, `stagger` apart, and end fully revealed without any scrolling
 
-**Scenario: Scroll during the intro**
+**Scenario: The page ends first**
 
-- **When** the user scrolls while the catch-up intro is running
-- **Then** the intro ends on the new live progress, never above it
+- **When** an item's usual end line lies past the max scroll
+- **Then** its Sequence shifts earlier by one shared amount, so the item finishes exactly at the max scroll with its usual scrub length
 
-Verified by the `ScrollRevealScrub` (items follow their eased slice), `ScrollRevealCatchUp` (the intro lands on the scroll-scrub value), `ScrollRevealCatchUpRetarget`, `ScrollSequenceStagger`, `ScrollSequenceTightStagger` (0.06 s sub-ranges) and `ScrollRevealMotionOff` MotionSource stories, in both drivers where the driver owns the behaviour, and by the `getMotionStepEase` unit test in `runtime/timing.test.ts`.
+Verified by the `ScrollRevealScrub`, `ScrollRevealEntrySequence`, `ScrollRevealEntryNeverFadesBack`, `ScrollRevealFinishesAtMaxScroll`, `ScrollSequenceStacked`, `ScrollSequenceRowStagger` and `ScrollRevealMotionOff` MotionSource stories (the scrub and entry sequence in both drivers), and by `source/scrollReach.test.ts` (`npm run test:motion`).
 
 ### FR-014: Settled motion equals the motion-off render
 
@@ -146,7 +176,7 @@ A surface's motion MUST reuse an existing Storybook composition whose `parameter
 
 ### U: Universal
 
-- **U0 MUST: every visible change is animated.** Presence, size, position, text, icon, colour, and loading-to-loaded changes move. A change snaps only under U3 or on first paint (U4).
+- **U0 MUST: every visible change is animated.** Presence, size, position, text, icon, colour, and loading-to-loaded changes move. A change snaps only under U3 or on first paint (U4). Entrances follow V.
 - **U1 MUST: tokens, never literals.** Durations, easings and springs come from `ui/foundations/motionTiming.ts`, `spring.ts` and the `motion-*` CSS classes and variables. Feature code names a step; literal durations, easings and springs outside the token files fail lint (`tasks.md`).
 - **U2 MUST: reuse the owners in `specs/platform/design-system/usage`.** A new variant, size, component or icon is listed in its PR with a reason (constitution III).
 - **U3 MUST: reduced motion animates nothing, fades included.**
@@ -154,7 +184,8 @@ A surface's motion MUST reuse an existing Storybook composition whose `parameter
   - CSS gate: `@media (prefers-reduced-motion: reduce)` plus `html[data-motion-override="off"]`.
   - Reveal and source code keeps its own gate, because it also reads the reveal root.
   - The owner gates itself; callers never pass a "no transition" class to make an owner snap.
-- **U4 MUST: no motion on first paint or on restore.** `AnimatePresence initial={false}`; restored drafts and server values render final.
+- **U4 MUST: no motion on first paint or on restore for state.** `AnimatePresence initial={false}`; restored drafts, server values and UI state render final.
+  - Entrance choreography is the one exception, and V3 owns it: on a load, content on screen plays the entry sequence. Content above a restored scroll position renders final.
 - **U5 MUST: springs first.** Every JS-driven animation (size, position, scale, presence and opacity) uses its step's spring. A step's duration and ease are its matched CSS fallback, used only where no JS runs (hover, press, focus, colour).
 - **U6 MUST: one owner per animated element.** A component animates its own parts and callers do not animate the same property (`Button` owns its label, icon and width).
 - **U7 MUST: interrupt and retarget, never queue.** A new change retargets from the on-screen value. Presence `sequenced` and `MorphLabel` are the deliberate sequences, and both retarget when interrupted.
@@ -211,6 +242,29 @@ A surface's motion MUST reuse an existing Storybook composition whose `parameter
 - **L4 MUST: lists that change.** Items are keyed by their own id, never by index; items enter by `ContentPresence mode="sequenced"`; leaving items fade where they stood; remaining items translate (H4); an empty state enters like an item.
 - **L5 SHOULD: items entering together stagger their fade only, with no nudge,** through the `MotionSource` sequence owner.
 
+### V: Scroll reveals (entrances)
+
+- **V1 MUST: a scroll reveal shows `reveal = intro(t) × reach(y)`, and both terms are live all the time.**
+  - There is no flag, latch or mode switch between a timed intro and scroll.
+  - `intro(t)` is the item's slot in the page's entry sequence (V3). It is 1 for every item not on screen at entry.
+  - `reach(y)` is scroll progress from the item's own position (V2).
+  - Each term eases on the `slow` curve.
+  - Primitive: `MotionSource.Sequence mode="scroll"` + `MotionSource.Item` (`source/MotionSourceSequence.tsx`), with `source/entrySequence.ts` (intro) and `source/scrollReach.ts` (reach).
+  - Don't: cap an intro by raw scroll progress. The old `progress = scroll × intro` left content on screen at load stuck part-way.
+- **V2 MUST: every reveal can finish.**
+  - Each item scrubs from its own start line over the Sequence offset's length (default `["start 95%", "start 55%"]`).
+  - Items in one grid row split the row's range with the Sequence's `stagger`. Items stacked in one column each use their own position.
+  - When the page can't scroll far enough, the whole Sequence shifts earlier by one shared amount. The last item then finishes exactly at the max scroll, and the length and stagger stay.
+  - Don't: a per-section offset to make a footer finish.
+- **V3 MUST: content on screen at entry plays one sequence.**
+  - An item is in the sequence when its top is above 95% of the viewport at the entry scroll: the hash target's position, or the restored scroll position.
+  - The items play in reading order once the app is ready. Each plays over `slow`, eased on `slow`. The next item starts its Sequence's `stagger` later, or 0.18 s later when it belongs to another Sequence.
+  - An item nested inside another sequenced item shares its parent's slot.
+  - Such an item is reached (`reach = 1`). Scroll only grows from there, so it never fades back.
+  - Items above a restored scroll position are reached too, and render final.
+- **V4 SHOULD: a section's top rule is a drawn divider,** not a static `border-t`: `MotionEffect.Divider` in the first `MotionSource.Item` of the section's Sequence, so it plays before the heading. The footer's top rule is the first case.
+- **V5 MUST: reduced motion, `?motion=off` and `?reveal=off` show every reveal final (U3).**
+
 ### R: Responsive and verification
 
 - **R1 MUST: CSS decides the look; `useTailwindBreakpoints` decides only whether expensive work mounts** (FR-001, FR-002).
@@ -236,7 +290,7 @@ Which UI uses which step:
 | tooltip, label swap (each phase), chips, scroll-edge fade | `quick` |
 | menus, popovers, select and combobox lists, command palette, field messages, presence size, button width | `smooth` |
 | dialogs, sheets, drawers, backdrops, carousel slides, full-width header menu panel | `gentle` |
-| scroll-reveal catch-up intro at load, reveals with no scroll position (modal content), loading screen, image crossfade | `slow` |
+| scroll-reveal entrance and scrub curve (V1, V3), reveals with no scroll position (modal content), loading screen, image crossfade | `slow` |
 
 Icon keyframe values (spin, ring) stay outside the steps.
 

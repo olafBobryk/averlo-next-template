@@ -30,9 +30,20 @@ text-motion and presence implementations.
   controller context are private; effects consume progress only through the
   nearest source context.
 - Section reveals have no separate reveal facade or marketing scroll-mode
-  switch: scroll-scrubbed reveals are `MotionSource.Sequence mode="scroll"`
-  with `MotionSource.Item` children; `reveal` sources stay for content with no
+  switch: scroll reveals are `MotionSource.Sequence mode="scroll"` with
+  `MotionSource.Item` children; `reveal` sources stay for content with no
   scroll position.
+- Every scroll-reveal item shows `reveal = intro(t) × reach(y)` (motion spec
+  V1–V3; `source/entrySequence.ts`, `source/scrollReach.ts`). Items above the
+  95% line at entry play one timed sequence in reading order and end fully
+  revealed. Every other item scrubs from its own position, finishes at the
+  max scroll at the latest, and reverses when scrolling back. Never add a
+  latch or mode switch between the two terms, and never cap an intro by
+  scroll progress.
+- Don't add per-section offsets to make bottom content finish: `reach`
+  already ends at the max scroll (V2).
+- A section's top rule is `MotionEffect.Divider` in the first
+  `MotionSource.Item` of its Sequence, not a static `border-t` (V4).
 - `owner-hover` resolves only the nearest `data-motion-owner` ancestor.
 - Animated rules compose the canonical, unlabeled `Divider` through
   `MotionEffect.Divider`.

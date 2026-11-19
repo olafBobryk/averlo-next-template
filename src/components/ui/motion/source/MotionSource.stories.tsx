@@ -13,7 +13,6 @@ import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import type { MotionCompositionMetadata } from "../compositionMetadata";
 import * as MotionSource from "./index";
 import { catalogContract } from "./MotionSource.catalog";
-import { getScrollSequenceRanges } from "./MotionSourceSequence";
 
 function DriverParityComposition() {
 	const [ready, setReady] = useState(false);
@@ -728,10 +727,6 @@ export const MotionViewportReentry: Story = {
 	parameters: { ...RevealViewportReentry.parameters, motionDriver: "motion" },
 };
 
-const catchUpOffset: MotionSource.SequenceScrollOffset = [
-	"start 100%",
-	"start 50%",
-];
 const progressTolerance = 0.03;
 
 function resetStoryScroll() {
@@ -747,6 +742,12 @@ function scrollSequence(root: HTMLElement) {
 	return sequence;
 }
 
+function sequenceItems(root: HTMLElement) {
+	return Array.from(
+		root.querySelectorAll<HTMLElement>("[data-motion-source-item]"),
+	);
+}
+
 function itemEffects(root: HTMLElement) {
 	return Array.from(
 		root.querySelectorAll<HTMLElement>(
@@ -755,34 +756,14 @@ function itemEffects(root: HTMLElement) {
 	);
 }
 
-function itemRanges(root: HTMLElement) {
-	return Array.from(
-		root.querySelectorAll<HTMLElement>("[data-motion-source-item]"),
-		(item) =>
-			(item.dataset.motionSourceItemRange ?? "0 1").split(" ").map(Number) as [
-				number,
-				number,
-			],
-	);
-}
-
 function opacityOf(element: HTMLElement) {
 	return Number(getComputedStyle(element).opacity);
-}
-
-function sliceOf(value: number, [start, end]: readonly [number, number]) {
-	return Math.min(1, Math.max(0, (value - start) / (end - start)));
 }
 
 /** The `slow` token curve, built here from the token, not the runtime. */
 const slowCurve = cubicBezier(
 	...(motionTiming.slow.ease as [number, number, number, number]),
 );
-
-/** Where pure scrolling puts an item: its slice position eased on `slow`. */
-function easedSliceOf(value: number, range: readonly [number, number]) {
-	return slowCurve(sliceOf(value, range));
-}
 
 /** Live progress of a `["start A%", "start B%"]` offset from the element rect. */
 function liveProgress(element: HTMLElement, from: number, to: number) {
@@ -792,6 +773,34 @@ function liveProgress(element: HTMLElement, from: number, to: number) {
 		1,
 		Math.max(0, (height * from - top) / (height * (from - to))),
 	);
+}
+
+/** Scroll so `element`'s own `["start 95%", "start 55%"]` progress is `value`. */
+function scrollToItemProgress(element: HTMLElement, value: number) {
+	const documentTop = element.getBoundingClientRect().top + window.scrollY;
+	window.scrollTo(0, documentTop - window.innerHeight * (0.95 - 0.4 * value));
+}
+
+function nextFrames(count: number) {
+	return new Promise<void>((resolve) => {
+		const step = (left: number) =>
+			left === 0 ? resolve() : requestAnimationFrame(() => step(left - 1));
+		step(count);
+	});
+}
+
+/**
+ * Animated, and the entry sequence has measured the page (one frame after
+ * the app is ready). Scrolling earlier would move the entry scroll itself.
+ */
+async function waitForAnimated(root: HTMLElement) {
+	await waitFor(() =>
+		expect(scrollSequence(root)).toHaveAttribute(
+			"data-motion-source-mode",
+			"animated",
+		),
+	);
+	await nextFrames(3);
 }
 
 /** Finish on the fully revealed state so the a11y scan sees settled content. */
@@ -819,27 +828,43 @@ function sampleFrames(effects: HTMLElement[], durationMs: number) {
 	});
 }
 
+const fixtureLabels = ["First", "Second", "Third"];
+
+/**
+ * `entry`: the items are on screen at load. `below-fold`: they are reached
+ * by scrolling. `page-end`: they end the page, so their usual end line is
+ * past the max scroll.
+ */
 function ScrollRevealFixture({
 	count,
-	lead,
-	offset,
+	layout = "stacked",
+	position,
 	stagger,
 }: {
 	count: number;
-	lead: "catch-up" | "below-fold";
-	offset?: MotionSource.SequenceScrollOffset;
+	layout?: "stacked" | "row";
+	position: "entry" | "below-fold" | "page-end";
 	stagger?: number;
 }) {
 	return (
-		<div className="min-h-[320vh] bg-background text-foreground">
-			<div className={lead === "catch-up" ? "h-[75vh]" : "h-[150vh]"} />
+		<div
+			className={
+				position === "page-end"
+					? "bg-background text-foreground"
+					: "min-h-[320vh] bg-background text-foreground"
+			}
+		>
+			<div className={position === "entry" ? "h-[30vh]" : "h-[150vh]"} />
 			<MotionSource.Sequence
-				className="grid max-w-3xl gap-4 px-8"
+				className={
+					layout === "row"
+						? "grid max-w-3xl grid-cols-3 gap-4 px-8"
+						: "grid max-w-3xl gap-4 px-8"
+				}
 				mode="scroll"
-				offset={offset}
 				stagger={stagger}
 			>
-				{["First", "Second", "Third"].slice(0, count).map((label) => (
+				{fixtureLabels.slice(0, count).map((label) => (
 					<MotionSource.Item key={label}>
 						<MotionEffect.Entrance>
 							<Panel padding="md">{label} scroll item</Panel>
@@ -847,6 +872,7 @@ function ScrollRevealFixture({
 					</MotionSource.Item>
 				))}
 			</MotionSource.Sequence>
+			{position === "page-end" ? <div className="h-8" /> : null}
 		</div>
 	);
 }
@@ -854,24 +880,19 @@ function ScrollRevealFixture({
 const verifyScrubFollowsScroll: NonNullable<Story["play"]> = async ({
 	canvasElement,
 }) => {
-	const sequence = scrollSequence(canvasElement);
+	await waitForAnimated(canvasElement);
+	const [item] = sequenceItems(canvasElement);
 	const [effect] = itemEffects(canvasElement);
-	await waitFor(() =>
-		expect(sequence).toHaveAttribute("data-motion-source-mode", "animated"),
-	);
-	const documentTop = sequence.getBoundingClientRect().top + window.scrollY;
-	const scrollToProgress = (value: number) =>
-		window.scrollTo(0, documentTop - window.innerHeight * (0.95 - 0.4 * value));
 	await waitFor(() => expect(opacityOf(effect)).toBe(0));
 	for (const target of [0.25, 0.75, 1, 0.5, 0]) {
-		scrollToProgress(target);
+		scrollToItemProgress(item, target);
 		await waitFor(
 			() => {
-				const live = liveProgress(sequence, 0.95, 0.55);
+				const live = liveProgress(item, 0.95, 0.55);
 				expect(Math.abs(live - target)).toBeLessThan(progressTolerance);
 				const opacity = opacityOf(effect);
-				// The item follows its slice eased on `slow`, not linearly.
-				expect(Math.abs(opacity - easedSliceOf(live, [0, 1]))).toBeLessThan(
+				// The item follows its own reach eased on `slow`, not linearly.
+				expect(Math.abs(opacity - slowCurve(live))).toBeLessThan(
 					progressTolerance,
 				);
 				if (target > 0 && target < 1)
@@ -883,63 +904,31 @@ const verifyScrubFollowsScroll: NonNullable<Story["play"]> = async ({
 	await scrollUntilRevealed(canvasElement);
 };
 
-const verifyCatchUpStopsAtScrollProgress: NonNullable<Story["play"]> = async ({
+/** V3: on screen at entry, the items play in order and end fully revealed with no scroll. */
+const verifyEntrySequence: NonNullable<Story["play"]> = async ({
 	canvasElement,
 }) => {
-	const sequence = scrollSequence(canvasElement);
 	const effects = itemEffects(canvasElement);
-	expect(effects).toHaveLength(2);
-	const samples = await sampleFrames(effects, 1600);
-	const live = liveProgress(sequence, 1, 0.5);
-	expect(Math.abs(live - 0.5)).toBeLessThan(progressTolerance);
-	const ranges = itemRanges(canvasElement);
-	ranges.forEach((range, index) => {
-		// The scroll-scrub value for this position: the intro lands on it.
-		const expected = easedSliceOf(live, range);
+	expect(effects).toHaveLength(3);
+	// `slow` plus two 0.18s steps is 0.92s.
+	const samples = await sampleFrames(effects, 1500);
+	const firstAbove = (index: number) =>
+		samples.findIndex((frame) => frame[index] > 0.5);
+	effects.forEach((_, index) => {
 		const values = samples.map((frame) => frame[index]);
-		// Animated up from hidden, never beyond, and settled exactly there.
-		expect(Math.min(...values)).toBeLessThan(expected * 0.6);
-		expect(Math.max(...values)).toBeLessThanOrEqual(
-			expected + progressTolerance,
-		);
-		expect(Math.abs((values.at(-1) ?? 0) - expected)).toBeLessThan(
-			progressTolerance,
-		);
+		expect(Math.min(...values)).toBeLessThan(0.1);
+		expect(values.at(-1)).toBeGreaterThan(0.99);
 	});
-	// After the intro the slice follows scroll again, and scrolling back to
-	// the load position reproduces exactly the value the intro landed on.
-	const landed = samples.at(-1) ?? [];
-	const loadScroll = window.scrollY;
-	window.scrollTo(0, window.innerHeight * 0.1);
-	await waitFor(
-		() => {
-			const next = liveProgress(sequence, 1, 0.5);
-			effects.forEach((effect, index) => {
-				expect(
-					Math.abs(opacityOf(effect) - easedSliceOf(next, ranges[index])),
-				).toBeLessThan(progressTolerance);
-			});
-		},
-		{ timeout: 3000 },
-	);
-	window.scrollTo(0, loadScroll);
-	await waitFor(
-		() => {
-			effects.forEach((effect, index) => {
-				expect(Math.abs(opacityOf(effect) - landed[index])).toBeLessThan(
-					progressTolerance,
-				);
-			});
-		},
-		{ timeout: 3000 },
-	);
-	await scrollUntilRevealed(canvasElement);
+	expect(firstAbove(0)).toBeGreaterThanOrEqual(0);
+	expect(firstAbove(0)).toBeLessThan(firstAbove(1));
+	expect(firstAbove(1)).toBeLessThan(firstAbove(2));
+	expect(window.scrollY).toBe(0);
 };
 
 export const ScrollRevealScrub: Story = {
 	args: { children: null, strategy: { type: "scroll" } },
 	beforeEach: resetStoryScroll,
-	render: () => <ScrollRevealFixture count={1} lead="below-fold" />,
+	render: () => <ScrollRevealFixture count={1} position="below-fold" />,
 	play: verifyScrubFollowsScroll,
 };
 
@@ -948,85 +937,98 @@ export const ScrollRevealScrubMotionDriver: Story = {
 	parameters: { motionDriver: "motion" },
 };
 
-export const ScrollRevealCatchUp: Story = {
+export const ScrollRevealEntrySequence: Story = {
 	args: { children: null, strategy: { type: "scroll" } },
 	beforeEach: resetStoryScroll,
-	render: () => (
-		<ScrollRevealFixture count={2} lead="catch-up" offset={catchUpOffset} />
-	),
-	play: verifyCatchUpStopsAtScrollProgress,
+	render: () => <ScrollRevealFixture count={3} position="entry" />,
+	play: verifyEntrySequence,
 };
 
-export const ScrollRevealCatchUpMotionDriver: Story = {
-	...ScrollRevealCatchUp,
+export const ScrollRevealEntrySequenceMotionDriver: Story = {
+	...ScrollRevealEntrySequence,
 	parameters: { motionDriver: "motion" },
 };
 
-export const ScrollRevealCatchUpRetarget: Story = {
+export const ScrollRevealEntryNeverFadesBack: Story = {
 	args: { children: null, strategy: { type: "scroll" } },
 	beforeEach: resetStoryScroll,
-	render: () => (
-		<ScrollRevealFixture count={2} lead="catch-up" offset={catchUpOffset} />
-	),
+	render: () => <ScrollRevealFixture count={3} position="entry" />,
 	play: async ({ canvasElement }) => {
-		const sequence = scrollSequence(canvasElement);
 		const effects = itemEffects(canvasElement);
-		// Scroll while the intro is still running: it must land on the new,
-		// live progress, not on the progress it started towards.
+		// Scroll while the entry sequence runs: the items are reached, so
+		// they still end fully revealed and stay there.
 		await new Promise((resolve) => requestAnimationFrame(resolve));
 		window.scrollTo(0, window.innerHeight * 0.2);
-		const samples = await sampleFrames(effects, 1600);
-		const live = liveProgress(sequence, 1, 0.5);
-		expect(Math.abs(live - 0.9)).toBeLessThan(progressTolerance);
-		itemRanges(canvasElement).forEach((range, index) => {
-			const expected = easedSliceOf(live, range);
-			const values = samples.map((frame) => frame[index]);
-			expect(Math.max(...values)).toBeLessThanOrEqual(
-				expected + progressTolerance,
-			);
-			expect(Math.abs((values.at(-1) ?? 0) - expected)).toBeLessThan(
-				progressTolerance,
-			);
-		});
-		await scrollUntilRevealed(canvasElement);
+		await waitFor(
+			() => {
+				for (const effect of effects)
+					expect(opacityOf(effect)).toBeGreaterThan(0.99);
+			},
+			{ timeout: 3000 },
+		);
+		window.scrollTo(0, 0);
+		await new Promise((resolve) => window.setTimeout(resolve, 200));
+		for (const effect of effects)
+			expect(opacityOf(effect)).toBeGreaterThan(0.99);
 	},
 };
 
-function verifySequenceStagger(
-	stagger: number,
-	expectedRanges: readonly (readonly [number, number])[],
-): NonNullable<Story["play"]> {
-	return async ({ canvasElement }) => {
-		const sequence = scrollSequence(canvasElement);
+export const ScrollRevealFinishesAtMaxScroll: Story = {
+	args: { children: null, strategy: { type: "scroll" } },
+	beforeEach: resetStoryScroll,
+	render: () => <ScrollRevealFixture count={3} position="page-end" />,
+	play: async ({ canvasElement }) => {
+		await waitForAnimated(canvasElement);
+		const items = sequenceItems(canvasElement);
 		const effects = itemEffects(canvasElement);
-		await waitFor(() =>
-			expect(sequence).toHaveAttribute("data-motion-source-mode", "animated"),
-		);
-		expect(sequence).toHaveAttribute(
-			"data-motion-source-sequence-stagger",
-			String(stagger),
-		);
-		const ranges = itemRanges(canvasElement);
-		const computedRanges = getScrollSequenceRanges(3, stagger);
-		ranges.forEach(([start, end], index) => {
-			expect(start).toBeCloseTo(expectedRanges[index][0], 3);
-			expect(end).toBeCloseTo(expectedRanges[index][1], 3);
-			expect(start).toBeCloseTo(computedRanges[index][0], 3);
-			expect(end).toBeCloseTo(computedRanges[index][1], 3);
-		});
-		expect(ranges[0][0]).toBe(0);
-		expect(ranges[2][1]).toBe(1);
-		expect(ranges[1][0]).toBeGreaterThan(ranges[0][0]);
-		expect(ranges[2][0]).toBeGreaterThan(ranges[1][0]);
-		const documentTop = sequence.getBoundingClientRect().top + window.scrollY;
-		window.scrollTo(0, documentTop - window.innerHeight * (0.95 - 0.4 * 0.5));
+		const maxScroll =
+			document.documentElement.scrollHeight - window.innerHeight;
+		// The last item's usual end line is past the max scroll.
+		expect(
+			items[2].getBoundingClientRect().top +
+				window.scrollY -
+				window.innerHeight * 0.55,
+		).toBeGreaterThan(maxScroll);
+		window.scrollTo(0, maxScroll);
 		await waitFor(
 			() => {
-				const live = liveProgress(sequence, 0.95, 0.55);
+				for (const effect of effects)
+					expect(opacityOf(effect)).toBeGreaterThan(0.99);
+			},
+			{ timeout: 3000 },
+		);
+		// A little above the max scroll the last item is still part-way: the
+		// whole group shifted, it kept its usual scrub length.
+		window.scrollTo(0, maxScroll - window.innerHeight * 0.1);
+		await waitFor(
+			() => {
 				const values = effects.map(opacityOf);
-				values.forEach((value, index) => {
+				expect(values[2]).toBeGreaterThan(0.01);
+				expect(values[2]).toBeLessThan(0.99);
+				expect(values[0]).toBeGreaterThanOrEqual(values[2]);
+			},
+			{ timeout: 3000 },
+		);
+		window.scrollTo(0, maxScroll);
+	},
+};
+
+export const ScrollSequenceStacked: Story = {
+	args: { children: null, strategy: { type: "scroll" } },
+	beforeEach: resetStoryScroll,
+	render: () => <ScrollRevealFixture count={3} position="below-fold" />,
+	play: async ({ canvasElement }) => {
+		await waitForAnimated(canvasElement);
+		const items = sequenceItems(canvasElement);
+		const effects = itemEffects(canvasElement);
+		scrollToItemProgress(items[1], 0.5);
+		await waitFor(
+			() => {
+				const values = effects.map(opacityOf);
+				// Each stacked item scrubs over the full offset from its own top.
+				items.forEach((item, index) => {
 					expect(
-						Math.abs(value - easedSliceOf(live, ranges[index])),
+						Math.abs(values[index] - slowCurve(liveProgress(item, 0.95, 0.55))),
 					).toBeLessThan(progressTolerance);
 				});
 				expect(values[0]).toBeGreaterThan(values[1]);
@@ -1035,33 +1037,44 @@ function verifySequenceStagger(
 			{ timeout: 3000 },
 		);
 		await scrollUntilRevealed(canvasElement);
-	};
-}
-
-export const ScrollSequenceStagger: Story = {
-	args: { children: null, strategy: { type: "scroll" } },
-	beforeEach: resetStoryScroll,
-	render: () => <ScrollRevealFixture count={3} lead="below-fold" />,
-	// 0.18s apart over 0.92s: [0, 0.6087], [0.1957, 0.8043], [0.3913, 1].
-	play: verifySequenceStagger(0.18, [
-		[0, 0.6087],
-		[0.1957, 0.8043],
-		[0.3913, 1],
-	]),
+	},
 };
 
-export const ScrollSequenceTightStagger: Story = {
+export const ScrollSequenceRowStagger: Story = {
 	args: { children: null, strategy: { type: "scroll" } },
 	beforeEach: resetStoryScroll,
 	render: () => (
-		<ScrollRevealFixture count={3} lead="below-fold" stagger={0.06} />
+		<ScrollRevealFixture count={3} layout="row" position="below-fold" />
 	),
-	// 0.06s apart over 0.68s: [0, 0.8235], [0.0882, 0.9118], [0.1765, 1].
-	play: verifySequenceStagger(0.06, [
-		[0, 0.8235],
-		[0.0882, 0.9118],
-		[0.1765, 1],
-	]),
+	play: async ({ canvasElement }) => {
+		await waitForAnimated(canvasElement);
+		const sequence = scrollSequence(canvasElement);
+		const [first] = sequenceItems(canvasElement);
+		const effects = itemEffects(canvasElement);
+		expect(sequence).toHaveAttribute(
+			"data-motion-source-sequence-stagger",
+			"0.18",
+		);
+		scrollToItemProgress(first, 0.5);
+		await waitFor(
+			() => {
+				const values = effects.map(opacityOf);
+				expect(values[0]).toBeGreaterThan(values[1]);
+				expect(values[1]).toBeGreaterThan(values[2]);
+			},
+			{ timeout: 3000 },
+		);
+		// The row's end line finishes every item in it.
+		scrollToItemProgress(first, 1);
+		await waitFor(
+			() => {
+				for (const effect of effects)
+					expect(opacityOf(effect)).toBeGreaterThan(0.99);
+			},
+			{ timeout: 3000 },
+		);
+		await scrollUntilRevealed(canvasElement);
+	},
 };
 
 export const ScrollRevealMotionOff: Story = {
@@ -1077,7 +1090,7 @@ export const ScrollRevealMotionOff: Story = {
 			else document.documentElement.dataset.motionOverride = previous;
 		};
 	},
-	render: () => <ScrollRevealFixture count={3} lead="below-fold" />,
+	render: () => <ScrollRevealFixture count={3} position="below-fold" />,
 	play: async ({ canvasElement }) => {
 		const sequence = scrollSequence(canvasElement);
 		await waitFor(() =>
