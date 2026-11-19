@@ -400,11 +400,10 @@ function ScrollSequence({
 	const items = useRef(
 		new Map<HTMLElement, { reach: MotionValue<number>; value: number }>(),
 	);
-	const layout = useRef<{
-		nodes: HTMLElement[];
-		slots: ReachSlot[];
-		shift: number;
-	}>({ nodes: [], slots: [], shift: 0 });
+	const layout = useRef<{ nodes: HTMLElement[]; slots: ReachSlot[] }>({
+		nodes: [],
+		slots: [],
+	});
 	const activeRef = useRef(active);
 	activeRef.current = active;
 	const progress = useMotionValue(motionOn && !active ? 0 : 1);
@@ -421,7 +420,7 @@ function ScrollSequence({
 				const viewportHeight = window.innerHeight;
 				layout.current = {
 					nodes,
-					...layoutReach({
+					slots: layoutReach({
 						items: nodes.map(measureItem),
 						offset: parsedOffset,
 						viewportHeight,
@@ -433,13 +432,11 @@ function ScrollSequence({
 				};
 			},
 			update: (scrollY) => {
-				const { nodes, slots, shift } = layout.current;
+				const { nodes, slots } = layout.current;
 				nodes.forEach((node, index) => {
 					items.current
 						.get(node)
-						?.reach.set(
-							activeRef.current ? reachAt(slots[index], shift, scrollY) : 0,
-						);
+						?.reach.set(activeRef.current ? reachAt(slots[index], scrollY) : 0);
 				});
 			},
 		});

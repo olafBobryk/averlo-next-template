@@ -997,9 +997,19 @@ export const ScrollRevealFinishesAtMaxScroll: Story = {
 			},
 			{ timeout: 3000 },
 		);
-		// A little above the max scroll the last item is still part-way: the
-		// whole group shifted, it kept its usual scrub length.
-		window.scrollTo(0, maxScroll - window.innerHeight * 0.1);
+		// The start never moves: just before the last item's top reaches the
+		// 95% line it is still hidden, and between that line and the max
+		// scroll it is part-way.
+		const lastStart =
+			items[2].getBoundingClientRect().top +
+			window.scrollY -
+			window.innerHeight * 0.95;
+		expect(lastStart).toBeLessThan(maxScroll);
+		window.scrollTo(0, lastStart - 20);
+		await waitFor(() => expect(opacityOf(effects[2])).toBe(0), {
+			timeout: 3000,
+		});
+		window.scrollTo(0, (lastStart + maxScroll) / 2);
 		await waitFor(
 			() => {
 				const values = effects.map(opacityOf);

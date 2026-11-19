@@ -47,7 +47,8 @@ This spec covers state-driven motion (presence, size, text, icon, button, loadin
   - a page's first content never transitioned in.
   Olaf fixed them on the product site with one always-live formula and asked for this backport. The 2026-11-08 answers on the catch-up intro and the linear Sequence slices are replaced. Their "eased" choice stays: each term eases on `slow`.
 - **Q: Content you can reach only at the very bottom?**
-  - A: it finishes at the max scroll. The reveal keeps its usual scrub length, shifted to end at the max scroll (V2).
+  - A: it finishes at the max scroll (V2).
+  - Follow-up on the backport: the first version kept the usual scrub length and shifted it earlier. On the template's short pages, that finished the footer before it was on screen. Olaf: "scrub shouldnt move?" He chose "start fixed, end at max": an item starts when its top reaches the 95% line as usual, and only the end is pulled in to the max scroll (V2).
 - **Q: Content on screen at load?**
   - A: it plays one sequence in reading order and ends fully revealed (V3).
 - **Q: A latch once the load sequence is done?**
@@ -162,7 +163,7 @@ A scroll reveal MUST follow V1–V3. Content on screen at entry plays the entry 
 **Scenario: The page ends first**
 
 - **When** an item's usual end line lies past the max scroll
-- **Then** its Sequence shifts earlier by one shared amount, so the item finishes exactly at the max scroll with its usual scrub length
+- **Then** it still starts when its top reaches the 95% line, and its end is pulled in to the max scroll, so it finishes there over a shorter scrub
 
 Verified by the `ScrollRevealScrub`, `ScrollRevealEntrySequence`, `ScrollRevealEntryNeverFadesBack`, `ScrollRevealFinishesAtMaxScroll`, `ScrollSequenceStacked`, `ScrollSequenceRowStagger` and `ScrollRevealMotionOff` MotionSource stories (the scrub and entry sequence in both drivers), and by `source/scrollReach.test.ts` (`npm run test:motion`).
 
@@ -254,7 +255,9 @@ A surface's motion MUST reuse an existing Storybook composition whose `parameter
 - **V2 MUST: every reveal can finish.**
   - Each item scrubs from its own start line over the Sequence offset's length (default `["start 95%", "start 55%"]`).
   - Items in one grid row split the row's range with the Sequence's `stagger`. Items stacked in one column each use their own position.
-  - When the page can't scroll far enough, the whole Sequence shifts earlier by one shared amount. The last item then finishes exactly at the max scroll, and the length and stagger stay.
+  - The start never moves. When the page ends before an item's end line, the end is pulled in to the max scroll, so that item's scrub is shorter and finishes exactly there. A row keeps its stagger within the shorter range.
+  - An item whose top never reaches the 95% line starts as its top enters the screen.
+  - Don't: shift a scrub earlier to keep its length. On a short page it finishes before the content is on screen.
   - Don't: a per-section offset to make a footer finish.
 - **V3 MUST: content on screen at entry plays one sequence.**
   - An item is in the sequence when its top is above 95% of the viewport at the entry scroll: the hash target's position, or the restored scroll position.

@@ -3,10 +3,11 @@
 // The `reach(y)` half of a scroll reveal: `reveal = intro(t) × reach(y)` (motion spec, rules V1–V3).
 //
 // Each item scrubs from its start line `s` to `s + length` (scroll px), from its own position. Items that share a
-// row (a grid row) split the row's range with the list stagger. When the page can't scroll far enough, the whole
-// group shifts earlier by one shared `shift`, so the last item finishes exactly at the max scroll and the usual
-// length and stagger stay. An item whose row top was above the entry line at the entry scroll is reached (1): it
-// is revealed by the entry sequence instead, and since scroll only grows from there it never fades back.
+// row (a grid row) split the row's range with the list stagger. The start never moves. When the page ends before
+// the end line, the end is pulled in to the max scroll, so the scrub is shorter and still finishes. An item whose
+// start line is past the max scroll starts as its top enters the screen. An item whose row top was above the entry
+// line at the entry scroll is reached (1): it is revealed by the entry sequence instead, and since scroll only grows
+// from there it never fades back.
 
 import type { UseScrollOptions } from "motion/react";
 
@@ -64,7 +65,7 @@ export function layoutReach({
 	entryScroll: number;
 	itemDuration: number;
 	stagger: number;
-}): { slots: ReachSlot[]; shift: number } {
+}): ReachSlot[] {
 	const rows: number[][] = [];
 	items.forEach((item, index) => {
 		const row = rows[rows.length - 1];
@@ -72,7 +73,7 @@ export function layoutReach({
 		else rows.push([index]);
 	});
 	const slots: ReachSlot[] = new Array(items.length);
-	let end = Number.NEGATIVE_INFINITY;
+	const lastScroll = Math.max(0, maxScroll);
 	for (const row of rows) {
 		const first = items[row[0]];
 		const rowStart = resolveLine(
@@ -81,34 +82,31 @@ export function layoutReach({
 			first.height,
 			viewportHeight,
 		);
-		const rowEnd = resolveLine(
-			offset[1],
-			first.top,
-			first.height,
-			viewportHeight,
+		// The start stays put; one the page never scrolls to falls back to the top entering the screen.
+		const start =
+			rowStart < lastScroll
+				? rowStart
+				: Math.min(rowStart, first.top - viewportHeight);
+		const rowEnd = Math.min(
+			resolveLine(offset[1], first.top, first.height, viewportHeight),
+			lastScroll,
 		);
-		const rowLength = Math.max(1, rowEnd - rowStart);
+		const rowLength = Math.max(1, rowEnd - start);
 		const total = itemDuration + Math.max(0, row.length - 1) * stagger;
 		row.forEach((itemIndex, position) => {
-			const start = rowStart + (rowLength * position * stagger) / total;
-			const length = (rowLength * itemDuration) / total;
 			slots[itemIndex] = {
-				start,
-				length,
+				start: start + (rowLength * position * stagger) / total,
+				length: (rowLength * itemDuration) / total,
 				reached: first.top - ENTRY_LINE * viewportHeight <= entryScroll,
 			};
-			end = Math.max(end, start + length);
 		});
 	}
-	return { slots, shift: Math.max(0, end - Math.max(0, maxScroll)) };
+	return slots;
 }
 
-export function reachAt(slot: ReachSlot, shift: number, scrollY: number) {
+export function reachAt(slot: ReachSlot, scrollY: number) {
 	if (slot.reached) return 1;
-	return Math.min(
-		1,
-		Math.max(0, (scrollY - (slot.start - shift)) / slot.length),
-	);
+	return Math.min(1, Math.max(0, (scrollY - slot.start) / slot.length));
 }
 
 // One scheduler for every group: scroll updates, layout changes re-measure. Both run once per frame.

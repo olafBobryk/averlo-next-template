@@ -19,18 +19,17 @@ test("resolves element edge and viewport line to a scroll position", () => {
 });
 
 test("a single item scrubs over its usual length from its own position", () => {
-	const { slots, shift } = layoutReach({
+	const [slot] = layoutReach({
 		...base,
 		items: [{ top: 2000, height: 100 }],
 		maxScroll: 10_000,
 	});
-	assert.equal(shift, 0);
-	assert.equal(reachAt(slots[0], shift, 1050), 0);
-	assert.equal(reachAt(slots[0], shift, 1250), 0.5);
-	assert.equal(reachAt(slots[0], shift, 1450), 1);
+	assert.equal(reachAt(slot, 1050), 0);
+	assert.equal(reachAt(slot, 1250), 0.5);
+	assert.equal(reachAt(slot, 1450), 1);
 });
 
-test("content reachable only at the max scroll finishes exactly there, keeping length and stagger", () => {
+test("content the page ends under keeps its start and finishes exactly at the max scroll", () => {
 	// Three stacked lines near the bottom: their natural end lines lie past the max scroll.
 	const items = [
 		{ top: 5700, height: 40 },
@@ -38,14 +37,28 @@ test("content reachable only at the max scroll finishes exactly there, keeping l
 		{ top: 5820, height: 40 },
 	];
 	const maxScroll = 5000;
-	const { slots, shift } = layoutReach({ ...base, items, maxScroll });
-	assert.ok(shift > 0);
-	assert.equal(reachAt(slots[2], shift, maxScroll), 1);
+	const slots = layoutReach({ ...base, items, maxScroll });
+	items.forEach((item, index) => {
+		// Nothing starts before its top reaches the 95% line.
+		assert.equal(slots[index].start, item.top - 950);
+		assert.equal(reachAt(slots[index], item.top - 950), 0);
+		assert.equal(reachAt(slots[index], maxScroll), 1);
+		assert.ok(slots[index].length < 400);
+	});
 	assert.ok(
-		reachAt(slots[0], shift, maxScroll - 100) >
-			reachAt(slots[2], shift, maxScroll - 100),
+		reachAt(slots[0], maxScroll - 100) > reachAt(slots[2], maxScroll - 100),
 	);
-	for (const slot of slots) assert.equal(slot.length, 400);
+});
+
+test("an item whose start line is past the max scroll starts as it enters the screen", () => {
+	const [slot] = layoutReach({
+		...base,
+		items: [{ top: 5980, height: 40 }],
+		maxScroll: 5000,
+	});
+	assert.equal(slot.start, 4980);
+	assert.equal(reachAt(slot, 4980), 0);
+	assert.equal(reachAt(slot, 5000), 1);
 });
 
 test("items in one grid row split the row's range; stacked items each use their own position", () => {
@@ -58,8 +71,9 @@ test("items in one grid row split the row's range; stacked items each use their 
 		],
 		maxScroll: 10_000,
 	});
-	assert.ok(row.slots[0].start < row.slots[1].start);
-	assert.ok(row.slots[1].start < row.slots[2].start);
+	assert.ok(row[0].start < row[1].start);
+	assert.ok(row[1].start < row[2].start);
+	assert.ok(Math.abs(row[2].start + row[2].length - 2450) < 1e-9);
 	const stacked = layoutReach({
 		...base,
 		items: [
@@ -68,12 +82,12 @@ test("items in one grid row split the row's range; stacked items each use their 
 		],
 		maxScroll: 10_000,
 	});
-	assert.equal(stacked.slots[1].start - stacked.slots[0].start, 400);
-	assert.equal(stacked.slots[0].length, stacked.slots[1].length);
+	assert.equal(stacked[1].start - stacked[0].start, 400);
+	assert.equal(stacked[0].length, stacked[1].length);
 });
 
 test("items above the 95% line at the entry scroll are reached and never fade back", () => {
-	const { slots, shift } = layoutReach({
+	const slots = layoutReach({
 		...base,
 		items: [
 			{ top: 900, height: 40 },
@@ -82,7 +96,7 @@ test("items above the 95% line at the entry scroll are reached and never fade ba
 		maxScroll: 10_000,
 	});
 	assert.equal(slots[0].reached, true);
-	assert.equal(reachAt(slots[0], shift, 0), 1);
+	assert.equal(reachAt(slots[0], 0), 1);
 	assert.equal(slots[1].reached, false);
-	assert.equal(reachAt(slots[1], shift, 0), 0);
+	assert.equal(reachAt(slots[1], 0), 0);
 });
