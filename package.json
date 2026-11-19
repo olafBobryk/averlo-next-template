@@ -20,6 +20,7 @@
 		"start": "next start",
 		"lint": "biome check",
 		"typecheck": "tsc --noEmit --pretty false",
+		"test:motion": "tsx --test 'src/components/ui/motion/**/*.test.ts'",
 		"test:unit": "tsx --test 'src/**/*.test.ts' 'src/**/*.test.tsx' 'scripts/**/*.test.mjs' 'biome/**/*.test.mjs' 'plugins/**/*.test.mjs' 'packages/create-averlo/test/*.test.mjs'",
 		"test:storybook:changed": "vitest run --project storybook --changed ${CHECK_BASE:-origin/main}",
 		"check:push": "npm run lint && npm run typecheck && npm run --if-present test:unit && npm run --if-present test:storybook:changed",

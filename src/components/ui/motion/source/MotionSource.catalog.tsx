@@ -84,16 +84,20 @@ export const catalogContract = defineCatalogOwnerContract({
 			storyId: "ui-motion-motion-source--scroll-reveal-scrub",
 		},
 		{
-			label: "At-load catch-up stops at live scroll progress",
-			storyId: "ui-motion-motion-source--scroll-reveal-catch-up",
+			label: "Content on screen at entry plays one sequence and ends revealed",
+			storyId: "ui-motion-motion-source--scroll-reveal-entry-sequence",
 		},
 		{
-			label: "Scroll Sequence staggers eased item sub-ranges",
-			storyId: "ui-motion-motion-source--scroll-sequence-stagger",
+			label: "Content reachable only at the bottom finishes at max scroll",
+			storyId: "ui-motion-motion-source--scroll-reveal-finishes-at-max-scroll",
 		},
 		{
-			label: "Tight 0.06s stagger keeps eased item sub-ranges",
-			storyId: "ui-motion-motion-source--scroll-sequence-tight-stagger",
+			label: "Stacked items each reveal from their own position",
+			storyId: "ui-motion-motion-source--scroll-sequence-stacked",
+		},
+		{
+			label: "Items in one row split the row's range with the stagger",
+			storyId: "ui-motion-motion-source--scroll-sequence-row-stagger",
 		},
 		{
 			label: "Staged footer-heading handoff composition",

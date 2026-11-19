@@ -1,6 +1,13 @@
 "use client";
 
-import { type UseScrollOptions, useMotionValue } from "motion/react";
+import {
+	animate,
+	type MotionValue,
+	motionValue,
+	type UseScrollOptions,
+	useMotionValue,
+} from "motion/react";
+import { usePathname } from "next/navigation";
 import {
 	type ComponentPropsWithoutRef,
 	createContext,
@@ -14,14 +21,25 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
+import { useMotionDriver } from "@/components/ui/foundations/motionDriverContext";
 import { motionTiming } from "@/components/ui/foundations/motionTiming";
+import { useMotionAllowed } from "@/hooks/useMotionAllowed";
+import { animateGsapProgress } from "../runtime/animateProgress";
 import { getMotionStepEase } from "../runtime/timing";
 import {
-	clampMotionProgress,
 	MotionSourceContext,
 	type MotionSourceContextValue,
+	type MotionSourceMode,
 } from "./context";
-import { ScrollSource } from "./MotionSourceRoot";
+import {
+	defaultStagger,
+	getPageEntryScroll,
+	type PlayIntro,
+	registerEntryItem,
+	startEntrySequence,
+	unregisterEntryItem,
+} from "./entrySequence";
 import {
 	MotionSchedulerContext,
 	type RegisteredMotionParticipant,
@@ -29,7 +47,14 @@ import {
 	waitForMotionDelay,
 } from "./scheduler/context";
 import { useMotionParticipant } from "./scheduler/useMotionParticipant";
-import { SlotWithRef } from "./sourceShared";
+import {
+	invalidateReach,
+	layoutReach,
+	type ReachSlot,
+	reachAt,
+	subscribeReachGroup,
+} from "./scrollReach";
+import { SlotWithRef, useSourceReady } from "./sourceShared";
 
 type SequenceBaseProps = {
 	children: ReactNode;
@@ -47,11 +72,12 @@ type TimeSequenceProps = SequenceBaseProps & {
 
 type ScrollSequenceProps = SequenceBaseProps & {
 	/**
-	 * One scroll progress owned by the Sequence; each `MotionSource.Item`
-	 * child gets a staggered sub-range of it.
+	 * Scroll reveals: each `MotionSource.Item` shows `intro × reach`
+	 * (motion spec V1–V3). `stagger` spaces the entry sequence and splits a
+	 * grid row's scroll range.
 	 */
 	mode: "scroll";
-	/** Catch-up intro for content on screen at activation (default on). */
+	/** Items on screen at entry join the page's entry sequence (default on). */
 	intro?: boolean;
 	offset?: MotionSourceSequenceOffset;
 	ready?: boolean;
@@ -62,15 +88,14 @@ export type MotionSourceSequenceOffset = UseScrollOptions["offset"];
 export type MotionSourceSequenceProps = TimeSequenceProps | ScrollSequenceProps;
 
 /**
- * Starts as the top edge clears the fold and completes once it passes just
- * above the middle, so the batch is fully shown before the reading line.
+ * Each item starts as its top edge clears the fold and completes once it
+ * passes just above the middle, or at the max scroll when the page ends
+ * first (V2).
  */
 export const scrollSequenceOffset: UseScrollOptions["offset"] = [
 	"start 95%",
 	"start 55%",
 ];
-
-const defaultStagger = 0.18;
 
 export function MotionSourceSequence(props: MotionSourceSequenceProps) {
 	return props.mode === "scroll" ? (
@@ -300,143 +325,221 @@ function TimeSequence({
 	);
 }
 
-type ItemRange = readonly [number, number];
-
-type ScrollSequenceSlices = {
-	register: (
-		node: HTMLElement,
-		setRange: (range: ItemRange) => void,
-	) => () => void;
+type SequenceItemRegistration = {
+	reach: MotionValue<number>;
+	unregister: () => void;
 };
 
-const ScrollSequenceContext = createContext<ScrollSequenceSlices | null>(null);
+type ScrollSequenceContextValue = {
+	/** Motion is allowed: off, every item renders final. */
+	motionOn: boolean;
+	/** `ready={false}` holds every item hidden. */
+	active: boolean;
+	/** App and driver ready: until then (SSR, hydration) items render final. */
+	appReady: boolean;
+	mode: MotionSourceMode;
+	stagger: number;
+	intro: boolean;
+	register: (node: HTMLElement) => SequenceItemRegistration;
+	/** An item's shown value, for the Sequence's own progress (its least revealed item). */
+	report: (node: HTMLElement, value: number) => void;
+};
+
+const ScrollSequenceContext = createContext<ScrollSequenceContextValue | null>(
+	null,
+);
+
+const itemDuration = Number(motionTiming.slow.duration);
+
+/** The element's layout top in the document, without its own reveal translate. */
+function measureItem(node: HTMLElement) {
+	const rect = node.getBoundingClientRect();
+	const transform = getComputedStyle(node).transform;
+	const translateY =
+		transform && transform !== "none"
+			? new DOMMatrixReadOnly(transform).m42
+			: 0;
+	return { top: rect.top + window.scrollY - translateY, height: rect.height };
+}
+
+function byDocumentOrder(first: HTMLElement, second: HTMLElement) {
+	return first.compareDocumentPosition(second) &
+		Node.DOCUMENT_POSITION_FOLLOWING
+		? -1
+		: 1;
+}
 
 /**
- * Sub-range i of n: each item spans one `slow` reveal and starts `stagger`
- * seconds after the previous one, normalised to the whole sequence. The
- * linear intro over the same total therefore plays each slice over `slow`,
- * and each item eases within its slice (`getScrollSequenceItemProgress`).
+ * Scroll reveals: every `MotionSource.Item` shows `reveal = intro(t) × reach(y)`
+ * (motion spec V1–V3), each term eased on `slow`.
+ * - `intro(t)`: the page's entry sequence (`entrySequence.ts`). Items on screen
+ *   at entry play one timed sequence in reading order; every other item has
+ *   intro = 1.
+ * - `reach(y)`: scroll progress from the item's own position
+ *   (`scrollReach.ts`), finishing at the max scroll at the latest. Items
+ *   already past their start line at entry are reached (1).
+ * Both are live all the time; nothing switches between them.
  */
-export function getScrollSequenceRanges(count: number, stagger: number) {
-	const span = Number(motionTiming.slow.duration);
-	const step = Math.max(0, stagger);
-	const total = span + Math.max(0, count - 1) * step;
-	return Array.from(
-		{ length: count },
-		(_, index): ItemRange => [
-			(index * step) / total,
-			(index * step + span) / total,
-		],
-	);
-}
-
-function getScrollSequenceDuration(count: number, stagger: number) {
-	return (
-		Number(motionTiming.slow.duration) +
-		Math.max(0, count - 1) * Math.max(0, stagger)
-	);
-}
-
 function ScrollSequence({
 	children,
-	as,
+	as: Tag = "div",
 	className,
 	intro = true,
 	offset = scrollSequenceOffset,
 	ready,
 	stagger = defaultStagger,
 }: ScrollSequenceProps) {
-	const itemsRef = useRef(new Map<HTMLElement, (range: ItemRange) => void>());
-	const frameRef = useRef<number | null>(null);
-
-	const connectedItems = useCallback(
-		() =>
-			[...itemsRef.current.keys()]
-				.filter((node) => node.isConnected)
-				.sort((first, second) =>
-					first.compareDocumentPosition(second) &
-					Node.DOCUMENT_POSITION_FOLLOWING
-						? -1
-						: 1,
-				),
-		[],
+	const appReady = useSourceReady();
+	const motionAllowed = useMotionAllowed(true);
+	const motionDisabled = useMotionDisableOverride();
+	const driver = useMotionDriver();
+	const motionOn = motionAllowed && !motionDisabled;
+	const active = ready !== false;
+	const mode: MotionSourceMode =
+		appReady && motionOn ? "animated" : "static-final";
+	const items = useRef(
+		new Map<HTMLElement, { reach: MotionValue<number>; value: number }>(),
 	);
+	const layout = useRef<{ nodes: HTMLElement[]; slots: ReachSlot[] }>({
+		nodes: [],
+		slots: [],
+	});
+	const activeRef = useRef(active);
+	activeRef.current = active;
+	const progress = useMotionValue(motionOn && !active ? 0 : 1);
+	const offsetKey = JSON.stringify(offset);
+	const resolvedStagger = Math.max(0, stagger);
 
-	const assignRanges = useCallback(() => {
-		frameRef.current = null;
-		const nodes = connectedItems();
-		const ranges = getScrollSequenceRanges(nodes.length, stagger);
-		nodes.forEach((node, index) => {
-			itemsRef.current.get(node)?.(ranges[index]);
-		});
-	}, [connectedItems, stagger]);
-
-	const scheduleAssign = useCallback(() => {
-		if (frameRef.current !== null) return;
-		frameRef.current = requestAnimationFrame(assignRanges);
-	}, [assignRanges]);
-
-	const register = useCallback<ScrollSequenceSlices["register"]>(
-		(node, setRange) => {
-			itemsRef.current.set(node, setRange);
-			scheduleAssign();
-			return () => {
-				itemsRef.current.delete(node);
-				scheduleAssign();
-			};
-		},
-		[scheduleAssign],
-	);
-
-	// Items register in their layout effects, before this one runs, so the
-	// first painted frame already has its sub-ranges.
 	useLayoutEffect(() => {
-		if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
-		assignRanges();
-	}, [assignRanges]);
+		const parsedOffset = JSON.parse(offsetKey) as NonNullable<typeof offset>;
+		return subscribeReachGroup({
+			measure: () => {
+				const nodes = [...items.current.keys()]
+					.filter((node) => node.isConnected)
+					.sort(byDocumentOrder);
+				const viewportHeight = window.innerHeight;
+				layout.current = {
+					nodes,
+					slots: layoutReach({
+						items: nodes.map(measureItem),
+						offset: parsedOffset,
+						viewportHeight,
+						maxScroll: document.documentElement.scrollHeight - viewportHeight,
+						entryScroll: getPageEntryScroll(),
+						itemDuration,
+						stagger: resolvedStagger,
+					}),
+				};
+			},
+			update: (scrollY) => {
+				const { nodes, slots } = layout.current;
+				nodes.forEach((node, index) => {
+					items.current
+						.get(node)
+						?.reach.set(activeRef.current ? reachAt(slots[index], scrollY) : 0);
+				});
+			},
+		});
+	}, [offsetKey, resolvedStagger]);
 
-	useEffect(
-		() => () => {
-			if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+	useEffect(() => {
+		void active;
+		invalidateReach();
+	}, [active]);
+
+	const register = useCallback((node: HTMLElement) => {
+		const reach = motionValue(0);
+		items.current.set(node, { reach, value: 0 });
+		invalidateReach();
+		return {
+			reach,
+			unregister: () => {
+				items.current.delete(node);
+				invalidateReach();
+			},
+		};
+	}, []);
+
+	const report = useCallback(
+		(node: HTMLElement, value: number) => {
+			const entry = items.current.get(node);
+			if (!entry) return;
+			entry.value = value;
+			let least = 1;
+			for (const item of items.current.values())
+				least = Math.min(least, item.value);
+			progress.set(least);
 		},
-		[],
+		[progress],
 	);
 
-	const introDuration = useCallback(
-		() => getScrollSequenceDuration(connectedItems().length, stagger),
-		[connectedItems, stagger],
+	const sequence = useMemo<ScrollSequenceContextValue>(
+		() => ({
+			active,
+			appReady,
+			intro,
+			mode,
+			motionOn,
+			register,
+			report,
+			stagger: resolvedStagger,
+		}),
+		[
+			active,
+			appReady,
+			intro,
+			mode,
+			motionOn,
+			register,
+			report,
+			resolvedStagger,
+		],
 	);
-	const slices = useMemo(() => ({ register }), [register]);
+	const source = useMemo<MotionSourceContextValue>(
+		() => ({ mode, progress, strategyType: "scroll" }),
+		[mode, progress],
+	);
 
 	return (
-		<ScrollSequenceContext.Provider value={slices}>
-			<ScrollSource
-				as={as}
-				className={className}
-				data-motion-source-sequence=""
-				data-motion-source-sequence-mode="scroll"
-				data-motion-source-sequence-stagger={stagger}
-				introDuration={introDuration}
-				strategy={{ type: "scroll", intro, offset, ready }}
-			>
-				{children}
-			</ScrollSource>
+		<ScrollSequenceContext.Provider value={sequence}>
+			<MotionSourceContext.Provider value={source}>
+				<Tag
+					className={className}
+					data-motion-source=""
+					data-motion-source-driver={driver === "hybrid" ? "gsap" : "motion"}
+					data-motion-source-mode={mode}
+					data-motion-source-strategy="scroll"
+					data-motion-source-sequence=""
+					data-motion-source-sequence-mode="scroll"
+					data-motion-source-sequence-stagger={stagger}
+				>
+					{children}
+				</Tag>
+			</MotionSourceContext.Provider>
 		</ScrollSequenceContext.Provider>
 	);
 }
 
-const easeItemSlice = getMotionStepEase("slow");
+const easeSlow = getMotionStepEase("slow");
 
-/**
- * An item's progress at Sequence progress `value`: its linear position in
- * the slice, eased on the `slow` curve. The ease is monotonic and fixes 0
- * and 1, so the catch-up intro (which scales the Sequence progress) still
- * lands on exactly the value pure scrolling gives, and never passes it.
- */
-function getScrollSequenceItemProgress(value: number, [start, end]: ItemRange) {
-	if (end <= start) return value >= end ? 1 : 0;
-	return easeItemSlice(clampMotionProgress((value - start) / (end - start)));
-}
+/** The entry intro runs at a constant rate over one `slow` reveal; the item eases it on `slow`. */
+const playIntroGsap: PlayIntro = (intro, delay) => {
+	const tween = animateGsapProgress(intro, 1, {
+		delay,
+		duration: itemDuration,
+		linear: true,
+	});
+	return () => tween.kill();
+};
+
+const playIntroMotion: PlayIntro = (intro, delay) => {
+	const controls = animate(intro, 1, {
+		delay,
+		duration: itemDuration,
+		ease: "linear",
+	});
+	return () => controls.stop();
+};
 
 type MotionSourceItemOwnProps = {
 	as?: ElementType;
@@ -448,9 +551,9 @@ export type MotionSourceItemProps = MotionSourceItemOwnProps &
 	Omit<ComponentPropsWithoutRef<"div">, keyof MotionSourceItemOwnProps>;
 
 /**
- * One staggered slice of a scroll Sequence's progress. Effects inside it
- * see 0 to 1 across the slice, eased on `slow`, and keep their own `range`
- * within it.
+ * One scroll reveal inside `MotionSource.Sequence mode="scroll"`. Effects
+ * inside it see `ease(intro) × ease(reach)`, 0 to 1, and keep their own
+ * `range` within it.
  */
 export function MotionSourceItem({
 	as: Tag = "div",
@@ -458,51 +561,100 @@ export function MotionSourceItem({
 	children,
 	...rest
 }: MotionSourceItemProps) {
-	const slices = useContext(ScrollSequenceContext);
-	const source = useContext(MotionSourceContext);
-	if (!slices || !source) {
+	const sequence = useContext(ScrollSequenceContext);
+	if (!sequence) {
 		throw new Error(
 			'MotionSource.Item must be rendered inside MotionSource.Sequence mode="scroll".',
 		);
 	}
+	const {
+		active,
+		appReady,
+		intro: joins,
+		motionOn,
+		register,
+		report,
+	} = sequence;
+	const stagger = sequence.stagger;
 	const nodeRef = useRef<HTMLElement | null>(null);
-	const [range, setRange] = useState<ItemRange>([0, 1]);
-	const progress = useMotionValue(
-		getScrollSequenceItemProgress(source.progress.get(), range),
-	);
-	const parentProgress = source.progress;
+	const driver = useMotionDriver();
+	const pathname = usePathname();
+	const intro = useMotionValue(0);
+	const reach = useMotionValue(0);
+	// Motion off: final. Held (`ready={false}`): hidden. Before the app is
+	// ready (SSR, hydration): final. Otherwise both terms apply.
+	const gate = !motionOn ? 1 : !active ? 0 : !appReady ? 1 : -1;
+	const progress = useMotionValue(gate >= 0 ? gate : 0);
+	useLayoutEffect(() => {
+		const update = () =>
+			progress.set(
+				gate >= 0 ? gate : easeSlow(intro.get()) * easeSlow(reach.get()),
+			);
+		update();
+		const unsubscribeIntro = intro.on("change", update);
+		const unsubscribeReach = reach.on("change", update);
+		return () => {
+			unsubscribeIntro();
+			unsubscribeReach();
+		};
+	}, [gate, intro, progress, reach]);
 
 	useLayoutEffect(() => {
 		const node = nodeRef.current;
 		if (!node) return;
-		return slices.register(node, (next) =>
-			setRange((current) =>
-				current[0] === next[0] && current[1] === next[1] ? current : next,
-			),
+		registerEntryItem(
+			node,
+			{
+				intro,
+				joins,
+				play: driver === "hybrid" ? playIntroGsap : playIntroMotion,
+				// The Sequence's stable `register` doubles as its identity.
+				sequence: register,
+				stagger,
+			},
+			pathname,
 		);
-	}, [slices]);
+		const registration = register(node);
+		reach.jump(registration.reach.get());
+		const unsubscribeReach = registration.reach.on("change", (value) =>
+			reach.set(value),
+		);
+		report(node, progress.get());
+		const unsubscribeProgress = progress.on("change", (value) =>
+			report(node, value),
+		);
+		return () => {
+			unsubscribeProgress();
+			unsubscribeReach();
+			registration.unregister();
+			unregisterEntryItem(node);
+		};
+	}, [
+		driver,
+		intro,
+		joins,
+		pathname,
+		progress,
+		reach,
+		register,
+		report,
+		stagger,
+	]);
 
-	useLayoutEffect(() => {
-		progress.jump(getScrollSequenceItemProgress(parentProgress.get(), range));
-		return parentProgress.on("change", (value) =>
-			progress.set(getScrollSequenceItemProgress(value, range)),
-		);
-	}, [parentProgress, progress, range]);
+	useEffect(() => {
+		if (!appReady) return;
+		startEntrySequence(motionOn, pathname);
+	}, [appReady, motionOn, pathname]);
 
 	const value = useMemo<MotionSourceContextValue>(
-		() => ({ mode: source.mode, progress, strategyType: source.strategyType }),
-		[progress, source.mode, source.strategyType],
+		() => ({ mode: sequence.mode, progress, strategyType: "scroll" }),
+		[progress, sequence.mode],
 	);
 	const Frame = asChild ? SlotWithRef : Tag;
 
 	return (
 		<MotionSourceContext.Provider value={value}>
-			<Frame
-				ref={nodeRef}
-				data-motion-source-item=""
-				data-motion-source-item-range={`${range[0].toFixed(4)} ${range[1].toFixed(4)}`}
-				{...rest}
-			>
+			<Frame ref={nodeRef} data-motion-source-item="" {...rest}>
 				{children}
 			</Frame>
 		</MotionSourceContext.Provider>

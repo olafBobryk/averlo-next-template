@@ -29,24 +29,9 @@ import {
 	useScrollSourceState,
 	useSourceReady,
 } from "../sourceShared";
-export function MotionScrollSource({
-	introDuration,
-	strategy,
-	...props
-}: ScrollSourceProps) {
+export function MotionScrollSource({ strategy, ...props }: ScrollSourceProps) {
 	const targetRef = useRef<HTMLElement | null>(null);
-	const {
-		enabled,
-		introProgress,
-		markIntroPlayed,
-		pathname,
-		progress,
-		shouldPlayIntro,
-		staticProgress,
-		syncRoute,
-	} = useScrollSourceState(strategy);
-	const introDurationRef = useRef(introDuration);
-	introDurationRef.current = introDuration;
+	const { enabled, progress, staticProgress } = useScrollSourceState(strategy);
 	const { scrollYProgress } = useScroll({
 		target: targetRef,
 		offset: strategy.offset ?? defaultScrollOffset,
@@ -56,47 +41,13 @@ export function MotionScrollSource({
 		strategy.smooth === false ? scrollYProgress : springProgress;
 
 	useLayoutEffect(() => {
-		void pathname;
-		syncRoute();
 		if (!enabled) {
 			progress.jump(staticProgress);
 			return;
 		}
-		const target = targetRef.current;
-		if (!target || !shouldPlayIntro(target)) {
-			progress.jump(sourceProgress.get());
-			return sourceProgress.on("change", (value) => progress.set(value));
-		}
-		// Live progress scaled by the intro factor: the intro lands on live
-		// progress, never past it, and then simply follows scroll.
-		const update = () =>
-			progress.set(sourceProgress.get() * introProgress.get());
-		progress.jump(sourceProgress.get() * introProgress.get());
-		const unsubscribeScroll = sourceProgress.on("change", update);
-		const unsubscribeIntro = introProgress.on("change", update);
-		const duration = introDurationRef.current?.();
-		const controls = animate(introProgress, 1, {
-			...(duration === undefined
-				? spring.slow
-				: { duration: duration * (1 - introProgress.get()), ease: "linear" }),
-			onComplete: markIntroPlayed,
-		});
-		return () => {
-			controls.stop();
-			unsubscribeScroll();
-			unsubscribeIntro();
-		};
-	}, [
-		enabled,
-		introProgress,
-		markIntroPlayed,
-		pathname,
-		progress,
-		shouldPlayIntro,
-		sourceProgress,
-		staticProgress,
-		syncRoute,
-	]);
+		progress.jump(sourceProgress.get());
+		return sourceProgress.on("change", (value) => progress.set(value));
+	}, [enabled, progress, sourceProgress, staticProgress]);
 
 	return (
 		<SourceFrame

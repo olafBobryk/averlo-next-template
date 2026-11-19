@@ -17,81 +17,31 @@ import {
 	useSourceReady,
 } from "../sourceShared";
 
-export function GsapScrollSource({
-	introDuration,
-	strategy,
-	...props
-}: ScrollSourceProps) {
+export function GsapScrollSource({ strategy, ...props }: ScrollSourceProps) {
 	const targetRef = useRef<HTMLElement | null>(null);
-	const {
-		enabled,
-		introProgress,
-		markIntroPlayed,
-		pathname,
-		progress,
-		shouldPlayIntro,
-		staticProgress,
-		syncRoute,
-	} = useScrollSourceState(strategy);
-	const introDurationRef = useRef(introDuration);
-	introDurationRef.current = introDuration;
+	const { enabled, progress, staticProgress } = useScrollSourceState(strategy);
 	const offset = strategy.offset ?? defaultScrollOffset;
 	const start = toScrollTriggerPosition(offset?.[0], "top bottom");
 	const end = toScrollTriggerPosition(offset?.[1], "bottom top");
 
 	useLayoutEffect(() => {
-		void pathname;
-		syncRoute();
 		if (!enabled) {
 			progress.jump(staticProgress);
 			return;
 		}
 		const target = targetRef.current;
 		if (!target) return;
-		const playIntro = shouldPlayIntro(target);
-		// One trigger owns live progress; during the intro it is scaled by
-		// the intro factor, so the intro lands on live progress, never past it.
-		const factor = () => (playIntro ? introProgress.get() : 1);
 		const trigger = ScrollTrigger.create({
 			end,
 			invalidateOnRefresh: true,
-			onRefresh: (self) => progress.jump(self.progress * factor()),
-			onUpdate: (self) => progress.set(self.progress * factor()),
+			onRefresh: (self) => progress.jump(self.progress),
+			onUpdate: (self) => progress.set(self.progress),
 			start,
 			trigger: target,
 		});
-		progress.jump(trigger.progress * factor());
-		if (!playIntro) return () => trigger.kill();
-
-		const unsubscribe = introProgress.on("change", (value) =>
-			progress.set(trigger.progress * value),
-		);
-		const duration = introDurationRef.current?.();
-		const tween = animateGsapProgress(introProgress, 1, {
-			duration:
-				duration === undefined
-					? undefined
-					: duration * (1 - introProgress.get()),
-			linear: duration !== undefined,
-			onComplete: markIntroPlayed,
-		});
-		return () => {
-			tween.kill();
-			unsubscribe();
-			trigger.kill();
-		};
-	}, [
-		enabled,
-		end,
-		introProgress,
-		markIntroPlayed,
-		pathname,
-		progress,
-		shouldPlayIntro,
-		start,
-		staticProgress,
-		syncRoute,
-	]);
+		progress.jump(trigger.progress);
+		return () => trigger.kill();
+	}, [enabled, end, progress, start, staticProgress]);
 
 	return (
 		<SourceFrame

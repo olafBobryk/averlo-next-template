@@ -6,13 +6,6 @@ import { Button } from "@/components/ui/primitives/Button";
 import type { SiteLayoutDocument } from "./siteLayout";
 import { getSiteLinkHref } from "./siteLayout";
 
-// The footer ends the page, so a mid-viewport end point is never reached:
-// the reveal completes as the content's bottom edge arrives, at max scroll.
-const footerRevealOffset: MotionSource.SequenceScrollOffset = [
-	"start end",
-	"end end",
-];
-
 export default function Footer({
 	className = "",
 	layout,
@@ -22,18 +15,21 @@ export default function Footer({
 	layout: SiteLayoutDocument["footer"];
 	socialLinks: SiteLayoutDocument["socialLinks"];
 }) {
+	// The footer ends the page: its reveals finish at the max scroll (motion
+	// spec V2). Its top rule draws in first (V4).
 	return (
-		<footer
+		<MotionSource.Sequence
+			as="footer"
 			className={
-				"flex flex-col items-center py-section-y px-section-x border-t border-white/[0.15] " +
+				"relative flex flex-col items-center py-section-y px-section-x " +
 				className
 			}
+			mode="scroll"
 		>
-			<MotionSource.Sequence
-				className="flex flex-col justify-center items-center max-w-section-max relative gap-[25px] "
-				mode="scroll"
-				offset={footerRevealOffset}
-			>
+			<MotionSource.Item className="absolute inset-x-0 top-0">
+				<MotionEffect.Divider />
+			</MotionSource.Item>
+			<div className="flex flex-col justify-center items-center max-w-section-max relative gap-[25px]">
 				<MotionSource.Item>
 					<MotionEffect.Entrance>
 						<Logo size="md" />
@@ -70,7 +66,7 @@ export default function Footer({
 						</MotionEffect.Entrance>
 					</MotionSource.Item>
 				) : null}
-			</MotionSource.Sequence>
-		</footer>
+			</div>
+		</MotionSource.Sequence>
 	);
 }
