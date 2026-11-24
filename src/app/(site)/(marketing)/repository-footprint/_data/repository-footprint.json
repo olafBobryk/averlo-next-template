@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "11b641b862e34578a41f805d43b5d32c0c4380d1",
+	"head": "1a461a7b1aa969372c6c4be5e3c32465a3a4d3cd",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -3116,6 +3116,24 @@
 			"lines": 151658,
 			"textBytes": 4777123,
 			"tokens": 1223607
+		},
+		{
+			"date": "2026-11-17",
+			"hash": "ae675b72ac7992239b83c3a952cabf6958669d6d",
+			"subject": "Ignore agent worktrees in git and Biome; tick merged 2026-11-08 design-system tasks",
+			"files": 1345,
+			"lines": 151198,
+			"textBytes": 4758640,
+			"tokens": 1218833
+		},
+		{
+			"date": "2026-11-24",
+			"hash": "1a461a7b1aa969372c6c4be5e3c32465a3a4d3cd",
+			"subject": "Merge pull request #10 from olafBobryk/chore/template-upkeep",
+			"files": 1348,
+			"lines": 151660,
+			"textBytes": 4777126,
+			"tokens": 1223650
 		}
 	],
 	"version": 1
