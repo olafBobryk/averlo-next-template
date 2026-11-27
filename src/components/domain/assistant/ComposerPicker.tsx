@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
 import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { Card } from "@/components/ui/primitives/surfaces";
@@ -234,13 +235,13 @@ export function useComposerPicker({
 								</Button>
 							</div>
 						) : null}
-						<div
+						<ScrollArea
+							edge={8}
 							id={id}
 							role="listbox"
 							aria-label={trigger.kind === "command" ? "Commands" : "Context"}
 							aria-busy={loading}
-							// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-							className="min-h-0 overflow-y-auto max-h-[280px] p-2 space-y-1"
+							className="max-h-[280px] space-y-1 px-2"
 						>
 							{items.map((item, i) => (
 								<button
@@ -283,7 +284,7 @@ export function useComposerPicker({
 										: "No context available."}
 								</div>
 							) : null}
-						</div>
+						</ScrollArea>
 					</Card>
 				</motion.div>
 			) : null,

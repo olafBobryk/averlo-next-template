@@ -7,6 +7,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import { Float } from "@/components/ui/primitives/surfaces";
 /** Shared rendered owner: Chat summary and Lab backlog differ only in content. */
@@ -100,14 +101,14 @@ export function SummaryOverlay({
 						key="summary"
 					>
 						<Float>
-							<div
+							<ScrollArea
+								edge={16}
 								ref={panel}
 								tabIndex={-1}
 								role="dialog"
 								aria-label={label}
 								id="workspace-summary"
-								// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-								className="max-h-[calc(100dvh-80px)] overflow-y-auto p-4 outline-none"
+								className="max-h-[calc(100dvh-80px)] px-4 outline-none"
 							>
 								<div className="mb-4 flex items-center justify-between gap-3">
 									<div className="flex min-w-0 items-center gap-2">
@@ -127,7 +128,7 @@ export function SummaryOverlay({
 									/>
 								</div>
 								{children}
-							</div>
+							</ScrollArea>
 						</Float>
 					</motion.div>
 				) : null}

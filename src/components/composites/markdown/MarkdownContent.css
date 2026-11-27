@@ -185,16 +185,30 @@
 	font-size: 0.92em;
 }
 
-.markdown-content pre {
-	overflow-x: auto;
+/* :where keeps the block margin below the first/last-child trims. */
+.markdown-content :where([data-slot="markdown-pre"]) {
+	margin: 0.75rem 0;
+}
+
+/* A code block's frame stays fixed; its ScrollArea pre scrolls inside it and
+   takes the inline padding (scroll S8). */
+.markdown-content [data-slot="markdown-pre"] {
+	overflow: hidden;
 	border: 1px solid color-mix(in oklch, var(--border), transparent 35%);
 	border-radius: var(--radius-lg);
 	background: color-mix(in oklch, var(--input), transparent 50%);
-	padding: 1rem;
+}
+
+.markdown-content pre {
+	padding-block: 1rem;
 	color: var(--foreground);
 	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 	font-size: var(--font-size-sm);
 	line-height: 1.65;
+}
+
+.markdown-content [data-slot="markdown-pre"] > pre {
+	margin: 0;
 }
 
 .markdown-content pre code {

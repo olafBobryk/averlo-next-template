@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Accordion } from "@/components/ui/misc";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/surfaces";
 import type { AssistantToolPart } from "@/lib/assistant/contracts";
@@ -232,13 +233,13 @@ export function ToolCallView({
 						<div className="text-sm font-medium text-muted-foreground">
 							Output
 						</div>
-						<section
+						<ScrollArea
+							as="section"
+							edge={0}
 							ref={viewport}
-							// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-							className="overflow-y-auto"
 							style={{ maxHeight: `${lines * 1.25}rem` }}
 							aria-label="Tool output"
-							// biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard users must be able to scroll tool output.
+							// Keyboard users must be able to scroll tool output.
 							tabIndex={0}
 						>
 							<div className="space-y-2 pr-3">
@@ -252,7 +253,7 @@ export function ToolCallView({
 									</pre>
 								)}
 							</div>
-						</section>
+						</ScrollArea>
 						{hasMore && lines < 24 && (
 							<Button
 								variant="bare"

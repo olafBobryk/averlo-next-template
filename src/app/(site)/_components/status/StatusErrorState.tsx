@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import { StatusContent } from "./StatusContent";
 
@@ -74,10 +75,19 @@ export function StatusErrorState({
 			details={
 				showDetails ? (
 					<div className="mt-4 flex w-full flex-col items-center gap-3">
-						{/* biome-ignore lint/plugin/noAdHocScrollHeight: debt */}
-						<pre className="max-h-48 w-full overflow-auto rounded-lg border border-border/15 bg-surface p-4 text-left text-xs leading-relaxed text-foreground/80">
-							{errorDetails}
-						</pre>
+						{/* The filled frame stays fixed; the details scroll inside it. */}
+						<div className="w-full overflow-hidden rounded-lg border border-border/15 bg-surface">
+							<ScrollArea
+								as="pre"
+								aria-label="Error details"
+								edge={16}
+								// A focus stop, so keyboard users can scroll the details.
+								tabIndex={0}
+								className="max-h-48 px-4 text-left text-xs leading-relaxed text-foreground/80"
+							>
+								{errorDetails}
+							</ScrollArea>
+						</div>
 						<Button variant="secondary" onClick={handleCopyDetails}>
 							{copyStatus === "copied"
 								? "Copied"

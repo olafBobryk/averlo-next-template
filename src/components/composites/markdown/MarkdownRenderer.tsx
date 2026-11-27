@@ -16,6 +16,7 @@ import {
 import { focusRing } from "@/components/ui/foundations/focus";
 import { ChoiceIndicatorMulti } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/misc";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text, textVariants } from "@/components/ui/primitives/Text";
 import {
@@ -300,7 +301,15 @@ function createMarkdownComponents(
 				</Text>
 			);
 		},
-		pre: ({ children }) => <pre>{children}</pre>,
+		// The filled frame stays fixed; long lines scroll inside it (scroll S8).
+		pre: ({ children }) => (
+			<div data-slot="markdown-pre">
+				{/* A focus stop, so keyboard users can scroll long lines. */}
+				<ScrollArea as="pre" axis="x" edge={16} tabIndex={0}>
+					{children}
+				</ScrollArea>
+			</div>
+		),
 		strong: ({ children }) => (
 			<strong className="font-semibold text-foreground/90">{children}</strong>
 		),

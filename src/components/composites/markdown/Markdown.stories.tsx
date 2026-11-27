@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect } from "storybook/test";
+import { expect, waitFor } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { catalogContract } from "./Markdown.catalog";
 import { MarkdownEditor } from "./MarkdownEditor";
@@ -120,5 +120,40 @@ export const EditorAndSkeleton: Story = {
 		);
 		await expect(editor).toHaveAttribute("aria-invalid", "true");
 		await expect(canvas.getByTestId("markdown-owner-editor")).toBeVisible();
+	},
+};
+
+const codeMarkdown = `Run the check:
+
+\`\`\`sh
+npm run check:push -- --reporter=verbose --base=origin/main --project=storybook --changed
+\`\`\``;
+
+export const CodeBlockScrollsInside: Story = {
+	render: () => (
+		<div style={{ width: 320 }}>
+			<MarkdownRenderer markdown={codeMarkdown} />
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const frame = canvasElement.querySelector(
+			'[data-slot="markdown-pre"]',
+		) as HTMLElement;
+		const pre = frame.querySelector("pre") as HTMLElement;
+		// The filled frame stays fixed; the code scrolls inside it (scroll S8).
+		await expect(getComputedStyle(frame).overflow).toBe("hidden");
+		await expect(pre).toHaveAttribute("data-scroll-area", "x");
+		await expect(pre.scrollWidth).toBeGreaterThan(pre.clientWidth);
+		await expect(pre).toHaveAttribute("data-scroll-edge-end", "true");
+		await expect(pre).not.toHaveAttribute("data-scroll-edge-start");
+		const before = frame.getBoundingClientRect();
+		pre.scrollLeft = pre.scrollWidth;
+		await waitFor(() =>
+			expect(pre).toHaveAttribute("data-scroll-edge-start", "true"),
+		);
+		await expect(pre).not.toHaveAttribute("data-scroll-edge-end");
+		const after = frame.getBoundingClientRect();
+		await expect(after.width).toBe(before.width);
+		await expect(after.height).toBe(before.height);
 	},
 };
