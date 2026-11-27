@@ -1,6 +1,6 @@
 {
 	"encoding": "o200k_base",
-	"head": "1a461a7b1aa969372c6c4be5e3c32465a3a4d3cd",
+	"head": "4f297e97ec500e5b5bd0089749efcc329ad9a895",
 	"scope": "all-authored-text",
 	"snapshots": [
 		{
@@ -3134,6 +3134,78 @@
 			"lines": 151660,
 			"textBytes": 4777126,
 			"tokens": 1223650
+		},
+		{
+			"date": "2026-11-27",
+			"hash": "f45c352d8ad4a519314bbffacf9aaf4027ca3542",
+			"subject": "fix(motion): let reduced motion and ?motion=off reach the CSS motion tokens",
+			"files": 1348,
+			"lines": 151673,
+			"textBytes": 4777519,
+			"tokens": 1223774
+		},
+		{
+			"date": "2026-11-27",
+			"hash": "e1bf7d7f1df119af9572811574e01eef4014aa30",
+			"subject": "feat(dropdown): gate motion with useAnimated and scroll capped panels inside a ScrollArea",
+			"files": 1348,
+			"lines": 151924,
+			"textBytes": 4785675,
+			"tokens": 1225945
+		},
+		{
+			"date": "2026-11-27",
+			"hash": "29e2df0c238f86459520540b18b45d8baacf4e28",
+			"subject": "test(button): prove the label morph snaps under ?motion=off",
+			"files": 1348,
+			"lines": 151984,
+			"textBytes": 4788007,
+			"tokens": 1226550
+		},
+		{
+			"date": "2026-11-27",
+			"hash": "883e08ae2810b4bce60bff5d85b94e9233a8c3f0",
+			"subject": "refactor(scroll): move remaining inner scrollers inside ScrollArea",
+			"files": 1348,
+			"lines": 152056,
+			"textBytes": 4790300,
+			"tokens": 1227152
+		},
+		{
+			"date": "2026-11-27",
+			"hash": "c436bc1e32642d21647b36bfa239089dba359214",
+			"subject": "docs(specs): tick scroll T004, buttons T002, overlays T003 and T005",
+			"files": 1348,
+			"lines": 152056,
+			"textBytes": 4790801,
+			"tokens": 1227297
+		},
+		{
+			"date": "2026-11-27",
+			"hash": "c7b2335955c59b0713e782fd545ee275ffa68953",
+			"subject": "refactor(scroll): move x-axis rows, the sidebar body and surfaces onto ScrollArea",
+			"files": 1348,
+			"lines": 152249,
+			"textBytes": 4797552,
+			"tokens": 1229182
+		},
+		{
+			"date": "2026-11-27",
+			"hash": "7a428f2cb806f196085c9816ed1106c7520b3aa3",
+			"subject": "feat(scroll): add axis=\"both\", move FileViewer onto it and record page scroll as E-002",
+			"files": 1348,
+			"lines": 152389,
+			"textBytes": 4804009,
+			"tokens": 1231040
+		},
+		{
+			"date": "2026-11-27",
+			"hash": "4f297e97ec500e5b5bd0089749efcc329ad9a895",
+			"subject": "Merge pull request #11 from olafBobryk/claude/finish-design-system-tasks-b7ea97",
+			"files": 1348,
+			"lines": 152389,
+			"textBytes": 4804009,
+			"tokens": 1231040
 		}
 	],
 	"version": 1
