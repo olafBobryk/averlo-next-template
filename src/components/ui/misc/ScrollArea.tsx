@@ -159,11 +159,15 @@ export function ScrollArea({
 	}, [update]);
 
 	const isY = axis === "y";
-	const fadeStart = overflow.start ? start : "0px";
-	const fadeEnd = overflow.end ? end : "0px";
+	// The fade covers exactly a side's padding (S7), so a side with no edge
+	// never masks: a mask would also drop backdrop blur inside it (S9).
+	const fadesStart = overflow.start && start !== "0px";
+	const fadesEnd = overflow.end && end !== "0px";
+	const fadeStart = fadesStart ? start : "0px";
+	const fadeEnd = fadesEnd ? end : "0px";
 	const direction = isY ? "to bottom" : overflow.rtl ? "to left" : "to right";
 	const mask =
-		edgeStyle === "fade" && (overflow.start || overflow.end)
+		edgeStyle === "fade" && (fadesStart || fadesEnd)
 			? `linear-gradient(${direction}, transparent 0, #000 ${fadeStart}, #000 calc(100% - ${fadeEnd}), transparent 100%)`
 			: undefined;
 

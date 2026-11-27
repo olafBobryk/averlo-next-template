@@ -61,9 +61,8 @@ export const surfaceLayoutStyles = cva("", {
 			md: "gap-6",
 			lg: "gap-8",
 		},
+		// A filled surface never scrolls; a ScrollArea scrolls inside it (S8).
 		overflow: {
-			// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-			auto: "overflow-auto",
 			hidden: "overflow-hidden",
 			visible: "overflow-visible",
 		},

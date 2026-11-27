@@ -325,13 +325,16 @@ function createMarkdownComponents(
 			);
 		},
 		table: ({ children }) => (
-			<div
-				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-				className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain"
+			// A focus stop, so keyboard users can scroll a wide table.
+			<ScrollArea
+				axis="x"
+				className="w-full max-w-full"
 				data-slot="markdown-table-scroll"
+				edge={0}
+				tabIndex={0}
 			>
 				<table className="w-full border-collapse text-left">{children}</table>
-			</div>
+			</ScrollArea>
 		),
 		tbody: ({ children }) => <tbody>{children}</tbody>,
 		td: ({ children, align }) => (

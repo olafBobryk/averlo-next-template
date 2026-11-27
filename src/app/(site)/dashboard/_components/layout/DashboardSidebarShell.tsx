@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useRef } from "react";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { ModalCard } from "@/components/ui/overlays/modal/ModalCard";
 import { ModalShell } from "@/components/ui/overlays/modal/ModalShell";
 import { Button } from "@/components/ui/primitives/Button";
@@ -147,13 +148,14 @@ export function DashboardSidebarShell({
 			>
 				{identity}
 			</div>
-			<div
-				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-				className="-mt-1 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3 pt-1"
+			<ScrollArea
+				className="-mt-1 flex-1"
 				data-dashboard-sidebar-body
+				edgeEnd={12}
+				edgeStart={4}
 			>
 				{body}
-			</div>
+			</ScrollArea>
 			<footer className="shrink-0" data-dashboard-sidebar-footer>
 				<Divider />
 				<div className="px-3 py-2">{footer}</div>

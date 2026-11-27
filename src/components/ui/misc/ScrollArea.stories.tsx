@@ -267,3 +267,39 @@ export const HorizontalRtlEdges: Story = {
 		}
 	},
 };
+
+export const NoEdgeNoMask: Story = {
+	render: () => (
+		<div className="w-72 overflow-hidden rounded-xl border border-border bg-card">
+			<ScrollArea
+				className="h-40"
+				data-testid="scroll-region"
+				edgeEnd={12}
+				edgeStart={0}
+				tabIndex={0}
+			>
+				{rows(12).map((row) => (
+					<div className="px-3 py-2 text-sm" key={row}>
+						{row}
+					</div>
+				))}
+			</ScrollArea>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const region = canvas.getByTestId("scroll-region");
+		// Scrolled to the end, only the start hides content, and it has no edge.
+		scrollTo(region, region.scrollHeight);
+		await waitFor(() =>
+			expect(region).toHaveAttribute("data-scroll-edge-start", "true"),
+		);
+		await expect(region).not.toHaveAttribute("data-scroll-edge-end");
+		await expect(mask(region)).toBe("none");
+		// Back in the middle, the end edge fades again.
+		scrollTo(region, 40);
+		await waitFor(() =>
+			expect(region).toHaveAttribute("data-scroll-edge-end", "true"),
+		);
+		await expect(mask(region)).toContain("linear-gradient");
+	},
+};

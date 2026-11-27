@@ -157,3 +157,27 @@ export const CodeBlockScrollsInside: Story = {
 		await expect(after.height).toBe(before.height);
 	},
 };
+
+const wideTableMarkdown = `| S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Edge | Edge | Sides | Inner | Gap | Height | Fade | Owner |`;
+
+export const TableScrollsInside: Story = {
+	render: () => (
+		<div style={{ width: 240 }}>
+			<MarkdownRenderer markdown={wideTableMarkdown} />
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const scroller = canvasElement.querySelector(
+			'[data-slot="markdown-table-scroll"]',
+		) as HTMLElement;
+		// A wide table scrolls sideways in a ScrollArea with no edge, so no fade.
+		await expect(scroller).toHaveAttribute("data-scroll-area", "x");
+		await expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
+		await waitFor(() =>
+			expect(scroller).toHaveAttribute("data-scroll-edge-end", "true"),
+		);
+		await expect(getComputedStyle(scroller).maskImage).toBe("none");
+	},
+};

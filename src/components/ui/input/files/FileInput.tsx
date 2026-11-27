@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import * as React from "react";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { IdleState } from "@/components/ui/misc/state/IdleState";
 import { Button } from "@/components/ui/primitives/Button";
 import { Field } from "@/components/ui/primitives/Field";
@@ -283,19 +284,19 @@ function FileInputRoot({
 		event.currentTarget.value = "";
 	}
 
-	function handleDragEnter(event: React.DragEvent<HTMLFieldSetElement>) {
+	function handleDragEnter(event: React.DragEvent<HTMLElement>) {
 		event.preventDefault();
 		event.stopPropagation();
 		if (!disabled && showAdd) setIsDragging(true);
 	}
 
-	function handleDragOver(event: React.DragEvent<HTMLFieldSetElement>) {
+	function handleDragOver(event: React.DragEvent<HTMLElement>) {
 		event.preventDefault();
 		event.stopPropagation();
 		if (!disabled && showAdd) setIsDragging(true);
 	}
 
-	function handleDragLeave(event: React.DragEvent<HTMLFieldSetElement>) {
+	function handleDragLeave(event: React.DragEvent<HTMLElement>) {
 		event.preventDefault();
 		event.stopPropagation();
 		if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -303,7 +304,7 @@ function FileInputRoot({
 		}
 	}
 
-	function handleDrop(event: React.DragEvent<HTMLFieldSetElement>) {
+	function handleDrop(event: React.DragEvent<HTMLElement>) {
 		event.preventDefault();
 		event.stopPropagation();
 		setIsDragging(false);
@@ -373,12 +374,14 @@ function FileInputRoot({
 					title={labels?.emptyTitle ?? "No files yet"}
 				/>
 			) : (
-				<fieldset
+				<ScrollArea
+					as="fieldset"
+					axis="x"
 					aria-label={
 						typeof label === "string" ? `${label} file list` : "File list"
 					}
-					// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-					className="m-0 min-w-0 max-w-full overflow-x-auto rounded-md border-0 p-0"
+					className="m-0 max-w-full rounded-md border-0"
+					edge={0}
 					onDragEnter={handleDragEnter}
 					onDragLeave={handleDragLeave}
 					onDragOver={handleDragOver}
@@ -499,7 +502,7 @@ function FileInputRoot({
 							</Card>
 						) : null}
 					</div>
-				</fieldset>
+				</ScrollArea>
 			)}
 		</Field>
 	);
