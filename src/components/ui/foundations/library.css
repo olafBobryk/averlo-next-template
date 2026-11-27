@@ -315,6 +315,29 @@
 	--site-header-height: 4.75rem;
 }
 
+/* The CSS motion gate (motion U3): reduced motion and `?motion=off` snap every
+   motion step. Unlayered like the tokens above, so it wins over them. */
+html[data-motion-override="off"] {
+	--motion-snap-duration: 1ms;
+	--motion-quick-duration: 1ms;
+	--motion-smooth-duration: 1ms;
+	--motion-gentle-duration: 1ms;
+	--motion-slow-duration: 1ms;
+	--motion-ring-duration: 1ms;
+	scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--motion-snap-duration: 1ms;
+		--motion-quick-duration: 1ms;
+		--motion-smooth-duration: 1ms;
+		--motion-gentle-duration: 1ms;
+		--motion-slow-duration: 1ms;
+		--motion-ring-duration: 1ms;
+	}
+}
+
 @media (min-width: 64rem) {
 	:root {
 		--site-header-height: 6.25rem;
@@ -580,16 +603,6 @@
 		animation: none !important;
 		/* biome-ignore lint/complexity/noImportantStyles: Automation overrides must beat server-rendered inline motion styles. */
 		transition: none !important;
-	}
-
-	html[data-motion-override="off"] {
-		--motion-snap-duration: 1ms;
-		--motion-quick-duration: 1ms;
-		--motion-smooth-duration: 1ms;
-		--motion-gentle-duration: 1ms;
-		--motion-slow-duration: 1ms;
-		--motion-ring-duration: 1ms;
-		scroll-behavior: auto;
 	}
 
 	html {
