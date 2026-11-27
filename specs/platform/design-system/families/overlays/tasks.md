@@ -4,6 +4,6 @@
 
 - [x] T001 [batch 2026-11-08] Pin `@floating-ui/react-dom` and move Dropdown positioning onto it behind the existing public props (FR-005).
 - [x] T002 [batch 2026-11-08] Add `presentation="anchored" | "sheet" | "auto"` (default `auto`, space-based) with stories at 390 and 1440 (FR-006).
-- [ ] T003 [batch 2026-11-08] Dropdown motion gate honours `?motion=off` through `useAnimated()` (FR-007).
+- [x] T003 [batch 2026-11-08] Dropdown motion gate honours `?motion=off` through `useAnimated()` (FR-007).
 - [x] T004 [batch 2026-11-08] `showToast.promise` cancel option with a `UI/Overlays/Toast` story (FR-009).
-- [ ] T005 Dropdown panels scroll inside a `ScrollArea` once `scroll` T001 lands (FR-005, scroll S8). Not in this batch unless the Dropdown work takes it.
+- [x] T005 Dropdown panels scroll inside a `ScrollArea` once `scroll` T001 lands (FR-005, scroll S8). Done 2026-11-27 with `scroll` T004.
