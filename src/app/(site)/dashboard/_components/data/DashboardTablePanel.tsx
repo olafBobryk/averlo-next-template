@@ -3,6 +3,7 @@ import Link from "next/link";
 import { type Key, type ReactNode, useId } from "react";
 import { Icon } from "@/components/ui/icons/Icon";
 import { PaginationControls } from "@/components/ui/misc/PaginationControls";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import Divider from "@/components/ui/primitives/Divider";
 import { ContentSection } from "@/components/ui/primitives/surfaces";
@@ -95,10 +96,11 @@ function DashboardTablePanelRoot<Row>({
 				)}
 			>
 				{rows.length > 0 ? (
-					<div
-						// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-						className="relative max-w-full overflow-x-auto"
+					<ScrollArea
+						axis="x"
+						className="max-w-full"
 						data-dashboard-table-scroll=""
+						edge={0}
 					>
 						<DashboardTableResponsiveController tableId={tableId} />
 						<DashboardTableSortController tableId={tableId} />
@@ -262,7 +264,7 @@ function DashboardTablePanelRoot<Row>({
 								</Button>
 							</div>
 						) : null}
-					</div>
+					</ScrollArea>
 				) : (
 					<div className={pageSize ? "p-4" : undefined}>{emptyState}</div>
 				)}
@@ -315,10 +317,11 @@ export function DashboardTablePanelSkeleton({
 		>
 			{header}
 			<ContentSection.Content className="min-w-0 overflow-hidden rounded-xl border border-[var(--card-border-color)] bg-card">
-				<div
-					// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-					className="relative max-w-full overflow-x-auto"
+				<ScrollArea
+					axis="x"
+					className="max-w-full"
 					data-dashboard-table-scroll=""
+					edge={0}
 				>
 					<DashboardTableResponsiveController tableId={tableId} />
 					<table
@@ -388,7 +391,7 @@ export function DashboardTablePanelSkeleton({
 							</Button.Skeleton>
 						</div>
 					) : null}
-				</div>
+				</ScrollArea>
 				{pageSize ? (
 					<>
 						<Divider decorative className="!bg-[var(--card-border-color)]" />

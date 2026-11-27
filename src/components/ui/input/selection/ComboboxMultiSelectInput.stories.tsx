@@ -72,3 +72,47 @@ export const ComboboxContract: Story = {
 export const SkeletonParity: Story = {
 	render: () => <ComboboxMultiSelectInput.Skeleton label="Offices" />,
 };
+
+const manyOffices = [
+	...options,
+	{ value: "dublin", label: "Dublin" },
+	{ value: "edinburgh", label: "Edinburgh" },
+	{ value: "florence", label: "Florence" },
+];
+
+function CrowdedCombobox() {
+	const [value, setValue] = useState<string[]>(
+		manyOffices.map((office) => office.value),
+	);
+	return (
+		<div className="w-72">
+			<ComboboxMultiSelectInput
+				label="Crowded offices"
+				onChange={setValue}
+				options={manyOffices}
+				placeholder="Search offices"
+				value={value}
+			/>
+		</div>
+	);
+}
+
+export const ChipRowScrollsUnderEdge: Story = {
+	render: () => <CrowdedCombobox />,
+	play: async ({ canvas }) => {
+		const input = canvas.getByRole("combobox", { name: "Crowded offices" });
+		const row = input.closest('[data-scroll-area="x"]') as HTMLElement;
+		// The chip row is a ScrollArea whose edges are the input's own padding
+		// (S1, S8); its scrollbar stays hidden and it fades under the far edge.
+		await expect(row).toBeTruthy();
+		// The default size (sm) pads its content 12px from the input's stroke.
+		await expect(getComputedStyle(row).paddingInlineStart).toBe("12px");
+		await expect(getComputedStyle(row).paddingInlineEnd).toBe("12px");
+		await expect(getComputedStyle(row).scrollbarWidth).toBe("none");
+		await expect(row.scrollWidth).toBeGreaterThan(row.clientWidth);
+		await waitFor(() =>
+			expect(row).toHaveAttribute("data-scroll-edge-end", "true"),
+		);
+		await expect(getComputedStyle(row).maskImage).toContain("linear-gradient");
+	},
+};

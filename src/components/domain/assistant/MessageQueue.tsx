@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
 import { spring } from "@/components/ui/foundations/spring";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { ContentPresence } from "@/components/ui/motion/presence/ContentPresence";
 import { Button } from "@/components/ui/primitives/Button";
 import { Card } from "@/components/ui/primitives/surfaces";
@@ -113,8 +114,7 @@ export function MessageQueue({
 								</Button>
 							</div>
 						</div>
-						{/* biome-ignore lint/plugin/noAdHocScrollHeight: debt */}
-						<ol className="max-h-64 overflow-y-auto overscroll-contain">
+						<ScrollArea as="ol" edge={0} className="max-h-64">
 							<AnimatePresence initial={false}>
 								{items.map((item, index) => (
 									<QueueRow
@@ -240,7 +240,7 @@ export function MessageQueue({
 									</QueueRow>
 								))}
 							</AnimatePresence>
-						</ol>
+						</ScrollArea>
 					</Card>
 				</motion.div>
 			)}

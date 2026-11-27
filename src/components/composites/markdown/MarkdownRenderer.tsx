@@ -16,6 +16,7 @@ import {
 import { focusRing } from "@/components/ui/foundations/focus";
 import { ChoiceIndicatorMulti } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/misc";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text, textVariants } from "@/components/ui/primitives/Text";
 import {
@@ -300,7 +301,15 @@ function createMarkdownComponents(
 				</Text>
 			);
 		},
-		pre: ({ children }) => <pre>{children}</pre>,
+		// The filled frame stays fixed; long lines scroll inside it (scroll S8).
+		pre: ({ children }) => (
+			<div data-slot="markdown-pre">
+				{/* A focus stop, so keyboard users can scroll long lines. */}
+				<ScrollArea as="pre" axis="x" edge={16} tabIndex={0}>
+					{children}
+				</ScrollArea>
+			</div>
+		),
 		strong: ({ children }) => (
 			<strong className="font-semibold text-foreground/90">{children}</strong>
 		),
@@ -316,13 +325,16 @@ function createMarkdownComponents(
 			);
 		},
 		table: ({ children }) => (
-			<div
-				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-				className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain"
+			// A focus stop, so keyboard users can scroll a wide table.
+			<ScrollArea
+				axis="x"
+				className="w-full max-w-full"
 				data-slot="markdown-table-scroll"
+				edge={0}
+				tabIndex={0}
 			>
 				<table className="w-full border-collapse text-left">{children}</table>
-			</div>
+			</ScrollArea>
 		),
 		tbody: ({ children }) => <tbody>{children}</tbody>,
 		td: ({ children, align }) => (

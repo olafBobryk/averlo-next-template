@@ -168,6 +168,14 @@ export const Shell: Story = {
 		expect(
 			canvas.getByRole("heading", { name: "Organization settings" }),
 		).toBeVisible();
+		// The sidebar body scrolls in a ScrollArea under the panel's edges (S8).
+		const body = canvasElement.querySelector(
+			"[data-dashboard-sidebar-body]",
+		) as HTMLElement;
+		await expect(body).toHaveAttribute("data-scroll-area", "y");
+		await expect(getComputedStyle(body).paddingTop).toBe("4px");
+		await expect(getComputedStyle(body).paddingBottom).toBe("12px");
+		await expect(getComputedStyle(body).overscrollBehaviorY).toBe("contain");
 	},
 };
 

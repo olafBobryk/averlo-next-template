@@ -65,12 +65,16 @@ const getMatchRank = (
 	return 3;
 };
 
-const contentPaddingBySize: Record<NonNullable<InputFrameSize>, string> = {
-	xxs: "px-1.5 py-[3.5px]",
-	xs: "px-2 py-[5.5px]",
-	sm: "px-3 py-[8.5px]",
-	md: "px-[15px] py-[11.5px]",
-	lg: "px-4 py-[12.5px]",
+/** The chip row's block padding, and the inline gap it scrolls under. */
+const contentPaddingBySize: Record<
+	NonNullable<InputFrameSize>,
+	{ className: string; edge: number }
+> = {
+	xxs: { className: "py-[3.5px]", edge: 6 },
+	xs: { className: "py-[5.5px]", edge: 8 },
+	sm: { className: "py-[8.5px]", edge: 12 },
+	md: { className: "py-[11.5px]", edge: 15 },
+	lg: { className: "py-[12.5px]", edge: 16 },
 };
 
 function ComboboxMultiSelectInputRoot<T>({
@@ -219,7 +223,7 @@ function ComboboxMultiSelectInputRoot<T>({
 		hasEnd: true,
 		disabled: disabled ? true : undefined,
 	});
-	const contentPaddingClass = contentPaddingBySize[size ?? "md"];
+	const contentPadding = contentPaddingBySize[size ?? "md"];
 
 	return (
 		<Field
@@ -388,7 +392,8 @@ function ComboboxMultiSelectInputRoot<T>({
 								selectedOptions={selectedOptions}
 								onToggleOption={toggleOption}
 								disabled={disabled}
-								contentPaddingClass={contentPaddingClass}
+								contentEdge={contentPadding.edge}
+								contentPaddingClass={contentPadding.className}
 								chipClassName={chipClassName}
 								chipTextClassName={chipTextClassName}
 								chipRemoveClassName={chipRemoveClassName}

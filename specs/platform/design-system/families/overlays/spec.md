@@ -155,7 +155,7 @@ Shared focus tokens MUST NOT be weakened. Consumers never override visible focus
 | FR-001, FR-004 | `UI/Primitives/Dropdown` `MenuOrderingSelectionAndDismissal`, `RecursiveMenu`, `RecursivePointerOwnership`, `ControlRowsHoverAndDismissal`; `UI/Primitives/Listbox` `KeyboardSelection`, `RecursiveKeyboardNavigation` | exists |
 | FR-002 | `UI/Overlays/Modal` `HostedFocusAndDismissal`, `NestedFocusAndScroll` | exists |
 | FR-003 | `UI/Overlays/Modal` `SubmissionCloseLock`; `UI/Overlays/ConfirmationModal` `RecoverableFailureAndRetry` | exists |
-| FR-005 | `UI/Primitives/Dropdown` `ScreenEdgeAlignment` plus flip/shift/height-cap play tests on the floating-ui engine | engine this batch |
+| FR-005 | `UI/Primitives/Dropdown` `ScreenEdgeAlignment`, `EdgePlacementPhone`, `EdgePlacementDesktop` (flip, shift, cap); `CappedPanelsScrollInside`, `PassThroughPanelOverflowsVisibly` (the panel stays fixed and scrolls inside a `ScrollArea`) | exists |
 | FR-006 | Dropdown `presentation` stories (anchored, sheet, auto at 390 and 1440) | this batch |
-| FR-007 | Dropdown story under `?motion=off` | this batch |
+| FR-007 | `UI/Primitives/Dropdown` `MotionOffSnap` | exists |
 | FR-009 | `UI/Overlays/Toast` `PromiseLifecycle` plus a cancel case | this batch |

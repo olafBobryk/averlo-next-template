@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import * as React from "react";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import Portal from "@/components/ui/overlays/Portal";
 import {
 	dropdownChromeClassName,
@@ -25,8 +26,10 @@ function assignRef<T>(ref: React.Ref<T> | undefined, value: T) {
 export function DropdownSurface({
 	align = "start",
 	anchorRef,
+	children,
 	className,
 	collisionPadding = COLLISION_PADDING,
+	display = "flex",
 	matchAnchorWidth = false,
 	offset = 8,
 	overflow = "hidden",
@@ -90,7 +93,6 @@ export function DropdownSurface({
 					minWidth: matchAnchorWidth
 						? "var(--dropdown-anchor-width)"
 						: undefined,
-					overflowY: floating.capped ? "auto" : style?.overflowY,
 					visibility: floating.isPositioned
 						? (style?.visibility ?? "visible")
 						: "hidden",
@@ -110,6 +112,7 @@ export function DropdownSurface({
 			data-dropdown-presentation={
 				fixed ? (sheet ? "sheet" : "anchored") : undefined
 			}
+			display={display}
 			padding={padding}
 			overflow={overflow}
 			ref={setPanelNode}
@@ -117,7 +120,23 @@ export function DropdownSurface({
 			style={resolvedStyle}
 			width={width}
 			{...props}
-		/>
+		>
+			{/* The panel stays fixed; capped content scrolls inside it (FR-005,
+			    scroll S8). A pass-through panel (`overflow="visible"`) lets its
+			    content's own surface and shadow show until the content is capped. */}
+			<ScrollArea
+				edge={0}
+				className={clsx(
+					"flex flex-col",
+					overflow === "visible" &&
+						!floating.capped &&
+						!sheet &&
+						"overflow-visible!",
+				)}
+			>
+				{children}
+			</ScrollArea>
+		</Float>
 	);
 
 	return fixed ? <Portal target={portalTargetId}>{panel}</Portal> : panel;

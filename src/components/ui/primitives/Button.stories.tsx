@@ -495,3 +495,63 @@ export const LabelChange: Story = {
 		await expect(loading.getBoundingClientRect().width).toBe(loadingWidth);
 	},
 };
+
+export const LabelChangeMotionOff: Story = {
+	beforeEach: () => {
+		const root = document.documentElement;
+		const previous = root.dataset.motionOverride;
+		// What the `?motion=off` bootstrap sets before the app renders.
+		root.dataset.motionOverride = "off";
+		return () => {
+			if (previous === undefined) delete root.dataset.motionOverride;
+			else root.dataset.motionOverride = previous;
+		};
+	},
+	render: () => <ButtonLabelChangeExample />,
+	play: async ({ canvas }) => {
+		// The morph snaps: the new label and its width land on the same frame,
+		// with no leaving layer and no in-between width (BT5).
+		const morphing = canvas.getByTestId("morph-button");
+		const before = morphing.getBoundingClientRect().width;
+		const snap = await sampleButton(morphing, async () => {
+			await userEvent.click(morphing);
+			await expect(morphing).toHaveAccessibleName("Saved to drafts");
+			await expect(
+				morphing.querySelectorAll("[data-morph-layer]"),
+			).toHaveLength(1);
+			await expect(
+				morphing.querySelector<HTMLElement>('[data-slot="morph-label"]')?.style
+					.width,
+			).toBe("auto");
+			await new Promise((resolve) => setTimeout(resolve, 300));
+		});
+		const after = morphing.getBoundingClientRect().width;
+		expect(after).toBeGreaterThan(before + 20);
+		expect(
+			snap.widths.every(
+				(width) => Math.abs(width - before) < 1 || Math.abs(width - after) < 1,
+			),
+		).toBe(true);
+		expect(snap.overflow).toEqual([]);
+
+		// Shrinking back snaps the same way.
+		await userEvent.click(morphing);
+		await expect(morphing).toHaveAccessibleName("Save");
+		await expect(morphing.querySelectorAll("[data-morph-layer]")).toHaveLength(
+			1,
+		);
+		await expect(morphing.getBoundingClientRect().width).toBeCloseTo(before, 0);
+
+		// Loading keeps its width and the crossfade to the spinner snaps.
+		const loading = canvas.getByTestId("loading-button");
+		const loadingWidth = loading.getBoundingClientRect().width;
+		const content = loading.firstElementChild as HTMLElement;
+		await expect(getComputedStyle(content).transitionDuration).toMatch(
+			/^(0|0\.001)s$/,
+		);
+		await userEvent.click(loading);
+		await expect(loading).toHaveAttribute("aria-busy", "true");
+		await waitFor(() => expect(getComputedStyle(content).opacity).toBe("0"));
+		await expect(loading.getBoundingClientRect().width).toBe(loadingWidth);
+	},
+};

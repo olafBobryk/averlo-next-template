@@ -57,7 +57,6 @@ export type DropdownProps = {
 	open?: boolean;
 	openOnHover?: boolean;
 	pinOnClick?: boolean;
-	disableWhenReducedMotion?: boolean;
 	autoFocusMenu?: boolean;
 	onOpenChange?: (open: boolean) => void;
 };

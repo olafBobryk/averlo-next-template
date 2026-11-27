@@ -56,6 +56,11 @@ export const SelectionContract: Story = {
 		await expect(
 			canvas.getByRole("button", { name: "Remove cover.png" }),
 		).toBeInTheDocument();
+		// The file row scrolls sideways in a ScrollArea (S8).
+		const list = canvas.getByRole("group", { name: "Assets file list" });
+		await expect(list).toHaveAttribute("data-scroll-area", "x");
+		await expect(getComputedStyle(list).overflowX).toBe("auto");
+		await expect(getComputedStyle(list).overscrollBehaviorX).toBe("contain");
 		await userEvent.upload(
 			input,
 			new File(["text"], "notes.txt", { type: "text/plain" }),

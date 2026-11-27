@@ -96,6 +96,18 @@ export const Image: Story = {
 		await expect(
 			await canvas.findByRole("img", { name: "Landscape.jpg" }),
 		).toBeVisible();
+		// The document pans on both axes in a ScrollArea with no edge (S8).
+		const viewport = canvas.getByRole("region", { name: "File content" });
+		await expect(viewport).toHaveAttribute("data-scroll-area", "both");
+		await expect(getComputedStyle(viewport).overflowX).toBe("auto");
+		await expect(getComputedStyle(viewport).overflowY).toBe("auto");
+		await expect(getComputedStyle(viewport).overscrollBehaviorX).toBe(
+			"contain",
+		);
+		await expect(getComputedStyle(viewport).overscrollBehaviorY).toBe(
+			"contain",
+		);
+		await expect(getComputedStyle(viewport).maskImage).toBe("none");
 	},
 };
 export const Dark: Story = { ...Image, globals: { theme: "dark" } };

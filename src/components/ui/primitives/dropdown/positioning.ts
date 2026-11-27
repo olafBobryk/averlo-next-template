@@ -111,11 +111,9 @@ export function useDropdownFloating({
 						"--dropdown-available-width",
 						`${Math.max(0, Math.floor(maxWidth))}px`,
 					);
-					if (!sheetRef.current) {
-						setCapped(element.scrollHeight > height + 1);
-					}
-					if (presentation !== "auto") return;
 					const wanted = requiredHeight(element);
+					if (!sheetRef.current) setCapped(wanted > height + 1);
+					if (presentation !== "auto") return;
 					// Auto docks to the bottom edge only when the anchored panel
 					// cannot reach its minimum size in the space it has.
 					const minimum = Math.min(MIN_ANCHORED_HEIGHT, wanted);

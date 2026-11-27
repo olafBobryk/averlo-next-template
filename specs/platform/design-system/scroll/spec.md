@@ -27,6 +27,17 @@ Inner scrollers run to their real visible edge, fade content under that edge, co
 - **Q: Scrollbar colours?**
   - A: From theme tokens; hidden only on carousels and tab rows (S13).
 
+### Session 2026-11-27
+
+- **Q: Do the last `debt`-tagged scrollers get their own task or stay a known limitation?**
+  - A: "New template task" (`tasks.md` T005).
+- **Q: The dashboard `main` and the chat transcript are page-level scrollers. Do they become `ScrollArea`s?**
+  - A: "Keep them native". They are page scroll, so S4 applies: no mask on page content and normal overscroll behaviour such as pull-to-refresh. They are listed as E-002; no `scope` prop.
+- **Q: How does the file viewer's two-axis pan fit `ScrollArea`?**
+  - A: "Add axis="both"" (S8).
+- **Q: Does a side with no edge still mask?**
+  - A: No. The fade covers exactly that side's padding, so a side with edge 0 draws no mask (S7). Accepted 27 November 2026.
+
 ## Requirements
 
 Rule IDs are stable and are cited by tests and lint rules.
@@ -37,13 +48,13 @@ Rule IDs are stable and are cited by tests and lint rules.
 - **S4 MUST: the rule covers inner scrollers only.** It applies to scrollers inside a card, modal, menu, popover or overlay. Page-level content scrolls with the page and has no mask; page carousels follow S11.
 - **S5 MUST: never a gap outside.** No positive margin on the scroll axis; a negative margin may reach over a container's padding. A `gap` beside the scroller becomes its padding.
 - **S6 MUST: the rule holds at every height.** The scroller runs edge to edge before it overflows too. Check at rest, with one item, at max height, and at both ends.
-- **S7 MUST: by default, content fades under the edge.** A mask gradient over exactly that side's padding, shown only while content is hidden past that edge. Content at rest is never faded.
-- **S8 MUST: `ScrollArea` is the only way.** Every inner scroller is a `ScrollArea` (`ui/misc/ScrollArea.tsx`). It owns the axis (`axis="y" | "x"`), the edge padding it absorbs (`edge`, `edgeStart`, `edgeEnd`) with a mask of the same size, the edge treatment (`edgeStyle="fade" | "border"`), overscroll containment (S12), the scrollbar treatment (`scrollbar="auto" | "hidden"`, S13) and the optional back-to-top control (`showBackToTop`). A surface with its own border or fill (menu, popover, listbox, modal panel, pill track, `pre`) stays fixed and puts a `ScrollArea` inside it, so the fade never touches the border or fill. No feature code sets `overflow-*-auto` or `overflow-*-scroll`; lint flags new ones.
+- **S7 MUST: by default, content fades under the edge.** A mask gradient over exactly that side's padding, shown only while content is hidden past that edge. Content at rest is never faded. A side with no edge (0) draws no mask.
+- **S8 MUST: `ScrollArea` is the only way.** Every inner scroller is a `ScrollArea` (`ui/misc/ScrollArea.tsx`). It owns the axis (`axis="y" | "x" | "both"`; `both` is a two-axis viewport, such as a pannable document, whose edges pad and fade both axes), the edge padding it absorbs (`edge`, `edgeStart`, `edgeEnd`) with a mask of the same size, the edge treatment (`edgeStyle="fade" | "border"`), overscroll containment (S12), the scrollbar treatment (`scrollbar="auto" | "hidden"`, S13) and the optional back-to-top control (`showBackToTop`). A surface with its own border or fill (menu, popover, listbox, modal panel, pill track, `pre`) stays fixed and puts a `ScrollArea` inside it, so the fade never touches the border or fill. No feature code sets `overflow-*-auto` or `overflow-*-scroll`; lint flags new ones.
 - **S8b MUST: `ScrollArea` absorbs `ScrollBorders`.** `edgeStyle="border"` shows an inset rule at a side only while content is hidden past that side, drawn as an overlay (pseudo-element or inset shadow) so it never changes the box or shifts layout. `ScrollBorders` retires as a separate component.
 - **S9 MUST: know the mask's limits.** The mask is not motion, so reduced motion changes nothing. Print removes it. A child that paints into the padding at rest, such as a focus ring, needs room inside the content. A mask removes the backdrop blur of glass inside it (motion U9).
 - **S10 SHOULD: a scrolling tab row keeps the active item in view,** with the indicator inside the scroller.
 - **S11 MUST: page-level carousels bleed.** A horizontal carousel in page content runs to the viewport edge; the page gutter becomes its padding with matching `scroll-padding` so snap lines up with the gutter; the next card peeks; horizontal overscroll is contained; no fade (S4); the scrollbar is hidden.
-- **S12 MUST: inner scrollers contain overscroll.** `ScrollArea` sets `overscroll-contain` on its axis.
+- **S12 MUST: inner scrollers contain overscroll.** `ScrollArea` sets `overscroll-contain` on its axis, or on both axes for `axis="both"`.
 - **S13 MUST: scrollbars take their colours from theme tokens.** Scrollbars are hidden only on carousels (S11) and tab rows (S10), through `scrollbar="hidden"`.
 - **S14 MUST: one page-scroll transport.** `ScrollController` owns Lenis as the optional page-scroll transport, synced with GSAP `ScrollTrigger`. Motion sources never create a second scroll transport; the Motion fallback keeps its own wheel transport.
 - **S15 SHOULD: measure only when measuring.** Measured scroll procedures (`docs/operations/scroll-performance.md` when installed) are loaded only when scroll performance is actually being measured.
@@ -63,11 +74,12 @@ An exception exists only once it has a row. The code carries `// spec exception 
 | ID | Rule broken | Where | Why | Decided by / when | Revisit when |
 |---|---|---|---|---|---|
 | E-001 | motion H3 (height goes through `ContentPresence`) | `src/app/(site)/_components/layout/useMenuPanelPresence.ts`, used by `HeaderFull` (menu panel) and `HeaderCompact` (header height), plus the thin-start overrides of both | `ContentPresence` uses one transition for opening and resizing, but the menu panel opens and closes on `gentle` while its open content resizes on `smooth`, and the compact header is itself the fixed-height box. The moving edge clips the content while it fades with the header surface on `gentle` (H1 `masked`) | Olaf approved the `gentle` header menu, 8 November 2026, and the clipped content fading with the header surface, 9 November 2026 | `ContentPresence` supports a separate open/close step and resize step, and can drive an outer box |
+| E-002 | S8 (every scroller is a `ScrollArea`; no feature `overflow-*-auto`) | `src/app/(site)/dashboard/_components/layout/dashboardContentShellProfiles.ts` (the dashboard `main` in the `standard` and `wide` profiles) and `src/components/domain/assistant/Conversation.tsx` (the chat transcript) | They are the page scroll of the dashboard and of the chat workspace, not inner scrollers, so S4 applies: no mask on page content, and normal overscroll behaviour such as pull-to-refresh | Olaf, 27 November 2026 ("Keep them native") | A page-scroll mode is added to `ScrollArea`, or these regions stop being the page scroll |
 
 A generated project keeps its own register.
 
 ## Success Criteria
 
-- **SC-001**: Every inner scroller in `src/` is a `ScrollArea`; lint reports no new `overflow-*-auto|scroll` outside it.
+- **SC-001**: Every inner scroller in `src/` is a `ScrollArea`. Lint reports no `overflow-*-auto|scroll` outside it, and no `debt` tag for it remains. The only native scrollers are the page scrollers listed as E-002.
 - **SC-002**: `ScrollArea` stories prove S1, S6, S7, S8b and S12 with play tests at 390 and 1440: the edge rule never shifts layout (box size identical with and without overflow), the mask appears only while content is hidden past an edge, and print styles remove it.
 - **SC-003**: No `ScrollBorders` import remains.

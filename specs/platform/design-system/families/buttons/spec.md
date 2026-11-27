@@ -55,7 +55,7 @@ Related owners: `ArrowAction` (arrow call-to-action), `useCopyAction` (copy with
 | Rule | Story (`UI/Primitives/Button` export) | Status |
 |---|---|---|
 | BT1, BT2 | `ActionHierarchy`, `DestructiveMeaning`, `SizesAndIcons`, `CompletePalette`, `ButtonLikeLink` | exists |
-| BT3 | a label-change morph story with a play test that no glyph is outside the box and width settles to the new label; `morph={false}` story | this batch |
+| BT3 | `LabelChange` (no glyph outside the box, width eases and settles to the new label; the `morph={false}` button jumps; loading keeps its width) | exists |
 | BT4 | `AsyncStateParity`, `DisabledAndLoading`, `InteractionContract` | exists |
-| BT5 | morph story under `?motion=off` | this batch |
+| BT5 | `LabelChangeMotionOff` (label and width land on the same frame, no leaving layer; the loading crossfade snaps) | exists |
 | BT6 | `GeometryAndSkeletons`, `TransparentSkeletons` | exists |

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { ErrorState } from "@/components/ui/misc/state/ErrorState";
 import { Button } from "@/components/ui/primitives/Button";
 import {
@@ -34,7 +35,7 @@ export function FileViewer({ source, onClose }: FileViewerProps) {
 function Viewer({ source, onClose }: FileViewerProps) {
 	const [attempt, setAttempt] = useState(0);
 	const asset = useFileAsset(source, attempt);
-	const viewport = useRef<HTMLElement>(null);
+	const viewport = useRef<HTMLDivElement>(null);
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const [size, setSize] = useState({ width: 0, height: 0 });
 	const [page, setPage] = useState(1);
@@ -349,14 +350,16 @@ function Viewer({ source, onClose }: FileViewerProps) {
 					onClick={onClose}
 				/>
 			</header>
-			<section
+			<ScrollArea
+				as="section"
+				axis="both"
+				edge={0}
 				ref={viewport}
-				// biome-ignore lint/a11y/noNoninteractiveTabindex: Keyboard users scroll the document region.
+				// Keyboard users scroll the document region.
 				tabIndex={0}
 				aria-label="File content"
 				aria-busy={!asset || rendering}
-				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-				className="min-h-0 flex-1 overflow-auto overscroll-contain bg-background sm:rounded-r-lg lg:rounded-r-xl outline-offset-[-2px]"
+				className="flex-1 bg-background sm:rounded-r-lg lg:rounded-r-xl outline-offset-[-2px]"
 				onPointerDown={(event) => {
 					if (
 						event.button !== 0 ||
@@ -441,7 +444,7 @@ function Viewer({ source, onClose }: FileViewerProps) {
 						)}
 					</div>
 				)}
-			</section>
+			</ScrollArea>
 		</section>
 	);
 }

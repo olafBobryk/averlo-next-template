@@ -187,3 +187,53 @@ export const Skeleton: Story = {
 		await expect(canvas.queryAllByRole("button")).toHaveLength(0);
 	},
 };
+
+const wideColumns = [
+	{
+		id: "name",
+		header: "Name",
+		render: (row: string) => (
+			<span className="whitespace-nowrap">{`${row} workspace record name`}</span>
+		),
+	},
+	{
+		id: "actions",
+		header: "Actions",
+		kind: "action" as const,
+		render: (row: string) => (
+			<Button aria-label={`Open ${row}`} size="sm" variant="ghost">
+				Open
+			</Button>
+		),
+	},
+];
+
+export const ScrollsInsideCard: Story = {
+	render: () => (
+		<div style={{ width: 200 }}>
+			<DashboardTablePanel
+				columns={wideColumns}
+				getRowKey={(row) => row}
+				rows={rows.slice(0, 3)}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const scroller = canvasElement.querySelector(
+			"[data-dashboard-table-scroll]",
+		) as HTMLElement;
+		const card = scroller.parentElement as HTMLElement;
+		// The card stays fixed; the table scrolls sideways in a ScrollArea (S8)
+		// that has no edge, so nothing fades.
+		await expect(scroller).toHaveAttribute("data-scroll-area", "x");
+		await expect(getComputedStyle(card).overflow).toBe("hidden");
+		await expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
+		const before = card.getBoundingClientRect();
+		scroller.scrollLeft = scroller.scrollWidth;
+		await waitFor(() =>
+			expect(scroller).toHaveAttribute("data-scroll-edge-start", "true"),
+		);
+		await expect(getComputedStyle(scroller).maskImage).toBe("none");
+		await expect(card.getBoundingClientRect().width).toBe(before.width);
+	},
+};

@@ -5,6 +5,7 @@ import * as React from "react";
 import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
 import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import {
 	ModalDescription,
 	ModalTitle,
@@ -144,9 +145,9 @@ export function DashboardCommandPalette({
 					<div>
 						<Divider decorative />
 					</div>
-					<div
-						// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-						className="min-h-0 overflow-y-auto overscroll-contain p-2"
+					<ScrollArea
+						edge={8}
+						className="px-2"
 						style={{
 							maxHeight: anchored
 								? "min(580px, calc(var(--command-available-height,60vh) - 9px))"
@@ -168,7 +169,7 @@ export function DashboardCommandPalette({
 								No matching commands.
 							</p>
 						)}
-					</div>
+					</ScrollArea>
 				</motion.div>
 			</div>
 		</>

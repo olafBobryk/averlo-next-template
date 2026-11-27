@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type * as React from "react";
 import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import { Button } from "@/components/ui/primitives/Button";
 import { Text } from "@/components/ui/primitives/Text";
 import { useMotionAllowed } from "@/hooks/useMotionAllowed";
@@ -40,6 +41,8 @@ type ComboboxMultiSelectInputContentProps<T> = {
 	selectedOptions: ComboboxMultiSelectOption<T>[];
 	onToggleOption: (option: ComboboxMultiSelectOption<T>) => void;
 	disabled?: boolean;
+	/** The inline gap to the input's edge, which the chip row scrolls under. */
+	contentEdge: number;
 	contentPaddingClass: string;
 	chipClassName?: string;
 	chipTextClassName?: string;
@@ -53,6 +56,7 @@ export function ComboboxMultiSelectInputContent<T>({
 	selectedOptions,
 	onToggleOption,
 	disabled,
+	contentEdge,
 	contentPaddingClass,
 	chipClassName,
 	chipTextClassName,
@@ -115,13 +119,15 @@ export function ComboboxMultiSelectInputContent<T>({
 	);
 
 	return (
-		<div
+		<ScrollArea
+			axis="x"
 			className={clsx(
-				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
-				"flex w-full flex-1 min-w-0 flex-nowrap items-center gap-x-2.5 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+				"flex w-full flex-1 flex-nowrap items-center gap-x-2.5",
 				contentPaddingClass,
 				chipListClassName,
 			)}
+			edge={contentEdge}
+			scrollbar="hidden"
 		>
 			{motionAllowed ? (
 				<AnimatePresence initial={false}>
@@ -150,6 +156,6 @@ export function ComboboxMultiSelectInputContent<T>({
 					{input}
 				</>
 			)}
-		</div>
+		</ScrollArea>
 	);
 }
