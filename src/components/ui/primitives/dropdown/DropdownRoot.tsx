@@ -5,11 +5,11 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
-import { useMotionDisableOverride } from "@/components/ui/foundations/motionDisableOverride";
 import { spring } from "@/components/ui/foundations/spring";
 import { Icon } from "@/components/ui/icons/Icon";
+import { ScrollArea } from "@/components/ui/misc/ScrollArea";
 import Portal from "@/components/ui/overlays/Portal";
-import { useMotionAllowed } from "@/hooks/useMotionAllowed";
+import { useAnimated } from "@/hooks/useMotionAllowed";
 import { getDropdownSurfaceClassName } from "../dropdownStyles";
 import { COLLISION_PADDING, DEFAULT_MENU_MIN_WIDTH } from "./constants";
 import { useDropdownFloating } from "./positioning";
@@ -52,7 +52,6 @@ export function DropdownRoot({
 	open,
 	openOnHover = true,
 	pinOnClick = openOnHover,
-	disableWhenReducedMotion = true,
 	autoFocusMenu = true,
 	onOpenChange,
 	collectionController,
@@ -61,9 +60,8 @@ export function DropdownRoot({
 	collectionController?: DropdownCollectionController;
 	keepOpenWhileFocusWithin?: boolean;
 }) {
-	const reducedMotionAllowed = useMotionAllowed(disableWhenReducedMotion);
-	const motionDisabled = useMotionDisableOverride();
-	const motionAllowed = reducedMotionAllowed && !motionDisabled;
+	// Reduced motion and `?motion=off` snap the panel (FR-007).
+	const motionAllowed = useAnimated();
 	const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
 	const [isPinned, setIsPinned] = React.useState(false);
 	const rootRef = React.useRef<HTMLElement | null>(null);
@@ -392,7 +390,6 @@ export function DropdownRoot({
 				maxWidth: "var(--dropdown-available-width)",
 				// The minimum never beats the space the panel has.
 				minWidth: `min(${toCssLength(explicitWidth ?? menuMinWidth)}, var(--dropdown-available-width, 100vw))`,
-				overflowY: floating.capped ? "auto" : undefined,
 				visibility: floating.isPositioned ? undefined : "hidden",
 				width: explicitWidth,
 				zIndex: 90,
@@ -405,6 +402,14 @@ export function DropdownRoot({
 		sheet && dropdownSheetClassName,
 	);
 	const menuMotionY = sheet ? 16 : floating.resolvedSide === "top" ? 6 : -6;
+	// The panel stays fixed; capped content scrolls inside it (FR-005, scroll
+	// S8). A list owner's own ScrollArea shrinks inside this column and scrolls
+	// first, so this one only scrolls content that has no scroller of its own.
+	const renderMenuContent = () => (
+		<ScrollArea edge={0} className="flex flex-col">
+			{renderMenu({ close: closeMenu })}
+		</ScrollArea>
+	);
 	const menuNode = motionAllowed ? (
 		<AnimatePresence>
 			{isOpen ? (
@@ -426,7 +431,7 @@ export function DropdownRoot({
 						if (!isPinned && openOnHover) scheduleClose();
 					}}
 				>
-					{renderMenu({ close: closeMenu })}
+					{renderMenuContent()}
 				</motion.div>
 			) : null}
 		</AnimatePresence>
@@ -445,7 +450,7 @@ export function DropdownRoot({
 				if (!isPinned && openOnHover) scheduleClose();
 			}}
 		>
-			{renderMenu({ close: closeMenu })}
+			{renderMenuContent()}
 		</div>
 	) : null;
 

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useRef, useState } from "react";
+import { type Ref, useRef, useState } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { formatCatalogOwnerContract } from "@/lib/component-catalog/contract";
 import { Button } from "./Button";
@@ -998,5 +998,234 @@ export const AutoSheetInShortViewport: Story = {
 			expect(rect.bottom).toBeLessThanOrEqual(window.innerHeight);
 			expect(rect.width).toBeLessThan(width);
 		});
+	},
+};
+
+export const MotionOffSnap: Story = {
+	beforeEach: () => {
+		const root = document.documentElement;
+		const previous = root.dataset.motionOverride;
+		// What the `?motion=off` bootstrap sets before the app renders.
+		root.dataset.motionOverride = "off";
+		return () => {
+			if (previous === undefined) delete root.dataset.motionOverride;
+			else root.dataset.motionOverride = previous;
+		};
+	},
+	render: () => (
+		<Dropdown.Menu
+			ariaLabel="Snapping actions"
+			openOnHover={false}
+			options={[
+				{ id: "rename", label: "Rename", onSelect: fn() },
+				{ id: "duplicate", label: "Duplicate", onSelect: fn() },
+			]}
+		/>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const body = within(canvasElement.ownerDocument.body);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Snapping actions" }),
+		);
+		const menu = await body.findByRole("menu", { name: "Snapping actions" });
+		const panel = menu.closest('[data-slot="float"]') as HTMLElement;
+		// No entry tween: the panel never carries a motion opacity or nudge and
+		// is fully opaque in its final place as soon as it exists (FR-007).
+		await expect(panel.style.opacity).toBe("");
+		await expect(panel.style.transform).toBe("");
+		await expect(getComputedStyle(panel).opacity).toBe("1");
+		await expect(getComputedStyle(panel).transform).toBe("none");
+		await userEvent.keyboard("{Escape}");
+		// No exit tween either: the panel leaves on the same commit.
+		await expect(panel).not.toBeInTheDocument();
+	},
+};
+
+const tallNotes = Array.from({ length: 24 }, (_, index) => `Note ${index + 1}`);
+
+function TallNotes({ label }: { label: string }) {
+	return (
+		<section aria-label={label} className="grid gap-1 p-2">
+			{tallNotes.map((note) => (
+				<Button key={note} align="left" size="sm" variant="bare">
+					{note}
+				</Button>
+			))}
+		</section>
+	);
+}
+
+function CappedPanels() {
+	const panelAnchor = useRef<HTMLButtonElement>(null);
+	const passAnchor = useRef<HTMLButtonElement>(null);
+	const [panelOpen, setPanelOpen] = useState(false);
+	const [passOpen, setPassOpen] = useState(false);
+	return (
+		<div className="flex flex-wrap items-start gap-2 p-2">
+			<Dropdown
+				openOnHover={false}
+				positionStrategy="fixed"
+				presentation="anchored"
+				renderTrigger={(trigger) => (
+					<Button
+						ref={trigger.ref as Ref<HTMLButtonElement>}
+						aria-expanded={trigger.isOpen}
+						onClick={trigger.onRightClick}
+						size="sm"
+					>
+						Menu notes
+					</Button>
+				)}
+				renderMenu={() => <TallNotes label="Menu notes" />}
+			/>
+			<Dropdown.Listbox
+				ariaLabel="Long list"
+				onSelect={fn()}
+				openOnHover={false}
+				options={edgeOptions}
+				presentation="anchored"
+				triggerContent="Long list"
+			/>
+			<Button ref={panelAnchor} size="sm" onClick={() => setPanelOpen(true)}>
+				Panel notes
+			</Button>
+			{panelOpen ? (
+				<Dropdown.Panel
+					anchorRef={panelAnchor}
+					positionStrategy="fixed"
+					presentation="anchored"
+				>
+					<TallNotes label="Panel notes" />
+				</Dropdown.Panel>
+			) : null}
+			<Button ref={passAnchor} size="sm" onClick={() => setPassOpen(true)}>
+				Pass-through notes
+			</Button>
+			{passOpen ? (
+				<Dropdown.Panel
+					anchorRef={passAnchor}
+					background="transparent"
+					border="none"
+					overflow="visible"
+					positionStrategy="fixed"
+					presentation="anchored"
+				>
+					<TallNotes label="Pass-through notes" />
+				</Dropdown.Panel>
+			) : null}
+		</div>
+	);
+}
+
+/** The panel stays put while its capped content scrolls inside a ScrollArea. */
+async function expectScrollsInside(region: HTMLElement) {
+	const panel = region.closest('[data-slot="float"]') as HTMLElement;
+	await waitFor(() => {
+		// Settled: the entry nudge has finished.
+		expect(["none", "matrix(1, 0, 0, 1, 0, 0)"]).toContain(
+			getComputedStyle(panel).transform,
+		);
+		expect(
+			panel.getAnimations().filter((run) => run.playState === "running"),
+		).toHaveLength(0);
+		const rect = panel.getBoundingClientRect();
+		expect(rect.top).toBeGreaterThanOrEqual(0);
+		expect(rect.bottom).toBeLessThanOrEqual(window.innerHeight);
+	});
+	// The surface itself never scrolls (scroll S8).
+	await expect(panel.scrollHeight).toBeLessThanOrEqual(panel.clientHeight + 1);
+	const scroller = region.closest('[data-scroll-area="y"]') as HTMLElement;
+	await expect(scroller).toBeTruthy();
+	await expect(panel.contains(scroller)).toBe(true);
+	await expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight);
+	const before = panel.getBoundingClientRect();
+	scroller.scrollTop = scroller.scrollHeight;
+	await waitFor(() =>
+		expect(scroller).toHaveAttribute("data-scroll-edge-start", "true"),
+	);
+	const after = panel.getBoundingClientRect();
+	await expect(after.top).toBe(before.top);
+	await expect(after.height).toBe(before.height);
+}
+
+export const CappedPanelsScrollInside: Story = {
+	globals: { viewport: { value: "phone-short" } },
+	parameters: { layout: "fullscreen", viewport: { options: viewportOptions } },
+	render: () => <CappedPanels />,
+	play: async ({ canvas, canvasElement }) => {
+		const body = within(canvasElement.ownerDocument.body);
+
+		// Free content in the menu panel scrolls in the panel's own ScrollArea.
+		await userEvent.click(canvas.getByRole("button", { name: "Menu notes" }));
+		await expectScrollsInside(
+			await body.findByRole("region", { name: "Menu notes" }),
+		);
+		await userEvent.keyboard("{Escape}");
+
+		// A list scrolls in its own ScrollArea, which shrinks inside the panel;
+		// the panel's wrapper has nothing left to scroll.
+		await userEvent.click(canvas.getByRole("button", { name: "Long list" }));
+		const list = await body.findByRole("listbox", { name: "Long list" });
+		await expectScrollsInside(list);
+		const wrapper = list.parentElement?.closest(
+			'[data-scroll-area="y"]',
+		) as HTMLElement;
+		await expect(wrapper.scrollHeight).toBeLessThanOrEqual(
+			wrapper.clientHeight + 1,
+		);
+		await userEvent.keyboard("{Escape}");
+
+		// Dropdown.Panel keeps the same contract.
+		await userEvent.click(canvas.getByRole("button", { name: "Panel notes" }));
+		await expectScrollsInside(
+			await body.findByRole("region", { name: "Panel notes" }),
+		);
+
+		// A pass-through panel scrolls inside too once its content is capped.
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Pass-through notes" }),
+		);
+		const passThrough = await body.findByRole("region", {
+			name: "Pass-through notes",
+		});
+		await waitFor(() =>
+			expect(
+				getComputedStyle(
+					passThrough.closest('[data-scroll-area="y"]') as HTMLElement,
+				).overflowY,
+			).toBe("auto"),
+		);
+		await expectScrollsInside(passThrough);
+	},
+};
+
+export const PassThroughPanelOverflowsVisibly: Story = {
+	render: () => {
+		const anchor = useRef<HTMLButtonElement>(null);
+		return (
+			<div className="min-h-64">
+				<Button ref={anchor}>Anchor</Button>
+				<Dropdown.Panel
+					anchorRef={anchor}
+					background="transparent"
+					border="none"
+					overflow="visible"
+					positionStrategy="fixed"
+				>
+					<section aria-label="Short card" className="p-3 shadow-lg">
+						<Button size="sm">Short content</Button>
+					</section>
+				</Dropdown.Panel>
+			</div>
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const body = within(canvasElement.ownerDocument.body);
+		const card = await body.findByRole("region", { name: "Short card" });
+		const scroller = card.closest('[data-scroll-area="y"]') as HTMLElement;
+		// Uncapped, the wrapper does not clip the content's own shadow.
+		await waitFor(() =>
+			expect(getComputedStyle(scroller).overflowY).toBe("visible"),
+		);
 	},
 };
