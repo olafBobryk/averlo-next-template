@@ -9,7 +9,7 @@ Build `ScrollArea` as the one inner-scroller owner, absorb `ScrollBorders` into 
 ## Technical Context
 
 - **Owner**: `src/components/ui/misc/ScrollArea.tsx` (+ stories and catalogue entry; `componentCatalog.generated.ts` regenerated).
-- **API**: `axis="y" | "x"`, `edge` / `edgeStart` / `edgeEnd` (padding the scroller absorbs, mask of the same size), `edgeStyle="fade" | "border"`, `scrollbar="auto" | "hidden"`, `showBackToTop`; always `overscroll-contain` on its axis; no mask in print.
+- **API**: `axis="y" | "x" | "both"` (`both` added 2026-11-27 for the file viewer), `edge` / `edgeStart` / `edgeEnd` (padding the scroller absorbs, mask of the same size), `edgeStyle="fade" | "border"`, `scrollbar="auto" | "hidden"`, `showBackToTop`; always `overscroll-contain` on its axis; no mask in print.
 - **Border mode**: inset overlay (pseudo-element or inset shadow), shown only while content hides past that edge; never changes the box.
 - **Scrollbar colours**: theme tokens (already the case in `library.css`; keep it).
 - **Testing**: Storybook play tests at 390 and 1440 (box size unchanged by the border, mask only while overflowing, both ends, one item, max height); `npm run lint`.

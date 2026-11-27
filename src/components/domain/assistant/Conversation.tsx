@@ -51,7 +51,8 @@ export function Conversation({
 		<div className="relative flex min-h-0 flex-1 flex-col">
 			{header ? <div className="z-10 shrink-0">{header}</div> : null}
 			<div
-				// biome-ignore lint/plugin/noAdHocScrollHeight: debt
+				// spec exception E-002: the chat transcript is the page scroll and stays native.
+				// biome-ignore lint/plugin/noAdHocScrollHeight: E-002
 				className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-6"
 				onScroll={(event) => {
 					const node = event.currentTarget;

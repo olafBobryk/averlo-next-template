@@ -79,7 +79,6 @@ export function StatusErrorState({
 						<div className="w-full overflow-hidden rounded-lg border border-border/15 bg-surface">
 							<ScrollArea
 								as="pre"
-								aria-label="Error details"
 								edge={16}
 								// A focus stop, so keyboard users can scroll the details.
 								tabIndex={0}

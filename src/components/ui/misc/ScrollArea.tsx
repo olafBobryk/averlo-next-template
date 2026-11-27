@@ -31,7 +31,8 @@ type ScrollAreaEdges =
 
 export type ScrollAreaProps = ScrollAreaEdges & {
 	as?: React.ElementType;
-	axis?: "x" | "y";
+	/** `both` scrolls a two-axis viewport (a pannable document); its edges pad both axes. */
+	axis?: "x" | "y" | "both";
 	children?: React.ReactNode;
 	className?: string;
 	/** `fade` masks content under the edge; `border` draws an inset rule. */
@@ -40,7 +41,7 @@ export type ScrollAreaProps = ScrollAreaEdges & {
 	frameClassName?: string;
 	ref?: React.Ref<HTMLDivElement>;
 	scrollbar?: "auto" | "hidden";
-	/** Border mode, y axis only: a back-to-top button once the end is reached. */
+	/** Border mode, y or both axes: a back-to-top button once the end is reached. */
 	showBackToTop?: boolean;
 } & Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "className">;
 
@@ -55,15 +56,25 @@ function assignRef<T>(ref: React.Ref<T> | undefined, value: T) {
 	else ref.current = value;
 }
 
-type Overflow = { start: boolean; end: boolean; any: boolean; rtl: boolean };
-const NO_OVERFLOW: Overflow = {
+type AxisOverflow = {
+	start: boolean;
+	end: boolean;
+	any: boolean;
+	rtl: boolean;
+};
+type Overflow = { x: AxisOverflow; y: AxisOverflow };
+const NO_AXIS_OVERFLOW: AxisOverflow = {
 	start: false,
 	end: false,
 	any: false,
 	rtl: false,
 };
+const NO_OVERFLOW: Overflow = { x: NO_AXIS_OVERFLOW, y: NO_AXIS_OVERFLOW };
 
-function readOverflow(element: HTMLElement, axis: "x" | "y"): Overflow {
+const sameAxis = (a: AxisOverflow, b: AxisOverflow) =>
+	a.start === b.start && a.end === b.end && a.any === b.any && a.rtl === b.rtl;
+
+function readOverflow(element: HTMLElement, axis: "x" | "y"): AxisOverflow {
 	const scrollSize = axis === "x" ? element.scrollWidth : element.scrollHeight;
 	const clientSize = axis === "x" ? element.clientWidth : element.clientHeight;
 	const rtl = axis === "x" && getComputedStyle(element).direction === "rtl";
@@ -116,12 +127,12 @@ export function ScrollArea({
 	const update = React.useCallback(() => {
 		const element = elementRef.current;
 		if (!element) return;
-		const next = readOverflow(element, axis);
+		const next: Overflow = {
+			x: axis === "y" ? NO_AXIS_OVERFLOW : readOverflow(element, "x"),
+			y: axis === "x" ? NO_AXIS_OVERFLOW : readOverflow(element, "y"),
+		};
 		setOverflow((current) =>
-			current.start === next.start &&
-			current.end === next.end &&
-			current.any === next.any &&
-			current.rtl === next.rtl
+			sameAxis(current.x, next.x) && sameAxis(current.y, next.y)
 				? current
 				: next,
 		);
@@ -158,27 +169,40 @@ export function ScrollArea({
 		};
 	}, [update]);
 
-	const isY = axis === "y";
+	const scrollsY = axis !== "x";
+	const scrollsX = axis !== "y";
+	const { x: overflowX, y: overflowY } = overflow;
+	const hiddenStart = overflowX.start || overflowY.start;
+	const hiddenEnd = overflowX.end || overflowY.end;
 	// The fade covers exactly a side's padding (S7), so a side with no edge
 	// never masks: a mask would also drop backdrop blur inside it (S9).
-	const fadesStart = overflow.start && start !== "0px";
-	const fadesEnd = overflow.end && end !== "0px";
-	const fadeStart = fadesStart ? start : "0px";
-	const fadeEnd = fadesEnd ? end : "0px";
-	const direction = isY ? "to bottom" : overflow.rtl ? "to left" : "to right";
-	const mask =
-		edgeStyle === "fade" && (fadesStart || fadesEnd)
-			? `linear-gradient(${direction}, transparent 0, #000 ${fadeStart}, #000 calc(100% - ${fadeEnd}), transparent 100%)`
-			: undefined;
+	const fade = (axisOverflow: AxisOverflow, direction: string) => {
+		const fadesStart = axisOverflow.start && start !== "0px";
+		const fadesEnd = axisOverflow.end && end !== "0px";
+		if (!fadesStart && !fadesEnd) return null;
+		return `linear-gradient(${direction}, transparent 0, #000 ${fadesStart ? start : "0px"}, #000 calc(100% - ${fadesEnd ? end : "0px"}), transparent 100%)`;
+	};
+	const masks =
+		edgeStyle === "fade"
+			? [
+					scrollsY ? fade(overflowY, "to bottom") : null,
+					scrollsX
+						? fade(overflowX, overflowX.rtl ? "to left" : "to right")
+						: null,
+				].filter((layer): layer is string => layer !== null)
+			: [];
+	const mask = masks.length > 0 ? masks.join(", ") : undefined;
 
 	const scroller = (
 		<Tag
 			ref={setNode}
 			className={clsx(
 				"relative min-h-0 min-w-0",
-				isY
-					? "overflow-y-auto overscroll-y-contain"
-					: "overflow-x-auto overscroll-x-contain",
+				axis === "both"
+					? "overflow-auto overscroll-contain"
+					: axis === "y"
+						? "overflow-y-auto overscroll-y-contain"
+						: "overflow-x-auto overscroll-x-contain",
 				scrollbar === "hidden" &&
 					"[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
 				"[mask-image:var(--scroll-area-mask)] print:[mask-image:none]",
@@ -188,8 +212,8 @@ export function ScrollArea({
 				className,
 			)}
 			data-scroll-area={axis}
-			data-scroll-edge-start={overflow.start || undefined}
-			data-scroll-edge-end={overflow.end || undefined}
+			data-scroll-edge-start={hiddenStart || undefined}
+			data-scroll-edge-end={hiddenEnd || undefined}
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
 			onScroll={(event: React.UIEvent<HTMLDivElement>) => {
@@ -197,10 +221,13 @@ export function ScrollArea({
 				onScroll?.(event);
 			}}
 			style={{
-				...(isY
-					? { paddingBottom: end, paddingTop: start }
-					: { paddingInlineEnd: end, paddingInlineStart: start }),
+				...(scrollsY ? { paddingBottom: end, paddingTop: start } : null),
+				...(scrollsX
+					? { paddingInlineEnd: end, paddingInlineStart: start }
+					: null),
 				["--scroll-area-mask" as string]: mask ?? "none",
+				// Two fades (both axes) show content only where both allow it.
+				...(masks.length > 1 ? { maskComposite: "intersect" } : null),
 				...style,
 			}}
 			{...rest}
@@ -223,32 +250,40 @@ export function ScrollArea({
 			onMouseLeave={() => setHovered(false)}
 		>
 			{scroller}
-			{overflow.start ? (
+			{overflowY.start ? (
 				<span
 					aria-hidden
 					data-scroll-rule="start"
-					className={clsx(
-						rule,
-						isY
-							? "inset-x-0 top-0 h-px"
-							: "inset-y-0 w-px ltr:left-0 rtl:right-0",
-					)}
+					className={clsx(rule, "inset-x-0 top-0 h-px")}
 				/>
 			) : null}
-			{overflow.end ? (
+			{overflowY.end ? (
 				<span
 					aria-hidden
 					data-scroll-rule="end"
-					className={clsx(
-						rule,
-						isY
-							? "inset-x-0 bottom-0 h-px"
-							: "inset-y-0 w-px ltr:right-0 rtl:left-0",
-					)}
+					className={clsx(rule, "inset-x-0 bottom-0 h-px")}
+				/>
+			) : null}
+			{overflowX.start ? (
+				<span
+					aria-hidden
+					data-scroll-rule="start"
+					className={clsx(rule, "inset-y-0 w-px ltr:left-0 rtl:right-0")}
+				/>
+			) : null}
+			{overflowX.end ? (
+				<span
+					aria-hidden
+					data-scroll-rule="end"
+					className={clsx(rule, "inset-y-0 w-px ltr:right-0 rtl:left-0")}
 				/>
 			) : null}
 			<AnimatePresence initial={false}>
-				{isY && showBackToTop && hovered && overflow.any && !overflow.end ? (
+				{scrollsY &&
+				showBackToTop &&
+				hovered &&
+				overflowY.any &&
+				!overflowY.end ? (
 					<motion.div
 						className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2"
 						initial={{ opacity: 0, y: 8 }}

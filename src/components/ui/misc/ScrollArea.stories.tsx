@@ -303,3 +303,79 @@ export const NoEdgeNoMask: Story = {
 		await expect(mask(region)).toContain("linear-gradient");
 	},
 };
+
+function Sheet() {
+	return (
+		<div
+			aria-hidden
+			className="rounded-md bg-muted"
+			style={{ height: 480, width: 640 }}
+		/>
+	);
+}
+
+export const BothAxes: Story = {
+	render: () => (
+		<div className="grid gap-3">
+			<div className="w-64 overflow-hidden rounded-xl border border-border bg-card">
+				<ScrollArea
+					aria-label="Pan viewport"
+					as="section"
+					axis="both"
+					className="h-40"
+					data-testid="pan"
+					edge={0}
+					tabIndex={0}
+				>
+					<Sheet />
+				</ScrollArea>
+			</div>
+			<div className="w-64 overflow-hidden rounded-xl border border-border bg-card">
+				<ScrollArea
+					aria-label="Faded viewport"
+					as="section"
+					axis="both"
+					className="h-40"
+					data-testid="faded"
+					edge={12}
+					tabIndex={0}
+				>
+					<Sheet />
+				</ScrollArea>
+			</div>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		// A two-axis viewport scrolls and contains overscroll on both axes.
+		const pan = canvas.getByTestId("pan");
+		await expect(pan).toHaveAttribute("data-scroll-area", "both");
+		await expect(getComputedStyle(pan).overflowX).toBe("auto");
+		await expect(getComputedStyle(pan).overflowY).toBe("auto");
+		await expect(getComputedStyle(pan).overscrollBehaviorX).toBe("contain");
+		await expect(getComputedStyle(pan).overscrollBehaviorY).toBe("contain");
+		await expect(pan.scrollWidth).toBeGreaterThan(pan.clientWidth);
+		await expect(pan.scrollHeight).toBeGreaterThan(pan.clientHeight);
+		await waitFor(() =>
+			expect(pan).toHaveAttribute("data-scroll-edge-end", "true"),
+		);
+		// No edge, no mask (S7).
+		await expect(mask(pan)).toBe("none");
+		pan.scrollLeft = 80;
+		scrollTo(pan, 80);
+		await waitFor(() =>
+			expect(pan).toHaveAttribute("data-scroll-edge-start", "true"),
+		);
+		await expect(mask(pan)).toBe("none");
+
+		// With an edge, both axes pad and fade, and the fades intersect.
+		const faded = canvas.getByTestId("faded");
+		await expect(getComputedStyle(faded).paddingTop).toBe("12px");
+		await expect(getComputedStyle(faded).paddingInlineStart).toBe("12px");
+		await waitFor(() =>
+			expect(mask(faded).match(/linear-gradient/g)).toHaveLength(2),
+		);
+		await expect(getComputedStyle(faded).maskComposite).toMatch(
+			/^intersect(, intersect)?$/,
+		);
+	},
+};

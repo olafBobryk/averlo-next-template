@@ -14,14 +14,16 @@ export const dashboardContentShellProfiles = {
 		bodyClassName: "",
 		contentClassName: "min-h-full",
 		gutterClassName: dashboardPageGutterClassName,
-		// biome-ignore lint/plugin/noAdHocScrollHeight: debt
+		// spec exception E-002: the dashboard page scroll stays native.
+		// biome-ignore lint/plugin/noAdHocScrollHeight: E-002
 		mainClassName: "min-h-0 overflow-y-auto [&_.dashboard-page-body]:max-w-6xl",
 	},
 	wide: {
 		bodyClassName: "",
 		contentClassName: "min-h-full",
 		gutterClassName: dashboardPageGutterClassName,
-		// biome-ignore lint/plugin/noAdHocScrollHeight: debt
+		// spec exception E-002: the dashboard page scroll stays native.
+		// biome-ignore lint/plugin/noAdHocScrollHeight: E-002
 		mainClassName: "min-h-0 overflow-y-auto",
 	},
 	workspace: {
